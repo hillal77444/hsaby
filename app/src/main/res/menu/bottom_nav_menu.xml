@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/dashboardFragment"
+        android:icon="@android:drawable/ic_menu_compass"
+        android:title="الرئيسية" />
+    <item
+        android:id="@+id/accountDetailsFragment"
+        android:icon="@android:drawable/ic_menu_myplaces"
+        android:title="الحسابات" />
+    <item
+        android:id="@+id/reportsFragment"
+        android:icon="@android:drawable/ic_menu_report_image"
+        android:title="التقارير" />
+    <item
+        android:id="@+id/searchFilterFragment"
+        android:icon="@android:drawable/ic_menu_search"
+        android:title="بحث" />
+    <item
+        android:id="@+id/settingsFragment"
+        android:icon="@android:drawable/ic_menu_manage"
+        android:title="الإعدادات" />
+</menu> 
