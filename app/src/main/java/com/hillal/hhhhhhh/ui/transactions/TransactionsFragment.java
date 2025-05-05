@@ -64,7 +64,7 @@ public class TransactionsFragment extends Fragment {
         binding.addTransactionFab.setOnClickListener(v -> {
             Bundle args = new Bundle();
             args.putLong("accountId", accountId);
-            Navigation.findNavController(v).navigate(R.id.action_transactionsFragment_to_addTransactionFragment, args);
+            Navigation.findNavController(v).navigate(R.id.nav_add_transaction, args);
         });
     }
 
