@@ -34,17 +34,13 @@ public class AccountsFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_accounts, container, false);
 
         // Initialize views
-        accountsRecyclerView = root.findViewById(R.id.accounts_recycler);
+        accountsRecyclerView = root.findViewById(R.id.accounts_list);
         searchEditText = root.findViewById(R.id.search_edit_text);
-        FloatingActionButton addAccountButton = root.findViewById(R.id.add_account_button);
+        FloatingActionButton addAccountButton = root.findViewById(R.id.fab_add_account);
 
         // Setup RecyclerView
         accountsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        accountsAdapter = new AccountsAdapter(new ArrayList<>(), account -> {
-            Bundle args = new Bundle();
-            args.putLong("accountId", account.getId());
-            Navigation.findNavController(root).navigate(R.id.nav_account_details, args);
-        });
+        accountsAdapter = new AccountsAdapter(new ArrayList<>());
         accountsRecyclerView.setAdapter(accountsAdapter);
 
         // Initialize ViewModel
@@ -72,7 +68,7 @@ public class AccountsFragment extends Fragment {
 
         // Setup add account button
         addAccountButton.setOnClickListener(v -> {
-            Navigation.findNavController(root).navigate(R.id.nav_add_account);
+            Navigation.findNavController(root).navigate(R.id.addAccountFragment);
         });
 
         return root;
@@ -80,15 +76,9 @@ public class AccountsFragment extends Fragment {
 
     private static class AccountsAdapter extends RecyclerView.Adapter<AccountsAdapter.ViewHolder> {
         private List<Account> accounts;
-        private final OnAccountClickListener listener;
 
-        public interface OnAccountClickListener {
-            void onAccountClick(Account account);
-        }
-
-        public AccountsAdapter(List<Account> accounts, OnAccountClickListener listener) {
+        public AccountsAdapter(List<Account> accounts) {
             this.accounts = accounts;
-            this.listener = listener;
         }
 
         public void updateAccounts(List<Account> newAccounts) {
@@ -108,13 +98,11 @@ public class AccountsFragment extends Fragment {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             Account account = accounts.get(position);
             holder.accountName.setText(account.getName());
-            holder.phoneNumber.setText(account.getPhoneNumber() != null ? account.getPhoneNumber() : "");
+            holder.phone.setText(account.getPhone());
             holder.balance.setText(String.format("%,.2f", account.getOpeningBalance()));
             holder.balance.setTextColor(account.isDebtor() ? 
                 holder.itemView.getContext().getColor(R.color.red) : 
                 holder.itemView.getContext().getColor(R.color.green));
-
-            holder.itemView.setOnClickListener(v -> listener.onAccountClick(account));
         }
 
         @Override
@@ -124,14 +112,14 @@ public class AccountsFragment extends Fragment {
 
         static class ViewHolder extends RecyclerView.ViewHolder {
             TextView accountName;
-            TextView phoneNumber;
+            TextView phone;
             TextView balance;
 
             ViewHolder(View itemView) {
                 super(itemView);
                 accountName = itemView.findViewById(R.id.account_name);
-                phoneNumber = itemView.findViewById(R.id.phone_number);
-                balance = itemView.findViewById(R.id.account_balance);
+                phone = itemView.findViewById(R.id.phone);
+                balance = itemView.findViewById(R.id.balance);
             }
         }
     }
