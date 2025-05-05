@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -17,8 +18,10 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.entities.Account;
 import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
+import com.hillal.hhhhhhh.databinding.FragmentAddAccountBinding;
 
 public class AddAccountFragment extends Fragment {
+    private FragmentAddAccountBinding binding;
     private AccountViewModel accountViewModel;
     private TextInputEditText nameEditText;
     private TextInputEditText phoneEditText;
@@ -27,23 +30,32 @@ public class AddAccountFragment extends Fragment {
     private MaterialButton saveButton;
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_add_account, container, false);
-
-        // Initialize views
-        nameEditText = root.findViewById(R.id.name_edit_text);
-        phoneEditText = root.findViewById(R.id.phone_edit_text);
-        notesEditText = root.findViewById(R.id.notes_edit_text);
-        balanceEditText = root.findViewById(R.id.balance_edit_text);
-        saveButton = root.findViewById(R.id.save_button);
-
-        // Initialize ViewModel
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
+    }
 
-        // Setup save button
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        binding = FragmentAddAccountBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setupViews();
+    }
+
+    private void setupViews() {
+        nameEditText = binding.nameEditText;
+        phoneEditText = binding.phoneEditText;
+        notesEditText = binding.notesEditText;
+        balanceEditText = binding.balanceEditText;
+        saveButton = binding.saveButton;
+
         saveButton.setOnClickListener(v -> saveAccount());
-
-        return root;
+        binding.cancelButton.setOnClickListener(v -> requireActivity().onBackPressed());
     }
 
     private void saveAccount() {
@@ -76,5 +88,11 @@ public class AddAccountFragment extends Fragment {
         } catch (NumberFormatException e) {
             Toast.makeText(getContext(), R.string.error_invalid_balance, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 } 
