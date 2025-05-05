@@ -171,4 +171,12 @@
     <string name="no_notes">لا توجد ملاحظات</string>
     <string name="account_added">تمت إضافة الحساب بنجاح</string>
     <string name="transaction_added">تمت إضافة العملية بنجاح</string>
+
+    <!-- Navigation Header -->
+    <string name="nav_header_title">تطبيق المحاسبة</string>
+    <string name="nav_header_subtitle">إدارة الحسابات والمعاملات</string>
+    <string name="nav_header_desc">رأس التنقل الرئيسي</string>
+    
+    <!-- Transactions -->
+    <string name="transactions">المعاملات</string>
 </resources>
