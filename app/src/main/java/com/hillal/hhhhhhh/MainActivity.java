@@ -12,48 +12,47 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
+    private NavController navController;
     private AccountRepository accountRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "MainActivity onCreate started");
+        Log.d(TAG, "onCreate started");
 
         try {
-            // Initialize ViewBinding
             binding = ActivityMainBinding.inflate(getLayoutInflater());
             setContentView(binding.getRoot());
+            Log.d(TAG, "Layout inflated successfully");
 
-            // Initialize repository
-            accountRepository = ((App) getApplication()).getAccountRepository();
+            setSupportActionBar(binding.toolbar);
+            Log.d(TAG, "Toolbar set successfully");
+
+            NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.nav_host_fragment_content_main);
+            if (navHostFragment != null) {
+                navController = navHostFragment.getNavController();
+                AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+                        R.id.navigation_dashboard, R.id.navigation_accounts,
+                        R.id.navigation_reports, R.id.navigation_settings)
+                        .build();
+                NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+                NavigationUI.setupWithNavController(binding.navView, navController);
+                Log.d(TAG, "Navigation setup completed successfully");
+            }
+
+            accountRepository = App.getInstance().getAccountRepository();
             Log.d(TAG, "AccountRepository initialized successfully");
-
-            // Setup toolbar
-            Toolbar toolbar = binding.toolbar;
-            setSupportActionBar(toolbar);
-
-            // Setup navigation
-            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-            appBarConfiguration = new AppBarConfiguration.Builder(
-                    R.id.navigation_dashboard,
-                    R.id.navigation_accounts,
-                    R.id.navigation_reports,
-                    R.id.navigation_settings)
-                    .build();
-            NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-            NavigationUI.setupWithNavController(binding.navView, navController);
-
-            Log.d(TAG, "MainActivity initialized successfully");
         } catch (Exception e) {
-            Log.e(TAG, "Error initializing MainActivity: " + e.getMessage(), e);
+            Log.e(TAG, "Error in onCreate", e);
             throw new RuntimeException("Failed to initialize MainActivity", e);
         }
     }
