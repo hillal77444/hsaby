@@ -175,4 +175,5 @@
     
     <!-- Dashboard -->
     <string name="recent_accounts">الحسابات الأخيرة</string>
+    <string name="error_invalid_balance">Invalid balance amount</string>
 </resources>
