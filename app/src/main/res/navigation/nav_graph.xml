@@ -9,7 +9,7 @@
     <fragment
         android:id="@+id/navigation_dashboard"
         android:name="com.hillal.hhhhhhh.ui.dashboard.DashboardFragment"
-        android:label="@string/menu_dashboard"
+        android:label="@string/title_dashboard"
         tools:layout="@layout/fragment_dashboard" />
 
     <!-- إضافة حساب جديد -->
@@ -52,14 +52,14 @@
     <fragment
         android:id="@+id/navigation_reports"
         android:name="com.hillal.hhhhhhh.ui.reports.ReportsFragment"
-        android:label="@string/menu_reports"
+        android:label="@string/title_reports"
         tools:layout="@layout/fragment_reports" />
 
     <!-- الإعدادات -->
     <fragment
         android:id="@+id/navigation_settings"
         android:name="com.hillal.hhhhhhh.ui.settings.SettingsFragment"
-        android:label="@string/menu_settings"
+        android:label="@string/title_settings"
         tools:layout="@layout/fragment_settings" />
 
     <!-- البحث والتصفية -->
@@ -94,7 +94,7 @@
     <fragment
         android:id="@+id/navigation_accounts"
         android:name="com.hillal.hhhhhhh.ui.accounts.AccountsFragment"
-        android:label="@string/menu_accounts"
+        android:label="@string/title_accounts"
         tools:layout="@layout/fragment_accounts" />
 
 </navigation>
