@@ -111,7 +111,7 @@ public class DashboardFragment extends Fragment {
             ViewHolder(View itemView) {
                 super(itemView);
                 accountName = itemView.findViewById(R.id.account_name);
-                balance = itemView.findViewById(R.id.account_balance);
+                balance = itemView.findViewById(R.id.balance);
             }
         }
     }
