@@ -1,35 +1,34 @@
 package com.hillal.hhhhhhh.data.model;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "accounts")
 public class Account {
     @PrimaryKey(autoGenerate = true)
-    private long id;
+    private int id;
     private String name;
-    private String phoneNumber;
+    private String phone;
     private double balance;
-    private boolean isCreditor;
     private String notes;
-    private long createdAt;
+    private boolean isCreditor;
     private long updatedAt;
 
-    public Account(String name, String phoneNumber, double balance, boolean isCreditor, String notes) {
+    public Account(String name, String phone, double balance, String notes, boolean isCreditor) {
         this.name = name;
-        this.phoneNumber = phoneNumber;
+        this.phone = phone;
         this.balance = balance;
-        this.isCreditor = isCreditor;
         this.notes = notes;
-        this.createdAt = System.currentTimeMillis();
+        this.isCreditor = isCreditor;
         this.updatedAt = System.currentTimeMillis();
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -41,12 +40,12 @@ public class Account {
         this.name = name;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public double getBalance() {
@@ -57,14 +56,6 @@ public class Account {
         this.balance = balance;
     }
 
-    public boolean isCreditor() {
-        return isCreditor;
-    }
-
-    public void setCreditor(boolean creditor) {
-        isCreditor = creditor;
-    }
-
     public String getNotes() {
         return notes;
     }
@@ -73,12 +64,12 @@ public class Account {
         this.notes = notes;
     }
 
-    public long getCreatedAt() {
-        return createdAt;
+    public boolean isCreditor() {
+        return isCreditor;
     }
 
-    public void setCreatedAt(long createdAt) {
-        this.createdAt = createdAt;
+    public void setCreditor(boolean creditor) {
+        isCreditor = creditor;
     }
 
     public long getUpdatedAt() {
