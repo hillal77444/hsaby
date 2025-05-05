@@ -48,7 +48,7 @@ public class AccountRepository {
         executorService.execute(() -> accountDao.delete(account));
     }
 
-    public LiveData<Account> getAccountById(long id) {
+    public LiveData<Account> getAccountById(int id) {
         return accountDao.getAccountById(id);
     }
 
