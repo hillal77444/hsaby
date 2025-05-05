@@ -40,8 +40,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "NavController initialized");
                 
                 appBarConfiguration = new AppBarConfiguration.Builder(
-                        R.id.homeFragment,
-                        R.id.reportsFragment
+                        R.id.navigation_dashboard,
+                        R.id.navigation_reports
                 ).build();
                 NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
                 Log.d(TAG, "ActionBar setup completed");
