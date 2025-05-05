@@ -163,4 +163,16 @@
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
+
+    <!-- Menu Items -->
+    <string name="menu_dashboard">لوحة التحكم</string>
+    <string name="menu_accounts">الحسابات</string>
+    <string name="menu_reports">التقارير</string>
+    <string name="menu_settings">الإعدادات</string>
+    <string name="menu_account_details">تفاصيل الحساب</string>
+    <string name="menu_add_account">إضافة حساب</string>
+    <string name="menu_add_transaction">إضافة عملية</string>
+    
+    <!-- Dashboard -->
+    <string name="recent_accounts">الحسابات الأخيرة</string>
 </resources>
