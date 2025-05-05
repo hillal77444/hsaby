@@ -3,42 +3,27 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/homeFragment">
+    app:startDestination="@id/navigation_dashboard">
 
     <!-- الصفحة الرئيسية -->
     <fragment
-        android:id="@+id/homeFragment"
-        android:name="com.hillal.hhhhhhh.HomeFragment"
-        android:label="@string/home_fragment_label"
-        tools:layout="@layout/fragment_home">
-        <action
-            android:id="@+id/action_homeFragment_to_addAccountFragment"
-            app:destination="@id/addAccountFragment"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
-        <action
-            android:id="@+id/action_homeFragment_to_accountDetailsFragment"
-            app:destination="@id/accountDetailsFragment"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
-    </fragment>
+        android:id="@+id/navigation_dashboard"
+        android:name="com.hillal.hhhhhhh.ui.dashboard.DashboardFragment"
+        android:label="@string/menu_dashboard"
+        tools:layout="@layout/fragment_dashboard" />
 
     <!-- إضافة حساب جديد -->
     <fragment
         android:id="@+id/addAccountFragment"
-        android:name="com.hillal.hhhhhhh.AddAccountFragment"
-        android:label="@string/add_account_fragment_label"
+        android:name="com.hillal.hhhhhhh.ui.accounts.AddAccountFragment"
+        android:label="@string/menu_add_account"
         tools:layout="@layout/fragment_add_account" />
 
     <!-- تفاصيل الحساب -->
     <fragment
         android:id="@+id/accountDetailsFragment"
-        android:name="com.hillal.hhhhhhh.AccountDetailsFragment"
-        android:label="@string/account_details_fragment_label"
+        android:name="com.hillal.hhhhhhh.ui.accounts.AccountDetailsFragment"
+        android:label="@string/menu_account_details"
         tools:layout="@layout/fragment_account_details">
         <argument
             android:name="accountId"
@@ -55,8 +40,8 @@
     <!-- إضافة عملية -->
     <fragment
         android:id="@+id/addTransactionFragment"
-        android:name="com.hillal.hhhhhhh.AddTransactionFragment"
-        android:label="@string/add_transaction_fragment_label"
+        android:name="com.hillal.hhhhhhh.ui.transactions.AddTransactionFragment"
+        android:label="@string/menu_add_transaction"
         tools:layout="@layout/fragment_add_transaction">
         <argument
             android:name="accountId"
@@ -65,16 +50,16 @@
 
     <!-- التقارير -->
     <fragment
-        android:id="@+id/reportsFragment"
-        android:name="com.hillal.hhhhhhh.ReportsFragment"
-        android:label="@string/reports_fragment_label"
+        android:id="@+id/navigation_reports"
+        android:name="com.hillal.hhhhhhh.ui.reports.ReportsFragment"
+        android:label="@string/menu_reports"
         tools:layout="@layout/fragment_reports" />
 
     <!-- الإعدادات -->
     <fragment
-        android:id="@+id/settingsFragment"
-        android:name="com.hillal.hhhhhhh.SettingsFragment"
-        android:label="@string/settings_fragment_label"
+        android:id="@+id/navigation_settings"
+        android:name="com.hillal.hhhhhhh.ui.settings.SettingsFragment"
+        android:label="@string/menu_settings"
         tools:layout="@layout/fragment_settings" />
 
     <!-- البحث والتصفية -->
@@ -104,5 +89,12 @@
         android:name="com.hillal.hhhhhhh.CategoriesFragment"
         android:label="@string/categories_fragment_label"
         tools:layout="@layout/fragment_categories" />
+
+    <!-- الحسابات -->
+    <fragment
+        android:id="@+id/navigation_accounts"
+        android:name="com.hillal.hhhhhhh.ui.accounts.AccountsFragment"
+        android:label="@string/menu_accounts"
+        tools:layout="@layout/fragment_accounts" />
 
 </navigation>
