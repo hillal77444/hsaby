@@ -45,6 +45,21 @@
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
 
+    <!-- Navigation -->
+    <string name="title_dashboard">لوحة التحكم</string>
+    <string name="title_accounts">الحسابات</string>
+    <string name="title_reports">التقارير</string>
+    <string name="title_settings">الإعدادات</string>
+    
+    <!-- Menu -->
+    <string name="menu_dashboard">لوحة التحكم</string>
+    <string name="menu_accounts">الحسابات</string>
+    <string name="menu_reports">التقارير</string>
+    <string name="menu_settings">الإعدادات</string>
+    <string name="menu_account_details">تفاصيل الحساب</string>
+    <string name="menu_add_account">إضافة حساب</string>
+    <string name="menu_add_transaction">إضافة عملية</string>
+
     <!-- عناوين الصفحات -->
     <string name="home_fragment_label">الرئيسية</string>
     <string name="add_account_fragment_label">إضافة حساب</string>
@@ -53,6 +68,9 @@
     <string name="reports_fragment_label">التقارير</string>
     <string name="settings_fragment_label">الإعدادات</string>
     <string name="search_filter_fragment_label">البحث والتصفية</string>
+    <string name="add_expense_fragment_label">إضافة مصروف</string>
+    <string name="expenses_fragment_label">المصروفات</string>
+    <string name="categories_fragment_label">الفئات</string>
     
     <!-- نصوص عامة -->
     <string name="total_creditor">إجمالي الدائن</string>
@@ -92,44 +110,26 @@
     <string name="filter_by_date">تصفية حسب التاريخ</string>
     <string name="filter_by_type">تصفية حسب النوع</string>
     <string name="show_results">عرض النتائج</string>
-    
-    <!-- سلاسل نصية جديدة -->
-    <string name="add_transaction">إضافة عملية</string>
-    <string name="account_name">اسم الحساب</string>
-    <string name="phone_number">رقم الجوال</string>
-    <string name="is_creditor">دائن</string>
-    <string name="description">الوصف</string>
-    <string name="is_credit">دائن</string>
-    <string name="total_expenses">إجمالي المصروفات</string>
-    <string name="add_new_expense">إضافة مصروف جديد</string>
-    <string name="view_all_expenses">عرض جميع المصروفات</string>
-    <string name="generate_reports">إنشاء التقارير</string>
-    <string name="manage_categories">إدارة الفئات</string>
-    <string name="required_field">هذا الحقل مطلوب</string>
-    <string name="invalid_number">رقم غير صالح</string>
-    <string name="account_added">تمت إضافة الحساب بنجاح</string>
-    <string name="transaction_added">تمت إضافة العملية بنجاح</string>
-
-    <!-- عناوين الصفحات الجديدة -->
-    <string name="add_expense_fragment_label">إضافة مصروف</string>
-    <string name="expenses_fragment_label">المصروفات</string>
-    <string name="categories_fragment_label">الفئات</string>
-
-    <!-- Navigation -->
-    <string name="dashboard">لوحة التحكم</string>
-    <string name="accounts">الحسابات</string>
-    <string name="reports">التقارير</string>
-    <string name="settings">الإعدادات</string>
+    <string name="search_hint">ابحث عن حساب...</string>
+    <string name="delete">حذف</string>
+    <string name="edit">تعديل</string>
+    <string name="add">إضافة</string>
     
     <!-- Account -->
     <string name="add_account">إضافة حساب</string>
     <string name="account_details">تفاصيل الحساب</string>
     <string name="search_accounts">بحث في الحسابات</string>
+    <string name="account_name">اسم الحساب</string>
+    <string name="phone_number">رقم الجوال</string>
+    <string name="is_creditor">دائن</string>
+    <string name="description">الوصف</string>
+    <string name="is_credit">دائن</string>
     
     <!-- Transaction -->
     <string name="debit">مدين</string>
     <string name="credit">دائن</string>
     <string name="currency_symbol">ريال</string>
+    <string name="add_transaction">إضافة عملية</string>
     
     <!-- Reports -->
     <string name="account_summary">ملخص الحسابات</string>
@@ -138,15 +138,13 @@
     <string name="transaction_summary">ملخص المعاملات</string>
     <string name="total_transactions">إجمالي المعاملات</string>
     <string name="average_transaction">متوسط المعاملة</string>
+    <string name="total_expenses">إجمالي المصروفات</string>
+    <string name="add_new_expense">إضافة مصروف جديد</string>
+    <string name="view_all_expenses">عرض جميع المصروفات</string>
+    <string name="generate_reports">إنشاء التقارير</string>
+    <string name="manage_categories">إدارة الفئات</string>
     
-    <!-- Common -->
-    <string name="error_name_required">الرجاء إدخال الاسم</string>
-    <string name="error_amount_required">الرجاء إدخال المبلغ</string>
-    <string name="error_invalid_amount">المبلغ غير صالح</string>
-    <string name="not_available">غير متوفر</string>
-    <string name="no_notes">لا توجد ملاحظات</string>
-
-    <!-- New strings for settings page -->
+    <!-- Settings -->
     <string name="settings_appearance">المظهر</string>
     <string name="settings_dark_mode">الوضع الليلي</string>
     <string name="settings_currency_format">تنسيق العملة</string>
@@ -158,48 +156,19 @@
     <string name="settings_restore">استعادة النسخ الاحتياطي</string>
     <string name="settings_danger_zone">منطقة الخطر</string>
     <string name="settings_clear_data">مسح جميع البيانات</string>
-
-    <string name="transactions">Transactions</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-
-    <!-- Menu Items -->
-    <string name="menu_dashboard">لوحة التحكم</string>
-    <string name="menu_accounts">الحسابات</string>
-    <string name="menu_reports">التقارير</string>
-    <string name="menu_settings">الإعدادات</string>
-    <string name="menu_account_details">تفاصيل الحساب</string>
-    <string name="menu_add_account">إضافة حساب</string>
-    <string name="menu_add_transaction">إضافة عملية</string>
-    
-    <!-- Dashboard -->
-    <string name="recent_accounts">الحسابات الأخيرة</string>
-    <string name="error_invalid_balance">Invalid balance amount</string>
-
-    <!-- Search -->
-    <string name="search_hint">ابحث عن حساب...</string>
-
-    <!-- Navigation -->
-    <string name="title_dashboard">لوحة التحكم</string>
-    <string name="title_accounts">الحسابات</string>
-    <string name="title_reports">التقارير</string>
-    <string name="title_settings">الإعدادات</string>
-    
-    <!-- Menu -->
-    <string name="menu_dashboard">لوحة التحكم</string>
-    <string name="menu_accounts">الحسابات</string>
-    <string name="menu_reports">التقارير</string>
-    <string name="menu_settings">الإعدادات</string>
-    
-    <!-- Common -->
-    <string name="search_hint">بحث...</string>
-    <string name="delete">حذف</string>
-    <string name="edit">تعديل</string>
-    <string name="add">إضافة</string>
     
     <!-- Error Messages -->
     <string name="error_initialization">خطأ في تهيئة التطبيق</string>
     <string name="error_database">خطأ في قاعدة البيانات</string>
     <string name="error_network">خطأ في الاتصال</string>
+    <string name="error_name_required">الرجاء إدخال الاسم</string>
+    <string name="error_amount_required">الرجاء إدخال المبلغ</string>
+    <string name="error_invalid_amount">المبلغ غير صالح</string>
+    <string name="error_invalid_balance">Invalid balance amount</string>
+    <string name="required_field">هذا الحقل مطلوب</string>
+    <string name="invalid_number">رقم غير صالح</string>
+    <string name="not_available">غير متوفر</string>
+    <string name="no_notes">لا توجد ملاحظات</string>
+    <string name="account_added">تمت إضافة الحساب بنجاح</string>
+    <string name="transaction_added">تمت إضافة العملية بنجاح</string>
 </resources>
