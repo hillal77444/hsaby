@@ -14,11 +14,14 @@ import com.hillal.hhhhhhh.data.entities.Account;
 import com.hillal.hhhhhhh.data.entities.Transaction;
 import com.hillal.hhhhhhh.data.entities.Report;
 import com.hillal.hhhhhhh.Converters;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Database(entities = {Account.class, Transaction.class, Report.class}, version = 1)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase instance;
+    public static final ExecutorService databaseWriteExecutor = Executors.newFixedThreadPool(4);
 
     public abstract AccountDao accountDao();
     public abstract TransactionDao transactionDao();
