@@ -33,7 +33,7 @@ public class DashboardFragment extends Fragment {
         totalDebtors = root.findViewById(R.id.total_debtors);
         totalCreditors = root.findViewById(R.id.total_creditors);
         netBalance = root.findViewById(R.id.net_balance);
-        recentAccountsRecyclerView = root.findViewById(R.id.recent_accounts_recycler);
+        recentAccountsRecyclerView = root.findViewById(R.id.recent_accounts_list);
 
         // Setup RecyclerView
         recentAccountsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
