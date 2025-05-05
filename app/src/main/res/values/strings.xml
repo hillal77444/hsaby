@@ -114,4 +114,46 @@
     <string name="add_expense_fragment_label">إضافة مصروف</string>
     <string name="expenses_fragment_label">المصروفات</string>
     <string name="categories_fragment_label">الفئات</string>
+
+    <!-- Navigation -->
+    <string name="dashboard">لوحة التحكم</string>
+    <string name="accounts">الحسابات</string>
+    <string name="reports">التقارير</string>
+    <string name="settings">الإعدادات</string>
+    
+    <!-- Account -->
+    <string name="add_account">إضافة حساب</string>
+    <string name="account_details">تفاصيل الحساب</string>
+    <string name="name">الاسم</string>
+    <string name="phone_number">رقم الهاتف</string>
+    <string name="opening_balance">الرصيد الافتتاحي</string>
+    <string name="notes">ملاحظات</string>
+    <string name="search_accounts">بحث في الحسابات</string>
+    
+    <!-- Transaction -->
+    <string name="add_transaction">إضافة معاملة</string>
+    <string name="date">التاريخ</string>
+    <string name="amount">المبلغ</string>
+    <string name="description">البيان</string>
+    <string name="transaction_type">نوع المعاملة</string>
+    <string name="debit">مدين</string>
+    <string name="credit">دائن</string>
+    <string name="currency">ريال</string>
+    
+    <!-- Reports -->
+    <string name="account_summary">ملخص الحسابات</string>
+    <string name="total_debtors">إجمالي المدينين</string>
+    <string name="total_creditors">إجمالي الدائنين</string>
+    <string name="net_balance">صافي الرصيد</string>
+    <string name="transaction_summary">ملخص المعاملات</string>
+    <string name="total_transactions">إجمالي المعاملات</string>
+    <string name="average_transaction">متوسط المعاملة</string>
+    
+    <!-- Common -->
+    <string name="save">حفظ</string>
+    <string name="error_name_required">الرجاء إدخال الاسم</string>
+    <string name="error_amount_required">الرجاء إدخال المبلغ</string>
+    <string name="error_invalid_amount">المبلغ غير صالح</string>
+    <string name="not_available">غير متوفر</string>
+    <string name="no_notes">لا توجد ملاحظات</string>
 </resources>
