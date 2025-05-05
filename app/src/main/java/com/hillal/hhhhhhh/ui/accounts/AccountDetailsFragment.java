@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -19,11 +20,14 @@ import com.hillal.hhhhhhh.data.entities.Account;
 import com.hillal.hhhhhhh.data.entities.Transaction;
 import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
 import com.hillal.hhhhhhh.viewmodel.TransactionViewModel;
+import com.hillal.hhhhhhh.databinding.FragmentAccountDetailsBinding;
+import androidx.navigation.fragment.NavHostFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AccountDetailsFragment extends Fragment {
+    private FragmentAccountDetailsBinding binding;
     private AccountViewModel accountViewModel;
     private TransactionViewModel transactionViewModel;
     private TextView accountName;
@@ -32,26 +36,51 @@ public class AccountDetailsFragment extends Fragment {
     private TextView accountNotes;
     private RecyclerView transactionsRecyclerView;
     private TransactionsAdapter transactionsAdapter;
-    private long accountId;
+    private int accountId;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        accountId = getArguments() != null ? getArguments().getInt("accountId") : -1;
+        accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_account_details, container, false);
+        binding = FragmentAccountDetailsBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setupViews();
+        loadAccountDetails();
+    }
+
+    private void setupViews() {
+        binding.addTransactionButton.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putInt("accountId", accountId);
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_accountDetailsFragment_to_addTransactionFragment, bundle);
+        });
+    }
+
+    private void loadAccountDetails() {
         // Get account ID from arguments
-        accountId = getArguments() != null ? getArguments().getLong("accountId") : -1;
         if (accountId == -1) {
-            Navigation.findNavController(root).navigateUp();
-            return root;
+            Navigation.findNavController(binding.getRoot()).navigateUp();
+            return;
         }
 
         // Initialize views
-        accountName = root.findViewById(R.id.account_name);
-        accountBalance = root.findViewById(R.id.balance);
-        accountPhone = root.findViewById(R.id.phone);
-        accountNotes = root.findViewById(R.id.notes);
-        transactionsRecyclerView = root.findViewById(R.id.transactions_list);
-        FloatingActionButton addTransactionButton = root.findViewById(R.id.add_transaction_button);
+        accountName = binding.accountName;
+        accountBalance = binding.balance;
+        accountPhone = binding.phone;
+        accountNotes = binding.notes;
+        transactionsRecyclerView = binding.transactionsList;
+        FloatingActionButton addTransactionButton = binding.addTransactionButton;
 
         // Setup RecyclerView
         transactionsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -59,7 +88,6 @@ public class AccountDetailsFragment extends Fragment {
         transactionsRecyclerView.setAdapter(transactionsAdapter);
 
         // Initialize ViewModels
-        accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
         transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
 
         // Observe account data
@@ -83,21 +111,18 @@ public class AccountDetailsFragment extends Fragment {
                     getContext().getColor(R.color.green));
             }
         });
-
-        // Setup add transaction button
-        addTransactionButton.setOnClickListener(v -> {
-            Bundle args = new Bundle();
-            args.putLong("accountId", accountId);
-            Navigation.findNavController(root).navigate(R.id.nav_add_transaction, args);
-        });
-
-        return root;
     }
 
     private void updateAccountDetails(Account account) {
         accountName.setText(account.getName());
         accountPhone.setText(account.getPhoneNumber() != null ? account.getPhoneNumber() : getString(R.string.not_available));
         accountNotes.setText(account.getNotes() != null ? account.getNotes() : getString(R.string.no_notes));
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 
     private static class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapter.ViewHolder> {
