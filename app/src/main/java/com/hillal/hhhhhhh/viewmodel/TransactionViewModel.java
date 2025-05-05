@@ -16,11 +16,13 @@ import java.util.concurrent.Executors;
 public class TransactionViewModel extends AndroidViewModel {
     private final TransactionDao transactionDao;
     private final ExecutorService executorService;
+    private final LiveData<List<Transaction>> allTransactions;
 
     public TransactionViewModel(Application application) {
         super(application);
         transactionDao = AppDatabase.getInstance(application).transactionDao();
         executorService = Executors.newSingleThreadExecutor();
+        allTransactions = transactionDao.getAllTransactions();
     }
 
     public LiveData<List<Transaction>> getTransactionsForAccount(long accountId) {
@@ -41,6 +43,22 @@ public class TransactionViewModel extends AndroidViewModel {
 
     public LiveData<List<Transaction>> getTransactionsBetweenDates(long startDate, long endDate) {
         return transactionDao.getTransactionsBetweenDates(startDate, endDate);
+    }
+
+    public LiveData<List<Transaction>> getAllTransactions() {
+        return allTransactions;
+    }
+
+    public void insert(Transaction transaction) {
+        AppDatabase.databaseWriteExecutor.execute(() -> transactionDao.insert(transaction));
+    }
+
+    public void update(Transaction transaction) {
+        AppDatabase.databaseWriteExecutor.execute(() -> transactionDao.update(transaction));
+    }
+
+    public void delete(Transaction transaction) {
+        AppDatabase.databaseWriteExecutor.execute(() -> transactionDao.delete(transaction));
     }
 
     @Override
