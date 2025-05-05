@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "onCreate completed successfully");
         } catch (Exception e) {
             Log.e(TAG, "Critical error in onCreate", e);
-            Toast.makeText(this, "خطأ في تهيئة التطبيق", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "1خطأ في تهيئة التطبيق", Toast.LENGTH_LONG).show();
             finish();
         }
     }
