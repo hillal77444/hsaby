@@ -3,13 +3,15 @@ package com.hillal.hhhhhhh.data.model;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "transactions",
         foreignKeys = @ForeignKey(entity = Account.class,
                 parentColumns = "id",
                 childColumns = "accountId",
-                onDelete = ForeignKey.CASCADE))
+                onDelete = ForeignKey.CASCADE),
+        indices = {@Index("accountId")})
 public class Transaction {
     @PrimaryKey(autoGenerate = true)
     private int id;
