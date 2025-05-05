@@ -17,7 +17,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.hhhhhhh.R;
-import com.hillal.hhhhhhh.data.entities.Transaction;
+import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.viewmodel.TransactionViewModel;
 import com.hillal.hhhhhhh.databinding.FragmentAddTransactionBinding;
 
@@ -57,43 +57,31 @@ public class AddTransactionFragment extends Fragment {
     }
 
     private void setupViews() {
-        // Get account ID from arguments
-        if (accountId == -1) {
-            Navigation.findNavController(requireView()).navigateUp();
-            return;
-        }
-
-        // Initialize views
         dateEditText = binding.dateEditText;
         amountEditText = binding.amountEditText;
         notesEditText = binding.notesEditText;
         transactionTypeGroup = binding.transactionTypeGroup;
         saveButton = binding.saveButton;
 
-        // Set current date
-        updateDateDisplay();
-
-        // Setup date picker
         dateEditText.setOnClickListener(v -> showDatePicker());
-
-        // Setup save button
         saveButton.setOnClickListener(v -> saveTransaction());
 
-        binding.cancelButton.setOnClickListener(v -> requireActivity().onBackPressed());
+        // Set default date to today
+        updateDateDisplay();
     }
 
     private void showDatePicker() {
         DatePickerDialog datePickerDialog = new DatePickerDialog(
-            requireContext(),
-            (view, year, month, dayOfMonth) -> {
-                calendar.set(Calendar.YEAR, year);
-                calendar.set(Calendar.MONTH, month);
-                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                updateDateDisplay();
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
+                requireContext(),
+                (view, year, month, dayOfMonth) -> {
+                    calendar.set(Calendar.YEAR, year);
+                    calendar.set(Calendar.MONTH, month);
+                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    updateDateDisplay();
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
         );
         datePickerDialog.show();
     }
@@ -106,36 +94,25 @@ public class AddTransactionFragment extends Fragment {
     private void saveTransaction() {
         String amountStr = amountEditText.getText().toString().trim();
         String notes = notesEditText.getText().toString().trim();
+        boolean isDebit = transactionTypeGroup.getCheckedButtonId() == R.id.debitButton;
 
         if (amountStr.isEmpty()) {
-            Toast.makeText(getContext(), R.string.error_amount_required, Toast.LENGTH_SHORT).show();
+            amountEditText.setError(getString(R.string.error_amount_required));
             return;
         }
 
+        double amount;
         try {
-            double amount = Double.parseDouble(amountStr);
-            if (amount <= 0) {
-                Toast.makeText(getContext(), R.string.error_invalid_amount, Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            int selectedButtonId = transactionTypeGroup.getCheckedButtonId();
-            boolean isDebit = selectedButtonId == R.id.debit_button;
-
-            Transaction transaction = new Transaction(
-                0, // id
-                accountId,
-                amount,
-                isDebit,
-                notes.isEmpty() ? null : notes,
-                calendar.getTimeInMillis()
-            );
-
-            transactionViewModel.insertTransaction(transaction);
-            Navigation.findNavController(requireView()).navigateUp();
+            amount = Double.parseDouble(amountStr);
         } catch (NumberFormatException e) {
-            Toast.makeText(getContext(), R.string.error_invalid_amount, Toast.LENGTH_SHORT).show();
+            amountEditText.setError(getString(R.string.error_invalid_amount));
+            return;
         }
+
+        Transaction transaction = new Transaction(accountId, amount, isDebit, notes);
+        transactionViewModel.insertTransaction(transaction);
+        Toast.makeText(getContext(), R.string.transaction_saved, Toast.LENGTH_SHORT).show();
+        Navigation.findNavController(getView()).navigateUp();
     }
 
     @Override
