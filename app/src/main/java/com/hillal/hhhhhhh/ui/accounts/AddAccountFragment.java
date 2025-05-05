@@ -61,12 +61,15 @@ public class AddAccountFragment extends Fragment {
             double balance = balanceStr.isEmpty() ? 0.0 : Double.parseDouble(balanceStr);
             boolean isDebtor = balance < 0;
 
-            Account account = new Account();
-            account.setName(name);
-            account.setPhoneNumber(phone.isEmpty() ? null : phone);
-            account.setNotes(notes.isEmpty() ? null : notes);
-            account.setOpeningBalance(Math.abs(balance));
-            account.setDebtor(isDebtor);
+            Account account = new Account(
+                0, // id
+                name,
+                phone.isEmpty() ? null : phone,
+                notes.isEmpty() ? null : notes,
+                Math.abs(balance),
+                isDebtor,
+                System.currentTimeMillis()
+            );
 
             accountViewModel.insertAccount(account);
             Navigation.findNavController(requireView()).navigateUp();
