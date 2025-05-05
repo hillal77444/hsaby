@@ -1,6 +1,7 @@
 package com.hillal.hhhhhhh.ui.dashboard;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,106 +14,50 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hillal.hhhhhhh.R;
-import com.hillal.hhhhhhh.data.entities.Account;
-import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.hillal.hhhhhhh.databinding.FragmentDashboardBinding;
+import com.hillal.hhhhhhh.ui.adapters.RecentAccountsAdapter;
 
 public class DashboardFragment extends Fragment {
-    private AccountViewModel accountViewModel;
-    private TextView totalDebtors, totalCreditors, netBalance;
-    private RecyclerView recentAccountsRecyclerView;
-    private RecentAccountsAdapter recentAccountsAdapter;
+    private static final String TAG = "DashboardFragment";
+    private FragmentDashboardBinding binding;
+    private DashboardViewModel dashboardViewModel;
+
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container, Bundle savedInstanceState) {
+        try {
+            dashboardViewModel = new ViewModelProvider(this).get(DashboardViewModel.class);
+            binding = FragmentDashboardBinding.inflate(inflater, container, false);
+            View root = binding.getRoot();
+
+            // إعداد RecyclerView
+            RecyclerView recentAccountsList = binding.recentAccountsList;
+            recentAccountsList.setLayoutManager(new LinearLayoutManager(getContext()));
+            recentAccountsList.setAdapter(new RecentAccountsAdapter());
+
+            // مراقبة التغييرات في البيانات
+            dashboardViewModel.getTotalDebtors().observe(getViewLifecycleOwner(), total -> {
+                binding.totalDebtors.setText(String.valueOf(total));
+            });
+
+            dashboardViewModel.getTotalCreditors().observe(getViewLifecycleOwner(), total -> {
+                binding.totalCreditors.setText(String.valueOf(total));
+            });
+
+            dashboardViewModel.getNetBalance().observe(getViewLifecycleOwner(), balance -> {
+                binding.netBalance.setText(String.valueOf(balance));
+            });
+
+            Log.d(TAG, "DashboardFragment created successfully");
+            return root;
+        } catch (Exception e) {
+            Log.e(TAG, "Error creating DashboardFragment: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to create DashboardFragment: " + e.getMessage(), e);
+        }
+    }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_dashboard, container, false);
-
-        // Initialize views
-        totalDebtors = root.findViewById(R.id.total_debtors);
-        totalCreditors = root.findViewById(R.id.total_creditors);
-        netBalance = root.findViewById(R.id.net_balance);
-        recentAccountsRecyclerView = root.findViewById(R.id.recent_accounts_list);
-
-        // Setup RecyclerView
-        recentAccountsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recentAccountsAdapter = new RecentAccountsAdapter(new ArrayList<>());
-        recentAccountsRecyclerView.setAdapter(recentAccountsAdapter);
-
-        // Initialize ViewModel
-        accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
-
-        // Observe accounts data
-        accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
-            updateDashboardStats(accounts);
-            recentAccountsAdapter.updateAccounts(accounts);
-        });
-
-        return root;
-    }
-
-    private void updateDashboardStats(List<Account> accounts) {
-        double totalDebt = 0;
-        double totalCredit = 0;
-
-        for (Account account : accounts) {
-            if (account.isDebtor()) {
-                totalDebt += account.getOpeningBalance();
-            } else {
-                totalCredit += account.getOpeningBalance();
-            }
-        }
-
-        totalDebtors.setText(String.format("%,.2f", totalDebt));
-        totalCreditors.setText(String.format("%,.2f", totalCredit));
-        netBalance.setText(String.format("%,.2f", totalCredit - totalDebt));
-    }
-
-    private static class RecentAccountsAdapter extends RecyclerView.Adapter<RecentAccountsAdapter.ViewHolder> {
-        private List<Account> accounts;
-
-        public RecentAccountsAdapter(List<Account> accounts) {
-            this.accounts = accounts;
-        }
-
-        public void updateAccounts(List<Account> newAccounts) {
-            this.accounts = newAccounts;
-            notifyDataSetChanged();
-        }
-
-        @NonNull
-        @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_recent_account, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            Account account = accounts.get(position);
-            holder.accountName.setText(account.getName());
-            holder.balance.setText(String.format("%,.2f", account.getOpeningBalance()));
-            holder.balance.setTextColor(account.isDebtor() ? 
-                holder.itemView.getContext().getColor(R.color.red) : 
-                holder.itemView.getContext().getColor(R.color.green));
-        }
-
-        @Override
-        public int getItemCount() {
-            return Math.min(accounts.size(), 5); // Show only 5 most recent accounts
-        }
-
-        static class ViewHolder extends RecyclerView.ViewHolder {
-            TextView accountName;
-            TextView balance;
-
-            ViewHolder(View itemView) {
-                super(itemView);
-                accountName = itemView.findViewById(R.id.account_name);
-                balance = itemView.findViewById(R.id.balance);
-            }
-        }
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 } 
