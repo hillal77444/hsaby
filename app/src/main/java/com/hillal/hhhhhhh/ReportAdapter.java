@@ -6,10 +6,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.hillal.hhhhhhh.db.Report;
+import com.hillal.hhhhhhh.data.entities.Report;
 import java.util.List;
 
-public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportViewHolder> {
+public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder> {
     private final List<Report> reports;
     private final OnReportClickListener listener;
 
@@ -24,17 +24,16 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
 
     @NonNull
     @Override
-    public ReportViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(android.R.layout.simple_list_item_1, parent, false);
-        return new ReportViewHolder(view);
+                .inflate(R.layout.item_report, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Report report = reports.get(position);
-        holder.titleTextView.setText(report.title);
-        holder.itemView.setOnClickListener(v -> listener.onReportClick(report));
+        holder.bind(report);
     }
 
     @Override
@@ -42,12 +41,20 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
         return reports.size();
     }
 
-    static class ReportViewHolder extends RecyclerView.ViewHolder {
-        final TextView titleTextView;
+    class ViewHolder extends RecyclerView.ViewHolder {
+        private final TextView titleTextView;
+        private final TextView descriptionTextView;
 
-        ReportViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
-            titleTextView = itemView.findViewById(android.R.id.text1);
+            titleTextView = itemView.findViewById(R.id.report_title);
+            descriptionTextView = itemView.findViewById(R.id.report_description);
+        }
+
+        void bind(Report report) {
+            titleTextView.setText(report.getTitle());
+            descriptionTextView.setText(report.getDescription());
+            itemView.setOnClickListener(v -> listener.onReportClick(report));
         }
     }
 }
