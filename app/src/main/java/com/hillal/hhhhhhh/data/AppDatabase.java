@@ -5,13 +5,16 @@ import android.content.Context;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
 
 import com.hillal.hhhhhhh.data.dao.AccountDao;
 import com.hillal.hhhhhhh.data.dao.TransactionDao;
 import com.hillal.hhhhhhh.data.entities.Account;
 import com.hillal.hhhhhhh.data.entities.Transaction;
+import com.hillal.hhhhhhh.Converters;
 
-@Database(entities = {Account.class, Transaction.class}, version = 1, exportSchema = false)
+@Database(entities = {Account.class, Transaction.class}, version = 1)
+@TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase instance;
 
@@ -24,8 +27,7 @@ public abstract class AppDatabase extends RoomDatabase {
                 context.getApplicationContext(),
                 AppDatabase.class,
                 "accounting_database"
-            ).fallbackToDestructiveMigration()
-             .build();
+            ).fallbackToDestructiveMigration().build();
         }
         return instance;
     }
