@@ -107,12 +107,14 @@ public class AddTransactionFragment extends Fragment {
             int selectedButtonId = transactionTypeGroup.getCheckedButtonId();
             boolean isDebit = selectedButtonId == R.id.debit_button;
 
-            Transaction transaction = new Transaction();
-            transaction.setAccountId(accountId);
-            transaction.setAmount(amount);
-            transaction.setDate(calendar.getTime());
-            transaction.setNotes(notes.isEmpty() ? null : notes);
-            transaction.setDebit(isDebit);
+            Transaction transaction = new Transaction(
+                0, // id
+                accountId,
+                amount,
+                isDebit,
+                notes.isEmpty() ? null : notes,
+                calendar.getTimeInMillis()
+            );
 
             transactionViewModel.insertTransaction(transaction);
             Navigation.findNavController(requireView()).navigateUp();
