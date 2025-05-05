@@ -41,8 +41,8 @@ public class RecentAccountsAdapter extends RecyclerView.Adapter<RecentAccountsAd
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Account account = accounts.get(position);
         holder.nameTextView.setText(account.getName());
-        holder.phoneTextView.setText(account.getPhone());
-        holder.balanceTextView.setText(String.format("%.2f", account.getBalance()));
+        holder.phoneTextView.setText(account.getPhoneNumber());
+        holder.balanceTextView.setText(String.format("%.2f", account.getOpeningBalance()));
     }
 
     @Override
