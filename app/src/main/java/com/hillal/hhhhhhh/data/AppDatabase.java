@@ -9,17 +9,20 @@ import androidx.room.TypeConverters;
 
 import com.hillal.hhhhhhh.data.dao.AccountDao;
 import com.hillal.hhhhhhh.data.dao.TransactionDao;
+import com.hillal.hhhhhhh.data.dao.ReportDao;
 import com.hillal.hhhhhhh.data.entities.Account;
 import com.hillal.hhhhhhh.data.entities.Transaction;
+import com.hillal.hhhhhhh.data.entities.Report;
 import com.hillal.hhhhhhh.Converters;
 
-@Database(entities = {Account.class, Transaction.class}, version = 1)
+@Database(entities = {Account.class, Transaction.class, Report.class}, version = 1)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase instance;
 
     public abstract AccountDao accountDao();
     public abstract TransactionDao transactionDao();
+    public abstract ReportDao reportDao();
 
     public static synchronized AppDatabase getInstance(Context context) {
         if (instance == null) {
