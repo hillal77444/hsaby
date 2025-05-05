@@ -5,6 +5,7 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import com.hillal.hhhhhhh.data.entities.Transaction;
 
@@ -15,8 +16,14 @@ public interface TransactionDao {
     @Insert
     long insert(Transaction transaction);
 
+    @Update
+    void update(Transaction transaction);
+
     @Delete
     void delete(Transaction transaction);
+
+    @Query("SELECT * FROM transactions ORDER BY date DESC")
+    LiveData<List<Transaction>> getAllTransactions();
 
     @Query("SELECT * FROM transactions WHERE accountId = :accountId ORDER BY date DESC")
     LiveData<List<Transaction>> getTransactionsForAccount(long accountId);
