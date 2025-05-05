@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -18,6 +19,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.entities.Transaction;
 import com.hillal.hhhhhhh.viewmodel.TransactionViewModel;
+import com.hillal.hhhhhhh.databinding.FragmentAddTransactionBinding;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -25,6 +27,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class AddTransactionFragment extends Fragment {
+    private FragmentAddTransactionBinding binding;
     private TransactionViewModel transactionViewModel;
     private TextInputEditText dateEditText;
     private TextInputEditText amountEditText;
@@ -35,22 +38,37 @@ public class AddTransactionFragment extends Fragment {
     private final Calendar calendar = Calendar.getInstance();
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_add_transaction, container, false);
-
-        // Get account ID from arguments
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         accountId = getArguments() != null ? getArguments().getLong("accountId") : -1;
+        transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        binding = FragmentAddTransactionBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setupViews();
+    }
+
+    private void setupViews() {
+        // Get account ID from arguments
         if (accountId == -1) {
-            Navigation.findNavController(root).navigateUp();
-            return root;
+            Navigation.findNavController(requireView()).navigateUp();
+            return;
         }
 
         // Initialize views
-        dateEditText = root.findViewById(R.id.date_edit_text);
-        amountEditText = root.findViewById(R.id.amount_edit_text);
-        notesEditText = root.findViewById(R.id.notes_edit_text);
-        transactionTypeGroup = root.findViewById(R.id.transaction_type_group);
-        saveButton = root.findViewById(R.id.save_button);
+        dateEditText = binding.dateEditText;
+        amountEditText = binding.amountEditText;
+        notesEditText = binding.notesEditText;
+        transactionTypeGroup = binding.transactionTypeGroup;
+        saveButton = binding.saveButton;
 
         // Set current date
         updateDateDisplay();
@@ -58,13 +76,10 @@ public class AddTransactionFragment extends Fragment {
         // Setup date picker
         dateEditText.setOnClickListener(v -> showDatePicker());
 
-        // Initialize ViewModel
-        transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
-
         // Setup save button
         saveButton.setOnClickListener(v -> saveTransaction());
 
-        return root;
+        binding.cancelButton.setOnClickListener(v -> requireActivity().onBackPressed());
     }
 
     private void showDatePicker() {
@@ -121,5 +136,11 @@ public class AddTransactionFragment extends Fragment {
         } catch (NumberFormatException e) {
             Toast.makeText(getContext(), R.string.error_invalid_amount, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 } 
