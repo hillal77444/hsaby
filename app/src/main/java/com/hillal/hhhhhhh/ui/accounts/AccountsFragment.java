@@ -98,7 +98,7 @@ public class AccountsFragment extends Fragment {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             Account account = accounts.get(position);
             holder.accountName.setText(account.getName());
-            holder.phone.setText(account.getPhone());
+            holder.phone.setText(account.getPhoneNumber());
             holder.balance.setText(String.format("%,.2f", account.getOpeningBalance()));
             holder.balance.setTextColor(account.isDebtor() ? 
                 holder.itemView.getContext().getColor(R.color.red) : 
