@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private NavController navController;
     private AccountRepository accountRepository;
+    private AppBarConfiguration appBarConfiguration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
                     .findFragmentById(R.id.nav_host_fragment_content_main);
             if (navHostFragment != null) {
                 navController = navHostFragment.getNavController();
-                AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+                appBarConfiguration = new AppBarConfiguration.Builder(
                         R.id.navigation_dashboard, R.id.navigation_accounts,
                         R.id.navigation_reports, R.id.navigation_settings)
                         .build();
@@ -76,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         return NavigationUI.navigateUp(navController, appBarConfiguration)
                 || super.onSupportNavigateUp();
     }
