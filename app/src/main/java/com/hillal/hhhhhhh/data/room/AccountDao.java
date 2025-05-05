@@ -42,4 +42,7 @@ public interface AccountDao {
 
     @Query("SELECT SUM(balance) FROM accounts WHERE isCreditor = 0")
     LiveData<Double> getTotalDebtors();
+
+    @Query("SELECT * FROM accounts WHERE name LIKE :query OR phone LIKE :query")
+    LiveData<List<Account>> searchAccounts(String query);
 } 
