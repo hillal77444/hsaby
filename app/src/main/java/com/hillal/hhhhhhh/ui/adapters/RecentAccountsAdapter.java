@@ -11,11 +11,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Account;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RecentAccountsAdapter extends RecyclerView.Adapter<RecentAccountsAdapter.ViewHolder> {
-    private List<Account> accounts = new ArrayList<>();
+    private List<Account> accounts;
+
+    public RecentAccountsAdapter() {
+        this.accounts = null;
+    }
+
+    public void updateAccounts(List<Account> accounts) {
+        this.accounts = accounts;
+        notifyDataSetChanged();
+    }
 
     @NonNull
     @Override
@@ -29,19 +37,13 @@ public class RecentAccountsAdapter extends RecyclerView.Adapter<RecentAccountsAd
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Account account = accounts.get(position);
         holder.nameTextView.setText(account.getName());
-        holder.phoneTextView.setText(account.getPhoneNumber());
-        holder.balanceTextView.setText(String.format("%s %s", 
-            account.getBalance(), holder.itemView.getContext().getString(R.string.currency_symbol)));
+        holder.phoneTextView.setText(account.getPhone());
+        holder.balanceTextView.setText(String.format("%.2f", account.getBalance()));
     }
 
     @Override
     public int getItemCount() {
-        return accounts.size();
-    }
-
-    public void setAccounts(List<Account> accounts) {
-        this.accounts = accounts;
-        notifyDataSetChanged();
+        return accounts != null ? accounts.size() : 0;
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
