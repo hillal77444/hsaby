@@ -1,6 +1,7 @@
 package com.hillal.hhhhhhh;
 
 import android.app.Application;
+import com.hillal.hhhhhhh.data.AppDatabase;
 
 public class App extends Application {
     private static App instance;
