@@ -10,11 +10,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Account;
+import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
+import com.hillal.hhhhhhh.viewmodel.TransactionViewModel;
 
 import java.util.List;
 
 public class RecentAccountsAdapter extends RecyclerView.Adapter<RecentAccountsAdapter.ViewHolder> {
     private List<Account> accounts;
+    private AccountViewModel accountViewModel;
+    private TransactionViewModel transactionViewModel;
 
     public RecentAccountsAdapter() {
         this.accounts = null;
