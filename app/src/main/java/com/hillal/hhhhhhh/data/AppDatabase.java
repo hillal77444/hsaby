@@ -7,6 +7,8 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
+import androidx.room.migration.Migration;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.hillal.hhhhhhh.data.dao.AccountDao;
 import com.hillal.hhhhhhh.data.dao.TransactionDao;
@@ -39,11 +41,24 @@ public abstract class AppDatabase extends RoomDatabase {
                 )
                 .fallbackToDestructiveMigration()
                 .allowMainThreadQueries() // للاختبار فقط
+                .addCallback(new RoomDatabase.Callback() {
+                    @Override
+                    public void onCreate(@NonNull SupportSQLiteDatabase db) {
+                        super.onCreate(db);
+                        Log.d(TAG, "Database created successfully");
+                    }
+
+                    @Override
+                    public void onOpen(@NonNull SupportSQLiteDatabase db) {
+                        super.onOpen(db);
+                        Log.d(TAG, "Database opened successfully");
+                    }
+                })
                 .build();
                 Log.d(TAG, "Database initialized successfully");
             } catch (Exception e) {
                 Log.e(TAG, "Error initializing database", e);
-                throw new RuntimeException("Failed to initialize database", e);
+                throw new RuntimeException("Failed to initialize database: " + e.getMessage(), e);
             }
         }
         return instance;
