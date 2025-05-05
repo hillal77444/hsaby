@@ -26,7 +26,7 @@ public interface AccountDao {
     List<Account> getRecentAccounts();
 
     @Query("SELECT * FROM accounts WHERE id = :id")
-    LiveData<Account> getAccountById(long id);
+    LiveData<Account> getAccountById(int id);
 
     @Query("SELECT * FROM accounts ORDER BY name ASC")
     LiveData<List<Account>> getAllAccounts();
