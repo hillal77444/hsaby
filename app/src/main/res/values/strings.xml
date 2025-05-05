@@ -179,4 +179,27 @@
 
     <!-- Search -->
     <string name="search_hint">ابحث عن حساب...</string>
+
+    <!-- Navigation -->
+    <string name="title_dashboard">لوحة التحكم</string>
+    <string name="title_accounts">الحسابات</string>
+    <string name="title_reports">التقارير</string>
+    <string name="title_settings">الإعدادات</string>
+    
+    <!-- Menu -->
+    <string name="menu_dashboard">لوحة التحكم</string>
+    <string name="menu_accounts">الحسابات</string>
+    <string name="menu_reports">التقارير</string>
+    <string name="menu_settings">الإعدادات</string>
+    
+    <!-- Common -->
+    <string name="search_hint">بحث...</string>
+    <string name="delete">حذف</string>
+    <string name="edit">تعديل</string>
+    <string name="add">إضافة</string>
+    
+    <!-- Error Messages -->
+    <string name="error_initialization">خطأ في تهيئة التطبيق</string>
+    <string name="error_database">خطأ في قاعدة البيانات</string>
+    <string name="error_network">خطأ في الاتصال</string>
 </resources>
