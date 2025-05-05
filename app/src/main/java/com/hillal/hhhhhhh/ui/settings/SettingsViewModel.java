@@ -10,5 +10,17 @@ public class SettingsViewModel extends ViewModel {
         this.accountRepository = accountRepository;
     }
 
+    public void backupData() {
+        accountRepository.backupData();
+    }
+
+    public void restoreData() {
+        accountRepository.restoreData();
+    }
+
+    public void clearAllData() {
+        accountRepository.clearAllData();
+    }
+
     // Add settings methods here
 } 
