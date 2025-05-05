@@ -10,25 +10,31 @@ import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.hillal.hhhhhhh.data.model.Account;
+import com.hillal.hhhhhhh.data.model.Transaction;
 
-@Database(entities = {Account.class}, version = 1, exportSchema = false)
+@Database(entities = {Account.class, Transaction.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG = "AppDatabase";
     private static final String DATABASE_NAME = "accounting_db";
     private static volatile AppDatabase instance;
 
     public abstract AccountDao accountDao();
+    public abstract TransactionDao transactionDao();
 
     public static synchronized AppDatabase getInstance(Context context) {
         if (instance == null) {
-            instance = Room.databaseBuilder(
-                    context.getApplicationContext(),
-                    AppDatabase.class,
-                    DATABASE_NAME)
-                    .fallbackToDestructiveMigration()
-                    .addCallback(roomCallback)
-                    .build();
-            Log.d(TAG, "Database instance created");
+            synchronized (AppDatabase.class) {
+                if (instance == null) {
+                    instance = Room.databaseBuilder(
+                            context.getApplicationContext(),
+                            AppDatabase.class,
+                            DATABASE_NAME)
+                            .fallbackToDestructiveMigration()
+                            .addCallback(roomCallback)
+                            .build();
+                    Log.d(TAG, "Database instance created");
+                }
+            }
         }
         return instance;
     }
