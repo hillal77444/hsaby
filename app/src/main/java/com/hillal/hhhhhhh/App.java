@@ -25,7 +25,7 @@ public class App extends Application {
             Log.d(TAG, "Database initialized successfully");
             
             // Initialize repository
-            accountRepository = new AccountRepository(database.accountDao());
+            accountRepository = new AccountRepository(database.accountDao(), database);
             Log.d(TAG, "AccountRepository initialized successfully");
             
             Log.d(TAG, "Application initialized successfully");
