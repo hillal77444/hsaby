@@ -51,7 +51,8 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "MainActivity initialized successfully");
         } catch (Exception e) {
             Log.e(TAG, "Error in MainActivity onCreate: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to initialize MainActivity: " + e.getMessage(), e);
+            Toast.makeText(this, "خطأ في تهيئة التطبيق", Toast.LENGTH_LONG).show();
+            finish();
         }
     }
 
