@@ -66,14 +66,14 @@ public class AccountDetailsFragment extends Fragment {
         accountNotes = binding.accountNotes;
         transactionsRecyclerView = binding.transactionsRecyclerView;
         transactionsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        transactionsAdapter = new TransactionsAdapter(new ArrayList<>());
+        transactionsAdapter = new TransactionsAdapter();
         transactionsRecyclerView.setAdapter(transactionsAdapter);
 
         FloatingActionButton fab = binding.fabAddTransaction;
         fab.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putLong("accountId", accountId);
-            Navigation.findNavController(v).navigate(R.id.action_accountDetailsFragment_to_addTransactionFragment, bundle);
+            Navigation.findNavController(v).navigate(R.id.nav_add_transaction, bundle);
         });
 
         binding.viewTransactionsButton.setOnClickListener(v -> {
@@ -92,7 +92,7 @@ public class AccountDetailsFragment extends Fragment {
 
         transactionViewModel.getTransactionsForAccount(accountId).observe(getViewLifecycleOwner(), transactions -> {
             if (transactions != null) {
-                transactionsAdapter.updateTransactions(transactions);
+                transactionsAdapter.submitList(transactions);
             }
         });
 
@@ -118,11 +118,11 @@ public class AccountDetailsFragment extends Fragment {
     private static class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapter.ViewHolder> {
         private List<Transaction> transactions;
 
-        public TransactionsAdapter(List<Transaction> transactions) {
-            this.transactions = transactions;
+        public TransactionsAdapter() {
+            this.transactions = new ArrayList<>();
         }
 
-        public void updateTransactions(List<Transaction> newTransactions) {
+        public void submitList(List<Transaction> newTransactions) {
             this.transactions = newTransactions;
             notifyDataSetChanged();
         }
