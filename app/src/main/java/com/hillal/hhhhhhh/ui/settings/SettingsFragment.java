@@ -26,7 +26,6 @@ public class SettingsFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         settingsViewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
-        sharedPreferences = requireContext().getSharedPreferences("app_settings", 0);
     }
 
     @Nullable
@@ -40,42 +39,58 @@ public class SettingsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Load current settings
-        boolean darkMode = sharedPreferences.getBoolean("dark_mode", false);
-        boolean notifications = sharedPreferences.getBoolean("notifications", true);
-        boolean autoBackup = sharedPreferences.getBoolean("auto_backup", true);
+        // Initialize SharedPreferences
+        sharedPreferences = requireContext().getSharedPreferences("app_settings", 0);
 
-        binding.darkModeSwitch.setChecked(darkMode);
-        binding.notificationsSwitch.setChecked(notifications);
-        binding.autoBackupSwitch.setChecked(autoBackup);
+        // Load saved settings
+        loadSettings();
 
         // Set up switch listeners
-        binding.darkModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        setupSwitchListeners();
+    }
+
+    private void loadSettings() {
+        // Load and set saved settings
+        binding.switchDarkMode.setChecked(sharedPreferences.getBoolean("dark_mode", false));
+        binding.switchNotifications.setChecked(sharedPreferences.getBoolean("notifications", true));
+        binding.switchAutoBackup.setChecked(sharedPreferences.getBoolean("auto_backup", true));
+        binding.switchCurrencyFormat.setChecked(sharedPreferences.getBoolean("currency_format", true));
+    }
+
+    private void setupSwitchListeners() {
+        binding.switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPreferences.edit().putBoolean("dark_mode", isChecked).apply();
-            // TODO: Apply theme change
+            // TODO: Implement dark mode change
         });
 
-        binding.notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        binding.switchNotifications.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPreferences.edit().putBoolean("notifications", isChecked).apply();
+            // TODO: Implement notifications toggle
         });
 
-        binding.autoBackupSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        binding.switchAutoBackup.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPreferences.edit().putBoolean("auto_backup", isChecked).apply();
+            // TODO: Implement auto backup toggle
+        });
+
+        binding.switchCurrencyFormat.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPreferences.edit().putBoolean("currency_format", isChecked).apply();
+            // TODO: Implement currency format change
         });
 
         // Set up backup button
-        binding.backupButton.setOnClickListener(v -> {
+        binding.buttonBackup.setOnClickListener(v -> {
             // TODO: Implement backup functionality
         });
 
         // Set up restore button
-        binding.restoreButton.setOnClickListener(v -> {
+        binding.buttonRestore.setOnClickListener(v -> {
             // TODO: Implement restore functionality
         });
 
         // Set up clear data button
-        binding.clearDataButton.setOnClickListener(v -> {
-            // TODO: Show confirmation dialog and implement clear data
+        binding.buttonClearData.setOnClickListener(v -> {
+            // TODO: Implement clear data functionality with confirmation dialog
         });
     }
 
