@@ -42,6 +42,7 @@ public class TransactionsFragment extends Fragment {
         setupRecyclerView();
         setupObservers();
         setupFab();
+        setupToolbar();
     }
 
     private void setupRecyclerView() {
@@ -66,6 +67,10 @@ public class TransactionsFragment extends Fragment {
             args.putLong("accountId", accountId);
             Navigation.findNavController(v).navigate(R.id.nav_add_transaction, args);
         });
+    }
+
+    private void setupToolbar() {
+        binding.toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
     }
 
     @Override
