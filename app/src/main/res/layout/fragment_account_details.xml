@@ -48,7 +48,7 @@
                         android:textAppearance="?attr/textAppearanceHeadline6" />
 
                     <TextView
-                        android:id="@+id/account_balance"
+                        android:id="@+id/balance"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
@@ -68,7 +68,7 @@
                         android:textAppearance="?attr/textAppearanceSubtitle2" />
 
                     <TextView
-                        android:id="@+id/phone_number"
+                        android:id="@+id/phone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
@@ -100,7 +100,7 @@
                 android:textAppearance="?attr/textAppearanceSubtitle1" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/transactions_recycler"
+                android:id="@+id/transactions_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false" />
