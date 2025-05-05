@@ -6,54 +6,78 @@ import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "transactions",
-        foreignKeys = @ForeignKey(entity = Account.class,
-                parentColumns = "id",
-                childColumns = "accountId",
-                onDelete = ForeignKey.CASCADE),
-        indices = {@Index("accountId")})
+@Entity(
+    tableName = "transactions",
+    foreignKeys = @ForeignKey(
+        entity = Account.class,
+        parentColumns = "id",
+        childColumns = "accountId",
+        onDelete = ForeignKey.CASCADE
+    ),
+    indices = @Index("accountId")
+)
 public class Transaction {
     @PrimaryKey(autoGenerate = true)
-    private int id;
-    private int accountId;
-    private String date;
+    private long id;
+    private long accountId;
     private double amount;
-    private String description;
     private boolean isDebit;
+    private String notes;
+    private long date;
 
-    public Transaction(int accountId, String date, double amount, String description, boolean isDebit) {
+    public Transaction(long accountId, double amount, boolean isDebit, String notes) {
         this.accountId = accountId;
-        this.date = date;
         this.amount = amount;
-        this.description = description;
         this.isDebit = isDebit;
+        this.notes = notes;
+        this.date = System.currentTimeMillis();
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
-    public int getAccountId() {
+    public long getAccountId() {
         return accountId;
     }
 
-    public String getDate() {
-        return date;
+    public void setAccountId(long accountId) {
+        this.accountId = accountId;
     }
 
     public double getAmount() {
         return amount;
     }
 
-    public String getDescription() {
-        return description;
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
 
     public boolean isDebit() {
         return isDebit;
+    }
+
+    public void setDebit(boolean debit) {
+        isDebit = debit;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public long getDate() {
+        return date;
+    }
+
+    public void setDate(long date) {
+        this.date = date;
     }
 } 
