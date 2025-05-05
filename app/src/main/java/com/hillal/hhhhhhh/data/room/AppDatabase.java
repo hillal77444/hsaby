@@ -11,8 +11,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
+import com.hillal.hhhhhhh.data.model.Settings;
 
-@Database(entities = {Account.class, Transaction.class}, version = 1, exportSchema = false)
+@Database(entities = {Account.class, Transaction.class, Settings.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG = "AppDatabase";
     private static final String DATABASE_NAME = "accounting_db";
@@ -20,6 +21,7 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract AccountDao accountDao();
     public abstract TransactionDao transactionDao();
+    public abstract SettingsDao settingsDao();
 
     public static synchronized AppDatabase getInstance(Context context) {
         if (instance == null) {
