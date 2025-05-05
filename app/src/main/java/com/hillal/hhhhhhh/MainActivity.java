@@ -7,7 +7,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
@@ -20,36 +20,22 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private ActivityMainBinding binding;
-    private NavController navController;
     private AppBarConfiguration appBarConfiguration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate started");
         try {
+            super.onCreate(savedInstanceState);
+            Log.d(TAG, "MainActivity onCreate started");
+
             binding = ActivityMainBinding.inflate(getLayoutInflater());
             setContentView(binding.getRoot());
-            Log.d(TAG, "Layout inflated successfully");
 
-            // إعداد NavController
-            NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.nav_host_fragment_content_main);
-            if (navHostFragment != null) {
-                navController = navHostFragment.getNavController();
-                Log.d(TAG, "NavController initialized");
-                
-                appBarConfiguration = new AppBarConfiguration.Builder(
-                        R.id.navigation_dashboard,
-                        R.id.navigation_reports
-                ).build();
-                NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-                Log.d(TAG, "ActionBar setup completed");
-            } else {
-                Log.e(TAG, "NavHostFragment is null - This is a critical error");
-                finish();
-                return;
-            }
+            setSupportActionBar(binding.toolbar);
+
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+            appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
+            NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
             // ربط BottomNavigationView مع NavController
             BottomNavigationView bottomNav = binding.bottomNavView;
@@ -62,11 +48,10 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            Log.d(TAG, "onCreate completed successfully");
+            Log.d(TAG, "MainActivity initialized successfully");
         } catch (Exception e) {
-            Log.e(TAG, "Critical error in onCreate", e);
-            Toast.makeText(this, "1خطأ في تهيئة التطبيق", Toast.LENGTH_LONG).show();
-            finish();
+            Log.e(TAG, "Error in MainActivity onCreate: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to initialize MainActivity: " + e.getMessage(), e);
         }
     }
 
@@ -128,12 +113,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onSupportNavigateUp() {
         try {
-            if (navController != null) {
-                return navController.navigateUp() || super.onSupportNavigateUp();
-            }
-            return super.onSupportNavigateUp();
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+            return NavigationUI.navigateUp(navController, appBarConfiguration) || super.onSupportNavigateUp();
         } catch (Exception e) {
-            Log.e(TAG, "Error in onSupportNavigateUp", e);
+            Log.e(TAG, "Error in onSupportNavigateUp: " + e.getMessage(), e);
             return super.onSupportNavigateUp();
         }
     }
