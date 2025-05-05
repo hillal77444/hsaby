@@ -48,7 +48,7 @@ public class AccountRepository {
         executorService.execute(() -> accountDao.delete(account));
     }
 
-    public LiveData<Account> getAccountById(int id) {
+    public LiveData<Account> getAccountById(long id) {
         return accountDao.getAccountById(id);
     }
 
@@ -60,11 +60,11 @@ public class AccountRepository {
         return accountDao.searchAccounts("%" + query + "%");
     }
 
-    public LiveData<List<Transaction>> getTransactionsForAccount(int accountId) {
+    public LiveData<List<Transaction>> getTransactionsForAccount(long accountId) {
         return database.transactionDao().getTransactionsForAccount(accountId);
     }
 
-    public LiveData<Double> getAccountBalance(int accountId) {
+    public LiveData<Double> getAccountBalance(long accountId) {
         return database.transactionDao().getAccountBalance(accountId);
     }
 
