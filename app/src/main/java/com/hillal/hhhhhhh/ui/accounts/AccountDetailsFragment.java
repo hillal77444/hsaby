@@ -16,8 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.hillal.hhhhhhh.R;
-import com.hillal.hhhhhhh.data.entities.Account;
-import com.hillal.hhhhhhh.data.entities.Transaction;
+import com.hillal.hhhhhhh.data.model.Account;
+import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
 import com.hillal.hhhhhhh.viewmodel.TransactionViewModel;
 import com.hillal.hhhhhhh.databinding.FragmentAccountDetailsBinding;
@@ -36,13 +36,14 @@ public class AccountDetailsFragment extends Fragment {
     private TextView accountNotes;
     private RecyclerView transactionsRecyclerView;
     private TransactionsAdapter transactionsAdapter;
-    private int accountId;
+    private long accountId;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        accountId = getArguments() != null ? getArguments().getInt("accountId") : -1;
+        accountId = getArguments() != null ? getArguments().getLong("accountId") : -1;
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
+        transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
     }
 
     @Override
@@ -59,64 +60,53 @@ public class AccountDetailsFragment extends Fragment {
     }
 
     private void setupViews() {
-        binding.addTransactionButton.setOnClickListener(v -> {
-            Bundle bundle = new Bundle();
-            bundle.putInt("accountId", accountId);
-            NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_accountDetailsFragment_to_addTransactionFragment, bundle);
-        });
-    }
-
-    private void loadAccountDetails() {
-        // Get account ID from arguments
-        if (accountId == -1) {
-            Navigation.findNavController(binding.getRoot()).navigateUp();
-            return;
-        }
-
-        // Initialize views
         accountName = binding.accountName;
-        accountBalance = binding.balance;
-        accountPhone = binding.phone;
-        accountNotes = binding.notes;
-        transactionsRecyclerView = binding.transactionsList;
-        FloatingActionButton addTransactionButton = binding.addTransactionButton;
-
-        // Setup RecyclerView
+        accountBalance = binding.accountBalance;
+        accountPhone = binding.accountPhone;
+        accountNotes = binding.accountNotes;
+        transactionsRecyclerView = binding.transactionsRecyclerView;
         transactionsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         transactionsAdapter = new TransactionsAdapter(new ArrayList<>());
         transactionsRecyclerView.setAdapter(transactionsAdapter);
 
-        // Initialize ViewModels
-        transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
+        FloatingActionButton fab = binding.fabAddTransaction;
+        fab.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putLong("accountId", accountId);
+            Navigation.findNavController(v).navigate(R.id.action_accountDetailsFragment_to_addTransactionFragment, bundle);
+        });
 
-        // Observe account data
+        binding.viewTransactionsButton.setOnClickListener(v -> {
+            Bundle args = new Bundle();
+            args.putLong("accountId", accountId);
+            Navigation.findNavController(v).navigate(R.id.nav_transactions, args);
+        });
+    }
+
+    private void loadAccountDetails() {
         accountViewModel.getAccountById(accountId).observe(getViewLifecycleOwner(), account -> {
             if (account != null) {
                 updateAccountDetails(account);
             }
         });
 
-        // Observe transactions data
         transactionViewModel.getTransactionsForAccount(accountId).observe(getViewLifecycleOwner(), transactions -> {
-            transactionsAdapter.updateTransactions(transactions);
+            if (transactions != null) {
+                transactionsAdapter.updateTransactions(transactions);
+            }
         });
 
-        // Observe account balance
         transactionViewModel.getAccountBalance(accountId).observe(getViewLifecycleOwner(), balance -> {
             if (balance != null) {
-                accountBalance.setText(String.format("%,.2f", balance));
-                accountBalance.setTextColor(balance < 0 ? 
-                    getContext().getColor(R.color.red) : 
-                    getContext().getColor(R.color.green));
+                accountBalance.setText(String.format("%.2f", balance));
             }
         });
     }
 
     private void updateAccountDetails(Account account) {
         accountName.setText(account.getName());
-        accountPhone.setText(account.getPhoneNumber() != null ? account.getPhoneNumber() : getString(R.string.not_available));
-        accountNotes.setText(account.getNotes() != null ? account.getNotes() : getString(R.string.no_notes));
+        accountPhone.setText(account.getPhoneNumber());
+        accountNotes.setText(account.getNotes());
     }
 
     @Override
@@ -149,11 +139,8 @@ public class AccountDetailsFragment extends Fragment {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             Transaction transaction = transactions.get(position);
             holder.date.setText(android.text.format.DateFormat.format("dd/MM/yyyy", transaction.getDate()));
-            holder.amount.setText(String.format("%,.2f", transaction.getAmount()));
-            holder.amount.setTextColor(transaction.isDebit() ? 
-                holder.itemView.getContext().getColor(R.color.red) : 
-                holder.itemView.getContext().getColor(R.color.green));
-            holder.notes.setText(transaction.getNotes() != null ? transaction.getNotes() : "");
+            holder.amount.setText(String.format("%.2f", transaction.getAmount()));
+            holder.notes.setText(transaction.getNotes());
         }
 
         @Override
