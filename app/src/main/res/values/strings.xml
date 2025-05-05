@@ -158,4 +158,9 @@
     <string name="settings_restore">استعادة النسخ الاحتياطي</string>
     <string name="settings_danger_zone">منطقة الخطر</string>
     <string name="settings_clear_data">مسح جميع البيانات</string>
+
+    <string name="transactions">Transactions</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
 </resources>
