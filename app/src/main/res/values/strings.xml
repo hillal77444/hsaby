@@ -156,4 +156,17 @@
     <string name="error_invalid_amount">المبلغ غير صالح</string>
     <string name="not_available">غير متوفر</string>
     <string name="no_notes">لا توجد ملاحظات</string>
+
+    <!-- New strings for settings page -->
+    <string name="settings_appearance">المظهر</string>
+    <string name="settings_dark_mode">الوضع الليلي</string>
+    <string name="settings_currency_format">تنسيق العملة</string>
+    <string name="settings_notifications">الإشعارات</string>
+    <string name="settings_enable_notifications">تفعيل الإشعارات</string>
+    <string name="settings_backup">النسخ الاحتياطي</string>
+    <string name="settings_auto_backup">النسخ الاحتياطي التلقائي</string>
+    <string name="settings_backup_now">نسخ احتياطي الآن</string>
+    <string name="settings_restore">استعادة النسخ الاحتياطي</string>
+    <string name="settings_danger_zone">منطقة الخطر</string>
+    <string name="settings_clear_data">مسح جميع البيانات</string>
 </resources>
