@@ -56,9 +56,9 @@ public class TransactionsAdapter extends ListAdapter<Transaction, TransactionsAd
 
         TransactionViewHolder(@NonNull View itemView) {
             super(itemView);
-            dateTextView = itemView.findViewById(R.id.dateTextView);
-            amountTextView = itemView.findViewById(R.id.amountTextView);
-            notesTextView = itemView.findViewById(R.id.notesTextView);
+            dateTextView = itemView.findViewById(R.id.transaction_date);
+            amountTextView = itemView.findViewById(R.id.transaction_amount);
+            notesTextView = itemView.findViewById(R.id.transaction_notes);
         }
 
         void bind(Transaction transaction) {
