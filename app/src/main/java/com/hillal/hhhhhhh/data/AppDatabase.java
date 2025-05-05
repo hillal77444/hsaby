@@ -35,6 +35,11 @@ public abstract class AppDatabase extends RoomDatabase {
     public static synchronized AppDatabase getInstance(Context context) {
         if (instance == null) {
             try {
+                Log.d(TAG, "Creating new database instance");
+                if (context == null) {
+                    throw new IllegalArgumentException("Context cannot be null");
+                }
+                
                 instance = Room.databaseBuilder(
                     context.getApplicationContext(),
                     AppDatabase.class,
@@ -56,9 +61,14 @@ public abstract class AppDatabase extends RoomDatabase {
                     }
                 })
                 .build();
+                
+                if (instance == null) {
+                    throw new RuntimeException("Failed to create database instance");
+                }
+                
                 Log.d(TAG, "Database initialized successfully");
             } catch (Exception e) {
-                Log.e(TAG, "Error initializing database", e);
+                Log.e(TAG, "Error initializing database: " + e.getMessage(), e);
                 throw new RuntimeException("Failed to initialize database: " + e.getMessage(), e);
             }
         }
