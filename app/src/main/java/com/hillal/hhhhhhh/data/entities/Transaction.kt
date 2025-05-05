@@ -2,6 +2,7 @@ package com.hillal.hhhhhhh.data.entities
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -13,7 +14,8 @@ import androidx.room.PrimaryKey
             childColumns = ["accountId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index("accountId")]
 )
 data class Transaction(
     @PrimaryKey(autoGenerate = true)
