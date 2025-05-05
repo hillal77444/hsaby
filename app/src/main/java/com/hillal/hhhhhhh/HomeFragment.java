@@ -15,6 +15,8 @@ import com.hillal.hhhhhhh.db.Report;
 import com.hillal.hhhhhhh.db.ReportDao;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
@@ -22,6 +24,7 @@ public class HomeFragment extends Fragment {
     private ReportAdapter adapter;
     private ReportDao reportDao;
     private List<Report> reports = new ArrayList<>();
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -92,10 +95,22 @@ public class HomeFragment extends Fragment {
         Log.d(TAG, "Loading reports");
         try {
             if (reportDao != null) {
-                reports.clear();
-                reports.addAll(reportDao.getAllReports());
-                adapter.notifyDataSetChanged();
-                Log.d(TAG, "Reports loaded successfully. Count: " + reports.size());
+                executorService.execute(() -> {
+                    try {
+                        List<Report> loadedReports = reportDao.getAllReports();
+                        requireActivity().runOnUiThread(() -> {
+                            reports.clear();
+                            reports.addAll(loadedReports);
+                            adapter.notifyDataSetChanged();
+                            Log.d(TAG, "Reports loaded successfully. Count: " + reports.size());
+                        });
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error loading reports in background", e);
+                        requireActivity().runOnUiThread(() -> 
+                            Toast.makeText(requireContext(), "خطأ في تحميل التقارير", Toast.LENGTH_LONG).show()
+                        );
+                    }
+                });
             } else {
                 Log.e(TAG, "ReportDao is null");
                 Toast.makeText(requireContext(), "خطأ في تحميل التقارير", Toast.LENGTH_LONG).show();
@@ -111,5 +126,11 @@ public class HomeFragment extends Fragment {
         super.onDestroyView();
         Log.d(TAG, "onDestroyView");
         binding = null;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        executorService.shutdown();
     }
 } 
