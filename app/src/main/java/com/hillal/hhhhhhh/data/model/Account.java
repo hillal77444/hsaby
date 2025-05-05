@@ -7,28 +7,28 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "accounts")
 public class Account {
     @PrimaryKey(autoGenerate = true)
-    private int id;
+    private long id;
     private String name;
-    private String phone;
-    private double balance;
+    private String phoneNumber;
     private String notes;
-    private boolean isCreditor;
-    private long updatedAt;
+    private double openingBalance;
+    private boolean isDebtor;
+    private long createdAt;
 
-    public Account(String name, String phone, double balance, String notes, boolean isCreditor) {
+    public Account(String name, String phoneNumber, String notes, double openingBalance, boolean isDebtor) {
         this.name = name;
-        this.phone = phone;
-        this.balance = balance;
+        this.phoneNumber = phoneNumber;
         this.notes = notes;
-        this.isCreditor = isCreditor;
-        this.updatedAt = System.currentTimeMillis();
+        this.openingBalance = openingBalance;
+        this.isDebtor = isDebtor;
+        this.createdAt = System.currentTimeMillis();
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -40,20 +40,12 @@ public class Account {
         this.name = name;
     }
 
-    public String getPhone() {
-        return phone;
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public double getBalance() {
-        return balance;
-    }
-
-    public void setBalance(double balance) {
-        this.balance = balance;
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public String getNotes() {
@@ -64,19 +56,27 @@ public class Account {
         this.notes = notes;
     }
 
-    public boolean isCreditor() {
-        return isCreditor;
+    public double getOpeningBalance() {
+        return openingBalance;
     }
 
-    public void setCreditor(boolean creditor) {
-        isCreditor = creditor;
+    public void setOpeningBalance(double openingBalance) {
+        this.openingBalance = openingBalance;
     }
 
-    public long getUpdatedAt() {
-        return updatedAt;
+    public boolean isDebtor() {
+        return isDebtor;
     }
 
-    public void setUpdatedAt(long updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setDebtor(boolean debtor) {
+        isDebtor = debtor;
+    }
+
+    public long getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(long createdAt) {
+        this.createdAt = createdAt;
     }
 } 
