@@ -47,10 +47,10 @@ public class AccountDetailsFragment extends Fragment {
 
         // Initialize views
         accountName = root.findViewById(R.id.account_name);
-        accountBalance = root.findViewById(R.id.account_balance);
-        accountPhone = root.findViewById(R.id.phone_number);
+        accountBalance = root.findViewById(R.id.balance);
+        accountPhone = root.findViewById(R.id.phone);
         accountNotes = root.findViewById(R.id.notes);
-        transactionsRecyclerView = root.findViewById(R.id.transactions_recycler);
+        transactionsRecyclerView = root.findViewById(R.id.transactions_list);
         FloatingActionButton addTransactionButton = root.findViewById(R.id.add_transaction_button);
 
         // Setup RecyclerView
