@@ -34,10 +34,10 @@ public class DashboardViewModel extends ViewModel {
         double creditors = 0.0;
 
         for (Account account : accounts) {
-            if (account.isCreditor()) {
-                creditors += account.getBalance();
+            if (account.isDebtor()) {
+                debtors += account.getOpeningBalance();
             } else {
-                debtors += account.getBalance();
+                creditors += account.getOpeningBalance();
             }
         }
 
