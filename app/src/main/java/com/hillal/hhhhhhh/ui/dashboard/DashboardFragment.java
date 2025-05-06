@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.navigation.Navigation;
 
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
@@ -79,9 +80,29 @@ public class DashboardFragment extends Fragment {
                     binding.totalCreditors.setText(String.format("%.2f %s", total, getString(R.string.currency_symbol)));
                 }
             });
+
+            setupClickListeners();
         } catch (Exception e) {
             Log.e(TAG, "Error in onViewCreated: " + e.getMessage(), e);
         }
+    }
+
+    private void setupClickListeners() {
+        // زر عرض القيود المحاسبية
+        binding.viewTransactionsButton.setOnClickListener(v -> 
+            Navigation.findNavController(v).navigate(R.id.transactionsFragment));
+
+        // زر عرض الحسابات
+        binding.viewAccountsButton.setOnClickListener(v -> 
+            Navigation.findNavController(v).navigate(R.id.navigation_accounts));
+
+        // زر عرض التقارير
+        binding.viewReportsButton.setOnClickListener(v -> 
+            Navigation.findNavController(v).navigate(R.id.navigation_reports));
+
+        // زر إضافة قيد محاسبي
+        binding.fabAddTransaction.setOnClickListener(v -> 
+            Navigation.findNavController(v).navigate(R.id.action_transactions_to_addTransaction));
     }
 
     @Override
