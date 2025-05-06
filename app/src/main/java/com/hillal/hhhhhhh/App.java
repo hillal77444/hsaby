@@ -2,6 +2,7 @@ package com.hillal.hhhhhhh;
 
 import android.app.Application;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
@@ -19,6 +20,14 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        
+        // Set up uncaught exception handler
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            Log.e(TAG, "Uncaught exception: " + throwable.getMessage(), throwable);
+            String errorMessage = "خطأ في التطبيق: " + throwable.getMessage();
+            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+        });
+
         Log.d(TAG, "Application onCreate started");
         
         try {
@@ -46,6 +55,7 @@ public class App extends Application {
         } catch (Exception e) {
             Log.e(TAG, "Error initializing application: " + e.getMessage(), e);
             e.printStackTrace();
+            Toast.makeText(this, "خطأ في تهيئة التطبيق: " + e.getMessage(), Toast.LENGTH_LONG).show();
             throw new RuntimeException("Failed to initialize application", e);
         }
     }
