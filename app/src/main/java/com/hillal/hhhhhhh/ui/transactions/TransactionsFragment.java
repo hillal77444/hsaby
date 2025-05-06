@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.databinding.FragmentTransactionsBinding;
 import com.hillal.hhhhhhh.ui.adapters.TransactionsAdapter;
 import com.hillal.hhhhhhh.viewmodel.TransactionViewModel;
