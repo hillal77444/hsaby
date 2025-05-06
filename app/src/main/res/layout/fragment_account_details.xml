@@ -48,8 +48,8 @@
                         android:textAppearance="?attr/textAppearanceHeadline6" />
 
                     <TextView
-                        android:id="@+id/balance"
-                        android:layout_width="match_parent"
+                        android:id="@+id/accountBalance"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceHeadline5"
@@ -68,8 +68,8 @@
                         android:textAppearance="?attr/textAppearanceSubtitle2" />
 
                     <TextView
-                        android:id="@+id/phone"
-                        android:layout_width="match_parent"
+                        android:id="@+id/accountPhone"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:textAppearance="?attr/textAppearanceBody1" />
@@ -82,8 +82,8 @@
                         android:textAppearance="?attr/textAppearanceSubtitle2" />
 
                     <TextView
-                        android:id="@+id/notes"
-                        android:layout_width="match_parent"
+                        android:id="@+id/accountNotes"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:textAppearance="?attr/textAppearanceBody1" />
@@ -115,21 +115,20 @@
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/transactions_list"
+                android:id="@+id/transactionsRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false" />
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/add_transaction_button"
+        android:id="@+id/fabAddTransaction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="@string/add_transaction"
-        app:srcCompat="@drawable/ic_add" />
+        android:src="@drawable/ic_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout> 
