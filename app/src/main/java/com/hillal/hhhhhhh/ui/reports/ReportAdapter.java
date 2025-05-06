@@ -9,19 +9,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hillal.hhhhhhh.R;
-import com.hillal.hhhhhhh.data.model.Transaction;
+import com.hillal.hhhhhhh.data.entities.Transaction;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder> {
-    private List<Transaction> transactions;
+    private List<Transaction> transactions = new ArrayList<>();
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-
-    public ReportAdapter(List<Transaction> transactions) {
-        this.transactions = transactions;
-    }
 
     @NonNull
     @Override
@@ -42,31 +39,30 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
         return transactions.size();
     }
 
-    public void updateTransactions(List<Transaction> newTransactions) {
-        this.transactions = newTransactions;
+    public void setTransactions(List<Transaction> transactions) {
+        this.transactions = transactions;
         notifyDataSetChanged();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
+        private final TextView dateTextView;
         private final TextView typeTextView;
         private final TextView amountTextView;
         private final TextView descriptionTextView;
-        private final TextView dateTextView;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
-            typeTextView = itemView.findViewById(R.id.transactionType);
-            amountTextView = itemView.findViewById(R.id.transactionAmount);
-            descriptionTextView = itemView.findViewById(R.id.transactionDescription);
-            dateTextView = itemView.findViewById(R.id.transactionDate);
+            dateTextView = itemView.findViewById(R.id.transaction_date);
+            typeTextView = itemView.findViewById(R.id.transaction_type);
+            amountTextView = itemView.findViewById(R.id.transaction_amount);
+            descriptionTextView = itemView.findViewById(R.id.transaction_description);
         }
 
         void bind(Transaction transaction) {
+            dateTextView.setText(DATE_FORMAT.format(transaction.getDate()));
             typeTextView.setText(transaction.getType());
-            amountTextView.setText(String.format("%.2f %s", 
-                    transaction.getAmount(), transaction.getCurrency()));
+            amountTextView.setText(String.format("%.2f", transaction.getAmount()));
             descriptionTextView.setText(transaction.getDescription());
-            dateTextView.setText(ReportAdapter.DATE_FORMAT.format(transaction.getDate()));
             
             // Set color based on transaction type
             int colorResId = transaction.getType().equals("مدين") ? 
