@@ -12,11 +12,13 @@ import android.os.Looper;
 import android.widget.Toast;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
+import androidx.room.Room;
 
 import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.data.repository.TransactionRepository;
 import com.hillal.hhhhhhh.data.repository.SettingsRepository;
+import com.hillal.hhhhhhh.data.dao.TransactionDao;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -77,7 +79,10 @@ public class App extends Application {
             
             // Initialize database
             Log.d(TAG, "Initializing database...");
-            database = AppDatabase.getInstance(this);
+            database = Room.databaseBuilder(getApplicationContext(),
+                    AppDatabase.class, "accounting_database")
+                    .fallbackToDestructiveMigration()
+                    .build();
             Log.d(TAG, "Database initialized successfully");
             
             // Initialize repositories
@@ -158,5 +163,9 @@ public class App extends Application {
             throw new IllegalStateException("SettingsRepository is null. Make sure to initialize the Application class.");
         }
         return settingsRepository;
+    }
+
+    public TransactionDao getTransactionDao() {
+        return database.transactionDao();
     }
 } 
