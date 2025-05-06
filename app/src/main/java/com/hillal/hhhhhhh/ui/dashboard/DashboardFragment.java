@@ -79,17 +79,8 @@ public class DashboardFragment extends Fragment {
                     binding.totalCreditors.setText(String.format("%.2f %s", total, getString(R.string.currency_symbol)));
                 }
             });
-
-            dashboardViewModel.getNetBalance().observe(getViewLifecycleOwner(), balance -> {
-                if (balance != null) {
-                    binding.netBalance.setText(String.format("%.2f %s", balance, getString(R.string.currency_symbol)));
-                }
-            });
-
-            Log.d(TAG, "DashboardFragment view setup completed successfully");
         } catch (Exception e) {
-            Log.e(TAG, "Error setting up DashboardFragment view: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to setup DashboardFragment view", e);
+            Log.e(TAG, "Error in onViewCreated: " + e.getMessage(), e);
         }
     }
 
