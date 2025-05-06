@@ -15,10 +15,12 @@ public class DashboardViewModelFactory implements ViewModelProvider.Factory {
 
     @NonNull
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(DashboardViewModel.class)) {
-            return (T) new DashboardViewModel(accountRepository);
+            DashboardViewModel viewModel = new DashboardViewModel(accountRepository);
+            return modelClass.cast(viewModel);
         }
-        throw new IllegalArgumentException("Unknown ViewModel class");
+        throw new IllegalArgumentException("Unknown ViewModel class: " + modelClass.getName());
     }
 } 
