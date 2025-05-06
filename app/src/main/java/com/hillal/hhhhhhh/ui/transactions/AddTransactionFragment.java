@@ -71,19 +71,16 @@ public class AddTransactionFragment extends Fragment {
     }
 
     private void showDatePicker() {
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                requireContext(),
-                (view, year, month, dayOfMonth) -> {
-                    calendar.set(Calendar.YEAR, year);
-                    calendar.set(Calendar.MONTH, month);
-                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                    updateDateDisplay();
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
+        DatePickerDialog datePicker = new DatePickerDialog(requireContext(),
+            (view, year, month, day) -> {
+                calendar.set(year, month, day);
+                updateDateDisplay();
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
         );
-        datePickerDialog.show();
+        datePicker.show();
     }
 
     private void updateDateDisplay() {
@@ -108,12 +105,8 @@ public class AddTransactionFragment extends Fragment {
                 return;
             }
 
-            Transaction transaction = new Transaction();
-            transaction.setAccountId(accountId);
-            transaction.setAmount(amount);
-            transaction.setNotes(notes);
-            transaction.setDate(calendar.getTime());
-            transaction.setDebit(isDebit);
+            Transaction transaction = new Transaction(accountId, amount, isDebit, notes);
+            transaction.setDate(calendar.getTimeInMillis());
 
             transactionViewModel.insert(transaction);
             Toast.makeText(requireContext(), R.string.transaction_saved, Toast.LENGTH_SHORT).show();
