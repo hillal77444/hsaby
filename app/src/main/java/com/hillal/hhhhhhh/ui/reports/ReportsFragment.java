@@ -7,18 +7,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
-import com.hillal.hhhhhhh.ui.viewmodel.AccountViewModel;
-import com.hillal.hhhhhhh.ui.viewmodel.TransactionViewModel;
+import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
+import com.hillal.hhhhhhh.viewmodel.TransactionViewModel;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -42,9 +40,9 @@ public class ReportsFragment extends Fragment {
         transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
         
         // Initialize views
-        totalDebtorsText = view.findViewById(R.id.totalDebtorsText);
-        totalCreditorsText = view.findViewById(R.id.totalCreditorsText);
-        totalBalanceText = view.findViewById(R.id.totalBalanceText);
+        totalDebtorsText = view.findViewById(R.id.total_debtors);
+        totalCreditorsText = view.findViewById(R.id.total_creditors);
+        totalBalanceText = view.findViewById(R.id.total_balance);
         
         // Setup RecyclerView
         RecyclerView recyclerView = view.findViewById(R.id.accounts_recycler_view);
