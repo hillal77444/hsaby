@@ -112,7 +112,6 @@
     
     <!-- Settings -->
     <string name="settings_appearance">المظهر</string>
-    <string name="settings_dark_mode">الوضع الليلي</string>
     <string name="settings_currency_format">تنسيق العملة</string>
     <string name="settings_notifications">الإشعارات</string>
     <string name="settings_enable_notifications">تفعيل الإشعارات</string>
