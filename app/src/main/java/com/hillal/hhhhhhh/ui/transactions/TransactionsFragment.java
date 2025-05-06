@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.tabs.TabLayout;
 import com.hillal.hhhhhhh.R;
+import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.databinding.FragmentTransactionsBinding;
 import com.hillal.hhhhhhh.ui.adapters.TransactionAdapter;
 
@@ -51,9 +53,10 @@ public class TransactionsFragment extends Fragment {
         adapter = new TransactionAdapter(new TransactionAdapter.TransactionDiffCallback());
         adapter.setOnItemClickListener(transaction -> {
             // Navigate to edit transaction
-            TransactionsFragmentDirections.ActionTransactionsToEditTransaction action =
-                    TransactionsFragmentDirections.actionTransactionsToEditTransaction(transaction.getId());
-            Navigation.findNavController(requireView()).navigate(action);
+            Bundle args = new Bundle();
+            args.putLong("transactionId", transaction.getId());
+            Navigation.findNavController(requireView())
+                    .navigate(R.id.action_transactions_to_editTransaction, args);
         });
         adapter.setOnItemLongClickListener(transaction -> {
             showDeleteConfirmationDialog(transaction);
