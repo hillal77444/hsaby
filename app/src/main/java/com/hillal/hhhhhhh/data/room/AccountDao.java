@@ -31,16 +31,16 @@ public interface AccountDao {
     @Query("SELECT * FROM accounts ORDER BY name ASC")
     LiveData<List<Account>> getAllAccounts();
 
-    @Query("SELECT * FROM accounts WHERE type = 'creditor' ORDER BY balance DESC")
+    @Query("SELECT * FROM accounts WHERE isDebtor = 0 ORDER BY openingBalance DESC")
     LiveData<List<Account>> getCreditors();
 
-    @Query("SELECT * FROM accounts WHERE type = 'debtor' ORDER BY balance DESC")
+    @Query("SELECT * FROM accounts WHERE isDebtor = 1 ORDER BY openingBalance DESC")
     LiveData<List<Account>> getDebtors();
 
-    @Query("SELECT SUM(balance) FROM accounts WHERE type = 'creditor'")
+    @Query("SELECT SUM(openingBalance) FROM accounts WHERE isDebtor = 0")
     LiveData<Double> getTotalCreditors();
 
-    @Query("SELECT SUM(balance) FROM accounts WHERE type = 'debtor'")
+    @Query("SELECT SUM(openingBalance) FROM accounts WHERE isDebtor = 1")
     LiveData<Double> getTotalDebtors();
 
     @Query("SELECT * FROM accounts WHERE name LIKE :query OR phoneNumber LIKE :query")
