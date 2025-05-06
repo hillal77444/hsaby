@@ -75,30 +75,26 @@
             android:text="@string/transaction_type"
             android:textAppearance="?attr/textAppearanceSubtitle2" />
 
-        <com.google.android.material.button.MaterialButtonToggleGroup
-            android:id="@+id/transaction_type_group"
+        <RadioGroup
+            android:id="@+id/transactionTypeGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:singleSelection="true">
+            android:orientation="horizontal">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/debit_button"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            <RadioButton
+                android:id="@+id/debitButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/debit" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/credit_button"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            <RadioButton
+                android:id="@+id/creditButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/credit" />
-
-        </com.google.android.material.button.MaterialButtonToggleGroup>
+        </RadioGroup>
 
         <!-- Save Button -->
         <com.google.android.material.button.MaterialButton
