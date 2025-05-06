@@ -45,7 +45,9 @@
                         android:id="@+id/account_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?attr/textAppearanceHeadline6" />
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        android:maxLines="2"
+                        android:ellipsize="end" />
 
                     <TextView
                         android:id="@+id/accountBalance"
@@ -53,7 +55,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceHeadline5"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
 
                     <View
                         android:layout_width="match_parent"
@@ -72,7 +76,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:textAppearance="?attr/textAppearanceBody1" />
+                        android:textAppearance="?attr/textAppearanceBody1"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -86,7 +92,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:textAppearance="?attr/textAppearanceBody1" />
+                        android:textAppearance="?attr/textAppearanceBody1"
+                        android:maxLines="3"
+                        android:ellipsize="end" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -118,7 +126,8 @@
                 android:id="@+id/transactionsRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:scrollbars="vertical" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
