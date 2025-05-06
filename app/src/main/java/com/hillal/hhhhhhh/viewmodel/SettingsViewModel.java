@@ -14,7 +14,7 @@ public class SettingsViewModel extends AndroidViewModel {
     public SettingsViewModel(Application application) {
         super(application);
         repository = new SettingsRepository(application);
-        allSettings = repository.getAllSettings();
+        allSettings = repository.getSettings();
     }
 
     public LiveData<List<Settings>> getAllSettings() {
