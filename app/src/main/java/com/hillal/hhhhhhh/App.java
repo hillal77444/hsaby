@@ -63,19 +63,39 @@ public class App extends Application {
             
             // Initialize database
             Log.d(TAG, "Initializing database...");
-            database = AppDatabase.getInstance(this);
-            Log.d(TAG, "Database initialized successfully");
+            try {
+                database = AppDatabase.getInstance(this);
+                Log.d(TAG, "Database initialized successfully");
+            } catch (Exception dbException) {
+                Log.e(TAG, "Database initialization failed", dbException);
+                throw dbException;
+            }
             
             // Initialize repositories
             Log.d(TAG, "Initializing repositories...");
-            accountRepository = new AccountRepository(database.accountDao(), database);
-            Log.d(TAG, "AccountRepository initialized");
+            try {
+                accountRepository = new AccountRepository(database.accountDao(), database);
+                Log.d(TAG, "AccountRepository initialized");
+            } catch (Exception accountException) {
+                Log.e(TAG, "AccountRepository initialization failed", accountException);
+                throw accountException;
+            }
             
-            transactionRepository = new TransactionRepository(this);
-            Log.d(TAG, "TransactionRepository initialized");
+            try {
+                transactionRepository = new TransactionRepository(this);
+                Log.d(TAG, "TransactionRepository initialized");
+            } catch (Exception transactionException) {
+                Log.e(TAG, "TransactionRepository initialization failed", transactionException);
+                throw transactionException;
+            }
             
-            settingsRepository = new SettingsRepository(this);
-            Log.d(TAG, "SettingsRepository initialized");
+            try {
+                settingsRepository = new SettingsRepository(this);
+                Log.d(TAG, "SettingsRepository initialized");
+            } catch (Exception settingsException) {
+                Log.e(TAG, "SettingsRepository initialization failed", settingsException);
+                throw settingsException;
+            }
             
             Log.d(TAG, "All repositories initialized successfully");
             Log.d(TAG, "Application initialized successfully");
