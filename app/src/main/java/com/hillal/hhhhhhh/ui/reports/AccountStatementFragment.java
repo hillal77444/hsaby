@@ -17,8 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.hhhhhhh.R;
-import com.hillal.hhhhhhh.data.entities.Account;
-import com.hillal.hhhhhhh.data.entities.Transaction;
+import com.hillal.hhhhhhh.data.model.Account;
+import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
 import com.hillal.hhhhhhh.viewmodel.TransactionViewModel;
 import com.itextpdf.text.Document;
@@ -45,6 +45,7 @@ public class AccountStatementFragment extends Fragment {
     private RecyclerView transactionsRecyclerView;
     private TransactionsAdapter transactionsAdapter;
     private long accountId;
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -130,8 +131,7 @@ public class AccountStatementFragment extends Fragment {
 
     private Date parseDate(String dateStr) {
         try {
-            // TODO: Implement proper date parsing
-            return new Date();
+            return dateFormat.parse(dateStr);
         } catch (Exception e) {
             return null;
         }
