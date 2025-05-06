@@ -3,17 +3,19 @@ package com.hillal.hhhhhhh.viewmodel;
 import android.app.Application;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import com.hillal.hhhhhhh.data.AppDatabase;
+import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.data.entities.Transaction;
 import java.util.Date;
 import java.util.List;
 
 public class TransactionViewModel extends AndroidViewModel {
     private final AppDatabase database;
+    private final TransactionRepository repository;
 
     public TransactionViewModel(Application application) {
         super(application);
         database = AppDatabase.getInstance(application);
+        repository = new TransactionRepository(database.transactionDao());
     }
 
     public LiveData<List<Transaction>> getAllTransactions() {
