@@ -58,8 +58,8 @@ public class RecentAccountsAdapter extends RecyclerView.Adapter<RecentAccountsAd
         ViewHolder(View itemView) {
             super(itemView);
             nameTextView = itemView.findViewById(R.id.account_name);
-            phoneTextView = itemView.findViewById(R.id.account_phone);
-            balanceTextView = itemView.findViewById(R.id.account_balance);
+            phoneTextView = itemView.findViewById(R.id.accountPhone);
+            balanceTextView = itemView.findViewById(R.id.accountBalance);
         }
     }
 } 
