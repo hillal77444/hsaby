@@ -13,7 +13,7 @@ public class TransactionViewModel extends AndroidViewModel {
 
     public TransactionViewModel(Application application) {
         super(application);
-        repository = new TransactionRepository(application);
+        repository = ((com.hillal.hhhhhhh.App) application).getTransactionRepository();
         allTransactions = repository.getAllTransactions();
     }
 
@@ -21,19 +21,23 @@ public class TransactionViewModel extends AndroidViewModel {
         return allTransactions;
     }
 
-    public void insertTransaction(Transaction transaction) {
+    public LiveData<List<Transaction>> getTransactionsForAccount(long accountId) {
+        return repository.getTransactionsForAccount(accountId);
+    }
+
+    public LiveData<Double> getAccountBalance(long accountId) {
+        return repository.getAccountBalance(accountId);
+    }
+
+    public void insert(Transaction transaction) {
         repository.insert(transaction);
     }
 
-    public void updateTransaction(Transaction transaction) {
+    public void update(Transaction transaction) {
         repository.update(transaction);
     }
 
-    public void deleteTransaction(Transaction transaction) {
+    public void delete(Transaction transaction) {
         repository.delete(transaction);
-    }
-
-    public LiveData<List<Transaction>> getTransactionsByAccountId(long accountId) {
-        return repository.getTransactionsByAccountId(accountId);
     }
 } 
