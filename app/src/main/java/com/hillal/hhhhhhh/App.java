@@ -1,6 +1,11 @@
 package com.hillal.hhhhhhh;
 
 import android.app.Application;
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -23,9 +28,31 @@ public class App extends Application {
         
         // Set up uncaught exception handler
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            Log.e(TAG, "Uncaught exception: " + throwable.getMessage(), throwable);
-            String errorMessage = "خطأ في التطبيق: " + throwable.getMessage();
-            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+            String errorMessage = "خطأ في التطبيق:\n" + throwable.getMessage() + 
+                                "\n\nStack Trace:\n" + Log.getStackTraceString(throwable);
+            
+            // Log the error
+            Log.e(TAG, errorMessage);
+            
+            // Copy error to clipboard
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("Error Log", errorMessage);
+            clipboard.setPrimaryClip(clip);
+            
+            // Show error dialog
+            new AlertDialog.Builder(getApplicationContext())
+                .setTitle("خطأ في التطبيق")
+                .setMessage("حدث خطأ في التطبيق. تم نسخ تفاصيل الخطأ تلقائياً.\n\n" + 
+                           "يرجى إرسال تفاصيل الخطأ للمطور.")
+                .setPositiveButton("موافق", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        android.os.Process.killProcess(android.os.Process.myPid());
+                        System.exit(1);
+                    }
+                })
+                .setCancelable(false)
+                .show();
         });
 
         Log.d(TAG, "Application onCreate started");
@@ -53,10 +80,29 @@ public class App extends Application {
             Log.d(TAG, "All repositories initialized successfully");
             Log.d(TAG, "Application initialized successfully");
         } catch (Exception e) {
-            Log.e(TAG, "Error initializing application: " + e.getMessage(), e);
-            e.printStackTrace();
-            Toast.makeText(this, "خطأ في تهيئة التطبيق: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            throw new RuntimeException("Failed to initialize application", e);
+            String errorMessage = "خطأ في تهيئة التطبيق:\n" + e.getMessage() + 
+                                "\n\nStack Trace:\n" + Log.getStackTraceString(e);
+            Log.e(TAG, errorMessage);
+            
+            // Copy error to clipboard
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("Error Log", errorMessage);
+            clipboard.setPrimaryClip(clip);
+            
+            // Show error dialog
+            new AlertDialog.Builder(this)
+                .setTitle("خطأ في التهيئة")
+                .setMessage("حدث خطأ أثناء تهيئة التطبيق. تم نسخ تفاصيل الخطأ تلقائياً.\n\n" + 
+                           "يرجى إرسال تفاصيل الخطأ للمطور.")
+                .setPositiveButton("موافق", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        android.os.Process.killProcess(android.os.Process.myPid());
+                        System.exit(1);
+                    }
+                })
+                .setCancelable(false)
+                .show();
         }
     }
 
