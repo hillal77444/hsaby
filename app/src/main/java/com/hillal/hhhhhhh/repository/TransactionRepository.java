@@ -17,18 +17,6 @@ public class TransactionRepository {
         this.executorService = Executors.newSingleThreadExecutor();
     }
 
-    public LiveData<List<Transaction>> getAllTransactions() {
-        return transactionDao.getAllTransactions();
-    }
-
-    public LiveData<List<Transaction>> getTransactionsForAccount(long accountId) {
-        return transactionDao.getTransactionsForAccount(accountId);
-    }
-
-    public LiveData<Double> getAccountBalance(long accountId) {
-        return transactionDao.getAccountBalance(accountId);
-    }
-
     public void insert(Transaction transaction) {
         executorService.execute(() -> transactionDao.insert(transaction));
     }
@@ -41,7 +29,27 @@ public class TransactionRepository {
         executorService.execute(() -> transactionDao.delete(transaction));
     }
 
+    public LiveData<List<Transaction>> getAllTransactions() {
+        return transactionDao.getAllTransactions();
+    }
+
+    public LiveData<List<Transaction>> getTransactionsByAccount(long accountId) {
+        return transactionDao.getTransactionsByAccount(accountId);
+    }
+
     public LiveData<List<Transaction>> getTransactionsByDateRange(long fromDate, long toDate) {
         return transactionDao.getTransactionsByDateRange(fromDate, toDate);
+    }
+
+    public LiveData<List<Transaction>> getTransactionsByAccountAndDateRange(long accountId, long fromDate, long toDate) {
+        return transactionDao.getTransactionsByAccountAndDateRange(accountId, fromDate, toDate);
+    }
+
+    public LiveData<Double> getTotalDebit(long accountId) {
+        return transactionDao.getTotalDebit(accountId);
+    }
+
+    public LiveData<Double> getTotalCredit(long accountId) {
+        return transactionDao.getTotalCredit(accountId);
     }
 } 
