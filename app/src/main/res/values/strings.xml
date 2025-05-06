@@ -80,15 +80,16 @@
     <string name="edit">تعديل</string>
     <string name="add">إضافة</string>
     
-    <!-- Account -->
+    <!-- Accounts -->
+    <string name="accounts">الحسابات</string>
+    <string name="accounts_description">عرض وإدارة الحسابات</string>
+    <string name="view_accounts">عرض الحسابات</string>
+    <string name="account_name">اسم الحساب</string>
+    <string name="phone_number">رقم الجوال</string>
+    <string name="description">الوصف</string>
     <string name="add_account">إضافة حساب</string>
     <string name="account_details">تفاصيل الحساب</string>
     <string name="search_accounts">بحث في الحسابات</string>
-    <string name="account_name">اسم الحساب</string>
-    <string name="phone_number">رقم الجوال</string>
-    <string name="is_creditor">دائن</string>
-    <string name="description">الوصف</string>
-    <string name="is_credit">دائن</string>
     
     <!-- Transaction -->
     <string name="credit">دائن</string>
@@ -145,9 +146,6 @@
     <string name="transactions">القيود المحاسبية</string>
     <string name="transactions_description">عرض وإدارة القيود المحاسبية</string>
     <string name="view_transactions">عرض القيود</string>
-    <string name="accounts">الحسابات</string>
-    <string name="accounts_description">عرض وإدارة الحسابات</string>
-    <string name="view_accounts">عرض الحسابات</string>
     <string name="reports">التقارير</string>
     <string name="reports_description">عرض التقارير المالية</string>
     <string name="view_reports">عرض التقارير</string>
