@@ -9,10 +9,10 @@ public class Account {
     private long id;
     
     private String name;
+    private String type; // "debtor" or "creditor"
     private double balance;
-    private String currency;
-    private String type;
-    private String color;
+    private String phoneNumber;
+    private String notes;
     private long createdAt;
     private long updatedAt;
 
@@ -38,22 +38,6 @@ public class Account {
         this.name = name;
     }
 
-    public double getBalance() {
-        return balance;
-    }
-
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-
     public String getType() {
         return type;
     }
@@ -62,12 +46,28 @@ public class Account {
         this.type = type;
     }
 
-    public String getColor() {
-        return color;
+    public double getBalance() {
+        return balance;
     }
 
-    public void setColor(String color) {
-        this.color = color;
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
     public long getCreatedAt() {
