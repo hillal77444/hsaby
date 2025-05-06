@@ -56,7 +56,6 @@
     <string name="debtor">مدين</string>
     <string name="date">التاريخ</string>
     <string name="amount">المبلغ</string>
-    <string name="transaction_type">نوع العملية</string>
     <string name="add_credit">أضفت له</string>
     <string name="add_debit">أخذت منه</string>
     <string name="from_date">من تاريخ</string>
