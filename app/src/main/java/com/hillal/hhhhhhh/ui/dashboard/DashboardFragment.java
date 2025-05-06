@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,6 +17,7 @@ import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.databinding.FragmentDashboardBinding;
 import com.hillal.hhhhhhh.ui.adapters.RecentAccountsAdapter;
+import com.hillal.hhhhhhh.App;
 
 public class DashboardFragment extends Fragment {
     private static final String TAG = "DashboardFragment";
@@ -32,7 +32,7 @@ public class DashboardFragment extends Fragment {
 
         try {
             // Initialize ViewModel
-            AccountRepository accountRepository = ((MainActivity) requireActivity()).getAccountRepository();
+            AccountRepository accountRepository = App.getInstance().getAccountRepository();
             dashboardViewModel = new ViewModelProvider(this, 
                 new DashboardViewModelFactory(accountRepository)).get(DashboardViewModel.class);
             Log.d(TAG, "DashboardViewModel initialized successfully");
@@ -62,20 +62,28 @@ public class DashboardFragment extends Fragment {
 
             // Observe data
             dashboardViewModel.getRecentAccounts().observe(getViewLifecycleOwner(), accounts -> {
-                recentAccountsAdapter.setAccounts(accounts);
-                Log.d(TAG, "Recent accounts updated: " + accounts.size() + " accounts");
+                if (accounts != null) {
+                    recentAccountsAdapter.setAccounts(accounts);
+                    Log.d(TAG, "Recent accounts updated: " + accounts.size() + " accounts");
+                }
             });
 
             dashboardViewModel.getTotalDebtors().observe(getViewLifecycleOwner(), total -> {
-                binding.totalDebtors.setText(String.format("%.2f %s", total, getString(R.string.currency_symbol)));
+                if (total != null) {
+                    binding.totalDebtors.setText(String.format("%.2f %s", total, getString(R.string.currency_symbol)));
+                }
             });
 
             dashboardViewModel.getTotalCreditors().observe(getViewLifecycleOwner(), total -> {
-                binding.totalCreditors.setText(String.format("%.2f %s", total, getString(R.string.currency_symbol)));
+                if (total != null) {
+                    binding.totalCreditors.setText(String.format("%.2f %s", total, getString(R.string.currency_symbol)));
+                }
             });
 
             dashboardViewModel.getNetBalance().observe(getViewLifecycleOwner(), balance -> {
-                binding.netBalance.setText(String.format("%.2f %s", balance, getString(R.string.currency_symbol)));
+                if (balance != null) {
+                    binding.netBalance.setText(String.format("%.2f %s", balance, getString(R.string.currency_symbol)));
+                }
             });
 
             Log.d(TAG, "DashboardFragment view setup completed successfully");
