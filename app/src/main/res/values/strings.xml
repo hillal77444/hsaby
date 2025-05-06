@@ -175,4 +175,6 @@
     <string name="closing_balance">الرصيد الختامي: %1$s</string>
     <string name="total_debit">إجمالي المدين: %1$s</string>
     <string name="total_credit">إجمالي الدائن: %1$s</string>
+    <string name="debtor">مدين</string>
+    <string name="creditor">دائن</string>
 </resources>
