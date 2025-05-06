@@ -163,4 +163,8 @@
     <string name="confirm_delete">هل أنت متأكد من حذف هذا القيد؟</string>
     <string name="yes">نعم</string>
     <string name="no">لا</string>
+
+    <!-- Dashboard -->
+    <string name="zero_balance">0.00</string>
+    <string name="view_all">عرض الكل</string>
 </resources>
