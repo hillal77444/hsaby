@@ -2,9 +2,9 @@ package com.hillal.hhhhhhh.data.repository;
 
 import android.app.Application;
 import androidx.lifecycle.LiveData;
-import com.hillal.hhhhhhh.data.dao.TransactionDao;
+import com.hillal.hhhhhhh.App;
 import com.hillal.hhhhhhh.data.model.Transaction;
-import com.hillal.hhhhhhh.data.room.AppDatabase;
+import com.hillal.hhhhhhh.data.room.TransactionDao;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,8 +15,8 @@ public class TransactionRepository {
     private final ExecutorService executorService;
 
     public TransactionRepository(Application application) {
-        AppDatabase db = AppDatabase.getDatabase(application);
-        transactionDao = db.transactionDao();
+        App app = (App) application;
+        transactionDao = app.getDatabase().transactionDao();
         allTransactions = transactionDao.getAllTransactions();
         executorService = Executors.newSingleThreadExecutor();
     }
