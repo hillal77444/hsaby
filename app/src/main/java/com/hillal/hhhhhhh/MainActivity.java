@@ -24,6 +24,10 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.databinding.ActivityMainBinding;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private ActivityMainBinding binding;
@@ -46,36 +50,63 @@ public class MainActivity extends AppCompatActivity {
             setSupportActionBar(binding.toolbar);
             Log.d(TAG, "Toolbar set successfully");
 
+            // Initialize App instance first
+            App app = (App) getApplication();
+            if (app == null) {
+                throw new IllegalStateException("Application instance is null");
+            }
+            Log.d(TAG, "Application instance initialized");
+
+            // Initialize repository
+            accountRepository = app.getAccountRepository();
+            if (accountRepository == null) {
+                throw new IllegalStateException("AccountRepository is null");
+            }
+            Log.d(TAG, "AccountRepository initialized successfully");
+
             // Setup navigation
             NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.nav_host_fragment_content_main);
-            if (navHostFragment != null) {
-                navController = navHostFragment.getNavController();
-                appBarConfiguration = new AppBarConfiguration.Builder(
-                        R.id.navigation_dashboard, R.id.navigation_accounts,
-                        R.id.navigation_reports, R.id.navigation_settings)
-                        .build();
-                NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-                NavigationUI.setupWithNavController(binding.navView, navController);
-                Log.d(TAG, "Navigation setup completed successfully");
-            } else {
-                String errorMessage = "=== خطأ في تهيئة التطبيق ===\n\n" +
-                                    "السبب: لم يتم العثور على NavHostFragment\n" +
-                                    "التفاصيل: fragment ID: R.id.nav_host_fragment_content_main";
-                Log.e(TAG, errorMessage);
-                showErrorAndExit(errorMessage);
-                return;
+            if (navHostFragment == null) {
+                throw new IllegalStateException("NavHostFragment not found");
+            }
+            
+            navController = navHostFragment.getNavController();
+            if (navController == null) {
+                throw new IllegalStateException("NavController is null");
             }
 
-            // Initialize repository
-            accountRepository = App.getInstance().getAccountRepository();
-            Log.d(TAG, "AccountRepository initialized successfully");
-        } catch (Exception e) {
+            appBarConfiguration = new AppBarConfiguration.Builder(
+                    R.id.navigation_dashboard, R.id.navigation_accounts,
+                    R.id.navigation_reports, R.id.navigation_settings)
+                    .build();
+
+            NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+            NavigationUI.setupWithNavController(binding.navView, navController);
+            Log.d(TAG, "Navigation setup completed successfully");
+
+        } catch (IllegalStateException e) {
             String errorMessage = "=== خطأ في تهيئة التطبيق ===\n\n" +
                                 "نوع الخطأ: " + e.getClass().getSimpleName() + "\n" +
                                 "الرسالة: " + e.getMessage() + "\n\n" +
                                 "=== تفاصيل الخطأ التقنية ===\n" +
-                                Log.getStackTraceString(e);
+                                Log.getStackTraceString(e) + "\n\n" +
+                                "=== معلومات النظام ===\n" +
+                                "نظام التشغيل: Android " + Build.VERSION.RELEASE + "\n" +
+                                "الجهاز: " + Build.MANUFACTURER + " " + Build.MODEL + "\n" +
+                                "وقت حدوث الخطأ: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+            Log.e(TAG, errorMessage, e);
+            showErrorAndExit(errorMessage);
+        } catch (Exception e) {
+            String errorMessage = "=== خطأ غير متوقع ===\n\n" +
+                                "نوع الخطأ: " + e.getClass().getSimpleName() + "\n" +
+                                "الرسالة: " + e.getMessage() + "\n\n" +
+                                "=== تفاصيل الخطأ التقنية ===\n" +
+                                Log.getStackTraceString(e) + "\n\n" +
+                                "=== معلومات النظام ===\n" +
+                                "نظام التشغيل: Android " + Build.VERSION.RELEASE + "\n" +
+                                "الجهاز: " + Build.MANUFACTURER + " " + Build.MODEL + "\n" +
+                                "وقت حدوث الخطأ: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
             Log.e(TAG, errorMessage, e);
             showErrorAndExit(errorMessage);
         }
