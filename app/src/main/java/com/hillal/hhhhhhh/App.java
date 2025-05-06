@@ -18,7 +18,7 @@ import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.data.repository.TransactionRepository;
 import com.hillal.hhhhhhh.data.repository.SettingsRepository;
-import com.hillal.hhhhhhh.data.dao.TransactionDao;
+import com.hillal.hhhhhhh.data.room.TransactionDao;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
