@@ -23,6 +23,6 @@ public interface SettingsDao {
     @Query("SELECT * FROM settings")
     LiveData<List<Settings>> getAllSettings();
 
-    @Query("SELECT * FROM settings WHERE [key] = :key")
-    LiveData<Settings> getSettingByKey(String key);
+    @Query("SELECT * FROM settings WHERE id = :id")
+    LiveData<Settings> getSettingById(int id);
 } 
