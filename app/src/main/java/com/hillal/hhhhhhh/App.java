@@ -5,12 +5,12 @@ import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
+import android.content.ContextWrapper;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.widget.Toast;
+import android.view.ContextThemeWrapper;
 
 import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
@@ -77,9 +77,9 @@ public class App extends Application {
             
             // Initialize repositories
             Log.d(TAG, "Initializing repositories...");
-            accountRepository = new AccountRepository(database.accountDao());
-            transactionRepository = new TransactionRepository(database.transactionDao());
-            settingsRepository = new SettingsRepository(database.settingsDao());
+            accountRepository = new AccountRepository(database.accountDao(), database);
+            transactionRepository = new TransactionRepository(this);
+            settingsRepository = new SettingsRepository(this);
             Log.d(TAG, "Repositories initialized successfully");
             
             Log.d(TAG, "Application initialized successfully");
