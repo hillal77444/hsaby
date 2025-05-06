@@ -51,18 +51,12 @@ public class SettingsFragment extends Fragment {
 
     private void loadSettings() {
         // Load and set saved settings
-        binding.switchDarkMode.setChecked(sharedPreferences.getBoolean("dark_mode", false));
         binding.switchNotifications.setChecked(sharedPreferences.getBoolean("notifications", true));
         binding.switchAutoBackup.setChecked(sharedPreferences.getBoolean("auto_backup", true));
         binding.switchCurrencyFormat.setChecked(sharedPreferences.getBoolean("currency_format", true));
     }
 
     private void setupSwitchListeners() {
-        binding.switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            sharedPreferences.edit().putBoolean("dark_mode", isChecked).apply();
-            // TODO: Implement dark mode change
-        });
-
         binding.switchNotifications.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPreferences.edit().putBoolean("notifications", isChecked).apply();
             // TODO: Implement notifications toggle
