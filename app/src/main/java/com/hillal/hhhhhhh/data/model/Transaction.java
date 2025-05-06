@@ -80,4 +80,31 @@ public class Transaction {
     public void setDate(long date) {
         this.date = date;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Transaction that = (Transaction) o;
+        return id == that.id &&
+                accountId == that.accountId &&
+                Double.compare(that.amount, amount) == 0 &&
+                isDebit == that.isDebit &&
+                date == that.date &&
+                (notes != null ? notes.equals(that.notes) : that.notes == null);
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = (int) (id ^ (id >>> 32));
+        result = 31 * result + (int) (accountId ^ (accountId >>> 32));
+        temp = Double.doubleToLongBits(amount);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (isDebit ? 1 : 0);
+        result = 31 * result + (notes != null ? notes.hashCode() : 0);
+        result = 31 * result + (int) (date ^ (date >>> 32));
+        return result;
+    }
 } 
