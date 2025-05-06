@@ -6,8 +6,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hillal.hhhhhhh.R;
@@ -15,60 +13,78 @@ import com.hillal.hhhhhhh.data.model.Transaction;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
-public class TransactionsAdapter extends ListAdapter<Transaction, TransactionsAdapter.TransactionViewHolder> {
+public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapter.ViewHolder> {
+    private final List<Transaction> transactions;
+    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+    private OnItemClickListener listener;
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+    public TransactionsAdapter(List<Transaction> transactions) {
+        this.transactions = transactions;
+    }
 
-    public TransactionsAdapter() {
-        super(new DiffUtil.ItemCallback<Transaction>() {
-            @Override
-            public boolean areItemsTheSame(@NonNull Transaction oldItem, @NonNull Transaction newItem) {
-                return oldItem.getId() == newItem.getId();
-            }
-
-            @Override
-            public boolean areContentsTheSame(@NonNull Transaction oldItem, @NonNull Transaction newItem) {
-                return oldItem.equals(newItem);
-            }
-        });
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
     }
 
     @NonNull
     @Override
-    public TransactionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_transaction, parent, false);
-        return new TransactionViewHolder(view);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
-        Transaction transaction = getItem(position);
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Transaction transaction = transactions.get(position);
         holder.bind(transaction);
     }
 
-    static class TransactionViewHolder extends RecyclerView.ViewHolder {
-        private final TextView dateTextView;
-        private final TextView amountTextView;
-        private final TextView notesTextView;
+    @Override
+    public int getItemCount() {
+        return transactions.size();
+    }
 
-        TransactionViewHolder(@NonNull View itemView) {
+    class ViewHolder extends RecyclerView.ViewHolder {
+        private final TextView typeTextView;
+        private final TextView amountTextView;
+        private final TextView descriptionTextView;
+        private final TextView dateTextView;
+
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
-            dateTextView = itemView.findViewById(R.id.transaction_date);
-            amountTextView = itemView.findViewById(R.id.transaction_amount);
-            notesTextView = itemView.findViewById(R.id.transaction_notes);
+            typeTextView = itemView.findViewById(R.id.transactionType);
+            amountTextView = itemView.findViewById(R.id.transactionAmount);
+            descriptionTextView = itemView.findViewById(R.id.transactionDescription);
+            dateTextView = itemView.findViewById(R.id.transactionDate);
+
+            itemView.setOnClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION && listener != null) {
+                    listener.onItemClick(transactions.get(position));
+                }
+            });
         }
 
         void bind(Transaction transaction) {
-            dateTextView.setText(DATE_FORMAT.format(new Date(transaction.getDate())));
-            String amount = String.format(Locale.getDefault(), "%.2f", transaction.getAmount());
-            amountTextView.setText(amount);
-            amountTextView.setTextColor(itemView.getContext().getColor(
-                transaction.isDebit() ? R.color.red : R.color.green
-            ));
-            notesTextView.setText(transaction.getNotes());
+            typeTextView.setText(transaction.getType());
+            amountTextView.setText(String.format("%.2f %s", 
+                    transaction.getAmount(), transaction.getCurrency()));
+            descriptionTextView.setText(transaction.getDescription());
+            dateTextView.setText(DATE_FORMAT.format(transaction.getDate()));
+            
+            // Set color based on transaction type
+            int colorResId = transaction.getType().equals("مدين") ? 
+                    R.color.debit_color : R.color.credit_color;
+            typeTextView.setTextColor(
+                    itemView.getContext().getResources().getColor(colorResId, null));
         }
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(Transaction transaction);
     }
 } 
