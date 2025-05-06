@@ -20,6 +20,8 @@ public class Transaction {
     private String type; // "debit" or "credit"
     private double amount;
     private String description;
+    private String notes;
+    private String currency;
     private Date date;
     private long createdAt;
     private long updatedAt;
@@ -68,6 +70,22 @@ public class Transaction {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
     public Date getDate() {
