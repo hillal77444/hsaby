@@ -68,16 +68,22 @@ public class AccountRepository {
         return database.transactionDao().getAccountBalance(accountId);
     }
 
-    public void insertTransaction(Transaction transaction) {
-        database.transactionDao().insertTransaction(transaction);
+    private void insertTransaction(Transaction transaction) {
+        executorService.execute(() -> {
+            database.transactionDao().insert(transaction);
+        });
     }
 
-    public void updateTransaction(Transaction transaction) {
-        database.transactionDao().updateTransaction(transaction);
+    private void updateTransaction(Transaction transaction) {
+        executorService.execute(() -> {
+            database.transactionDao().update(transaction);
+        });
     }
 
-    public void deleteTransaction(Transaction transaction) {
-        database.transactionDao().deleteTransaction(transaction);
+    private void deleteTransaction(Transaction transaction) {
+        executorService.execute(() -> {
+            database.transactionDao().delete(transaction);
+        });
     }
 
     public void backupData() {
