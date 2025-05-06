@@ -45,7 +45,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:maxLength="10"
+                android:imeOptions="actionDone" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -62,8 +64,10 @@
                 android:id="@+id/notes_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textMultiLine"
-                android:minLines="3" />
+                android:inputType="textCapSentences|textMultiLine"
+                android:minLines="3"
+                android:maxLines="5"
+                android:imeOptions="actionDone" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -108,13 +112,10 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/cancel_button"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="@string/cancel"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/save_button" />
+            android:layout_marginTop="16dp"
+            android:text="@string/cancel" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView> 
