@@ -40,4 +40,8 @@ public class TransactionViewModel extends AndroidViewModel {
     public void delete(Transaction transaction) {
         repository.delete(transaction);
     }
+
+    public LiveData<List<Transaction>> getTransactionsByDateRange(long accountId, long fromDate, long toDate) {
+        return repository.getTransactionsByDateRange(accountId, fromDate, toDate);
+    }
 } 
