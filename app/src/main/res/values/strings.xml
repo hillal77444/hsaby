@@ -167,4 +167,17 @@
     <!-- Dashboard -->
     <string name="zero_balance">0.00</string>
     <string name="view_all">عرض الكل</string>
+
+    <!-- Transaction Messages -->
+    <string name="transaction_saved">تم حفظ القيد بنجاح</string>
+    <string name="transaction_deleted">تم حذف القيد بنجاح</string>
+
+    <!-- Transaction Fields -->
+    <string name="transaction_date">تاريخ القيد</string>
+    <string name="transaction_amount">المبلغ</string>
+    <string name="transaction_notes">ملاحظات</string>
+
+    <!-- Navigation Actions -->
+    <string name="action_transactions_to_addTransaction">إضافة قيد جديد</string>
+    <string name="action_transactions_to_editTransaction">تعديل القيد</string>
 </resources>
