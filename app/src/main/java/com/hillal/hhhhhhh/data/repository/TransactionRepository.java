@@ -40,15 +40,15 @@ public class TransactionRepository {
     }
 
     public void insert(Transaction transaction) {
-        executorService.execute(() -> transactionDao.insertTransaction(transaction));
+        executorService.execute(() -> transactionDao.insert(transaction));
     }
 
     public void update(Transaction transaction) {
-        executorService.execute(() -> transactionDao.updateTransaction(transaction));
+        executorService.execute(() -> transactionDao.update(transaction));
     }
 
     public void delete(Transaction transaction) {
-        executorService.execute(() -> transactionDao.deleteTransaction(transaction));
+        executorService.execute(() -> transactionDao.delete(transaction));
     }
 
     public LiveData<Transaction> getById(long id) {
