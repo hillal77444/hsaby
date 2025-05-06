@@ -183,4 +183,11 @@
     <string name="no_transactions">لا توجد معاملات</string>
     <string name="transaction_saved">تم حفظ المعاملة بنجاح</string>
     <string name="view_all">عرض الكل</string>
+    <string name="zero_balance">0.00</string>
+    <string name="currency">ريال</string>
+    <string name="transaction_type">نوع العملية</string>
+    <string name="debit">مدين</string>
+    <string name="credit">دائن</string>
+    <string name="save">حفظ</string>
+    <string name="cancel">إلغاء</string>
 </resources>
