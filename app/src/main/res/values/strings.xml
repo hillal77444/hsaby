@@ -92,7 +92,6 @@
     <string name="is_credit">دائن</string>
     
     <!-- Transaction -->
-    <string name="debit">مدين</string>
     <string name="credit">دائن</string>
     <string name="currency_symbol">ريال</string>
     <string name="add_transaction">إضافة عملية</string>
@@ -147,8 +146,6 @@
     <string name="transactions">القيود المحاسبية</string>
     <string name="all_transactions">جميع القيود</string>
     <string name="debit">مدين</string>
-    <string name="credit">دائن</string>
-    <string name="add_transaction">إضافة قيد</string>
     <string name="edit_transaction">تعديل القيد</string>
     <string name="delete_transaction">حذف القيد</string>
     <string name="transaction_details">تفاصيل القيد</string>
@@ -167,6 +164,4 @@
     <string name="confirm_delete">هل أنت متأكد من حذف هذا القيد؟</string>
     <string name="yes">نعم</string>
     <string name="no">لا</string>
-    <string name="save">حفظ</string>
-    <string name="cancel">إلغاء</string>
 </resources>
