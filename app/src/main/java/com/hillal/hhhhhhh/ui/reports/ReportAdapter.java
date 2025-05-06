@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Locale;
 
 public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder> {
-    private final List<Transaction> transactions;
-    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+    private List<Transaction> transactions;
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
     public ReportAdapter(List<Transaction> transactions) {
         this.transactions = transactions;
@@ -66,7 +66,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
             amountTextView.setText(String.format("%.2f %s", 
                     transaction.getAmount(), transaction.getCurrency()));
             descriptionTextView.setText(transaction.getDescription());
-            dateTextView.setText(DATE_FORMAT.format(transaction.getDate()));
+            dateTextView.setText(ReportAdapter.DATE_FORMAT.format(transaction.getDate()));
             
             // Set color based on transaction type
             int colorResId = transaction.getType().equals("مدين") ? 
