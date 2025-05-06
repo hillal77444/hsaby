@@ -2,35 +2,36 @@
 <resources>
     <string name="app_name">تطبيق المحاسبة</string>
     <string name="action_settings">الإعدادات</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
+    
+    <!-- التنقل -->
+    <string name="first_fragment_label">الصفحة الأولى</string>
+    <string name="second_fragment_label">الصفحة الثانية</string>
+    <string name="next">التالي</string>
+    <string name="previous">السابق</string>
 
     <string name="lorem_ipsum">نص تجريبي للاختبار</string>
     <string name="no_recent_accounts">لا توجد حسابات حديثة</string>
 
-    <!-- Navigation -->
+    <!-- عناوين الصفحات -->
     <string name="title_dashboard">لوحة التحكم</string>
     <string name="title_accounts">الحسابات</string>
     <string name="title_reports">التقارير</string>
     <string name="title_settings">الإعدادات</string>
     
-    <!-- Menu -->
+    <!-- القائمة -->
     <string name="menu_dashboard">لوحة التحكم</string>
     <string name="menu_accounts">الحسابات</string>
     <string name="menu_reports">التقارير</string>
     <string name="menu_settings">الإعدادات</string>
     <string name="menu_account_details">تفاصيل الحساب</string>
     <string name="menu_add_account">إضافة حساب</string>
-    <string name="menu_add_transaction">إضافة عملية</string>
+    <string name="menu_add_transaction">إضافة قيد محاسبي</string>
 
-    <!-- عناوين الصفحات -->
+    <!-- عناوين الشاشات -->
     <string name="home_fragment_label">الرئيسية</string>
     <string name="add_account_fragment_label">إضافة حساب</string>
     <string name="account_details_fragment_label">تفاصيل الحساب</string>
-    <string name="add_transaction_fragment_label">إضافة عملية</string>
+    <string name="add_transaction_fragment_label">إضافة قيد محاسبي</string>
     <string name="reports_fragment_label">التقارير</string>
     <string name="settings_fragment_label">الإعدادات</string>
     <string name="search_filter_fragment_label">البحث والتصفية</string>
@@ -52,12 +53,8 @@
     <string name="opening_balance">الرصيد الافتتاحي</string>
     <string name="current_balance">الرصيد الحالي</string>
     <string name="status">الحالة</string>
-    <string name="creditor">دائن</string>
-    <string name="debtor">مدين</string>
     <string name="date">التاريخ</string>
     <string name="amount">المبلغ</string>
-    <string name="add_credit">أضفت له</string>
-    <string name="add_debit">أخذت منه</string>
     <string name="from_date">من تاريخ</string>
     <string name="to_date">إلى تاريخ</string>
     <string name="report_type">نوع التقرير</string>
@@ -80,7 +77,7 @@
     <string name="edit">تعديل</string>
     <string name="add">إضافة</string>
     
-    <!-- Accounts -->
+    <!-- الحسابات -->
     <string name="accounts">الحسابات</string>
     <string name="accounts_description">عرض وإدارة الحسابات</string>
     <string name="view_accounts">عرض الحسابات</string>
@@ -91,66 +88,15 @@
     <string name="account_details">تفاصيل الحساب</string>
     <string name="search_accounts">بحث في الحسابات</string>
     
-    <!-- Transaction -->
-    <string name="currency_symbol">ريال</string>
-    <string name="add_transaction">إضافة عملية</string>
-    
-    <!-- Reports -->
-    <string name="account_summary">ملخص الحسابات</string>
-    <string name="total_debtors">إجمالي المدينين</string>
-    <string name="total_creditors">إجمالي الدائنين</string>
-    <string name="transaction_summary">ملخص المعاملات</string>
-    <string name="total_transactions">إجمالي المعاملات</string>
-    <string name="average_transaction">متوسط المعاملة</string>
-    <string name="total_expenses">إجمالي المصروفات</string>
-    <string name="add_new_expense">إضافة مصروف جديد</string>
-    <string name="view_all_expenses">عرض جميع المصروفات</string>
-    <string name="generate_reports">إنشاء التقارير</string>
-    <string name="manage_categories">إدارة الفئات</string>
-    
-    <!-- Settings -->
-    <string name="settings_appearance">المظهر</string>
-    <string name="settings_currency_format">تنسيق العملة</string>
-    <string name="settings_notifications">الإشعارات</string>
-    <string name="settings_enable_notifications">تفعيل الإشعارات</string>
-    <string name="settings_backup">النسخ الاحتياطي</string>
-    <string name="settings_auto_backup">النسخ الاحتياطي التلقائي</string>
-    <string name="settings_backup_now">نسخ احتياطي الآن</string>
-    <string name="settings_restore">استعادة النسخ الاحتياطي</string>
-    <string name="settings_danger_zone">منطقة الخطر</string>
-    <string name="settings_clear_data">مسح جميع البيانات</string>
-    
-    <!-- Error Messages -->
-    <string name="error_initialization">خطأ في تهيئة التطبيق</string>
-    <string name="error_database">خطأ في قاعدة البيانات</string>
-    <string name="error_network">خطأ في الاتصال</string>
-    <string name="error_name_required">الرجاء إدخال الاسم</string>
-    <string name="error_amount_required">يرجى إدخال المبلغ</string>
-    <string name="error_invalid_amount">يرجى إدخال مبلغ صحيح</string>
-    <string name="error_invalid_balance">Invalid balance amount</string>
-    <string name="required_field">هذا الحقل مطلوب</string>
-    <string name="invalid_number">رقم غير صالح</string>
-    <string name="not_available">غير متوفر</string>
-    <string name="no_notes">لا توجد ملاحظات</string>
-    <string name="account_added">تمت إضافة الحساب بنجاح</string>
-    <string name="transaction_added">تمت إضافة العملية بنجاح</string>
-    <string name="account_saved">تم حفظ الحساب بنجاح</string>
-
-    <!-- Navigation Header -->
-    <string name="nav_header_title">تطبيق المحاسبة</string>
-    <string name="nav_header_subtitle">إدارة الحسابات والمعاملات</string>
-    <string name="nav_header_desc">رأس التنقل الرئيسي</string>
-    
-    <!-- Transactions -->
+    <!-- القيود المحاسبية -->
     <string name="transactions">القيود المحاسبية</string>
     <string name="transactions_description">عرض وإدارة القيود المحاسبية</string>
     <string name="view_transactions">عرض القيود</string>
-    <string name="reports">التقارير</string>
-    <string name="reports_description">عرض التقارير المالية</string>
-    <string name="view_reports">عرض التقارير</string>
     <string name="all_transactions">جميع القيود</string>
     <string name="debit">مدين</string>
     <string name="credit">دائن</string>
+    <string name="add_credit">أضفت له</string>
+    <string name="add_debit">أخذت منه</string>
     <string name="edit_transaction">تعديل القيد</string>
     <string name="delete_transaction">حذف القيد</string>
     <string name="transaction_details">تفاصيل القيد</string>
@@ -169,18 +115,65 @@
     <string name="confirm_delete">هل أنت متأكد من حذف هذا القيد؟</string>
     <string name="yes">نعم</string>
     <string name="no">لا</string>
+    <string name="transaction_saved">تم حفظ القيد بنجاح</string>
+    <string name="transaction_deleted">تم حذف القيد بنجاح</string>
 
-    <!-- Dashboard -->
+    <!-- التقارير -->
+    <string name="reports">التقارير</string>
+    <string name="reports_description">عرض التقارير المالية</string>
+    <string name="view_reports">عرض التقارير</string>
+    <string name="account_summary">ملخص الحسابات</string>
+    <string name="total_debtors">إجمالي المدينين</string>
+    <string name="total_creditors">إجمالي الدائنين</string>
+    <string name="transaction_summary">ملخص المعاملات</string>
+    <string name="total_transactions">إجمالي المعاملات</string>
+    <string name="average_transaction">متوسط المعاملة</string>
+    <string name="total_expenses">إجمالي المصروفات</string>
+    <string name="add_new_expense">إضافة مصروف جديد</string>
+    <string name="view_all_expenses">عرض جميع المصروفات</string>
+    <string name="generate_reports">إنشاء التقارير</string>
+    <string name="manage_categories">إدارة الفئات</string>
+    
+    <!-- الإعدادات -->
+    <string name="settings_appearance">المظهر</string>
+    <string name="settings_currency_format">تنسيق العملة</string>
+    <string name="settings_notifications">الإشعارات</string>
+    <string name="settings_enable_notifications">تفعيل الإشعارات</string>
+    <string name="settings_backup">النسخ الاحتياطي</string>
+    <string name="settings_auto_backup">النسخ الاحتياطي التلقائي</string>
+    <string name="settings_backup_now">نسخ احتياطي الآن</string>
+    <string name="settings_restore">استعادة النسخ الاحتياطي</string>
+    <string name="settings_danger_zone">منطقة الخطر</string>
+    <string name="settings_clear_data">مسح جميع البيانات</string>
+    
+    <!-- رسائل الخطأ -->
+    <string name="error_initialization">خطأ في تهيئة التطبيق</string>
+    <string name="error_database">خطأ في قاعدة البيانات</string>
+    <string name="error_network">خطأ في الاتصال</string>
+    <string name="error_name_required">الرجاء إدخال الاسم</string>
+    <string name="error_amount_required">يرجى إدخال المبلغ</string>
+    <string name="error_invalid_amount">يرجى إدخال مبلغ صحيح</string>
+    <string name="error_invalid_balance">مبلغ الرصيد غير صالح</string>
+    <string name="required_field">هذا الحقل مطلوب</string>
+    <string name="invalid_number">رقم غير صالح</string>
+    <string name="not_available">غير متوفر</string>
+    <string name="no_notes">لا توجد ملاحظات</string>
+    <string name="account_added">تمت إضافة الحساب بنجاح</string>
+    <string name="transaction_added">تمت إضافة العملية بنجاح</string>
+    <string name="account_saved">تم حفظ الحساب بنجاح</string>
+
+    <!-- رأس التنقل -->
+    <string name="nav_header_title">تطبيق المحاسبة</string>
+    <string name="nav_header_subtitle">إدارة الحسابات والمعاملات</string>
+    <string name="nav_header_desc">رأس التنقل الرئيسي</string>
+
+    <!-- لوحة التحكم -->
     <string name="dashboard_title">لوحة التحكم</string>
     <string name="dashboard_description">نظرة عامة على الحسابات والقيود</string>
     <string name="zero_balance">0.00</string>
     <string name="view_all">عرض الكل</string>
 
-    <!-- Transaction Messages -->
-    <string name="transaction_saved">تم حفظ القيد بنجاح</string>
-    <string name="transaction_deleted">تم حذف القيد بنجاح</string>
-
-    <!-- Navigation Actions -->
+    <!-- إجراءات التنقل -->
     <string name="action_transactions_to_addTransaction">إضافة قيد محاسبي</string>
     <string name="action_transactions_to_editTransaction">تعديل قيد محاسبي</string>
 </resources>
