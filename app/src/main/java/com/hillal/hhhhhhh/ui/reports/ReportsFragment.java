@@ -29,7 +29,7 @@ public class ReportsFragment extends Fragment {
     private ReportAdapter reportAdapter;
     private TextView totalDebtorsText;
     private TextView totalCreditorsText;
-    private TextView totalBalanceText;
+    private TextView netBalanceText;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -42,7 +42,7 @@ public class ReportsFragment extends Fragment {
         // Initialize views
         totalDebtorsText = view.findViewById(R.id.total_debtors);
         totalCreditorsText = view.findViewById(R.id.total_creditors);
-        totalBalanceText = view.findViewById(R.id.total_balance);
+        netBalanceText = view.findViewById(R.id.net_balance);
         
         // Setup RecyclerView
         RecyclerView recyclerView = view.findViewById(R.id.accounts_recycler_view);
@@ -73,7 +73,7 @@ public class ReportsFragment extends Fragment {
             // Update UI
             totalDebtorsText.setText(String.format("إجمالي المدينين: %.2f", totalDebtors));
             totalCreditorsText.setText(String.format("إجمالي الدائنين: %.2f", totalCreditors));
-            totalBalanceText.setText(String.format("الرصيد: %.2f", totalDebtors - totalCreditors));
+            netBalanceText.setText(String.format("الرصيد: %.2f", totalDebtors - totalCreditors));
 
             // Update adapter
             reportAdapter.setTransactions(allTransactions);
