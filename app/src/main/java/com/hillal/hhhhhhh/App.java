@@ -23,20 +23,29 @@ public class App extends Application {
         
         try {
             instance = this;
+            Log.d(TAG, "Instance set");
             
             // Initialize database
+            Log.d(TAG, "Initializing database...");
             database = AppDatabase.getInstance(this);
             Log.d(TAG, "Database initialized successfully");
             
             // Initialize repositories
+            Log.d(TAG, "Initializing repositories...");
             accountRepository = new AccountRepository(database.accountDao(), database);
-            transactionRepository = new TransactionRepository(this);
-            settingsRepository = new SettingsRepository(this);
-            Log.d(TAG, "Repositories initialized successfully");
+            Log.d(TAG, "AccountRepository initialized");
             
+            transactionRepository = new TransactionRepository(this);
+            Log.d(TAG, "TransactionRepository initialized");
+            
+            settingsRepository = new SettingsRepository(this);
+            Log.d(TAG, "SettingsRepository initialized");
+            
+            Log.d(TAG, "All repositories initialized successfully");
             Log.d(TAG, "Application initialized successfully");
         } catch (Exception e) {
             Log.e(TAG, "Error initializing application: " + e.getMessage(), e);
+            e.printStackTrace();
             throw new RuntimeException("Failed to initialize application", e);
         }
     }
