@@ -50,4 +50,12 @@ public class TransactionsViewModel extends AndroidViewModel {
     public void insertTransaction(Transaction transaction) {
         repository.insert(transaction);
     }
+
+    public LiveData<Transaction> getTransactionById(long id) {
+        return repository.getTransactionById(id);
+    }
+
+    public void updateTransaction(Transaction transaction) {
+        repository.updateTransaction(transaction);
+    }
 } 
