@@ -10,8 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/menu_dashboard"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -21,7 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="@string/total_debtor"
-        android:textSize="16sp"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/title" />
 
@@ -31,8 +30,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="@string/zero_balance"
-        android:textSize="18sp"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         android:textColor="@color/red"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintStart_toEndOf="@id/total_debtors_label"
         app:layout_constraintTop_toTopOf="@id/total_debtors_label" />
 
@@ -42,7 +43,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="@string/total_creditor"
-        android:textSize="16sp"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/total_debtors_label" />
 
@@ -52,8 +53,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="@string/zero_balance"
-        android:textSize="18sp"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         android:textColor="@color/green"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintStart_toEndOf="@id/total_creditors_label"
         app:layout_constraintTop_toTopOf="@id/total_creditors_label" />
 
@@ -63,7 +66,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="@string/net_balance"
-        android:textSize="16sp"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/total_creditors_label" />
 
@@ -73,7 +76,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="@string/zero_balance"
-        android:textSize="18sp"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintStart_toEndOf="@id/net_balance_label"
         app:layout_constraintTop_toTopOf="@id/net_balance_label" />
 
@@ -82,7 +87,22 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
+        android:clipToPadding="false"
+        android:padding="8dp"
+        android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/net_balance_label" />
+
+    <TextView
+        android:id="@+id/empty_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_recent_accounts"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/net_balance_label" />
 
 </androidx.constraintlayout.widget.ConstraintLayout> 
