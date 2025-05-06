@@ -92,7 +92,6 @@
     <string name="search_accounts">بحث في الحسابات</string>
     
     <!-- Transaction -->
-    <string name="credit">دائن</string>
     <string name="currency_symbol">ريال</string>
     <string name="add_transaction">إضافة عملية</string>
     
