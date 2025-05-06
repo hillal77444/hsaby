@@ -1,6 +1,5 @@
 package com.hillal.hhhhhhh.ui.transactions;
 
-import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,39 +12,28 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.button.MaterialButtonToggleGroup;
-import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Transaction;
-import com.hillal.hhhhhhh.viewmodel.TransactionViewModel;
 import com.hillal.hhhhhhh.databinding.FragmentAddTransactionBinding;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 public class AddTransactionFragment extends Fragment {
     private FragmentAddTransactionBinding binding;
-    private TransactionViewModel transactionViewModel;
-    private TextInputEditText dateEditText;
-    private TextInputEditText amountEditText;
-    private TextInputEditText notesEditText;
-    private MaterialButtonToggleGroup transactionTypeGroup;
-    private MaterialButton saveButton;
+    private TransactionsViewModel viewModel;
     private long accountId;
-    private final Calendar calendar = Calendar.getInstance();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        accountId = getArguments() != null ? getArguments().getLong("accountId") : -1;
-        transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
+        viewModel = new ViewModelProvider(this).get(TransactionsViewModel.class);
+        accountId = getArguments() != null ? getArguments().getLong("accountId", -1) : -1;
     }
 
+    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentAddTransactionBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -54,65 +42,71 @@ public class AddTransactionFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setupViews();
+        setupListeners();
     }
 
     private void setupViews() {
-        dateEditText = binding.dateEditText;
-        amountEditText = binding.amountEditText;
-        notesEditText = binding.notesEditText;
-        transactionTypeGroup = binding.transactionTypeGroup;
-        saveButton = binding.saveButton;
-
-        dateEditText.setOnClickListener(v -> showDatePicker());
-        saveButton.setOnClickListener(v -> saveTransaction());
-
-        // Set default date to today
-        updateDateDisplay();
-    }
-
-    private void showDatePicker() {
-        DatePickerDialog datePicker = new DatePickerDialog(requireContext(),
-            (view, year, month, day) -> {
-                calendar.set(year, month, day);
-                updateDateDisplay();
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
+        // Set up date picker
+        Calendar calendar = Calendar.getInstance();
+        binding.datePicker.init(
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH),
+                null
         );
-        datePicker.show();
     }
 
-    private void updateDateDisplay() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        dateEditText.setText(dateFormat.format(calendar.getTime()));
+    private void setupListeners() {
+        binding.saveButton.setOnClickListener(v -> saveTransaction());
+        binding.cancelButton.setOnClickListener(v -> Navigation.findNavController(requireView()).navigateUp());
     }
 
     private void saveTransaction() {
-        String amountStr = amountEditText.getText().toString().trim();
-        String notes = notesEditText.getText().toString().trim();
-        boolean isDebit = transactionTypeGroup.getCheckedButtonId() == R.id.debitButton;
+        String amountStr = binding.amountEditText.getText().toString();
+        String description = binding.descriptionEditText.getText().toString();
+        String notes = binding.notesEditText.getText().toString();
+        boolean isDebit = binding.typeRadioGroup.getCheckedRadioButtonId() == R.id.radioDebit;
+        String currency = getSelectedCurrency();
 
         if (amountStr.isEmpty()) {
-            amountEditText.setError(getString(R.string.error_amount_required));
+            binding.amountEditText.setError(getString(R.string.error_amount_required));
             return;
         }
 
         try {
             double amount = Double.parseDouble(amountStr);
-            if (amount <= 0) {
-                amountEditText.setError(getString(R.string.error_invalid_amount));
-                return;
-            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(
+                    binding.datePicker.getYear(),
+                    binding.datePicker.getMonth(),
+                    binding.datePicker.getDayOfMonth()
+            );
 
-            Transaction transaction = new Transaction(accountId, amount, isDebit, notes);
-            transaction.setDate(calendar.getTimeInMillis());
+            Transaction transaction = new Transaction();
+            transaction.setAccountId(accountId);
+            transaction.setAmount(amount);
+            transaction.setType(isDebit ? "مدين" : "دائن");
+            transaction.setDescription(description);
+            transaction.setNotes(notes);
+            transaction.setCurrency(currency);
+            transaction.setDate(calendar.getTime());
 
-            transactionViewModel.insert(transaction);
+            viewModel.insertTransaction(transaction);
             Toast.makeText(requireContext(), R.string.transaction_saved, Toast.LENGTH_SHORT).show();
             Navigation.findNavController(requireView()).navigateUp();
         } catch (NumberFormatException e) {
-            amountEditText.setError(getString(R.string.error_invalid_amount));
+            binding.amountEditText.setError(getString(R.string.error_invalid_amount));
+        }
+    }
+
+    private String getSelectedCurrency() {
+        int checkedId = binding.currencyRadioGroup.getCheckedRadioButtonId();
+        if (checkedId == R.id.radioYer) {
+            return getString(R.string.currency_yer);
+        } else if (checkedId == R.id.radioSar) {
+            return getString(R.string.currency_sar);
+        } else {
+            return getString(R.string.currency_usd);
         }
     }
 
