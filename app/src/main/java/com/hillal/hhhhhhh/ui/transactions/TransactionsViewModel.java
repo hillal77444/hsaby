@@ -52,10 +52,6 @@ public class TransactionsViewModel extends AndroidViewModel {
     }
 
     public LiveData<Transaction> getTransactionById(long id) {
-        return repository.getTransactionById(id);
-    }
-
-    public void updateTransaction(Transaction transaction) {
-        repository.updateTransaction(transaction);
+        return repository.getById(id);
     }
 } 
