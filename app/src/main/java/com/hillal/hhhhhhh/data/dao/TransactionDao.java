@@ -33,4 +33,7 @@ public interface TransactionDao {
 
     @Query("SELECT * FROM transactions WHERE date BETWEEN :startDate AND :endDate")
     LiveData<List<Transaction>> getTransactionsBetweenDates(long startDate, long endDate);
+
+    @Query("SELECT * FROM transactions WHERE accountId = :accountId AND date BETWEEN :fromDate AND :toDate ORDER BY date DESC")
+    LiveData<List<Transaction>> getTransactionsByDateRange(long accountId, long fromDate, long toDate);
 } 
