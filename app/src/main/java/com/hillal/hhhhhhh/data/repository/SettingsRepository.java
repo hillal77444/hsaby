@@ -7,20 +7,21 @@ import com.hillal.hhhhhhh.data.model.Settings;
 import com.hillal.hhhhhhh.data.room.SettingsDao;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.List;
 
 public class SettingsRepository {
     private final SettingsDao settingsDao;
-    private final LiveData<Settings> settings;
+    private final LiveData<List<Settings>> settings;
     private final ExecutorService executorService;
 
     public SettingsRepository(Application application) {
         App app = (App) application;
         settingsDao = app.getDatabase().settingsDao();
-        settings = settingsDao.getSettings();
+        settings = settingsDao.getAllSettings();
         executorService = Executors.newSingleThreadExecutor();
     }
 
-    public LiveData<Settings> getSettings() {
+    public LiveData<List<Settings>> getSettings() {
         return settings;
     }
 
