@@ -41,4 +41,19 @@ public interface TransactionDao {
 
     @Query("SELECT * FROM transactions WHERE currency = :currency ORDER BY date DESC")
     LiveData<List<Transaction>> getTransactionsByCurrency(String currency);
+
+    @Query("SELECT * FROM transactions WHERE accountId = :accountId ORDER BY date DESC")
+    LiveData<List<Transaction>> getTransactionsByAccount(long accountId);
+
+    @Query("SELECT * FROM transactions WHERE date BETWEEN :fromDate AND :toDate ORDER BY date DESC")
+    LiveData<List<Transaction>> getTransactionsByDateRange(long fromDate, long toDate);
+
+    @Query("SELECT * FROM transactions WHERE accountId = :accountId AND date BETWEEN :fromDate AND :toDate ORDER BY date DESC")
+    LiveData<List<Transaction>> getTransactionsByAccountAndDateRange(long accountId, long fromDate, long toDate);
+
+    @Query("SELECT SUM(amount) FROM transactions WHERE accountId = :accountId AND type = 'debit'")
+    LiveData<Double> getTotalDebit(long accountId);
+
+    @Query("SELECT SUM(amount) FROM transactions WHERE accountId = :accountId AND type = 'credit'")
+    LiveData<Double> getTotalCredit(long accountId);
 } 
