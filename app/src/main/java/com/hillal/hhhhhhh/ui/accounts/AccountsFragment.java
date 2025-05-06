@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.hhhhhhh.R;
-import com.hillal.hhhhhhh.data.entities.Account;
+import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
 
 import java.util.ArrayList;
