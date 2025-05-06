@@ -96,6 +96,40 @@ public class AccountStatementFragment extends Fragment {
         });
     }
 
+    private void loadTransactions() {
+        String fromDateStr = fromDateInput.getText() != null ? fromDateInput.getText().toString() : "";
+        String toDateStr = toDateInput.getText() != null ? toDateInput.getText().toString() : "";
+        
+        Date fromDate = parseDate(fromDateStr);
+        Date toDate = parseDate(toDateStr);
+        
+        if (fromDate != null && toDate != null) {
+            transactionViewModel.getTransactionsByAccountAndDateRange(accountId, fromDate.getTime(), toDate.getTime())
+                .observe(getViewLifecycleOwner(), this::updateTransactions);
+        } else {
+            transactionViewModel.getTransactionsByAccount(accountId)
+                .observe(getViewLifecycleOwner(), this::updateTransactions);
+        }
+    }
+
+    private void updateTransactions(List<Transaction> transactions) {
+        transactionsAdapter.submitList(transactions);
+        
+        double totalDebit = 0;
+        double totalCredit = 0;
+        
+        for (Transaction transaction : transactions) {
+            if (transaction.getType().equals("debit")) {
+                totalDebit += transaction.getAmount();
+            } else {
+                totalCredit += transaction.getAmount();
+            }
+        }
+        
+        totalDebitText.setText(String.format("إجمالي المدين: %.2f", totalDebit));
+        totalCreditText.setText(String.format("إجمالي الدائن: %.2f", totalCredit));
+    }
+
     private void generateStatement() {
         String fromDateStr = fromDateInput.getText().toString();
         String toDateStr = toDateInput.getText().toString();
