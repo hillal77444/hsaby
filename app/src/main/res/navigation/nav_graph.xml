@@ -53,7 +53,22 @@
         android:id="@+id/navigation_reports"
         android:name="com.hillal.hhhhhhh.ui.reports.ReportsFragment"
         android:label="@string/title_reports"
-        tools:layout="@layout/fragment_reports" />
+        tools:layout="@layout/fragment_reports">
+        <action
+            android:id="@+id/action_reports_to_accountStatement"
+            app:destination="@id/accountStatementFragment" />
+    </fragment>
+
+    <!-- كشف الحساب -->
+    <fragment
+        android:id="@+id/accountStatementFragment"
+        android:name="com.hillal.hhhhhhh.ui.reports.AccountStatementFragment"
+        android:label="@string/account_statement"
+        tools:layout="@layout/fragment_account_statement">
+        <argument
+            android:name="accountId"
+            app:argType="long" />
+    </fragment>
 
     <!-- الإعدادات -->
     <fragment
