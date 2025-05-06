@@ -10,21 +10,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.navigation.Navigation;
 
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.databinding.FragmentDashboardBinding;
-import com.hillal.hhhhhhh.ui.adapters.RecentAccountsAdapter;
 import com.hillal.hhhhhhh.App;
 
 public class DashboardFragment extends Fragment {
     private static final String TAG = "DashboardFragment";
     private FragmentDashboardBinding binding;
     private DashboardViewModel dashboardViewModel;
-    private RecentAccountsAdapter recentAccountsAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,33 +51,8 @@ public class DashboardFragment extends Fragment {
         Log.d(TAG, "DashboardFragment onViewCreated started");
 
         try {
-            // Setup RecyclerView
-            RecyclerView recentAccountsList = binding.recentAccountsList;
-            recentAccountsList.setLayoutManager(new LinearLayoutManager(requireContext()));
-            recentAccountsAdapter = new RecentAccountsAdapter();
-            recentAccountsList.setAdapter(recentAccountsAdapter);
-
-            // Observe data
-            dashboardViewModel.getRecentAccounts().observe(getViewLifecycleOwner(), accounts -> {
-                if (accounts != null) {
-                    recentAccountsAdapter.updateAccounts(accounts);
-                    Log.d(TAG, "Recent accounts updated: " + accounts.size() + " accounts");
-                }
-            });
-
-            dashboardViewModel.getTotalDebtors().observe(getViewLifecycleOwner(), total -> {
-                if (total != null) {
-                    binding.totalDebtors.setText(String.format("%.2f %s", total, getString(R.string.currency_symbol)));
-                }
-            });
-
-            dashboardViewModel.getTotalCreditors().observe(getViewLifecycleOwner(), total -> {
-                if (total != null) {
-                    binding.totalCreditors.setText(String.format("%.2f %s", total, getString(R.string.currency_symbol)));
-                }
-            });
-
             setupClickListeners();
+            observeData();
         } catch (Exception e) {
             Log.e(TAG, "Error in onViewCreated: " + e.getMessage(), e);
         }
@@ -103,6 +74,20 @@ public class DashboardFragment extends Fragment {
         // زر إضافة قيد محاسبي
         binding.fabAddTransaction.setOnClickListener(v -> 
             Navigation.findNavController(v).navigate(R.id.action_transactions_to_addTransaction));
+    }
+
+    private void observeData() {
+        dashboardViewModel.getTotalDebtors().observe(getViewLifecycleOwner(), total -> {
+            if (total != null) {
+                binding.totalDebtors.setText(String.format("%.2f %s", total, getString(R.string.currency_symbol)));
+            }
+        });
+
+        dashboardViewModel.getTotalCreditors().observe(getViewLifecycleOwner(), total -> {
+            if (total != null) {
+                binding.totalCreditors.setText(String.format("%.2f %s", total, getString(R.string.currency_symbol)));
+            }
+        });
     }
 
     @Override
