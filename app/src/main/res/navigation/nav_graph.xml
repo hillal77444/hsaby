@@ -69,4 +69,25 @@
         android:label="@string/title_accounts"
         tools:layout="@layout/fragment_accounts" />
 
+    <fragment
+        android:id="@+id/transactionsFragment"
+        android:name="com.hillal.hhhhhhh.ui.transactions.TransactionsFragment"
+        android:label="@string/transactions">
+        <action
+            android:id="@+id/action_transactions_to_addTransaction"
+            app:destination="@id/addTransactionFragment" />
+        <action
+            android:id="@+id/action_transactions_to_editTransaction"
+            app:destination="@id/editTransactionFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editTransactionFragment"
+        android:name="com.hillal.hhhhhhh.ui.transactions.EditTransactionFragment"
+        android:label="@string/edit_transaction">
+        <argument
+            android:name="transactionId"
+            app:argType="long" />
+    </fragment>
+
 </navigation>
