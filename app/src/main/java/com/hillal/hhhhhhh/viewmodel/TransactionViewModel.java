@@ -3,8 +3,8 @@ package com.hillal.hhhhhhh.viewmodel;
 import android.app.Application;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import com.hillal.hhhhhhh.data.model.Transaction;
-import com.hillal.hhhhhhh.data.repository.TransactionRepository;
+import com.hillal.hhhhhhh.data.entities.Transaction;
+import com.hillal.hhhhhhh.repository.TransactionRepository;
 import java.util.List;
 
 public class TransactionViewModel extends AndroidViewModel {
@@ -13,7 +13,7 @@ public class TransactionViewModel extends AndroidViewModel {
 
     public TransactionViewModel(Application application) {
         super(application);
-        repository = ((com.hillal.hhhhhhh.App) application).getTransactionRepository();
+        repository = new TransactionRepository(((com.hillal.hhhhhhh.App) application).getTransactionDao());
         allTransactions = repository.getAllTransactions();
     }
 
