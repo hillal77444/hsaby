@@ -52,10 +52,10 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
-            dateTextView = itemView.findViewById(R.id.transaction_date);
-            typeTextView = itemView.findViewById(R.id.transaction_type);
-            amountTextView = itemView.findViewById(R.id.transaction_amount);
-            descriptionTextView = itemView.findViewById(R.id.transaction_description);
+            dateTextView = itemView.findViewById(R.id.transactionDate);
+            typeTextView = itemView.findViewById(R.id.transactionType);
+            amountTextView = itemView.findViewById(R.id.transactionAmount);
+            descriptionTextView = itemView.findViewById(R.id.transactionDescription);
         }
 
         void bind(Transaction transaction) {
