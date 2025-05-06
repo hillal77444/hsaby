@@ -49,7 +49,11 @@
     <string name="cancel">إلغاء</string>
     <string name="name">الاسم</string>
     <string name="phone">رقم الجوال</string>
+    <string name="phone_number">رقم الجوال</string>
     <string name="notes">ملاحظات</string>
+    <string name="description">البيان</string>
+    <string name="currency">العملة</string>
+    <string name="search_hint">ابحث عن حساب...</string>
     <string name="date">التاريخ</string>
     <string name="amount">المبلغ</string>
     <string name="from_date">من تاريخ</string>
