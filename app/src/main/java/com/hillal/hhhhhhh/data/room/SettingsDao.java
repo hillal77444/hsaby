@@ -20,9 +20,9 @@ public interface SettingsDao {
     @Delete
     void delete(Settings settings);
 
-    @Query("SELECT * FROM settings ORDER BY key ASC")
+    @Query("SELECT * FROM settings")
     LiveData<List<Settings>> getAllSettings();
 
-    @Query("SELECT * FROM settings WHERE key = :key")
+    @Query("SELECT * FROM settings WHERE `key` = :key")
     LiveData<Settings> getSettingByKey(String key);
 } 
