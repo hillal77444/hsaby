@@ -4,16 +4,21 @@ import android.app.Application;
 import androidx.lifecycle.LiveData;
 import com.hillal.hhhhhhh.data.dao.TransactionDao;
 import com.hillal.hhhhhhh.data.model.Transaction;
+import com.hillal.hhhhhhh.data.room.AppDatabase;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class TransactionRepository {
     private final TransactionDao transactionDao;
     private final LiveData<List<Transaction>> allTransactions;
+    private final ExecutorService executorService;
 
     public TransactionRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
         transactionDao = db.transactionDao();
         allTransactions = transactionDao.getAllTransactions();
+        executorService = Executors.newSingleThreadExecutor();
     }
 
     public LiveData<List<Transaction>> getAllTransactions() {
@@ -29,20 +34,14 @@ public class TransactionRepository {
     }
 
     public void insert(Transaction transaction) {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            transactionDao.insert(transaction);
-        });
+        executorService.execute(() -> transactionDao.insert(transaction));
     }
 
     public void update(Transaction transaction) {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            transactionDao.update(transaction);
-        });
+        executorService.execute(() -> transactionDao.update(transaction));
     }
 
     public void delete(Transaction transaction) {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            transactionDao.delete(transaction);
-        });
+        executorService.execute(() -> transactionDao.delete(transaction));
     }
-} 
+}
