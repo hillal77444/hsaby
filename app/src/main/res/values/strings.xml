@@ -143,6 +143,15 @@
     
     <!-- Transactions -->
     <string name="transactions">القيود المحاسبية</string>
+    <string name="transactions_description">عرض وإدارة القيود المحاسبية</string>
+    <string name="view_transactions">عرض القيود</string>
+    <string name="accounts">الحسابات</string>
+    <string name="accounts_description">عرض وإدارة الحسابات</string>
+    <string name="view_accounts">عرض الحسابات</string>
+    <string name="reports">التقارير</string>
+    <string name="reports_description">عرض التقارير المالية</string>
+    <string name="view_reports">عرض التقارير</string>
+    <string name="add_transaction">إضافة قيد محاسبي</string>
     <string name="all_transactions">جميع القيود</string>
     <string name="debit">مدين</string>
     <string name="edit_transaction">تعديل القيد</string>
