@@ -13,4 +13,8 @@
     <color name="accent">#03DAC5</color>
     <color name="red">#F44336</color>
     <color name="green">#4CAF50</color>
+    
+    <!-- ألوان القيود المحاسبية -->
+    <color name="debit_color">#E53935</color>  <!-- أحمر للقيد المدين -->
+    <color name="credit_color">#43A047</color> <!-- أخضر للقيد الدائن -->
 </resources>
