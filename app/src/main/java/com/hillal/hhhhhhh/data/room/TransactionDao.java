@@ -38,4 +38,7 @@ public interface TransactionDao {
 
     @Query("SELECT * FROM transactions WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
     LiveData<List<Transaction>> getTransactionsByDateRange(long startDate, long endDate);
+
+    @Query("SELECT * FROM transactions WHERE currency = :currency ORDER BY date DESC")
+    LiveData<List<Transaction>> getTransactionsByCurrency(String currency);
 } 
