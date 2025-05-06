@@ -50,4 +50,8 @@ public class TransactionRepository {
     public void delete(Transaction transaction) {
         executorService.execute(() -> transactionDao.deleteTransaction(transaction));
     }
+
+    public LiveData<Transaction> getById(long id) {
+        return transactionDao.getTransactionById(id);
+    }
 }
