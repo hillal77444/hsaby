@@ -33,9 +33,6 @@ public interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE id = :transactionId")
     LiveData<Transaction> getTransactionById(long transactionId);
 
-    @Query("SELECT * FROM transactions WHERE currency = :currency ORDER BY date DESC")
-    LiveData<List<Transaction>> getTransactionsByCurrency(String currency);
-
     @Query("SELECT * FROM transactions WHERE type = :type ORDER BY date DESC")
     LiveData<List<Transaction>> getTransactionsByType(String type);
 
