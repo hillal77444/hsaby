@@ -61,29 +61,23 @@ public class AccountRepository {
     }
 
     public LiveData<List<Transaction>> getTransactionsForAccount(long accountId) {
-        return database.transactionDao().getTransactionsForAccount(accountId);
+        return database.transactionDao().getTransactionsByAccount(accountId);
     }
 
     public LiveData<Double> getAccountBalance(long accountId) {
         return database.transactionDao().getAccountBalance(accountId);
     }
 
-    private void insertTransaction(Transaction transaction) {
-        executorService.execute(() -> {
-            database.transactionDao().insert(transaction);
-        });
+    public void insertTransaction(Transaction transaction) {
+        executorService.execute(() -> database.transactionDao().insert(transaction));
     }
 
-    private void updateTransaction(Transaction transaction) {
-        executorService.execute(() -> {
-            database.transactionDao().update(transaction);
-        });
+    public void updateTransaction(Transaction transaction) {
+        executorService.execute(() -> database.transactionDao().update(transaction));
     }
 
-    private void deleteTransaction(Transaction transaction) {
-        executorService.execute(() -> {
-            database.transactionDao().delete(transaction);
-        });
+    public void deleteTransaction(Transaction transaction) {
+        executorService.execute(() -> database.transactionDao().delete(transaction));
     }
 
     public void backupData() {
