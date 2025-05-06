@@ -16,36 +16,66 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/total_debtors"
+        android:id="@+id/total_debtors_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="0.00"
-        android:textSize="18sp"
-        android:textColor="@color/red"
+        android:text="@string/total_debtor"
+        android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/title" />
+
+    <TextView
+        android:id="@+id/total_debtors"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/zero_balance"
+        android:textSize="18sp"
+        android:textColor="@color/red"
+        app:layout_constraintStart_toEndOf="@id/total_debtors_label"
+        app:layout_constraintTop_toTopOf="@id/total_debtors_label" />
+
+    <TextView
+        android:id="@+id/total_creditors_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/total_creditor"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/total_debtors_label" />
 
     <TextView
         android:id="@+id/total_creditors"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="0.00"
+        android:layout_marginStart="8dp"
+        android:text="@string/zero_balance"
         android:textSize="18sp"
         android:textColor="@color/green"
+        app:layout_constraintStart_toEndOf="@id/total_creditors_label"
+        app:layout_constraintTop_toTopOf="@id/total_creditors_label" />
+
+    <TextView
+        android:id="@+id/net_balance_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/net_balance"
+        android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/total_debtors" />
+        app:layout_constraintTop_toBottomOf="@id/total_creditors_label" />
 
     <TextView
         android:id="@+id/net_balance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="0.00"
+        android:layout_marginStart="8dp"
+        android:text="@string/zero_balance"
         android:textSize="18sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/total_creditors" />
+        app:layout_constraintStart_toEndOf="@id/net_balance_label"
+        app:layout_constraintTop_toTopOf="@id/net_balance_label" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recent_accounts_list"
@@ -53,6 +83,6 @@
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/net_balance" />
+        app:layout_constraintTop_toBottomOf="@id/net_balance_label" />
 
 </androidx.constraintlayout.widget.ConstraintLayout> 
