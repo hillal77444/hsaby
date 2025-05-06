@@ -1,8 +1,9 @@
 package com.hillal.hhhhhhh.repository;
 
+import android.app.Application;
 import androidx.lifecycle.LiveData;
-import com.hillal.hhhhhhh.data.dao.TransactionDao;
-import com.hillal.hhhhhhh.data.entities.Transaction;
+import com.hillal.hhhhhhh.data.room.TransactionDao;
+import com.hillal.hhhhhhh.data.model.Transaction;
 import java.util.List;
 
 public class TransactionRepository {
