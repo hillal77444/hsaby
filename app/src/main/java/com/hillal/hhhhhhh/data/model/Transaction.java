@@ -5,6 +5,9 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+import com.hillal.hhhhhhh.data.Converters;
+import java.util.Date;
 
 @Entity(
     tableName = "transactions",
@@ -16,21 +19,21 @@ import androidx.room.PrimaryKey;
     ),
     indices = @Index("accountId")
 )
+@TypeConverters({Converters.class})
 public class Transaction {
     @PrimaryKey(autoGenerate = true)
     private long id;
     private long accountId;
     private double amount;
-    private boolean isDebit;
+    private String currency; // ريال يمني، ريال سعودي، دولار
+    private String description;
+    private String type; // مدين، دائن
+    private Date date;
+    private String referenceNumber; // رقم المرجع
     private String notes;
-    private long date;
 
-    public Transaction(long accountId, double amount, boolean isDebit, String notes) {
-        this.accountId = accountId;
-        this.amount = amount;
-        this.isDebit = isDebit;
-        this.notes = notes;
-        this.date = System.currentTimeMillis();
+    public Transaction() {
+        this.date = new Date();
     }
 
     public long getId() {
@@ -57,12 +60,44 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public boolean isDebit() {
-        return isDebit;
+    public String getCurrency() {
+        return currency;
     }
 
-    public void setDebit(boolean debit) {
-        isDebit = debit;
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public String getReferenceNumber() {
+        return referenceNumber;
+    }
+
+    public void setReferenceNumber(String referenceNumber) {
+        this.referenceNumber = referenceNumber;
     }
 
     public String getNotes() {
@@ -73,14 +108,6 @@ public class Transaction {
         this.notes = notes;
     }
 
-    public long getDate() {
-        return date;
-    }
-
-    public void setDate(long date) {
-        this.date = date;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -89,8 +116,11 @@ public class Transaction {
         return id == that.id &&
                 accountId == that.accountId &&
                 Double.compare(that.amount, amount) == 0 &&
-                isDebit == that.isDebit &&
-                date == that.date &&
+                (currency != null ? currency.equals(that.currency) : that.currency == null) &&
+                (description != null ? description.equals(that.description) : that.description == null) &&
+                (type != null ? type.equals(that.type) : that.type == null) &&
+                (date != null ? date.equals(that.date) : that.date == null) &&
+                (referenceNumber != null ? referenceNumber.equals(that.referenceNumber) : that.referenceNumber == null) &&
                 (notes != null ? notes.equals(that.notes) : that.notes == null);
     }
 
@@ -102,9 +132,12 @@ public class Transaction {
         result = 31 * result + (int) (accountId ^ (accountId >>> 32));
         temp = Double.doubleToLongBits(amount);
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        result = 31 * result + (isDebit ? 1 : 0);
+        result = 31 * result + (currency != null ? currency.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (date != null ? date.hashCode() : 0);
+        result = 31 * result + (referenceNumber != null ? referenceNumber.hashCode() : 0);
         result = 31 * result + (notes != null ? notes.hashCode() : 0);
-        result = 31 * result + (int) (date ^ (date >>> 32));
         return result;
     }
 } 
