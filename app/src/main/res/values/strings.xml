@@ -76,6 +76,7 @@
     <string name="current_balance">الرصيد الحالي</string>
     <string name="account_added">تمت إضافة الحساب بنجاح</string>
     <string name="account_saved">تم حفظ الحساب بنجاح</string>
+    <string name="account_statement_description">اضغط على أي حساب لعرض كشف الحساب التفصيلي</string>
 
     <!-- القيود المحاسبية -->
     <string name="transactions">القيود المحاسبية</string>
@@ -164,4 +165,15 @@
     <!-- إجراءات التنقل -->
     <string name="action_transactions_to_addTransaction">إضافة قيد محاسبي</string>
     <string name="action_transactions_to_editTransaction">تعديل قيد محاسبي</string>
+
+    <string name="select_date_range">اختر نطاق التاريخ</string>
+    <string name="generate_statement">إنشاء كشف الحساب</string>
+    <string name="export_to_pdf">تصدير كملف PDF</string>
+    <string name="account_statement">كشف الحساب</string>
+    <string name="account_statement_for">كشف حساب: %1$s</string>
+    <string name="period">الفترة: %1$s - %2$s</string>
+    <string name="opening_balance">الرصيد الافتتاحي: %1$s</string>
+    <string name="closing_balance">الرصيد الختامي: %1$s</string>
+    <string name="total_debit">إجمالي المدين: %1$s</string>
+    <string name="total_credit">إجمالي الدائن: %1$s</string>
 </resources>
