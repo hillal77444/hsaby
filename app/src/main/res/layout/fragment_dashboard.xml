@@ -124,6 +124,24 @@
                         android:text="@string/reports_description"
                         android:textAppearance="?attr/textAppearanceBody2" />
 
+                    <!-- إجمالي المدينين -->
+                    <TextView
+                        android:id="@+id/totalDebtors"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:textAppearance="?attr/textAppearanceSubtitle1"
+                        tools:text="إجمالي المدينين: 1000 ريال يمني" />
+
+                    <!-- إجمالي الدائنين -->
+                    <TextView
+                        android:id="@+id/totalCreditors"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textAppearance="?attr/textAppearanceSubtitle1"
+                        tools:text="إجمالي الدائنين: 500 ريال يمني" />
+
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/viewReportsButton"
                         android:layout_width="wrap_content"
