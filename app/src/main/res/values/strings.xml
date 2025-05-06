@@ -50,49 +50,35 @@
     <string name="name">الاسم</string>
     <string name="phone">رقم الجوال</string>
     <string name="notes">ملاحظات</string>
-    <string name="opening_balance">الرصيد الافتتاحي</string>
-    <string name="current_balance">الرصيد الحالي</string>
-    <string name="status">الحالة</string>
     <string name="date">التاريخ</string>
     <string name="amount">المبلغ</string>
     <string name="from_date">من تاريخ</string>
     <string name="to_date">إلى تاريخ</string>
-    <string name="report_type">نوع التقرير</string>
-    <string name="general_report">تقرير عام</string>
-    <string name="account_report">تقرير حساب</string>
-    <string name="type_report">تقرير حسب النوع</string>
-    <string name="export">تصدير</string>
-    <string name="import_data">استيراد</string>
-    <string name="backup">نسخة احتياطية</string>
-    <string name="language">اللغة</string>
-    <string name="currency">ريال</string>
-    <string name="change_password">تغيير كلمة المرور</string>
-    <string name="reset_data">إعادة تعيين البيانات</string>
-    <string name="search_by_name">البحث بالاسم</string>
-    <string name="filter_by_date">تصفية حسب التاريخ</string>
-    <string name="filter_by_type">تصفية حسب النوع</string>
-    <string name="show_results">عرض النتائج</string>
-    <string name="search_hint">ابحث عن حساب...</string>
+    <string name="status">الحالة</string>
     <string name="delete">حذف</string>
     <string name="edit">تعديل</string>
     <string name="add">إضافة</string>
+    <string name="yes">نعم</string>
+    <string name="no">لا</string>
     
     <!-- الحسابات -->
     <string name="accounts">الحسابات</string>
     <string name="accounts_description">عرض وإدارة الحسابات</string>
     <string name="view_accounts">عرض الحسابات</string>
-    <string name="account_name">اسم الحساب</string>
-    <string name="phone_number">رقم الجوال</string>
-    <string name="description">الوصف</string>
     <string name="add_account">إضافة حساب</string>
     <string name="account_details">تفاصيل الحساب</string>
     <string name="search_accounts">بحث في الحسابات</string>
-    
+    <string name="opening_balance">الرصيد الافتتاحي</string>
+    <string name="current_balance">الرصيد الحالي</string>
+    <string name="account_added">تمت إضافة الحساب بنجاح</string>
+    <string name="account_saved">تم حفظ الحساب بنجاح</string>
+
     <!-- القيود المحاسبية -->
     <string name="transactions">القيود المحاسبية</string>
     <string name="transactions_description">عرض وإدارة القيود المحاسبية</string>
     <string name="view_transactions">عرض القيود</string>
     <string name="all_transactions">جميع القيود</string>
+    <string name="add_transaction">إضافة قيد محاسبي</string>
     <string name="debit">مدين</string>
     <string name="credit">دائن</string>
     <string name="add_credit">أضفت له</string>
@@ -113,10 +99,6 @@
     <string name="currency_usd">دولار أمريكي</string>
     <string name="no_transactions">لا توجد قيود محاسبية</string>
     <string name="confirm_delete">هل أنت متأكد من حذف هذا القيد؟</string>
-    <string name="yes">نعم</string>
-    <string name="no">لا</string>
-    <string name="transaction_saved">تم حفظ القيد بنجاح</string>
-    <string name="transaction_deleted">تم حذف القيد بنجاح</string>
 
     <!-- التقارير -->
     <string name="reports">التقارير</string>
@@ -158,9 +140,7 @@
     <string name="invalid_number">رقم غير صالح</string>
     <string name="not_available">غير متوفر</string>
     <string name="no_notes">لا توجد ملاحظات</string>
-    <string name="account_added">تمت إضافة الحساب بنجاح</string>
     <string name="transaction_added">تمت إضافة العملية بنجاح</string>
-    <string name="account_saved">تم حفظ الحساب بنجاح</string>
 
     <!-- رأس التنقل -->
     <string name="nav_header_title">تطبيق المحاسبة</string>
