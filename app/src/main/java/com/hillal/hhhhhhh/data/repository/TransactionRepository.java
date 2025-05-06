@@ -23,8 +23,8 @@ public class TransactionRepository {
         return transactionDao.getAllTransactions();
     }
 
-    public LiveData<List<Transaction>> getTransactionsForAccount(long accountId) {
-        return transactionDao.getTransactionsForAccount(accountId);
+    public LiveData<List<Transaction>> getTransactionsByAccount(long accountId) {
+        return transactionDao.getTransactionsByAccount(accountId);
     }
 
     public LiveData<List<Transaction>> getTransactionsByType(String type) {
@@ -53,5 +53,21 @@ public class TransactionRepository {
 
     public LiveData<Transaction> getById(long id) {
         return transactionDao.getTransactionById(id);
+    }
+
+    public LiveData<List<Transaction>> getTransactionsByDateRange(long fromDate, long toDate) {
+        return transactionDao.getTransactionsByDateRange(fromDate, toDate);
+    }
+
+    public LiveData<List<Transaction>> getTransactionsByAccountAndDateRange(long accountId, long fromDate, long toDate) {
+        return transactionDao.getTransactionsByAccountAndDateRange(accountId, fromDate, toDate);
+    }
+
+    public LiveData<Double> getTotalDebit(long accountId) {
+        return transactionDao.getTotalDebit(accountId);
+    }
+
+    public LiveData<Double> getTotalCredit(long accountId) {
+        return transactionDao.getTotalCredit(accountId);
     }
 }
