@@ -63,7 +63,7 @@ public class DashboardFragment extends Fragment {
             // Observe data
             dashboardViewModel.getRecentAccounts().observe(getViewLifecycleOwner(), accounts -> {
                 if (accounts != null) {
-                    recentAccountsAdapter.setAccounts(accounts);
+                    recentAccountsAdapter.updateAccounts(accounts);
                     Log.d(TAG, "Recent accounts updated: " + accounts.size() + " accounts");
                 }
             });
