@@ -182,6 +182,6 @@
     <string name="transactions">المعاملات</string>
     <string name="no_transactions">لا توجد معاملات</string>
     <string name="transaction_saved">تم حفظ المعاملة بنجاح</string>
-    <string name="view_all">عرض الكل</string>
+    <string name="view_all">عرض  الكل</string>
     <string name="zero_balance">0.00</string>
 </resources>
