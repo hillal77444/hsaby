@@ -72,7 +72,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             binding.transactionAmount.setText(String.format("%.2f %s", 
                     transaction.getAmount(), transaction.getCurrency()));
             binding.transactionDescription.setText(transaction.getDescription());
-            binding.transactionDate.setText(dateFormat.format(new Date(transaction.getDate())));
+            binding.transactionDate.setText(dateFormat.format(transaction.getDate()));
             
             // Set color based on transaction type
             int colorResId = transaction.getType().equals("مدين") ? 
