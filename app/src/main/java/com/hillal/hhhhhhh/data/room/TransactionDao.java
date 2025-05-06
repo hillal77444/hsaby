@@ -12,12 +12,6 @@ import java.util.List;
 
 @Dao
 public interface TransactionDao {
-    @Query("SELECT * FROM transactions WHERE accountId = :accountId ORDER BY date DESC")
-    LiveData<List<Transaction>> getTransactionsForAccount(long accountId);
-
-    @Query("SELECT COALESCE(SUM(CASE WHEN isDebit = 1 THEN amount ELSE -amount END), 0) FROM transactions WHERE accountId = :accountId")
-    LiveData<Double> getAccountBalance(long accountId);
-
     @Insert
     void insertTransaction(Transaction transaction);
 
@@ -26,4 +20,25 @@ public interface TransactionDao {
 
     @Delete
     void deleteTransaction(Transaction transaction);
+
+    @Query("SELECT * FROM transactions WHERE accountId = :accountId ORDER BY date DESC")
+    LiveData<List<Transaction>> getTransactionsForAccount(long accountId);
+
+    @Query("SELECT * FROM transactions ORDER BY date DESC")
+    LiveData<List<Transaction>> getAllTransactions();
+
+    @Query("SELECT SUM(CASE WHEN type = 'مدين' THEN amount ELSE -amount END) FROM transactions WHERE accountId = :accountId")
+    LiveData<Double> getAccountBalance(long accountId);
+
+    @Query("SELECT * FROM transactions WHERE id = :transactionId")
+    LiveData<Transaction> getTransactionById(long transactionId);
+
+    @Query("SELECT * FROM transactions WHERE currency = :currency ORDER BY date DESC")
+    LiveData<List<Transaction>> getTransactionsByCurrency(String currency);
+
+    @Query("SELECT * FROM transactions WHERE type = :type ORDER BY date DESC")
+    LiveData<List<Transaction>> getTransactionsByType(String type);
+
+    @Query("SELECT * FROM transactions WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
+    LiveData<List<Transaction>> getTransactionsByDateRange(long startDate, long endDate);
 } 
