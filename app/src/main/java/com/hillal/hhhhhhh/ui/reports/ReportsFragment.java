@@ -17,104 +17,68 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
-import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
-import com.hillal.hhhhhhh.viewmodel.TransactionViewModel;
+import com.hillal.hhhhhhh.ui.viewmodel.AccountViewModel;
+import com.hillal.hhhhhhh.ui.viewmodel.TransactionViewModel;
 
 import java.text.NumberFormat;
-import java.util.Locale;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class ReportsFragment extends Fragment {
     private AccountViewModel accountViewModel;
     private TransactionViewModel transactionViewModel;
-    private RecyclerView accountsRecyclerView;
-    private AccountsAdapter accountsAdapter;
+    private ReportAdapter reportAdapter;
     private TextView totalDebtorsText;
     private TextView totalCreditorsText;
-    private TextView totalTransactionsText;
-    private TextView averageTransactionText;
+    private TextView totalBalanceText;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_reports, container, false);
+        
+        // Initialize ViewModels
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
         transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_reports, container, false);
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
         
-        setupViews(view);
-        setupRecyclerView();
-        observeData();
+        // Initialize views
+        totalDebtorsText = view.findViewById(R.id.totalDebtorsText);
+        totalCreditorsText = view.findViewById(R.id.totalCreditorsText);
+        totalBalanceText = view.findViewById(R.id.totalBalanceText);
+        
+        // Setup RecyclerView
+        RecyclerView recyclerView = view.findViewById(R.id.accounts_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        reportAdapter = new ReportAdapter();
+        recyclerView.setAdapter(reportAdapter);
+        
+        // Observe data
+        observeAccounts();
+        
+        return view;
     }
 
-    private void setupViews(View view) {
-        totalDebtorsText = view.findViewById(R.id.total_debtors);
-        totalCreditorsText = view.findViewById(R.id.total_creditors);
-        totalTransactionsText = view.findViewById(R.id.total_transactions);
-        averageTransactionText = view.findViewById(R.id.average_transaction);
-        accountsRecyclerView = view.findViewById(R.id.accounts_recycler_view);
-    }
-
-    private void setupRecyclerView() {
-        accountsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        accountsAdapter = new AccountsAdapter(account -> {
-            Bundle args = new Bundle();
-            args.putLong("accountId", account.getId());
-            Navigation.findNavController(requireView())
-                .navigate(R.id.action_reports_to_accountStatement, args);
-        });
-        accountsRecyclerView.setAdapter(accountsAdapter);
-    }
-
-    private void observeData() {
+    private void observeAccounts() {
         accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
-            accountsAdapter.setAccounts(accounts);
-            updateAccountSummary(accounts);
-        });
+            double totalDebtors = 0;
+            double totalCreditors = 0;
+            List<Transaction> allTransactions = new ArrayList<>();
 
-        transactionViewModel.getAllTransactions().observe(getViewLifecycleOwner(), transactions -> {
-            updateTransactionSummary(transactions);
-        });
-    }
-
-    private void updateAccountSummary(List<Account> accounts) {
-        double totalDebtors = 0;
-        double totalCreditors = 0;
-
-        for (Account account : accounts) {
-            if (account.getType().equals("debtor")) {
-                totalDebtors += account.getBalance();
-            } else {
-                totalCreditors += account.getBalance();
+            for (Account account : accounts) {
+                if (account.isDebtor()) {
+                    totalDebtors += account.getOpeningBalance();
+                } else {
+                    totalCreditors += account.getOpeningBalance();
+                }
             }
-        }
 
-        NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.getDefault());
-        totalDebtorsText.setText(formatter.format(totalDebtors));
-        totalCreditorsText.setText(formatter.format(totalCreditors));
-    }
+            // Update UI
+            totalDebtorsText.setText(String.format("إجمالي المدينين: %.2f", totalDebtors));
+            totalCreditorsText.setText(String.format("إجمالي الدائنين: %.2f", totalCreditors));
+            totalBalanceText.setText(String.format("الرصيد: %.2f", totalDebtors - totalCreditors));
 
-    private void updateTransactionSummary(List<Transaction> transactions) {
-        int totalTransactions = transactions.size();
-        double totalAmount = 0;
-
-        for (Transaction transaction : transactions) {
-            totalAmount += transaction.getAmount();
-        }
-
-        double averageAmount = totalTransactions > 0 ? totalAmount / totalTransactions : 0;
-        NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.getDefault());
-
-        totalTransactionsText.setText(String.valueOf(totalTransactions));
-        averageTransactionText.setText(formatter.format(averageAmount));
+            // Update adapter
+            reportAdapter.setTransactions(allTransactions);
+        });
     }
 } 
