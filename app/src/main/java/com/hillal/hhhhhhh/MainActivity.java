@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -48,13 +49,21 @@ public class MainActivity extends AppCompatActivity {
                 NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
                 NavigationUI.setupWithNavController(binding.navView, navController);
                 Log.d(TAG, "Navigation setup completed successfully");
+            } else {
+                String error = "خطأ: لم يتم العثور على NavHostFragment";
+                Log.e(TAG, error);
+                Toast.makeText(this, error, Toast.LENGTH_LONG).show();
+                finish();
+                return;
             }
 
             accountRepository = App.getInstance().getAccountRepository();
             Log.d(TAG, "AccountRepository initialized successfully");
         } catch (Exception e) {
-            Log.e(TAG, "Error in onCreate", e);
-            throw new RuntimeException("Failed to initialize MainActivity", e);
+            String error = "خطأ في تهيئة التطبيق: " + e.getMessage();
+            Log.e(TAG, error, e);
+            Toast.makeText(this, error, Toast.LENGTH_LONG).show();
+            finish();
         }
     }
 
