@@ -9,14 +9,24 @@ public class Account {
     private long id;
     
     private String name;
-    private String type; // "debtor" or "creditor"
-    private double balance;
     private String phoneNumber;
     private String notes;
+    private double openingBalance;
+    private boolean isDebtor;
     private long createdAt;
     private long updatedAt;
 
     public Account() {
+        this.createdAt = System.currentTimeMillis();
+        this.updatedAt = System.currentTimeMillis();
+    }
+
+    public Account(String name, String phoneNumber, String notes, double openingBalance, boolean isDebtor) {
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.notes = notes;
+        this.openingBalance = openingBalance;
+        this.isDebtor = isDebtor;
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
     }
@@ -38,22 +48,6 @@ public class Account {
         this.name = name;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public double getBalance() {
-        return balance;
-    }
-
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
-
     public String getPhoneNumber() {
         return phoneNumber;
     }
@@ -68,6 +62,22 @@ public class Account {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public double getOpeningBalance() {
+        return openingBalance;
+    }
+
+    public void setOpeningBalance(double openingBalance) {
+        this.openingBalance = openingBalance;
+    }
+
+    public boolean isDebtor() {
+        return isDebtor;
+    }
+
+    public void setDebtor(boolean debtor) {
+        isDebtor = debtor;
     }
 
     public long getCreatedAt() {
