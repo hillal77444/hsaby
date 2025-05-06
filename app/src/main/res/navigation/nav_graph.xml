@@ -62,34 +62,6 @@
         android:label="@string/title_settings"
         tools:layout="@layout/fragment_settings" />
 
-    <!-- البحث والتصفية -->
-    <fragment
-        android:id="@+id/searchFilterFragment"
-        android:name="com.hillal.hhhhhhh.SearchFilterFragment"
-        android:label="@string/search_filter_fragment_label"
-        tools:layout="@layout/fragment_search_filter" />
-
-    <!-- إضافة مصروف -->
-    <fragment
-        android:id="@+id/addExpenseFragment"
-        android:name="com.hillal.hhhhhhh.AddExpenseFragment"
-        android:label="@string/add_expense_fragment_label"
-        tools:layout="@layout/fragment_add_expense" />
-
-    <!-- المصروفات -->
-    <fragment
-        android:id="@+id/expensesFragment"
-        android:name="com.hillal.hhhhhhh.ExpensesFragment"
-        android:label="@string/expenses_fragment_label"
-        tools:layout="@layout/fragment_expenses" />
-
-    <!-- الفئات -->
-    <fragment
-        android:id="@+id/categoriesFragment"
-        android:name="com.hillal.hhhhhhh.CategoriesFragment"
-        android:label="@string/categories_fragment_label"
-        tools:layout="@layout/fragment_categories" />
-
     <!-- الحسابات -->
     <fragment
         android:id="@+id/navigation_accounts"
