@@ -92,16 +92,19 @@ public class AccountDetailsFragment extends Fragment {
             }
         });
 
-        transactionViewModel.getTransactionsForAccount(accountId).observe(getViewLifecycleOwner(), transactions -> {
-            if (transactions != null) {
-                transactionsAdapter.submitList(transactions);
-            }
+        loadTransactions();
+    }
+
+    private void loadTransactions() {
+        transactionViewModel.getTransactionsByAccount(accountId).observe(getViewLifecycleOwner(), transactions -> {
+            transactionsAdapter.submitList(transactions);
         });
 
-        transactionViewModel.getAccountBalance(accountId).observe(getViewLifecycleOwner(), balance -> {
-            if (balance != null) {
+        transactionViewModel.getTotalDebit(accountId).observe(getViewLifecycleOwner(), debit -> {
+            transactionViewModel.getTotalCredit(accountId).observe(getViewLifecycleOwner(), credit -> {
+                double balance = (credit != null ? credit : 0) - (debit != null ? debit : 0);
                 accountBalance.setText(String.format("%.2f", balance));
-            }
+            });
         });
     }
 
