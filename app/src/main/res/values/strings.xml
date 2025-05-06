@@ -73,9 +73,9 @@
     <string name="categories_fragment_label">الفئات</string>
     
     <!-- نصوص عامة -->
-    <string name="total_creditor">إجمالي الدائن</string>
-    <string name="total_debtor">إجمالي المدين</string>
-    <string name="net_balance">الرصيد الصافي</string>
+    <string name="total_creditor">إجمالي الدائنين</string>
+    <string name="total_debtor">إجمالي المدينين</string>
+    <string name="net_balance">صافي الرصيد</string>
     <string name="add_new_account">إضافة حساب جديد</string>
     <string name="search_filter_accounts">بحث وتصفية الحسابات</string>
     <string name="save">حفظ</string>
@@ -83,7 +83,7 @@
     <string name="name">الاسم</string>
     <string name="phone">رقم الجوال</string>
     <string name="notes">ملاحظات</string>
-    <string name="opening_balance">رصيد افتتاحي</string>
+    <string name="opening_balance">الرصيد الافتتاحي</string>
     <string name="current_balance">الرصيد الحالي</string>
     <string name="status">الحالة</string>
     <string name="creditor">دائن</string>
@@ -103,7 +103,7 @@
     <string name="import_data">استيراد</string>
     <string name="backup">نسخة احتياطية</string>
     <string name="language">اللغة</string>
-    <string name="currency">العملة</string>
+    <string name="currency">ريال</string>
     <string name="change_password">تغيير كلمة المرور</string>
     <string name="reset_data">إعادة تعيين البيانات</string>
     <string name="search_by_name">البحث بالاسم</string>
