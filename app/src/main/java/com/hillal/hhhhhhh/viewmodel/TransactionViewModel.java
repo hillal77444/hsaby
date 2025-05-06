@@ -4,8 +4,8 @@ import android.app.Application;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import com.hillal.hhhhhhh.data.room.AppDatabase;
-import com.hillal.hhhhhhh.data.entities.Transaction;
-import java.util.Date;
+import com.hillal.hhhhhhh.data.model.Transaction;
+import com.hillal.hhhhhhh.repository.TransactionRepository;
 import java.util.List;
 
 public class TransactionViewModel extends AndroidViewModel {
@@ -19,44 +19,30 @@ public class TransactionViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<Transaction>> getAllTransactions() {
-        return database.transactionDao().getAllTransactions();
-    }
-
-    public LiveData<List<Transaction>> getTransactionsByAccount(long accountId) {
-        return database.transactionDao().getTransactionsByAccount(accountId);
-    }
-
-    public LiveData<List<Transaction>> getTransactionsByAccountAndDateRange(long accountId, Date fromDate, Date toDate) {
-        return database.transactionDao().getTransactionsByAccountAndDateRange(accountId, fromDate, toDate);
-    }
-
-    public void insert(Transaction transaction) {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            database.transactionDao().insert(transaction);
-        });
-    }
-
-    public void update(Transaction transaction) {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            database.transactionDao().update(transaction);
-        });
-    }
-
-    public void delete(Transaction transaction) {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            database.transactionDao().delete(transaction);
-        });
+        return repository.getAllTransactions();
     }
 
     public LiveData<List<Transaction>> getTransactionsForAccount(long accountId) {
-        return database.transactionDao().getTransactionsForAccount(accountId);
+        return repository.getTransactionsForAccount(accountId);
+    }
+
+    public void insert(Transaction transaction) {
+        repository.insert(transaction);
+    }
+
+    public void update(Transaction transaction) {
+        repository.update(transaction);
+    }
+
+    public void delete(Transaction transaction) {
+        repository.delete(transaction);
     }
 
     public LiveData<Double> getAccountBalance(long accountId) {
-        return database.transactionDao().getAccountBalance(accountId);
+        return repository.getAccountBalance(accountId);
     }
 
-    public LiveData<List<Transaction>> getTransactionsByDateRange(long accountId, long fromDate, long toDate) {
-        return database.transactionDao().getTransactionsByDateRange(accountId, fromDate, toDate);
+    public LiveData<List<Transaction>> getTransactionsByDateRange(long fromDate, long toDate) {
+        return repository.getTransactionsByDateRange(fromDate, toDate);
     }
 } 
