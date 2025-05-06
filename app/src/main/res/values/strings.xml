@@ -53,7 +53,7 @@
     <string name="notes">ملاحظات</string>
     <string name="description">البيان</string>
     <string name="currency">العملة</string>
-    <string name="search_hint">ابحث عن حساب...</string>
+    <string name="search_hint">ابحث عن حساب…</string>
     <string name="date">التاريخ</string>
     <string name="amount">المبلغ</string>
     <string name="from_date">من تاريخ</string>
@@ -72,7 +72,7 @@
     <string name="add_account">إضافة حساب</string>
     <string name="account_details">تفاصيل الحساب</string>
     <string name="search_accounts">بحث في الحسابات</string>
-    <string name="opening_balance">الرصيد الافتتاحي</string>
+    <string name="opening_balance">الرصيد الافتتاحي: %1$s</string>
     <string name="current_balance">الرصيد الحالي</string>
     <string name="account_added">تمت إضافة الحساب بنجاح</string>
     <string name="account_saved">تم حفظ الحساب بنجاح</string>
@@ -172,7 +172,6 @@
     <string name="account_statement">كشف الحساب</string>
     <string name="account_statement_for">كشف حساب: %1$s</string>
     <string name="period">الفترة: %1$s - %2$s</string>
-    <string name="opening_balance">الرصيد الافتتاحي: %1$s</string>
     <string name="closing_balance">الرصيد الختامي: %1$s</string>
     <string name="total_debit">إجمالي المدين: %1$s</string>
     <string name="total_credit">إجمالي الدائن: %1$s</string>
