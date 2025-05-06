@@ -31,6 +31,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -44,6 +45,10 @@ public class AccountStatementFragment extends Fragment {
     private TextInputEditText toDateInput;
     private RecyclerView transactionsRecyclerView;
     private TransactionsAdapter transactionsAdapter;
+    private TextView accountNameText;
+    private TextView accountBalanceText;
+    private TextView totalDebitText;
+    private TextView totalCreditText;
     private long accountId;
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
@@ -65,6 +70,10 @@ public class AccountStatementFragment extends Fragment {
         fromDateInput = view.findViewById(R.id.fromDateInput);
         toDateInput = view.findViewById(R.id.toDateInput);
         transactionsRecyclerView = view.findViewById(R.id.transactionsRecyclerView);
+        accountNameText = view.findViewById(R.id.accountNameText);
+        accountBalanceText = view.findViewById(R.id.accountBalanceText);
+        totalDebitText = view.findViewById(R.id.totalDebitText);
+        totalCreditText = view.findViewById(R.id.totalCreditText);
         
         transactionsAdapter = new TransactionsAdapter();
         transactionsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -73,16 +82,16 @@ public class AccountStatementFragment extends Fragment {
         view.findViewById(R.id.generateStatementButton).setOnClickListener(v -> generateStatement());
         view.findViewById(R.id.exportPdfButton).setOnClickListener(v -> exportToPdf());
 
-        loadAccountDetails();
+        loadAccountData();
         return view;
     }
 
-    private void loadAccountDetails() {
+    private void loadAccountData() {
         accountViewModel.getAccountById(accountId).observe(getViewLifecycleOwner(), account -> {
             if (account != null) {
-                ((TextView) getView().findViewById(R.id.accountNameText)).setText(account.getName());
-                ((TextView) getView().findViewById(R.id.accountBalanceText)).setText(
-                    String.format("الرصيد: %.2f", account.getOpeningBalance()));
+                accountNameText.setText(account.getName());
+                accountBalanceText.setText(String.format("الرصيد: %.2f", account.getOpeningBalance()));
+                loadTransactions();
             }
         });
     }
@@ -119,10 +128,8 @@ public class AccountStatementFragment extends Fragment {
             }
         }
 
-        ((TextView) getView().findViewById(R.id.totalDebitText)).setText(
-            String.format("إجمالي المدين: %.2f", totalDebit));
-        ((TextView) getView().findViewById(R.id.totalCreditText)).setText(
-            String.format("إجمالي الدائن: %.2f", totalCredit));
+        totalDebitText.setText(String.format("إجمالي المدين: %.2f", totalDebit));
+        totalCreditText.setText(String.format("إجمالي الدائن: %.2f", totalCredit));
     }
 
     private void exportToPdf() {
@@ -130,9 +137,11 @@ public class AccountStatementFragment extends Fragment {
     }
 
     private Date parseDate(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) return null;
+        
         try {
             return dateFormat.parse(dateStr);
-        } catch (Exception e) {
+        } catch (ParseException e) {
             return null;
         }
     }
