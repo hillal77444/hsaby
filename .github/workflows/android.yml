@@ -29,7 +29,8 @@ jobs:
     - name: Accept Android SDK Licenses
       run: |
         yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+        sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "extras;android;m2repository" "extras;google;m2repository"
+
     - name: Make gradlew executable
       run: chmod +x gradlew
 
@@ -37,11 +38,14 @@ jobs:
       run: |
         echo "=== Starting Build Process ==="
         ./gradlew clean
+        echo "=== Checking Resources ==="
+        ./gradlew :app:lintDebug
         echo "=== Building APK ==="
-        ./gradlew :app:assembleDebug --no-daemon --console=plain --stacktrace
+        ./gradlew :app:assembleDebug --no-daemon --console=plain --stacktrace --info
         echo "=== Checking for APK ==="
         ls -la app/build/outputs/apk/debug/
         echo "=== Build Process Completed ==="
+
     - name: Upload APK
       if: success()
       uses: actions/upload-artifact@v4
