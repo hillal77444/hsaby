@@ -125,8 +125,8 @@
     <string name="error_database">خطأ في قاعدة البيانات</string>
     <string name="error_network">خطأ في الاتصال</string>
     <string name="error_name_required">الرجاء إدخال الاسم</string>
-    <string name="error_amount_required">الرجاء إدخال المبلغ</string>
-    <string name="error_invalid_amount">المبلغ غير صالح</string>
+    <string name="error_amount_required">يرجى إدخال المبلغ</string>
+    <string name="error_invalid_amount">يرجى إدخال مبلغ صحيح</string>
     <string name="error_invalid_balance">Invalid balance amount</string>
     <string name="required_field">هذا الحقل مطلوب</string>
     <string name="invalid_number">رقم غير صالح</string>
@@ -158,7 +158,7 @@
     <string name="filter_by_currency">تصفية حسب العملة</string>
     <string name="currency_yer">ريال يمني</string>
     <string name="currency_sar">ريال سعودي</string>
-    <string name="currency_usd">دولار</string>
+    <string name="currency_usd">دولار أمريكي</string>
     <string name="no_transactions">لا توجد قيود محاسبية</string>
     <string name="confirm_delete">هل أنت متأكد من حذف هذا القيد؟</string>
     <string name="yes">نعم</string>
