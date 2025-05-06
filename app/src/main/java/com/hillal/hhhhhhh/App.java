@@ -9,6 +9,7 @@ import android.content.ContextWrapper;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.Toast;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 
@@ -36,11 +37,12 @@ public class App extends Application {
         
         // Set up uncaught exception handler
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            String errorMessage = "حدث خطأ غير متوقع:\n\n" +
+            String errorMessage = "=== تفاصيل الخطأ ===\n\n" +
                                 "نوع الخطأ: " + throwable.getClass().getSimpleName() + "\n" +
                                 "الرسالة: " + throwable.getMessage() + "\n\n" +
-                                "تفاصيل الخطأ:\n" + Log.getStackTraceString(throwable) + "\n\n" +
-                                "معلومات النظام:\n" +
+                                "=== تفاصيل الخطأ التقنية ===\n" +
+                                Log.getStackTraceString(throwable) + "\n\n" +
+                                "=== معلومات النظام ===\n" +
                                 "نظام التشغيل: Android " + Build.VERSION.RELEASE + "\n" +
                                 "الجهاز: " + Build.MANUFACTURER + " " + Build.MODEL + "\n" +
                                 "وقت حدوث الخطأ: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
@@ -49,7 +51,7 @@ public class App extends Application {
             
             // Copy error to clipboard
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("Error Details", errorMessage);
+            ClipData clip = ClipData.newPlainText("تفاصيل الخطأ", errorMessage);
             clipboard.setPrimaryClip(clip);
             
             // Show error dialog
@@ -57,8 +59,11 @@ public class App extends Application {
                 AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.Theme_Hhhhhhh));
                 builder.setTitle("خطأ في التطبيق")
                        .setMessage("حدث خطأ غير متوقع. تم نسخ تفاصيل الخطأ إلى الحافظة.\n\n" +
-                                 "يرجى مشاركة هذه المعلومات مع المطور.")
-                       .setPositiveButton("موافق", (dialog, which) -> {
+                                 "يمكنك لصق التفاصيل في أي مكان لمشاركتها مع المطور.")
+                       .setPositiveButton("نسخ التفاصيل", (dialog, which) -> {
+                           // نسخ التفاصيل مرة أخرى للتأكد
+                           clipboard.setPrimaryClip(clip);
+                           Toast.makeText(this, "تم نسخ تفاصيل الخطأ إلى الحافظة", Toast.LENGTH_LONG).show();
                            dialog.dismiss();
                            System.exit(1);
                        })
@@ -84,11 +89,12 @@ public class App extends Application {
             
             Log.d(TAG, "Application initialized successfully");
         } catch (Exception e) {
-            String errorMessage = "خطأ في تهيئة التطبيق:\n\n" +
+            String errorMessage = "=== تفاصيل الخطأ ===\n\n" +
                                 "نوع الخطأ: " + e.getClass().getSimpleName() + "\n" +
                                 "الرسالة: " + e.getMessage() + "\n\n" +
-                                "تفاصيل الخطأ:\n" + Log.getStackTraceString(e) + "\n\n" +
-                                "معلومات النظام:\n" +
+                                "=== تفاصيل الخطأ التقنية ===\n" +
+                                Log.getStackTraceString(e) + "\n\n" +
+                                "=== معلومات النظام ===\n" +
                                 "نظام التشغيل: Android " + Build.VERSION.RELEASE + "\n" +
                                 "الجهاز: " + Build.MANUFACTURER + " " + Build.MODEL + "\n" +
                                 "وقت حدوث الخطأ: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
@@ -97,7 +103,7 @@ public class App extends Application {
             
             // Copy error to clipboard
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("Error Details", errorMessage);
+            ClipData clip = ClipData.newPlainText("تفاصيل الخطأ", errorMessage);
             clipboard.setPrimaryClip(clip);
             
             // Show error dialog
@@ -105,8 +111,11 @@ public class App extends Application {
                 AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.Theme_Hhhhhhh));
                 builder.setTitle("خطأ في التطبيق")
                        .setMessage("حدث خطأ أثناء تهيئة التطبيق. تم نسخ تفاصيل الخطأ إلى الحافظة.\n\n" +
-                                 "يرجى مشاركة هذه المعلومات مع المطور.")
-                       .setPositiveButton("موافق", (dialog, which) -> {
+                                 "يمكنك لصق التفاصيل في أي مكان لمشاركتها مع المطور.")
+                       .setPositiveButton("نسخ التفاصيل", (dialog, which) -> {
+                           // نسخ التفاصيل مرة أخرى للتأكد
+                           clipboard.setPrimaryClip(clip);
+                           Toast.makeText(this, "تم نسخ تفاصيل الخطأ إلى الحافظة", Toast.LENGTH_LONG).show();
                            dialog.dismiss();
                            System.exit(1);
                        })
