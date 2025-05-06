@@ -171,6 +171,7 @@
     <string name="no_notes">لا توجد ملاحظات</string>
     <string name="account_added">تمت إضافة الحساب بنجاح</string>
     <string name="transaction_added">تمت إضافة العملية بنجاح</string>
+    <string name="account_saved">تم حفظ الحساب بنجاح</string>
 
     <!-- Navigation Header -->
     <string name="nav_header_title">تطبيق المحاسبة</string>
