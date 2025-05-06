@@ -17,7 +17,7 @@ public class TransactionRepository {
     public TransactionRepository(Application application) {
         App app = (App) application;
         transactionDao = app.getDatabase().transactionDao();
-        allTransactions = transactionDao.getAllTransactions();
+        allTransactions = transactionDao.getTransactionsForAccount(-1); // -1 to get all transactions
         executorService = Executors.newSingleThreadExecutor();
     }
 
@@ -34,14 +34,14 @@ public class TransactionRepository {
     }
 
     public void insert(Transaction transaction) {
-        executorService.execute(() -> transactionDao.insert(transaction));
+        executorService.execute(() -> transactionDao.insertTransaction(transaction));
     }
 
     public void update(Transaction transaction) {
-        executorService.execute(() -> transactionDao.update(transaction));
+        executorService.execute(() -> transactionDao.updateTransaction(transaction));
     }
 
     public void delete(Transaction transaction) {
-        executorService.execute(() -> transactionDao.delete(transaction));
+        executorService.execute(() -> transactionDao.deleteTransaction(transaction));
     }
 }
