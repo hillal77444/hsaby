@@ -40,17 +40,17 @@ import java.util.Locale;
 public class AccountStatementFragment extends Fragment {
     private AccountViewModel accountViewModel;
     private TransactionViewModel transactionViewModel;
-    private TextInputEditText fromDateEditText;
-    private TextInputEditText toDateEditText;
+    private TextInputEditText fromDateInput;
+    private TextInputEditText toDateInput;
     private RecyclerView transactionsRecyclerView;
     private TransactionsAdapter transactionsAdapter;
-    private Date fromDate;
-    private Date toDate;
     private long accountId;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
+        transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
         if (getArguments() != null) {
             accountId = getArguments().getLong("accountId");
         }
@@ -59,163 +59,81 @@ public class AccountStatementFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_account_statement, container, false);
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        View view = inflater.inflate(R.layout.fragment_account_statement, container, false);
         
-        accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
-        transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
+        fromDateInput = view.findViewById(R.id.fromDateInput);
+        toDateInput = view.findViewById(R.id.toDateInput);
+        transactionsRecyclerView = view.findViewById(R.id.transactionsRecyclerView);
         
-        setupViews(view);
-        setupDatePickers();
-        setupClickListeners();
-        loadAccountDetails();
-    }
-
-    private void setupViews(View view) {
-        fromDateEditText = view.findViewById(R.id.from_date);
-        toDateEditText = view.findViewById(R.id.to_date);
-        transactionsRecyclerView = view.findViewById(R.id.transactions_recycler_view);
-        
-        transactionsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         transactionsAdapter = new TransactionsAdapter();
+        transactionsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         transactionsRecyclerView.setAdapter(transactionsAdapter);
-    }
 
-    private void setupDatePickers() {
-        Calendar calendar = Calendar.getInstance();
-        
-        fromDateEditText.setOnClickListener(v -> {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(
-                requireContext(),
-                (view, year, month, dayOfMonth) -> {
-                    calendar.set(year, month, dayOfMonth);
-                    fromDate = calendar.getTime();
-                    fromDateEditText.setText(new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                            .format(fromDate));
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-            );
-            datePickerDialog.show();
-        });
+        view.findViewById(R.id.generateStatementButton).setOnClickListener(v -> generateStatement());
+        view.findViewById(R.id.exportPdfButton).setOnClickListener(v -> exportToPdf());
 
-        toDateEditText.setOnClickListener(v -> {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(
-                requireContext(),
-                (view, year, month, dayOfMonth) -> {
-                    calendar.set(year, month, dayOfMonth);
-                    toDate = calendar.getTime();
-                    toDateEditText.setText(new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                            .format(toDate));
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-            );
-            datePickerDialog.show();
-        });
-    }
-
-    private void setupClickListeners() {
-        view.findViewById(R.id.generate_statement_button).setOnClickListener(v -> generateStatement());
-        view.findViewById(R.id.export_pdf_button).setOnClickListener(v -> exportToPdf());
+        loadAccountDetails();
+        return view;
     }
 
     private void loadAccountDetails() {
-        accountViewModel.getAccount(accountId).observe(getViewLifecycleOwner(), account -> {
+        accountViewModel.getAccountById(accountId).observe(getViewLifecycleOwner(), account -> {
             if (account != null) {
-                // Update UI with account details
-                ((TextView) view.findViewById(R.id.account_name)).setText(account.getName());
-                ((TextView) view.findViewById(R.id.account_balance)).setText(
-                    String.format("%.2f", account.getBalance()));
+                ((TextView) getView().findViewById(R.id.accountNameText)).setText(account.getName());
+                ((TextView) getView().findViewById(R.id.accountBalanceText)).setText(
+                    String.format("الرصيد: %.2f", account.getOpeningBalance()));
             }
         });
     }
 
     private void generateStatement() {
-        if (fromDate == null || toDate == null) {
-            Toast.makeText(getContext(), "Please select date range", Toast.LENGTH_SHORT).show();
+        String fromDateStr = fromDateInput.getText().toString();
+        String toDateStr = toDateInput.getText().toString();
+        
+        if (fromDateStr.isEmpty() || toDateStr.isEmpty()) {
             return;
         }
 
-        transactionViewModel.getTransactionsByAccountAndDateRange(accountId, fromDate, toDate)
+        Date fromDate = parseDate(fromDateStr);
+        Date toDate = parseDate(toDateStr);
+
+        if (fromDate != null && toDate != null) {
+            transactionViewModel.getTransactionsByDateRange(fromDate.getTime(), toDate.getTime())
                 .observe(getViewLifecycleOwner(), transactions -> {
-                    transactionsAdapter.setTransactions(transactions);
-                    updateAccountBalance(transactions);
+                    transactionsAdapter.submitList(transactions);
+                    updateSummary(transactions);
                 });
+        }
     }
 
-    private void updateAccountBalance(List<Transaction> transactions) {
+    private void updateSummary(List<Transaction> transactions) {
         double totalDebit = 0;
         double totalCredit = 0;
 
         for (Transaction transaction : transactions) {
-            if (transaction.getType().equals("debit")) {
+            if ("debit".equals(transaction.getType())) {
                 totalDebit += transaction.getAmount();
             } else {
                 totalCredit += transaction.getAmount();
             }
         }
 
-        ((TextView) view.findViewById(R.id.total_debit)).setText(
-            String.format("%.2f", totalDebit));
-        ((TextView) view.findViewById(R.id.total_credit)).setText(
-            String.format("%.2f", totalCredit));
+        ((TextView) getView().findViewById(R.id.totalDebitText)).setText(
+            String.format("إجمالي المدين: %.2f", totalDebit));
+        ((TextView) getView().findViewById(R.id.totalCreditText)).setText(
+            String.format("إجمالي الدائن: %.2f", totalCredit));
     }
 
     private void exportToPdf() {
-        if (fromDate == null || toDate == null) {
-            Toast.makeText(getContext(), "Please select date range", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        // TODO: Implement PDF export functionality
+    }
 
+    private Date parseDate(String dateStr) {
         try {
-            File pdfFile = new File(requireContext().getExternalFilesDir(null), 
-                "account_statement.pdf");
-            Document document = new Document();
-            PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
-            document.open();
-
-            // Add title
-            Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
-            Paragraph title = new Paragraph("Account Statement", titleFont);
-            title.setAlignment(Element.ALIGN_CENTER);
-            document.add(title);
-            document.add(new Paragraph("\n"));
-
-            // Add account details
-            Account account = accountViewModel.getAccount(accountId).getValue();
-            if (account != null) {
-                document.add(new Paragraph("Account: " + account.getName()));
-                document.add(new Paragraph("Balance: " + String.format("%.2f", account.getBalance())));
-            }
-            document.add(new Paragraph("\n"));
-
-            // Add date range
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            document.add(new Paragraph("Period: " + dateFormat.format(fromDate) + 
-                " to " + dateFormat.format(toDate)));
-            document.add(new Paragraph("\n"));
-
-            // Add transactions
-            for (Transaction transaction : transactionsAdapter.getTransactions()) {
-                document.add(new Paragraph(dateFormat.format(transaction.getDate()) + 
-                    " - " + transaction.getType() + " - " + 
-                    String.format("%.2f", transaction.getAmount()) + 
-                    " - " + transaction.getDescription()));
-            }
-
-            document.close();
-            Toast.makeText(getContext(), "PDF saved to: " + pdfFile.getAbsolutePath(), 
-                Toast.LENGTH_LONG).show();
-        } catch (DocumentException | IOException e) {
-            Toast.makeText(getContext(), "Error creating PDF: " + e.getMessage(), 
-                Toast.LENGTH_SHORT).show();
+            // TODO: Implement proper date parsing
+            return new Date();
+        } catch (Exception e) {
+            return null;
         }
     }
 } 
