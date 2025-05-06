@@ -17,8 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.hhhhhhh.R;
-import com.hillal.hhhhhhh.data.model.Account;
-import com.hillal.hhhhhhh.data.model.Transaction;
+import com.hillal.hhhhhhh.data.entities.Account;
+import com.hillal.hhhhhhh.data.entities.Transaction;
 import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
 import com.hillal.hhhhhhh.viewmodel.TransactionViewModel;
 import com.itextpdf.text.Document;
@@ -30,6 +30,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -39,23 +40,20 @@ import java.util.Locale;
 public class AccountStatementFragment extends Fragment {
     private AccountViewModel accountViewModel;
     private TransactionViewModel transactionViewModel;
-    private TextView accountNameText;
-    private TextView accountBalanceText;
-    private TextInputEditText fromDateInput;
-    private TextInputEditText toDateInput;
+    private TextInputEditText fromDateEditText;
+    private TextInputEditText toDateEditText;
     private RecyclerView transactionsRecyclerView;
     private TransactionsAdapter transactionsAdapter;
-    private long accountId;
     private Date fromDate;
     private Date toDate;
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+    private long accountId;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        accountId = getArguments() != null ? getArguments().getLong("accountId") : -1;
-        accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
-        transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
+        if (getArguments() != null) {
+            accountId = getArguments().getLong("accountId");
+        }
     }
 
     @Nullable
@@ -67,6 +65,10 @@ public class AccountStatementFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        
+        accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
+        transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
+        
         setupViews(view);
         setupDatePickers();
         setupClickListeners();
@@ -74,172 +76,146 @@ public class AccountStatementFragment extends Fragment {
     }
 
     private void setupViews(View view) {
-        accountNameText = view.findViewById(R.id.accountNameText);
-        accountBalanceText = view.findViewById(R.id.accountBalanceText);
-        fromDateInput = view.findViewById(R.id.fromDateInput);
-        toDateInput = view.findViewById(R.id.toDateInput);
-        transactionsRecyclerView = view.findViewById(R.id.transactionsRecyclerView);
-        transactionsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        fromDateEditText = view.findViewById(R.id.from_date);
+        toDateEditText = view.findViewById(R.id.to_date);
+        transactionsRecyclerView = view.findViewById(R.id.transactions_recycler_view);
+        
+        transactionsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         transactionsAdapter = new TransactionsAdapter();
         transactionsRecyclerView.setAdapter(transactionsAdapter);
     }
 
     private void setupDatePickers() {
         Calendar calendar = Calendar.getInstance();
-        fromDateInput.setOnClickListener(v -> showDatePicker(fromDateInput, calendar));
-        toDateInput.setOnClickListener(v -> showDatePicker(toDateInput, calendar));
-    }
+        
+        fromDateEditText.setOnClickListener(v -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                requireContext(),
+                (view, year, month, dayOfMonth) -> {
+                    calendar.set(year, month, dayOfMonth);
+                    fromDate = calendar.getTime();
+                    fromDateEditText.setText(new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                            .format(fromDate));
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            );
+            datePickerDialog.show();
+        });
 
-    private void showDatePicker(TextInputEditText input, Calendar calendar) {
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-            requireContext(),
-            (view, year, month, dayOfMonth) -> {
-                calendar.set(year, month, dayOfMonth);
-                Date date = calendar.getTime();
-                input.setText(DATE_FORMAT.format(date));
-                if (input == fromDateInput) {
-                    fromDate = date;
-                } else {
-                    toDate = date;
-                }
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        );
-        datePickerDialog.show();
+        toDateEditText.setOnClickListener(v -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                requireContext(),
+                (view, year, month, dayOfMonth) -> {
+                    calendar.set(year, month, dayOfMonth);
+                    toDate = calendar.getTime();
+                    toDateEditText.setText(new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                            .format(toDate));
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            );
+            datePickerDialog.show();
+        });
     }
 
     private void setupClickListeners() {
-        requireView().findViewById(R.id.generateStatementButton).setOnClickListener(v -> generateStatement());
-        requireView().findViewById(R.id.exportPdfButton).setOnClickListener(v -> exportToPdf());
+        view.findViewById(R.id.generate_statement_button).setOnClickListener(v -> generateStatement());
+        view.findViewById(R.id.export_pdf_button).setOnClickListener(v -> exportToPdf());
     }
 
     private void loadAccountDetails() {
-        accountViewModel.getAccountById(accountId).observe(getViewLifecycleOwner(), account -> {
+        accountViewModel.getAccount(accountId).observe(getViewLifecycleOwner(), account -> {
             if (account != null) {
-                accountNameText.setText(getString(R.string.account_statement_for, account.getName()));
-                loadTransactions(account);
+                // Update UI with account details
+                ((TextView) view.findViewById(R.id.account_name)).setText(account.getName());
+                ((TextView) view.findViewById(R.id.account_balance)).setText(
+                    String.format("%.2f", account.getBalance()));
             }
         });
     }
 
-    private void loadTransactions(Account account) {
-        if (fromDate != null && toDate != null) {
-            transactionViewModel.getTransactionsByDateRange(accountId, fromDate.getTime(), toDate.getTime())
+    private void generateStatement() {
+        if (fromDate == null || toDate == null) {
+            Toast.makeText(getContext(), "Please select date range", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        transactionViewModel.getTransactionsByAccountAndDateRange(accountId, fromDate, toDate)
                 .observe(getViewLifecycleOwner(), transactions -> {
                     transactionsAdapter.setTransactions(transactions);
-                    updateAccountBalance(account, transactions);
+                    updateAccountBalance(transactions);
                 });
-        }
     }
 
-    private void updateAccountBalance(Account account, List<Transaction> transactions) {
+    private void updateAccountBalance(List<Transaction> transactions) {
         double totalDebit = 0;
         double totalCredit = 0;
+
         for (Transaction transaction : transactions) {
-            if ("مدين".equals(transaction.getType())) {
+            if (transaction.getType().equals("debit")) {
                 totalDebit += transaction.getAmount();
             } else {
                 totalCredit += transaction.getAmount();
             }
         }
-        double balance = account.getOpeningBalance() + totalDebit - totalCredit;
-        accountBalanceText.setText(getString(R.string.closing_balance, String.format("%.2f", balance)));
-    }
 
-    private void generateStatement() {
-        if (fromDate == null || toDate == null) {
-            Toast.makeText(requireContext(), "الرجاء اختيار نطاق التاريخ", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        loadAccountDetails();
+        ((TextView) view.findViewById(R.id.total_debit)).setText(
+            String.format("%.2f", totalDebit));
+        ((TextView) view.findViewById(R.id.total_credit)).setText(
+            String.format("%.2f", totalCredit));
     }
 
     private void exportToPdf() {
         if (fromDate == null || toDate == null) {
-            Toast.makeText(requireContext(), "الرجاء اختيار نطاق التاريخ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Please select date range", Toast.LENGTH_SHORT).show();
             return;
         }
 
         try {
-            File pdfFile = new File(requireContext().getExternalFilesDir(null), "account_statement.pdf");
+            File pdfFile = new File(requireContext().getExternalFilesDir(null), 
+                "account_statement.pdf");
             Document document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
             document.open();
 
             // Add title
             Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
-            Paragraph title = new Paragraph(accountNameText.getText().toString(), titleFont);
+            Paragraph title = new Paragraph("Account Statement", titleFont);
             title.setAlignment(Element.ALIGN_CENTER);
-            title.setSpacingAfter(20);
             document.add(title);
+            document.add(new Paragraph("\n"));
+
+            // Add account details
+            Account account = accountViewModel.getAccount(accountId).getValue();
+            if (account != null) {
+                document.add(new Paragraph("Account: " + account.getName()));
+                document.add(new Paragraph("Balance: " + String.format("%.2f", account.getBalance())));
+            }
+            document.add(new Paragraph("\n"));
 
             // Add date range
-            Paragraph dateRange = new Paragraph(getString(R.string.period, 
-                DATE_FORMAT.format(fromDate), DATE_FORMAT.format(toDate)));
-            dateRange.setAlignment(Element.ALIGN_CENTER);
-            dateRange.setSpacingAfter(20);
-            document.add(dateRange);
-
-            // Calculate totals
-            double totalDebit = 0;
-            double totalCredit = 0;
-            List<Transaction> transactions = transactionsAdapter.getTransactions();
-            for (Transaction transaction : transactions) {
-                if ("مدين".equals(transaction.getType())) {
-                    totalDebit += transaction.getAmount();
-                } else {
-                    totalCredit += transaction.getAmount();
-                }
-            }
-
-            // Add summary
-            Font summaryFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
-            Paragraph summary = new Paragraph();
-            summary.setSpacingBefore(20);
-            summary.setSpacingAfter(20);
-            
-            // Add opening balance
-            Account account = accountViewModel.getAccountById(accountId).getValue();
-            if (account != null) {
-                summary.add(new Paragraph(getString(R.string.opening_balance, 
-                    String.format("%.2f", account.getOpeningBalance())), summaryFont));
-                summary.add(new Paragraph("\n"));
-            }
-
-            // Add totals
-            summary.add(new Paragraph(getString(R.string.total_debit, 
-                String.format("%.2f", totalDebit)), summaryFont));
-            summary.add(new Paragraph(getString(R.string.total_credit, 
-                String.format("%.2f", totalCredit)), summaryFont));
-            summary.add(new Paragraph(accountBalanceText.getText().toString(), summaryFont));
-            document.add(summary);
-
-            // Add transactions table header
-            Paragraph tableHeader = new Paragraph("التاريخ | النوع | المبلغ | البيان");
-            tableHeader.setAlignment(Element.ALIGN_RIGHT);
-            tableHeader.setSpacingBefore(20);
-            tableHeader.setSpacingAfter(10);
-            document.add(tableHeader);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            document.add(new Paragraph("Period: " + dateFormat.format(fromDate) + 
+                " to " + dateFormat.format(toDate)));
+            document.add(new Paragraph("\n"));
 
             // Add transactions
-            Font transactionFont = new Font(Font.FontFamily.HELVETICA, 10);
-            for (Transaction transaction : transactions) {
-                Paragraph transactionText = new Paragraph(String.format("%s | %s | %s | %s",
-                    DATE_FORMAT.format(transaction.getDate()),
-                    transaction.getType(),
-                    String.format("%.2f", transaction.getAmount()),
-                    transaction.getDescription()), transactionFont);
-                transactionText.setAlignment(Element.ALIGN_RIGHT);
-                transactionText.setSpacingAfter(5);
-                document.add(transactionText);
+            for (Transaction transaction : transactionsAdapter.getTransactions()) {
+                document.add(new Paragraph(dateFormat.format(transaction.getDate()) + 
+                    " - " + transaction.getType() + " - " + 
+                    String.format("%.2f", transaction.getAmount()) + 
+                    " - " + transaction.getDescription()));
             }
 
             document.close();
-            Toast.makeText(requireContext(), "تم حفظ كشف الحساب بنجاح", Toast.LENGTH_SHORT).show();
-        } catch (DocumentException | java.io.IOException e) {
-            Toast.makeText(requireContext(), "حدث خطأ أثناء حفظ الملف", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "PDF saved to: " + pdfFile.getAbsolutePath(), 
+                Toast.LENGTH_LONG).show();
+        } catch (DocumentException | IOException e) {
+            Toast.makeText(getContext(), "Error creating PDF: " + e.getMessage(), 
+                Toast.LENGTH_SHORT).show();
         }
     }
 } 
