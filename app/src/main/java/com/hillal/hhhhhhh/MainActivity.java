@@ -1,5 +1,8 @@
 package com.hillal.hhhhhhh;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -9,6 +12,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.navigation.NavController;
@@ -78,17 +82,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showErrorAndExit(String errorMessage) {
-        // Show error toast
-        Toast.makeText(this, "حدث خطأ في التطبيق. سيتم إغلاقه.", Toast.LENGTH_LONG).show();
+        // Copy error to clipboard
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("تفاصيل الخطأ", errorMessage);
+        clipboard.setPrimaryClip(clip);
         
-        // Log error
-        Log.e(TAG, errorMessage);
-        
-        // Exit after a delay to allow toast to be shown
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            finish();
-            System.exit(1);
-        }, 2000);
+        // Show error dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.Theme_Hhhhhhh));
+        builder.setTitle("خطأ في التطبيق")
+               .setMessage("حدث خطأ غير متوقع. تم نسخ تفاصيل الخطأ إلى الحافظة.\n\n" +
+                         "يمكنك لصق التفاصيل في أي مكان لمشاركتها مع المطور.")
+               .setPositiveButton("نسخ التفاصيل", (dialog, which) -> {
+                   // نسخ التفاصيل مرة أخرى للتأكد
+                   clipboard.setPrimaryClip(clip);
+                   Toast.makeText(this, "تم نسخ تفاصيل الخطأ إلى الحافظة", Toast.LENGTH_LONG).show();
+                   dialog.dismiss();
+                   finish();
+                   System.exit(1);
+               })
+               .setCancelable(false)
+               .show();
     }
 
     @Override
