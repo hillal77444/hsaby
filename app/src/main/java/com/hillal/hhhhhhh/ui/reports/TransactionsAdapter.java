@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hillal.hhhhhhh.R;
-import com.hillal.hhhhhhh.data.model.Transaction;
+import com.hillal.hhhhhhh.data.entities.Transaction;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
