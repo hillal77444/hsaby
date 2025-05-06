@@ -25,6 +25,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.text.SimpleDateFormat;
 
 public class AccountDetailsFragment extends Fragment {
     private FragmentAccountDetailsBinding binding;
@@ -37,6 +38,7 @@ public class AccountDetailsFragment extends Fragment {
     private RecyclerView transactionsRecyclerView;
     private TransactionsAdapter transactionsAdapter;
     private long accountId;
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -138,9 +140,7 @@ public class AccountDetailsFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             Transaction transaction = transactions.get(position);
-            holder.date.setText(android.text.format.DateFormat.format("dd/MM/yyyy", transaction.getDate()));
-            holder.amount.setText(String.format("%.2f", transaction.getAmount()));
-            holder.notes.setText(transaction.getNotes());
+            holder.bind(transaction);
         }
 
         @Override
@@ -149,15 +149,31 @@ public class AccountDetailsFragment extends Fragment {
         }
 
         static class ViewHolder extends RecyclerView.ViewHolder {
-            TextView date;
-            TextView amount;
-            TextView notes;
+            private final TextView typeTextView;
+            private final TextView amountTextView;
+            private final TextView descriptionTextView;
+            private final TextView dateTextView;
 
-            ViewHolder(View itemView) {
+            ViewHolder(@NonNull View itemView) {
                 super(itemView);
-                date = itemView.findViewById(R.id.transaction_date);
-                amount = itemView.findViewById(R.id.transaction_amount);
-                notes = itemView.findViewById(R.id.transaction_notes);
+                typeTextView = itemView.findViewById(R.id.transactionType);
+                amountTextView = itemView.findViewById(R.id.transactionAmount);
+                descriptionTextView = itemView.findViewById(R.id.transactionDescription);
+                dateTextView = itemView.findViewById(R.id.transactionDate);
+            }
+
+            void bind(Transaction transaction) {
+                typeTextView.setText(transaction.getType());
+                amountTextView.setText(String.format("%.2f %s", 
+                        transaction.getAmount(), transaction.getCurrency()));
+                descriptionTextView.setText(transaction.getDescription());
+                dateTextView.setText(DATE_FORMAT.format(transaction.getDate()));
+                
+                // Set color based on transaction type
+                int colorResId = transaction.getType().equals("مدين") ? 
+                        R.color.debit_color : R.color.credit_color;
+                typeTextView.setTextColor(
+                        itemView.getContext().getResources().getColor(colorResId, null));
             }
         }
     }
