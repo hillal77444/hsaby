@@ -9,6 +9,7 @@
     <string name="previous">Previous</string>
 
     <string name="lorem_ipsum">نص تجريبي للاختبار</string>
+    <string name="no_recent_accounts">لا توجد حسابات حديثة</string>
 
     <!-- Navigation -->
     <string name="title_dashboard">لوحة التحكم</string>
