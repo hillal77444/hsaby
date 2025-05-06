@@ -11,8 +11,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.hillal.hhhhhhh.R;
-import com.hillal.hhhhhhh.data.entities.Account;
-import com.hillal.hhhhhhh.data.entities.Transaction;
+import com.hillal.hhhhhhh.data.model.Account;
+import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
 import com.hillal.hhhhhhh.viewmodel.TransactionViewModel;
 
