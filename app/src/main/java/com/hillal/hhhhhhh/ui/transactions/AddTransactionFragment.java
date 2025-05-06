@@ -101,18 +101,26 @@ public class AddTransactionFragment extends Fragment {
             return;
         }
 
-        double amount;
         try {
-            amount = Double.parseDouble(amountStr);
+            double amount = Double.parseDouble(amountStr);
+            if (amount <= 0) {
+                amountEditText.setError(getString(R.string.error_invalid_amount));
+                return;
+            }
+
+            Transaction transaction = new Transaction();
+            transaction.setAccountId(accountId);
+            transaction.setAmount(amount);
+            transaction.setNotes(notes);
+            transaction.setDate(calendar.getTime());
+            transaction.setDebit(isDebit);
+
+            transactionViewModel.insert(transaction);
+            Toast.makeText(requireContext(), R.string.transaction_saved, Toast.LENGTH_SHORT).show();
+            Navigation.findNavController(requireView()).navigateUp();
         } catch (NumberFormatException e) {
             amountEditText.setError(getString(R.string.error_invalid_amount));
-            return;
         }
-
-        Transaction transaction = new Transaction(accountId, amount, isDebit, notes);
-        transactionViewModel.insertTransaction(transaction);
-        Toast.makeText(getContext(), R.string.transaction_saved, Toast.LENGTH_SHORT).show();
-        Navigation.findNavController(getView()).navigateUp();
     }
 
     @Override
@@ -120,4 +128,4 @@ public class AddTransactionFragment extends Fragment {
         super.onDestroyView();
         binding = null;
     }
-} 
+}
