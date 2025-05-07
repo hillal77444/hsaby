@@ -19,7 +19,7 @@ import com.hillal.hhhhhhh.data.model.Settings;
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG = "AppDatabase";
-    private static final String DATABASE_NAME = "accounting_db";
+    private static final String DATABASE_NAME = "accounting_database";
     private static volatile AppDatabase instance;
 
     public abstract AccountDao accountDao();
