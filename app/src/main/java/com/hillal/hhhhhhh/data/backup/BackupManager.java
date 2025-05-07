@@ -17,6 +17,7 @@ import java.util.Locale;
 public class BackupManager {
     private static final String TAG = "BackupManager";
     private static final String BACKUP_DIR = "backups";
+    private static final String PREF_AUTO_BACKUP = "auto_backup_enabled";
     private final Context context;
     private final Gson gson;
 
@@ -99,6 +100,16 @@ public class BackupManager {
             .putString("phone", user.getPhone())
             .putString("token", user.getToken())
             .apply();
+    }
+
+    public boolean isAutoBackupEnabled() {
+        SharedPreferences prefs = context.getSharedPreferences("backup_prefs", Context.MODE_PRIVATE);
+        return prefs.getBoolean(PREF_AUTO_BACKUP, false);
+    }
+
+    public void enableAutoBackup(boolean enable) {
+        SharedPreferences prefs = context.getSharedPreferences("backup_prefs", Context.MODE_PRIVATE);
+        prefs.edit().putBoolean(PREF_AUTO_BACKUP, enable).apply();
     }
 
     private static class BackupData {
