@@ -42,14 +42,28 @@ public class AuthRepository {
                     saveUserData(user);
                     callback.onSuccess(user);
                 } else {
-                    callback.onError("فشل تسجيل الدخول");
+                    String errorMessage = "فشل تسجيل الدخول: " + response.code();
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMessage += " - " + response.errorBody().string();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error reading error body", e);
+                        }
+                    }
+                    callback.onError(errorMessage);
                 }
             }
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
-                Log.e(TAG, "Login error: " + t.getMessage());
-                callback.onError("خطأ في الاتصال");
+                Log.e(TAG, "Login error: " + t.getMessage(), t);
+                String errorMessage = "خطأ في الاتصال: " + t.getMessage();
+                if (t instanceof java.net.UnknownHostException) {
+                    errorMessage = "لا يمكن الوصول إلى الخادم. يرجى التحقق من اتصال الإنترنت";
+                } else if (t instanceof java.net.SocketTimeoutException) {
+                    errorMessage = "انتهت مهلة الاتصال بالخادم. يرجى المحاولة مرة أخرى";
+                }
+                callback.onError(errorMessage);
             }
         });
     }
@@ -63,14 +77,28 @@ public class AuthRepository {
                     saveUserData(user);
                     callback.onSuccess(user);
                 } else {
-                    callback.onError("فشل التسجيل");
+                    String errorMessage = "فشل التسجيل: " + response.code();
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMessage += " - " + response.errorBody().string();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error reading error body", e);
+                        }
+                    }
+                    callback.onError(errorMessage);
                 }
             }
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
-                Log.e(TAG, "Registration error: " + t.getMessage());
-                callback.onError("خطأ في الاتصال");
+                Log.e(TAG, "Registration error: " + t.getMessage(), t);
+                String errorMessage = "خطأ في الاتصال: " + t.getMessage();
+                if (t instanceof java.net.UnknownHostException) {
+                    errorMessage = "لا يمكن الوصول إلى الخادم. يرجى التحقق من اتصال الإنترنت";
+                } else if (t instanceof java.net.SocketTimeoutException) {
+                    errorMessage = "انتهت مهلة الاتصال بالخادم. يرجى المحاولة مرة أخرى";
+                }
+                callback.onError(errorMessage);
             }
         });
     }
