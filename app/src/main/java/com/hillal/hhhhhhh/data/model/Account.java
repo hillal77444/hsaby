@@ -97,4 +97,9 @@ public class Account {
     public void setUpdatedAt(long updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 } 
