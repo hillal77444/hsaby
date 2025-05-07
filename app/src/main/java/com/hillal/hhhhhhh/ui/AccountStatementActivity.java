@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.text.ParseException;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class AccountStatementActivity extends AppCompatActivity {
     private AccountStatementViewModel viewModel;
