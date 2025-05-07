@@ -106,7 +106,7 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private void showReport() {
-        Account selectedAccount = (Account) accountDropdown.getSelectedItem();
+        Account selectedAccount = (Account) accountDropdown.getText().toString();
         String startDate = startDateInput.getText().toString();
         String endDate = endDateInput.getText().toString();
 
@@ -130,15 +130,14 @@ public class AccountStatementActivity extends AppCompatActivity {
             }
 
             // عرض التقرير
-            String htmlContent = generateHtmlReport(selectedAccount, start, end);
+            String htmlContent = generateReportHtml(selectedAccount, start, end);
             webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
         } catch (ParseException e) {
             Toast.makeText(this, "خطأ في تنسيق التاريخ", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private String generateReportHtml(Account account, String startDate, String endDate) {
-        // هنا يمكنك إنشاء HTML للتقرير
+    private String generateReportHtml(Account account, Date startDate, Date endDate) {
         StringBuilder html = new StringBuilder();
         html.append("<!DOCTYPE html>");
         html.append("<html dir='rtl' lang='ar'>");
@@ -156,7 +155,7 @@ public class AccountStatementActivity extends AppCompatActivity {
         // عنوان التقرير
         html.append("<h2>كشف الحساب التفصيلي</h2>");
         html.append("<p>الحساب: ").append(account.getName()).append("</p>");
-        html.append("<p>الفترة: من ").append(startDate).append(" إلى ").append(endDate).append("</p>");
+        html.append("<p>الفترة: من ").append(dateFormat.format(startDate)).append(" إلى ").append(dateFormat.format(endDate)).append("</p>");
 
         // جدول المعاملات
         html.append("<table>");
@@ -171,12 +170,12 @@ public class AccountStatementActivity extends AppCompatActivity {
         // هنا يمكنك إضافة المعاملات من قاعدة البيانات
         viewModel.getTransactionsForAccountInDateRange(
             account.getId(),
-            parseDate(startDate),
-            parseDate(endDate)
+            startDate,
+            endDate
         ).observe(this, transactions -> {
             for (Transaction transaction : transactions) {
                 html.append("<tr>");
-                html.append("<td>").append(formatDate(transaction.getDate())).append("</td>");
+                html.append("<td>").append(dateFormat.format(transaction.getDate())).append("</td>");
                 html.append("<td>").append(transaction.getDescription()).append("</td>");
                 html.append("<td>").append(transaction.getType().equals("debit") ? formatAmount(transaction.getAmount()) : "").append("</td>");
                 html.append("<td>").append(transaction.getType().equals("credit") ? formatAmount(transaction.getAmount()) : "").append("</td>");
@@ -190,18 +189,6 @@ public class AccountStatementActivity extends AppCompatActivity {
         html.append("</html>");
 
         return html.toString();
-    }
-
-    private Date parseDate(String dateStr) {
-        try {
-            return dateFormat.parse(dateStr);
-        } catch (Exception e) {
-            return new Date();
-        }
-    }
-
-    private String formatDate(Date date) {
-        return dateFormat.format(date);
     }
 
     private String formatAmount(double amount) {
