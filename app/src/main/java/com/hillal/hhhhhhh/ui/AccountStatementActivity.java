@@ -24,6 +24,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.text.ParseException;
+import java.util.Map;
+import java.util.ArrayList;
 
 public class AccountStatementActivity extends AppCompatActivity {
     private AccountStatementViewModel viewModel;
@@ -185,35 +187,49 @@ public class AccountStatementActivity extends AppCompatActivity {
         html.append("<p>الحساب: ").append(account.getName()).append("</p>");
         html.append("<p>الفترة: من ").append(dateFormat.format(startDate)).append(" إلى ").append(dateFormat.format(endDate)).append("</p>");
 
-        // جدول المعاملات
-        html.append("<table>");
-        html.append("<tr>");
-        html.append("<th>التاريخ</th>");
-        html.append("<th>الوصف</th>");
-        html.append("<th>مدين</th>");
-        html.append("<th>دائن</th>");
-        html.append("<th>الرصيد</th>");
-        html.append("</tr>");
-
-        double runningBalance = 0;
+        // افصل المعاملات حسب العملة
+        Map<String, List<Transaction>> currencyMap = new HashMap<>();
         for (Transaction transaction : transactions) {
-            html.append("<tr>");
-            html.append("<td>").append(dateFormat.format(transaction.getDate())).append("</td>");
-            html.append("<td>").append(transaction.getDescription()).append("</td>");
-            if (transaction.getType().equals("debit")) {
-                html.append("<td>").append(formatAmount(transaction.getAmount())).append("</td>");
-                html.append("<td></td>");
-                runningBalance -= transaction.getAmount();
-            } else {
-                html.append("<td></td>");
-                html.append("<td>").append(formatAmount(transaction.getAmount())).append("</td>");
-                runningBalance += transaction.getAmount();
+            String currency = transaction.getCurrency();
+            if (!currencyMap.containsKey(currency)) {
+                currencyMap.put(currency, new ArrayList<>());
             }
-            html.append("<td>").append(formatAmount(runningBalance)).append("</td>");
-            html.append("</tr>");
+            currencyMap.get(currency).add(transaction);
         }
 
-        html.append("</table>");
+        // لكل عملة، أنشئ جدول خاص بها
+        for (String currency : currencyMap.keySet()) {
+            html.append("<h3>العملة: ").append(currency).append("</h3>");
+            html.append("<table>");
+            html.append("<tr>");
+            html.append("<th>التاريخ</th>");
+            html.append("<th>الوصف</th>");
+            html.append("<th>مدين</th>");
+            html.append("<th>دائن</th>");
+            html.append("<th>الرصيد</th>");
+            html.append("</tr>");
+
+            double runningBalance = 0;
+            for (Transaction transaction : currencyMap.get(currency)) {
+                html.append("<tr>");
+                html.append("<td>").append(dateFormat.format(transaction.getDate())).append("</td>");
+                html.append("<td>").append(transaction.getDescription()).append("</td>");
+                // تحقق من نوع القيد (مدين/دائن أو debit/credit)
+                if (transaction.getType().equals("مدين") || transaction.getType().equalsIgnoreCase("debit")) {
+                    html.append("<td>").append(formatAmount(transaction.getAmount())).append("</td>");
+                    html.append("<td></td>");
+                    runningBalance -= transaction.getAmount();
+                } else {
+                    html.append("<td></td>");
+                    html.append("<td>").append(formatAmount(transaction.getAmount())).append("</td>");
+                    runningBalance += transaction.getAmount();
+                }
+                html.append("<td>").append(formatAmount(runningBalance)).append(" ").append(currency).append("</td>");
+                html.append("</tr>");
+            }
+            html.append("</table>");
+        }
+
         html.append("</body>");
         html.append("</html>");
         return html.toString();
