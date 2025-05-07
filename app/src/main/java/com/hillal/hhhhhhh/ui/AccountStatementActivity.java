@@ -278,7 +278,7 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private String formatAmount(double amount) {
-        return String.format(Locale.getDefault(), "%.2f ريال", amount);
+        return String.format(Locale.getDefault(), "%.2f", amount);
     }
 
     private void setDefaultDates() {
