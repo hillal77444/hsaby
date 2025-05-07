@@ -5,15 +5,18 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.hillal.hhhhhhh.R;
+import com.hillal.hhhhhhh.data.backup.BackupManager;
+import com.hillal.hhhhhhh.data.security.EncryptionManager;
+import com.hillal.hhhhhhh.data.sync.SyncManager;
 import com.hillal.hhhhhhh.databinding.FragmentSettingsBinding;
 import com.hillal.hhhhhhh.viewmodel.SettingsViewModel;
 
@@ -21,11 +24,18 @@ public class SettingsFragment extends Fragment {
     private FragmentSettingsBinding binding;
     private SettingsViewModel settingsViewModel;
     private SharedPreferences sharedPreferences;
+    private BackupManager backupManager;
+    private SyncManager syncManager;
+    private EncryptionManager encryptionManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         settingsViewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
+        backupManager = new BackupManager(requireContext());
+        syncManager = new SyncManager(requireContext());
+        encryptionManager = new EncryptionManager(requireContext());
+        sharedPreferences = requireContext().getSharedPreferences("app_settings", 0);
     }
 
     @Nullable
@@ -38,53 +48,75 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        // Initialize SharedPreferences
-        sharedPreferences = requireContext().getSharedPreferences("app_settings", 0);
-
-        // Load saved settings
-        loadSettings();
-
-        // Set up switch listeners
-        setupSwitchListeners();
+        setupViews();
     }
 
-    private void loadSettings() {
-        // Load and set saved settings
-        binding.switchNotifications.setChecked(sharedPreferences.getBoolean("notifications", true));
-        binding.switchAutoBackup.setChecked(sharedPreferences.getBoolean("auto_backup", true));
-        binding.switchCurrencyFormat.setChecked(sharedPreferences.getBoolean("currency_format", true));
+    private void setupViews() {
+        setupBackupSettings();
+        setupSyncSettings();
+        setupSecuritySettings();
     }
 
-    private void setupSwitchListeners() {
-        binding.switchNotifications.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            sharedPreferences.edit().putBoolean("notifications", isChecked).apply();
-            // TODO: Implement notifications toggle
-        });
-
+    private void setupBackupSettings() {
+        binding.switchAutoBackup.setChecked(backupManager.isAutoBackupEnabled());
         binding.switchAutoBackup.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            sharedPreferences.edit().putBoolean("auto_backup", isChecked).apply();
-            // TODO: Implement auto backup toggle
+            backupManager.enableAutoBackup(isChecked);
+            Toast.makeText(getContext(), 
+                isChecked ? R.string.msg_backup_enabled : R.string.msg_backup_disabled, 
+                Toast.LENGTH_SHORT).show();
         });
 
-        binding.switchCurrencyFormat.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            sharedPreferences.edit().putBoolean("currency_format", isChecked).apply();
-            // TODO: Implement currency format change
+        binding.buttonBackupNow.setOnClickListener(v -> {
+            backupManager.createBackup(new BackupManager.BackupCallback() {
+                @Override
+                public void onSuccess(String backupPath) {
+                    Toast.makeText(getContext(), R.string.msg_backup_success, Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
-        // Set up backup button
-        binding.buttonBackup.setOnClickListener(v -> {
-            // TODO: Implement backup functionality
-        });
-
-        // Set up restore button
         binding.buttonRestore.setOnClickListener(v -> {
-            // TODO: Implement restore functionality
+            // TODO: Implement file picker for backup selection
+            Toast.makeText(getContext(), R.string.msg_restore_not_implemented, Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void setupSyncSettings() {
+        binding.switchAutoSync.setChecked(syncManager.isAutoSyncEnabled());
+        binding.switchAutoSync.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            syncManager.enableAutoSync(isChecked);
+            Toast.makeText(getContext(), 
+                isChecked ? R.string.msg_sync_enabled : R.string.msg_sync_disabled, 
+                Toast.LENGTH_SHORT).show();
         });
 
-        // Set up clear data button
-        binding.buttonClearData.setOnClickListener(v -> {
-            // TODO: Implement clear data functionality with confirmation dialog
+        binding.buttonSyncNow.setOnClickListener(v -> {
+            syncManager.syncData(new SyncManager.SyncCallback() {
+                @Override
+                public void onSuccess() {
+                    Toast.makeText(getContext(), R.string.msg_sync_success, Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+    }
+
+    private void setupSecuritySettings() {
+        binding.switchEncryption.setChecked(encryptionManager.isEncryptionEnabled());
+        binding.switchEncryption.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            encryptionManager.enableEncryption(isChecked);
+            Toast.makeText(getContext(), 
+                isChecked ? R.string.msg_encryption_enabled : R.string.msg_encryption_disabled, 
+                Toast.LENGTH_SHORT).show();
         });
     }
 
