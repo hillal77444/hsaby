@@ -207,7 +207,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             double previousBalance = 0;
             for (Transaction t : allCurrencyTransactions) {
                 if (t.getDate().before(startDate)) {
-                    if (t.getType().equals("مدين") || t.getType().equalsIgnoreCase("debit")) {
+                    if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
                         previousBalance -= t.getAmount();
                     } else {
                         previousBalance += t.getAmount();
@@ -219,7 +219,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             double totalCredit = 0;
             for (Transaction t : allCurrencyTransactions) {
                 if (!t.getDate().before(startDate) && !t.getDate().after(endDate)) {
-                    if (t.getType().equals("مدين") || t.getType().equalsIgnoreCase("debit")) {
+                    if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
                         totalDebit += t.getAmount();
                     } else {
                         totalCredit += t.getAmount();
@@ -249,7 +249,7 @@ public class AccountStatementActivity extends AppCompatActivity {
                     html.append("<tr>");
                     html.append("<td>").append(dateFormat.format(transaction.getDate())).append("</td>");
                     html.append("<td>").append(transaction.getDescription()).append("</td>");
-                    if (transaction.getType().equals("مدين") || transaction.getType().equalsIgnoreCase("debit")) {
+                    if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
                         html.append("<td>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
                         html.append("<td></td>");
                         runningBalance -= transaction.getAmount();
