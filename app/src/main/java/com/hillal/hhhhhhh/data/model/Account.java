@@ -32,13 +32,6 @@ public class Account {
         this.updatedAt = System.currentTimeMillis();
     }
 
-    @Ignore
-    public Account(String accountNumber, String accountName, double balance) {
-        this.accountNumber = accountNumber;
-        this.accountName = accountName;
-        this.balance = balance;
-    }
-
     // Getters and Setters
     public long getId() {
         return id;
