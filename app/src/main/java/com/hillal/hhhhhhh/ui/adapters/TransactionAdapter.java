@@ -130,15 +130,24 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
         }
 
         private String buildWhatsAppMessage(String accountName, Transaction transaction, double balanceAfter) {
-            String amount = String.format(Locale.getDefault(), "%.2f %s", transaction.getAmount(), transaction.getCurrency());
-            String type = transaction.getType().equals("debit") ? "دين" : "دائن";
-            String actionText = transaction.getType().equals("debit") ? "على حسابكم" : "إلى حسابكم";
+            // جميع الأرقام بالإنجليزي
+            String amount = String.format(Locale.US, "%.2f %s", transaction.getAmount(), transaction.getCurrency());
+            String type;
+            if (transaction.getType().equals("مدين") || transaction.getType().equalsIgnoreCase("debit")) {
+                type = "مدين";
+            } else {
+                type = "دائن";
+            }
+            String actionText = type.equals("مدين") ? "على حسابكم" : "إلى حسابكم";
             String balanceText = balanceAfter < 0 ? "عليكم: " : "لكم: ";
-            String balanceAmount = String.format(Locale.getDefault(), "%.2f %s", Math.abs(balanceAfter), transaction.getCurrency());
+            String balanceAmount = String.format(Locale.US, "%.2f %s", Math.abs(balanceAfter), transaction.getCurrency());
+            String description = transaction.getDescription();
+
             return "السيد/ " + accountName + "\n"
                  + "نود اشعاركم أنه تم قيد مبلغ: \n"
                  + amount + " " + actionText + "\n"
-                 + "البيان/ " + type + "\n"
+                 + "البيان/ " + description + "\n"
+                 + "نوع القيد/ " + type + "\n"
                  + "رصيدكم/ " + balanceText + balanceAmount;
         }
 
