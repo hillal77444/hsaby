@@ -206,4 +206,10 @@
     <!-- رسائل المزامنة -->
     <string name="msg_sync_enabled">تم تفعيل المزامنة التلقائية</string>
     <string name="msg_sync_disabled">تم إيقاف المزامنة التلقائية</string>
+
+    <string name="full_name">الاسم الرباعي</string>
+    <string name="display_name">الاسم المستخدم في الإشعارات</string>
+    <string name="confirm_password">تأكيد كلمة المرور</string>
+    <string name="transactions">العمليات</string>
+    <string name="edit_transaction">تعديل العملية</string>
 </resources>
