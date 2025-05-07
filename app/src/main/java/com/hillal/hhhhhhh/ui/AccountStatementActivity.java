@@ -106,11 +106,11 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private void showReport() {
-        Account selectedAccount = (Account) accountDropdown.getText().toString();
+        String selectedAccountName = accountDropdown.getText().toString();
         String startDate = startDateInput.getText().toString();
         String endDate = endDateInput.getText().toString();
 
-        if (selectedAccount == null) {
+        if (selectedAccountName.isEmpty()) {
             Toast.makeText(this, "الرجاء اختيار الحساب", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -129,9 +129,24 @@ public class AccountStatementActivity extends AppCompatActivity {
                 return;
             }
 
-            // عرض التقرير
-            String htmlContent = generateReportHtml(selectedAccount, start, end);
-            webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
+            // البحث عن الحساب المحدد
+            viewModel.getAllAccounts().observe(this, accounts -> {
+                Account selectedAccount = null;
+                for (Account account : accounts) {
+                    if (account.getName().equals(selectedAccountName)) {
+                        selectedAccount = account;
+                        break;
+                    }
+                }
+
+                if (selectedAccount != null) {
+                    // عرض التقرير
+                    String htmlContent = generateReportHtml(selectedAccount, start, end);
+                    webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
+                } else {
+                    Toast.makeText(this, "لم يتم العثور على الحساب المحدد", Toast.LENGTH_SHORT).show();
+                }
+            });
         } catch (ParseException e) {
             Toast.makeText(this, "خطأ في تنسيق التاريخ", Toast.LENGTH_SHORT).show();
         }
