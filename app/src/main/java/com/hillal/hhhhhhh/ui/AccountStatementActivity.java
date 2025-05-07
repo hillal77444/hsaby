@@ -143,9 +143,16 @@ public class AccountStatementActivity extends AppCompatActivity {
                 }
 
                 if (selectedAccount != null) {
-                    // عرض التقرير
-                    String htmlContent = generateReportHtml(selectedAccount, start, end);
-                    webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
+                    // جلب المعاملات أولاً
+                    viewModel.getTransactionsForAccountInDateRange(
+                        selectedAccount.getId(),
+                        start,
+                        end
+                    ).observe(this, transactions -> {
+                        // بناء وعرض التقرير بعد وصول المعاملات
+                        String htmlContent = generateReportHtml(selectedAccount, start, end, transactions);
+                        webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
+                    });
                 } else {
                     Toast.makeText(this, "لم يتم العثور على الحساب المحدد", Toast.LENGTH_SHORT).show();
                 }
@@ -155,7 +162,7 @@ public class AccountStatementActivity extends AppCompatActivity {
         }
     }
 
-    private String generateReportHtml(Account account, Date startDate, Date endDate) {
+    private String generateReportHtml(Account account, Date startDate, Date endDate, List<Transaction> transactions) {
         StringBuilder html = new StringBuilder();
         html.append("<!DOCTYPE html>");
         html.append("<html dir='rtl' lang='ar'>");
@@ -185,47 +192,32 @@ public class AccountStatementActivity extends AppCompatActivity {
         html.append("<th>الرصيد</th>");
         html.append("</tr>");
 
-        // هنا يمكنك إضافة المعاملات من قاعدة البيانات
-        viewModel.getTransactionsForAccountInDateRange(
-            account.getId(),
-            startDate,
-            endDate
-        ).observe(this, transactions -> {
-            for (Transaction transaction : transactions) {
-                html.append("<tr>");
-                html.append("<td>").append(dateFormat.format(transaction.getDate())).append("</td>");
-                html.append("<td>").append(transaction.getDescription()).append("</td>");
-                html.append("<td>").append(transaction.getType().equals("debit") ? formatAmount(transaction.getAmount()) : "").append("</td>");
-                html.append("<td>").append(transaction.getType().equals("credit") ? formatAmount(transaction.getAmount()) : "").append("</td>");
-                html.append("<td>").append(formatAmount(calculateBalance(transactions, transaction))).append("</td>");
-                html.append("</tr>");
+        double runningBalance = 0;
+        for (Transaction transaction : transactions) {
+            html.append("<tr>");
+            html.append("<td>").append(dateFormat.format(transaction.getDate())).append("</td>");
+            html.append("<td>").append(transaction.getDescription()).append("</td>");
+            if (transaction.getType().equals("debit")) {
+                html.append("<td>").append(formatAmount(transaction.getAmount())).append("</td>");
+                html.append("<td></td>");
+                runningBalance -= transaction.getAmount();
+            } else {
+                html.append("<td></td>");
+                html.append("<td>").append(formatAmount(transaction.getAmount())).append("</td>");
+                runningBalance += transaction.getAmount();
             }
-        });
+            html.append("<td>").append(formatAmount(runningBalance)).append("</td>");
+            html.append("</tr>");
+        }
 
         html.append("</table>");
         html.append("</body>");
         html.append("</html>");
-
         return html.toString();
     }
 
     private String formatAmount(double amount) {
         return String.format(Locale.getDefault(), "%.2f ريال", amount);
-    }
-
-    private double calculateBalance(List<Transaction> transactions, Transaction currentTransaction) {
-        double balance = 0;
-        for (Transaction t : transactions) {
-            if (t.getDate().after(currentTransaction.getDate())) {
-                continue;
-            }
-            if (t.getType().equals("credit")) {
-                balance += t.getAmount();
-            } else {
-                balance -= t.getAmount();
-            }
-        }
-        return balance;
     }
 
     private void setDefaultDates() {
