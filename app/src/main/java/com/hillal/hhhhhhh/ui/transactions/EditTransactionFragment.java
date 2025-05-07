@@ -124,7 +124,7 @@ public class EditTransactionFragment extends Fragment {
         binding.amountEditText.setText(String.valueOf(transaction.getAmount()));
 
         // Set type
-        if ("مدين".equals(transaction.getType())) {
+        if ("مدين".equals(transaction.getType()) || "عليه".equals(transaction.getType())) {
             binding.radioDebit.setChecked(true);
         } else {
             binding.radioCredit.setChecked(true);
@@ -190,7 +190,7 @@ public class EditTransactionFragment extends Fragment {
             transaction.setId(transactionId);
             transaction.setAccountId(selectedAccountId);
             transaction.setAmount(amount);
-            transaction.setType(isDebit ? "مدين" : "دائن");
+            transaction.setType(isDebit ? "عليه" : "له");
             transaction.setDescription(description);
             transaction.setNotes(notes);
             transaction.setCurrency(currency);
