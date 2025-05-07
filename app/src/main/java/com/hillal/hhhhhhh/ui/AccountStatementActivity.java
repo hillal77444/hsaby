@@ -127,6 +127,15 @@ public class AccountStatementActivity extends AppCompatActivity {
             Date start = dateFormat.parse(startDate);
             Date end = dateFormat.parse(endDate);
 
+            // اجعل endDate نهاية اليوم
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(end);
+            cal.set(Calendar.HOUR_OF_DAY, 23);
+            cal.set(Calendar.MINUTE, 59);
+            cal.set(Calendar.SECOND, 59);
+            cal.set(Calendar.MILLISECOND, 999);
+            end = cal.getTime();
+
             if (start.after(end)) {
                 Toast.makeText(this, "تاريخ البداية يجب أن يكون قبل تاريخ النهاية", Toast.LENGTH_SHORT).show();
                 return;
