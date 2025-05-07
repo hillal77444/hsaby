@@ -3,6 +3,7 @@ package com.hillal.hhhhhhh.ui.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.widget.Toast;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
@@ -143,13 +144,27 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
 
         private void sendWhatsAppMessage(Context context, String phoneNumber, String message) {
             if (phoneNumber == null || phoneNumber.isEmpty()) {
-                // يمكنك عرض رسالة خطأ هنا
+                Toast.makeText(context, "رقم الهاتف غير متوفر لهذا الحساب", Toast.LENGTH_SHORT).show();
                 return;
             }
-            String url = "https://wa.me/" + phoneNumber + "?text=" + Uri.encode(message);
+            // إضافة مفتاح الدولة تلقائياً إذا لم يكن موجوداً
+            String normalizedPhone = phoneNumber.trim();
+            if (normalizedPhone.startsWith("0")) {
+                // يحذف الصفر الأول ويضيف 967
+                normalizedPhone = "967" + normalizedPhone.substring(1);
+            } else if (!normalizedPhone.startsWith("967") && !normalizedPhone.startsWith("00")) {
+                // إذا لم يبدأ بـ 967 أو 00، أضف 967
+                normalizedPhone = "967" + normalizedPhone;
+            }
+            String url = "https://wa.me/" + normalizedPhone + "?text=" + Uri.encode(message);
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(url));
-            context.startActivity(intent);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (intent.resolveActivity(context.getPackageManager()) != null) {
+                context.startActivity(intent);
+            } else {
+                Toast.makeText(context, "واتساب غير مثبت على الجهاز", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
