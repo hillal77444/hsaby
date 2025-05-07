@@ -25,6 +25,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.databinding.ActivityMainBinding;
+import com.hillal.hhhhhhh.viewmodel.AuthViewModel;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private NavController navController;
     private AccountRepository accountRepository;
     private AppBarConfiguration appBarConfiguration;
+    private AuthViewModel authViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Layout inflated successfully");
 
             // Setup toolbar
-            setSupportActionBar(binding.toolbar);
+            setSupportActionBar(binding.appBarMain.toolbar);
             Log.d(TAG, "Toolbar set successfully");
 
             // Initialize App instance first
@@ -79,13 +81,21 @@ public class MainActivity extends AppCompatActivity {
             }
 
             appBarConfiguration = new AppBarConfiguration.Builder(
-                    R.id.navigation_dashboard, R.id.navigation_accounts,
-                    R.id.navigation_reports, R.id.navigation_settings)
+                    R.id.nav_home, R.id.nav_gallery)
+                    .setOpenableLayout(binding.drawerLayout)
                     .build();
 
             NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
             NavigationUI.setupWithNavController(binding.navView, navController);
             Log.d(TAG, "Navigation setup completed successfully");
+
+            // Initialize AuthViewModel
+            authViewModel = new AuthViewModel(getApplication());
+            
+            // Check if user is logged in
+            if (!authViewModel.isLoggedIn()) {
+                navController.navigate(R.id.nav_login);
+            }
 
         } catch (IllegalStateException e) {
             String errorMessage = "=== خطأ في تهيئة التطبيق ===\n\n" +
@@ -167,19 +177,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        try {
-            return NavigationUI.navigateUp(navController, appBarConfiguration)
-                    || super.onSupportNavigateUp();
-        } catch (Exception e) {
-            String errorMessage = "=== خطأ في التنقل ===\n\n" +
-                                "نوع الخطأ: " + e.getClass().getSimpleName() + "\n" +
-                                "الرسالة: " + e.getMessage() + "\n\n" +
-                                "=== تفاصيل الخطأ التقنية ===\n" +
-                                Log.getStackTraceString(e);
-            Log.e(TAG, errorMessage, e);
-            Toast.makeText(this, "حدث خطأ أثناء التنقل", Toast.LENGTH_LONG).show();
-            return false;
-        }
+        return NavigationUI.navigateUp(navController, appBarConfiguration)
+                || super.onSupportNavigateUp();
     }
 
     public AccountRepository getAccountRepository() {
