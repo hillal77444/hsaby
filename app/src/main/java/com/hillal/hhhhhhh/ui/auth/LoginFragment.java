@@ -57,15 +57,16 @@ public class LoginFragment extends Fragment {
 
     private void setupRegisterButton() {
         binding.buttonRegister.setOnClickListener(v -> {
+            String username = binding.editTextUsername.getText().toString();
             String phone = binding.editTextPhone.getText().toString();
             String password = binding.editTextPassword.getText().toString();
 
-            if (phone.isEmpty() || password.isEmpty()) {
+            if (username.isEmpty() || phone.isEmpty() || password.isEmpty()) {
                 Toast.makeText(getContext(), "Please fill all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            authViewModel.register(phone, password);
+            authViewModel.register(username, phone, password);
         });
     }
 
