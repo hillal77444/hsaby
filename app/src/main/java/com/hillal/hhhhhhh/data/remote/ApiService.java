@@ -27,10 +27,12 @@ public interface ApiService {
     }
 
     class RegisterRequest {
+        private String username;
         private String phone;
         private String password;
 
-        public RegisterRequest(String phone, String password) {
+        public RegisterRequest(String username, String phone, String password) {
+            this.username = username;
             this.phone = phone;
             this.password = password;
         }
