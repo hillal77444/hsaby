@@ -23,10 +23,14 @@ public class EncryptionManager {
     private static final int GCM_TAG_LENGTH = 128;
 
     private final Context context;
-    private final KeyStore keyStore;
+    private KeyStore keyStore;
 
     public EncryptionManager(Context context) {
         this.context = context;
+        initializeKeyStore();
+    }
+
+    private void initializeKeyStore() {
         try {
             keyStore = KeyStore.getInstance(ANDROID_KEYSTORE);
             keyStore.load(null);
@@ -34,7 +38,7 @@ public class EncryptionManager {
                 generateKey();
             }
         } catch (Exception e) {
-            Log.e(TAG, "Error initializing EncryptionManager: " + e.getMessage());
+            Log.e(TAG, "Error initializing KeyStore: " + e.getMessage());
         }
     }
 
@@ -56,6 +60,11 @@ public class EncryptionManager {
     }
 
     public String encrypt(String plaintext) {
+        if (keyStore == null) {
+            Log.e(TAG, "KeyStore not initialized");
+            return null;
+        }
+
         try {
             SecretKey secretKey = (SecretKey) keyStore.getKey(KEY_ALIAS, null);
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);
@@ -76,6 +85,11 @@ public class EncryptionManager {
     }
 
     public String decrypt(String encryptedData) {
+        if (keyStore == null) {
+            Log.e(TAG, "KeyStore not initialized");
+            return null;
+        }
+
         try {
             byte[] combined = Base64.decode(encryptedData, Base64.DEFAULT);
             byte[] iv = new byte[12];
