@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             
             // Check if user is logged in
             if (!authViewModel.isLoggedIn()) {
-                navController.navigate(R.id.nav_login);
+                navController.navigate(R.id.loginFragment);
             }
 
         } catch (IllegalStateException e) {
