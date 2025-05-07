@@ -23,6 +23,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.text.ParseException;
 
 public class AccountStatementActivity extends AppCompatActivity {
     private AccountStatementViewModel viewModel;
@@ -115,13 +116,25 @@ public class AccountStatementActivity extends AppCompatActivity {
         }
 
         if (startDate.isEmpty() || endDate.isEmpty()) {
-            Toast.makeText(this, "الرجاء اختيار الفترة الزمنية", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "الرجاء تحديد الفترة الزمنية", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // تحميل التقرير في WebView
-        String htmlContent = generateReportHtml(selectedAccount, startDate, endDate);
-        webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
+        try {
+            Date start = dateFormat.parse(startDate);
+            Date end = dateFormat.parse(endDate);
+
+            if (start.after(end)) {
+                Toast.makeText(this, "تاريخ البداية يجب أن يكون قبل تاريخ النهاية", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // عرض التقرير
+            String htmlContent = generateHtmlReport(selectedAccount, start, end);
+            webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
+        } catch (ParseException e) {
+            Toast.makeText(this, "خطأ في تنسيق التاريخ", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private String generateReportHtml(Account account, String startDate, String endDate) {
