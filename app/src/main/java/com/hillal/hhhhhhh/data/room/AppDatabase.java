@@ -15,7 +15,7 @@ import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.model.Settings;
 
-@Database(entities = {Account.class, Transaction.class, Settings.class}, version = 1, exportSchema = false)
+@Database(entities = {Account.class, Transaction.class, Settings.class}, version = 2, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG = "AppDatabase";
