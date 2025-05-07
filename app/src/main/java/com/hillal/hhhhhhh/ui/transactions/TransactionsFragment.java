@@ -83,10 +83,10 @@ public class TransactionsFragment extends Fragment {
                         viewModel.loadAllTransactions();
                         break;
                     case 1: // Debit
-                        viewModel.loadTransactionsByType("مدين");
+                        viewModel.loadTransactionsByType("عليه");
                         break;
                     case 2: // Credit
-                        viewModel.loadTransactionsByType("دائن");
+                        viewModel.loadTransactionsByType("له");
                         break;
                 }
             }
