@@ -47,7 +47,7 @@ public class LoginFragment extends Fragment {
             String password = binding.editTextPassword.getText().toString();
 
             if (phone.isEmpty() || password.isEmpty()) {
-                Toast.makeText(getContext(), "Please fill all fields", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "يرجى إدخال رقم الهاتف وكلمة المرور", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -57,16 +57,8 @@ public class LoginFragment extends Fragment {
 
     private void setupRegisterButton() {
         binding.buttonRegister.setOnClickListener(v -> {
-            String username = binding.editTextUsername.getText().toString();
-            String phone = binding.editTextPhone.getText().toString();
-            String password = binding.editTextPassword.getText().toString();
-
-            if (username.isEmpty() || phone.isEmpty() || password.isEmpty()) {
-                Toast.makeText(getContext(), "Please fill all fields", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            authViewModel.register(username, phone, password);
+            Navigation.findNavController(requireView())
+                    .navigate(R.id.action_login_to_register);
         });
     }
 
@@ -84,7 +76,7 @@ public class LoginFragment extends Fragment {
                 case ERROR:
                     binding.buttonLogin.setEnabled(true);
                     binding.buttonRegister.setEnabled(true);
-                    Toast.makeText(getContext(), "Authentication failed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "رقم الهاتف أو كلمة المرور غير صحيحة", Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     binding.buttonLogin.setEnabled(true);
