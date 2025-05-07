@@ -150,20 +150,25 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             // إضافة مفتاح الدولة تلقائياً إذا لم يكن موجوداً
             String normalizedPhone = phoneNumber.trim();
             if (normalizedPhone.startsWith("0")) {
-                // يحذف الصفر الأول ويضيف 967
                 normalizedPhone = "967" + normalizedPhone.substring(1);
             } else if (!normalizedPhone.startsWith("967") && !normalizedPhone.startsWith("00")) {
-                // إذا لم يبدأ بـ 967 أو 00، أضف 967
                 normalizedPhone = "967" + normalizedPhone;
             }
             String url = "https://wa.me/" + normalizedPhone + "?text=" + Uri.encode(message);
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(url));
+            intent.setPackage("com.whatsapp");
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            if (intent.resolveActivity(context.getPackageManager()) != null) {
+            try {
                 context.startActivity(intent);
-            } else {
-                Toast.makeText(context, "واتساب غير مثبت على الجهاز", Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                // إذا لم يكن واتساب العادي مثبت، جرب واتساب الأعمال
+                intent.setPackage("com.whatsapp.w4b");
+                try {
+                    context.startActivity(intent);
+                } catch (Exception ex) {
+                    Toast.makeText(context, "واتساب غير مثبت على الجهاز", Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }
