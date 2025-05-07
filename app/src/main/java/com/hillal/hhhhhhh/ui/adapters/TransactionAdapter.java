@@ -129,7 +129,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             }
             Collections.sort(sortedList, Comparator.comparing(Transaction::getDate));
             for (Transaction t : sortedList) {
-                if (t.getType().equals("مدين") || t.getType().equalsIgnoreCase("debit")) {
+                if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
                     balance -= t.getAmount();
                 } else {
                     balance += t.getAmount();
