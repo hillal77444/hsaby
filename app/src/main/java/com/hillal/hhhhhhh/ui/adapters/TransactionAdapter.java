@@ -144,11 +144,11 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             String amount = String.format(Locale.US, "%.2f %s", transaction.getAmount(), transaction.getCurrency());
             String type;
             if (transaction.getType().equals("مدين") || transaction.getType().equalsIgnoreCase("debit")) {
-                type = "مدين";
+                type = "عليه";
             } else {
-                type = "دائن";
+                type = "له";
             }
-            String actionText = type.equals("مدين") ? "على حسابكم" : "إلى حسابكم";
+            String actionText = type.equals("عليه") ? "على حسابكم" : "إلى حسابكم";
             String balanceText = balanceAfter < 0 ? "عليكم: " : "لكم: ";
             String balanceAmount = String.format(Locale.US, "%.2f %s", Math.abs(balanceAfter), transaction.getCurrency());
             String description = transaction.getDescription();
