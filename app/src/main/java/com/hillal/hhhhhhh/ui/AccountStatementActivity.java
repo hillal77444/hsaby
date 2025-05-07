@@ -134,23 +134,17 @@ public class AccountStatementActivity extends AppCompatActivity {
 
             // البحث عن الحساب المحدد
             viewModel.getAllAccounts().observe(this, accounts -> {
-                Account selectedAccount = null;
-                for (Account account : accounts) {
-                    if (account.getName().equals(selectedAccountName)) {
-                        selectedAccount = account;
-                        break;
-                    }
-                }
+                final Account selectedAccount = getSelectedAccount(accounts, selectedAccountName);
+                final Date startFinal = start;
+                final Date endFinal = end;
 
                 if (selectedAccount != null) {
-                    // جلب المعاملات أولاً
                     viewModel.getTransactionsForAccountInDateRange(
                         selectedAccount.getId(),
-                        start,
-                        end
+                        startFinal,
+                        endFinal
                     ).observe(this, transactions -> {
-                        // بناء وعرض التقرير بعد وصول المعاملات
-                        String htmlContent = generateReportHtml(selectedAccount, start, end, transactions);
+                        String htmlContent = generateReportHtml(selectedAccount, startFinal, endFinal, transactions);
                         webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
                     });
                 } else {
@@ -227,6 +221,15 @@ public class AccountStatementActivity extends AppCompatActivity {
         String fromDate = dateFormat.format(cal.getTime());
         startDateInput.setText(fromDate);
         endDateInput.setText(toDate);
+    }
+
+    private Account getSelectedAccount(List<Account> accounts, String selectedAccountName) {
+        for (Account account : accounts) {
+            if (account.getName().equals(selectedAccountName)) {
+                return account;
+            }
+        }
+        return null;
     }
 
     @Override
