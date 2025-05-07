@@ -210,5 +210,4 @@
     <string name="full_name">الاسم الرباعي</string>
     <string name="display_name">الاسم المستخدم في الإشعارات</string>
     <string name="confirm_password">تأكيد كلمة المرور</string>
-    <string name="edit_transaction">تعديل العملية</string>
 </resources>
