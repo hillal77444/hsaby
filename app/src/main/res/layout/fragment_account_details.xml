@@ -141,9 +141,10 @@
                 android:id="@+id/viewAccountStatementButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 android:text="@string/account_statement"
-                app:icon="@drawable/ic_statement" />
+                app:icon="@drawable/ic_statement"
+                android:visibility="visible" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
