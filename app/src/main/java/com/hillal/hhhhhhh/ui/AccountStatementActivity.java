@@ -134,9 +134,9 @@ public class AccountStatementActivity extends AppCompatActivity {
             cal.set(Calendar.MINUTE, 59);
             cal.set(Calendar.SECOND, 59);
             cal.set(Calendar.MILLISECOND, 999);
-            end = cal.getTime();
+            Date endOfDay = cal.getTime();
 
-            if (start.after(end)) {
+            if (start.after(endOfDay)) {
                 Toast.makeText(this, "تاريخ البداية يجب أن يكون قبل تاريخ النهاية", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -145,7 +145,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             viewModel.getAllAccounts().observe(this, accounts -> {
                 final Account selectedAccount = getSelectedAccount(accounts, selectedAccountName);
                 final Date startFinal = start;
-                final Date endFinal = end;
+                final Date endFinal = endOfDay;
 
                 if (selectedAccount != null) {
                     viewModel.getTransactionsForAccountInDateRange(
