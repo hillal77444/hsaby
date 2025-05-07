@@ -20,16 +20,23 @@ import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.databinding.FragmentTransactionsBinding;
 import com.hillal.hhhhhhh.ui.adapters.TransactionAdapter;
+import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
+import com.hillal.hhhhhhh.data.model.Account;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TransactionsFragment extends Fragment {
     private FragmentTransactionsBinding binding;
     private TransactionsViewModel viewModel;
     private TransactionAdapter adapter;
+    private AccountViewModel accountViewModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this).get(TransactionsViewModel.class);
+        accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
     }
 
     @Nullable
@@ -46,7 +53,7 @@ public class TransactionsFragment extends Fragment {
         setupTabLayout();
         setupCurrencyFilter();
         setupFab();
-        observeTransactions();
+        observeAccountsAndTransactions();
     }
 
     private void setupRecyclerView() {
@@ -113,11 +120,19 @@ public class TransactionsFragment extends Fragment {
         });
     }
 
-    private void observeTransactions() {
-        viewModel.getTransactions().observe(getViewLifecycleOwner(), transactions -> {
-            adapter.submitList(transactions);
-            binding.transactionsRecyclerView.setVisibility(
-                    transactions.isEmpty() ? View.GONE : View.VISIBLE);
+    private void observeAccountsAndTransactions() {
+        accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
+            Map<Long, Account> accountMap = new HashMap<>();
+            for (Account account : accounts) {
+                accountMap.put(account.getId(), account);
+            }
+            adapter.setAccountMap(accountMap);
+            // بعد تعيين الخريطة، راقب المعاملات
+            viewModel.getTransactions().observe(getViewLifecycleOwner(), transactions -> {
+                adapter.submitList(transactions);
+                binding.transactionsRecyclerView.setVisibility(
+                        transactions.isEmpty() ? View.GONE : View.VISIBLE);
+            });
         });
     }
 
