@@ -57,6 +57,9 @@ public class AccountStatementActivity extends AppCompatActivity {
         setupDatePickers();
         loadAccounts();
         setupWebView();
+
+        // تعيين التواريخ الافتراضية
+        setDefaultDates();
     }
 
     private void initializeViews() {
@@ -223,6 +226,15 @@ public class AccountStatementActivity extends AppCompatActivity {
             }
         }
         return balance;
+    }
+
+    private void setDefaultDates() {
+        Calendar cal = Calendar.getInstance();
+        String toDate = dateFormat.format(cal.getTime());
+        cal.add(Calendar.DATE, -2); // أول أمس
+        String fromDate = dateFormat.format(cal.getTime());
+        startDateInput.setText(fromDate);
+        endDateInput.setText(toDate);
     }
 
     @Override
