@@ -34,7 +34,7 @@ public class AuthRepository {
     }
 
     public void login(String phone, String password, AuthCallback callback) {
-        apiService.login(phone, password).enqueue(new Callback<User>() {
+        apiService.login(new ApiService.LoginRequest(phone, password)).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -55,7 +55,7 @@ public class AuthRepository {
     }
 
     public void register(String username, String phone, String password, AuthCallback callback) {
-        apiService.register(username, phone, password).enqueue(new Callback<User>() {
+        apiService.register(new ApiService.RegisterRequest(username, phone, password)).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 if (response.isSuccessful() && response.body() != null) {
