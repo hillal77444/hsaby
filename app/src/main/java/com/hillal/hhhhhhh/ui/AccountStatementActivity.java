@@ -197,8 +197,31 @@ public class AccountStatementActivity extends AppCompatActivity {
             currencyMap.get(currency).add(transaction);
         }
 
-        // لكل عملة، أنشئ جدول خاص بها
         for (String currency : currencyMap.keySet()) {
+            List<Transaction> allCurrencyTransactions = currencyMap.get(currency);
+            // احسب الرصيد السابق (كل العمليات قبل startDate)
+            double previousBalance = 0;
+            for (Transaction t : allCurrencyTransactions) {
+                if (t.getDate().before(startDate)) {
+                    if (t.getType().equals("مدين") || t.getType().equalsIgnoreCase("debit")) {
+                        previousBalance -= t.getAmount();
+                    } else {
+                        previousBalance += t.getAmount();
+                    }
+                }
+            }
+            // احسب إجمالي المدين والدائن خلال الفترة
+            double totalDebit = 0;
+            double totalCredit = 0;
+            for (Transaction t : allCurrencyTransactions) {
+                if (!t.getDate().before(startDate) && !t.getDate().after(endDate)) {
+                    if (t.getType().equals("مدين") || t.getType().equalsIgnoreCase("debit")) {
+                        totalDebit += t.getAmount();
+                    } else {
+                        totalCredit += t.getAmount();
+                    }
+                }
+            }
             html.append("<h3>العملة: ").append(currency).append("</h3>");
             html.append("<table>");
             html.append("<tr>");
@@ -208,25 +231,40 @@ public class AccountStatementActivity extends AppCompatActivity {
             html.append("<th>دائن</th>");
             html.append("<th>الرصيد</th>");
             html.append("</tr>");
-
-            double runningBalance = 0;
-            for (Transaction transaction : currencyMap.get(currency)) {
-                html.append("<tr>");
-                html.append("<td>").append(dateFormat.format(transaction.getDate())).append("</td>");
-                html.append("<td>").append(transaction.getDescription()).append("</td>");
-                // تحقق من نوع القيد (مدين/دائن أو debit/credit)
-                if (transaction.getType().equals("مدين") || transaction.getType().equalsIgnoreCase("debit")) {
-                    html.append("<td>").append(formatAmount(transaction.getAmount())).append("</td>");
-                    html.append("<td></td>");
-                    runningBalance -= transaction.getAmount();
-                } else {
-                    html.append("<td></td>");
-                    html.append("<td>").append(formatAmount(transaction.getAmount())).append("</td>");
-                    runningBalance += transaction.getAmount();
+            // صف الرصيد السابق
+            html.append("<tr>");
+            html.append("<td>").append(dateFormat.format(startDate)).append("</td>");
+            html.append("<td>الرصيد السابق</td>");
+            html.append("<td></td><td></td>");
+            html.append("<td>").append(formatAmount(previousBalance)).append(" ").append(currency).append("</td>");
+            html.append("</tr>");
+            // العمليات خلال الفترة
+            double runningBalance = previousBalance;
+            for (Transaction transaction : allCurrencyTransactions) {
+                if (!transaction.getDate().before(startDate) && !transaction.getDate().after(endDate)) {
+                    html.append("<tr>");
+                    html.append("<td>").append(dateFormat.format(transaction.getDate())).append("</td>");
+                    html.append("<td>").append(transaction.getDescription()).append("</td>");
+                    if (transaction.getType().equals("مدين") || transaction.getType().equalsIgnoreCase("debit")) {
+                        html.append("<td>").append(formatAmount(transaction.getAmount())).append("</td>");
+                        html.append("<td></td>");
+                        runningBalance -= transaction.getAmount();
+                    } else {
+                        html.append("<td></td>");
+                        html.append("<td>").append(formatAmount(transaction.getAmount())).append("</td>");
+                        runningBalance += transaction.getAmount();
+                    }
+                    html.append("<td>").append(formatAmount(runningBalance)).append(" ").append(currency).append("</td>");
+                    html.append("</tr>");
                 }
-                html.append("<td>").append(formatAmount(runningBalance)).append(" ").append(currency).append("</td>");
-                html.append("</tr>");
             }
+            // صف الإجمالي
+            html.append("<tr style='font-weight:bold;background:#f0f0f0;'>");
+            html.append("<td colspan='2'>الإجمالي خلال الفترة</td>");
+            html.append("<td>").append(formatAmount(totalDebit)).append("</td>");
+            html.append("<td>").append(formatAmount(totalCredit)).append("</td>");
+            html.append("<td></td>");
+            html.append("</tr>");
             html.append("</table>");
         }
 
