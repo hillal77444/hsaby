@@ -27,6 +27,7 @@ import java.text.ParseException;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Collections;
 
 public class AccountStatementActivity extends AppCompatActivity {
     private AccountStatementViewModel viewModel;
@@ -200,6 +201,8 @@ public class AccountStatementActivity extends AppCompatActivity {
 
         for (String currency : currencyMap.keySet()) {
             List<Transaction> allCurrencyTransactions = currencyMap.get(currency);
+            // رتب العمليات من الأقدم إلى الأحدث
+            Collections.sort(allCurrencyTransactions, (a, b) -> a.getDate().compareTo(b.getDate()));
             // احسب الرصيد السابق (كل العمليات قبل startDate)
             double previousBalance = 0;
             for (Transaction t : allCurrencyTransactions) {
@@ -237,7 +240,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             html.append("<td>").append(dateFormat.format(startDate)).append("</td>");
             html.append("<td>الرصيد السابق</td>");
             html.append("<td></td><td></td>");
-            html.append("<td>").append(formatAmount(previousBalance)).append(" ").append(currency).append("</td>");
+            html.append("<td>").append(String.format(Locale.US, "%.2f", previousBalance)).append("</td>");
             html.append("</tr>");
             // العمليات خلال الفترة
             double runningBalance = previousBalance;
@@ -247,23 +250,23 @@ public class AccountStatementActivity extends AppCompatActivity {
                     html.append("<td>").append(dateFormat.format(transaction.getDate())).append("</td>");
                     html.append("<td>").append(transaction.getDescription()).append("</td>");
                     if (transaction.getType().equals("مدين") || transaction.getType().equalsIgnoreCase("debit")) {
-                        html.append("<td>").append(formatAmount(transaction.getAmount())).append("</td>");
+                        html.append("<td>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
                         html.append("<td></td>");
                         runningBalance -= transaction.getAmount();
                     } else {
                         html.append("<td></td>");
-                        html.append("<td>").append(formatAmount(transaction.getAmount())).append("</td>");
+                        html.append("<td>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
                         runningBalance += transaction.getAmount();
                     }
-                    html.append("<td>").append(formatAmount(runningBalance)).append(" ").append(currency).append("</td>");
+                    html.append("<td>").append(String.format(Locale.US, "%.2f", runningBalance)).append("</td>");
                     html.append("</tr>");
                 }
             }
             // صف الإجمالي
             html.append("<tr style='font-weight:bold;background:#f0f0f0;'>");
             html.append("<td colspan='2'>الإجمالي خلال الفترة</td>");
-            html.append("<td>").append(formatAmount(totalDebit)).append("</td>");
-            html.append("<td>").append(formatAmount(totalCredit)).append("</td>");
+            html.append("<td>").append(String.format(Locale.US, "%.2f", totalDebit)).append("</td>");
+            html.append("<td>").append(String.format(Locale.US, "%.2f", totalCredit)).append("</td>");
             html.append("<td></td>");
             html.append("</tr>");
             html.append("</table>");
