@@ -40,8 +40,8 @@
     <string name="categories_fragment_label">الفئات</string>
     
     <!-- نصوص عامة -->
-    <string name="total_creditor">إجمالي الدائنين</string>
-    <string name="total_debtor">إجمالي المدينين</string>
+    <string name="total_creditor">إجمالي له</string>
+    <string name="total_debtor">إجمالي عليه</string>
     <string name="net_balance">صافي الرصيد</string>
     <string name="add_new_account">إضافة حساب جديد</string>
     <string name="search_filter_accounts">بحث وتصفية الحسابات</string>
@@ -84,8 +84,8 @@
     <string name="view_transactions">عرض القيود</string>
     <string name="all_transactions">جميع القيود</string>
     <string name="add_transaction">إضافة قيد محاسبي</string>
-    <string name="debit">مدين</string>
-    <string name="credit">دائن</string>
+    <string name="debit">عليه</string>
+    <string name="credit">له</string>
     <string name="add_credit">أضفت له</string>
     <string name="add_debit">أخذت منه</string>
     <string name="edit_transaction">تعديل القيد</string>
@@ -110,8 +110,8 @@
     <string name="reports_description">عرض التقارير المالية</string>
     <string name="view_reports">عرض التقارير</string>
     <string name="account_summary">ملخص الحسابات</string>
-    <string name="total_debtors">إجمالي المدينين</string>
-    <string name="total_creditors">إجمالي الدائنين</string>
+    <string name="total_debtors">إجمالي عليه</string>
+    <string name="total_creditors">إجمالي له</string>
     <string name="transaction_summary">ملخص المعاملات</string>
     <string name="total_transactions">إجمالي المعاملات</string>
     <string name="average_transaction">متوسط المعاملة</string>
@@ -173,8 +173,8 @@
     <string name="account_statement_for">كشف حساب: %1$s</string>
     <string name="period">الفترة: %1$s - %2$s</string>
     <string name="closing_balance">الرصيد الختامي: %1$s</string>
-    <string name="total_debit">إجمالي المدين: %1$s</string>
-    <string name="total_credit">إجمالي الدائن: %1$s</string>
-    <string name="debtor">مدين</string>
-    <string name="creditor">دائن</string>
+    <string name="total_debit">إجمالي عليه: %1$s</string>
+    <string name="total_credit">إجمالي له: %1$s</string>
+    <string name="debtor">عليه</string>
+    <string name="creditor">له</string>
 </resources>
