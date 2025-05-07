@@ -6,6 +6,7 @@ import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import java.util.Date;
+import java.util.Objects;
 
 @Entity(tableName = "transactions",
         foreignKeys = @ForeignKey(entity = Account.class,
@@ -110,5 +111,22 @@ public class Transaction {
 
     public void setUpdatedAt(long updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Transaction that = (Transaction) o;
+        return id == that.id &&
+                amount == that.amount &&
+                Objects.equals(date, that.date) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(type, that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, date, description, amount, type);
     }
 } 
