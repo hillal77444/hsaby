@@ -34,10 +34,30 @@
     </LinearLayout>
 
     <TextView
+        android:id="@+id/accountNameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="#3F51B5"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"/>
+
+    <TextView
         android:id="@+id/transactionDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="14sp"
+        android:layout_marginTop="4dp"/>
+
+    <Button
+        android:id="@+id/btnSendWhatsApp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="إرسال"
+        android:drawableLeft="@android:drawable/ic_menu_send"
+        android:layout_gravity="end"
+        android:backgroundTint="#25D366"
+        android:textColor="#fff"
         android:layout_marginTop="4dp"/>
 
 </LinearLayout> 
