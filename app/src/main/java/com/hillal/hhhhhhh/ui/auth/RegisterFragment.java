@@ -63,7 +63,9 @@ public class RegisterFragment extends Fragment {
                 return;
             }
 
-            authViewModel.register(fullName, displayName, phone, password);
+            // دمج الاسم الكامل واسم العرض في حقل واحد
+            String username = fullName + " (" + displayName + ")";
+            authViewModel.register(username, phone, password);
         });
     }
 
