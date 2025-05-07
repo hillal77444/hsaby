@@ -1,5 +1,6 @@
 package com.hillal.hhhhhhh.ui.accounts;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -82,6 +83,13 @@ public class AccountDetailsFragment extends Fragment {
             Bundle args = new Bundle();
             args.putLong("accountId", accountId);
             Navigation.findNavController(v).navigate(R.id.nav_transactions, args);
+        });
+
+        // إضافة زر كشف الحساب التفصيلي
+        binding.viewAccountStatementButton.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), AccountStatementActivity.class);
+            intent.putExtra("account_id", accountId);
+            startActivity(intent);
         });
     }
 
