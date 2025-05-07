@@ -142,12 +142,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
         private String buildWhatsAppMessage(String accountName, Transaction transaction, double balanceAfter) {
             // جميع الأرقام بالإنجليزي
             String amount = String.format(Locale.US, "%.2f %s", transaction.getAmount(), transaction.getCurrency());
-            String type;
-            if (transaction.getType().equals("مدين") || transaction.getType().equalsIgnoreCase("debit")) {
-                type = "عليه";
-            } else {
-                type = "له";
-            }
+            String type = transaction.getType(); // استخدام نوع القيد مباشرة
             String actionText = type.equals("عليه") ? "على حسابكم" : "إلى حسابكم";
             String balanceText = balanceAfter < 0 ? "عليكم: " : "لكم: ";
             String balanceAmount = String.format(Locale.US, "%.2f %s", Math.abs(balanceAfter), transaction.getCurrency());
