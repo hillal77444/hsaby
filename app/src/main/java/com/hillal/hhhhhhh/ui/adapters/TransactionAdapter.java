@@ -18,6 +18,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ArrayList;
 
 public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdapter.TransactionViewHolder> {
     private OnItemClickListener onItemClickListener;
@@ -115,16 +119,22 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
         // حساب الرصيد بعد القيد (يمكنك تحسينه حسب منطقك)
         private double calculateBalance(long accountId, long transactionId) {
             double balance = 0;
+            // تأكد من الترتيب من الأقدم إلى الأحدث
+            List<Transaction> sortedList = new ArrayList<>();
             for (int i = 0; i < getItemCount(); i++) {
                 Transaction t = getItem(i);
                 if (t.getAccountId() == accountId) {
-                    if (t.getType().equals("credit")) {
-                        balance += t.getAmount();
-                    } else {
-                        balance -= t.getAmount();
-                    }
-                    if (t.getId() == transactionId) break;
+                    sortedList.add(t);
                 }
+            }
+            Collections.sort(sortedList, Comparator.comparing(Transaction::getDate));
+            for (Transaction t : sortedList) {
+                if (t.getType().equals("مدين") || t.getType().equalsIgnoreCase("debit")) {
+                    balance -= t.getAmount();
+                } else {
+                    balance += t.getAmount();
+                }
+                if (t.getId() == transactionId) break;
             }
             return balance;
         }
