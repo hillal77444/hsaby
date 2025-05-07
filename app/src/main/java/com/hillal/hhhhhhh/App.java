@@ -58,19 +58,8 @@ public class App extends Application {
             
             // Show error dialog
             new Handler(Looper.getMainLooper()).post(() -> {
-                AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.Theme_Hhhhhhh));
-                builder.setTitle("خطأ في التطبيق")
-                       .setMessage("حدث خطأ غير متوقع. تم نسخ تفاصيل الخطأ إلى الحافظة.\n\n" +
-                                 "يمكنك لصق التفاصيل في أي مكان لمشاركتها مع المطور.")
-                       .setPositiveButton("نسخ التفاصيل", (dialog, which) -> {
-                           // نسخ التفاصيل مرة أخرى للتأكد
-                           clipboard.setPrimaryClip(clip);
-                           Toast.makeText(this, "تم نسخ تفاصيل الخطأ إلى الحافظة", Toast.LENGTH_LONG).show();
-                           dialog.dismiss();
-                           System.exit(1);
-                       })
-                       .setCancelable(false)
-                       .show();
+                Toast.makeText(this, "حدث خطأ غير متوقع. تم نسخ التفاصيل إلى الحافظة.", Toast.LENGTH_LONG).show();
+                System.exit(1);
             });
         });
 
@@ -113,19 +102,8 @@ public class App extends Application {
             
             // Show error dialog
             new Handler(Looper.getMainLooper()).post(() -> {
-                AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.Theme_Hhhhhhh));
-                builder.setTitle("خطأ في التطبيق")
-                       .setMessage("حدث خطأ أثناء تهيئة التطبيق. تم نسخ تفاصيل الخطأ إلى الحافظة.\n\n" +
-                                 "يمكنك لصق التفاصيل في أي مكان لمشاركتها مع المطور.")
-                       .setPositiveButton("نسخ التفاصيل", (dialog, which) -> {
-                           // نسخ التفاصيل مرة أخرى للتأكد
-                           clipboard.setPrimaryClip(clip);
-                           Toast.makeText(this, "تم نسخ تفاصيل الخطأ إلى الحافظة", Toast.LENGTH_LONG).show();
-                           dialog.dismiss();
-                           System.exit(1);
-                       })
-                       .setCancelable(false)
-                       .show();
+                Toast.makeText(this, "حدث خطأ أثناء تهيئة التطبيق. تم نسخ التفاصيل إلى الحافظة.", Toast.LENGTH_LONG).show();
+                System.exit(1);
             });
         }
     }
