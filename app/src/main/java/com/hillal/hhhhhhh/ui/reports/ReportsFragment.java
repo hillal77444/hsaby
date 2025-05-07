@@ -1,5 +1,6 @@
 package com.hillal.hhhhhhh.ui.reports;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,7 @@ import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
 import com.hillal.hhhhhhh.viewmodel.TransactionViewModel;
+import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -50,33 +52,35 @@ public class ReportsFragment extends Fragment {
         reportAdapter = new ReportAdapter();
         recyclerView.setAdapter(reportAdapter);
         
+        // ربط زر كشف الحساب التفصيلي
+        MaterialButton viewAccountStatementButton = view.findViewById(R.id.viewAccountStatementButton);
+        viewAccountStatementButton.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), com.hillal.hhhhhhh.ui.AccountStatementActivity.class);
+            startActivity(intent);
+        });
+        
         // Observe data
-        observeAccounts();
+        observeTransactions();
         
         return view;
     }
 
-    private void observeAccounts() {
-        accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
-            double totalDebtors = 0;
-            double totalCreditors = 0;
-            List<Transaction> allTransactions = new ArrayList<>();
-
-            for (Account account : accounts) {
-                if (account.isDebtor()) {
-                    totalDebtors += account.getOpeningBalance();
-                } else {
-                    totalCreditors += account.getOpeningBalance();
+    private void observeTransactions() {
+        transactionViewModel.getAllTransactions().observe(getViewLifecycleOwner(), transactions -> {
+            double totalDebit = 0;
+            double totalCredit = 0;
+            if (transactions != null) {
+                for (Transaction transaction : transactions) {
+                    if ("debit".equals(transaction.getType())) {
+                        totalDebit += transaction.getAmount();
+                    } else if ("credit".equals(transaction.getType())) {
+                        totalCredit += transaction.getAmount();
+                    }
                 }
             }
-
-            // Update UI
-            totalDebtorsText.setText(String.format("إجمالي المدينين: %.2f", totalDebtors));
-            totalCreditorsText.setText(String.format("إجمالي الدائنين: %.2f", totalCreditors));
-            netBalanceText.setText(String.format("الرصيد: %.2f", totalDebtors - totalCreditors));
-
-            // Update adapter
-            reportAdapter.setTransactions(allTransactions);
+            totalDebtorsText.setText(String.format("إجمالي المدينين: %.2f", totalDebit));
+            totalCreditorsText.setText(String.format("إجمالي الدائنين: %.2f", totalCredit));
+            netBalanceText.setText(String.format("الرصيد: %.2f", totalDebit - totalCredit));
         });
     }
 } 
