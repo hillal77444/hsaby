@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -11,138 +10,71 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <com.google.android.material.card.MaterialCardView
+        <!-- النسخ الاحتياطي -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_backup"
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            android:layout_marginBottom="16dp"/>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchAutoBackup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            app:cardElevation="2dp">
+            android:text="@string/settings_auto_backup"
+            android:layout_marginBottom="8dp"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_appearance"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-                    android:layout_marginBottom="8dp"/>
-
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switch_currency_format"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_currency_format"/>
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonBackupNow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            app:cardElevation="2dp">
+            android:text="@string/settings_backup_now"
+            android:layout_marginBottom="8dp"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_notifications"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-                    android:layout_marginBottom="8dp"/>
-
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switch_notifications"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_enable_notifications"/>
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonRestore"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            app:cardElevation="2dp">
+            android:text="@string/settings_restore"
+            android:layout_marginBottom="24dp"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+        <!-- المزامنة -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_sync"
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            android:layout_marginBottom="16dp"/>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_backup"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-                    android:layout_marginBottom="8dp"/>
-
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switch_auto_backup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_auto_backup"
-                    android:layout_marginBottom="16dp"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_backup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_backup_now"
-                    android:layout_marginBottom="8dp"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    app:icon="@drawable/ic_backup"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_restore"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_restore"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    app:icon="@drawable/ic_restore"/>
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchAutoSync"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardElevation="2dp">
+            android:text="@string/settings_auto_sync"
+            android:layout_marginBottom="8dp"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonSyncNow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_sync_now"
+            android:layout_marginBottom="24dp"/>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_danger_zone"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-                    android:textColor="@color/design_default_color_error"
-                    android:layout_marginBottom="8dp"/>
+        <!-- الأمان -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_security"
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            android:layout_marginBottom="16dp"/>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_clear_data"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_clear_data"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:textColor="@color/design_default_color_error"
-                    app:icon="@drawable/ic_delete"/>
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchEncryption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_encryption"
+            android:layout_marginBottom="8dp"/>
 
     </LinearLayout>
-</androidx.core.widget.NestedScrollView> 
+</ScrollView> 
