@@ -91,12 +91,15 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                     itemView.getContext().getResources().getColor(colorResId, null));
 
             // عرض اسم الحساب
-            String accountName = "";
-            String phoneNumber = "";
+            final String accountName;
+            final String phoneNumber;
             if (accountMap != null && accountMap.containsKey(transaction.getAccountId())) {
                 Account account = accountMap.get(transaction.getAccountId());
                 accountName = account.getName();
                 phoneNumber = account.getPhoneNumber();
+            } else {
+                accountName = "";
+                phoneNumber = "";
             }
             binding.accountNameTextView.setText(accountName);
 
