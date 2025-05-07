@@ -136,7 +136,7 @@ public class AddTransactionFragment extends Fragment {
             Transaction transaction = new Transaction();
             transaction.setAccountId(selectedAccountId);
             transaction.setAmount(amount);
-            transaction.setType(isDebit ? "مدين" : "دائن");
+            transaction.setType(isDebit ? "عليه" : "له");
             transaction.setDescription(description);
             transaction.setNotes(notes);
             transaction.setCurrency(currency);
