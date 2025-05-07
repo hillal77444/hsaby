@@ -2,6 +2,7 @@ package com.hillal.hhhhhhh.data.model;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.Ignore;
 
 @Entity(tableName = "accounts")
 public class Account {
@@ -29,6 +30,13 @@ public class Account {
         this.isDebtor = isDebtor;
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
+    }
+
+    @Ignore
+    public Account(String accountNumber, String accountName, double balance) {
+        this.accountNumber = accountNumber;
+        this.accountName = accountName;
+        this.balance = balance;
     }
 
     // Getters and Setters
