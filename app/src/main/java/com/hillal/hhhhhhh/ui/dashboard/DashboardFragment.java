@@ -70,10 +70,6 @@ public class DashboardFragment extends Fragment {
         // زر عرض التقارير
         binding.viewReportsButton.setOnClickListener(v -> 
             Navigation.findNavController(v).navigate(R.id.navigation_reports));
-
-        // زر إضافة قيد محاسبي
-        binding.fabAddTransaction.setOnClickListener(v -> 
-            Navigation.findNavController(v).navigate(R.id.action_transactions_to_addTransaction));
     }
 
     private void observeData() {
