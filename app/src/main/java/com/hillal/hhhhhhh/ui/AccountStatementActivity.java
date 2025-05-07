@@ -231,8 +231,8 @@ public class AccountStatementActivity extends AppCompatActivity {
             html.append("<tr>");
             html.append("<th>التاريخ</th>");
             html.append("<th>الوصف</th>");
-            html.append("<th>مدين</th>");
-            html.append("<th>دائن</th>");
+            html.append("<th>عليه</th>");
+            html.append("<th>له</th>");
             html.append("<th>الرصيد</th>");
             html.append("</tr>");
             // صف الرصيد السابق
