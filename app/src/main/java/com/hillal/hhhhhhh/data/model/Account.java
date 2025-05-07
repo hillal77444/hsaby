@@ -22,6 +22,7 @@ public class Account {
         this.updatedAt = System.currentTimeMillis();
     }
 
+    @Ignore
     public Account(String name, String phoneNumber, String notes, double openingBalance, boolean isDebtor) {
         this.name = name;
         this.phoneNumber = phoneNumber;
