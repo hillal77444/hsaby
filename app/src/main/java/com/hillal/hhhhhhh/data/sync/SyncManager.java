@@ -19,6 +19,8 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class SyncManager {
     private static final String TAG = "SyncManager";
@@ -116,8 +118,38 @@ public class SyncManager {
                     newAccounts.size(), newTransactions.size());
                 Log.d(TAG, syncDetails);
 
+                // تحويل البيانات إلى JSON
+                JSONObject syncData = new JSONObject();
+                JSONArray accountsArray = new JSONArray();
+                JSONArray transactionsArray = new JSONArray();
+
+                // تحويل الحسابات
+                for (Account account : newAccounts) {
+                    JSONObject accountJson = new JSONObject();
+                    accountJson.put("account_number", account.getAccountNumber());
+                    accountJson.put("account_name", account.getAccountName());
+                    accountJson.put("balance", account.getBalance());
+                    accountsArray.put(accountJson);
+                }
+
+                // تحويل المعاملات
+                for (Transaction transaction : newTransactions) {
+                    JSONObject transactionJson = new JSONObject();
+                    transactionJson.put("id", transaction.getId());
+                    transactionJson.put("date", transaction.getDate().toString());
+                    transactionJson.put("amount", transaction.getAmount());
+                    transactionJson.put("description", transaction.getDescription());
+                    transactionJson.put("account_id", transaction.getAccountId());
+                    transactionsArray.put(transactionJson);
+                }
+
+                syncData.put("accounts", accountsArray);
+                syncData.put("transactions", transactionsArray);
+
+                Log.d(TAG, "Sync data: " + syncData.toString());
+
                 // إرسال البيانات الجديدة إلى السيرفر
-                apiService.syncData("Bearer " + token, new ApiService.SyncRequest(newAccounts, newTransactions))
+                apiService.syncData("Bearer " + token, syncData.toString())
                     .enqueue(new Callback<Void>() {
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
