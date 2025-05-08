@@ -49,18 +49,47 @@ public class Transaction {
         this.type = type;
         this.description = description;
         this.currency = currency;
-        this.date = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-            .format(new java.util.Date(System.currentTimeMillis()));
+        this.date = formatDate(System.currentTimeMillis());
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
     }
 
     // Empty constructor for Room
     public Transaction() {
-        this.date = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-            .format(new java.util.Date(System.currentTimeMillis()));
+        this.date = formatDate(System.currentTimeMillis());
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
+    }
+
+    // Helper method to format date
+    private String formatDate(long timestamp) {
+        return new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            .format(new java.util.Date(timestamp));
+    }
+
+    // Helper method to parse date
+    private String parseDate(Object dateValue) {
+        if (dateValue == null) {
+            return formatDate(System.currentTimeMillis());
+        }
+        
+        try {
+            if (dateValue instanceof Number) {
+                // إذا كان التاريخ timestamp
+                long timestamp = ((Number) dateValue).longValue();
+                return formatDate(timestamp);
+            } else if (dateValue instanceof String) {
+                // إذا كان التاريخ نص ISO
+                String dateStr = (String) dateValue;
+                // التحقق من صحة تنسيق التاريخ
+                new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(dateStr);
+                return dateStr;
+            }
+        } catch (Exception e) {
+            // في حالة حدوث أي خطأ، نستخدم الوقت الحالي
+            return formatDate(System.currentTimeMillis());
+        }
+        return formatDate(System.currentTimeMillis());
     }
 
     // Getters and Setters
@@ -132,8 +161,8 @@ public class Transaction {
         return date;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setDate(Object dateValue) {
+        this.date = parseDate(dateValue);
     }
 
     // Helper method to get timestamp
