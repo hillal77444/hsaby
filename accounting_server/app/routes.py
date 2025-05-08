@@ -220,6 +220,7 @@ def get_accounts():
         accounts = Account.query.filter_by(user_id=user_id).all()
         return jsonify([{
             'id': acc.id,
+            'server_id': acc.id,  # إضافة server_id للتوافق
             'account_number': acc.account_number,
             'account_name': acc.account_name,
             'balance': acc.balance
@@ -235,9 +236,9 @@ def get_transactions():
         user_id = get_jwt_identity()
         transactions = Transaction.query.filter_by(user_id=user_id).all()
         return jsonify([{
-            'id': trans.id,  # هذا سيكون server_id في التطبيق
+            'id': trans.id,
             'server_id': trans.id,  # إضافة server_id للتوافق
-            'date': trans.date.isoformat(),
+            'date': int(trans.date.timestamp() * 1000),  # تحويل التاريخ إلى timestamp بالميلي ثانية
             'amount': trans.amount,
             'description': trans.description,
             'account_id': trans.account_id,
@@ -247,4 +248,81 @@ def get_transactions():
         } for trans in transactions])
     except Exception as e:
         logger.error(f"Get transactions error: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء جلب المعاملات'}), 500 
+        return jsonify({'error': 'حدث خطأ أثناء جلب المعاملات'}), 500
+
+@main.route('/api/debug/data', methods=['GET'])
+@jwt_required()
+def debug_data():
+    try:
+        user_id = get_jwt_identity()
+        
+        # جلب الحسابات
+        accounts = Account.query.filter_by(user_id=user_id).all()
+        accounts_data = [{
+            'id': acc.id,
+            'account_number': acc.account_number,
+            'account_name': acc.account_name,
+            'balance': acc.balance,
+            'user_id': acc.user_id,
+            'raw_date': str(acc.created_at) if hasattr(acc, 'created_at') else None
+        } for acc in accounts]
+        
+        # جلب المعاملات
+        transactions = Transaction.query.filter_by(user_id=user_id).all()
+        transactions_data = [{
+            'id': trans.id,
+            'date': str(trans.date),  # التاريخ الخام من قاعدة البيانات
+            'date_timestamp': int(trans.date.timestamp() * 1000),  # التاريخ كـ timestamp
+            'amount': trans.amount,
+            'description': trans.description,
+            'account_id': trans.account_id,
+            'user_id': trans.user_id,
+            'type': trans.type,
+            'currency': trans.currency,
+            'notes': trans.notes
+        } for trans in transactions]
+        
+        return jsonify({
+            'accounts': accounts_data,
+            'transactions': transactions_data,
+            'user_id': user_id
+        })
+    except Exception as e:
+        logger.error(f"Debug data error: {str(e)}")
+        return jsonify({'error': f'حدث خطأ أثناء جلب بيانات التصحيح: {str(e)}'}), 500
+
+@main.route('/api/debug/public', methods=['GET'])
+def debug_public():
+    try:
+        # جلب جميع الحسابات
+        accounts = Account.query.all()
+        accounts_data = [{
+            'id': acc.id,
+            'account_number': acc.account_number,
+            'account_name': acc.account_name,
+            'balance': acc.balance,
+            'user_id': acc.user_id,
+            'raw_date': str(acc.created_at) if hasattr(acc, 'created_at') else None
+        } for acc in accounts]
+        
+        # جلب جميع المعاملات
+        transactions = Transaction.query.all()
+        transactions_data = [{
+            'id': trans.id,
+            'date': str(trans.date),  # التاريخ الخام من قاعدة البيانات
+            'date_timestamp': int(trans.date.timestamp() * 1000),  # التاريخ كـ timestamp
+            'amount': trans.amount,
+            'description': trans.description,
+            'account_id': trans.account_id,
+            'user_id': trans.user_id
+        } for trans in transactions]
+        
+        return jsonify({
+            'accounts': accounts_data,
+            'transactions': transactions_data,
+            'total_accounts': len(accounts),
+            'total_transactions': len(transactions)
+        })
+    except Exception as e:
+        logger.error(f"Public debug data error: {str(e)}")
+        return jsonify({'error': f'حدث خطأ أثناء جلب بيانات التصحيح: {str(e)}'}), 500 
