@@ -75,4 +75,7 @@ public interface TransactionDao {
 
     @Query("SELECT * FROM transactions WHERE updatedAt > :timestamp")
     List<Transaction> getTransactionsModifiedAfter(long timestamp);
+
+    @Query("SELECT * FROM transactions WHERE updated_at > :timestamp")
+    List<Transaction> getModifiedTransactions(long timestamp);
 } 
