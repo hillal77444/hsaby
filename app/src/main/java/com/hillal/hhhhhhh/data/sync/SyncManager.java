@@ -134,7 +134,9 @@ public class SyncManager {
                                         Log.d(TAG, "Error response body: " + errorBody);
                                         // محاولة تحليل رسالة الخطأ من JSON
                                         if (errorBody.contains("error")) {
-                                            errorMessage = errorBody.split("\"error\":\"")[1].split("\"")[0];
+                                            String rawError = errorBody.split("\"error\":\"")[1].split("\"")[0];
+                                            // تحويل النص من Unicode إلى نص عربي
+                                            errorMessage = java.net.URLDecoder.decode(rawError, "UTF-8");
                                         } else {
                                             errorMessage = String.format("فشل المزامنة (رمز الخطأ: %d)", response.code());
                                         }
