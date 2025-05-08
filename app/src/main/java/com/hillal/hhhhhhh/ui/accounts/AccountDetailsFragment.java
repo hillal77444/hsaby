@@ -73,6 +73,13 @@ public class AccountDetailsFragment extends Fragment {
         transactionsAdapter = new TransactionsAdapter();
         transactionsRecyclerView.setAdapter(transactionsAdapter);
 
+        // إضافة زر تعديل الحساب
+        binding.editAccountButton.setOnClickListener(v -> {
+            Bundle args = new Bundle();
+            args.putLong("accountId", accountId);
+            Navigation.findNavController(v).navigate(R.id.editAccountFragment, args);
+        });
+
         FloatingActionButton fab = binding.fabAddTransaction;
         fab.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
