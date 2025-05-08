@@ -118,19 +118,23 @@ public class SettingsFragment extends Fragment {
         });
 
         // إضافة زر جلب البيانات من السيرفر
-        binding.fetchDataButton.setOnClickListener(v -> {
-            DataManager dataManager = new DataManager(requireContext(), db.accountDao(), db.transactionDao());
-            dataManager.fetchDataFromServer(new DataManager.DataCallback() {
-                @Override
-                public void onSuccess() {
-                    Toast.makeText(requireContext(), "تم جلب البيانات بنجاح", Toast.LENGTH_SHORT).show();
-                }
+        DataManager dataManager = new DataManager(
+            requireContext(),
+            db.accountDao(),
+            db.transactionDao(),
+            db.pendingOperationDao()
+        );
 
-                @Override
-                public void onError(String error) {
-                    Toast.makeText(requireContext(), "خطأ: " + error, Toast.LENGTH_SHORT).show();
-                }
-            });
+        dataManager.fetchDataFromServer(new DataManager.DataCallback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(requireContext(), "تم جلب البيانات بنجاح", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(requireContext(), "خطأ: " + error, Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
