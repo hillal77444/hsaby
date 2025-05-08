@@ -1,33 +1,42 @@
 package com.hillal.hhhhhhh.data.model;
 
 import androidx.room.Entity;
-import androidx.room.ForeignKey;
-import androidx.room.Index;
 import androidx.room.PrimaryKey;
+import com.google.gson.annotations.SerializedName;
 
-import java.util.Date;
-import java.util.Objects;
-
-@Entity(tableName = "transactions",
-        foreignKeys = @ForeignKey(entity = Account.class,
-                parentColumns = "id",
-                childColumns = "accountId",
-                onDelete = ForeignKey.CASCADE),
-        indices = {@Index("accountId")})
+@Entity(tableName = "transactions")
 public class Transaction {
     @PrimaryKey(autoGenerate = true)
     private long id;
+
+    @SerializedName("account_id")
     private long accountId;
-    private String type; // "debit" or "credit"
+
+    @SerializedName("amount")
     private double amount;
+
+    @SerializedName("type")
+    private String type;
+
+    @SerializedName("description")
     private String description;
-    private String notes;
-    private String currency;
-    private Date date;
+
+    @SerializedName("date")
+    private long date;
+
+    @SerializedName("created_at")
     private long createdAt;
+
+    @SerializedName("updated_at")
     private long updatedAt;
 
-    public Transaction() {
+    // Constructor
+    public Transaction(long accountId, double amount, String type, String description) {
+        this.accountId = accountId;
+        this.amount = amount;
+        this.type = type;
+        this.description = description;
+        this.date = System.currentTimeMillis();
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
     }
@@ -49,20 +58,20 @@ public class Transaction {
         this.accountId = accountId;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public double getAmount() {
         return amount;
     }
 
     public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getDescription() {
@@ -73,27 +82,11 @@ public class Transaction {
         this.description = description;
     }
 
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-
-    public Date getDate() {
+    public long getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(long date) {
         this.date = date;
     }
 
@@ -111,22 +104,5 @@ public class Transaction {
 
     public void setUpdatedAt(long updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Transaction that = (Transaction) o;
-        return id == that.id &&
-                amount == that.amount &&
-                Objects.equals(date, that.date) &&
-                Objects.equals(description, that.description) &&
-                Objects.equals(type, that.type);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, date, description, amount, type);
     }
 } 
