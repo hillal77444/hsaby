@@ -58,8 +58,10 @@ public class LoginFragment extends Fragment {
                     Log.d(TAG, "Login successful");
                     binding.progressBar.setVisibility(View.GONE);
                     Toast.makeText(getContext(), "تم تسجيل الدخول بنجاح", Toast.LENGTH_SHORT).show();
+                    
+                    // التنقل إلى لوحة التحكم
                     NavHostFragment.findNavController(LoginFragment.this)
-                            .navigate(R.id.action_loginFragment_to_homeFragment);
+                            .navigate(R.id.navigation_dashboard);
                 }
 
                 @Override
