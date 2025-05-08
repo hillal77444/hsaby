@@ -2,7 +2,7 @@ package com.hillal.hhhhhhh.data.repository;
 
 import android.app.Application;
 import androidx.lifecycle.LiveData;
-import com.hillal.hhhhhhh.data.AppDatabase;
+import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.data.room.TransactionDao;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import java.util.Date;
