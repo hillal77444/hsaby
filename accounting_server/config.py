@@ -3,15 +3,15 @@ from datetime import timedelta
 
 class Config:
     # إعدادات قاعدة البيانات
-    SQLALCHEMY_DATABASE_URI = 'postgresql://accounting_user:your_password@localhost/accounting_db'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://accounting_user:Accounting@123@localhost/accounting_db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # إعدادات JWT
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'your-secret-key')  # يجب تغييره في الإنتاج
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
+    JWT_SECRET_KEY = 'accounting-app-secure-jwt-key-2024'  # مفتاح آمن للإنتاج
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)  # زيادة مدة صلاحية التوكن
     
     # إعدادات الأمان
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key')  # يجب تغييره في الإنتاج
+    SECRET_KEY = 'accounting-app-secure-key-2024'  # مفتاح آمن للإنتاج
     
     # إعدادات المزامنة
     SYNC_BATCH_SIZE = 100
