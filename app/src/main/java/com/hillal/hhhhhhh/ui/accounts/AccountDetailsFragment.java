@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.app.AlertDialog;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -80,6 +82,11 @@ public class AccountDetailsFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.editAccountFragment, args);
         });
 
+        // إضافة زر حذف الحساب
+        binding.deleteAccountButton.setOnClickListener(v -> {
+            showDeleteConfirmationDialog();
+        });
+
         FloatingActionButton fab = binding.fabAddTransaction;
         fab.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
@@ -128,6 +135,23 @@ public class AccountDetailsFragment extends Fragment {
         accountName.setText(account.getName());
         accountPhone.setText(account.getPhoneNumber());
         accountNotes.setText(account.getNotes());
+    }
+
+    private void showDeleteConfirmationDialog() {
+        new AlertDialog.Builder(requireContext())
+            .setTitle(R.string.delete_account)
+            .setMessage(R.string.delete_account_confirmation)
+            .setPositiveButton(R.string.delete, (dialog, which) -> {
+                accountViewModel.getAccountById(accountId).observe(getViewLifecycleOwner(), account -> {
+                    if (account != null) {
+                        accountViewModel.deleteAccount(account);
+                        Toast.makeText(getContext(), R.string.account_deleted, Toast.LENGTH_SHORT).show();
+                        Navigation.findNavController(requireView()).navigateUp();
+                    }
+                });
+            })
+            .setNegativeButton(R.string.cancel, null)
+            .show();
     }
 
     @Override
