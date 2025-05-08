@@ -21,6 +21,9 @@ public class Account {
     @SerializedName("phone_number")
     private String phoneNumber;
 
+    @SerializedName("notes")
+    private String notes;
+
     @SerializedName("is_debtor")
     private boolean isDebtor;
 
@@ -37,6 +40,12 @@ public class Account {
         this.balance = balance;
         this.phoneNumber = phoneNumber;
         this.isDebtor = isDebtor;
+        this.createdAt = System.currentTimeMillis();
+        this.updatedAt = System.currentTimeMillis();
+    }
+
+    // Empty constructor for Room
+    public Account() {
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
     }
@@ -80,6 +89,14 @@ public class Account {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
     public boolean isDebtor() {
