@@ -11,6 +11,7 @@ import com.hillal.hhhhhhh.data.remote.RetrofitClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import java.io.IOException;
 
 public class AuthRepository {
     private static final String TAG = "AuthRepository";
@@ -34,6 +35,7 @@ public class AuthRepository {
     }
 
     public void login(String phone, String password, AuthCallback callback) {
+        Log.d(TAG, "Attempting to login with phone: " + phone);
         apiService.login(new ApiService.LoginRequest(phone, password)).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
@@ -50,6 +52,7 @@ public class AuthRepository {
                             Log.e(TAG, "Error reading error body", e);
                         }
                     }
+                    Log.e(TAG, "Login failed: " + errorMessage);
                     callback.onError(errorMessage);
                 }
             }
@@ -57,11 +60,19 @@ public class AuthRepository {
             @Override
             public void onFailure(Call<User> call, Throwable t) {
                 Log.e(TAG, "Login error: " + t.getMessage(), t);
-                String errorMessage = "خطأ في الاتصال: " + t.getMessage();
+                String errorMessage;
                 if (t instanceof java.net.UnknownHostException) {
                     errorMessage = "لا يمكن الوصول إلى الخادم. يرجى التحقق من اتصال الإنترنت";
+                    Log.e(TAG, "Server is unreachable. Check if the server is running and accessible.");
                 } else if (t instanceof java.net.SocketTimeoutException) {
                     errorMessage = "انتهت مهلة الاتصال بالخادم. يرجى المحاولة مرة أخرى";
+                    Log.e(TAG, "Connection timeout. Server might be overloaded or network is slow.");
+                } else if (t instanceof IOException) {
+                    errorMessage = "خطأ في الاتصال بالخادم: " + t.getMessage();
+                    Log.e(TAG, "IO Exception during connection", t);
+                } else {
+                    errorMessage = "خطأ غير متوقع: " + t.getMessage();
+                    Log.e(TAG, "Unexpected error during login", t);
                 }
                 callback.onError(errorMessage);
             }
@@ -69,6 +80,7 @@ public class AuthRepository {
     }
 
     public void register(String username, String phone, String password, AuthCallback callback) {
+        Log.d(TAG, "Attempting to register with username: " + username + ", phone: " + phone);
         apiService.register(new ApiService.RegisterRequest(username, phone, password)).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
@@ -85,6 +97,7 @@ public class AuthRepository {
                             Log.e(TAG, "Error reading error body", e);
                         }
                     }
+                    Log.e(TAG, "Registration failed: " + errorMessage);
                     callback.onError(errorMessage);
                 }
             }
@@ -92,11 +105,19 @@ public class AuthRepository {
             @Override
             public void onFailure(Call<User> call, Throwable t) {
                 Log.e(TAG, "Registration error: " + t.getMessage(), t);
-                String errorMessage = "خطأ في الاتصال: " + t.getMessage();
+                String errorMessage;
                 if (t instanceof java.net.UnknownHostException) {
                     errorMessage = "لا يمكن الوصول إلى الخادم. يرجى التحقق من اتصال الإنترنت";
+                    Log.e(TAG, "Server is unreachable. Check if the server is running and accessible.");
                 } else if (t instanceof java.net.SocketTimeoutException) {
                     errorMessage = "انتهت مهلة الاتصال بالخادم. يرجى المحاولة مرة أخرى";
+                    Log.e(TAG, "Connection timeout. Server might be overloaded or network is slow.");
+                } else if (t instanceof IOException) {
+                    errorMessage = "خطأ في الاتصال بالخادم: " + t.getMessage();
+                    Log.e(TAG, "IO Exception during connection", t);
+                } else {
+                    errorMessage = "خطأ غير متوقع: " + t.getMessage();
+                    Log.e(TAG, "Unexpected error during registration", t);
                 }
                 callback.onError(errorMessage);
             }
