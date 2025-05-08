@@ -114,6 +114,20 @@ public class SyncManager {
                     return;
                 }
 
+                // تحديث أرصدة الحسابات بناءً على المعاملات
+                for (Account account : newAccounts) {
+                    Double totalDebit = transactionDao.getTotalDebit(account.getId()).getValue();
+                    Double totalCredit = transactionDao.getTotalCredit(account.getId()).getValue();
+                    
+                    if (totalDebit != null && totalCredit != null) {
+                        double balance = totalCredit - totalDebit;
+                        account.setBalance(balance);
+                        accountDao.update(account);
+                        Log.d(TAG, String.format("Updated account %s balance to %f", 
+                            account.getName(), balance));
+                    }
+                }
+
                 String syncDetails = String.format("جاري مزامنة %d حساب و %d معاملة", 
                     newAccounts.size(), newTransactions.size());
                 Log.d(TAG, syncDetails);
