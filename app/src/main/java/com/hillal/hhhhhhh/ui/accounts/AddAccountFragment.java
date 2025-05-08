@@ -59,30 +59,32 @@ public class AddAccountFragment extends Fragment {
     }
 
     private void saveAccount() {
-        String name = nameEditText.getText().toString().trim();
-        String phone = phoneEditText.getText().toString().trim();
-        String notes = notesEditText.getText().toString().trim();
-        String balanceStr = openingBalanceEditText.getText().toString().trim();
+        String name = binding.nameEditText.getText().toString();
+        String phone = binding.phoneEditText.getText().toString();
+        String notes = binding.notesEditText.getText().toString();
+        String balanceStr = binding.balanceEditText.getText().toString();
 
         if (name.isEmpty()) {
-            nameEditText.setError(getString(R.string.error_name_required));
+            binding.nameEditText.setError("الرجاء إدخال اسم الحساب");
             return;
         }
 
-        double openingBalance = 0.0;
-        if (!balanceStr.isEmpty()) {
-            try {
-                openingBalance = Double.parseDouble(balanceStr);
-            } catch (NumberFormatException e) {
-                openingBalanceEditText.setError(getString(R.string.error_invalid_balance));
-                return;
-            }
+        try {
+            double balance = Double.parseDouble(balanceStr);
+            Account account = new Account(
+                String.valueOf(System.currentTimeMillis()), // account number
+                name,
+                balance,
+                phone,
+                false // isDebtor
+            );
+            account.setNotes(notes);
+            accountViewModel.insertAccount(account);
+            Toast.makeText(getContext(), R.string.account_saved, Toast.LENGTH_SHORT).show();
+            Navigation.findNavController(requireView()).navigateUp();
+        } catch (NumberFormatException e) {
+            binding.balanceEditText.setError("الرجاء إدخال رصيد صحيح");
         }
-
-        Account account = new Account(name, phone, notes, openingBalance, false);
-        accountViewModel.insertAccount(account);
-        Toast.makeText(getContext(), R.string.account_saved, Toast.LENGTH_SHORT).show();
-        Navigation.findNavController(requireView()).navigateUp();
     }
 
     @Override
