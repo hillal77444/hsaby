@@ -80,22 +80,31 @@ public class MainActivity extends AppCompatActivity {
                 throw new IllegalStateException("NavController is null");
             }
 
+            // Initialize AuthViewModel
+            authViewModel = new AuthViewModel(getApplication());
+            
+            // Check if user is logged in
+            if (authViewModel.isLoggedIn()) {
+                // User is logged in, navigate to dashboard
+                navController.navigate(R.id.navigation_dashboard);
+            } else {
+                // User is not logged in, navigate to login
+                navController.navigate(R.id.loginFragment);
+            }
+
+            // Setup navigation drawer
             appBarConfiguration = new AppBarConfiguration.Builder(
-                    R.id.nav_home, R.id.nav_gallery)
+                    R.id.navigation_dashboard,
+                    R.id.nav_accounts,
+                    R.id.nav_transactions,
+                    R.id.nav_reports,
+                    R.id.nav_settings)
                     .setOpenableLayout(binding.drawerLayout)
                     .build();
 
             NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
             NavigationUI.setupWithNavController(binding.navView, navController);
             Log.d(TAG, "Navigation setup completed successfully");
-
-            // Initialize AuthViewModel
-            authViewModel = new AuthViewModel(getApplication());
-            
-            // Check if user is logged in
-            if (!authViewModel.isLoggedIn()) {
-                navController.navigate(R.id.loginFragment);
-            }
 
         } catch (IllegalStateException e) {
             String errorMessage = "=== خطأ في تهيئة التطبيق ===\n\n" +
@@ -109,42 +118,22 @@ public class MainActivity extends AppCompatActivity {
                                 "وقت حدوث الخطأ: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
             Log.e(TAG, errorMessage, e);
             showErrorAndExit(errorMessage);
-        } catch (Exception e) {
-            String errorMessage = "=== خطأ غير متوقع ===\n\n" +
-                                "نوع الخطأ: " + e.getClass().getSimpleName() + "\n" +
-                                "الرسالة: " + e.getMessage() + "\n\n" +
-                                "=== تفاصيل الخطأ التقنية ===\n" +
-                                Log.getStackTraceString(e) + "\n\n" +
-                                "=== معلومات النظام ===\n" +
-                                "نظام التشغيل: Android " + Build.VERSION.RELEASE + "\n" +
-                                "الجهاز: " + Build.MANUFACTURER + " " + Build.MODEL + "\n" +
-                                "وقت حدوث الخطأ: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-            Log.e(TAG, errorMessage, e);
-            showErrorAndExit(errorMessage);
         }
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        return NavigationUI.navigateUp(navController, appBarConfiguration)
+                || super.onSupportNavigateUp();
+    }
+
     private void showErrorAndExit(String errorMessage) {
-        // Copy error to clipboard
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("تفاصيل الخطأ", errorMessage);
-        clipboard.setPrimaryClip(clip);
-        
-        // Show error dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.Theme_Hhhhhhh));
-        builder.setTitle("خطأ في التطبيق")
-               .setMessage("حدث خطأ غير متوقع. تم نسخ تفاصيل الخطأ إلى الحافظة.\n\n" +
-                         "يمكنك لصق التفاصيل في أي مكان لمشاركتها مع المطور.")
-               .setPositiveButton("نسخ التفاصيل", (dialog, which) -> {
-                   // نسخ التفاصيل مرة أخرى للتأكد
-                   clipboard.setPrimaryClip(clip);
-                   Toast.makeText(this, "تم نسخ تفاصيل الخطأ إلى الحافظة", Toast.LENGTH_LONG).show();
-                   dialog.dismiss();
-                   finish();
-                   System.exit(1);
-               })
-               .setCancelable(false)
-               .show();
+        new AlertDialog.Builder(this)
+                .setTitle("خطأ في التطبيق")
+                .setMessage(errorMessage)
+                .setPositiveButton("خروج", (dialog, which) -> finish())
+                .setCancelable(false)
+                .show();
     }
 
     @Override
@@ -173,12 +162,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        return NavigationUI.navigateUp(navController, appBarConfiguration)
-                || super.onSupportNavigateUp();
     }
 
     public AccountRepository getAccountRepository() {
