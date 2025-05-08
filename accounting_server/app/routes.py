@@ -244,7 +244,12 @@ def get_accounts():
             'server_id': acc.id,  # إضافة server_id للتوافق
             'account_number': acc.account_number,
             'account_name': acc.account_name,
-            'balance': acc.balance
+            'balance': acc.balance,
+            'phone_number': acc.phone_number,  # إضافة رقم الهاتف
+            'is_debtor': acc.is_debtor,  # إضافة حالة المدين
+            'notes': acc.notes,  # إضافة الملاحظات
+            'created_at': int(acc.created_at.timestamp() * 1000) if acc.created_at else None,  # إضافة تاريخ الإنشاء
+            'updated_at': int(acc.updated_at.timestamp() * 1000) if acc.updated_at else None  # إضافة تاريخ التحديث
         } for acc in accounts])
     except Exception as e:
         logger.error(f"Get accounts error: {str(e)}")
