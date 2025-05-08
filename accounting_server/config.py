@@ -3,7 +3,7 @@ from datetime import timedelta
 
 class Config:
     # إعدادات قاعدة البيانات
-    SQLALCHEMY_DATABASE_URI = 'postgresql://accounting_user:Accounting@123@localhost/accounting_db'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://accounting_user:Accounting%40123@127.0.0.1/accounting_db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # إعدادات JWT
