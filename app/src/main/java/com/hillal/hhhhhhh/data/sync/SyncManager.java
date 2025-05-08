@@ -118,40 +118,22 @@ public class SyncManager {
                     newAccounts.size(), newTransactions.size());
                 Log.d(TAG, syncDetails);
 
-                // تحويل البيانات إلى JSON
-                JSONObject syncData = new JSONObject();
-                JSONArray accountsArray = new JSONArray();
-                JSONArray transactionsArray = new JSONArray();
-
-                // تحويل الحسابات
-                for (Account account : newAccounts) {
-                    JSONObject accountJson = new JSONObject();
-                    accountJson.put("account_number", account.getAccountNumber());
-                    accountJson.put("account_name", account.getName());
-                    accountJson.put("balance", account.getBalance());
-                    accountsArray.put(accountJson);
-                }
-
-                // تحويل المعاملات
-                for (Transaction transaction : newTransactions) {
-                    JSONObject transactionJson = new JSONObject();
-                    transactionJson.put("id", transaction.getId());
-                    String dateStr = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-                        .format(new java.util.Date(transaction.getDate()));
-                    transactionJson.put("date", dateStr);
-                    transactionJson.put("amount", transaction.getAmount());
-                    transactionJson.put("description", transaction.getDescription());
-                    transactionJson.put("account_id", transaction.getAccountId());
-                    transactionsArray.put(transactionJson);
-                }
-
-                syncData.put("accounts", accountsArray);
-                syncData.put("transactions", transactionsArray);
-
-                Log.d(TAG, "Sync data: " + syncData.toString());
-
                 // إرسال البيانات الجديدة إلى السيرفر
                 ApiService.SyncRequest syncRequest = new ApiService.SyncRequest(newAccounts, newTransactions);
+                Log.d(TAG, "Sending sync request with " + newAccounts.size() + " accounts and " + 
+                    newTransactions.size() + " transactions");
+                
+                // تسجيل تفاصيل البيانات المرسلة
+                for (Account account : newAccounts) {
+                    Log.d(TAG, String.format("Account: number=%s, name=%s, balance=%f", 
+                        account.getAccountNumber(), account.getName(), account.getBalance()));
+                }
+                
+                for (Transaction transaction : newTransactions) {
+                    Log.d(TAG, String.format("Transaction: id=%d, amount=%f, date=%s", 
+                        transaction.getId(), transaction.getAmount(), transaction.getFormattedDate()));
+                }
+                
                 apiService.syncData("Bearer " + token, syncRequest)
                     .enqueue(new Callback<Void>() {
                         @Override
@@ -160,6 +142,7 @@ public class SyncManager {
                                 updateLastSyncTime();
                                 String successMessage = String.format("تمت مزامنة %d حساب و %d معاملة بنجاح", 
                                     newAccounts.size(), newTransactions.size());
+                                Log.d(TAG, successMessage);
                                 callback.onSuccess();
                             } else {
                                 String errorMessage;
