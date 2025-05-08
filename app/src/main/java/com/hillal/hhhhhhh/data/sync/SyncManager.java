@@ -128,6 +128,18 @@ public class SyncManager {
                     }
                 }
 
+                // التحقق من صحة المعاملات
+                for (Transaction transaction : newTransactions) {
+                    // نتحقق فقط من الحقول الضرورية
+                    if (transaction.getType() == null || transaction.getType().isEmpty()) {
+                        transaction.setType("credit");
+                    }
+                    if (transaction.getCurrency() == null || transaction.getCurrency().isEmpty()) {
+                        transaction.setCurrency("YER");
+                    }
+                    // نترك الوصف فارغاً إذا لم يكن موجوداً
+                }
+
                 String syncDetails = String.format("جاري مزامنة %d حساب و %d معاملة", 
                     newAccounts.size(), newTransactions.size());
                 Log.d(TAG, syncDetails);
@@ -144,8 +156,9 @@ public class SyncManager {
                 }
                 
                 for (Transaction transaction : newTransactions) {
-                    Log.d(TAG, String.format("Transaction: id=%d, amount=%f, date=%s", 
-                        transaction.getId(), transaction.getAmount(), transaction.getFormattedDate()));
+                    Log.d(TAG, String.format("Transaction: id=%d, amount=%f, date=%s, description=%s, type=%s", 
+                        transaction.getId(), transaction.getAmount(), transaction.getFormattedDate(),
+                        transaction.getDescription(), transaction.getType()));
                 }
                 
                 apiService.syncData("Bearer " + token, syncRequest)
