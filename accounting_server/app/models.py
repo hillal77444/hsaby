@@ -14,7 +14,7 @@ class Account(db.Model):
     account_number = db.Column(db.String(20), nullable=False)
     account_name = db.Column(db.String(100), nullable=False)
     balance = db.Column(db.Float, default=0.0)
-    is_debtor = db.Column(db.Boolean, default=False)
+    is_debtor = db.Column(db.Boolean, default=False)  # قيمة افتراضية للبيانات القديمة
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -25,9 +25,9 @@ class Transaction(db.Model):
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     amount = db.Column(db.Float, nullable=False)
     description = db.Column(db.String(200))
-    type = db.Column(db.String(20), nullable=False, default='debit')  # debit, credit
-    currency = db.Column(db.String(20), nullable=False)  # لا نحدد قيمة افتراضية
-    notes = db.Column(db.Text)
+    type = db.Column(db.String(20), default='debit')  # قيمة افتراضية للبيانات القديمة
+    currency = db.Column(db.String(20), default='ريال يمني')  # قيمة افتراضية للبيانات القديمة
+    notes = db.Column(db.Text, default='')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     account_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
