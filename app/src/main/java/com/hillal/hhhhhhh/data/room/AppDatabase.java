@@ -14,8 +14,9 @@ import com.hillal.hhhhhhh.data.Converters;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.model.Settings;
+import com.hillal.hhhhhhh.data.model.PendingOperation;
 
-@Database(entities = {Account.class, Transaction.class, Settings.class}, version = 2, exportSchema = false)
+@Database(entities = {Account.class, Transaction.class, Settings.class, PendingOperation.class}, version = 2, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG = "AppDatabase";
@@ -25,6 +26,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract AccountDao accountDao();
     public abstract TransactionDao transactionDao();
     public abstract SettingsDao settingsDao();
+    public abstract PendingOperationDao pendingOperationDao();
 
     public static synchronized AppDatabase getInstance(Context context) {
         if (instance == null) {
