@@ -123,7 +123,13 @@ public class EditTransactionFragment extends Fragment {
         // Set initial values
         binding.amountEditText.setText(String.valueOf(transaction.getAmount()));
         binding.descriptionEditText.setText(transaction.getDescription());
-        binding.typeSpinner.setSelection(transaction.getType().equals("credit") ? 0 : 1);
+        
+        // Set type
+        if ("credit".equals(transaction.getType()) || "له".equals(transaction.getType())) {
+            binding.radioCredit.setChecked(true);
+        } else {
+            binding.radioDebit.setChecked(true);
+        }
         
         // Set date
         calendar.setTimeInMillis(transaction.getDate());
@@ -175,7 +181,7 @@ public class EditTransactionFragment extends Fragment {
         String amountStr = binding.amountEditText.getText().toString();
         String description = binding.descriptionEditText.getText().toString();
         String notes = binding.notesEditText.getText().toString();
-        boolean isDebit = binding.typeSpinner.getSelectedItem().toString().equals("عليه");
+        boolean isDebit = binding.radioDebit.isChecked();
         String currency = getSelectedCurrency();
 
         if (amountStr.isEmpty()) {
@@ -190,7 +196,7 @@ public class EditTransactionFragment extends Fragment {
             transaction.setId(transactionId);
             transaction.setAccountId(selectedAccountId);
             transaction.setAmount(amount);
-            transaction.setType(isDebit ? "عليه" : "له");
+            transaction.setType(isDebit ? "debit" : "credit");
             transaction.setDescription(description);
             transaction.setNotes(notes);
             transaction.setCurrency(currency);
