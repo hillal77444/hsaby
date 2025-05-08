@@ -116,17 +116,15 @@ public class SyncManager {
                 Log.d(TAG, "تم العثور على " + modifiedTransactions.size() + " معاملة معدلة");
 
                 // إنشاء طلب المزامنة
-                SyncRequest syncRequest = new SyncRequest(newAccounts, modifiedTransactions);
+                ApiService.SyncRequest syncRequest = new ApiService.SyncRequest(newAccounts, modifiedTransactions);
                 
                 // تحويل طلب المزامنة إلى JSON للنسخ
                 String syncRequestJson = new Gson().toJson(syncRequest);
 
                 // إرسال البيانات إلى السيرفر
-                Response<SyncResponse> response = apiService.syncData("Bearer " + token, syncRequest).execute();
+                Response<Void> response = apiService.syncData("Bearer " + token, syncRequest).execute();
                 
-                if (response.isSuccessful() && response.body() != null) {
-                    SyncResponse syncResponse = response.body();
-                    
+                if (response.isSuccessful()) {
                     // تحديث معرفات السيرفر للحسابات الجديدة
                     for (Account account : newAccounts) {
                         account.setServerId(account.getId());
