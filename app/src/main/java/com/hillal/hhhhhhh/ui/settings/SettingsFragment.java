@@ -21,7 +21,7 @@ import com.hillal.hhhhhhh.data.sync.SyncManager;
 import com.hillal.hhhhhhh.databinding.FragmentSettingsBinding;
 import com.hillal.hhhhhhh.viewmodel.SettingsViewModel;
 import com.hillal.hhhhhhh.data.room.AppDatabase;
-import com.hillal.hhhhhhh.data.DataManager;
+import com.hillal.hhhhhhh.data.remote.DataManager;
 
 public class SettingsFragment extends Fragment {
     private FragmentSettingsBinding binding;
@@ -30,13 +30,14 @@ public class SettingsFragment extends Fragment {
     private BackupManager backupManager;
     private SyncManager syncManager;
     private EncryptionManager encryptionManager;
+    private AppDatabase db;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         settingsViewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
         backupManager = new BackupManager(requireContext());
-        AppDatabase db = AppDatabase.getInstance(requireContext());
+        db = AppDatabase.getInstance(requireContext());
         syncManager = new SyncManager(requireContext(), db.accountDao(), db.transactionDao());
         encryptionManager = new EncryptionManager(requireContext());
         sharedPreferences = requireContext().getSharedPreferences("app_settings", 0);
@@ -117,8 +118,7 @@ public class SettingsFragment extends Fragment {
         });
 
         // إضافة زر جلب البيانات من السيرفر
-        Button fetchDataButton = view.findViewById(R.id.fetch_data_button);
-        fetchDataButton.setOnClickListener(v -> {
+        binding.fetchDataButton.setOnClickListener(v -> {
             DataManager dataManager = new DataManager(requireContext(), db.accountDao(), db.transactionDao());
             dataManager.fetchDataFromServer(new DataManager.DataCallback() {
                 @Override
