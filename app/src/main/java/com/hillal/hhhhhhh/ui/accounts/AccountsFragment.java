@@ -106,7 +106,7 @@ public class AccountsFragment extends Fragment {
 
             holder.itemView.setOnClickListener(v -> {
                 Bundle args = new Bundle();
-                args.putInt("accountId", (int) account.getId());
+                args.putLong("accountId", account.getId());
                 Navigation.findNavController(v).navigate(R.id.accountDetailsFragment, args);
             });
         }
