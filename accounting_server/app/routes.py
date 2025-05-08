@@ -5,9 +5,15 @@ from app.utils import hash_password, verify_password, generate_sync_token
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 from datetime import datetime
 import logging
+import json
 
 main = Blueprint('main', __name__)
 logger = logging.getLogger(__name__)
+
+def json_response(data, status_code=200):
+    response = jsonify(data)
+    response.headers['Content-Type'] = 'application/json; charset=utf-8'
+    return response, status_code
 
 @main.route('/api/register', methods=['POST'])
 def register():
@@ -91,11 +97,11 @@ def sync_data():
         data = request.get_json()
         
         if not data:
-            return jsonify({'error': 'لا توجد بيانات للمزامنة'}), 400
+            return json_response({'error': 'لا توجد بيانات للمزامنة'}, 400)
         
         # التحقق من صحة البيانات
         if 'accounts' not in data and 'transactions' not in data:
-            return jsonify({'error': 'يجب إرسال بيانات الحسابات أو المعاملات'}), 400
+            return json_response({'error': 'يجب إرسال بيانات الحسابات أو المعاملات'}, 400)
         
         # معالجة الحسابات
         if 'accounts' in data:
@@ -117,7 +123,7 @@ def sync_data():
                     else:
                         account.balance = account_data['balance']
                 except KeyError as e:
-                    return jsonify({'error': f'بيانات الحساب غير مكتملة: {str(e)}'}), 400
+                    return json_response({'error': f'بيانات الحساب غير مكتملة: {str(e)}'}, 400)
         
         # معالجة المعاملات
         if 'transactions' in data:
@@ -139,17 +145,17 @@ def sync_data():
                         )
                         db.session.add(transaction)
                 except KeyError as e:
-                    return jsonify({'error': f'بيانات المعاملة غير مكتملة: {str(e)}'}), 400
+                    return json_response({'error': f'بيانات المعاملة غير مكتملة: {str(e)}'}, 400)
                 except ValueError as e:
-                    return jsonify({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}), 400
+                    return json_response({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}, 400)
         
         db.session.commit()
-        return jsonify({'message': 'تمت المزامنة بنجاح'})
+        return json_response({'message': 'تمت المزامنة بنجاح'})
         
     except Exception as e:
         logger.error(f"Sync error: {str(e)}")
         db.session.rollback()
-        return jsonify({'error': 'حدث خطأ أثناء المزامنة'}), 500
+        return json_response({'error': 'حدث خطأ أثناء المزامنة'}, 500)
 
 @main.route('/api/accounts', methods=['GET'])
 @jwt_required()
