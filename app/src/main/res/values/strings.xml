@@ -25,6 +25,7 @@
     <string name="menu_settings">الإعدادات</string>
     <string name="menu_account_details">تفاصيل الحساب</string>
     <string name="menu_add_account">إضافة حساب</string>
+    <string name="menu_edit_account">تعديل الحساب</string>
     <string name="menu_add_transaction">إضافة قيد محاسبي</string>
 
     <!-- عناوين الشاشات -->
