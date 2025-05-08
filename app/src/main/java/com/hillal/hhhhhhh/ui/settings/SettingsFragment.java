@@ -87,7 +87,10 @@ public class SettingsFragment extends Fragment {
     }
 
     private void setupSyncSettings() {
-        binding.switchAutoSync.setChecked(syncManager.isAutoSyncEnabled());
+        // تفعيل المزامنة التلقائية افتراضياً
+        binding.switchAutoSync.setChecked(true);
+        syncManager.enableAutoSync(true);
+        
         binding.switchAutoSync.setOnCheckedChangeListener((buttonView, isChecked) -> {
             syncManager.enableAutoSync(isChecked);
             Toast.makeText(getContext(), 
