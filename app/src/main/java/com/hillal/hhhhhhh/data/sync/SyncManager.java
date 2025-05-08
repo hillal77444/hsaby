@@ -24,7 +24,8 @@ public class SyncManager {
     private final AccountDao accountDao;
     private final TransactionDao transactionDao;
     private final Handler handler;
-    private boolean isAutoSyncEnabled = true; // تفعيل المزامنة التلقائية افتراضياً
+    private boolean isAutoSyncEnabled = true;
+    private long lastSyncTime = 0;
 
     public SyncManager(Context context, AccountDao accountDao, TransactionDao transactionDao) {
         this.context = context;
@@ -32,7 +33,22 @@ public class SyncManager {
         this.accountDao = accountDao;
         this.transactionDao = transactionDao;
         this.handler = new Handler(Looper.getMainLooper());
+        this.lastSyncTime = getLastSyncTime();
         startAutoSync();
+    }
+
+    private long getLastSyncTime() {
+        return context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
+                .getLong("last_sync_time", 0);
+    }
+
+    private void updateLastSyncTime() {
+        long currentTime = System.currentTimeMillis();
+        context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
+                .edit()
+                .putLong("last_sync_time", currentTime)
+                .apply();
+        this.lastSyncTime = currentTime;
     }
 
     public interface SyncCallback {
@@ -56,36 +72,51 @@ public class SyncManager {
                             Log.e(TAG, "Auto sync failed: " + error);
                         }
                     });
-                    // تكرار المزامنة كل 30 دقيقة
                     handler.postDelayed(this, 30 * 60 * 1000);
                 }
-            }, 30 * 60 * 1000); // أول مزامنة بعد 30 دقيقة
+            }, 30 * 60 * 1000);
         }
     }
 
     public void syncData(SyncCallback callback) {
-        // جمع البيانات من قاعدة البيانات المحلية
         new Thread(() -> {
-            List<Account> accounts = accountDao.getAllAccountsSync();
-            List<Transaction> transactions = transactionDao.getAllTransactionsSync();
-            
-            // إرسال البيانات إلى السيرفر
-            apiService.syncData(new SyncRequest(accounts, transactions)).enqueue(new Callback<Void>() {
-                @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
-                    if (response.isSuccessful()) {
-                        callback.onSuccess();
-                    } else {
-                        callback.onError("فشل المزامنة");
-                    }
+            try {
+                // جلب البيانات الجديدة فقط
+                List<Account> newAccounts = accountDao.getAccountsModifiedAfter(lastSyncTime);
+                List<Transaction> newTransactions = transactionDao.getTransactionsModifiedAfter(lastSyncTime);
+                
+                if (newAccounts.isEmpty() && newTransactions.isEmpty()) {
+                    Log.d(TAG, "No new data to sync");
+                    callback.onSuccess();
+                    return;
                 }
 
-                @Override
-                public void onFailure(Call<Void> call, Throwable t) {
-                    Log.e(TAG, "Sync error: " + t.getMessage());
-                    callback.onError("خطأ في الاتصال");
-                }
-            });
+                Log.d(TAG, "Syncing " + newAccounts.size() + " accounts and " + 
+                          newTransactions.size() + " transactions");
+
+                // إرسال البيانات الجديدة إلى السيرفر
+                apiService.syncData(new SyncRequest(newAccounts, newTransactions))
+                    .enqueue(new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            if (response.isSuccessful()) {
+                                updateLastSyncTime();
+                                callback.onSuccess();
+                            } else {
+                                callback.onError("فشل المزامنة");
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Void> call, Throwable t) {
+                            Log.e(TAG, "Sync error: " + t.getMessage());
+                            callback.onError("خطأ في الاتصال");
+                        }
+                    });
+            } catch (Exception e) {
+                Log.e(TAG, "Error during sync: " + e.getMessage());
+                callback.onError("خطأ في المزامنة");
+            }
         }).start();
     }
 
@@ -105,7 +136,7 @@ public class SyncManager {
 
     public boolean isAutoSyncEnabled() {
         return context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
-                .getBoolean("auto_sync", true); // القيمة الافتراضية true
+                .getBoolean("auto_sync", true);
     }
 
     public void setSyncInterval(int minutes) {
