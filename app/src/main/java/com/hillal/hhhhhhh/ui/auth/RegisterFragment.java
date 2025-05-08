@@ -1,93 +1,120 @@
 package com.hillal.hhhhhhh.ui.auth;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.databinding.FragmentRegisterBinding;
 import com.hillal.hhhhhhh.viewmodel.AuthViewModel;
 
 public class RegisterFragment extends Fragment {
+    private static final String TAG = "RegisterFragment";
     private FragmentRegisterBinding binding;
     private AuthViewModel authViewModel;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentRegisterBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
-
-        setupRegisterButton();
-        observeAuthState();
-
-        return root;
+        return binding.getRoot();
     }
 
-    private void setupRegisterButton() {
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+
         binding.buttonRegister.setOnClickListener(v -> {
-            String fullName = binding.editTextFullName.getText().toString();
-            String displayName = binding.editTextDisplayName.getText().toString();
-            String phone = binding.editTextPhone.getText().toString();
+            String fullName = binding.editTextFullName.getText().toString().trim();
+            String displayName = binding.editTextDisplayName.getText().toString().trim();
+            String phone = binding.editTextPhone.getText().toString().trim();
             String password = binding.editTextPassword.getText().toString();
             String confirmPassword = binding.editTextConfirmPassword.getText().toString();
 
             // التحقق من صحة المدخلات
-            if (fullName.isEmpty() || displayName.isEmpty() || phone.isEmpty() || 
-                password.isEmpty() || confirmPassword.isEmpty()) {
-                Toast.makeText(getContext(), "يرجى ملء جميع الحقول", Toast.LENGTH_SHORT).show();
+            if (fullName.isEmpty()) {
+                binding.editTextFullName.setError("الرجاء إدخال الاسم الرباعي");
                 return;
             }
-
+            if (displayName.isEmpty()) {
+                binding.editTextDisplayName.setError("الرجاء إدخال الاسم المستخدم في الإشعارات");
+                return;
+            }
+            if (phone.isEmpty()) {
+                binding.editTextPhone.setError("الرجاء إدخال رقم الهاتف");
+                return;
+            }
+            if (password.isEmpty()) {
+                binding.editTextPassword.setError("الرجاء إدخال كلمة المرور");
+                return;
+            }
+            if (confirmPassword.isEmpty()) {
+                binding.editTextConfirmPassword.setError("الرجاء تأكيد كلمة المرور");
+                return;
+            }
             if (!password.equals(confirmPassword)) {
-                Toast.makeText(getContext(), "كلمات المرور غير متطابقة", Toast.LENGTH_SHORT).show();
+                binding.editTextConfirmPassword.setError("كلمة المرور غير متطابقة");
                 return;
             }
 
-            if (password.length() < 6) {
-                Toast.makeText(getContext(), "يجب أن تكون كلمة المرور 6 أحرف على الأقل", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            // تعطيل الزر أثناء عملية التسجيل
+            binding.buttonRegister.setEnabled(false);
+            binding.progressBar.setVisibility(View.VISIBLE);
 
-            // دمج الاسم الكامل واسم العرض في حقل واحد
+            Log.d(TAG, "Attempting to register with phone: " + phone);
+            
+            // دمج الاسم الرباعي واسم العرض في اسم مستخدم واحد
             String username = fullName + " (" + displayName + ")";
-            authViewModel.register(username, phone, password);
-        });
-    }
+            
+            authViewModel.register(username, phone, password, new AuthViewModel.AuthCallback() {
+                @Override
+                public void onSuccess() {
+                    Log.d(TAG, "Registration successful");
+                    binding.progressBar.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), "تم إنشاء الحساب بنجاح", Toast.LENGTH_SHORT).show();
+                    NavHostFragment.findNavController(RegisterFragment.this)
+                            .navigate(R.id.action_registerFragment_to_loginFragment);
+                }
 
-    private void observeAuthState() {
-        authViewModel.getAuthState().observe(getViewLifecycleOwner(), state -> {
-            switch (state) {
-                case LOADING:
-                    binding.buttonRegister.setEnabled(false);
-                    break;
-                case SUCCESS:
-                    Navigation.findNavController(requireView())
-                            .navigate(R.id.action_register_to_home);
-                    break;
-                case ERROR:
+                @Override
+                public void onError(String error) {
+                    Log.e(TAG, "Registration failed: " + error);
+                    binding.progressBar.setVisibility(View.GONE);
                     binding.buttonRegister.setEnabled(true);
-                    Toast.makeText(getContext(), "فشل إنشاء الحساب", Toast.LENGTH_SHORT).show();
-                    break;
-                default:
-                    binding.buttonRegister.setEnabled(true);
-                    break;
-            }
+                    
+                    // رسائل خطأ أكثر تفصيلاً
+                    String errorMessage;
+                    if (error.contains("UnknownHostException")) {
+                        errorMessage = "لا يمكن الوصول إلى الخادم. يرجى التحقق من اتصال الإنترنت";
+                    } else if (error.contains("SocketTimeoutException")) {
+                        errorMessage = "انتهت مهلة الاتصال بالخادم. يرجى المحاولة مرة أخرى";
+                    } else if (error.contains("500")) {
+                        errorMessage = "خطأ في الخادم. يرجى المحاولة لاحقاً";
+                    } else if (error.contains("400")) {
+                        errorMessage = "بيانات غير صحيحة. يرجى التحقق من المدخلات";
+                    } else if (error.contains("409")) {
+                        errorMessage = "رقم الهاتف مسجل مسبقاً";
+                    } else {
+                        errorMessage = "فشل إنشاء الحساب: " + error;
+                    }
+                    
+                    Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
+                }
+            });
         });
+
+        binding.buttonBackToLogin.setOnClickListener(v -> 
+            NavHostFragment.findNavController(RegisterFragment.this)
+                    .navigate(R.id.action_registerFragment_to_loginFragment)
+        );
     }
 
     @Override
