@@ -84,11 +84,14 @@ public class SyncManager {
 
     private void startAutoSync() {
         if (isAutoSyncEnabled) {
-            handler.postDelayed(new Runnable() {
+            Log.d(TAG, "Starting auto sync scheduler...");
+            handler.removeCallbacksAndMessages(null); // إزالة أي مهام سابقة
+            
+            Runnable syncRunnable = new Runnable() {
                 @Override
                 public void run() {
                     if (isNetworkAvailable()) {
-                        Log.d(TAG, "Starting auto sync...");
+                        Log.d(TAG, "Executing auto sync...");
                         // جلب البيانات من السيرفر أولاً
                         DataManager dataManager = new DataManager(
                             context,
@@ -107,6 +110,8 @@ public class SyncManager {
                                         Log.d(TAG, "Auto sync successful");
                                         updateLastSyncTime();
                                         currentRetryCount = 0;
+                                        // جدولة المزامنة التالية
+                                        handler.postDelayed(this, SYNC_INTERVAL);
                                     }
 
                                     @Override
@@ -124,13 +129,14 @@ public class SyncManager {
                             }
                         });
                     } else {
-                        Log.d(TAG, "No network available, skipping sync");
+                        Log.d(TAG, "No network available, retrying in 1 minute...");
+                        handler.postDelayed(this, 60 * 1000); // محاولة بعد دقيقة
                     }
-
-                    // جدولة المزامنة التالية
-                    handler.postDelayed(this, SYNC_INTERVAL);
                 }
-            }, SYNC_INTERVAL);
+            };
+
+            // بدء المزامنة التلقائية
+            handler.post(syncRunnable);
         }
     }
 
@@ -256,17 +262,23 @@ public class SyncManager {
     }
 
     public void enableAutoSync(boolean enable) {
-        // دائماً نرجع true لأن المزامنة التلقائية مفعلة بشكل افتراضي
-        isAutoSyncEnabled = true;
+        Log.d(TAG, "Setting auto sync to: " + enable);
+        isAutoSyncEnabled = enable;
         context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
                 .edit()
-                .putBoolean("auto_sync", true)
+                .putBoolean("auto_sync", enable)
                 .apply();
         
-        // بدء المزامنة التلقائية
-        startAutoSync();
-        // تنفيذ مزامنة فورية
-        performInitialSync();
+        if (enable) {
+            // بدء المزامنة التلقائية
+            startAutoSync();
+            // تنفيذ مزامنة فورية
+            performInitialSync();
+        } else {
+            // إيقاف المزامنة التلقائية
+            handler.removeCallbacksAndMessages(null);
+            Log.d(TAG, "Auto sync disabled");
+        }
     }
 
     private void performInitialSync() {
