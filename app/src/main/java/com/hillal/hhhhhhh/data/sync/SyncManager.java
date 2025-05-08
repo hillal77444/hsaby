@@ -127,7 +127,7 @@ public class SyncManager {
                 for (Account account : newAccounts) {
                     JSONObject accountJson = new JSONObject();
                     accountJson.put("account_number", account.getAccountNumber());
-                    accountJson.put("account_name", account.getAccountName());
+                    accountJson.put("account_name", account.getName());
                     accountJson.put("balance", account.getBalance());
                     accountsArray.put(accountJson);
                 }
@@ -136,7 +136,9 @@ public class SyncManager {
                 for (Transaction transaction : newTransactions) {
                     JSONObject transactionJson = new JSONObject();
                     transactionJson.put("id", transaction.getId());
-                    transactionJson.put("date", transaction.getDate().toString());
+                    String dateStr = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                        .format(new java.util.Date(transaction.getDate()));
+                    transactionJson.put("date", dateStr);
                     transactionJson.put("amount", transaction.getAmount());
                     transactionJson.put("description", transaction.getDescription());
                     transactionJson.put("account_id", transaction.getAccountId());
@@ -149,7 +151,8 @@ public class SyncManager {
                 Log.d(TAG, "Sync data: " + syncData.toString());
 
                 // إرسال البيانات الجديدة إلى السيرفر
-                apiService.syncData("Bearer " + token, syncData.toString())
+                ApiService.SyncRequest syncRequest = new ApiService.SyncRequest(newAccounts, newTransactions);
+                apiService.syncData("Bearer " + token, syncRequest)
                     .enqueue(new Callback<Void>() {
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
