@@ -15,6 +15,8 @@ class Account(db.Model):
     account_name = db.Column(db.String(100), nullable=False)
     balance = db.Column(db.Float, default=0.0)
     is_debtor = db.Column(db.Boolean, default=False)  # قيمة افتراضية للبيانات القديمة
+    phone_number = db.Column(db.String(20))  # إضافة حقل رقم الهاتف
+    notes = db.Column(db.Text)  # إضافة حقل الملاحظات
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
