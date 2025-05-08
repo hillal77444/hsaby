@@ -41,6 +41,8 @@ public class SyncManager {
     private static final int SYNC_INTERVAL = 5 * 60 * 1000; // 5 دقائق
     private static final int MAX_RETRY_COUNT = 3;
     private int currentRetryCount = 0;
+    private static final String SYNC_TAG = "sync_task";
+    private Runnable currentSyncTask;
 
     public SyncManager(Context context, AccountDao accountDao, TransactionDao transactionDao) {
         this.context = context;
@@ -82,62 +84,68 @@ public class SyncManager {
         void onError(String error);
     }
 
-    private void startAutoSync() {
-        if (isAutoSyncEnabled) {
-            Log.d(TAG, "Starting auto sync scheduler...");
-            handler.removeCallbacksAndMessages(null); // إزالة أي مهام سابقة
-            
-            Runnable syncRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    if (isNetworkAvailable()) {
-                        Log.d(TAG, "Executing auto sync...");
-                        // جلب البيانات من السيرفر أولاً
-                        DataManager dataManager = new DataManager(
-                            context,
-                            accountDao,
-                            transactionDao,
-                            null
-                        );
+    public void startAutoSync() {
+        if (!isAutoSyncEnabled) {
+            Log.d(TAG, "Auto sync is disabled");
+            return;
+        }
 
-                        dataManager.fetchDataFromServer(new DataManager.DataCallback() {
+        Log.d(TAG, "Starting auto sync scheduler...");
+        
+        // إزالة المهام السابقة فقط إذا كانت هناك مزامنة جديدة
+        if (currentSyncTask != null) {
+            handler.removeCallbacks(currentSyncTask);
+        }
+
+        currentSyncTask = new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "Executing auto sync...");
+                if (!isNetworkAvailable()) {
+                    Log.d(TAG, "No network available, retrying in 1 minute");
+                    handler.postDelayed(this, 60000); // Retry after 1 minute
+                    return;
+                }
+
+                DataManager dataManager = new DataManager(
+                    context,
+                    accountDao,
+                    transactionDao,
+                    null
+                );
+
+                dataManager.fetchDataFromServer(new DataManager.DataCallback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(TAG, "Data fetched successfully, syncing...");
+                        syncData(new SyncCallback() {
                             @Override
                             public void onSuccess() {
-                                // بعد جلب البيانات، نقوم بمزامنة التغييرات المحلية
-                                syncData(new SyncCallback() {
-                                    @Override
-                                    public void onSuccess() {
-                                        Log.d(TAG, "Auto sync successful");
-                                        updateLastSyncTime();
-                                        currentRetryCount = 0;
-                                        // جدولة المزامنة التالية
-                                        handler.postDelayed(this, SYNC_INTERVAL);
-                                    }
-
-                                    @Override
-                                    public void onError(String error) {
-                                        Log.e(TAG, "Auto sync failed: " + error);
-                                        handleSyncFailure();
-                                    }
-                                });
+                                Log.d(TAG, "Auto sync successful");
+                                updateLastSyncTime();
+                                currentRetryCount = 0;
+                                // جدولة المزامنة التالية
+                                handler.postDelayed(currentSyncTask, SYNC_INTERVAL);
                             }
 
                             @Override
                             public void onError(String error) {
-                                Log.e(TAG, "Auto fetch failed: " + error);
+                                Log.e(TAG, "Auto sync failed: " + error);
                                 handleSyncFailure();
                             }
                         });
-                    } else {
-                        Log.d(TAG, "No network available, retrying in 1 minute...");
-                        handler.postDelayed(this, 60 * 1000); // محاولة بعد دقيقة
                     }
-                }
-            };
 
-            // بدء المزامنة التلقائية
-            handler.post(syncRunnable);
-        }
+                    @Override
+                    public void onError(String error) {
+                        Log.e(TAG, "Error fetching data: " + error);
+                        handleSyncFailure();
+                    }
+                });
+            }
+        };
+
+        handler.post(currentSyncTask);
     }
 
     private void handleSyncFailure() {
@@ -276,7 +284,10 @@ public class SyncManager {
             performInitialSync();
         } else {
             // إيقاف المزامنة التلقائية
-            handler.removeCallbacksAndMessages(null);
+            if (currentSyncTask != null) {
+                handler.removeCallbacks(currentSyncTask);
+                currentSyncTask = null;
+            }
             Log.d(TAG, "Auto sync disabled");
         }
     }
