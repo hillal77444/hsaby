@@ -3,12 +3,16 @@ package com.hillal.hhhhhhh.data.model;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.Ignore;
+import androidx.room.ColumnInfo;
 import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "transactions")
 public class Transaction {
     @PrimaryKey(autoGenerate = true)
     private long id;
+
+    @SerializedName("server_id")
+    private long serverId;
 
     @SerializedName("account_id")
     private long accountId;
@@ -64,6 +68,14 @@ public class Transaction {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public long getServerId() {
+        return serverId;
+    }
+
+    public void setServerId(long serverId) {
+        this.serverId = serverId;
     }
 
     public long getAccountId() {
