@@ -98,7 +98,7 @@ public class SyncManager {
                         .getString("token", null);
                 
                 if (token == null) {
-                    String error = "يرجى تسجيل الدخول أولاً";
+                    final String error = "يرجى تسجيل الدخول أولاً";
                     copyToClipboard(error);
                     handler.post(() -> callback.onError(error));
                     return;
@@ -159,8 +159,8 @@ public class SyncManager {
                                 Log.d(TAG, successMessage);
                                 handler.post(() -> callback.onSuccess());
                             } else {
-                                String errorMessage;
                                 try {
+                                    final String errorMessage;
                                     if (response.errorBody() != null) {
                                         String errorBody = response.errorBody().string();
                                         Log.d(TAG, "Error response body: " + errorBody);
@@ -175,20 +175,22 @@ public class SyncManager {
                                     } else {
                                         errorMessage = String.format("فشل المزامنة (رمز الخطأ: %d)", response.code());
                                     }
+                                    Log.e(TAG, "Sync failed: " + errorMessage);
+                                    copyToClipboard(errorMessage);
+                                    handler.post(() -> callback.onError(errorMessage));
                                 } catch (Exception e) {
                                     Log.e(TAG, "Error parsing error response", e);
-                                    errorMessage = String.format("فشل المزامنة (رمز الخطأ: %d)", response.code());
+                                    final String errorMessage = String.format("فشل المزامنة (رمز الخطأ: %d)", response.code());
+                                    copyToClipboard(errorMessage);
+                                    handler.post(() -> callback.onError(errorMessage));
                                 }
-                                Log.e(TAG, "Sync failed: " + errorMessage);
-                                copyToClipboard(errorMessage);
-                                handler.post(() -> callback.onError(errorMessage));
                             }
                         }
 
                         @Override
                         public void onFailure(Call<Void> call, Throwable t) {
                             Log.e(TAG, "Sync error: " + t.getMessage());
-                            String errorMessage;
+                            final String errorMessage;
                             if (t instanceof java.net.UnknownHostException) {
                                 errorMessage = "لا يمكن الوصول إلى الخادم. يرجى التحقق من اتصال الإنترنت";
                             } else if (t instanceof java.net.SocketTimeoutException) {
@@ -202,7 +204,7 @@ public class SyncManager {
                     });
             } catch (Exception e) {
                 Log.e(TAG, "Error during sync: " + e.getMessage());
-                String errorMessage = "خطأ في المزامنة: " + e.getMessage();
+                final String errorMessage = "خطأ في المزامنة: " + e.getMessage();
                 copyToClipboard(errorMessage);
                 handler.post(() -> callback.onError(errorMessage));
             }
@@ -238,7 +240,7 @@ public class SyncManager {
 
     public int getSyncInterval() {
         return context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
-                .getInt("sync_interval", 30); // القيمة الافتراضية 30 دقيقة
+                .getInt("sync_interval", 5); // القيمة الافتراضية 30 دقيقة
     }
 
     private static class SyncRequest {
