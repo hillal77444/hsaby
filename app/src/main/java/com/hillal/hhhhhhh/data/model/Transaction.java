@@ -161,7 +161,14 @@ public class Transaction {
         return date;
     }
 
-    public void setDate(Object dateValue) {
+    // Setter for Room
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    // Additional setter for handling different date formats
+    @Ignore
+    public void setDateValue(Object dateValue) {
         this.date = parseDate(dateValue);
     }
 
