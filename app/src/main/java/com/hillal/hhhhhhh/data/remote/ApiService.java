@@ -57,5 +57,14 @@ public interface ApiService {
             this.accounts = accounts;
             this.transactions = transactions;
         }
+
+        // Getters for JSON serialization
+        public List<Account> getAccounts() {
+            return accounts;
+        }
+
+        public List<Transaction> getTransactions() {
+            return transactions;
+        }
     }
 } 
