@@ -16,6 +16,7 @@ import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.databinding.FragmentDashboardBinding;
 import com.hillal.hhhhhhh.App;
+import com.hillal.hhhhhhh.data.SyncManager;
 
 public class DashboardFragment extends Fragment {
     private static final String TAG = "DashboardFragment";
@@ -51,6 +52,15 @@ public class DashboardFragment extends Fragment {
         Log.d(TAG, "DashboardFragment onViewCreated started");
 
         try {
+            // استدعاء المزامنة عند دخول لوحة التحكم
+            App app = (App) requireActivity().getApplication();
+            SyncManager syncManager = new SyncManager(
+                requireContext(),
+                app.getDatabase().accountDao(),
+                app.getDatabase().transactionDao()
+            );
+            syncManager.onDashboardEntered();
+
             setupClickListeners();
             observeData();
         } catch (Exception e) {
