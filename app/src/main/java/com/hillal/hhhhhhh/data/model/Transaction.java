@@ -21,6 +21,12 @@ public class Transaction {
     @SerializedName("description")
     private String description;
 
+    @SerializedName("notes")
+    private String notes;
+
+    @SerializedName("currency")
+    private String currency;
+
     @SerializedName("date")
     private long date;
 
@@ -31,11 +37,19 @@ public class Transaction {
     private long updatedAt;
 
     // Constructor
-    public Transaction(long accountId, double amount, String type, String description) {
+    public Transaction(long accountId, double amount, String type, String description, String currency) {
         this.accountId = accountId;
         this.amount = amount;
         this.type = type;
         this.description = description;
+        this.currency = currency;
+        this.date = System.currentTimeMillis();
+        this.createdAt = System.currentTimeMillis();
+        this.updatedAt = System.currentTimeMillis();
+    }
+
+    // Empty constructor for Room
+    public Transaction() {
         this.date = System.currentTimeMillis();
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
@@ -80,6 +94,22 @@ public class Transaction {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
     public long getDate() {
