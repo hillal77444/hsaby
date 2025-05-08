@@ -19,7 +19,7 @@ public interface ApiService {
     Call<User> register(@Body RegisterRequest request);
 
     @POST("api/sync")
-    Call<Void> syncData(@Body SyncRequest request);
+    Call<Void> syncData(@Header("Authorization") String token, @Body SyncRequest request);
 
     @GET("api/accounts")
     Call<List<Account>> getAccounts(@Header("Authorization") String token);
