@@ -84,8 +84,8 @@ public class TransactionRepository {
         return transactionDao.getTotalCredit(accountId);
     }
 
-    public List<Transaction> getTransactionsModifiedAfter(long timestamp) {
-        return transactionDao.getTransactionsModifiedAfter(timestamp);
+    public List<Transaction> getModifiedTransactions(long timestamp) {
+        return transactionDao.getModifiedTransactions(timestamp);
     }
 
     public void insert(Transaction transaction) {
