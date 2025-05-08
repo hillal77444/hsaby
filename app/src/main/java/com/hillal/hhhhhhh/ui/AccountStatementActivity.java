@@ -202,11 +202,11 @@ public class AccountStatementActivity extends AppCompatActivity {
         for (String currency : currencyMap.keySet()) {
             List<Transaction> allCurrencyTransactions = currencyMap.get(currency);
             // رتب العمليات من الأقدم إلى الأحدث
-            Collections.sort(allCurrencyTransactions, (a, b) -> a.getDate().compareTo(b.getDate()));
+            sortTransactionsByDate(allCurrencyTransactions);
             // احسب الرصيد السابق (كل العمليات قبل startDate)
             double previousBalance = 0;
             for (Transaction t : allCurrencyTransactions) {
-                if (t.getDate().before(startDate)) {
+                if (t.getDate() < startDate.getTime()) {
                     if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
                         previousBalance -= t.getAmount();
                     } else {
@@ -218,7 +218,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             double totalDebit = 0;
             double totalCredit = 0;
             for (Transaction t : allCurrencyTransactions) {
-                if (!t.getDate().before(startDate) && !t.getDate().after(endDate)) {
+                if (t.getDate() >= startDate.getTime() && t.getDate() <= endDate.getTime()) {
                     if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
                         totalDebit += t.getAmount();
                     } else {
@@ -245,7 +245,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             // العمليات خلال الفترة
             double runningBalance = previousBalance;
             for (Transaction transaction : allCurrencyTransactions) {
-                if (!transaction.getDate().before(startDate) && !transaction.getDate().after(endDate)) {
+                if (transaction.getDate() >= startDate.getTime() && transaction.getDate() <= endDate.getTime()) {
                     html.append("<tr>");
                     html.append("<td>").append(dateFormat.format(transaction.getDate())).append("</td>");
                     html.append("<td>").append(transaction.getDescription()).append("</td>");
@@ -297,6 +297,19 @@ public class AccountStatementActivity extends AppCompatActivity {
             }
         }
         return null;
+    }
+
+    private void sortTransactionsByDate(List<Transaction> transactions) {
+        Collections.sort(transactions, (a, b) -> Long.compare(a.getDate(), b.getDate()));
+    }
+
+    private boolean isTransactionInDateRange(Transaction transaction, Date startDate, Date endDate) {
+        long transactionDate = transaction.getDate();
+        return transactionDate >= startDate.getTime() && transactionDate <= endDate.getTime();
+    }
+
+    private void filterTransactionsByDateRange(List<Transaction> transactions, Date startDate, Date endDate) {
+        transactions.removeIf(t -> !isTransactionInDateRange(t, startDate, endDate));
     }
 
     @Override
