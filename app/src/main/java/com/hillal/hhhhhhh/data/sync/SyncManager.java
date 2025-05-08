@@ -112,8 +112,9 @@ public class SyncManager {
                     return;
                 }
 
-                Log.d(TAG, "Syncing " + newAccounts.size() + " accounts and " + 
-                          newTransactions.size() + " transactions");
+                String syncDetails = String.format("جاري مزامنة %d حساب و %d معاملة", 
+                    newAccounts.size(), newTransactions.size());
+                Log.d(TAG, syncDetails);
 
                 // إرسال البيانات الجديدة إلى السيرفر
                 apiService.syncData("Bearer " + token, new ApiService.SyncRequest(newAccounts, newTransactions))
@@ -122,24 +123,27 @@ public class SyncManager {
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             if (response.isSuccessful()) {
                                 updateLastSyncTime();
+                                String successMessage = String.format("تمت مزامنة %d حساب و %d معاملة بنجاح", 
+                                    newAccounts.size(), newTransactions.size());
                                 callback.onSuccess();
                             } else {
                                 String errorMessage;
                                 try {
                                     if (response.errorBody() != null) {
                                         String errorBody = response.errorBody().string();
+                                        Log.d(TAG, "Error response body: " + errorBody);
                                         // محاولة تحليل رسالة الخطأ من JSON
                                         if (errorBody.contains("error")) {
                                             errorMessage = errorBody.split("\"error\":\"")[1].split("\"")[0];
                                         } else {
-                                            errorMessage = "فشل المزامنة: " + response.code();
+                                            errorMessage = String.format("فشل المزامنة (رمز الخطأ: %d)", response.code());
                                         }
                                     } else {
-                                        errorMessage = "فشل المزامنة: " + response.code();
+                                        errorMessage = String.format("فشل المزامنة (رمز الخطأ: %d)", response.code());
                                     }
                                 } catch (Exception e) {
                                     Log.e(TAG, "Error parsing error response", e);
-                                    errorMessage = "فشل المزامنة: " + response.code();
+                                    errorMessage = String.format("فشل المزامنة (رمز الخطأ: %d)", response.code());
                                 }
                                 Log.e(TAG, "Sync failed: " + errorMessage);
                                 copyToClipboard(errorMessage);
