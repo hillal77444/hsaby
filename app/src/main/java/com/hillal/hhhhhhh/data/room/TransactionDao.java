@@ -16,6 +16,9 @@ public interface TransactionDao {
     @Insert
     void insert(Transaction transaction);
 
+    @Insert
+    void insertAll(List<Transaction> transactions);
+
     @Update
     void update(Transaction transaction);
 
