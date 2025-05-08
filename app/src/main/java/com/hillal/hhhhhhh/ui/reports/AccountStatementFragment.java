@@ -90,7 +90,7 @@ public class AccountStatementFragment extends Fragment {
         accountViewModel.getAccountById(accountId).observe(getViewLifecycleOwner(), account -> {
             if (account != null) {
                 accountNameText.setText(account.getName());
-                accountBalanceText.setText(String.format("الرصيد: %.2f", account.getOpeningBalance()));
+                accountBalanceText.setText(String.format("الرصيد: %.2f", account.getBalance()));
                 loadTransactions();
             }
         });
