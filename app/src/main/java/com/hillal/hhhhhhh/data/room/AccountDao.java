@@ -16,6 +16,9 @@ public interface AccountDao {
     @Insert
     void insert(Account account);
 
+    @Insert
+    void insertAll(List<Account> accounts);
+
     @Update
     void update(Account account);
 
