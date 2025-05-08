@@ -122,7 +122,7 @@ public class AddTransactionFragment extends Fragment {
         String amountStr = binding.amountEditText.getText().toString();
         String description = binding.descriptionEditText.getText().toString();
         String notes = binding.notesEditText.getText().toString();
-        boolean isDebit = binding.typeRadioGroup.getCheckedRadioButtonId() == R.id.radioDebit;
+        boolean isDebit = binding.radioDebit.isChecked();
         String currency = getSelectedCurrency();
 
         if (amountStr.isEmpty()) {
