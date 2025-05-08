@@ -3,8 +3,11 @@ from datetime import timedelta
 
 class Config:
     # إعدادات قاعدة البيانات
-    SQLALCHEMY_DATABASE_URI = 'postgresql://accounting_user:Accounting%40123@127.0.0.1/accounting_db'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:////root/accounting_server/data/accounting.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # مسار قاعدة البيانات
+    DATABASE_PATH = '/root/accounting_server/data'
     
     # إعدادات JWT
     JWT_SECRET_KEY = 'accounting-app-secure-jwt-key-2024'  # مفتاح آمن للإنتاج
