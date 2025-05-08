@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private AccountRepository accountRepository;
     private AppBarConfiguration appBarConfiguration;
     private AuthViewModel authViewModel;
+    private SyncManager syncManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,5 +167,14 @@ public class MainActivity extends AppCompatActivity {
 
     public AccountRepository getAccountRepository() {
         return accountRepository;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // تفعيل المزامنة عند العودة إلى التطبيق
+        if (syncManager != null) {
+            syncManager.onDashboardEntered();
+        }
     }
 }
