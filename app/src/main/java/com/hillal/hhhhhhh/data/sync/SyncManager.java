@@ -21,6 +21,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import com.google.gson.Gson;
 
 public class SyncManager {
     private static final String TAG = "SyncManager";
@@ -31,6 +34,7 @@ public class SyncManager {
     private final Handler handler;
     private boolean isAutoSyncEnabled = true;
     private long lastSyncTime = 0;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public SyncManager(Context context, AccountDao accountDao, TransactionDao transactionDao) {
         this.context = context;
@@ -91,137 +95,79 @@ public class SyncManager {
     }
 
     public void syncData(SyncCallback callback) {
-        new Thread(() -> {
+        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("token", null);
+
+        if (token == null) {
+            callback.onError("يرجى تسجيل الدخول أولاً");
+            return;
+        }
+
+        executor.execute(() -> {
             try {
-                // جلب التوكن
-                String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                        .getString("token", null);
-                
-                if (token == null) {
-                    final String error = "يرجى تسجيل الدخول أولاً";
-                    copyToClipboard(error);
-                    handler.post(() -> callback.onError(error));
-                    return;
-                }
+                // جلب الحسابات الجديدة
+                List<Account> newAccounts = accountDao.getNewAccounts();
+                Log.d(TAG, "تم العثور على " + newAccounts.size() + " حساب جديد");
 
-                // جلب البيانات الجديدة فقط
-                List<Account> newAccounts = accountDao.getAccountsModifiedAfter(lastSyncTime);
-                List<Transaction> newTransactions = transactionDao.getTransactionsModifiedAfter(lastSyncTime);
-                
-                if (newAccounts.isEmpty() && newTransactions.isEmpty()) {
-                    Log.d(TAG, "No new data to sync");
-                    handler.post(() -> callback.onSuccess());
-                    return;
-                }
+                // جلب المعاملات المعدلة منذ آخر مزامنة
+                long lastSyncTime = context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
+                        .getLong("last_sync_time", 0);
+                List<Transaction> modifiedTransactions = transactionDao.getModifiedTransactions(lastSyncTime);
+                Log.d(TAG, "تم العثور على " + modifiedTransactions.size() + " معاملة معدلة");
 
-                // تحديث أرصدة الحسابات بناءً على المعاملات
-                for (Account account : newAccounts) {
-                    Double totalDebit = transactionDao.getTotalDebit(account.getId()).getValue();
-                    Double totalCredit = transactionDao.getTotalCredit(account.getId()).getValue();
+                // إنشاء طلب المزامنة
+                SyncRequest syncRequest = new SyncRequest(newAccounts, modifiedTransactions);
+                
+                // تحويل طلب المزامنة إلى JSON للنسخ
+                String syncRequestJson = new Gson().toJson(syncRequest);
+
+                // إرسال البيانات إلى السيرفر
+                Response<SyncResponse> response = apiService.syncData("Bearer " + token, syncRequest).execute();
+                
+                if (response.isSuccessful() && response.body() != null) {
+                    SyncResponse syncResponse = response.body();
                     
-                    if (totalDebit != null && totalCredit != null) {
-                        double balance = totalCredit - totalDebit;
-                        account.setBalance(balance);
+                    // تحديث معرفات السيرفر للحسابات الجديدة
+                    for (Account account : newAccounts) {
+                        account.setServerId(account.getId());
                         accountDao.update(account);
-                        Log.d(TAG, String.format("Updated account %s balance to %f", 
-                            account.getName(), balance));
                     }
-                }
-
-                // التحقق من صحة المعاملات
-                for (Transaction transaction : newTransactions) {
-                    // نتحقق فقط من الحقول الضرورية
-                    if (transaction.getType() == null || transaction.getType().isEmpty()) {
-                        transaction.setType("credit");
+                    
+                    // تحديث معرفات السيرفر للمعاملات الجديدة
+                    for (Transaction transaction : modifiedTransactions) {
+                        transaction.setServerId(transaction.getId());
+                        transactionDao.update(transaction);
                     }
-                    if (transaction.getCurrency() == null || transaction.getCurrency().isEmpty()) {
-                        transaction.setCurrency("YER");
-                    }
-                    // نترك الوصف فارغاً إذا لم يكن موجوداً
-                }
-
-                String syncDetails = String.format("جاري مزامنة %d حساب و %d معاملة", 
-                    newAccounts.size(), newTransactions.size());
-                Log.d(TAG, syncDetails);
-
-                // إرسال البيانات الجديدة إلى السيرفر
-                ApiService.SyncRequest syncRequest = new ApiService.SyncRequest(newAccounts, newTransactions);
-                Log.d(TAG, "Sending sync request with " + newAccounts.size() + " accounts and " + 
-                    newTransactions.size() + " transactions");
-                
-                // تسجيل تفاصيل البيانات المرسلة
-                for (Account account : newAccounts) {
-                    Log.d(TAG, String.format("Account: number=%s, name=%s, balance=%f", 
-                        account.getAccountNumber(), account.getName(), account.getBalance()));
-                }
-                
-                for (Transaction transaction : newTransactions) {
-                    Log.d(TAG, String.format("Transaction: id=%d, amount=%f, date=%s, description=%s, type=%s", 
-                        transaction.getId(), transaction.getAmount(), transaction.getFormattedDate(),
-                        transaction.getDescription(), transaction.getType()));
-                }
-                
-                apiService.syncData("Bearer " + token, syncRequest)
-                    .enqueue(new Callback<Void>() {
-                        @Override
-                        public void onResponse(Call<Void> call, Response<Void> response) {
-                            if (response.isSuccessful()) {
-                                updateLastSyncTime();
-                                String successMessage = String.format("تمت مزامنة %d حساب و %d معاملة بنجاح", 
-                                    newAccounts.size(), newTransactions.size());
-                                Log.d(TAG, successMessage);
-                                handler.post(() -> callback.onSuccess());
-                            } else {
-                                try {
-                                    final String errorMessage;
-                                    if (response.errorBody() != null) {
-                                        String errorBody = response.errorBody().string();
-                                        Log.d(TAG, "Error response body: " + errorBody);
-                                        // محاولة تحليل رسالة الخطأ من JSON
-                                        if (errorBody.contains("error")) {
-                                            String rawError = errorBody.split("\"error\":\"")[1].split("\"")[0];
-                                            // تحويل النص من Unicode إلى نص عربي
-                                            errorMessage = java.net.URLDecoder.decode(rawError, "UTF-8");
-                                        } else {
-                                            errorMessage = String.format("فشل المزامنة (رمز الخطأ: %d)", response.code());
-                                        }
-                                    } else {
-                                        errorMessage = String.format("فشل المزامنة (رمز الخطأ: %d)", response.code());
-                                    }
-                                    Log.e(TAG, "Sync failed: " + errorMessage);
-                                    copyToClipboard(errorMessage);
-                                    handler.post(() -> callback.onError(errorMessage));
-                                } catch (Exception e) {
-                                    Log.e(TAG, "Error parsing error response", e);
-                                    final String errorMessage = String.format("فشل المزامنة (رمز الخطأ: %d)", response.code());
-                                    copyToClipboard(errorMessage);
-                                    handler.post(() -> callback.onError(errorMessage));
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<Void> call, Throwable t) {
-                            Log.e(TAG, "Sync error: " + t.getMessage());
-                            final String errorMessage;
-                            if (t instanceof java.net.UnknownHostException) {
-                                errorMessage = "لا يمكن الوصول إلى الخادم. يرجى التحقق من اتصال الإنترنت";
-                            } else if (t instanceof java.net.SocketTimeoutException) {
-                                errorMessage = "انتهت مهلة الاتصال بالخادم. يرجى المحاولة مرة أخرى";
-                            } else {
-                                errorMessage = "خطأ في الاتصال: " + t.getMessage();
-                            }
-                            copyToClipboard(errorMessage);
-                            handler.post(() -> callback.onError(errorMessage));
-                        }
+                    
+                    // تحديث وقت آخر مزامنة
+                    context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
+                            .edit()
+                            .putLong("last_sync_time", System.currentTimeMillis())
+                            .apply();
+                    
+                    Log.d(TAG, "تمت المزامنة بنجاح");
+                    handler.post(() -> callback.onSuccess());
+                } else {
+                    String errorBody = response.errorBody() != null ? response.errorBody().string() : "خطأ غير معروف";
+                    Log.e(TAG, "فشلت المزامنة: " + errorBody);
+                    
+                    // نسخ بيانات طلب المزامنة إلى الحافظة
+                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("Sync Request Data", 
+                        "Sync Request JSON:\n" + syncRequestJson + 
+                        "\n\nError Response:\n" + errorBody);
+                    clipboard.setPrimaryClip(clip);
+                    
+                    handler.post(() -> {
+                        Toast.makeText(context, "تم نسخ بيانات المزامنة إلى الحافظة", Toast.LENGTH_LONG).show();
+                        callback.onError("فشلت المزامنة: " + errorBody);
                     });
+                }
             } catch (Exception e) {
-                Log.e(TAG, "Error during sync: " + e.getMessage());
-                final String errorMessage = "خطأ في المزامنة: " + e.getMessage();
-                copyToClipboard(errorMessage);
-                handler.post(() -> callback.onError(errorMessage));
+                Log.e(TAG, "خطأ في المزامنة: " + e.getMessage());
+                handler.post(() -> callback.onError("خطأ في المزامنة: " + e.getMessage()));
             }
-        }).start();
+        });
     }
 
     public void enableAutoSync(boolean enable) {
