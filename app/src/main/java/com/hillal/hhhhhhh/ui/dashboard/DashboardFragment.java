@@ -16,7 +16,7 @@ import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.databinding.FragmentDashboardBinding;
 import com.hillal.hhhhhhh.App;
-import com.hillal.hhhhhhh.data.SyncManager;
+import com.hillal.hhhhhhh.data.sync.SyncManager;
 
 public class DashboardFragment extends Fragment {
     private static final String TAG = "DashboardFragment";
