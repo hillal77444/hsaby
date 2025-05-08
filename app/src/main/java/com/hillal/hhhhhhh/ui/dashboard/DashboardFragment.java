@@ -52,7 +52,7 @@ public class DashboardFragment extends Fragment {
         Log.d(TAG, "DashboardFragment onViewCreated started");
 
         try {
-            // استدعاء المزامنة عند دخول لوحة التحكم
+            // إضافة المزامنة عند دخول لوحة التحكم
             App app = (App) requireActivity().getApplication();
             SyncManager syncManager = new SyncManager(
                 requireContext(),
