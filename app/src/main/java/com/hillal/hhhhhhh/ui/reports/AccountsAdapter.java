@@ -74,7 +74,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<AccountsAdapter.ViewHo
         void bind(Account account) {
             nameTextView.setText(account.getName());
             NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.getDefault());
-            balanceTextView.setText(formatter.format(account.getOpeningBalance()));
+            balanceTextView.setText(formatter.format(account.getBalance()));
             typeTextView.setText(account.isDebtor() ? R.string.debtor : R.string.creditor);
         }
     }
