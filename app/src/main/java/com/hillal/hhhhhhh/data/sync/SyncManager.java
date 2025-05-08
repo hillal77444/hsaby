@@ -7,6 +7,8 @@ import android.os.Looper;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.widget.Toast;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 
 import com.hillal.hhhhhhh.data.remote.ApiService;
 import com.hillal.hhhhhhh.data.remote.RetrofitClient;
@@ -14,6 +16,7 @@ import com.hillal.hhhhhhh.data.room.AccountDao;
 import com.hillal.hhhhhhh.data.room.TransactionDao;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
+import com.hillal.hhhhhhh.data.DataManager;
 
 import java.util.List;
 import retrofit2.Call;
@@ -35,6 +38,9 @@ public class SyncManager {
     private boolean isAutoSyncEnabled = true;
     private long lastSyncTime = 0;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private static final int SYNC_INTERVAL = 5 * 60 * 1000; // 5 دقائق
+    private static final int MAX_RETRY_COUNT = 3;
+    private int currentRetryCount = 0;
 
     public SyncManager(Context context, AccountDao accountDao, TransactionDao transactionDao) {
         this.context = context;
@@ -43,7 +49,18 @@ public class SyncManager {
         this.transactionDao = transactionDao;
         this.handler = new Handler(Looper.getMainLooper());
         this.lastSyncTime = getLastSyncTime();
+        
+        // تفعيل المزامنة التلقائية بشكل افتراضي
+        this.isAutoSyncEnabled = true;
+        context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
+                .edit()
+                .putBoolean("auto_sync", true)
+                .apply();
+        
+        // بدء المزامنة التلقائية
         startAutoSync();
+        // تنفيذ مزامنة فورية
+        performInitialSync();
     }
 
     private long getLastSyncTime() {
@@ -70,21 +87,78 @@ public class SyncManager {
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    syncData(new SyncCallback() {
-                        @Override
-                        public void onSuccess() {
-                            Log.d(TAG, "Auto sync successful");
-                        }
+                    if (isNetworkAvailable()) {
+                        Log.d(TAG, "Starting auto sync...");
+                        // جلب البيانات من السيرفر أولاً
+                        DataManager dataManager = new DataManager(
+                            context,
+                            accountDao,
+                            transactionDao,
+                            null
+                        );
 
-                        @Override
-                        public void onError(String error) {
-                            Log.e(TAG, "Auto sync failed: " + error);
-                        }
-                    });
-                    handler.postDelayed(this, 30 * 60 * 1000);
+                        dataManager.fetchDataFromServer(new DataManager.DataCallback() {
+                            @Override
+                            public void onSuccess() {
+                                // بعد جلب البيانات، نقوم بمزامنة التغييرات المحلية
+                                syncData(new SyncCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "Auto sync successful");
+                                        updateLastSyncTime();
+                                        currentRetryCount = 0;
+                                    }
+
+                                    @Override
+                                    public void onError(String error) {
+                                        Log.e(TAG, "Auto sync failed: " + error);
+                                        handleSyncFailure();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                Log.e(TAG, "Auto fetch failed: " + error);
+                                handleSyncFailure();
+                            }
+                        });
+                    } else {
+                        Log.d(TAG, "No network available, skipping sync");
+                    }
+
+                    // جدولة المزامنة التالية
+                    handler.postDelayed(this, SYNC_INTERVAL);
                 }
-            }, 30 * 60 * 1000);
+            }, SYNC_INTERVAL);
         }
+    }
+
+    private void handleSyncFailure() {
+        currentRetryCount++;
+        if (currentRetryCount < MAX_RETRY_COUNT) {
+            Log.d(TAG, "Retrying sync in 1 minute... (Attempt " + currentRetryCount + " of " + MAX_RETRY_COUNT + ")");
+            handler.postDelayed(() -> {
+                if (isNetworkAvailable()) {
+                    startAutoSync();
+                }
+            }, 60 * 1000); // محاولة إعادة المزامنة بعد دقيقة
+        } else {
+            Log.e(TAG, "Max retry attempts reached. Will try again in next sync interval.");
+            currentRetryCount = 0;
+        }
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
+            return capabilities != null && (
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
+        }
+        return false;
     }
 
     private void copyToClipboard(String text) {
@@ -103,6 +177,11 @@ public class SyncManager {
             return;
         }
 
+        if (!isNetworkAvailable()) {
+            callback.onError("لا يوجد اتصال بالإنترنت");
+            return;
+        }
+
         executor.execute(() -> {
             try {
                 // جلب الحسابات الجديدة
@@ -114,6 +193,14 @@ public class SyncManager {
                         .getLong("last_sync_time", 0);
                 List<Transaction> modifiedTransactions = transactionDao.getModifiedTransactions(lastSyncTime);
                 Log.d(TAG, "تم العثور على " + modifiedTransactions.size() + " معاملة معدلة");
+
+                if (newAccounts.isEmpty() && modifiedTransactions.isEmpty()) {
+                    Log.d(TAG, "لا توجد بيانات جديدة للمزامنة");
+                    // حتى لو لم تكن هناك بيانات جديدة، نقوم بتحديث وقت آخر مزامنة
+                    updateLastSyncTime();
+                    handler.post(() -> callback.onSuccess());
+                    return;
+                }
 
                 // إنشاء طلب المزامنة
                 ApiService.SyncRequest syncRequest = new ApiService.SyncRequest(newAccounts, modifiedTransactions);
@@ -169,22 +256,58 @@ public class SyncManager {
     }
 
     public void enableAutoSync(boolean enable) {
-        isAutoSyncEnabled = enable;
+        // دائماً نرجع true لأن المزامنة التلقائية مفعلة بشكل افتراضي
+        isAutoSyncEnabled = true;
         context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
                 .edit()
-                .putBoolean("auto_sync", enable)
+                .putBoolean("auto_sync", true)
                 .apply();
         
-        if (enable) {
-            startAutoSync();
-        } else {
-            handler.removeCallbacksAndMessages(null);
+        // بدء المزامنة التلقائية
+        startAutoSync();
+        // تنفيذ مزامنة فورية
+        performInitialSync();
+    }
+
+    private void performInitialSync() {
+        if (!isNetworkAvailable()) {
+            Log.d(TAG, "No network available, skipping initial sync");
+            return;
         }
+
+        DataManager dataManager = new DataManager(
+            context,
+            accountDao,
+            transactionDao,
+            null
+        );
+        dataManager.fetchDataFromServer(new DataManager.DataCallback() {
+            @Override
+            public void onSuccess() {
+                syncData(new SyncCallback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(TAG, "Initial sync successful");
+                        updateLastSyncTime();
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Log.e(TAG, "Initial sync failed: " + error);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e(TAG, "Initial fetch failed: " + error);
+            }
+        });
     }
 
     public boolean isAutoSyncEnabled() {
-        return context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
-                .getBoolean("auto_sync", true);
+        // دائماً نرجع true لأن المزامنة التلقائية مفعلة بشكل افتراضي
+        return true;
     }
 
     public void setSyncInterval(int minutes) {
@@ -198,6 +321,14 @@ public class SyncManager {
     public int getSyncInterval() {
         return context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
                 .getInt("sync_interval", 5); // القيمة الافتراضية 30 دقيقة
+    }
+
+    // دالة جديدة لتفعيل المزامنة عند دخول لوحة التحكم
+    public void onDashboardEntered() {
+        if (isNetworkAvailable()) {
+            Log.d(TAG, "Dashboard entered, performing sync...");
+            performInitialSync();
+        }
     }
 
     private static class SyncRequest {
