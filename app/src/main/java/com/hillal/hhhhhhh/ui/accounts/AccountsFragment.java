@@ -99,7 +99,7 @@ public class AccountsFragment extends Fragment {
             Account account = accounts.get(position);
             holder.accountName.setText(account.getName());
             holder.phone.setText(account.getPhoneNumber());
-            holder.balance.setText(String.format("%,.2f", account.getOpeningBalance()));
+            holder.balance.setText(String.format("%,.2f", account.getBalance()));
             holder.balance.setTextColor(account.isDebtor() ? 
                 holder.itemView.getContext().getColor(R.color.red) : 
                 holder.itemView.getContext().getColor(R.color.green));
