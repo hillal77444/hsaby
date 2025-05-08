@@ -125,7 +125,7 @@ public class EditTransactionFragment extends Fragment {
         binding.descriptionEditText.setText(transaction.getDescription());
         
         // Set type
-        if ("credit".equals(transaction.getType()) || "له".equals(transaction.getType())) {
+        if ("credit".equals(transaction.getType())) {
             binding.radioCredit.setChecked(true);
         } else {
             binding.radioDebit.setChecked(true);
