@@ -9,6 +9,9 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
 import retrofit2.http.GET;
+import retrofit2.http.PUT;
+import retrofit2.http.DELETE;
+import retrofit2.http.Path;
 import retrofit2.http.Header;
 
 public interface ApiService {
@@ -26,6 +29,15 @@ public interface ApiService {
 
     @GET("api/transactions")
     Call<List<Transaction>> getTransactions(@Header("Authorization") String token);
+
+    @PUT("api/transactions/{id}")
+    Call<Void> updateTransaction(@Header("Authorization") String token, 
+                               @Path("id") long transactionId, 
+                               @Body Transaction transaction);
+
+    @DELETE("api/transactions/{id}")
+    Call<Void> deleteTransaction(@Header("Authorization") String token, 
+                               @Path("id") long transactionId);
 
     class LoginRequest {
         private String phone;
