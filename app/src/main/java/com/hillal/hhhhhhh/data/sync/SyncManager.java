@@ -95,7 +95,7 @@ public class SyncManager {
                           newTransactions.size() + " transactions");
 
                 // إرسال البيانات الجديدة إلى السيرفر
-                apiService.syncData(new SyncRequest(newAccounts, newTransactions))
+                apiService.syncData(new ApiService.SyncRequest(newAccounts, newTransactions))
                     .enqueue(new Callback<Void>() {
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
