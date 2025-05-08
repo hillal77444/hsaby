@@ -75,7 +75,7 @@
         tools:layout="@layout/fragment_account_details">
         <argument
             android:name="accountId"
-            app:argType="integer" />
+            app:argType="long" />
         <action
             android:id="@+id/action_accountDetailsFragment_to_addTransactionFragment"
             app:destination="@id/addTransactionFragment"
