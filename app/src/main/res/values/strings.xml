@@ -212,4 +212,7 @@
     <string name="display_name">الاسم المستخدم في الإشعارات</string>
     <string name="confirm_password">تأكيد كلمة المرور</string>
     <string name="back_to_login">العودة لتسجيل الدخول</string>
+    <string name="delete_account">حذف الحساب</string>
+    <string name="delete_account_confirmation">هل أنت متأكد من حذف هذا الحساب؟</string>
+    <string name="account_deleted">تم حذف الحساب بنجاح</string>
 </resources>
