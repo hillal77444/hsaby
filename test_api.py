@@ -20,8 +20,8 @@ session.mount("https://", adapter)
 def test_register():
     # بيانات التسجيل
     register_data = {
-        "username": "user_123",
-        "phone": "+966500000002",
+        "username": "test_user_3",
+        "phone": "+966500000003",
         "password": "Test@123"
     }
     
@@ -34,6 +34,7 @@ def test_register():
             timeout=10  # مهلة 10 ثواني
         )
         
+        print("\n=== اختبار التسجيل ===")
         print("Register Response:", response.status_code)
         print("Register Response Body:", response.text)
         
@@ -45,7 +46,7 @@ def test_register():
 def test_login():
     # بيانات تسجيل الدخول
     login_data = {
-        "phone": "+966500000002",
+        "phone": "+966500000003",
         "password": "Test@123"
     }
     
@@ -58,7 +59,8 @@ def test_login():
             timeout=10  # مهلة 10 ثواني
         )
         
-        print("\nLogin Response:", response.status_code)
+        print("\n=== اختبار تسجيل الدخول ===")
+        print("Login Response:", response.status_code)
         print("Login Response Body:", response.text)
         
         return response.json() if response.ok else None
@@ -67,8 +69,11 @@ def test_login():
         return None
 
 if __name__ == "__main__":
-    print("Testing Registration...")
+    print("بدء الاختبار...")
     register_result = test_register()
     
-    print("\nTesting Login...")
-    login_result = test_login() 
+    if register_result:
+        print("\nتم التسجيل بنجاح، جاري اختبار تسجيل الدخول...")
+        login_result = test_login()
+    else:
+        print("\nفشل التسجيل، لن يتم اختبار تسجيل الدخول") 
