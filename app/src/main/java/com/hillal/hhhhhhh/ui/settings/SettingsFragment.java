@@ -19,7 +19,7 @@ import com.hillal.hhhhhhh.data.security.EncryptionManager;
 import com.hillal.hhhhhhh.data.sync.SyncManager;
 import com.hillal.hhhhhhh.databinding.FragmentSettingsBinding;
 import com.hillal.hhhhhhh.viewmodel.SettingsViewModel;
-import com.hillal.hhhhhhh.data.database.AppDatabase;
+import com.hillal.hhhhhhh.data.room.AppDatabase;
 
 public class SettingsFragment extends Fragment {
     private FragmentSettingsBinding binding;
