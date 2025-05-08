@@ -137,14 +137,19 @@
                 android:text="@string/view_transactions"
                 app:icon="@drawable/ic_transactions" />
 
-            <com.google.android.material.button.MaterialButton
+            <Button
                 android:id="@+id/viewAccountStatementButton"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:text="@string/account_statement"
-                app:icon="@drawable/ic_statement"
-                android:visibility="visible" />
+                android:layout_marginTop="8dp"/>
+
+            <Button
+                android:id="@+id/editAccountButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/edit"
+                android:layout_marginTop="8dp"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
