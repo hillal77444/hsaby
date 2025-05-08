@@ -103,6 +103,12 @@ public class AccountsFragment extends Fragment {
             holder.balance.setTextColor(account.isDebtor() ? 
                 holder.itemView.getContext().getColor(R.color.red) : 
                 holder.itemView.getContext().getColor(R.color.green));
+
+            holder.itemView.setOnClickListener(v -> {
+                Bundle args = new Bundle();
+                args.putLong("accountId", account.getId());
+                Navigation.findNavController(v).navigate(R.id.accountDetailsFragment, args);
+            });
         }
 
         @Override
