@@ -122,6 +122,12 @@ public class Transaction {
         this.date = date;
     }
 
+    // Helper method to get formatted date
+    public String getFormattedDate() {
+        return new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            .format(new java.util.Date(date));
+    }
+
     public long getCreatedAt() {
         return createdAt;
     }
