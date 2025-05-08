@@ -120,14 +120,18 @@ public class EditTransactionFragment extends Fragment {
             }
         });
 
-        // Set amount
+        // Set initial values
         binding.amountEditText.setText(String.valueOf(transaction.getAmount()));
-
-        // Set type
-        if ("مدين".equals(transaction.getType()) || "عليه".equals(transaction.getType())) {
-            binding.radioDebit.setChecked(true);
-        } else {
-            binding.radioCredit.setChecked(true);
+        binding.descriptionEditText.setText(transaction.getDescription());
+        binding.typeSpinner.setSelection(transaction.getType().equals("credit") ? 0 : 1);
+        
+        // Set date
+        calendar.setTimeInMillis(transaction.getDate());
+        updateDateButtonText();
+        
+        // Set notes if available
+        if (transaction.getNotes() != null) {
+            binding.notesEditText.setText(transaction.getNotes());
         }
 
         // Set currency
@@ -138,14 +142,6 @@ public class EditTransactionFragment extends Fragment {
         } else {
             binding.radioUsd.setChecked(true);
         }
-
-        // Set date
-        calendar.setTime(transaction.getDate());
-        updateDateField();
-
-        // Set description and notes
-        binding.descriptionEditText.setText(transaction.getDescription());
-        binding.notesEditText.setText(transaction.getNotes());
     }
 
     private void showDatePicker() {
@@ -166,6 +162,10 @@ public class EditTransactionFragment extends Fragment {
         binding.dateEditText.setText(dateFormat.format(calendar.getTime()));
     }
 
+    private void updateDateButtonText() {
+        binding.dateEditText.setText(dateFormat.format(calendar.getTime()));
+    }
+
     private void updateTransaction() {
         if (selectedAccountId == -1) {
             Toast.makeText(requireContext(), "الرجاء اختيار الحساب", Toast.LENGTH_SHORT).show();
@@ -175,7 +175,7 @@ public class EditTransactionFragment extends Fragment {
         String amountStr = binding.amountEditText.getText().toString();
         String description = binding.descriptionEditText.getText().toString();
         String notes = binding.notesEditText.getText().toString();
-        boolean isDebit = binding.typeRadioGroup.getCheckedRadioButtonId() == R.id.radioDebit;
+        boolean isDebit = binding.typeSpinner.getSelectedItem().toString().equals("عليه");
         String currency = getSelectedCurrency();
 
         if (amountStr.isEmpty()) {
@@ -194,7 +194,8 @@ public class EditTransactionFragment extends Fragment {
             transaction.setDescription(description);
             transaction.setNotes(notes);
             transaction.setCurrency(currency);
-            transaction.setDate(calendar.getTime());
+            transaction.setDate(calendar.getTimeInMillis());
+            transaction.setUpdatedAt(System.currentTimeMillis());
 
             transactionsViewModel.updateTransaction(transaction);
             Toast.makeText(requireContext(), R.string.transaction_saved, Toast.LENGTH_SHORT).show();
