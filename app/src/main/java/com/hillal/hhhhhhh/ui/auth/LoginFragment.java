@@ -1,89 +1,94 @@
 package com.hillal.hhhhhhh.ui.auth;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.databinding.FragmentLoginBinding;
 import com.hillal.hhhhhhh.viewmodel.AuthViewModel;
 
 public class LoginFragment extends Fragment {
+    private static final String TAG = "LoginFragment";
     private FragmentLoginBinding binding;
     private AuthViewModel authViewModel;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentLoginBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
-
-        setupLoginButton();
-        setupRegisterButton();
-        observeAuthState();
-
-        return root;
+        return binding.getRoot();
     }
 
-    private void setupLoginButton() {
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+
         binding.buttonLogin.setOnClickListener(v -> {
-            String phone = binding.editTextPhone.getText().toString();
+            String phone = binding.editTextPhone.getText().toString().trim();
             String password = binding.editTextPassword.getText().toString();
 
-            if (phone.isEmpty() || password.isEmpty()) {
-                Toast.makeText(getContext(), "يرجى إدخال رقم الهاتف وكلمة المرور", Toast.LENGTH_SHORT).show();
+            // التحقق من صحة المدخلات
+            if (phone.isEmpty()) {
+                binding.editTextPhone.setError("الرجاء إدخال رقم الهاتف");
+                return;
+            }
+            if (password.isEmpty()) {
+                binding.editTextPassword.setError("الرجاء إدخال كلمة المرور");
                 return;
             }
 
-            authViewModel.login(phone, password);
-        });
-    }
+            // تعطيل الزر أثناء عملية تسجيل الدخول
+            binding.buttonLogin.setEnabled(false);
+            binding.progressBar.setVisibility(View.VISIBLE);
 
-    private void setupRegisterButton() {
-        binding.buttonRegister.setOnClickListener(v -> {
-            Navigation.findNavController(requireView())
-                    .navigate(R.id.action_login_to_register);
-        });
-    }
+            Log.d(TAG, "Attempting to login with phone: " + phone);
+            
+            authViewModel.login(phone, password, new AuthViewModel.AuthCallback() {
+                @Override
+                public void onSuccess() {
+                    Log.d(TAG, "Login successful");
+                    binding.progressBar.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), "تم تسجيل الدخول بنجاح", Toast.LENGTH_SHORT).show();
+                    NavHostFragment.findNavController(LoginFragment.this)
+                            .navigate(R.id.action_loginFragment_to_homeFragment);
+                }
 
-    private void observeAuthState() {
-        authViewModel.getAuthState().observe(getViewLifecycleOwner(), state -> {
-            switch (state) {
-                case LOADING:
-                    binding.buttonLogin.setEnabled(false);
-                    binding.buttonRegister.setEnabled(false);
-                    break;
-                case SUCCESS:
-                    Navigation.findNavController(requireView())
-                            .navigate(R.id.action_login_to_home);
-                    break;
-                case ERROR:
+                @Override
+                public void onError(String error) {
+                    Log.e(TAG, "Login failed: " + error);
+                    binding.progressBar.setVisibility(View.GONE);
                     binding.buttonLogin.setEnabled(true);
-                    binding.buttonRegister.setEnabled(true);
-                    Toast.makeText(getContext(), "رقم الهاتف أو كلمة المرور غير صحيحة", Toast.LENGTH_SHORT).show();
-                    break;
-                default:
-                    binding.buttonLogin.setEnabled(true);
-                    binding.buttonRegister.setEnabled(true);
-                    break;
-            }
+                    
+                    // رسائل خطأ أكثر تفصيلاً
+                    String errorMessage;
+                    if (error.contains("UnknownHostException")) {
+                        errorMessage = "لا يمكن الوصول إلى الخادم. يرجى التحقق من اتصال الإنترنت";
+                    } else if (error.contains("SocketTimeoutException")) {
+                        errorMessage = "انتهت مهلة الاتصال بالخادم. يرجى المحاولة مرة أخرى";
+                    } else if (error.contains("401")) {
+                        errorMessage = "رقم الهاتف أو كلمة المرور غير صحيحة";
+                    } else {
+                        errorMessage = "فشل تسجيل الدخول: " + error;
+                    }
+                    
+                    Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
+                }
+            });
         });
+
+        binding.buttonRegister.setOnClickListener(v -> 
+            NavHostFragment.findNavController(LoginFragment.this)
+                    .navigate(R.id.action_loginFragment_to_registerFragment)
+        );
     }
 
     @Override
