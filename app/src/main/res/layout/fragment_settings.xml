@@ -59,6 +59,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/settings_sync_now"
+            android:layout_marginBottom="8dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/fetchDataButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="جلب البيانات من السيرفر"
             android:layout_marginBottom="24dp"/>
 
         <!-- الأمان -->
