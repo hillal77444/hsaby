@@ -45,4 +45,10 @@ public interface AccountDao {
 
     @Query("SELECT * FROM accounts WHERE name LIKE :query OR phoneNumber LIKE :query")
     LiveData<List<Account>> searchAccounts(String query);
+
+    @Query("DELETE FROM accounts WHERE id = :accountId")
+    void deleteAccount(long accountId);
+
+    @Query("SELECT * FROM accounts WHERE updatedAt > :timestamp")
+    List<Account> getAccountsModifiedAfter(long timestamp);
 } 
