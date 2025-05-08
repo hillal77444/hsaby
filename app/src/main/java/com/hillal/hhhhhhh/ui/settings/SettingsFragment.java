@@ -19,6 +19,7 @@ import com.hillal.hhhhhhh.data.security.EncryptionManager;
 import com.hillal.hhhhhhh.data.sync.SyncManager;
 import com.hillal.hhhhhhh.databinding.FragmentSettingsBinding;
 import com.hillal.hhhhhhh.viewmodel.SettingsViewModel;
+import com.hillal.hhhhhhh.data.database.AppDatabase;
 
 public class SettingsFragment extends Fragment {
     private FragmentSettingsBinding binding;
@@ -33,7 +34,8 @@ public class SettingsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         settingsViewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
         backupManager = new BackupManager(requireContext());
-        syncManager = new SyncManager(requireContext());
+        AppDatabase db = AppDatabase.getInstance(requireContext());
+        syncManager = new SyncManager(requireContext(), db.accountDao(), db.transactionDao());
         encryptionManager = new EncryptionManager(requireContext());
         sharedPreferences = requireContext().getSharedPreferences("app_settings", 0);
     }
