@@ -62,7 +62,7 @@ public class AddAccountFragment extends Fragment {
         String name = binding.nameEditText.getText().toString();
         String phone = binding.phoneEditText.getText().toString();
         String notes = binding.notesEditText.getText().toString();
-        String balanceStr = binding.balanceEditText.getText().toString();
+        String balanceStr = binding.openingBalanceEditText.getText().toString();
 
         if (name.isEmpty()) {
             binding.nameEditText.setError("الرجاء إدخال اسم الحساب");
@@ -83,7 +83,7 @@ public class AddAccountFragment extends Fragment {
             Toast.makeText(getContext(), R.string.account_saved, Toast.LENGTH_SHORT).show();
             Navigation.findNavController(requireView()).navigateUp();
         } catch (NumberFormatException e) {
-            binding.balanceEditText.setError("الرجاء إدخال رصيد صحيح");
+            binding.openingBalanceEditText.setError("الرجاء إدخال رصيد صحيح");
         }
     }
 
