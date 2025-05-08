@@ -24,6 +24,9 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
+import com.hillal.hhhhhhh.data.sync.SyncManager;
+import com.hillal.hhhhhhh.data.room.AccountDao;
+import com.hillal.hhhhhhh.data.room.TransactionDao;
 import com.hillal.hhhhhhh.databinding.ActivityMainBinding;
 import com.hillal.hhhhhhh.viewmodel.AuthViewModel;
 
@@ -68,6 +71,12 @@ public class MainActivity extends AppCompatActivity {
                 throw new IllegalStateException("AccountRepository is null");
             }
             Log.d(TAG, "AccountRepository initialized successfully");
+
+            // Initialize SyncManager
+            AccountDao accountDao = app.getDatabase().accountDao();
+            TransactionDao transactionDao = app.getDatabase().transactionDao();
+            syncManager = new SyncManager(this, accountDao, transactionDao);
+            Log.d(TAG, "SyncManager initialized successfully");
 
             // Setup navigation
             NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
