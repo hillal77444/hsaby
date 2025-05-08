@@ -10,8 +10,15 @@ import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.room.AccountDao;
 import com.hillal.hhhhhhh.data.room.TransactionDao;
+import com.google.gson.Gson;
+import com.hillal.hhhhhhh.data.model.PendingOperation;
+import com.hillal.hhhhhhh.data.room.PendingOperationDao;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -22,19 +29,31 @@ public class DataManager {
     private final ApiService apiService;
     private final AccountDao accountDao;
     private final TransactionDao transactionDao;
+    private final PendingOperationDao pendingOperationDao;
     private final Handler handler;
+    private final ExecutorService executor;
+    private final Gson gson;
 
-    public DataManager(Context context, AccountDao accountDao, TransactionDao transactionDao) {
+    public DataManager(Context context, AccountDao accountDao, TransactionDao transactionDao, PendingOperationDao pendingOperationDao) {
         this.context = context;
         this.apiService = RetrofitClient.getApiService();
         this.accountDao = accountDao;
         this.transactionDao = transactionDao;
+        this.pendingOperationDao = pendingOperationDao;
         this.handler = new Handler(Looper.getMainLooper());
+        this.executor = Executors.newSingleThreadExecutor();
+        this.gson = new Gson();
     }
 
     public interface DataCallback {
         void onSuccess();
         void onError(String error);
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     public void fetchDataFromServer(DataCallback callback) {
@@ -52,12 +71,18 @@ public class DataManager {
             public void onResponse(Call<List<Account>> call, Response<List<Account>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Account> accounts = response.body();
-                    // حفظ الحسابات في قاعدة البيانات المحلية
-                    accountDao.insertAll(accounts);
-                    Log.d(TAG, "تم جلب " + accounts.size() + " حساب بنجاح");
-
-                    // جلب المعاملات
-                    fetchTransactions(token, callback);
+                    // حفظ الحسابات في قاعدة البيانات المحلية على خيط منفصل
+                    executor.execute(() -> {
+                        try {
+                            accountDao.insertAll(accounts);
+                            Log.d(TAG, "تم جلب " + accounts.size() + " حساب بنجاح");
+                            // جلب المعاملات
+                            fetchTransactions(token, callback);
+                        } catch (Exception e) {
+                            Log.e(TAG, "خطأ في حفظ الحسابات: " + e.getMessage());
+                            handler.post(() -> callback.onError("خطأ في حفظ الحسابات: " + e.getMessage()));
+                        }
+                    });
                 } else {
                     handler.post(() -> callback.onError("فشل في جلب الحسابات"));
                 }
@@ -76,10 +101,17 @@ public class DataManager {
             public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Transaction> transactions = response.body();
-                    // حفظ المعاملات في قاعدة البيانات المحلية
-                    transactionDao.insertAll(transactions);
-                    Log.d(TAG, "تم جلب " + transactions.size() + " معاملة بنجاح");
-                    handler.post(() -> callback.onSuccess());
+                    // حفظ المعاملات في قاعدة البيانات المحلية على خيط منفصل
+                    executor.execute(() -> {
+                        try {
+                            transactionDao.insertAll(transactions);
+                            Log.d(TAG, "تم جلب " + transactions.size() + " معاملة بنجاح");
+                            handler.post(() -> callback.onSuccess());
+                        } catch (Exception e) {
+                            Log.e(TAG, "خطأ في حفظ المعاملات: " + e.getMessage());
+                            handler.post(() -> callback.onError("خطأ في حفظ المعاملات: " + e.getMessage()));
+                        }
+                    });
                 } else {
                     handler.post(() -> callback.onError("فشل في جلب المعاملات"));
                 }
@@ -90,5 +122,167 @@ public class DataManager {
                 handler.post(() -> callback.onError("خطأ في الاتصال: " + t.getMessage()));
             }
         });
+    }
+
+    public void updateTransaction(Transaction transaction, DataCallback callback) {
+        if (!isNetworkAvailable()) {
+            // حفظ العملية في قائمة العمليات المعلقة
+            executor.execute(() -> {
+                try {
+                    String transactionJson = gson.toJson(transaction);
+                    PendingOperation operation = new PendingOperation("UPDATE", transaction.getId(), transactionJson);
+                    pendingOperationDao.insert(operation);
+                    transactionDao.update(transaction);
+                    Log.d(TAG, "تم حفظ عملية التحديث في قائمة العمليات المعلقة");
+                    handler.post(() -> callback.onSuccess());
+                } catch (Exception e) {
+                    Log.e(TAG, "خطأ في حفظ العملية المعلقة: " + e.getMessage());
+                    handler.post(() -> callback.onError("خطأ في حفظ العملية المعلقة: " + e.getMessage()));
+                }
+            });
+            return;
+        }
+
+        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("token", null);
+
+        if (token == null) {
+            handler.post(() -> callback.onError("يرجى تسجيل الدخول أولاً"));
+            return;
+        }
+
+        apiService.updateTransaction("Bearer " + token, transaction.getId(), transaction)
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            // تحديث القيد في قاعدة البيانات المحلية
+                            executor.execute(() -> {
+                                try {
+                                    transactionDao.update(transaction);
+                                    Log.d(TAG, "تم تحديث القيد بنجاح");
+                                    handler.post(() -> callback.onSuccess());
+                                } catch (Exception e) {
+                                    Log.e(TAG, "خطأ في تحديث القيد: " + e.getMessage());
+                                    handler.post(() -> callback.onError("خطأ في تحديث القيد: " + e.getMessage()));
+                                }
+                            });
+                        } else {
+                            handler.post(() -> callback.onError("فشل في تحديث القيد"));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        handler.post(() -> callback.onError("خطأ في الاتصال: " + t.getMessage()));
+                    }
+                });
+    }
+
+    public void deleteTransaction(long transactionId, DataCallback callback) {
+        if (!isNetworkAvailable()) {
+            // حفظ العملية في قائمة العمليات المعلقة
+            executor.execute(() -> {
+                try {
+                    PendingOperation operation = new PendingOperation("DELETE", transactionId, null);
+                    pendingOperationDao.insert(operation);
+                    Transaction transaction = new Transaction();
+                    transaction.setId(transactionId);
+                    transactionDao.delete(transaction);
+                    Log.d(TAG, "تم حفظ عملية الحذف في قائمة العمليات المعلقة");
+                    handler.post(() -> callback.onSuccess());
+                } catch (Exception e) {
+                    Log.e(TAG, "خطأ في حفظ العملية المعلقة: " + e.getMessage());
+                    handler.post(() -> callback.onError("خطأ في حفظ العملية المعلقة: " + e.getMessage()));
+                }
+            });
+            return;
+        }
+
+        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("token", null);
+
+        if (token == null) {
+            handler.post(() -> callback.onError("يرجى تسجيل الدخول أولاً"));
+            return;
+        }
+
+        apiService.deleteTransaction("Bearer " + token, transactionId)
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            // حذف القيد من قاعدة البيانات المحلية
+                            executor.execute(() -> {
+                                try {
+                                    Transaction transaction = new Transaction();
+                                    transaction.setId(transactionId);
+                                    transactionDao.delete(transaction);
+                                    Log.d(TAG, "تم حذف القيد بنجاح");
+                                    handler.post(() -> callback.onSuccess());
+                                } catch (Exception e) {
+                                    Log.e(TAG, "خطأ في حذف القيد: " + e.getMessage());
+                                    handler.post(() -> callback.onError("خطأ في حذف القيد: " + e.getMessage()));
+                                }
+                            });
+                        } else {
+                            handler.post(() -> callback.onError("فشل في حذف القيد"));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        handler.post(() -> callback.onError("خطأ في الاتصال: " + t.getMessage()));
+                    }
+                });
+    }
+
+    public void syncPendingOperations(DataCallback callback) {
+        if (!isNetworkAvailable()) {
+            handler.post(() -> callback.onError("لا يوجد اتصال بالإنترنت"));
+            return;
+        }
+
+        executor.execute(() -> {
+            try {
+                List<PendingOperation> operations = pendingOperationDao.getAllPendingOperations();
+                for (PendingOperation operation : operations) {
+                    if (operation.getOperationType().equals("UPDATE")) {
+                        Transaction transaction = gson.fromJson(operation.getTransactionData(), Transaction.class);
+                        updateTransaction(transaction, new DataCallback() {
+                            @Override
+                            public void onSuccess() {
+                                pendingOperationDao.delete(operation);
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                Log.e(TAG, "فشل في مزامنة عملية التحديث: " + error);
+                            }
+                        });
+                    } else if (operation.getOperationType().equals("DELETE")) {
+                        deleteTransaction(operation.getTransactionId(), new DataCallback() {
+                            @Override
+                            public void onSuccess() {
+                                pendingOperationDao.delete(operation);
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                Log.e(TAG, "فشل في مزامنة عملية الحذف: " + error);
+                            }
+                        });
+                    }
+                }
+                handler.post(() -> callback.onSuccess());
+            } catch (Exception e) {
+                Log.e(TAG, "خطأ في مزامنة العمليات المعلقة: " + e.getMessage());
+                handler.post(() -> callback.onError("خطأ في مزامنة العمليات المعلقة: " + e.getMessage()));
+            }
+        });
+    }
+
+    public void shutdown() {
+        executor.shutdown();
     }
 } 
