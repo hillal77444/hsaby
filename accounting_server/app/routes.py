@@ -133,12 +133,14 @@ def sync_data():
                             account_number=account_data['account_number'],
                             account_name=account_data['account_name'],
                             balance=account_data['balance'],
+                            is_debtor=account_data.get('is_debtor', False),
                             user_id=user_id
                         )
                         db.session.add(account)
                         logger.info(f"Added new account: {account.account_number}")
                     else:
                         account.balance = account_data['balance']
+                        account.is_debtor = account_data.get('is_debtor', account.is_debtor)
                         logger.info(f"Updated account: {account.account_number}")
                 except KeyError as e:
                     logger.error(f"Missing account field: {str(e)}")
@@ -186,6 +188,9 @@ def sync_data():
                             date=date,
                             amount=transaction_data['amount'],
                             description=transaction_data['description'],
+                            type=transaction_data.get('type', 'debit'),
+                            currency=transaction_data.get('currency', 'ريال يمني'),
+                            notes=transaction_data.get('notes', ''),
                             user_id=user_id,
                             account_id=transaction_data['account_id']
                         )
@@ -302,7 +307,7 @@ def debug_public():
             'account_name': acc.account_name,
             'balance': acc.balance,
             'user_id': acc.user_id,
-            'raw_date': str(acc.created_at) if hasattr(acc, 'created_at') else None
+            'created_at': str(acc.created_at) if acc.created_at else None
         } for acc in accounts]
         
         # جلب جميع المعاملات
@@ -313,6 +318,9 @@ def debug_public():
             'date_timestamp': int(trans.date.timestamp() * 1000),  # التاريخ كـ timestamp
             'amount': trans.amount,
             'description': trans.description,
+            'type': trans.type,
+            'currency': trans.currency,
+            'notes': trans.notes,
             'account_id': trans.account_id,
             'user_id': trans.user_id
         } for trans in transactions]
