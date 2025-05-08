@@ -56,6 +56,17 @@
         android:label="@string/menu_add_account"
         tools:layout="@layout/fragment_add_account" />
 
+    <!-- تعديل حساب -->
+    <fragment
+        android:id="@+id/editAccountFragment"
+        android:name="com.hillal.hhhhhhh.ui.accounts.EditAccountFragment"
+        android:label="@string/menu_edit_account"
+        tools:layout="@layout/fragment_add_account">
+        <argument
+            android:name="accountId"
+            app:argType="long" />
+    </fragment>
+
     <!-- تفاصيل الحساب -->
     <fragment
         android:id="@+id/accountDetailsFragment"
