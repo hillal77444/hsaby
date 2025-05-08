@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -20,6 +21,7 @@ import com.hillal.hhhhhhh.data.sync.SyncManager;
 import com.hillal.hhhhhhh.databinding.FragmentSettingsBinding;
 import com.hillal.hhhhhhh.viewmodel.SettingsViewModel;
 import com.hillal.hhhhhhh.data.room.AppDatabase;
+import com.hillal.hhhhhhh.data.DataManager;
 
 public class SettingsFragment extends Fragment {
     private FragmentSettingsBinding binding;
@@ -110,6 +112,23 @@ public class SettingsFragment extends Fragment {
                 @Override
                 public void onError(String error) {
                     Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+
+        // إضافة زر جلب البيانات من السيرفر
+        Button fetchDataButton = view.findViewById(R.id.fetch_data_button);
+        fetchDataButton.setOnClickListener(v -> {
+            DataManager dataManager = new DataManager(requireContext(), db.accountDao(), db.transactionDao());
+            dataManager.fetchDataFromServer(new DataManager.DataCallback() {
+                @Override
+                public void onSuccess() {
+                    Toast.makeText(requireContext(), "تم جلب البيانات بنجاح", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(requireContext(), "خطأ: " + error, Toast.LENGTH_SHORT).show();
                 }
             });
         });
