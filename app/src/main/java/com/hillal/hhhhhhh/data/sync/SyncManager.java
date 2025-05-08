@@ -87,7 +87,7 @@ public class SyncManager {
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText("خطأ المزامنة", text);
         clipboard.setPrimaryClip(clip);
-        Toast.makeText(context, "تم نسخ رسالة الخطأ إلى الحافظة", Toast.LENGTH_SHORT).show();
+        handler.post(() -> Toast.makeText(context, "تم نسخ رسالة الخطأ إلى الحافظة", Toast.LENGTH_SHORT).show());
     }
 
     public void syncData(SyncCallback callback) {
@@ -100,7 +100,7 @@ public class SyncManager {
                 if (token == null) {
                     String error = "يرجى تسجيل الدخول أولاً";
                     copyToClipboard(error);
-                    callback.onError(error);
+                    handler.post(() -> callback.onError(error));
                     return;
                 }
 
@@ -110,7 +110,7 @@ public class SyncManager {
                 
                 if (newAccounts.isEmpty() && newTransactions.isEmpty()) {
                     Log.d(TAG, "No new data to sync");
-                    callback.onSuccess();
+                    handler.post(() -> callback.onSuccess());
                     return;
                 }
 
@@ -143,7 +143,7 @@ public class SyncManager {
                                 String successMessage = String.format("تمت مزامنة %d حساب و %d معاملة بنجاح", 
                                     newAccounts.size(), newTransactions.size());
                                 Log.d(TAG, successMessage);
-                                callback.onSuccess();
+                                handler.post(() -> callback.onSuccess());
                             } else {
                                 String errorMessage;
                                 try {
@@ -167,7 +167,7 @@ public class SyncManager {
                                 }
                                 Log.e(TAG, "Sync failed: " + errorMessage);
                                 copyToClipboard(errorMessage);
-                                callback.onError(errorMessage);
+                                handler.post(() -> callback.onError(errorMessage));
                             }
                         }
 
@@ -183,14 +183,14 @@ public class SyncManager {
                                 errorMessage = "خطأ في الاتصال: " + t.getMessage();
                             }
                             copyToClipboard(errorMessage);
-                            callback.onError(errorMessage);
+                            handler.post(() -> callback.onError(errorMessage));
                         }
                     });
             } catch (Exception e) {
                 Log.e(TAG, "Error during sync: " + e.getMessage());
                 String errorMessage = "خطأ في المزامنة: " + e.getMessage();
                 copyToClipboard(errorMessage);
-                callback.onError(errorMessage);
+                handler.post(() -> callback.onError(errorMessage));
             }
         }).start();
     }
