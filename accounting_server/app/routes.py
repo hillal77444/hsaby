@@ -93,41 +93,55 @@ def sync_data():
         if not data:
             return jsonify({'error': 'لا توجد بيانات للمزامنة'}), 400
         
+        # التحقق من صحة البيانات
+        if 'accounts' not in data and 'transactions' not in data:
+            return jsonify({'error': 'يجب إرسال بيانات الحسابات أو المعاملات'}), 400
+        
         # معالجة الحسابات
-        for account_data in data.get('accounts', []):
-            account = Account.query.filter_by(
-                account_number=account_data['account_number'],
-                user_id=user_id
-            ).first()
-            
-            if not account:
-                account = Account(
-                    account_number=account_data['account_number'],
-                    account_name=account_data['account_name'],
-                    balance=account_data['balance'],
-                    user_id=user_id
-                )
-                db.session.add(account)
-            else:
-                account.balance = account_data['balance']
+        if 'accounts' in data:
+            for account_data in data['accounts']:
+                try:
+                    account = Account.query.filter_by(
+                        account_number=account_data['account_number'],
+                        user_id=user_id
+                    ).first()
+                    
+                    if not account:
+                        account = Account(
+                            account_number=account_data['account_number'],
+                            account_name=account_data['account_name'],
+                            balance=account_data['balance'],
+                            user_id=user_id
+                        )
+                        db.session.add(account)
+                    else:
+                        account.balance = account_data['balance']
+                except KeyError as e:
+                    return jsonify({'error': f'بيانات الحساب غير مكتملة: {str(e)}'}), 400
         
         # معالجة المعاملات
-        for transaction_data in data.get('transactions', []):
-            transaction = Transaction.query.filter_by(
-                id=transaction_data['id'],
-                user_id=user_id
-            ).first()
-            
-            if not transaction:
-                transaction = Transaction(
-                    id=transaction_data['id'],
-                    date=datetime.fromisoformat(transaction_data['date']),
-                    amount=transaction_data['amount'],
-                    description=transaction_data['description'],
-                    user_id=user_id,
-                    account_id=transaction_data['account_id']
-                )
-                db.session.add(transaction)
+        if 'transactions' in data:
+            for transaction_data in data['transactions']:
+                try:
+                    transaction = Transaction.query.filter_by(
+                        id=transaction_data['id'],
+                        user_id=user_id
+                    ).first()
+                    
+                    if not transaction:
+                        transaction = Transaction(
+                            id=transaction_data['id'],
+                            date=datetime.fromisoformat(transaction_data['date']),
+                            amount=transaction_data['amount'],
+                            description=transaction_data['description'],
+                            user_id=user_id,
+                            account_id=transaction_data['account_id']
+                        )
+                        db.session.add(transaction)
+                except KeyError as e:
+                    return jsonify({'error': f'بيانات المعاملة غير مكتملة: {str(e)}'}), 400
+                except ValueError as e:
+                    return jsonify({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}), 400
         
         db.session.commit()
         return jsonify({'message': 'تمت المزامنة بنجاح'})
