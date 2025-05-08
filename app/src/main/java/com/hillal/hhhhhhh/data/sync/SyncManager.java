@@ -81,6 +81,15 @@ public class SyncManager {
     public void syncData(SyncCallback callback) {
         new Thread(() -> {
             try {
+                // جلب التوكن
+                String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                        .getString("token", null);
+                
+                if (token == null) {
+                    callback.onError("يرجى تسجيل الدخول أولاً");
+                    return;
+                }
+
                 // جلب البيانات الجديدة فقط
                 List<Account> newAccounts = accountDao.getAccountsModifiedAfter(lastSyncTime);
                 List<Transaction> newTransactions = transactionDao.getTransactionsModifiedAfter(lastSyncTime);
@@ -95,7 +104,7 @@ public class SyncManager {
                           newTransactions.size() + " transactions");
 
                 // إرسال البيانات الجديدة إلى السيرفر
-                apiService.syncData(new ApiService.SyncRequest(newAccounts, newTransactions))
+                apiService.syncData("Bearer " + token, new ApiService.SyncRequest(newAccounts, newTransactions))
                     .enqueue(new Callback<Void>() {
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
@@ -103,19 +112,36 @@ public class SyncManager {
                                 updateLastSyncTime();
                                 callback.onSuccess();
                             } else {
-                                callback.onError("فشل المزامنة");
+                                String errorMessage = "فشل المزامنة: " + response.code();
+                                if (response.errorBody() != null) {
+                                    try {
+                                        errorMessage += " - " + response.errorBody().string();
+                                    } catch (Exception e) {
+                                        Log.e(TAG, "Error reading error body", e);
+                                    }
+                                }
+                                Log.e(TAG, "Sync failed: " + errorMessage);
+                                callback.onError(errorMessage);
                             }
                         }
 
                         @Override
                         public void onFailure(Call<Void> call, Throwable t) {
                             Log.e(TAG, "Sync error: " + t.getMessage());
-                            callback.onError("خطأ في الاتصال");
+                            String errorMessage;
+                            if (t instanceof java.net.UnknownHostException) {
+                                errorMessage = "لا يمكن الوصول إلى الخادم. يرجى التحقق من اتصال الإنترنت";
+                            } else if (t instanceof java.net.SocketTimeoutException) {
+                                errorMessage = "انتهت مهلة الاتصال بالخادم. يرجى المحاولة مرة أخرى";
+                            } else {
+                                errorMessage = "خطأ في الاتصال: " + t.getMessage();
+                            }
+                            callback.onError(errorMessage);
                         }
                     });
             } catch (Exception e) {
                 Log.e(TAG, "Error during sync: " + e.getMessage());
-                callback.onError("خطأ في المزامنة");
+                callback.onError("خطأ في المزامنة: " + e.getMessage());
             }
         }).start();
     }
