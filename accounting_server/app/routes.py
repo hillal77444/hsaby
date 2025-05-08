@@ -129,6 +129,7 @@ def sync_data():
                     ).first()
                     
                     if not account:
+                        # حساب جديد - نستخدم القيم المرسلة من التطبيق
                         account = Account(
                             account_number=account_data['account_number'],
                             account_name=account_data['account_name'],
@@ -139,8 +140,10 @@ def sync_data():
                         db.session.add(account)
                         logger.info(f"Added new account: {account.account_number}")
                     else:
+                        # حساب موجود - نحدث فقط القيم الأساسية
                         account.balance = account_data['balance']
-                        account.is_debtor = account_data.get('is_debtor', account.is_debtor)
+                        if 'is_debtor' in account_data:
+                            account.is_debtor = account_data['is_debtor']
                         logger.info(f"Updated account: {account.account_number}")
                 except KeyError as e:
                     logger.error(f"Missing account field: {str(e)}")
@@ -183,6 +186,7 @@ def sync_data():
                     ).first()
                     
                     if not transaction:
+                        # معاملة جديدة - نستخدم القيم المرسلة من التطبيق
                         transaction = Transaction(
                             id=transaction_data['id'],
                             date=date,
@@ -196,6 +200,18 @@ def sync_data():
                         )
                         db.session.add(transaction)
                         logger.info(f"Added new transaction: {transaction.id}")
+                    else:
+                        # معاملة موجودة - نحدث فقط القيم الأساسية
+                        transaction.date = date
+                        transaction.amount = transaction_data['amount']
+                        transaction.description = transaction_data['description']
+                        if 'type' in transaction_data:
+                            transaction.type = transaction_data['type']
+                        if 'currency' in transaction_data:
+                            transaction.currency = transaction_data['currency']
+                        if 'notes' in transaction_data:
+                            transaction.notes = transaction_data['notes']
+                        logger.info(f"Updated transaction: {transaction.id}")
                 except KeyError as e:
                     logger.error(f"Missing transaction field: {str(e)}")
                     return json_response({'error': f'بيانات المعاملة غير مكتملة: {str(e)}'}, 400)
