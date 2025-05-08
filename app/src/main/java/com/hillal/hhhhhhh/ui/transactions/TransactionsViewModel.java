@@ -33,14 +33,16 @@ public class TransactionsViewModel extends AndroidViewModel {
     }
 
     public void loadTransactionsByCurrency(String currency) {
-        repository.getAllTransactions().observeForever(transactions -> {
-            List<Transaction> filteredTransactions = new ArrayList<>();
-            for (Transaction t : transactions.getValue()) {
-                if (currency.equals(t.getCurrency())) {
-                    filteredTransactions.add(t);
+        repository.getAllTransactions().observeForever(transactionList -> {
+            if (transactionList != null) {
+                List<Transaction> filteredTransactions = new ArrayList<>();
+                for (Transaction t : transactionList) {
+                    if (currency.equals(t.getCurrency())) {
+                        filteredTransactions.add(t);
+                    }
                 }
+                transactions.setValue(filteredTransactions);
             }
-            transactions.setValue(filteredTransactions);
         });
     }
 
