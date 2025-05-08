@@ -33,7 +33,7 @@ public class Transaction {
     private String currency;
 
     @SerializedName("date")
-    private long date;
+    private String date;
 
     @SerializedName("created_at")
     private long createdAt;
@@ -49,14 +49,16 @@ public class Transaction {
         this.type = type;
         this.description = description;
         this.currency = currency;
-        this.date = System.currentTimeMillis();
+        this.date = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            .format(new java.util.Date(System.currentTimeMillis()));
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
     }
 
     // Empty constructor for Room
     public Transaction() {
-        this.date = System.currentTimeMillis();
+        this.date = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            .format(new java.util.Date(System.currentTimeMillis()));
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
     }
@@ -126,18 +128,28 @@ public class Transaction {
         this.currency = currency;
     }
 
-    public long getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(long date) {
+    public void setDate(String date) {
         this.date = date;
+    }
+
+    // Helper method to get timestamp
+    public long getTimestamp() {
+        try {
+            return new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                .parse(date)
+                .getTime();
+        } catch (Exception e) {
+            return System.currentTimeMillis();
+        }
     }
 
     // Helper method to get formatted date
     public String getFormattedDate() {
-        return new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-            .format(new java.util.Date(date));
+        return date;
     }
 
     public long getCreatedAt() {
@@ -164,7 +176,7 @@ public class Transaction {
         return id == that.id &&
                accountId == that.accountId &&
                Double.compare(that.amount, amount) == 0 &&
-               date == that.date &&
+               date.equals(that.date) &&
                createdAt == that.createdAt &&
                updatedAt == that.updatedAt &&
                type.equals(that.type) &&
@@ -185,7 +197,7 @@ public class Transaction {
         result = 31 * result + description.hashCode();
         result = 31 * result + (notes != null ? notes.hashCode() : 0);
         result = 31 * result + currency.hashCode();
-        result = 31 * result + (int) (date ^ (date >>> 32));
+        result = 31 * result + date.hashCode();
         result = 31 * result + (int) (createdAt ^ (createdAt >>> 32));
         result = 31 * result + (int) (updatedAt ^ (updatedAt >>> 32));
         return result;
