@@ -2,6 +2,7 @@ package com.hillal.hhhhhhh.data.model;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.Ignore;
 import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "accounts")
@@ -34,6 +35,7 @@ public class Account {
     private long updatedAt;
 
     // Constructor
+    @Ignore
     public Account(String accountNumber, String name, double balance, String phoneNumber, boolean isDebtor) {
         this.accountNumber = accountNumber;
         this.name = name;
