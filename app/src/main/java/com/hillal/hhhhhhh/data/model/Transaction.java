@@ -2,6 +2,7 @@ package com.hillal.hhhhhhh.data.model;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.Ignore;
 import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "transactions")
@@ -37,6 +38,7 @@ public class Transaction {
     private long updatedAt;
 
     // Constructor
+    @Ignore
     public Transaction(long accountId, double amount, String type, String description, String currency) {
         this.accountId = accountId;
         this.amount = amount;
@@ -134,5 +136,40 @@ public class Transaction {
 
     public void setUpdatedAt(long updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Transaction that = (Transaction) o;
+        return id == that.id &&
+               accountId == that.accountId &&
+               Double.compare(that.amount, amount) == 0 &&
+               date == that.date &&
+               createdAt == that.createdAt &&
+               updatedAt == that.updatedAt &&
+               type.equals(that.type) &&
+               description.equals(that.description) &&
+               currency.equals(that.currency) &&
+               (notes == null ? that.notes == null : notes.equals(that.notes));
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = (int) (id ^ (id >>> 32));
+        result = 31 * result + (int) (accountId ^ (accountId >>> 32));
+        temp = Double.doubleToLongBits(amount);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + type.hashCode();
+        result = 31 * result + description.hashCode();
+        result = 31 * result + (notes != null ? notes.hashCode() : 0);
+        result = 31 * result + currency.hashCode();
+        result = 31 * result + (int) (date ^ (date >>> 32));
+        result = 31 * result + (int) (createdAt ^ (createdAt >>> 32));
+        result = 31 * result + (int) (updatedAt ^ (updatedAt >>> 32));
+        return result;
     }
 } 
