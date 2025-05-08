@@ -163,6 +163,18 @@ def sync_data():
                         logger.error(f"Missing required fields for transaction: {missing_fields}")
                         return json_response({'error': f'بيانات المعاملة غير مكتملة: {", ".join(missing_fields)}'}, 400)
                     
+                    # معالجة التاريخ
+                    try:
+                        if isinstance(transaction_data['date'], (int, float)):
+                            # إذا كان التاريخ timestamp
+                            date = datetime.fromtimestamp(transaction_data['date'] / 1000)  # تحويل من milliseconds إلى seconds
+                        else:
+                            # إذا كان التاريخ نص ISO
+                            date = datetime.fromisoformat(transaction_data['date'].replace('Z', '+00:00'))
+                    except (ValueError, TypeError) as e:
+                        logger.error(f"Invalid date format: {str(e)}")
+                        return json_response({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}, 400)
+                    
                     transaction = Transaction.query.filter_by(
                         id=transaction_data['id'],
                         user_id=user_id
@@ -171,7 +183,7 @@ def sync_data():
                     if not transaction:
                         transaction = Transaction(
                             id=transaction_data['id'],
-                            date=datetime.fromisoformat(transaction_data['date']),
+                            date=date,
                             amount=transaction_data['amount'],
                             description=transaction_data['description'],
                             user_id=user_id,
@@ -182,9 +194,6 @@ def sync_data():
                 except KeyError as e:
                     logger.error(f"Missing transaction field: {str(e)}")
                     return json_response({'error': f'بيانات المعاملة غير مكتملة: {str(e)}'}, 400)
-                except ValueError as e:
-                    logger.error(f"Invalid date format: {str(e)}")
-                    return json_response({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}, 400)
                 except Exception as e:
                     logger.error(f"Error processing transaction: {str(e)}")
                     return json_response({'error': f'خطأ في معالجة بيانات المعاملة: {str(e)}'}, 400)
