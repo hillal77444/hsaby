@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.hillal.hhhhhhh.App;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.repository.TransactionRepository;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TransactionsViewModel extends AndroidViewModel {
@@ -32,11 +33,15 @@ public class TransactionsViewModel extends AndroidViewModel {
     }
 
     public void loadTransactionsByCurrency(String currency) {
-        if (currency == null) {
-            loadAllTransactions();
-        } else {
-            repository.getTransactionsByCurrency(currency).observeForever(transactions::setValue);
-        }
+        repository.getAllTransactions().observeForever(transactions -> {
+            List<Transaction> filteredTransactions = new ArrayList<>();
+            for (Transaction t : transactions.getValue()) {
+                if (currency.equals(t.getCurrency())) {
+                    filteredTransactions.add(t);
+                }
+            }
+            transactions.setValue(filteredTransactions);
+        });
     }
 
     public void deleteTransaction(Transaction transaction) {
@@ -52,6 +57,6 @@ public class TransactionsViewModel extends AndroidViewModel {
     }
 
     public LiveData<Transaction> getTransactionById(long id) {
-        return repository.getById(id);
+        return repository.getTransactionById(id);
     }
 } 
