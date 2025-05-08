@@ -181,9 +181,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // تفعيل المزامنة عند العودة إلى التطبيق
-        if (syncManager != null) {
-            syncManager.onDashboardEntered();
+        Log.d(TAG, "onResume called");
+        // إعادة تشغيل المزامنة التلقائية عند عودة التطبيق للواجهة
+        if (syncManager != null && syncManager.isAutoSyncEnabled()) {
+            syncManager.startAutoSync();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause called");
+        // لا نقوم بإيقاف المزامنة التلقائية هنا لأنها قد تكون قيد التنفيذ
     }
 }
