@@ -42,7 +42,7 @@ public class RecentAccountsAdapter extends RecyclerView.Adapter<RecentAccountsAd
         Account account = accounts.get(position);
         holder.nameTextView.setText(account.getName());
         holder.phoneTextView.setText(account.getPhoneNumber());
-        holder.balanceTextView.setText(String.format("%.2f", account.getOpeningBalance()));
+        holder.balanceTextView.setText(String.format("%.2f", account.getBalance()));
     }
 
     @Override
