@@ -235,11 +235,15 @@ def get_transactions():
         user_id = get_jwt_identity()
         transactions = Transaction.query.filter_by(user_id=user_id).all()
         return jsonify([{
-            'id': trans.id,
+            'id': trans.id,  # هذا سيكون server_id في التطبيق
+            'server_id': trans.id,  # إضافة server_id للتوافق
             'date': trans.date.isoformat(),
             'amount': trans.amount,
             'description': trans.description,
-            'account_id': trans.account_id
+            'account_id': trans.account_id,
+            'type': trans.type,
+            'currency': trans.currency,
+            'notes': trans.notes
         } for trans in transactions])
     except Exception as e:
         logger.error(f"Get transactions error: {str(e)}")
