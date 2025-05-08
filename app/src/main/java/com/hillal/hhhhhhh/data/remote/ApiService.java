@@ -7,13 +7,13 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface ApiService {
-    @POST("auth/login")
+    @POST("api/login")
     Call<User> login(@Body LoginRequest request);
 
-    @POST("auth/register")
+    @POST("api/register")
     Call<User> register(@Body RegisterRequest request);
 
-    @POST("sync/data")
+    @POST("api/sync/data")
     Call<Void> syncData();
 
     class LoginRequest {
