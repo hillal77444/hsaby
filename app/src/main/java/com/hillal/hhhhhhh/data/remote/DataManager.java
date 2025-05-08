@@ -184,10 +184,27 @@ public class DataManager {
             // حفظ العملية في قائمة العمليات المعلقة
             executor.execute(() -> {
                 try {
+                    // التحقق مما إذا كان القيد موجوداً في قاعدة البيانات المحلية
+                    Transaction transaction = transactionDao.getTransactionById(transactionId).getValue();
+                    if (transaction == null) {
+                        // إذا كان القيد غير موجود، نتجاهل عملية الحذف
+                        Log.d(TAG, "تم تجاهل عملية الحذف لأن القيد غير موجود محلياً");
+                        handler.post(() -> callback.onSuccess());
+                        return;
+                    }
+
+                    // التحقق مما إذا كان القيد تم إنشاؤه محلياً ولم يتم مزامنته بعد
+                    if (transaction.getServerId() == 0) {
+                        // إذا كان القيد تم إنشاؤه محلياً، نحذفه مباشرة من قاعدة البيانات المحلية
+                        transactionDao.delete(transaction);
+                        Log.d(TAG, "تم حذف القيد المحلي مباشرة");
+                        handler.post(() -> callback.onSuccess());
+                        return;
+                    }
+
+                    // إذا كان القيد موجوداً في السيرفر، نحفظ عملية الحذف في قائمة العمليات المعلقة
                     PendingOperation operation = new PendingOperation("DELETE", transactionId, null);
                     pendingOperationDao.insert(operation);
-                    Transaction transaction = new Transaction();
-                    transaction.setId(transactionId);
                     transactionDao.delete(transaction);
                     Log.d(TAG, "تم حفظ عملية الحذف في قائمة العمليات المعلقة");
                     handler.post(() -> callback.onSuccess());
@@ -249,6 +266,14 @@ public class DataManager {
                 for (PendingOperation operation : operations) {
                     if (operation.getOperationType().equals("UPDATE")) {
                         Transaction transaction = gson.fromJson(operation.getTransactionData(), Transaction.class);
+                        // التحقق مما إذا كان القيد لا يزال موجوداً محلياً
+                        Transaction localTransaction = transactionDao.getTransactionById(transaction.getId()).getValue();
+                        if (localTransaction == null) {
+                            // إذا كان القيد غير موجود، نحذف العملية المعلقة
+                            pendingOperationDao.delete(operation);
+                            Log.d(TAG, "تم تجاهل عملية التحديث لأن القيد غير موجود محلياً");
+                            continue;
+                        }
                         updateTransaction(transaction, new DataCallback() {
                             @Override
                             public void onSuccess() {
@@ -261,6 +286,14 @@ public class DataManager {
                             }
                         });
                     } else if (operation.getOperationType().equals("DELETE")) {
+                        // التحقق مما إذا كان القيد لا يزال موجوداً محلياً
+                        Transaction localTransaction = transactionDao.getTransactionById(operation.getTransactionId()).getValue();
+                        if (localTransaction == null) {
+                            // إذا كان القيد غير موجود، نحذف العملية المعلقة
+                            pendingOperationDao.delete(operation);
+                            Log.d(TAG, "تم تجاهل عملية الحذف لأن القيد غير موجود محلياً");
+                            continue;
+                        }
                         deleteTransaction(operation.getTransactionId(), new DataCallback() {
                             @Override
                             public void onSuccess() {
