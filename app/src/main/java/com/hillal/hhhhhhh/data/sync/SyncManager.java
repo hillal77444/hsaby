@@ -4,6 +4,9 @@ import android.content.Context;
 import android.util.Log;
 import android.os.Handler;
 import android.os.Looper;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.widget.Toast;
 
 import com.hillal.hhhhhhh.data.remote.ApiService;
 import com.hillal.hhhhhhh.data.remote.RetrofitClient;
@@ -78,6 +81,13 @@ public class SyncManager {
         }
     }
 
+    private void copyToClipboard(String text) {
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("خطأ المزامنة", text);
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(context, "تم نسخ رسالة الخطأ إلى الحافظة", Toast.LENGTH_SHORT).show();
+    }
+
     public void syncData(SyncCallback callback) {
         new Thread(() -> {
             try {
@@ -86,7 +96,9 @@ public class SyncManager {
                         .getString("token", null);
                 
                 if (token == null) {
-                    callback.onError("يرجى تسجيل الدخول أولاً");
+                    String error = "يرجى تسجيل الدخول أولاً";
+                    copyToClipboard(error);
+                    callback.onError(error);
                     return;
                 }
 
@@ -112,15 +124,25 @@ public class SyncManager {
                                 updateLastSyncTime();
                                 callback.onSuccess();
                             } else {
-                                String errorMessage = "فشل المزامنة: " + response.code();
-                                if (response.errorBody() != null) {
-                                    try {
-                                        errorMessage += " - " + response.errorBody().string();
-                                    } catch (Exception e) {
-                                        Log.e(TAG, "Error reading error body", e);
+                                String errorMessage;
+                                try {
+                                    if (response.errorBody() != null) {
+                                        String errorBody = response.errorBody().string();
+                                        // محاولة تحليل رسالة الخطأ من JSON
+                                        if (errorBody.contains("error")) {
+                                            errorMessage = errorBody.split("\"error\":\"")[1].split("\"")[0];
+                                        } else {
+                                            errorMessage = "فشل المزامنة: " + response.code();
+                                        }
+                                    } else {
+                                        errorMessage = "فشل المزامنة: " + response.code();
                                     }
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error parsing error response", e);
+                                    errorMessage = "فشل المزامنة: " + response.code();
                                 }
                                 Log.e(TAG, "Sync failed: " + errorMessage);
+                                copyToClipboard(errorMessage);
                                 callback.onError(errorMessage);
                             }
                         }
@@ -136,12 +158,15 @@ public class SyncManager {
                             } else {
                                 errorMessage = "خطأ في الاتصال: " + t.getMessage();
                             }
+                            copyToClipboard(errorMessage);
                             callback.onError(errorMessage);
                         }
                     });
             } catch (Exception e) {
                 Log.e(TAG, "Error during sync: " + e.getMessage());
-                callback.onError("خطأ في المزامنة: " + e.getMessage());
+                String errorMessage = "خطأ في المزامنة: " + e.getMessage();
+                copyToClipboard(errorMessage);
+                callback.onError(errorMessage);
             }
         }).start();
     }
