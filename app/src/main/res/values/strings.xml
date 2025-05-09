@@ -105,6 +105,7 @@
     <string name="currency_usd">دولار أمريكي</string>
     <string name="no_transactions">لا توجد قيود محاسبية</string>
     <string name="confirm_delete">هل أنت متأكد من حذف هذا القيد؟</string>
+    <string name="transaction_updated">تم تحديث القيد بنجاح</string>
 
     <!-- التقارير -->
     <string name="reports">التقارير</string>
