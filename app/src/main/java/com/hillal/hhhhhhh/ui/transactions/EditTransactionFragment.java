@@ -17,8 +17,9 @@ import androidx.navigation.Navigation;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
-import com.hillal.hhhhhhh.databinding.FragmentAddTransactionBinding;
+import com.hillal.hhhhhhh.databinding.FragmentEditTransactionBinding;
 import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
+import com.hillal.hhhhhhh.data.preferences.UserPreferences;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -27,11 +28,12 @@ import java.util.List;
 import java.util.Locale;
 
 public class EditTransactionFragment extends Fragment {
-    private FragmentAddTransactionBinding binding;
+    private FragmentEditTransactionBinding binding;
     private TransactionsViewModel transactionsViewModel;
     private AccountViewModel accountViewModel;
+    private UserPreferences userPreferences;
+    private long transactionId;
     private long selectedAccountId = -1;
-    private long transactionId = -1;
     private final Calendar calendar = Calendar.getInstance();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", new Locale("ar"));
 
@@ -40,6 +42,7 @@ public class EditTransactionFragment extends Fragment {
         super.onCreate(savedInstanceState);
         transactionsViewModel = new ViewModelProvider(this).get(TransactionsViewModel.class);
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
+        userPreferences = new UserPreferences(requireContext());
         
         if (getArguments() != null) {
             transactionId = getArguments().getLong("transactionId", -1);
@@ -49,7 +52,7 @@ public class EditTransactionFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentAddTransactionBinding.inflate(inflater, container, false);
+        binding = FragmentEditTransactionBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -112,32 +115,34 @@ public class EditTransactionFragment extends Fragment {
     }
 
     private void populateTransactionData(Transaction transaction) {
-        // Set account
+        selectedAccountId = transaction.getAccountId();
+        
+        // Load account name
         accountViewModel.getAccountById(transaction.getAccountId()).observe(getViewLifecycleOwner(), account -> {
             if (account != null) {
                 binding.accountAutoComplete.setText(account.getName(), false);
-                selectedAccountId = account.getId();
             }
         });
 
-        // Set initial values
         binding.amountEditText.setText(String.valueOf(transaction.getAmount()));
         binding.descriptionEditText.setText(transaction.getDescription());
         
-        // Set type
-        if ("credit".equals(transaction.getType())) {
-            binding.radioCredit.setChecked(true);
+        // إضافة اسم المستخدم في الملاحظات إذا كانت فارغة
+        String notes = transaction.getNotes();
+        if (notes == null || notes.isEmpty()) {
+            String userName = userPreferences.getUserName();
+            if (!userName.isEmpty()) {
+                binding.notesEditText.setText(userName);
+            }
         } else {
-            binding.radioDebit.setChecked(true);
+            binding.notesEditText.setText(notes);
         }
-        
-        // Set date
-        calendar.setTimeInMillis(transaction.getDate());
-        updateDateButtonText();
-        
-        // Set notes if available
-        if (transaction.getNotes() != null) {
-            binding.notesEditText.setText(transaction.getNotes());
+
+        // Set transaction type
+        if ("debit".equals(transaction.getType())) {
+            binding.radioDebit.setChecked(true);
+        } else {
+            binding.radioCredit.setChecked(true);
         }
 
         // Set currency
@@ -148,6 +153,10 @@ public class EditTransactionFragment extends Fragment {
         } else {
             binding.radioUsd.setChecked(true);
         }
+
+        // Set date
+        calendar.setTimeInMillis(transaction.getDate());
+        updateDateField();
     }
 
     private void showDatePicker() {
@@ -165,10 +174,6 @@ public class EditTransactionFragment extends Fragment {
     }
 
     private void updateDateField() {
-        binding.dateEditText.setText(dateFormat.format(calendar.getTime()));
-    }
-
-    private void updateDateButtonText() {
         binding.dateEditText.setText(dateFormat.format(calendar.getTime()));
     }
 
@@ -204,7 +209,7 @@ public class EditTransactionFragment extends Fragment {
             transaction.setUpdatedAt(System.currentTimeMillis());
 
             transactionsViewModel.updateTransaction(transaction);
-            Toast.makeText(requireContext(), R.string.transaction_saved, Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), R.string.transaction_updated, Toast.LENGTH_SHORT).show();
             Navigation.findNavController(requireView()).navigateUp();
         } catch (NumberFormatException e) {
             binding.amountEditText.setError(getString(R.string.error_invalid_amount));
