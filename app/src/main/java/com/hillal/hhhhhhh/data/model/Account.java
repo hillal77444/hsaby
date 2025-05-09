@@ -39,6 +39,12 @@ public class Account {
     @SerializedName("updated_at")
     private long updatedAt;
 
+    @SerializedName("last_sync_time")
+    private long lastSyncTime;
+
+    @SerializedName("is_modified")
+    private boolean isModified;
+
     // Constructor
     @Ignore
     public Account(String accountNumber, String name, double balance, String phoneNumber, boolean isDebtor) {
@@ -138,8 +144,33 @@ public class Account {
         this.updatedAt = updatedAt;
     }
 
+    public long getLastSyncTime() {
+        return lastSyncTime;
+    }
+
+    public void setLastSyncTime(long lastSyncTime) {
+        this.lastSyncTime = lastSyncTime;
+    }
+
+    public boolean isModified() {
+        return isModified;
+    }
+
+    public void setModified(boolean modified) {
+        isModified = modified;
+    }
+
     @Override
     public String toString() {
-        return name;
+        return "Account{" +
+                "id=" + id +
+                ", serverId=" + serverId +
+                ", name='" + name + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", balance=" + balance +
+                ", isDebtor=" + isDebtor +
+                ", lastSyncTime=" + lastSyncTime +
+                ", isModified=" + isModified +
+                '}';
     }
 } 
