@@ -25,6 +25,7 @@ import com.hillal.hhhhhhh.data.model.Account;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.hillal.hhhhhhh.App;
 
 public class TransactionsFragment extends Fragment {
     private FragmentTransactionsBinding binding;
