@@ -83,19 +83,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
         }
 
         void bind(Transaction transaction) {
-            binding.transactionType.setText(transaction.getType());
-            binding.transactionAmount.setText(String.format("%.2f %s", 
-                    transaction.getAmount(), transaction.getCurrency()));
-            binding.transactionDescription.setText(transaction.getDescription());
-            binding.transactionDate.setText(dateFormat.format(transaction.getDate()));
-            
-            // Set color based on transaction type
-            int colorResId = transaction.getType().equals("مدين") ? 
-                    R.color.debit_color : R.color.credit_color;
-            binding.transactionType.setTextColor(
-                    itemView.getContext().getResources().getColor(colorResId, null));
-
-            // عرض اسم الحساب
+            // ربط اسم الحساب
             final String accountName;
             final String phoneNumber;
             if (accountMap != null && accountMap.containsKey(transaction.getAccountId())) {
@@ -107,6 +95,21 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                 phoneNumber = "";
             }
             binding.accountNameTextView.setText(accountName);
+
+            // ربط التاريخ
+            binding.transactionDate.setText(dateFormat.format(transaction.getDate()));
+
+            // ربط البيان
+            binding.transactionDescription.setText(transaction.getDescription());
+
+            // ربط عليه وله
+            if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
+                binding.transactionDebit.setText(String.format("%.2f %s", transaction.getAmount(), transaction.getCurrency()));
+                binding.transactionCredit.setText(String.format("0 %s", transaction.getCurrency()));
+            } else {
+                binding.transactionDebit.setText(String.format("0 %s", transaction.getCurrency()));
+                binding.transactionCredit.setText(String.format("%.2f %s", transaction.getAmount(), transaction.getCurrency()));
+            }
 
             // زر إرسال واتساب
             binding.btnSendWhatsApp.setOnClickListener(v -> {
