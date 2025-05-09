@@ -27,6 +27,7 @@ import org.json.JSONObject;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import com.google.gson.Gson;
+import java.util.ArrayList;
 
 public class SyncManager {
     private static final String TAG = "SyncManager";
@@ -198,29 +199,39 @@ public class SyncManager {
 
         executor.execute(() -> {
             try {
-                // جلب الحسابات الجديدة
+                // جلب الحسابات الجديدة والمعدلة
                 List<Account> newAccounts = accountDao.getNewAccounts();
-                Log.d(TAG, "تم العثور على " + newAccounts.size() + " حساب جديد");
+                List<Account> modifiedAccounts = accountDao.getModifiedAccounts(lastSyncTime);
+                Log.d(TAG, "تم العثور على " + newAccounts.size() + " حساب جديد و " + modifiedAccounts.size() + " حساب معدل");
 
-                // جلب المعاملات المعدلة منذ آخر مزامنة
-                long lastSyncTime = context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
-                        .getLong("last_sync_time", 0);
+                // جلب المعاملات الجديدة والمعدلة
+                List<Transaction> newTransactions = transactionDao.getNewTransactions();
                 List<Transaction> modifiedTransactions = transactionDao.getModifiedTransactions(lastSyncTime);
-                Log.d(TAG, "تم العثور على " + modifiedTransactions.size() + " معاملة معدلة");
+                Log.d(TAG, "تم العثور على " + newTransactions.size() + " معاملة جديدة و " + modifiedTransactions.size() + " معاملة معدلة");
 
-                if (newAccounts.isEmpty() && modifiedTransactions.isEmpty()) {
+                // دمج الحسابات الجديدة والمعدلة
+                List<Account> allAccounts = new ArrayList<>();
+                allAccounts.addAll(newAccounts);
+                allAccounts.addAll(modifiedAccounts);
+
+                // دمج المعاملات الجديدة والمعدلة
+                List<Transaction> allTransactions = new ArrayList<>();
+                allTransactions.addAll(newTransactions);
+                allTransactions.addAll(modifiedTransactions);
+
+                if (allAccounts.isEmpty() && allTransactions.isEmpty()) {
                     Log.d(TAG, "لا توجد بيانات جديدة للمزامنة");
-                    // حتى لو لم تكن هناك بيانات جديدة، نقوم بتحديث وقت آخر مزامنة
                     updateLastSyncTime();
                     handler.post(() -> callback.onSuccess());
                     return;
                 }
 
                 // إنشاء طلب المزامنة
-                ApiService.SyncRequest syncRequest = new ApiService.SyncRequest(newAccounts, modifiedTransactions);
+                ApiService.SyncRequest syncRequest = new ApiService.SyncRequest(allAccounts, allTransactions);
                 
                 // تحويل طلب المزامنة إلى JSON للنسخ
                 String syncRequestJson = new Gson().toJson(syncRequest);
+                Log.d(TAG, "بيانات المزامنة: " + syncRequestJson);
 
                 // إرسال البيانات إلى السيرفر
                 Response<Void> response = apiService.syncData("Bearer " + token, syncRequest).execute();
@@ -230,32 +241,44 @@ public class SyncManager {
                     for (Account account : newAccounts) {
                         account.setServerId(account.getId());
                         accountDao.update(account);
+                        Log.d(TAG, "تم تحديث معرف السيرفر للحساب الجديد: " + account.getName());
                     }
                     
                     // تحديث معرفات السيرفر للمعاملات الجديدة
-                    for (Transaction transaction : modifiedTransactions) {
+                    for (Transaction transaction : newTransactions) {
                         transaction.setServerId(transaction.getId());
                         transactionDao.update(transaction);
+                        Log.d(TAG, "تم تحديث معرف السيرفر للمعاملة الجديدة: " + transaction.getDescription());
+                    }
+
+                    // تحديث حالة المزامنة للحسابات المعدلة
+                    for (Account account : modifiedAccounts) {
+                        account.setLastSyncTime(System.currentTimeMillis());
+                        accountDao.update(account);
+                        Log.d(TAG, "تم تحديث حالة المزامنة للحساب المعدل: " + account.getName());
+                    }
+
+                    // تحديث حالة المزامنة للمعاملات المعدلة
+                    for (Transaction transaction : modifiedTransactions) {
+                        transaction.setLastSyncTime(System.currentTimeMillis());
+                        transactionDao.update(transaction);
+                        Log.d(TAG, "تم تحديث حالة المزامنة للمعاملة المعدلة: " + transaction.getDescription());
                     }
                     
                     // تحديث وقت آخر مزامنة
-                    context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
-                            .edit()
-                            .putLong("last_sync_time", System.currentTimeMillis())
-                            .apply();
+                    updateLastSyncTime();
                     
                     Log.d(TAG, "تمت المزامنة بنجاح");
-                    handler.post(() -> callback.onSuccess());
+                    handler.post(() -> {
+                        Toast.makeText(context, "تمت المزامنة بنجاح", Toast.LENGTH_SHORT).show();
+                        callback.onSuccess();
+                    });
                 } else {
                     String errorBody = response.errorBody() != null ? response.errorBody().string() : "خطأ غير معروف";
                     Log.e(TAG, "فشلت المزامنة: " + errorBody);
                     
                     // نسخ بيانات طلب المزامنة إلى الحافظة
-                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("Sync Request Data", 
-                        "Sync Request JSON:\n" + syncRequestJson + 
-                        "\n\nError Response:\n" + errorBody);
-                    clipboard.setPrimaryClip(clip);
+                    copyToClipboard("Sync Request JSON:\n" + syncRequestJson + "\n\nError Response:\n" + errorBody);
                     
                     handler.post(() -> {
                         Toast.makeText(context, "تم نسخ بيانات المزامنة إلى الحافظة", Toast.LENGTH_LONG).show();
