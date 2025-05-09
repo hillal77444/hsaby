@@ -49,23 +49,28 @@ public class TransactionsAdapter extends ListAdapter<Transaction, TransactionsAd
 
     static class TransactionViewHolder extends RecyclerView.ViewHolder {
         private final TextView dateTextView;
-        private final TextView typeTextView;
-        private final TextView amountTextView;
+        private final TextView debitTextView;
+        private final TextView creditTextView;
         private final TextView descriptionTextView;
 
         public TransactionViewHolder(@NonNull View itemView) {
             super(itemView);
             dateTextView = itemView.findViewById(R.id.transactionDate);
-            typeTextView = itemView.findViewById(R.id.transactionType);
-            amountTextView = itemView.findViewById(R.id.transactionAmount);
+            debitTextView = itemView.findViewById(R.id.transactionDebit);
+            creditTextView = itemView.findViewById(R.id.transactionCredit);
             descriptionTextView = itemView.findViewById(R.id.transactionDescription);
         }
 
         public void bind(Transaction transaction) {
             dateTextView.setText(dateFormat.format(transaction.getDate()));
-            typeTextView.setText(transaction.getType().equals("debit") ? "مدين" : "دائن");
-            amountTextView.setText(String.format("%.2f", transaction.getAmount()));
             descriptionTextView.setText(transaction.getDescription());
+            if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
+                debitTextView.setText(String.format("%.2f %s", transaction.getAmount(), transaction.getCurrency()));
+                creditTextView.setText(String.format("0 %s", transaction.getCurrency()));
+            } else {
+                debitTextView.setText(String.format("0 %s", transaction.getCurrency()));
+                creditTextView.setText(String.format("%.2f %s", transaction.getAmount(), transaction.getCurrency()));
+            }
         }
     }
 } 
