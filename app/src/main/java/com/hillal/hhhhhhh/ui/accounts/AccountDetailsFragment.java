@@ -192,31 +192,29 @@ public class AccountDetailsFragment extends Fragment {
         }
 
         static class ViewHolder extends RecyclerView.ViewHolder {
-            private final TextView typeTextView;
-            private final TextView amountTextView;
+            private final TextView debitTextView;
+            private final TextView creditTextView;
             private final TextView descriptionTextView;
             private final TextView dateTextView;
 
             ViewHolder(@NonNull View itemView) {
                 super(itemView);
-                typeTextView = itemView.findViewById(R.id.transactionType);
-                amountTextView = itemView.findViewById(R.id.transactionAmount);
+                debitTextView = itemView.findViewById(R.id.transactionDebit);
+                creditTextView = itemView.findViewById(R.id.transactionCredit);
                 descriptionTextView = itemView.findViewById(R.id.transactionDescription);
                 dateTextView = itemView.findViewById(R.id.transactionDate);
             }
 
             void bind(Transaction transaction) {
-                typeTextView.setText(transaction.getType());
-                amountTextView.setText(String.format("%.2f %s", 
-                        transaction.getAmount(), transaction.getCurrency()));
-                descriptionTextView.setText(transaction.getDescription());
                 dateTextView.setText(DATE_FORMAT.format(transaction.getDate()));
-                
-                // Set color based on transaction type
-                int colorResId = transaction.getType().equals("مدين") ? 
-                        R.color.debit_color : R.color.credit_color;
-                typeTextView.setTextColor(
-                        itemView.getContext().getResources().getColor(colorResId, null));
+                descriptionTextView.setText(transaction.getDescription());
+                if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
+                    debitTextView.setText(String.format("%.2f %s", transaction.getAmount(), transaction.getCurrency()));
+                    creditTextView.setText(String.format("0 %s", transaction.getCurrency()));
+                } else {
+                    debitTextView.setText(String.format("0 %s", transaction.getCurrency()));
+                    creditTextView.setText(String.format("%.2f %s", transaction.getAmount(), transaction.getCurrency()));
+                }
             }
         }
     }
