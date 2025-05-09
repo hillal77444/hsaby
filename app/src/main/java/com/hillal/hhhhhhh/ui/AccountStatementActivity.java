@@ -2,6 +2,8 @@ package com.hillal.hhhhhhh.ui;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.ArrayAdapter;
@@ -111,6 +113,26 @@ public class AccountStatementActivity extends AppCompatActivity {
                 accountNames
             );
             accountDropdown.setAdapter(adapter);
+            
+            // تفعيل البحث الفوري
+            accountDropdown.setOnItemClickListener((parent, view, position, id) -> {
+                String selectedAccountName = (String) parent.getItemAtPosition(position);
+                // يمكنك إضافة أي إجراء إضافي هنا عند اختيار الحساب
+            });
+            
+            // تفعيل البحث أثناء الكتابة
+            accountDropdown.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    adapter.getFilter().filter(s);
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {}
+            });
         });
     }
 
