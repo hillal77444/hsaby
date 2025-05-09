@@ -194,4 +194,20 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onPause called");
         // لا نقوم بإيقاف المزامنة التلقائية هنا لأنها قد تكون قيد التنفيذ
     }
+
+    @Override
+    public void onBackPressed() {
+        // إذا كنا في لوحة التحكم، نعرض مربع حوار للتأكيد قبل الخروج
+        if (navController.getCurrentDestination().getId() == R.id.navigation_dashboard) {
+            new AlertDialog.Builder(this)
+                .setTitle("تأكيد الخروج")
+                .setMessage("هل تريد الخروج من التطبيق؟")
+                .setPositiveButton("نعم", (dialog, which) -> finish())
+                .setNegativeButton("لا", null)
+                .show();
+        } else {
+            // في أي صفحة أخرى، نترك سلوك الرجوع الافتراضي
+            super.onBackPressed();
+        }
+    }
 }
