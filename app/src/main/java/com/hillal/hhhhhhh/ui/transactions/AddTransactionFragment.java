@@ -19,6 +19,7 @@ import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.databinding.FragmentAddTransactionBinding;
 import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
+import com.hillal.hhhhhhh.data.preferences.UserPreferences;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -30,6 +31,7 @@ public class AddTransactionFragment extends Fragment {
     private FragmentAddTransactionBinding binding;
     private TransactionsViewModel transactionsViewModel;
     private AccountViewModel accountViewModel;
+    private UserPreferences userPreferences;
     private long selectedAccountId = -1;
     private final Calendar calendar = Calendar.getInstance();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", new Locale("ar"));
@@ -39,6 +41,7 @@ public class AddTransactionFragment extends Fragment {
         super.onCreate(savedInstanceState);
         transactionsViewModel = new ViewModelProvider(this).get(TransactionsViewModel.class);
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
+        userPreferences = new UserPreferences(requireContext());
     }
 
     @Nullable
@@ -59,6 +62,12 @@ public class AddTransactionFragment extends Fragment {
     private void setupViews() {
         // Set initial date
         updateDateField();
+        
+        // إضافة اسم المستخدم في الملاحظات
+        String userName = userPreferences.getUserName();
+        if (!userName.isEmpty()) {
+            binding.notesEditText.setText(userName);
+        }
     }
 
     private void setupListeners() {
