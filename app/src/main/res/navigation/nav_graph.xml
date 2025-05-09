@@ -153,4 +153,11 @@
             app:argType="long" />
     </fragment>
 
+    <!-- تعديل الملف الشخصي -->
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="com.hillal.hhhhhhh.ui.profile.EditProfileFragment"
+        android:label="تعديل الملف الشخصي"
+        tools:layout="@layout/fragment_edit_profile" />
+
 </navigation>
