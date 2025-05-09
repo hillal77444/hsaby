@@ -140,10 +140,14 @@ def sync_data():
                         db.session.add(account)
                         logger.info(f"Added new account: {account.account_number}")
                     else:
-                        # حساب موجود - نحدث فقط القيم الأساسية
+                        # حساب موجود - نحدث القيم الأساسية
                         account.balance = account_data['balance']
                         if 'is_debtor' in account_data:
                             account.is_debtor = account_data['is_debtor']
+                        if 'account_name' in account_data:
+                            account.account_name = account_data['account_name']
+                        if 'phone_number' in account_data:
+                            account.phone_number = account_data['phone_number']
                         logger.info(f"Updated account: {account.account_number}")
                 except KeyError as e:
                     logger.error(f"Missing account field: {str(e)}")
