@@ -2,54 +2,51 @@ name: Android CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
   workflow_dispatch:
+    inputs:
+      action:
+        description: 'اختر العملية المطلوبة'
+        required: true
+        default: 'build'
+        type: choice
+        options:
+          - build
+          - download
 
 jobs:
   build:
+    if: github.event.inputs.action == 'build' || github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: gradle
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
-      with:
-        cmdline-tools-version: '12.0'
-
-    - name: Accept Android SDK Licenses
-      run: |
-        yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "extras;android;m2repository" "extras;google;m2repository"
-
-    - name: Make gradlew executable
-      run: chmod +x gradlew
-
-    - name: Build debug APK
-      run: |
-        echo "=== Starting Build Process ==="
-        ./gradlew clean
-        echo "=== Checking Resources ==="
-        ./gradlew :app:lintDebug
-        echo "=== Building APK ==="
-        ./gradlew :app:assembleDebug --no-daemon --console=plain --stacktrace --info
-        echo "=== Checking for APK ==="
-        ls -la app/build/outputs/apk/debug/
-        echo "=== Build Process Completed ==="
-
-    - name: Upload APK
-      if: success()
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
-        if-no-files-found: error
+  download:
+    if: github.event.inputs.action == 'download'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create ZIP file
+        run: zip -r project.zip . -x "*.git*" "*.gradle*" "build/*" "app/build/*"
+      - name: Upload ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: project-files
+          path: project.zip
