@@ -37,6 +37,8 @@ public class AccountStatementActivity extends AppCompatActivity {
     private WebView webView;
     private Calendar calendar;
     private SimpleDateFormat dateFormat;
+    // قائمة الحسابات للاستخدام الداخلي
+    private List<Account> allAccounts = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,10 +99,16 @@ public class AccountStatementActivity extends AppCompatActivity {
 
     private void loadAccounts() {
         viewModel.getAllAccounts().observe(this, accounts -> {
-            ArrayAdapter<Account> adapter = new ArrayAdapter<>(
+            if (accounts == null) return;
+            allAccounts = accounts;
+            List<String> accountNames = new ArrayList<>();
+            for (Account acc : accounts) {
+                accountNames.add(acc.getName());
+            }
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_dropdown_item_1line,
-                accounts
+                accountNames
             );
             accountDropdown.setAdapter(adapter);
         });
@@ -291,9 +299,10 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private Account getSelectedAccount(List<Account> accounts, String selectedAccountName) {
-        for (Account account : accounts) {
-            if (account.getName().equals(selectedAccountName)) {
-                return account;
+        // استخدم القائمة الداخلية للبحث عن الحساب بالاسم
+        for (Account acc : allAccounts) {
+            if (acc.getName().equals(selectedAccountName)) {
+                return acc;
             }
         }
         return null;
