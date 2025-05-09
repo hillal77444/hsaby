@@ -17,11 +17,13 @@ import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.databinding.FragmentDashboardBinding;
 import com.hillal.hhhhhhh.App;
 import com.hillal.hhhhhhh.data.sync.SyncManager;
+import com.hillal.hhhhhhh.data.preferences.UserPreferences;
 
 public class DashboardFragment extends Fragment {
     private static final String TAG = "DashboardFragment";
     private FragmentDashboardBinding binding;
     private DashboardViewModel dashboardViewModel;
+    private UserPreferences userPreferences;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -33,6 +35,7 @@ public class DashboardFragment extends Fragment {
             AccountRepository accountRepository = App.getInstance().getAccountRepository();
             dashboardViewModel = new ViewModelProvider(this, 
                 new DashboardViewModelFactory(accountRepository)).get(DashboardViewModel.class);
+            userPreferences = new UserPreferences(requireContext());
             Log.d(TAG, "DashboardViewModel initialized successfully");
         } catch (Exception e) {
             Log.e(TAG, "Error initializing DashboardFragment: " + e.getMessage(), e);
@@ -63,12 +66,17 @@ public class DashboardFragment extends Fragment {
 
             setupClickListeners();
             observeData();
+            updateUserName();
         } catch (Exception e) {
             Log.e(TAG, "Error in onViewCreated: " + e.getMessage(), e);
         }
     }
 
     private void setupClickListeners() {
+        // زر تعديل الملف الشخصي
+        binding.editProfileButton.setOnClickListener(v -> 
+            Navigation.findNavController(v).navigate(R.id.editProfileFragment));
+
         // زر عرض القيود المحاسبية
         binding.viewTransactionsButton.setOnClickListener(v -> {
             // تنفيذ المزامنة
@@ -116,6 +124,13 @@ public class DashboardFragment extends Fragment {
                 binding.totalCreditors.setText(String.format("%.2f %s", total, getString(R.string.currency_symbol)));
             }
         });
+    }
+
+    private void updateUserName() {
+        String userName = userPreferences.getUserName();
+        if (!userName.isEmpty()) {
+            binding.userNameText.setText(userName);
+        }
     }
 
     @Override
