@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:background="#F6F8FA">
+    android:background="#F6F8FA">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -133,8 +133,8 @@
             android:layout_marginBottom="8dp"
             android:text="عرض التقرير"
             android:textSize="18sp"
+            android:textColor="#fff"
             app:backgroundTint="#2196F3"
-            app:textColor="#fff"
             app:cornerRadius="24dp"
             app:icon="@android:drawable/ic_menu_view"
             app:iconGravity="textStart"
@@ -153,7 +153,7 @@
                 android:id="@+id/webView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:background="#fff"
+                android:background="#fff"
                 android:overScrollMode="never"/>
         </androidx.cardview.widget.CardView>
 
