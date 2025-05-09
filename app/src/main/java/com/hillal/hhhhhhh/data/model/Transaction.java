@@ -6,6 +6,8 @@ import androidx.room.Ignore;
 import androidx.room.ColumnInfo;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Date;
+
 @Entity(tableName = "transactions")
 public class Transaction {
     @PrimaryKey(autoGenerate = true)
@@ -40,6 +42,12 @@ public class Transaction {
 
     @SerializedName("updated_at")
     private long updatedAt;
+
+    @SerializedName("last_sync_time")
+    private long lastSyncTime;
+
+    @SerializedName("is_modified")
+    private boolean isModified;
 
     // Constructor
     @Ignore
@@ -180,6 +188,22 @@ public class Transaction {
         this.updatedAt = updatedAt;
     }
 
+    public long getLastSyncTime() {
+        return lastSyncTime;
+    }
+
+    public void setLastSyncTime(long lastSyncTime) {
+        this.lastSyncTime = lastSyncTime;
+    }
+
+    public boolean isModified() {
+        return isModified;
+    }
+
+    public void setModified(boolean modified) {
+        isModified = modified;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -213,5 +237,20 @@ public class Transaction {
         result = 31 * result + (int) (createdAt ^ (createdAt >>> 32));
         result = 31 * result + (int) (updatedAt ^ (updatedAt >>> 32));
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "id=" + id +
+                ", serverId=" + serverId +
+                ", accountId=" + accountId +
+                ", type='" + type + '\'' +
+                ", amount=" + amount +
+                ", description='" + description + '\'' +
+                ", date=" + date +
+                ", lastSyncTime=" + lastSyncTime +
+                ", isModified=" + isModified +
+                '}';
     }
 } 
