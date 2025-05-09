@@ -150,6 +150,27 @@ public class TransactionsFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        // تنفيذ المزامنة عند الخروج من الصفحة
+        try {
+            App app = (App) requireActivity().getApplication();
+            com.hillal.hhhhhhh.data.sync.SyncManager syncManager = new com.hillal.hhhhhhh.data.sync.SyncManager(
+                requireContext(),
+                app.getDatabase().accountDao(),
+                app.getDatabase().transactionDao()
+            );
+            syncManager.syncData(new com.hillal.hhhhhhh.data.sync.SyncManager.SyncCallback() {
+                @Override
+                public void onSuccess() {
+                    // لا تفعل شيء إضافي
+                }
+                @Override
+                public void onError(String error) {
+                    // لا تفعل شيء إضافي
+                }
+            });
+        } catch (Exception e) {
+            // تجاهل أي خطأ هنا حتى لا يتأثر الخروج من الصفحة
+        }
         super.onDestroyView();
         binding = null;
     }
