@@ -9,6 +9,15 @@ android {
     namespace 'com.hillal.hhhhhhh'
     compileSdk 34
 
+    signingConfigs {
+        release {
+            storeFile file("keystore.jks")
+            storePassword "Hillal774447251"
+            keyAlias "Hillal"
+            keyPassword "Hillal774447251"
+        }
+    }
+
     defaultConfig {
         applicationId "com.hillal.hhhhhhh"
         minSdk 26
@@ -32,7 +41,8 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            signingConfig signingConfigs.release
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
