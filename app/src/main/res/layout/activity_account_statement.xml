@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F6F8FA">
+    app:background="#F6F8FA">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,9 +29,10 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@android:drawable/ic_menu_myplaces"
-                    android:tint="#2196F3"
+                    app:tint="#2196F3"
                     android:contentDescription="أيقونة حساب"
-                    android:layout_marginEnd="8dp" />
+                    android:layout_marginEnd="8dp"
+                    android:scaleType="fitCenter" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="0dp"
@@ -71,9 +72,10 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@android:drawable/ic_menu_month"
-                    android:tint="#2196F3"
+                    app:tint="#2196F3"
                     android:contentDescription="أيقونة تقويم"
-                    android:layout_marginEnd="8dp" />
+                    android:layout_marginEnd="8dp"
+                    android:scaleType="fitCenter" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="0dp"
@@ -96,10 +98,11 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@android:drawable/ic_menu_month"
-                    android:tint="#2196F3"
+                    app:tint="#2196F3"
                     android:contentDescription="أيقونة تقويم"
                     android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp" />
+                    android:layout_marginEnd="8dp"
+                    android:scaleType="fitCenter" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="0dp"
@@ -130,8 +133,8 @@
             android:layout_marginBottom="8dp"
             android:text="عرض التقرير"
             android:textSize="18sp"
-            android:backgroundTint="#2196F3"
-            android:textColor="#fff"
+            app:backgroundTint="#2196F3"
+            app:textColor="#fff"
             app:cornerRadius="24dp"
             app:icon="@android:drawable/ic_menu_view"
             app:iconGravity="textStart"
@@ -150,7 +153,7 @@
                 android:id="@+id/webView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#fff"
+                app:background="#fff"
                 android:overScrollMode="never"/>
         </androidx.cardview.widget.CardView>
 
