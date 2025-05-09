@@ -45,7 +45,11 @@
                         android:id="@+id/accountDropdown"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="none"/>
+                        android:inputType="text"
+                        android:completionThreshold="1"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:imeOptions="actionSearch"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
