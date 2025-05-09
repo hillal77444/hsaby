@@ -70,8 +70,30 @@ public class DashboardFragment extends Fragment {
 
     private void setupClickListeners() {
         // زر عرض القيود المحاسبية
-        binding.viewTransactionsButton.setOnClickListener(v -> 
-            Navigation.findNavController(v).navigate(R.id.transactionsFragment));
+        binding.viewTransactionsButton.setOnClickListener(v -> {
+            // تنفيذ المزامنة
+            App app = (App) requireActivity().getApplication();
+            SyncManager syncManager = new SyncManager(
+                requireContext(),
+                app.getDatabase().accountDao(),
+                app.getDatabase().transactionDao()
+            );
+            
+            syncManager.syncData(new SyncManager.SyncCallback() {
+                @Override
+                public void onSuccess() {
+                    // بعد نجاح المزامنة، الانتقال إلى صفحة القيود
+                    Navigation.findNavController(v).navigate(R.id.transactionsFragment);
+                }
+
+                @Override
+                public void onError(String error) {
+                    // في حالة حدوث خطأ، نعرض رسالة الخطأ ثم ننتقل إلى صفحة القيود
+                    android.widget.Toast.makeText(requireContext(), error, android.widget.Toast.LENGTH_SHORT).show();
+                    Navigation.findNavController(v).navigate(R.id.transactionsFragment);
+                }
+            });
+        });
 
         // زر عرض الحسابات
         binding.viewAccountsButton.setOnClickListener(v -> 
