@@ -48,6 +48,8 @@ android {
             ndk {
                 debugSymbolLevel 'FULL'
             }
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            consumerProguardFiles 'proguard-rules.pro'
         }
         debug {
             debuggable true
