@@ -8,36 +8,36 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="8dp">
 
-        <!-- شريط اختيار الحساب -->
+        <!-- صف اختيار الحساب -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="6dp">
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="16dp"
+                android:padding="8dp"
                 android:gravity="center_vertical">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@android:drawable/ic_menu_myplaces"
                     app:tint="#2196F3"
                     android:contentDescription="أيقونة حساب"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="4dp"
                     android:scaleType="fitCenter" />
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:hint="اختر الحساب"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
@@ -51,37 +51,35 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- شريط اختيار الفترة -->
+        <!-- صف التواريخ وزر التقرير -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginBottom="8dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="6dp">
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="16dp"
+                android:padding="8dp"
                 android:gravity="center_vertical">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@android:drawable/ic_menu_month"
                     app:tint="#2196F3"
                     android:contentDescription="أيقونة تقويم"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="4dp"
                     android:scaleType="fitCenter" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="4dp"
                     android:hint="من تاريخ"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
@@ -94,20 +92,11 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_month"
-                    app:tint="#2196F3"
-                    android:contentDescription="أيقونة تقويم"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:scaleType="fitCenter" />
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
                     android:hint="إلى تاريخ"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
@@ -119,35 +108,31 @@
                         android:focusable="false"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- زر التقرير -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnShowReport"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="تقرير"
+                    android:textSize="14sp"
+                    android:textColor="#fff"
+                    app:backgroundTint="#2196F3"
+                    app:cornerRadius="8dp"
+                    app:icon="@android:drawable/ic_menu_view"
+                    app:iconGravity="textStart"
+                    app:iconPadding="4dp"/>
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-
-        <!-- زر عرض التقرير -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnShowReport"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:text="عرض التقرير"
-            android:textSize="18sp"
-            android:textColor="#fff"
-            app:backgroundTint="#2196F3"
-            app:cornerRadius="24dp"
-            app:icon="@android:drawable/ic_menu_view"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"/>
 
         <!-- عرض التقرير -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_margin="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp">
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp">
 
             <WebView
                 android:id="@+id/webView"
