@@ -42,7 +42,6 @@ jobs:
             platform-tools
             platforms;android-34
             tools
-            platform-tools
             extras;android;m2repository
             extras;google;m2repository
       - name: Grant execute permission for gradlew
