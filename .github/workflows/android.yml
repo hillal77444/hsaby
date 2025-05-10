@@ -38,7 +38,7 @@ jobs:
         with:
           cmdline-tools-version: "9477386"
           packages: |
-            build-tools;34.0.0
+            build-tools;33.0.2
             platform-tools
             platforms;android-24
             tools
@@ -49,7 +49,7 @@ jobs:
       - name: Install Android SDK components
         run: |
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "build-tools;34.0.0"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "build-tools;33.0.2"
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools"
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-24"
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "tools"
