@@ -163,7 +163,7 @@ jobs:
           -keepattributes Exceptions
           EOL
       - name: Build Release APK
-        run: ./gradlew assembleRelease --stacktrace -Xlint:deprecation
+        run: ./gradlew assembleRelease --stacktrace
       - name: Check APK exists
         run: |
           if [ ! -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
