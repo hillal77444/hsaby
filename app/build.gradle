@@ -80,7 +80,13 @@ android {
         exclude 'META-INF/notice.txt'
         exclude 'META-INF/ASL2.0'
         exclude 'com/itextpdf/text/AGPL.txt'
+        exclude 'com/itextpdf/text/LICENSE.txt'
         pickFirst 'com/itextpdf/text/AGPL.txt'
+        pickFirst 'com/itextpdf/text/LICENSE.txt'
+        pickFirst 'META-INF/LICENSE.txt'
+        pickFirst 'META-INF/NOTICE.txt'
+        pickFirst 'META-INF/ASL2.0'
+        pickFirst 'META-INF/LGPL2.1'
     }
 }
 
