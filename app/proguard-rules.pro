@@ -51,31 +51,6 @@
   @com.google.gson.annotations.SerializedName <fields>;
 }
 
-# Keep iText PDF
--keep class com.itextpdf.** { *; }
--keep class com.lowagie.** { *; }
--keep class org.bouncycastle.** { *; }
-
-# Keep Apache Commons Imaging
--keep class org.apache.commons.imaging.** { *; }
--keep class org.apache.commons.imaging.formats.** { *; }
-
-# Keep Java AWT classes
--dontwarn java.awt.**
--keep class java.awt.** { *; }
--keep class java.awt.image.** { *; }
--keep class java.awt.geom.** { *; }
-
-# Keep other required classes
--keep class org.apache.commons.** { *; }
--keep class org.apache.** { *; }
-
-# Keep your model classes
--keep class com.hillal.hhhhhhh.data.model.** { *; }
--keep class com.hillal.hhhhhhh.data.remote.** { *; }
--keep class com.hillal.hhhhhhh.ui.** { *; }
--keep class com.hillal.hhhhhhh.utils.** { *; }
-
 # Keep Room
 -keep class * extends androidx.room.RoomDatabase
 -keep @androidx.room.Entity class *
@@ -115,38 +90,6 @@
 -keep class * extends androidx.lifecycle.LiveData
 -keep class * extends androidx.lifecycle.MutableLiveData
 -keep class * extends androidx.lifecycle.MediatorLiveData
-
-# Keep iText PDF specific classes
--keep class com.itextpdf.text.** { *; }
--keep class com.itextpdf.text.pdf.** { *; }
--keep class com.itextpdf.text.pdf.parser.** { *; }
--keep class com.itextpdf.text.pdf.security.** { *; }
--keep class com.itextpdf.text.pdf.codec.** { *; }
--keep class com.itextpdf.text.pdf.fonts.** { *; }
--keep class com.itextpdf.text.pdf.draw.** { *; }
--keep class com.itextpdf.text.pdf.collection.** { *; }
--keep class com.itextpdf.text.pdf.parser.** { *; }
--keep class com.itextpdf.text.pdf.parser.filter.** { *; }
--keep class com.itextpdf.text.pdf.parser.filter.operator.** { *; }
--keep class com.itextpdf.text.pdf.parser.filter.operator.text.** { *; }
--keep class com.itextpdf.text.pdf.parser.filter.operator.markedcontent.** { *; }
--keep class com.itextpdf.text.pdf.parser.filter.operator.graphics.** { *; }
--keep class com.itextpdf.text.pdf.parser.filter.operator.graphics.state.** { *; }
--keep class com.itextpdf.text.pdf.parser.filter.operator.graphics.path.** { *; }
--keep class com.itextpdf.text.pdf.parser.filter.operator.graphics.path.construction.** { *; }
--keep class com.itextpdf.text.pdf.parser.filter.operator.graphics.path.painting.** { *; }
--keep class com.itextpdf.text.pdf.parser.filter.operator.graphics.path.clipping.** { *; }
-
-# Keep Kotlin
--keep class kotlin.** { *; }
--keep class kotlin.Metadata { *; }
--dontwarn kotlin.**
--keepclassmembers class **$WhenMappings {
-    <fields>;
-}
--keepclassmembers class kotlin.Metadata {
-    public <methods>;
-}
 
 # Keep AndroidX
 -keep class androidx.** { *; }
