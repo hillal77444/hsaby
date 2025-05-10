@@ -102,6 +102,27 @@
 -keep class com.lowagie.** { *; }
 -keep class org.bouncycastle.** { *; }
 
+# Keep iText PDF specific classes
+-keep class com.itextpdf.text.** { *; }
+-keep class com.itextpdf.text.pdf.** { *; }
+-keep class com.itextpdf.text.pdf.parser.** { *; }
+-keep class com.itextpdf.text.pdf.security.** { *; }
+-keep class com.itextpdf.text.pdf.codec.** { *; }
+-keep class com.itextpdf.text.pdf.fonts.** { *; }
+-keep class com.itextpdf.text.pdf.draw.** { *; }
+-keep class com.itextpdf.text.pdf.collection.** { *; }
+-keep class com.itextpdf.text.pdf.parser.** { *; }
+-keep class com.itextpdf.text.pdf.parser.filter.** { *; }
+-keep class com.itextpdf.text.pdf.parser.filter.operator.** { *; }
+-keep class com.itextpdf.text.pdf.parser.filter.operator.text.** { *; }
+-keep class com.itextpdf.text.pdf.parser.filter.operator.markedcontent.** { *; }
+-keep class com.itextpdf.text.pdf.parser.filter.operator.graphics.** { *; }
+-keep class com.itextpdf.text.pdf.parser.filter.operator.graphics.state.** { *; }
+-keep class com.itextpdf.text.pdf.parser.filter.operator.graphics.path.** { *; }
+-keep class com.itextpdf.text.pdf.parser.filter.operator.graphics.path.construction.** { *; }
+-keep class com.itextpdf.text.pdf.parser.filter.operator.graphics.path.painting.** { *; }
+-keep class com.itextpdf.text.pdf.parser.filter.operator.graphics.path.clipping.** { *; }
+
 # Keep Java AWT classes needed by iText
 -dontwarn java.awt.**
 -dontwarn javax.imageio.**
