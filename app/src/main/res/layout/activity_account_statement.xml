@@ -44,15 +44,15 @@
                     <AutoCompleteTextView
                         android:id="@+id/accountDropdown"
                         android:layout_width="match_parent"
-                        android:layout_height="40dp"
+                        android:layout_height="48dp"
                         android:completionThreshold="1"
                         android:imeOptions="actionSearch"
                         android:inputType="text"
                         android:maxLines="1"
                         android:singleLine="true"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:textSize="14sp"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:textSize="16sp"
                         android:textColor="#000" />
 
                 </com.google.android.material.textfield.TextInputLayout>
@@ -94,13 +94,13 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/startDateInput"
                         android:layout_width="match_parent"
-                        android:layout_height="40dp"
+                        android:layout_height="48dp"
                         android:focusable="false"
                         android:inputType="none"
-                        android:textSize="14sp"
+                        android:textSize="16sp"
                         android:textColor="#000"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp" />
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -115,13 +115,13 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/endDateInput"
                         android:layout_width="match_parent"
-                        android:layout_height="40dp"
+                        android:layout_height="48dp"
                         android:focusable="false"
                         android:inputType="none"
-                        android:textSize="14sp"
+                        android:textSize="16sp"
                         android:textColor="#000"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp" />
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -129,10 +129,10 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnShowReport"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
+                    android:layout_height="48dp"
                     android:text="تقرير"
                     android:textColor="#FFFFFF"
-                    android:textSize="13sp"
+                    android:textSize="14sp"
                     android:minWidth="60dp"
                     app:backgroundTint="#2196F3"
                     app:cornerRadius="8dp"
