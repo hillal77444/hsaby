@@ -129,6 +129,13 @@ android {
     }
 }
 
+repositories {
+    google()
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+    maven { url 'https://maven.google.com' }
+}
+
 dependencies {
     def room_version = "2.6.1"
     def nav_version = "2.7.7"
