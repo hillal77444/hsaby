@@ -119,8 +119,9 @@ dependencies {
 
     // iText PDF for Android
     implementation 'com.itextpdf:itextg:5.5.10'
-    implementation 'com.itextpdf:itext-pdfa:5.5.13.3'
-    implementation 'com.itextpdf:itext-xtra:5.5.13.3'
+    implementation 'com.itextpdf:itext-pdfa:5.5.10'
+    implementation 'com.itextpdf:itext-xtra:5.5.10'
+    implementation 'org.apache.commons:commons-imaging:1.0-alpha3'
 
     // Retrofit for network requests
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
