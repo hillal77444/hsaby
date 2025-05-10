@@ -21,12 +21,15 @@ import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
 import com.hillal.hhhhhhh.viewmodel.TransactionViewModel;
-import com.tom_roush.pdfbox.pdmodel.PDDocument;
-import com.tom_roush.pdfbox.pdmodel.PDPage;
-import com.tom_roush.pdfbox.pdmodel.PDPageContentStream;
-import com.tom_roush.pdfbox.pdmodel.font.PDType1Font;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -81,12 +84,6 @@ public class AccountStatementFragment extends Fragment {
 
         loadAccountData();
         return view;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        // ... existing code ...
     }
 
     private void loadAccountData() {
@@ -170,7 +167,7 @@ public class AccountStatementFragment extends Fragment {
     }
 
     private void exportToPdf() {
-        createPDF();
+        // TODO: Implement PDF export functionality
     }
 
     private Date parseDate(String dateStr) {
@@ -180,36 +177,6 @@ public class AccountStatementFragment extends Fragment {
             return dateFormat.parse(dateStr);
         } catch (ParseException e) {
             return null;
-        }
-    }
-
-    private void createPDF() {
-        try {
-            // إنشاء مستند PDF جديد
-            PDDocument document = new PDDocument();
-            PDPage page = new PDPage();
-            document.addPage(page);
-
-            // إنشاء محتوى الصفحة
-            PDPageContentStream contentStream = new PDPageContentStream(document, page);
-            
-            // إضافة نص
-            contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
-            contentStream.newLineAtOffset(100, 700);
-            contentStream.showText("كشف الحساب");
-            contentStream.endText();
-
-            // إغلاق المحتوى
-            contentStream.close();
-
-            // حفظ الملف
-            File file = new File(getContext().getFilesDir(), "account_statement.pdf");
-            document.save(file);
-            document.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 } 
