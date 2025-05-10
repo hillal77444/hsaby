@@ -31,9 +31,13 @@ jobs:
           cache: gradle
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Create keystore file
+      - name: Check keystore exists
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/keystore.jks
+          if [ ! -f "keystore.jks" ]; then
+            echo "Error: keystore.jks not found!"
+            exit 1
+          fi
+          echo "Keystore file exists"
       - name: Create gradle.properties
         run: |
           echo "RELEASE_STORE_FILE=keystore.jks" >> app/gradle.properties
