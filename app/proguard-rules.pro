@@ -51,6 +51,25 @@
   @com.google.gson.annotations.SerializedName <fields>;
 }
 
+# Keep iText PDF
+-keep class com.itextpdf.** { *; }
+-keep class com.lowagie.** { *; }
+-keep class org.bouncycastle.** { *; }
+
+# Keep Apache Commons Imaging
+-keep class org.apache.commons.imaging.** { *; }
+-keep class org.apache.commons.imaging.formats.** { *; }
+
+# Keep Java AWT classes
+-dontwarn java.awt.**
+-keep class java.awt.** { *; }
+-keep class java.awt.image.** { *; }
+-keep class java.awt.geom.** { *; }
+
+# Keep other required classes
+-keep class org.apache.commons.** { *; }
+-keep class org.apache.** { *; }
+
 # Keep your model classes
 -keep class com.hillal.hhhhhhh.data.model.** { *; }
 -keep class com.hillal.hhhhhhh.data.remote.** { *; }
@@ -97,11 +116,6 @@
 -keep class * extends androidx.lifecycle.MutableLiveData
 -keep class * extends androidx.lifecycle.MediatorLiveData
 
-# Keep iText PDF
--keep class com.itextpdf.** { *; }
--keep class com.lowagie.** { *; }
--keep class org.bouncycastle.** { *; }
-
 # Keep iText PDF specific classes
 -keep class com.itextpdf.text.** { *; }
 -keep class com.itextpdf.text.pdf.** { *; }
@@ -122,18 +136,6 @@
 -keep class com.itextpdf.text.pdf.parser.filter.operator.graphics.path.construction.** { *; }
 -keep class com.itextpdf.text.pdf.parser.filter.operator.graphics.path.painting.** { *; }
 -keep class com.itextpdf.text.pdf.parser.filter.operator.graphics.path.clipping.** { *; }
-
-# Keep Java AWT classes needed by iText
--dontwarn java.awt.**
--dontwarn javax.imageio.**
--dontwarn javax.xml.crypto.**
--dontwarn org.apache.jcp.xml.dsig.**
--dontwarn org.apache.xml.security.**
--keep class java.awt.** { *; }
--keep class javax.imageio.** { *; }
--keep class javax.xml.crypto.** { *; }
--keep class org.apache.jcp.xml.dsig.** { *; }
--keep class org.apache.xml.security.** { *; }
 
 # Keep Kotlin
 -keep class kotlin.** { *; }
