@@ -96,19 +96,20 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             }
             binding.accountNameTextView.setText(accountName);
 
-            // ربط التاريخ
-            binding.transactionDate.setText(dateFormat.format(transaction.getDate()));
+            // ربط التاريخ بالإنجليزي
+            SimpleDateFormat dateFormatEn = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
+            binding.transactionDate.setText(dateFormatEn.format(transaction.getDate()));
 
             // ربط البيان
             binding.transactionDescription.setText(transaction.getDescription());
 
-            // ربط عليه وله
+            // ربط عليه وله بالأرقام الإنجليزية
             if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
-                binding.transactionDebit.setText(String.format("%.2f %s", transaction.getAmount(), transaction.getCurrency()));
-                binding.transactionCredit.setText(String.format("0 %s", transaction.getCurrency()));
+                binding.transactionDebit.setText(String.format(Locale.US, "%.2f %s", transaction.getAmount(), transaction.getCurrency()));
+                binding.transactionCredit.setText(String.format(Locale.US, "0 %s", transaction.getCurrency()));
             } else {
-                binding.transactionDebit.setText(String.format("0 %s", transaction.getCurrency()));
-                binding.transactionCredit.setText(String.format("%.2f %s", transaction.getAmount(), transaction.getCurrency()));
+                binding.transactionDebit.setText(String.format(Locale.US, "0 %s", transaction.getCurrency()));
+                binding.transactionCredit.setText(String.format(Locale.US, "%.2f %s", transaction.getAmount(), transaction.getCurrency()));
             }
 
             // زر إرسال واتساب
