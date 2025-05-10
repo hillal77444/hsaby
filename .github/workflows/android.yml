@@ -28,6 +28,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: gradle
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+        with:
+          build-tools-version: "34.0.0"
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Create gradle.properties
@@ -146,11 +150,6 @@ jobs:
           EOL
       - name: Build Release APK
         run: ./gradlew assembleRelease --stacktrace
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
-        with:
-          build-tools-version: "34.0.0"
-          
       - name: Sign APK
         run: |
           $ANDROID_HOME/build-tools/34.0.0/zipalign -v 4 app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release-aligned.apk
