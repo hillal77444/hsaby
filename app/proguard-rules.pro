@@ -102,6 +102,18 @@
 -keep class com.lowagie.** { *; }
 -keep class org.bouncycastle.** { *; }
 
+# Keep Java AWT classes needed by iText
+-dontwarn java.awt.**
+-dontwarn javax.imageio.**
+-dontwarn javax.xml.crypto.**
+-dontwarn org.apache.jcp.xml.dsig.**
+-dontwarn org.apache.xml.security.**
+-keep class java.awt.** { *; }
+-keep class javax.imageio.** { *; }
+-keep class javax.xml.crypto.** { *; }
+-keep class org.apache.jcp.xml.dsig.** { *; }
+-keep class org.apache.xml.security.** { *; }
+
 # Keep Kotlin
 -keep class kotlin.** { *; }
 -keep class kotlin.Metadata { *; }
