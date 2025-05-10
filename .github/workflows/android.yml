@@ -37,24 +37,19 @@ jobs:
         uses: android-actions/setup-android@v3
         with:
           cmdline-tools-version: "9477386"
-          packages: |
-            build-tools;33.0.2
-            platform-tools
-            platforms;android-24
-            tools
-            extras;android;m2repository
-            extras;google;m2repository
           accept-android-sdk-licenses: true
           log-accepted-android-sdk-licenses: false
       - name: Install Android SDK components
         run: |
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "build-tools;33.0.2"
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools"
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-24"
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "tools"
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "extras;android;m2repository"
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "extras;google;m2repository"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --update
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-24"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "tools"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "extras;android;m2repository"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "extras;google;m2repository"
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Check keystore exists
