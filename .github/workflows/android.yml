@@ -20,6 +20,11 @@ jobs:
   build:
     if: github.event.inputs.action == 'build' || github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
+    env:
+      RELEASE_STORE_FILE: keystore.jks
+      RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -150,6 +155,13 @@ jobs:
           EOL
       - name: Build Release APK
         run: ./gradlew assembleRelease --stacktrace
+      - name: Check APK exists
+        run: |
+          if [ ! -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
+            echo "APK file not found!"
+            ls -la app/build/outputs/apk/release/
+            exit 1
+          fi
       - name: Sign APK
         run: |
           $ANDROID_HOME/build-tools/34.0.0/zipalign -v 4 app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release-aligned.apk
