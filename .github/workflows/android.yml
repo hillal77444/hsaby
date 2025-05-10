@@ -37,8 +37,10 @@ jobs:
         uses: android-actions/setup-android@v3
         with:
           cmdline-tools-version: "9477386"
-          build-tools-version: "34.0.0"
-          platform-version: "34"
+          packages: |
+            build-tools;34.0.0
+            platform-tools
+            platforms;android-34
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Check keystore exists
@@ -163,7 +165,12 @@ jobs:
           -keepattributes Exceptions
           EOL
       - name: Build Release APK
-        run: ./gradlew assembleRelease --stacktrace
+        run: |
+          echo "android.injected.signing.store.file=keystore.jks" >> app/gradle.properties
+          echo "android.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }}" >> app/gradle.properties
+          echo "android.injected.signing.key.alias=${{ secrets.KEY_ALIAS }}" >> app/gradle.properties
+          echo "android.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}" >> app/gradle.properties
+          ./gradlew assembleRelease --stacktrace
       - name: Check APK exists
         run: |
           if [ ! -f "app/build/outputs/apk/release/app-release.apk" ]; then
