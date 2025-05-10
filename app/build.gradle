@@ -144,6 +144,13 @@ dependencies {
 
     // مكتبة PDF متوافقة مع أندرويد
     implementation 'com.tom-roush:pdfbox-android:2.0.27.0'
+    implementation 'com.tom-roush:pdfbox-android-font:2.0.27.0'
+    implementation 'com.tom-roush:pdfbox-android-image:2.0.27.0'
+    
+    // مكتبات إضافية للتعامل مع الصور
+    implementation 'com.tom-roush:pdfbox-android-image-jpeg2000:2.0.27.0'
+    implementation 'com.tom-roush:pdfbox-android-image-jbig2:2.0.27.0'
+    implementation 'com.tom-roush:pdfbox-android-image-ccitt:2.0.27.0'
 
     // Retrofit for network requests
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
