@@ -42,11 +42,13 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            minifyEnabled false
-            shrinkResources false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            
+            // تقليل حجم التطبيق
             ndk {
-                debugSymbolLevel 'FULL'
+                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
             }
         }
         debug {
@@ -70,6 +72,20 @@ android {
         buildConfig true
     }
 
+    // تقليل حجم التطبيق
+    bundle {
+        language {
+            enableSplit = true
+        }
+        density {
+            enableSplit = true
+        }
+        abi {
+            enableSplit = true
+        }
+    }
+
+    // تقليل حجم التطبيق
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/LICENSE'
@@ -79,6 +95,7 @@ android {
         exclude 'META-INF/NOTICE.txt'
         exclude 'META-INF/notice.txt'
         exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/*.kotlin_module'
         exclude 'com/itextpdf/text/AGPL.txt'
         exclude 'com/itextpdf/text/LICENSE.txt'
         pickFirst 'com/itextpdf/text/AGPL.txt'
@@ -135,4 +152,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+
+    // تقليل حجم التطبيق
+    implementation 'androidx.multidex:multidex:2.0.1'
 } 
