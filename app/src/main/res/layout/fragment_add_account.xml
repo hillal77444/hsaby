@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:background="#F6F8FA">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -11,13 +12,19 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- الاسم -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="12dp"
             android:hint="@string/name"
             app:startIconDrawable="@drawable/ic_person"
-            app:startIconTint="@color/primary">
+            app:startIconTint="@color/primary"
+            app:boxBackgroundMode="outlined"
+            app:boxCornerRadiusTopStart="8dp"
+            app:boxCornerRadiusTopEnd="8dp"
+            app:boxCornerRadiusBottomStart="8dp"
+            app:boxCornerRadiusBottomEnd="8dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/name_edit_text"
@@ -25,16 +32,21 @@
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
                 android:maxLines="1" />
-
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- الهاتف -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="12dp"
             android:hint="@string/phone_number"
             app:startIconDrawable="@drawable/ic_phone"
-            app:startIconTint="@color/primary">
+            app:startIconTint="@color/primary"
+            app:boxBackgroundMode="outlined"
+            app:boxCornerRadiusTopStart="8dp"
+            app:boxCornerRadiusTopEnd="8dp"
+            app:boxCornerRadiusBottomStart="8dp"
+            app:boxCornerRadiusBottomEnd="8dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/phone_edit_text"
@@ -42,32 +54,43 @@
                 android:layout_height="wrap_content"
                 android:inputType="phone"
                 android:maxLines="1" />
-
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- الرصيد الافتتاحي -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="12dp"
             android:hint="@string/opening_balance"
             app:startIconDrawable="@drawable/ic_money"
-            app:startIconTint="@color/primary">
+            app:startIconTint="@color/primary"
+            app:boxBackgroundMode="outlined"
+            app:boxCornerRadiusTopStart="8dp"
+            app:boxCornerRadiusTopEnd="8dp"
+            app:boxCornerRadiusBottomStart="8dp"
+            app:boxCornerRadiusBottomEnd="8dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/openingBalanceEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal" />
-
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- الملاحظات (مخفاة فقط) -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="12dp"
             android:hint="@string/notes"
+            android:visibility="gone"
             app:startIconDrawable="@drawable/ic_note"
-            app:startIconTint="@color/primary">
+            app:startIconTint="@color/primary"
+            app:boxBackgroundMode="outlined"
+            app:boxCornerRadiusTopStart="8dp"
+            app:boxCornerRadiusTopEnd="8dp"
+            app:boxCornerRadiusBottomStart="8dp"
+            app:boxCornerRadiusBottomEnd="8dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/notes_edit_text"
@@ -75,22 +98,24 @@
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
                 android:minLines="3" />
-
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- أزرار -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/save_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="@color/primary"
+            android:textColor="@android:color/white"
             android:text="@string/save" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/cancel_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:text="@string/cancel" />
 
     </LinearLayout>
-</androidx.core.widget.NestedScrollView> 
+</androidx.core.widget.NestedScrollView>
