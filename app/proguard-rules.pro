@@ -51,6 +51,25 @@
   @com.google.gson.annotations.SerializedName <fields>;
 }
 
+# Keep PdfBox and related libraries
+-keep class com.tom_roush.pdfbox.** { *; }
+-keep class com.tom_roush.pdfbox.android.** { *; }
+-keep class com.tom_roush.pdfbox.filter.** { *; }
+-keep class com.tom_roush.pdfbox.pdmodel.** { *; }
+-keep class com.tom_roush.pdfbox.cos.** { *; }
+-keep class com.tom_roush.pdfbox.util.** { *; }
+
+# Keep image processing libraries
+-keep class com.gemalto.jp2.** { *; }
+-keep class org.apache.pdfbox.jbig2.** { *; }
+-keep class org.apache.pdfbox.filter.** { *; }
+
+# Keep your model classes
+-keep class com.hillal.hhhhhhh.data.model.** { *; }
+-keep class com.hillal.hhhhhhh.data.remote.** { *; }
+-keep class com.hillal.hhhhhhh.ui.** { *; }
+-keep class com.hillal.hhhhhhh.utils.** { *; }
+
 # Keep Room
 -keep class * extends androidx.room.RoomDatabase
 -keep @androidx.room.Entity class *
@@ -90,6 +109,17 @@
 -keep class * extends androidx.lifecycle.LiveData
 -keep class * extends androidx.lifecycle.MutableLiveData
 -keep class * extends androidx.lifecycle.MediatorLiveData
+
+# Keep Kotlin
+-keep class kotlin.** { *; }
+-keep class kotlin.Metadata { *; }
+-dontwarn kotlin.**
+-keepclassmembers class **$WhenMappings {
+    <fields>;
+}
+-keepclassmembers class kotlin.Metadata {
+    public <methods>;
+}
 
 # Keep AndroidX
 -keep class androidx.** { *; }
