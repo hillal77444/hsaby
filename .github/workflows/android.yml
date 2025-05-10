@@ -164,8 +164,11 @@ jobs:
           fi
       - name: Sign APK
         run: |
+          echo "Zipaligning APK..."
           $ANDROID_HOME/build-tools/34.0.0/zipalign -v 4 app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release-aligned.apk
+          echo "Signing APK..."
           $ANDROID_HOME/build-tools/34.0.0/apksigner sign --ks keystore.jks --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --ks-key-alias ${{ secrets.KEY_ALIAS }} --key-pass pass:${{ secrets.KEY_PASSWORD }} app/build/outputs/apk/release/app-release-aligned.apk
+          echo "Moving final APK..."
           mv app/build/outputs/apk/release/app-release-aligned.apk app/build/outputs/apk/release/app-release.apk
       - name: Upload APK
         uses: actions/upload-artifact@v4
