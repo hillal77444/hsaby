@@ -258,8 +258,11 @@ public class AccountStatementActivity extends AppCompatActivity {
             cal.set(Calendar.MILLISECOND, 999);
             Date endOfDay = cal.getTime();
 
+            // Convert account ID from String to long
+            long accountId = Long.parseLong(selectedAccountId);
+
             viewModel.getTransactionsForAccountInDateRange(
-                selectedAccountId,
+                accountId,
                 start.getTime(),
                 endOfDay.getTime()
             ).observe(this, transactions -> {
@@ -267,6 +270,8 @@ public class AccountStatementActivity extends AppCompatActivity {
                 String js = String.format("updateReport('%s');", html.replace("'", "\\'"));
                 webView.evaluateJavascript(js, null);
             });
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "خطأ في معرف الحساب", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Toast.makeText(this, "خطأ في تنسيق التاريخ", Toast.LENGTH_SHORT).show();
         }
