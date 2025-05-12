@@ -11,8 +11,9 @@ import java.io.FileInputStream
 import java.nio.charset.StandardCharsets
 import com.google.gson.Gson
 import java.security.MessageDigest
+import org.json.JSONArray
 
-class WebAppInterface(private val context: MainActivity, private val dbHelper: DatabaseHelper) {
+class WebAppInterface(private val context: Context, private val dbHelper: DatabaseHelper) {
     private val TAG = "WebAppInterface"
     private val gson = Gson()
 
@@ -37,58 +38,14 @@ class WebAppInterface(private val context: MainActivity, private val dbHelper: D
     }
 
     @JavascriptInterface
-    fun login(username: String, phone: String, password: String): String {
-        return try {
-            val user = dbHelper.getUser(username, phone)
-            if (user != null && user.passwordHash == hashPassword(password)) {
-                (context as MainActivity).saveLoginState(username, phone)
-                gson.toJson(mapOf(
-                    "success" to true,
-                    "message" to "تم تسجيل الدخول بنجاح"
-                ))
-            } else {
-                gson.toJson(mapOf(
-                    "success" to false,
-                    "message" to "بيانات الدخول غير صحيحة"
-                ))
-            }
-        } catch (e: Exception) {
-            gson.toJson(mapOf(
-                "success" to false,
-                "message" to "حدث خطأ أثناء تسجيل الدخول"
-            ))
-        }
+    fun login(username: String, password: String): Boolean {
+        return dbHelper.verifyLogin(username, password)
     }
 
     @JavascriptInterface
-    fun register(username: String, phone: String, password: String): String {
-        return try {
-            if (dbHelper.getUser(username, phone) != null) {
-                gson.toJson(mapOf(
-                    "success" to false,
-                    "message" to "المستخدم موجود بالفعل"
-                ))
-            } else {
-                val success = dbHelper.addUser(username, phone, hashPassword(password))
-                if (success) {
-                    (context as MainActivity).saveLoginState(username, phone)
-                    gson.toJson(mapOf(
-                        "success" to true,
-                        "message" to "تم إنشاء الحساب بنجاح"
-                    ))
-                } else {
-                    gson.toJson(mapOf(
-                        "success" to false,
-                        "message" to "فشل في إنشاء الحساب"
-                    ))
-                }
-            }
-        } catch (e: Exception) {
-            gson.toJson(mapOf(
-                "success" to false,
-                "message" to "حدث خطأ أثناء إنشاء الحساب"
-            ))
-        }
+    fun register(username: String, phone: String, password: String): Boolean {
+        val passwordHash = dbHelper.hashPassword(password)
+        return dbHelper.addUser(username, phone, passwordHash)
     }
 
     @JavascriptInterface
@@ -108,240 +65,129 @@ class WebAppInterface(private val context: MainActivity, private val dbHelper: D
     }
 
     @JavascriptInterface
-    fun getAccounts(): String {
-        return try {
-            val accounts = dbHelper.getAllAccounts()
-            gson.toJson(mapOf(
-                "success" to true,
-                "accounts" to accounts
-            ))
-        } catch (e: Exception) {
-            gson.toJson(mapOf(
-                "success" to false,
-                "message" to "حدث خطأ أثناء جلب الحسابات"
-            ))
-        }
+    fun getAccount(accountId: Long): String {
+        val account = dbHelper.getAccount(accountId)
+        return account?.toString() ?: "{}"
     }
 
     @JavascriptInterface
-    fun addAccount(accountJson: String): String {
-        return try {
-            val account = gson.fromJson(accountJson, Account::class.java)
-            val success = dbHelper.addAccount(account)
-            if (success) {
-                gson.toJson(mapOf(
-                    "success" to true,
-                    "message" to "تم إضافة الحساب بنجاح"
-                ))
-            } else {
-                gson.toJson(mapOf(
-                    "success" to false,
-                    "message" to "فشل في إضافة الحساب"
-                ))
+    fun getAllAccounts(): String {
+        return dbHelper.getAllAccounts().toString()
+    }
+
+    @JavascriptInterface
+    fun addAccount(accountJson: String): Boolean {
+        val account = JSONObject(accountJson)
+        val newAccount = Account(
+            accountNumber = account.getString("account_number"),
+            accountName = account.getString("account_name"),
+            balance = account.getDouble("balance"),
+            phoneNumber = if (account.has("phone_number")) account.getString("phone_number") else null,
+            isDebtor = account.getBoolean("is_debtor"),
+            notes = if (account.has("notes")) account.getString("notes") else null
+        )
+        return dbHelper.addAccount(newAccount)
+    }
+
+    @JavascriptInterface
+    fun updateAccount(accountJson: String): Boolean {
+        val account = JSONObject(accountJson)
+        val updatedAccount = Account(
+            id = account.getLong("id"),
+            accountNumber = account.getString("account_number"),
+            accountName = account.getString("account_name"),
+            balance = account.getDouble("balance"),
+            phoneNumber = if (account.has("phone_number")) account.getString("phone_number") else null,
+            isDebtor = account.getBoolean("is_debtor"),
+            notes = if (account.has("notes")) account.getString("notes") else null
+        )
+        return dbHelper.updateAccount(updatedAccount)
+    }
+
+    @JavascriptInterface
+    fun deleteAccount(accountId: Long): Boolean {
+        return dbHelper.deleteAccount(accountId)
+    }
+
+    @JavascriptInterface
+    fun getTransactionsForAccount(accountId: Long): String {
+        val transactions = dbHelper.getTransactionsForAccount(accountId)
+        val jsonArray = JSONArray()
+        transactions.forEach { transaction ->
+            val json = JSONObject().apply {
+                put("id", transaction.id)
+                put("date", transaction.date)
+                put("amount", transaction.amount)
+                put("description", transaction.description)
+                put("type", transaction.type)
+                put("currency", transaction.currency)
+                put("notes", transaction.notes)
+                put("account_id", transaction.accountId)
             }
-        } catch (e: Exception) {
-            gson.toJson(mapOf(
-                "success" to false,
-                "message" to "حدث خطأ أثناء إضافة الحساب"
-            ))
+            jsonArray.put(json)
         }
+        return jsonArray.toString()
     }
 
     @JavascriptInterface
-    fun updateAccount(accountJson: String): String {
-        return try {
-            val account = gson.fromJson(accountJson, Account::class.java)
-            val success = dbHelper.updateAccount(account)
-            if (success) {
-                gson.toJson(mapOf(
-                    "success" to true,
-                    "message" to "تم تحديث الحساب بنجاح"
-                ))
-            } else {
-                gson.toJson(mapOf(
-                    "success" to false,
-                    "message" to "فشل في تحديث الحساب"
-                ))
-            }
-        } catch (e: Exception) {
-            gson.toJson(mapOf(
-                "success" to false,
-                "message" to "حدث خطأ أثناء تحديث الحساب"
-            ))
-        }
+    fun addTransaction(transactionJson: String): Boolean {
+        val transaction = JSONObject(transactionJson)
+        val newTransaction = Transaction(
+            date = transaction.getLong("date"),
+            amount = transaction.getDouble("amount"),
+            description = transaction.getString("description"),
+            type = transaction.getString("type"),
+            currency = transaction.getString("currency"),
+            notes = if (transaction.has("notes")) transaction.getString("notes") else null,
+            accountId = transaction.getLong("account_id")
+        )
+        return dbHelper.addTransaction(newTransaction)
     }
 
     @JavascriptInterface
-    fun deleteAccount(accountId: Int): String {
-        return try {
-            val success = dbHelper.deleteAccount(accountId)
-            if (success) {
-                gson.toJson(mapOf(
-                    "success" to true,
-                    "message" to "تم حذف الحساب بنجاح"
-                ))
-            } else {
-                gson.toJson(mapOf(
-                    "success" to false,
-                    "message" to "فشل في حذف الحساب"
-                ))
-            }
-        } catch (e: Exception) {
-            gson.toJson(mapOf(
-                "success" to false,
-                "message" to "حدث خطأ أثناء حذف الحساب"
-            ))
-        }
+    fun updateTransaction(transactionJson: String): Boolean {
+        val transaction = JSONObject(transactionJson)
+        val updatedTransaction = Transaction(
+            id = transaction.getLong("id"),
+            date = transaction.getLong("date"),
+            amount = transaction.getDouble("amount"),
+            description = transaction.getString("description"),
+            type = transaction.getString("type"),
+            currency = transaction.getString("currency"),
+            notes = if (transaction.has("notes")) transaction.getString("notes") else null,
+            accountId = transaction.getLong("account_id")
+        )
+        return dbHelper.updateTransaction(updatedTransaction)
     }
 
     @JavascriptInterface
-    fun getTransactions(accountId: Int): String {
-        return try {
-            val transactions = dbHelper.getTransactionsForAccount(accountId)
-            gson.toJson(mapOf(
-                "success" to true,
-                "transactions" to transactions
-            ))
-        } catch (e: Exception) {
-            gson.toJson(mapOf(
-                "success" to false,
-                "message" to "حدث خطأ أثناء جلب المعاملات"
-            ))
-        }
-    }
-
-    @JavascriptInterface
-    fun addTransaction(transactionJson: String): String {
-        return try {
-            val transaction = gson.fromJson(transactionJson, Transaction::class.java)
-            val success = dbHelper.addTransaction(transaction)
-            if (success) {
-                gson.toJson(mapOf(
-                    "success" to true,
-                    "message" to "تم إضافة المعاملة بنجاح"
-                ))
-            } else {
-                gson.toJson(mapOf(
-                    "success" to false,
-                    "message" to "فشل في إضافة المعاملة"
-                ))
-            }
-        } catch (e: Exception) {
-            gson.toJson(mapOf(
-                "success" to false,
-                "message" to "حدث خطأ أثناء إضافة المعاملة"
-            ))
-        }
-    }
-
-    @JavascriptInterface
-    fun updateTransaction(transactionJson: String): String {
-        return try {
-            val transaction = gson.fromJson(transactionJson, Transaction::class.java)
-            val success = dbHelper.updateTransaction(transaction)
-            if (success) {
-                gson.toJson(mapOf(
-                    "success" to true,
-                    "message" to "تم تحديث المعاملة بنجاح"
-                ))
-            } else {
-                gson.toJson(mapOf(
-                    "success" to false,
-                    "message" to "فشل في تحديث المعاملة"
-                ))
-            }
-        } catch (e: Exception) {
-            gson.toJson(mapOf(
-                "success" to false,
-                "message" to "حدث خطأ أثناء تحديث المعاملة"
-            ))
-        }
-    }
-
-    @JavascriptInterface
-    fun deleteTransaction(transactionId: Int): String {
-        return try {
-            val success = dbHelper.deleteTransaction(transactionId)
-            if (success) {
-                gson.toJson(mapOf(
-                    "success" to true,
-                    "message" to "تم حذف المعاملة بنجاح"
-                ))
-            } else {
-                gson.toJson(mapOf(
-                    "success" to false,
-                    "message" to "فشل في حذف المعاملة"
-                ))
-            }
-        } catch (e: Exception) {
-            gson.toJson(mapOf(
-                "success" to false,
-                "message" to "حدث خطأ أثناء حذف المعاملة"
-            ))
-        }
+    fun deleteTransaction(transactionId: Long): Boolean {
+        return dbHelper.deleteTransaction(transactionId)
     }
 
     @JavascriptInterface
     fun getSettings(): String {
-        return try {
-            val settings = dbHelper.getAllSettings()
-            gson.toJson(mapOf(
-                "success" to true,
-                "settings" to settings
-            ))
-        } catch (e: Exception) {
-            gson.toJson(mapOf(
-                "success" to false,
-                "message" to "حدث خطأ أثناء جلب الإعدادات"
-            ))
+        val settings = dbHelper.getAllSettings()
+        val json = JSONObject()
+        settings.forEach { (key, value) ->
+            json.put(key, value)
         }
+        return json.toString()
     }
 
     @JavascriptInterface
-    fun updateSettings(settingsJson: String): String {
-        return try {
-            val settings = gson.fromJson(settingsJson, Map::class.java)
-            val success = dbHelper.updateSettings(settings)
-            if (success) {
-                gson.toJson(mapOf(
-                    "success" to true,
-                    "message" to "تم تحديث الإعدادات بنجاح"
-                ))
-            } else {
-                gson.toJson(mapOf(
-                    "success" to false,
-                    "message" to "فشل في تحديث الإعدادات"
-                ))
-            }
-        } catch (e: Exception) {
-            gson.toJson(mapOf(
-                "success" to false,
-                "message" to "حدث خطأ أثناء تحديث الإعدادات"
-            ))
+    fun updateSettings(settingsJson: String): Boolean {
+        val json = JSONObject(settingsJson)
+        val settings = mutableMapOf<String, String>()
+        json.keys().forEach { key ->
+            settings[key] = json.getString(key)
         }
+        return dbHelper.updateSettings(settings)
     }
 
     @JavascriptInterface
-    fun syncData(): String {
-        return try {
-            val success = dbHelper.syncData()
-            if (success) {
-                gson.toJson(mapOf(
-                    "success" to true,
-                    "message" to "تم مزامنة البيانات بنجاح"
-                ))
-            } else {
-                gson.toJson(mapOf(
-                    "success" to false,
-                    "message" to "فشل في مزامنة البيانات"
-                ))
-            }
-        } catch (e: Exception) {
-            gson.toJson(mapOf(
-                "success" to false,
-                "message" to "حدث خطأ أثناء مزامنة البيانات"
-            ))
-        }
+    fun syncData(): Boolean {
+        return dbHelper.syncData()
     }
 
     private fun hashPassword(password: String): String {
