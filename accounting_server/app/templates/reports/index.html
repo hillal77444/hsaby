@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="card">
+        <button onclick="refreshContent()" class="refresh-button">
+            <span>🔄</span> تحديث المحتوى
+        </button>
+        
+        <div class="report-type-selector">
+            <button onclick="showReport('daily')" class="report-type-btn active">تقرير يومي</button>
+            <button onclick="showReport('monthly')" class="report-type-btn">تقرير شهري</button>
+            <button onclick="showReport('yearly')" class="report-type-btn">تقرير سنوي</button>
+        </div>
+
+        <div class="form-group">
+            <label for="accountDropdown">الحساب</label>
+            <select id="accountDropdown" onchange="onAccountSelected()">
+                <option value="">-- اختر الحساب --</option>
+            </select>
+        </div>
+
+        <div class="date-container">
+            <div class="form-group">
+                <label for="startDateInput">من تاريخ</label>
+                <input type="date" id="startDateInput" onchange="onDateChanged()">
+            </div>
+            <div class="form-group">
+                <label for="endDateInput">إلى تاريخ</label>
+                <input type="date" id="endDateInput" onchange="onDateChanged()">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="currencyFilter">العملة</label>
+            <select id="currencyFilter" onchange="onCurrencyChanged()">
+                <option value="all">جميع العملات</option>
+                <option value="ريال يمني">ريال يمني</option>
+                <option value="دولار أمريكي">دولار أمريكي</option>
+                <option value="ريال سعودي">ريال سعودي</option>
+            </select>
+        </div>
+
+        <button onclick="generateReport()" class="generate-btn">إنشاء التقرير</button>
+    </div>
+
+    <div id="reportContainer">
+        <div class="report-summary">
+            <div class="summary-card total-debit">
+                <h3>إجمالي المدين</h3>
+                <p class="amount">0 ريال يمني</p>
+            </div>
+            <div class="summary-card total-credit">
+                <h3>إجمالي الدائن</h3>
+                <p class="amount">0 ريال يمني</p>
+            </div>
+            <div class="summary-card balance">
+                <h3>الرصيد</h3>
+                <p class="amount">0 ريال يمني</p>
+            </div>
+        </div>
+
+        <div class="report-details">
+            <h2>تفاصيل المعاملات</h2>
+            <div id="transactionsList"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
