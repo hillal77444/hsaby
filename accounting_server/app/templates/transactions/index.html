@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="card">
+        <button onclick="refreshContent()" class="refresh-button">
+            <span>🔄</span> تحديث المحتوى
+        </button>
+        <div class="form-group">
+            <label for="accountDropdown">الحساب</label>
+            <select id="accountDropdown" onchange="onAccountSelected()">
+                <option value="">-- اختر الحساب --</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="transactionType">نوع المعاملة</label>
+            <select id="transactionType">
+                <option value="debit">مدين</option>
+                <option value="credit">دائن</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="amount">المبلغ</label>
+            <input type="number" id="amount" placeholder="أدخل المبلغ">
+        </div>
+        <div class="form-group">
+            <label for="description">الوصف</label>
+            <input type="text" id="description" placeholder="أدخل وصف المعاملة">
+        </div>
+        <div class="form-group">
+            <label for="currency">العملة</label>
+            <select id="currency">
+                <option value="ريال يمني">ريال يمني</option>
+                <option value="دولار أمريكي">دولار أمريكي</option>
+                <option value="ريال سعودي">ريال سعودي</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="notes">ملاحظات</label>
+            <textarea id="notes" placeholder="أدخل ملاحظات إضافية"></textarea>
+        </div>
+        <button onclick="saveTransaction()">حفظ المعاملة</button>
+    </div>
+    <div id="transactionsList"></div>
+    <script src="script.js"></script>
+</body>
+</html> 
