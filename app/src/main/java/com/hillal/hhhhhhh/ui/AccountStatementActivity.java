@@ -183,6 +183,7 @@ public class AccountStatementActivity extends AppCompatActivity {
 
                     function updateDates(startDate, endDate) {
                         document.getElementById('startDateInput').value = startDate;
+                        
                         document.getElementById('endDateInput').value = endDate;
                     }
 
@@ -361,7 +362,7 @@ public class AccountStatementActivity extends AppCompatActivity {
         public void onDateChanged() {
             runOnUiThread(() -> {
                 webView.evaluateJavascript(
-                    "(function() { return { startDate: document.getElementById('startDateInput').value, endDate: document.getElementById('endDateInput').value }; })();",
+                    "(function() { return { endDate: document.getElementById('endDateInput').value, startDate: document.getElementById('startDateInput').value }; })();",
                     value -> {
                         try {
                             value = value.replace("\\", "");
@@ -369,8 +370,8 @@ public class AccountStatementActivity extends AppCompatActivity {
                                 value = value.substring(1, value.length() - 1);
                             }
                             String[] dates = value.split(",");
-                            startDate = dates[0].split(":")[1].replace("\"", "");
-                            endDate = dates[1].split(":")[1].replace("\"", "");
+                            endDate = dates[0].split(":")[1].replace("\"", "");
+                            startDate = dates[1].split(":")[1].replace("\"", "");
                             updateReport();
                         } catch (Exception e) {
                             e.printStackTrace();
