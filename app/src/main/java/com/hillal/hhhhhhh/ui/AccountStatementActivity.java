@@ -14,7 +14,6 @@ import com.hillal.hhhhhhh.viewmodel.AccountStatementViewModel;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.json.JSONObject;
 
 public class AccountStatementActivity extends AppCompatActivity {
     private WebView webView;
@@ -33,7 +32,6 @@ public class AccountStatementActivity extends AppCompatActivity {
         webView = findViewById(R.id.webView);
         viewModel = new ViewModelProvider(this).get(AccountStatementViewModel.class);
         dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-        dateFormat.setTimeZone(TimeZone.getDefault());
         allAccounts = new ArrayList<>();
 
         setupWebView();
@@ -188,54 +186,6 @@ public class AccountStatementActivity extends AppCompatActivity {
             """;
     }
 
-    private class WebAppInterface {
-        @JavascriptInterface
-        public void onAccountSelected(String accountId) {
-            selectedAccountId = accountId;
-            updateReport();
-        }
-
-        @JavascriptInterface
-        public void onDateChanged() {
-            runOnUiThread(() -> {
-                webView.evaluateJavascript(
-                    "(function() { " +
-                    "const startDate = document.getElementById('startDateInput').value; " +
-                    "const endDate = document.getElementById('endDateInput').value; " +
-                    "return JSON.stringify({startDate: startDate, endDate: endDate}); " +
-                    "})();",
-                    value -> {
-                        try {
-                            // Parse the JSON response
-                            value = value.replace("\\", "");
-                            if (value.startsWith("\"") && value.endsWith("\"")) {
-                                value = value.substring(1, value.length() - 1);
-                            }
-                            
-                            // Parse JSON string
-                            JSONObject json = new JSONObject(value);
-                            startDate = json.getString("startDate");
-                            endDate = json.getString("endDate");
-                            
-                            if (!startDate.isEmpty() && !endDate.isEmpty()) {
-                                updateReport();
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Toast.makeText(AccountStatementActivity.this, 
-                                "خطأ في قراءة التاريخ", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                );
-            });
-        }
-
-        @JavascriptInterface
-        public void showReport() {
-            updateReport();
-        }
-    }
-
     private void loadAccounts() {
         viewModel.getAllAccounts().observe(this, accounts -> {
             if (accounts != null && !accounts.isEmpty()) {
@@ -256,11 +206,11 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private void loadInitialData() {
-        Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
+        Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, -3);
         startDate = dateFormat.format(calendar.getTime());
         
-        calendar = Calendar.getInstance(TimeZone.getDefault());
+        calendar = Calendar.getInstance();
         endDate = dateFormat.format(calendar.getTime());
 
         String js = String.format("updateDates('%s', '%s');", startDate, endDate);
@@ -269,60 +219,44 @@ public class AccountStatementActivity extends AppCompatActivity {
 
     private void updateReport() {
         if (selectedAccountId == null || selectedAccountId.isEmpty()) {
-            runOnUiThread(() -> Toast.makeText(this, "الرجاء اختيار حساب", Toast.LENGTH_SHORT).show());
+            Toast.makeText(this, "الرجاء اختيار حساب", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (startDate == null || startDate.isEmpty() || endDate == null || endDate.isEmpty()) {
-            runOnUiThread(() -> Toast.makeText(this, "الرجاء تحديد الفترة الزمنية", Toast.LENGTH_SHORT).show());
+        if (startDate == null || endDate == null) {
+            Toast.makeText(this, "الرجاء تحديد الفترة الزمنية", Toast.LENGTH_SHORT).show();
             return;
         }
 
         try {
-            // تحويل التواريخ من HTML5 date input (yyyy-MM-dd) إلى Date
-            Calendar cal = Calendar.getInstance(TimeZone.getDefault());
-            
-            // تحويل تاريخ البداية
-            String[] startParts = startDate.split("-");
-            cal.set(Calendar.YEAR, Integer.parseInt(startParts[0]));
-            cal.set(Calendar.MONTH, Integer.parseInt(startParts[1]) - 1);
-            cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(startParts[2]));
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            Date start = cal.getTime();
+            Date start = dateFormat.parse(startDate);
+            Date end = dateFormat.parse(endDate);
 
-            // تحويل تاريخ النهاية
-            String[] endParts = endDate.split("-");
-            cal.set(Calendar.YEAR, Integer.parseInt(endParts[0]));
-            cal.set(Calendar.MONTH, Integer.parseInt(endParts[1]) - 1);
-            cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(endParts[2]));
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(end);
             cal.set(Calendar.HOUR_OF_DAY, 23);
             cal.set(Calendar.MINUTE, 59);
             cal.set(Calendar.SECOND, 59);
             cal.set(Calendar.MILLISECOND, 999);
             Date endOfDay = cal.getTime();
 
-            // تحويل معرف الحساب
-            long accountId = Long.parseLong(selectedAccountId);
+            if (start.after(endOfDay)) {
+                Toast.makeText(this, "تاريخ البداية يجب أن يكون قبل تاريخ النهاية", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
+            long accountId = Long.parseLong(selectedAccountId);
             viewModel.getTransactionsForAccountInDateRange(
                 accountId,
                 start,
                 endOfDay
             ).observe(this, transactions -> {
-                runOnUiThread(() -> {
-                    String html = generateReportHtml(transactions);
-                    String js = String.format("updateReport('%s');", html.replace("'", "\\'"));
-                    webView.evaluateJavascript(js, null);
-                });
+                String html = generateReportHtml(transactions);
+                String js = String.format("updateReport('%s');", html.replace("'", "\\'"));
+                webView.evaluateJavascript(js, null);
             });
-        } catch (NumberFormatException e) {
-            runOnUiThread(() -> Toast.makeText(this, "خطأ في معرف الحساب", Toast.LENGTH_SHORT).show());
-            e.printStackTrace();
         } catch (Exception e) {
-            runOnUiThread(() -> Toast.makeText(this, "خطأ في تنسيق التاريخ: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+            Toast.makeText(this, "خطأ في تنسيق التاريخ", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }
@@ -347,18 +281,22 @@ public class AccountStatementActivity extends AppCompatActivity {
             long firstTransactionDate = currencyTransactions.get(0).getDate();
             for (Transaction t : currencyTransactions) {
                 if (t.getDate() < firstTransactionDate) {
-                    previousBalance += t.getAmount();
+                    if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
+                        previousBalance -= t.getAmount();
+                    } else {
+                        previousBalance += t.getAmount();
+                    }
                 }
             }
 
             html.append("<div class='card'>");
             html.append("<div class='currency-header'>").append(currency).append("</div>");
             html.append("<table>");
-            html.append("<tr><th>التاريخ</th><th>الوصف</th><th>مدين</th><th>دائن</th><th>الرصيد</th></tr>");
+            html.append("<tr><th>التاريخ</th><th>الوصف</th><th>عليه</th><th>له</th><th>الرصيد</th></tr>");
             
             // Add previous balance row
             html.append("<tr>");
-            html.append("<td>").append(formatDate(new Date(firstTransactionDate))).append("</td>");
+            html.append("<td>").append(dateFormat.format(new Date(firstTransactionDate))).append("</td>");
             html.append("<td>الرصيد السابق</td>");
             html.append("<td></td><td></td>");
             html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", previousBalance)).append("</td>");
@@ -370,20 +308,21 @@ public class AccountStatementActivity extends AppCompatActivity {
 
             for (Transaction t : currencyTransactions) {
                 html.append("<tr>");
-                html.append("<td>").append(formatDate(new Date(t.getDate()))).append("</td>");
+                html.append("<td>").append(dateFormat.format(new Date(t.getDate()))).append("</td>");
                 html.append("<td>").append(t.getDescription()).append("</td>");
                 
-                if (t.getAmount() > 0) {
+                if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
                     html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", t.getAmount())).append("</td>");
                     html.append("<td></td>");
                     totalDebit += t.getAmount();
+                    runningBalance -= t.getAmount();
                 } else {
                     html.append("<td></td>");
-                    html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", -t.getAmount())).append("</td>");
-                    totalCredit += -t.getAmount();
+                    html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", t.getAmount())).append("</td>");
+                    totalCredit += t.getAmount();
+                    runningBalance += t.getAmount();
                 }
                 
-                runningBalance += t.getAmount();
                 html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", runningBalance)).append("</td>");
                 html.append("</tr>");
             }
@@ -403,12 +342,39 @@ public class AccountStatementActivity extends AppCompatActivity {
         return html.toString();
     }
 
-    private String formatDate(Date date) {
-        Calendar cal = Calendar.getInstance(TimeZone.getDefault());
-        cal.setTime(date);
-        return String.format(Locale.ENGLISH, "%04d-%02d-%02d",
-            cal.get(Calendar.YEAR),
-            cal.get(Calendar.MONTH) + 1,
-            cal.get(Calendar.DAY_OF_MONTH));
+    private class WebAppInterface {
+        @JavascriptInterface
+        public void onAccountSelected(String accountId) {
+            selectedAccountId = accountId;
+            updateReport();
+        }
+
+        @JavascriptInterface
+        public void onDateChanged() {
+            runOnUiThread(() -> {
+                webView.evaluateJavascript(
+                    "(function() { return { startDate: document.getElementById('startDateInput').value, endDate: document.getElementById('endDateInput').value }; })();",
+                    value -> {
+                        try {
+                            value = value.replace("\\", "");
+                            if (value.startsWith("\"") && value.endsWith("\"")) {
+                                value = value.substring(1, value.length() - 1);
+                            }
+                            String[] dates = value.split(",");
+                            startDate = dates[0].split(":")[1].replace("\"", "");
+                            endDate = dates[1].split(":")[1].replace("\"", "");
+                            updateReport();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                );
+            });
+        }
+
+        @JavascriptInterface
+        public void showReport() {
+            updateReport();
+        }
     }
 } 
