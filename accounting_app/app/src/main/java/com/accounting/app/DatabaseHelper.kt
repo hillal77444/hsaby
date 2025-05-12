@@ -204,6 +204,138 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.update(TABLE_USERS, values, null, null)
     }
 
+    fun getUser(username: String, phone: String): User? {
+        val db = this.readableDatabase
+        val cursor = db.query(
+            TABLE_USERS,
+            null,
+            "$COLUMN_USERNAME = ? AND $COLUMN_PHONE = ?",
+            arrayOf(username, phone),
+            null,
+            null,
+            null
+        )
+        return if (cursor.moveToFirst()) {
+            val user = User(
+                id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_USER_ID)),
+                username = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USERNAME)),
+                phone = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PHONE)),
+                passwordHash = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD_HASH))
+            )
+            cursor.close()
+            user
+        } else {
+            cursor.close()
+            null
+        }
+    }
+
+    fun addUser(username: String, phone: String, passwordHash: String): Boolean {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_USERNAME, username)
+            put(COLUMN_PHONE, phone)
+            put(COLUMN_PASSWORD_HASH, passwordHash)
+        }
+        return db.insert(TABLE_USERS, null, values) != -1L
+    }
+
+    // وظائف الحسابات
+    fun addAccount(account: Account): Boolean {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_ACCOUNT_NUMBER, account.accountNumber)
+            put(COLUMN_ACCOUNT_NAME, account.accountName)
+            put(COLUMN_BALANCE, account.balance)
+            put(COLUMN_PHONE_NUMBER, account.phoneNumber)
+            put(COLUMN_IS_DEBTOR, if (account.isDebtor) 1 else 0)
+            put(COLUMN_NOTES, account.notes)
+            put(COLUMN_CREATED_AT, account.createdAt)
+            put(COLUMN_UPDATED_AT, account.updatedAt)
+        }
+        return db.insert(TABLE_ACCOUNTS, null, values) != -1L
+    }
+
+    fun updateAccount(account: Account): Boolean {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_ACCOUNT_NUMBER, account.accountNumber)
+            put(COLUMN_ACCOUNT_NAME, account.accountName)
+            put(COLUMN_BALANCE, account.balance)
+            put(COLUMN_PHONE_NUMBER, account.phoneNumber)
+            put(COLUMN_IS_DEBTOR, if (account.isDebtor) 1 else 0)
+            put(COLUMN_NOTES, account.notes)
+            put(COLUMN_UPDATED_AT, account.updatedAt)
+        }
+        return db.update(TABLE_ACCOUNTS, values, "$COLUMN_ACCOUNT_ID = ?", arrayOf(account.id.toString())) > 0
+    }
+
+    fun deleteAccount(accountId: Long): Boolean {
+        val db = this.writableDatabase
+        return db.delete(TABLE_ACCOUNTS, "$COLUMN_ACCOUNT_ID = ?", arrayOf(accountId.toString())) > 0
+    }
+
+    // وظائف المعاملات
+    fun addTransaction(transaction: Transaction): Boolean {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_DATE, transaction.date)
+            put(COLUMN_AMOUNT, transaction.amount)
+            put(COLUMN_DESCRIPTION, transaction.description)
+            put(COLUMN_TYPE, transaction.type)
+            put(COLUMN_CURRENCY, transaction.currency)
+            put(COLUMN_NOTES, transaction.notes)
+            put(COLUMN_ACCOUNT_ID_FK, transaction.accountId)
+        }
+        return db.insert(TABLE_TRANSACTIONS, null, values) != -1L
+    }
+
+    fun updateTransaction(transaction: Transaction): Boolean {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_DATE, transaction.date)
+            put(COLUMN_AMOUNT, transaction.amount)
+            put(COLUMN_DESCRIPTION, transaction.description)
+            put(COLUMN_TYPE, transaction.type)
+            put(COLUMN_CURRENCY, transaction.currency)
+            put(COLUMN_NOTES, transaction.notes)
+        }
+        return db.update(TABLE_TRANSACTIONS, values, "$COLUMN_TRANSACTION_ID = ?", arrayOf(transaction.id.toString())) > 0
+    }
+
+    fun deleteTransaction(transactionId: Long): Boolean {
+        val db = this.writableDatabase
+        return db.delete(TABLE_TRANSACTIONS, "$COLUMN_TRANSACTION_ID = ?", arrayOf(transactionId.toString())) > 0
+    }
+
+    fun getTransactionsForAccount(accountId: Long): List<Transaction> {
+        val db = this.readableDatabase
+        val transactions = mutableListOf<Transaction>()
+        val cursor = db.query(
+            TABLE_TRANSACTIONS,
+            null,
+            "$COLUMN_ACCOUNT_ID_FK = ?",
+            arrayOf(accountId.toString()),
+            null,
+            null,
+            "$COLUMN_DATE DESC"
+        )
+        while (cursor.moveToNext()) {
+            transactions.add(Transaction(
+                id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_TRANSACTION_ID)),
+                date = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
+                amount = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_AMOUNT)),
+                description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)),
+                type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
+                currency = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CURRENCY)),
+                notes = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOTES)),
+                accountId = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_ID_FK))
+            ))
+        }
+        cursor.close()
+        return transactions
+    }
+
     // وظائف الإعدادات
     fun saveAppSettings(darkMode: Boolean, notifications: Boolean, syncInterval: Int) {
         val db = this.writableDatabase
@@ -298,54 +430,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.delete(TABLE_SYNC_QUEUE, null, null)
     }
 
-    // وظائف الحسابات
-    fun addAccount(accountNumber: String, accountName: String, balance: Double, phoneNumber: String?, isDebtor: Boolean, notes: String?): Long {
-        val db = this.writableDatabase
-        val values = ContentValues().apply {
-            put(COLUMN_ACCOUNT_NUMBER, accountNumber)
-            put(COLUMN_ACCOUNT_NAME, accountName)
-            put(COLUMN_BALANCE, balance)
-            put(COLUMN_PHONE_NUMBER, phoneNumber)
-            put(COLUMN_IS_DEBTOR, if (isDebtor) 1 else 0)
-            put(COLUMN_NOTES, notes)
-            put(COLUMN_CREATED_AT, System.currentTimeMillis())
-            put(COLUMN_UPDATED_AT, System.currentTimeMillis())
-        }
-        val id = db.insert(TABLE_ACCOUNTS, null, values)
-        
-        // إضافة العملية للمزامنة
-        if (id != -1L) {
-            addToSyncQueue("ADD_ACCOUNT", values.toString())
-        }
-        
-        return id
-    }
-
-    fun updateAccount(accountId: Long, accountNumber: String, accountName: String, balance: Double, phoneNumber: String?, isDebtor: Boolean, notes: String?) {
-        val db = this.writableDatabase
-        val values = ContentValues().apply {
-            put(COLUMN_ACCOUNT_NUMBER, accountNumber)
-            put(COLUMN_ACCOUNT_NAME, accountName)
-            put(COLUMN_BALANCE, balance)
-            put(COLUMN_PHONE_NUMBER, phoneNumber)
-            put(COLUMN_IS_DEBTOR, if (isDebtor) 1 else 0)
-            put(COLUMN_NOTES, notes)
-            put(COLUMN_UPDATED_AT, System.currentTimeMillis())
-        }
-        db.update(TABLE_ACCOUNTS, values, "$COLUMN_ACCOUNT_ID = ?", arrayOf(accountId.toString()))
-        
-        // إضافة العملية للمزامنة
-        addToSyncQueue("UPDATE_ACCOUNT", values.toString())
-    }
-
-    fun deleteAccount(accountId: Long) {
-        val db = this.writableDatabase
-        db.delete(TABLE_ACCOUNTS, "$COLUMN_ACCOUNT_ID = ?", arrayOf(accountId.toString()))
-        
-        // إضافة العملية للمزامنة
-        addToSyncQueue("DELETE_ACCOUNT", accountId.toString())
-    }
-
     fun getAccount(accountId: Long): JSONObject? {
         val db = this.readableDatabase
         val cursor = db.query(
@@ -407,158 +491,54 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return accounts
     }
 
-    // وظائف المعاملات
-    fun addTransaction(accountId: Long, date: Long, amount: Double, description: String, type: String, currency: String, notes: String?): Long {
-        val db = this.writableDatabase
-        val values = ContentValues().apply {
-            put(COLUMN_DATE, date)
-            put(COLUMN_AMOUNT, amount)
-            put(COLUMN_DESCRIPTION, description)
-            put(COLUMN_TYPE, type)
-            put(COLUMN_CURRENCY, currency)
-            put(COLUMN_NOTES, notes)
-            put(COLUMN_ACCOUNT_ID_FK, accountId)
-        }
-        val id = db.insert(TABLE_TRANSACTIONS, null, values)
-        
-        // تحديث رصيد الحساب
-        updateAccountBalance(accountId, amount, type)
-        
-        // إضافة العملية للمزامنة
-        if (id != -1L) {
-            addToSyncQueue("ADD_TRANSACTION", values.toString())
-        }
-        
-        return id
-    }
-
-    fun updateTransaction(transactionId: Long, date: Long, amount: Double, description: String, type: String, currency: String, notes: String?) {
-        val db = this.writableDatabase
-        
-        // الحصول على المعاملة القديمة
-        val oldTransaction = getTransaction(transactionId)
-        if (oldTransaction != null) {
-            // إلغاء تأثير المعاملة القديمة على رصيد الحساب
-            val oldAmount = oldTransaction.getDouble("amount")
-            val oldType = oldTransaction.getString("type")
-            val accountId = oldTransaction.getLong("account_id")
-            updateAccountBalance(accountId, -oldAmount, oldType)
-        }
-        
-        val values = ContentValues().apply {
-            put(COLUMN_DATE, date)
-            put(COLUMN_AMOUNT, amount)
-            put(COLUMN_DESCRIPTION, description)
-            put(COLUMN_TYPE, type)
-            put(COLUMN_CURRENCY, currency)
-            put(COLUMN_NOTES, notes)
-        }
-        db.update(TABLE_TRANSACTIONS, values, "$COLUMN_TRANSACTION_ID = ?", arrayOf(transactionId.toString()))
-        
-        // تطبيق تأثير المعاملة الجديدة على رصيد الحساب
-        if (oldTransaction != null) {
-            updateAccountBalance(oldTransaction.getLong("account_id"), amount, type)
-        }
-        
-        // إضافة العملية للمزامنة
-        addToSyncQueue("UPDATE_TRANSACTION", values.toString())
-    }
-
-    fun deleteTransaction(transactionId: Long) {
-        val db = this.writableDatabase
-        
-        // الحصول على المعاملة قبل حذفها
-        val transaction = getTransaction(transactionId)
-        if (transaction != null) {
-            // إلغاء تأثير المعاملة على رصيد الحساب
-            val amount = transaction.getDouble("amount")
-            val type = transaction.getString("type")
-            val accountId = transaction.getLong("account_id")
-            updateAccountBalance(accountId, -amount, type)
-        }
-        
-        db.delete(TABLE_TRANSACTIONS, "$COLUMN_TRANSACTION_ID = ?", arrayOf(transactionId.toString()))
-        
-        // إضافة العملية للمزامنة
-        addToSyncQueue("DELETE_TRANSACTION", transactionId.toString())
-    }
-
-    fun getTransaction(transactionId: Long): JSONObject? {
+    fun getAllSettings(): Map<String, String> {
         val db = this.readableDatabase
+        val settings = mutableMapOf<String, String>()
         val cursor = db.query(
-            TABLE_TRANSACTIONS,
+            TABLE_SETTINGS,
+            arrayOf(COLUMN_KEY, COLUMN_VALUE),
             null,
-            "$COLUMN_TRANSACTION_ID = ?",
-            arrayOf(transactionId.toString()),
+            null,
             null,
             null,
             null
-        )
-        return if (cursor.moveToFirst()) {
-            val transaction = JSONObject().apply {
-                put("id", cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_TRANSACTION_ID)))
-                put("date", cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)))
-                put("amount", cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_AMOUNT)))
-                put("description", cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)))
-                put("type", cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)))
-                put("currency", cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CURRENCY)))
-                put("notes", cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOTES)))
-                put("account_id", cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_ID_FK)))
-            }
-            cursor.close()
-            transaction
-        } else {
-            cursor.close()
-            null
-        }
-    }
-
-    fun getAccountTransactions(accountId: Long): JSONArray {
-        val db = this.readableDatabase
-        val transactions = JSONArray()
-        val cursor = db.query(
-            TABLE_TRANSACTIONS,
-            null,
-            "$COLUMN_ACCOUNT_ID_FK = ?",
-            arrayOf(accountId.toString()),
-            null,
-            null,
-            "$COLUMN_DATE DESC"
         )
         while (cursor.moveToNext()) {
-            val transaction = JSONObject().apply {
-                put("id", cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_TRANSACTION_ID)))
-                put("date", cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)))
-                put("amount", cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_AMOUNT)))
-                put("description", cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)))
-                put("type", cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)))
-                put("currency", cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CURRENCY)))
-                put("notes", cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOTES)))
-                put("account_id", cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_ID_FK)))
-            }
-            transactions.put(transaction)
+            val key = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_KEY))
+            val value = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_VALUE))
+            settings[key] = value
         }
         cursor.close()
-        return transactions
+        return settings
     }
 
-    private fun updateAccountBalance(accountId: Long, amount: Double, type: String) {
+    fun updateSettings(settings: Map<String, String>): Boolean {
         val db = this.writableDatabase
-        val account = getAccount(accountId) ?: return
-        
-        val currentBalance = account.getDouble("balance")
-        val isDebtor = account.getBoolean("is_debtor")
-        val newBalance = when (type) {
-            "DEPOSIT" -> if (isDebtor) currentBalance - amount else currentBalance + amount
-            "WITHDRAW" -> if (isDebtor) currentBalance + amount else currentBalance - amount
-            else -> currentBalance
+        var success = true
+        db.beginTransaction()
+        try {
+            for ((key, value) in settings) {
+                val values = ContentValues().apply {
+                    put(COLUMN_KEY, key)
+                    put(COLUMN_VALUE, value)
+                }
+                if (db.insertWithOnConflict(TABLE_SETTINGS, null, values, SQLiteDatabase.CONFLICT_REPLACE) == -1L) {
+                    success = false
+                    break
+                }
+            }
+            if (success) {
+                db.setTransactionSuccessful()
+            }
+        } finally {
+            db.endTransaction()
         }
-        
-        val values = ContentValues().apply {
-            put(COLUMN_BALANCE, newBalance)
-            put(COLUMN_UPDATED_AT, System.currentTimeMillis())
-        }
-        db.update(TABLE_ACCOUNTS, values, "$COLUMN_ACCOUNT_ID = ?", arrayOf(accountId.toString()))
+        return success
+    }
+
+    fun syncData(): Boolean {
+        // TODO: تنفيذ المزامنة مع السيرفر
+        return true
     }
 
     // وظائف إدارة واجهة المستخدم
