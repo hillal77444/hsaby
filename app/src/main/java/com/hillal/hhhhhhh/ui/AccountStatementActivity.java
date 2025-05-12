@@ -245,12 +245,31 @@ public class AccountStatementActivity extends AppCompatActivity {
             return;
         }
 
-        viewModel.getTransactionsForAccountInDateRange(selectedAccountId, startDate, endDate)
-            .observe(this, transactions -> {
+        try {
+            Date start = dateFormat.parse(startDate);
+            Date end = dateFormat.parse(endDate);
+            
+            // Set end date to end of day
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(end);
+            cal.set(Calendar.HOUR_OF_DAY, 23);
+            cal.set(Calendar.MINUTE, 59);
+            cal.set(Calendar.SECOND, 59);
+            cal.set(Calendar.MILLISECOND, 999);
+            Date endOfDay = cal.getTime();
+
+            viewModel.getTransactionsForAccountInDateRange(
+                selectedAccountId,
+                start.getTime(),
+                endOfDay.getTime()
+            ).observe(this, transactions -> {
                 String html = generateReportHtml(transactions);
                 String js = String.format("updateReport('%s');", html.replace("'", "\\'"));
                 webView.evaluateJavascript(js, null);
             });
+        } catch (Exception e) {
+            Toast.makeText(this, "خطأ في تنسيق التاريخ", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private String generateReportHtml(List<Transaction> transactions) {
@@ -269,12 +288,13 @@ public class AccountStatementActivity extends AppCompatActivity {
             List<Transaction> currencyTransactions = entry.getValue();
             
             // Sort transactions by date
-            Collections.sort(currencyTransactions, (t1, t2) -> t1.getDate().compareTo(t2.getDate()));
+            Collections.sort(currencyTransactions, (t1, t2) -> Long.compare(t1.getDate(), t2.getDate()));
             
             // Calculate previous balance
             double previousBalance = 0;
+            long firstTransactionDate = currencyTransactions.get(0).getDate();
             for (Transaction t : currencyTransactions) {
-                if (t.getDate().before(currencyTransactions.get(0).getDate())) {
+                if (t.getDate() < firstTransactionDate) {
                     previousBalance += t.getAmount();
                 }
             }
@@ -286,7 +306,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             
             // Add previous balance row
             html.append("<tr>");
-            html.append("<td>").append(dateFormat.format(currencyTransactions.get(0).getDate())).append("</td>");
+            html.append("<td>").append(dateFormat.format(new Date(firstTransactionDate))).append("</td>");
             html.append("<td>الرصيد السابق</td>");
             html.append("<td></td><td></td>");
             html.append("<td>").append(String.format("%.2f", previousBalance)).append("</td>");
@@ -298,7 +318,7 @@ public class AccountStatementActivity extends AppCompatActivity {
 
             for (Transaction t : currencyTransactions) {
                 html.append("<tr>");
-                html.append("<td>").append(dateFormat.format(t.getDate())).append("</td>");
+                html.append("<td>").append(dateFormat.format(new Date(t.getDate()))).append("</td>");
                 html.append("<td>").append(t.getDescription()).append("</td>");
                 
                 if (t.getAmount() > 0) {
