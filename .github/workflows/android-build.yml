@@ -21,8 +21,26 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
+    - name: Check project structure
+      run: |
+        echo "Current directory structure:"
+        ls -la
+        echo "Checking accounting_app directory:"
+        ls -la accounting_app || echo "accounting_app directory not found"
+        echo "Creating accounting_app directory if it doesn't exist"
+        mkdir -p accounting_app
+
+    - name: Initialize Gradle project
+      working-directory: accounting_app
+      run: |
+        if [ ! -f "gradlew" ]; then
+          echo "Initializing Gradle project..."
+          gradle wrapper
+        fi
+
     - name: Grant execute permission for gradlew
-      run: chmod +x accounting_app/gradlew
+      working-directory: accounting_app
+      run: chmod +x gradlew
 
     - name: Build with Gradle
       working-directory: accounting_app
