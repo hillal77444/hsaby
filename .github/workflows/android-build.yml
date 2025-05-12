@@ -22,27 +22,30 @@ jobs:
         cache: gradle
 
     - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+      run: chmod +x accounting_app/gradlew
 
     - name: Build with Gradle
+      working-directory: accounting_app
       run: ./gradlew build
 
     - name: Build Debug APK
+      working-directory: accounting_app
       run: ./gradlew assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
+        path: accounting_app/app/build/outputs/apk/debug/app-debug.apk
 
     - name: Build Release APK
+      working-directory: accounting_app
       run: ./gradlew assembleRelease
 
     - name: Sign Release APK
       uses: r0adkll/sign-android-release@v1
       with:
-        releaseDirectory: app/build/outputs/apk/release
+        releaseDirectory: accounting_app/app/build/outputs/apk/release
         signingKeyBase64: ${{ secrets.SIGNING_KEY }}
         alias: ${{ secrets.KEY_ALIAS }}
         keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
@@ -52,4 +55,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: app-release
-        path: app/build/outputs/apk/release/app-release-signed.apk 
+        path: accounting_app/app/build/outputs/apk/release/app-release-signed.apk 
