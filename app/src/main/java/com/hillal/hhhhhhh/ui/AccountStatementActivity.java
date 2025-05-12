@@ -267,6 +267,9 @@ public class AccountStatementActivity extends AppCompatActivity {
             fromDate, toDate
         );
         webView.evaluateJavascript(js, null);
+
+        // تحديث التقرير تلقائياً
+        updateReport();
     }
 
     private String getSelectedAccountId() {
