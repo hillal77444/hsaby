@@ -32,6 +32,7 @@ public class AccountStatementActivity extends AppCompatActivity {
         webView = findViewById(R.id.webView);
         viewModel = new ViewModelProvider(this).get(AccountStatementViewModel.class);
         dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+        dateFormat.setTimeZone(TimeZone.getDefault());
         allAccounts = new ArrayList<>();
 
         setupWebView();
@@ -243,10 +244,12 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private void loadInitialData() {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
         calendar.add(Calendar.DAY_OF_MONTH, -3);
         startDate = dateFormat.format(calendar.getTime());
-        endDate = dateFormat.format(new Date());
+        
+        calendar = Calendar.getInstance(TimeZone.getDefault());
+        endDate = dateFormat.format(calendar.getTime());
 
         String js = String.format("updateDates('%s', '%s');", startDate, endDate);
         webView.evaluateJavascript(js, null);
@@ -264,11 +267,19 @@ public class AccountStatementActivity extends AppCompatActivity {
         }
 
         try {
-            Date start = dateFormat.parse(startDate);
-            Date end = dateFormat.parse(endDate);
+            Calendar cal = Calendar.getInstance(TimeZone.getDefault());
             
-            // Set end date to end of day
-            Calendar cal = Calendar.getInstance();
+            // تحويل تاريخ البداية
+            Date start = dateFormat.parse(startDate);
+            cal.setTime(start);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            start = cal.getTime();
+
+            // تحويل تاريخ النهاية
+            Date end = dateFormat.parse(endDate);
             cal.setTime(end);
             cal.set(Calendar.HOUR_OF_DAY, 23);
             cal.set(Calendar.MINUTE, 59);
@@ -276,7 +287,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             cal.set(Calendar.MILLISECOND, 999);
             Date endOfDay = cal.getTime();
 
-            // Convert account ID from String to long
+            // تحويل معرف الحساب
             long accountId = Long.parseLong(selectedAccountId);
 
             viewModel.getTransactionsForAccountInDateRange(
@@ -292,6 +303,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             Toast.makeText(this, "خطأ في معرف الحساب", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Toast.makeText(this, "خطأ في تنسيق التاريخ", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
         }
     }
 
@@ -300,7 +312,6 @@ public class AccountStatementActivity extends AppCompatActivity {
             return "<div class='card'>لا توجد معاملات في هذه الفترة</div>";
         }
 
-        // Group transactions by currency
         Map<String, List<Transaction>> transactionsByCurrency = transactions.stream()
             .collect(Collectors.groupingBy(Transaction::getCurrency));
 
@@ -310,10 +321,8 @@ public class AccountStatementActivity extends AppCompatActivity {
             String currency = entry.getKey();
             List<Transaction> currencyTransactions = entry.getValue();
             
-            // Sort transactions by date
             Collections.sort(currencyTransactions, (t1, t2) -> Long.compare(t1.getDate(), t2.getDate()));
             
-            // Calculate previous balance
             double previousBalance = 0;
             long firstTransactionDate = currencyTransactions.get(0).getDate();
             for (Transaction t : currencyTransactions) {
@@ -332,7 +341,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             html.append("<td>").append(dateFormat.format(new Date(firstTransactionDate))).append("</td>");
             html.append("<td>الرصيد السابق</td>");
             html.append("<td></td><td></td>");
-            html.append("<td>").append(String.format("%.2f", previousBalance)).append("</td>");
+            html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", previousBalance)).append("</td>");
             html.append("</tr>");
 
             double runningBalance = previousBalance;
@@ -345,26 +354,26 @@ public class AccountStatementActivity extends AppCompatActivity {
                 html.append("<td>").append(t.getDescription()).append("</td>");
                 
                 if (t.getAmount() > 0) {
-                    html.append("<td>").append(String.format("%.2f", t.getAmount())).append("</td>");
+                    html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", t.getAmount())).append("</td>");
                     html.append("<td></td>");
                     totalDebit += t.getAmount();
                 } else {
                     html.append("<td></td>");
-                    html.append("<td>").append(String.format("%.2f", -t.getAmount())).append("</td>");
+                    html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", -t.getAmount())).append("</td>");
                     totalCredit += -t.getAmount();
                 }
                 
                 runningBalance += t.getAmount();
-                html.append("<td>").append(String.format("%.2f", runningBalance)).append("</td>");
+                html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", runningBalance)).append("</td>");
                 html.append("</tr>");
             }
 
             // Add totals row
             html.append("<tr style='font-weight: bold;'>");
             html.append("<td colspan='2'>المجموع</td>");
-            html.append("<td>").append(String.format("%.2f", totalDebit)).append("</td>");
-            html.append("<td>").append(String.format("%.2f", totalCredit)).append("</td>");
-            html.append("<td>").append(String.format("%.2f", runningBalance)).append("</td>");
+            html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", totalDebit)).append("</td>");
+            html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", totalCredit)).append("</td>");
+            html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", runningBalance)).append("</td>");
             html.append("</tr>");
             
             html.append("</table>");
