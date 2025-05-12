@@ -15,6 +15,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import android.view.MenuItem;
+import android.content.SharedPreferences;
+import java.net.HttpURLConnection;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 
 public class AccountStatementActivity extends AppCompatActivity {
     private WebView webView;
@@ -24,6 +29,9 @@ public class AccountStatementActivity extends AppCompatActivity {
     private String selectedAccountId;
     private String startDate;
     private String endDate;
+    private static final String PREF_NAME = "AccountStatementPrefs";
+    private static final String KEY_HTML_CONTENT = "html_content";
+    private static final String SERVER_URL = "http://10.0.2.2:5000/api/html-content";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +51,7 @@ public class AccountStatementActivity extends AppCompatActivity {
 
         setupWebView();
         loadAccounts();
+        loadHtmlContent();
     }
 
     private void setupWebView() {
@@ -56,9 +65,57 @@ public class AccountStatementActivity extends AppCompatActivity {
                 loadInitialData();
             }
         });
+    }
 
-        String html = generateInitialHtml();
-        webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
+    private void loadHtmlContent() {
+        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        String savedHtml = prefs.getString(KEY_HTML_CONTENT, null);
+        
+        if (savedHtml != null) {
+            webView.loadDataWithBaseURL(null, savedHtml, "text/html", "UTF-8", null);
+        } else {
+            webView.loadDataWithBaseURL(null, generateInitialHtml(), "text/html", "UTF-8", null);
+        }
+    }
+
+    private void saveHtmlContent(String html) {
+        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        prefs.edit().putString(KEY_HTML_CONTENT, html).apply();
+    }
+
+    private void fetchUpdatedHtmlFromServer() {
+        new Thread(() -> {
+            try {
+                URL url = new URL(SERVER_URL);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                
+                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    
+                    while ((line = reader.readLine()) != null) {
+                        response.append(line);
+                    }
+                    reader.close();
+                    
+                    String newHtml = response.toString();
+                    saveHtmlContent(newHtml);
+                    
+                    runOnUiThread(() -> {
+                        webView.evaluateJavascript("updateContent('" + newHtml + "')", null);
+                    });
+                }
+                
+                conn.disconnect();
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "فشل تحديث المحتوى", Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
     }
 
     private String generateInitialHtml() {
@@ -161,10 +218,35 @@ public class AccountStatementActivity extends AppCompatActivity {
                         display: block;
                         margin-bottom: 4px;
                     }
+                    .refresh-button {
+                        background-color: #4CAF50;
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        margin-bottom: 16px;
+                        width: 100%;
+                        font-size: 16px;
+                        font-weight: bold;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                    }
+                    .refresh-button:hover {
+                        background-color: #45a049;
+                    }
+                    .refresh-button:active {
+                        transform: translateY(1px);
+                    }
                 </style>
             </head>
             <body>
                 <div class="card">
+                    <button onclick="refreshContent()" class="refresh-button">
+                        <span>🔄</span> تحديث المحتوى
+                    </button>
                     <div class="form-group">
                         <label for="accountDropdown">اختر الحساب</label>
                         <select id="accountDropdown" onchange="onAccountSelected()">
@@ -213,6 +295,17 @@ public class AccountStatementActivity extends AppCompatActivity {
 
                     function updateReport(html) {
                         document.getElementById('reportContainer').innerHTML = html;
+                    }
+
+                    function refreshContent() {
+                        Android.refreshContent();
+                    }
+
+                    function updateContent(newHtml) {
+                        const parser = new DOMParser();
+                        const newDoc = parser.parseFromString(newHtml, 'text/html');
+                        const newContent = newDoc.querySelector('.card').innerHTML;
+                        document.querySelector('.card').innerHTML = newContent;
                     }
                 </script>
             </body>
@@ -408,6 +501,13 @@ public class AccountStatementActivity extends AppCompatActivity {
         @JavascriptInterface
         public void showReport() {
             updateReport();
+        }
+
+        @JavascriptInterface
+        public void refreshContent() {
+            runOnUiThread(() -> {
+                fetchUpdatedHtmlFromServer();
+            });
         }
     }
 
