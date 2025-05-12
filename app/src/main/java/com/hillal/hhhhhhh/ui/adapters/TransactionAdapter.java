@@ -28,6 +28,8 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
     private OnItemLongClickListener onItemLongClickListener;
     private Map<Long, Account> accountMap;
 
+
+
     public TransactionAdapter(@NonNull DiffUtil.ItemCallback<Transaction> diffCallback) {
         super(diffCallback);
     }
@@ -55,6 +57,19 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
     @Override
     public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
         holder.bind(getItem(position));
+    }
+
+    private String getCurrencySymbol(String currency) {
+        switch (currency.toLowerCase()) {
+            case "ريال يمني":
+                return "YER";
+            case "ريال سعودي":
+                return "SAR";
+            case "دولار أمريكي":
+                return "USD";
+            default:
+                return currency;
+        }
     }
 
     class TransactionViewHolder extends RecyclerView.ViewHolder {
@@ -103,13 +118,15 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             // ربط البيان
             binding.transactionDescription.setText(transaction.getDescription());
 
+            
+
             // ربط عليه وله بالأرقام الإنجليزية
             if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
-                binding.transactionDebit.setText(String.format(Locale.US, "%.2f %s", transaction.getAmount(), transaction.getCurrency()));
+                binding.transactionDebit.setText(String.format(Locale.US, "%.2f %s", transaction.getAmount(), getCurrencySymbol(transaction.getCurrency())));
                 binding.transactionCredit.setText("0");
             } else {
                 binding.transactionDebit.setText("0");
-                binding.transactionCredit.setText(String.format(Locale.US, "%.2f %s", transaction.getAmount(), transaction.getCurrency()));
+                binding.transactionCredit.setText(String.format(Locale.US, "%.2f %s", transaction.getAmount(), getCurrencySymbol(transaction.getCurrency())));
             }
 
             // زر إرسال واتساب
