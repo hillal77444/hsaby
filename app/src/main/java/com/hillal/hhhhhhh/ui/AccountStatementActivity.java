@@ -82,6 +82,7 @@ public class AccountStatementActivity extends AppCompatActivity {
                         border: 1px solid #ddd;
                         border-radius: 4px;
                         margin-top: 4px;
+                        font-size: 16px;
                     }
                     .date-container {
                         display: flex;
@@ -98,6 +99,7 @@ public class AccountStatementActivity extends AppCompatActivity {
                         border-radius: 4px;
                         width: 100%;
                         cursor: pointer;
+                        font-size: 16px;
                     }
                     button:hover {
                         background-color: #1976D2;
@@ -121,13 +123,19 @@ public class AccountStatementActivity extends AppCompatActivity {
                         margin-top: 16px;
                         border-radius: 4px;
                     }
+                    label {
+                        font-size: 16px;
+                        color: #333;
+                    }
                 </style>
             </head>
             <body>
                 <div class="card">
                     <div class="form-group">
                         <label for="accountDropdown">اختر الحساب</label>
-                        <select id="accountDropdown" onchange="onAccountSelected()"></select>
+                        <select id="accountDropdown" onchange="onAccountSelected()">
+                            <option value="">-- اختر الحساب --</option>
+                        </select>
                     </div>
                     <div class="date-container">
                         <div class="form-group">
@@ -145,7 +153,10 @@ public class AccountStatementActivity extends AppCompatActivity {
 
                 <script>
                     function onAccountSelected() {
-                        Android.onAccountSelected(document.getElementById('accountDropdown').value);
+                        const accountId = document.getElementById('accountDropdown').value;
+                        if (accountId) {
+                            Android.onAccountSelected(accountId);
+                        }
                     }
 
                     function onDateChanged() {
@@ -158,7 +169,7 @@ public class AccountStatementActivity extends AppCompatActivity {
 
                     function updateAccounts(accounts) {
                         const dropdown = document.getElementById('accountDropdown');
-                        dropdown.innerHTML = accounts;
+                        dropdown.innerHTML = '<option value="">-- اختر الحساب --</option>' + accounts;
                     }
 
                     function updateDates(startDate, endDate) {
@@ -214,13 +225,20 @@ public class AccountStatementActivity extends AppCompatActivity {
 
     private void loadAccounts() {
         viewModel.getAllAccounts().observe(this, accounts -> {
-            allAccounts = accounts;
-            String options = accounts.stream()
-                .map(account -> String.format("<option value='%s'>%s</option>", account.getId(), account.getName()))
-                .collect(Collectors.joining());
-            
-            String js = String.format("updateAccounts('%s');", options);
-            webView.evaluateJavascript(js, null);
+            if (accounts != null && !accounts.isEmpty()) {
+                allAccounts = accounts;
+                StringBuilder options = new StringBuilder();
+                for (Account account : accounts) {
+                    options.append("<option value='").append(account.getId()).append("'>")
+                           .append(account.getName())
+                           .append("</option>");
+                }
+                
+                String js = String.format("updateAccounts('%s');", options.toString().replace("'", "\\'"));
+                webView.evaluateJavascript(js, null);
+            } else {
+                Toast.makeText(this, "لا توجد حسابات متاحة", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
