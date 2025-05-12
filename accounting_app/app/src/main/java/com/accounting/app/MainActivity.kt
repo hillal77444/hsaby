@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         // Initialize database
         dbHelper = DatabaseHelper(this)
 
-        // Initialize WebView
+        // Initialize WebView and SwipeRefreshLayout
         webView = findViewById(R.id.webView)
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
 
