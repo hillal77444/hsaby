@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.HashMap;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class AccountStatementActivity extends AppCompatActivity {
     private AccountStatementViewModel viewModel;
@@ -109,20 +111,21 @@ public class AccountStatementActivity extends AppCompatActivity {
     private class WebAppInterface {
         @JavascriptInterface
         public void onAccountSelected(String accountId) {
-            // تحديث التقرير عند اختيار حساب
-            updateReport();
+            runOnUiThread(() -> {
+                if (accountId != null && !accountId.isEmpty()) {
+                    updateReport();
+                }
+            });
         }
 
         @JavascriptInterface
         public void onDateChanged() {
-            // تحديث التقرير عند تغيير التاريخ
-            updateReport();
+            runOnUiThread(this::updateReport);
         }
 
         @JavascriptInterface
         public void showReport() {
-            // عرض التقرير
-            updateReport();
+            runOnUiThread(this::updateReport);
         }
     }
 
@@ -143,59 +146,111 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private void updateReport() {
-        String accountId = getSelectedAccountId();
-        String startDate = getStartDate();
-        String endDate = getEndDate();
+        // عرض مؤشر التحميل
+        webView.evaluateJavascript(
+            "document.getElementById('reportContent').innerHTML = '<div style=\"text-align: center; padding: 20px;\">جاري تحميل التقرير...</div>'",
+            null
+        );
 
-        if (accountId.isEmpty()) {
-            Toast.makeText(this, "الرجاء اختيار الحساب", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        // الحصول على القيم من WebView
+        webView.evaluateJavascript(
+            "JSON.stringify({" +
+            "accountId: document.getElementById('accountSelect').value," +
+            "startDate: document.getElementById('startDate').value," +
+            "endDate: document.getElementById('endDate').value" +
+            "})",
+            value -> {
+                try {
+                    JSONObject data = new JSONObject(value);
+                    String accountId = data.getString("accountId");
+                    String startDate = data.getString("startDate");
+                    String endDate = data.getString("endDate");
 
-        if (startDate.isEmpty() || endDate.isEmpty()) {
-            Toast.makeText(this, "الرجاء تحديد الفترة الزمنية", Toast.LENGTH_SHORT).show();
-            return;
-        }
+                    if (accountId.isEmpty()) {
+                        showError("الرجاء اختيار الحساب");
+                        return;
+                    }
 
-        try {
-            Date start = parseDate(startDate);
-            Date end = parseDate(endDate);
+                    if (startDate.isEmpty() || endDate.isEmpty()) {
+                        showError("الرجاء تحديد الفترة الزمنية");
+                        return;
+                    }
 
-            // اجعل endDate نهاية اليوم
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(end);
-            cal.set(Calendar.HOUR_OF_DAY, 23);
-            cal.set(Calendar.MINUTE, 59);
-            cal.set(Calendar.SECOND, 59);
-            cal.set(Calendar.MILLISECOND, 999);
-            Date endOfDay = cal.getTime();
+                    try {
+                        Date start = parseDate(startDate);
+                        Date end = parseDate(endDate);
 
-            if (start.after(endOfDay)) {
-                Toast.makeText(this, "تاريخ البداية يجب أن يكون قبل تاريخ النهاية", Toast.LENGTH_SHORT).show();
-                return;
-            }
+                        // اجعل endDate نهاية اليوم
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(end);
+                        cal.set(Calendar.HOUR_OF_DAY, 23);
+                        cal.set(Calendar.MINUTE, 59);
+                        cal.set(Calendar.SECOND, 59);
+                        cal.set(Calendar.MILLISECOND, 999);
+                        Date endOfDay = cal.getTime();
 
-            viewModel.getTransactionsForAccountInDateRange(
-                Long.parseLong(accountId),
-                start,
-                endOfDay
-            ).observe(this, transactions -> {
-                if (transactions != null && !transactions.isEmpty()) {
-                    String reportHtml = generateReportHtml(transactions);
-                    webView.evaluateJavascript(
-                        "document.getElementById('reportContent').innerHTML = '" + reportHtml + "'",
-                        null
-                    );
-                } else {
-                    webView.evaluateJavascript(
-                        "document.getElementById('reportContent').innerHTML = '<p style=\"text-align: center; color: #666;\">لا توجد عمليات في الفترة المحددة</p>'",
-                        null
-                    );
+                        if (start.after(endOfDay)) {
+                            showError("تاريخ البداية يجب أن يكون قبل تاريخ النهاية");
+                            return;
+                        }
+
+                        // الحصول على معلومات الحساب
+                        Account selectedAccount = null;
+                        for (Account acc : allAccounts) {
+                            if (acc.getId() == Long.parseLong(accountId)) {
+                                selectedAccount = acc;
+                                break;
+                            }
+                        }
+
+                        if (selectedAccount == null) {
+                            showError("لم يتم العثور على الحساب المحدد");
+                            return;
+                        }
+
+                        // عرض معلومات الحساب
+                        String accountInfo = String.format(
+                            "<div style='margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;'>" +
+                            "<h3 style='margin: 0 0 10px 0;'>%s</h3>" +
+                            "<p style='margin: 5px 0;'>الفترة: من %s إلى %s</p>" +
+                            "</div>",
+                            selectedAccount.getName(),
+                            formatDate(start.getTime()),
+                            formatDate(end.getTime())
+                        );
+
+                        webView.evaluateJavascript(
+                            "document.getElementById('reportContent').innerHTML = '" + accountInfo + "'",
+                            null
+                        );
+
+                        // تحميل العمليات
+                        viewModel.getTransactionsForAccountInDateRange(
+                            selectedAccount.getId(),
+                            start,
+                            endOfDay
+                        ).observe(this, transactions -> {
+                            if (transactions != null && !transactions.isEmpty()) {
+                                String reportHtml = generateReportHtml(transactions);
+                                webView.evaluateJavascript(
+                                    "document.getElementById('reportContent').innerHTML += '" + reportHtml + "'",
+                                    null
+                                );
+                            } else {
+                                webView.evaluateJavascript(
+                                    "document.getElementById('reportContent').innerHTML += '<p style=\"text-align: center; color: #666; padding: 20px;\">لا توجد عمليات في الفترة المحددة</p>'",
+                                    null
+                                );
+                            }
+                        });
+                    } catch (Exception e) {
+                        showError("خطأ في تنسيق التاريخ");
+                    }
+                } catch (JSONException e) {
+                    showError("خطأ في معالجة البيانات");
                 }
-            });
-        } catch (Exception e) {
-            Toast.makeText(this, "خطأ في تنسيق التاريخ", Toast.LENGTH_SHORT).show();
-        }
+            }
+        );
     }
 
     private void loadInitialData() {
@@ -292,24 +347,25 @@ public class AccountStatementActivity extends AppCompatActivity {
             }
 
             // عنوان العملة
-            html.append("<h3 style='margin-top: 20px; margin-bottom: 10px;'>العملة: ").append(currency).append("</h3>");
+            html.append("<div style='margin-top: 30px;'>");
+            html.append("<h3 style='margin: 0 0 15px 0; color: #2196F3;'>العملة: ").append(currency).append("</h3>");
             
-            html.append("<table style='width: 100%; border-collapse: collapse; margin-bottom: 20px;'>");
+            html.append("<table style='width: 100%; border-collapse: collapse; margin-bottom: 20px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);'>");
             html.append("<tr style='background: #f5f5f5;'>");
-            html.append("<th style='border: 1px solid #ddd; padding: 8px; text-align: right;'>التاريخ</th>");
-            html.append("<th style='border: 1px solid #ddd; padding: 8px; text-align: right;'>الوصف</th>");
-            html.append("<th style='border: 1px solid #ddd; padding: 8px; text-align: right;'>عليه</th>");
-            html.append("<th style='border: 1px solid #ddd; padding: 8px; text-align: right;'>له</th>");
-            html.append("<th style='border: 1px solid #ddd; padding: 8px; text-align: right;'>الرصيد</th>");
+            html.append("<th style='border: 1px solid #ddd; padding: 12px; text-align: right;'>التاريخ</th>");
+            html.append("<th style='border: 1px solid #ddd; padding: 12px; text-align: right;'>الوصف</th>");
+            html.append("<th style='border: 1px solid #ddd; padding: 12px; text-align: right;'>عليه</th>");
+            html.append("<th style='border: 1px solid #ddd; padding: 12px; text-align: right;'>له</th>");
+            html.append("<th style='border: 1px solid #ddd; padding: 12px; text-align: right;'>الرصيد</th>");
             html.append("</tr>");
 
             // صف الرصيد السابق
             html.append("<tr>");
-            html.append("<td style='border: 1px solid #ddd; padding: 8px; text-align: right;'>").append(formatDate(Calendar.getInstance().getTimeInMillis())).append("</td>");
-            html.append("<td style='border: 1px solid #ddd; padding: 8px; text-align: right;'>الرصيد السابق</td>");
-            html.append("<td style='border: 1px solid #ddd; padding: 8px; text-align: right;'></td>");
-            html.append("<td style='border: 1px solid #ddd; padding: 8px; text-align: right;'></td>");
-            html.append("<td style='border: 1px solid #ddd; padding: 8px; text-align: right;'>").append(String.format(Locale.US, "%.2f", previousBalance)).append("</td>");
+            html.append("<td style='border: 1px solid #ddd; padding: 12px; text-align: right;'>").append(formatDate(Calendar.getInstance().getTimeInMillis())).append("</td>");
+            html.append("<td style='border: 1px solid #ddd; padding: 12px; text-align: right;'>الرصيد السابق</td>");
+            html.append("<td style='border: 1px solid #ddd; padding: 12px; text-align: right;'></td>");
+            html.append("<td style='border: 1px solid #ddd; padding: 12px; text-align: right;'></td>");
+            html.append("<td style='border: 1px solid #ddd; padding: 12px; text-align: right;'>").append(String.format(Locale.US, "%.2f", previousBalance)).append("</td>");
             html.append("</tr>");
 
             double runningBalance = previousBalance;
@@ -319,34 +375,35 @@ public class AccountStatementActivity extends AppCompatActivity {
             // عرض العمليات
             for (Transaction t : currencyTransactions) {
                 html.append("<tr>");
-                html.append("<td style='border: 1px solid #ddd; padding: 8px; text-align: right;'>").append(formatDate(t.getDate())).append("</td>");
-                html.append("<td style='border: 1px solid #ddd; padding: 8px; text-align: right;'>").append(t.getDescription()).append("</td>");
+                html.append("<td style='border: 1px solid #ddd; padding: 12px; text-align: right;'>").append(formatDate(t.getDate())).append("</td>");
+                html.append("<td style='border: 1px solid #ddd; padding: 12px; text-align: right;'>").append(t.getDescription()).append("</td>");
                 
                 if ("debit".equals(t.getType())) {
-                    html.append("<td style='border: 1px solid #ddd; padding: 8px; text-align: right;'>").append(String.format(Locale.US, "%.2f", t.getAmount())).append("</td>");
-                    html.append("<td style='border: 1px solid #ddd; padding: 8px; text-align: right;'></td>");
+                    html.append("<td style='border: 1px solid #ddd; padding: 12px; text-align: right;'>").append(String.format(Locale.US, "%.2f", t.getAmount())).append("</td>");
+                    html.append("<td style='border: 1px solid #ddd; padding: 12px; text-align: right;'></td>");
                     runningBalance -= t.getAmount();
                     totalDebit += t.getAmount();
                 } else {
-                    html.append("<td style='border: 1px solid #ddd; padding: 8px; text-align: right;'></td>");
-                    html.append("<td style='border: 1px solid #ddd; padding: 8px; text-align: right;'>").append(String.format(Locale.US, "%.2f", t.getAmount())).append("</td>");
+                    html.append("<td style='border: 1px solid #ddd; padding: 12px; text-align: right;'></td>");
+                    html.append("<td style='border: 1px solid #ddd; padding: 12px; text-align: right;'>").append(String.format(Locale.US, "%.2f", t.getAmount())).append("</td>");
                     runningBalance += t.getAmount();
                     totalCredit += t.getAmount();
                 }
                 
-                html.append("<td style='border: 1px solid #ddd; padding: 8px; text-align: right;'>").append(String.format(Locale.US, "%.2f", runningBalance)).append("</td>");
+                html.append("<td style='border: 1px solid #ddd; padding: 12px; text-align: right;'>").append(String.format(Locale.US, "%.2f", runningBalance)).append("</td>");
                 html.append("</tr>");
             }
 
             // صف الإجمالي
             html.append("<tr style='background: #f0f0f0; font-weight: bold;'>");
-            html.append("<td style='border: 1px solid #ddd; padding: 8px; text-align: right;' colspan='2'>الإجمالي</td>");
-            html.append("<td style='border: 1px solid #ddd; padding: 8px; text-align: right;'>").append(String.format(Locale.US, "%.2f", totalDebit)).append("</td>");
-            html.append("<td style='border: 1px solid #ddd; padding: 8px; text-align: right;'>").append(String.format(Locale.US, "%.2f", totalCredit)).append("</td>");
-            html.append("<td style='border: 1px solid #ddd; padding: 8px; text-align: right;'></td>");
+            html.append("<td style='border: 1px solid #ddd; padding: 12px; text-align: right;' colspan='2'>الإجمالي</td>");
+            html.append("<td style='border: 1px solid #ddd; padding: 12px; text-align: right;'>").append(String.format(Locale.US, "%.2f", totalDebit)).append("</td>");
+            html.append("<td style='border: 1px solid #ddd; padding: 12px; text-align: right;'>").append(String.format(Locale.US, "%.2f", totalCredit)).append("</td>");
+            html.append("<td style='border: 1px solid #ddd; padding: 12px; text-align: right;'></td>");
             html.append("</tr>");
 
             html.append("</table>");
+            html.append("</div>");
         }
 
         return html.toString();
@@ -355,6 +412,17 @@ public class AccountStatementActivity extends AppCompatActivity {
     private String formatDate(long timestamp) {
         return new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
             .format(new Date(timestamp));
+    }
+
+    private void showError(String message) {
+        String errorHtml = String.format(
+            "<div style='text-align: center; padding: 20px; color: #dc3545;'>%s</div>",
+            message
+        );
+        webView.evaluateJavascript(
+            "document.getElementById('reportContent').innerHTML = '" + errorHtml + "'",
+            null
+        );
     }
 
     @Override
