@@ -79,21 +79,7 @@ class MainActivity : AppCompatActivity() {
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
         }
 
-        // إعداد معالجات المسارات
-        val assetLoader = WebViewAssetLoader.Builder()
-            .addPathHandler("/assets/", AssetsPathHandler(this))
-            .addPathHandler("/res/", ResourcesPathHandler(this))
-            .addPathHandler("/internal/", InternalStoragePathHandler(this, "internal"))
-            .build()
-
         webView.webViewClient = object : WebViewClient() {
-            override fun shouldInterceptRequest(
-                view: WebView,
-                request: WebResourceRequest
-            ): WebResourceResponse? {
-                return assetLoader.shouldInterceptRequest(request.url)
-            }
-
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 swipeRefreshLayout.isRefreshing = false
@@ -101,36 +87,9 @@ class MainActivity : AppCompatActivity() {
                     isFirstLoad = false
                     injectJavaScript()
                 }
-
-                // التحقق من حالة تسجيل الدخول
-                if (isLoggedIn()) {
-                    // إرسال بيانات المستخدم المخزنة إلى JavaScript
-                    val userData = """
-                        {
-                            "username": "${getStoredUsername()}",
-                            "phone": "${getStoredPhone()}"
-                        }
-                    """.trimIndent()
-                    webView.evaluateJavascript(
-                        "window.dispatchEvent(new CustomEvent('userData', { detail: $userData }));",
-                        null
-                    )
-                }
             }
         }
 
-        webView.webChromeClient = object : WebChromeClient() {
-            override fun onShowFileChooser(
-                webView: WebView?,
-                filePathCallback: ValueCallback<Array<Uri>>?,
-                fileChooserParams: FileChooserParams?
-            ): Boolean {
-                // معالجة اختيار الملفات
-                return true
-            }
-        }
-
-        // إضافة واجهة JavaScript
         webView.addJavascriptInterface(WebAppInterface(this, dbHelper), "Android")
     }
 
