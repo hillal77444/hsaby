@@ -53,6 +53,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COLUMN_DARK_MODE = "dark_mode"
         private const val COLUMN_NOTIFICATIONS = "notifications"
         private const val COLUMN_SYNC_INTERVAL = "sync_interval"
+        private const val COLUMN_KEY = "key"
+        private const val COLUMN_VALUE = "value"
 
         // أعمدة جدول قائمة المزامنة
         private const val COLUMN_QUEUE_ID = "id"
