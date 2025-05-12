@@ -46,7 +46,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COLUMN_DESCRIPTION = "description"
         private const val COLUMN_TYPE = "type"
         private const val COLUMN_CURRENCY = "currency"
-        private const val COLUMN_NOTES = "notes"
         private const val COLUMN_ACCOUNT_ID_FK = "account_id"
 
         // أعمدة جدول الإعدادات
