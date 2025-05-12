@@ -9,10 +9,11 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.FileInputStream
 import java.nio.charset.StandardCharsets
+import com.google.gson.Gson
 
-class WebAppInterface(private val context: Context) {
+class WebAppInterface(private val context: MainActivity, private val dbHelper: DatabaseHelper) {
     private val TAG = "WebAppInterface"
-    private val dbHelper = DatabaseHelper(context)
+    private val gson = Gson()
 
     @JavascriptInterface
     fun showToast(message: String) {
@@ -20,8 +21,18 @@ class WebAppInterface(private val context: Context) {
     }
 
     @JavascriptInterface
+    fun onPageLoaded() {
+        // يمكن إضافة أي كود مطلوب عند تحميل الصفحة
+    }
+
+    @JavascriptInterface
+    fun isOnline(): Boolean {
+        return context.isOnline()
+    }
+
+    @JavascriptInterface
     fun refreshContent() {
-        (context as MainActivity).refreshContent()
+        context.refreshContent()
     }
 
     @JavascriptInterface
@@ -37,7 +48,7 @@ class WebAppInterface(private val context: Context) {
             if (dbHelper.verifyLogin(username, password)) {
                 // حفظ حالة تسجيل الدخول إذا تم اختيار "تذكرني"
                 if (rememberMe) {
-                    (context as MainActivity).saveLoginState(username, phone)
+                    context.saveLoginState(username, phone)
                 }
                 showToast("تم تسجيل الدخول بنجاح")
             } else {
@@ -53,7 +64,7 @@ class WebAppInterface(private val context: Context) {
     fun logout() {
         try {
             // مسح حالة تسجيل الدخول
-            (context as MainActivity).clearLoginState()
+            context.clearLoginState()
             showToast("تم تسجيل الخروج بنجاح")
         } catch (e: Exception) {
             Log.e(TAG, "Error during logout: ${e.message}")
@@ -72,10 +83,10 @@ class WebAppInterface(private val context: Context) {
             dbHelper.updateProfile(username, phone)
 
             // تحديث بيانات تسجيل الدخول المخزنة
-            (context as MainActivity).saveLoginState(username, phone)
+            context.saveLoginState(username, phone)
 
             // إرسال البيانات للسيرفر إذا كان متصلاً
-            if ((context as MainActivity).isOnline) {
+            if (context.isOnline) {
                 // TODO: إضافة كود إرسال البيانات للسيرفر
             }
 
@@ -103,7 +114,7 @@ class WebAppInterface(private val context: Context) {
             dbHelper.updatePassword(newPassword)
 
             // إرسال التغيير للسيرفر إذا كان متصلاً
-            if ((context as MainActivity).isOnline) {
+            if (context.isOnline) {
                 // TODO: إضافة كود إرسال كلمة المرور الجديدة للسيرفر
             }
 
@@ -126,7 +137,7 @@ class WebAppInterface(private val context: Context) {
             dbHelper.saveAppSettings(darkMode, notifications, syncInterval)
 
             // إرسال الإعدادات للسيرفر إذا كان متصلاً
-            if ((context as MainActivity).isOnline) {
+            if (context.isOnline) {
                 // TODO: إضافة كود إرسال الإعدادات للسيرفر
             }
 
@@ -155,10 +166,10 @@ class WebAppInterface(private val context: Context) {
             // حذف البيانات المحلية
             dbHelper.deleteAllData()
             // مسح حالة تسجيل الدخول
-            (context as MainActivity).clearLoginState()
+            context.clearLoginState()
 
             // حذف الحساب من السيرفر إذا كان متصلاً
-            if ((context as MainActivity).isOnline) {
+            if (context.isOnline) {
                 // TODO: إضافة كود حذف الحساب من السيرفر
             }
 
@@ -184,7 +195,7 @@ class WebAppInterface(private val context: Context) {
     @JavascriptInterface
     fun syncData() {
         try {
-            if ((context as MainActivity).isOnline) {
+            if (context.isOnline) {
                 // مزامنة البيانات مع السيرفر
                 // TODO: إضافة كود المزامنة
                 showToast("تمت المزامنة بنجاح")
@@ -427,14 +438,14 @@ class WebAppInterface(private val context: Context) {
             dbHelper.saveUIVersion(uiVersion)
 
             // تحميل وتطبيق التحديثات
-            if ((context as MainActivity).isOnline) {
+            if (context.isOnline) {
                 // تحميل ملفات CSS و JavaScript
                 downloadAndSaveFile(cssUrl, "styles.css")
                 downloadAndSaveFile(jsUrl, "app.js")
                 downloadAndSaveFile(htmlUrl, "index.html")
 
                 // تحديث واجهة المستخدم
-                (context as MainActivity).refreshContent()
+                context.refreshContent()
                 showToast("تم تحديث واجهة التطبيق بنجاح")
             } else {
                 showToast("لا يوجد اتصال بالإنترنت")
@@ -489,7 +500,7 @@ class WebAppInterface(private val context: Context) {
             File(context.filesDir, "index.html").delete()
 
             // إعادة تحميل الصفحة
-            (context as MainActivity).refreshContent()
+            context.refreshContent()
             showToast("تم مسح ذاكرة واجهة المستخدم بنجاح")
         } catch (e: Exception) {
             Log.e(TAG, "Error clearing UI cache: ${e.message}")
