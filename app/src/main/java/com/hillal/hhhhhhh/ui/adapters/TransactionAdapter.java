@@ -106,9 +106,9 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             // ربط عليه وله بالأرقام الإنجليزية
             if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
                 binding.transactionDebit.setText(String.format(Locale.US, "%.2f %s", transaction.getAmount(), transaction.getCurrency()));
-                binding.transactionCredit.setText(String.format(Locale.US, "0 %s", transaction.getCurrency()));
+                binding.transactionCredit.setText("0");
             } else {
-                binding.transactionDebit.setText(String.format(Locale.US, "0 %s", transaction.getCurrency()));
+                binding.transactionDebit.setText("0");
                 binding.transactionCredit.setText(String.format(Locale.US, "%.2f %s", transaction.getAmount(), transaction.getCurrency()));
             }
 
