@@ -14,6 +14,7 @@ import com.hillal.hhhhhhh.viewmodel.AccountStatementViewModel;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.json.JSONObject;
 
 public class AccountStatementActivity extends AppCompatActivity {
     private WebView webView;
@@ -198,7 +199,11 @@ public class AccountStatementActivity extends AppCompatActivity {
         public void onDateChanged() {
             runOnUiThread(() -> {
                 webView.evaluateJavascript(
-                    "(function() { return { startDate: document.getElementById('startDateInput').value, endDate: document.getElementById('endDateInput').value }; })();",
+                    "(function() { " +
+                    "const startDate = document.getElementById('startDateInput').value; " +
+                    "const endDate = document.getElementById('endDateInput').value; " +
+                    "return JSON.stringify({startDate: startDate, endDate: endDate}); " +
+                    "})();",
                     value -> {
                         try {
                             // Parse the JSON response
@@ -206,12 +211,19 @@ public class AccountStatementActivity extends AppCompatActivity {
                             if (value.startsWith("\"") && value.endsWith("\"")) {
                                 value = value.substring(1, value.length() - 1);
                             }
-                            String[] dates = value.split(",");
-                            startDate = dates[0].split(":")[1].replace("\"", "");
-                            endDate = dates[1].split(":")[1].replace("\"", "");
-                            updateReport();
+                            
+                            // Parse JSON string
+                            JSONObject json = new JSONObject(value);
+                            startDate = json.getString("startDate");
+                            endDate = json.getString("endDate");
+                            
+                            if (!startDate.isEmpty() && !endDate.isEmpty()) {
+                                updateReport();
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
+                            Toast.makeText(AccountStatementActivity.this, 
+                                "خطأ في قراءة التاريخ", Toast.LENGTH_SHORT).show();
                         }
                     }
                 );
@@ -261,26 +273,31 @@ public class AccountStatementActivity extends AppCompatActivity {
             return;
         }
 
-        if (startDate == null || endDate == null) {
+        if (startDate == null || startDate.isEmpty() || endDate == null || endDate.isEmpty()) {
             Toast.makeText(this, "الرجاء تحديد الفترة الزمنية", Toast.LENGTH_SHORT).show();
             return;
         }
 
         try {
+            // تحويل التواريخ من HTML5 date input (yyyy-MM-dd) إلى Date
             Calendar cal = Calendar.getInstance(TimeZone.getDefault());
             
             // تحويل تاريخ البداية
-            Date start = dateFormat.parse(startDate);
-            cal.setTime(start);
+            String[] startParts = startDate.split("-");
+            cal.set(Calendar.YEAR, Integer.parseInt(startParts[0]));
+            cal.set(Calendar.MONTH, Integer.parseInt(startParts[1]) - 1);
+            cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(startParts[2]));
             cal.set(Calendar.HOUR_OF_DAY, 0);
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
             cal.set(Calendar.MILLISECOND, 0);
-            start = cal.getTime();
+            Date start = cal.getTime();
 
             // تحويل تاريخ النهاية
-            Date end = dateFormat.parse(endDate);
-            cal.setTime(end);
+            String[] endParts = endDate.split("-");
+            cal.set(Calendar.YEAR, Integer.parseInt(endParts[0]));
+            cal.set(Calendar.MONTH, Integer.parseInt(endParts[1]) - 1);
+            cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(endParts[2]));
             cal.set(Calendar.HOUR_OF_DAY, 23);
             cal.set(Calendar.MINUTE, 59);
             cal.set(Calendar.SECOND, 59);
@@ -301,8 +318,9 @@ public class AccountStatementActivity extends AppCompatActivity {
             });
         } catch (NumberFormatException e) {
             Toast.makeText(this, "خطأ في معرف الحساب", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
         } catch (Exception e) {
-            Toast.makeText(this, "خطأ في تنسيق التاريخ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "خطأ في تنسيق التاريخ: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }
@@ -338,7 +356,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             
             // Add previous balance row
             html.append("<tr>");
-            html.append("<td>").append(dateFormat.format(new Date(firstTransactionDate))).append("</td>");
+            html.append("<td>").append(formatDate(new Date(firstTransactionDate))).append("</td>");
             html.append("<td>الرصيد السابق</td>");
             html.append("<td></td><td></td>");
             html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", previousBalance)).append("</td>");
@@ -350,7 +368,7 @@ public class AccountStatementActivity extends AppCompatActivity {
 
             for (Transaction t : currencyTransactions) {
                 html.append("<tr>");
-                html.append("<td>").append(dateFormat.format(new Date(t.getDate()))).append("</td>");
+                html.append("<td>").append(formatDate(new Date(t.getDate()))).append("</td>");
                 html.append("<td>").append(t.getDescription()).append("</td>");
                 
                 if (t.getAmount() > 0) {
@@ -381,5 +399,14 @@ public class AccountStatementActivity extends AppCompatActivity {
         }
 
         return html.toString();
+    }
+
+    private String formatDate(Date date) {
+        Calendar cal = Calendar.getInstance(TimeZone.getDefault());
+        cal.setTime(date);
+        return String.format(Locale.ENGLISH, "%04d-%02d-%02d",
+            cal.get(Calendar.YEAR),
+            cal.get(Calendar.MONTH) + 1,
+            cal.get(Calendar.DAY_OF_MONTH));
     }
 } 
