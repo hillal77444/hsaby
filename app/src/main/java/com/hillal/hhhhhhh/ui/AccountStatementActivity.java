@@ -263,8 +263,8 @@ public class AccountStatementActivity extends AppCompatActivity {
 
             viewModel.getTransactionsForAccountInDateRange(
                 accountId,
-                start.getTime(),
-                endOfDay.getTime()
+                start,
+                endOfDay
             ).observe(this, transactions -> {
                 String html = generateReportHtml(transactions);
                 String js = String.format("updateReport('%s');", html.replace("'", "\\'"));
