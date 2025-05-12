@@ -148,12 +148,12 @@ public class AccountStatementActivity extends AppCompatActivity {
                     </div>
                     <div class="date-container">
                         <div class="form-group">
-                            <label for="startDateInput">من تاريخ</label>
-                            <input type="date" id="startDateInput" onchange="onDateChanged()">
-                        </div>
-                        <div class="form-group">
                             <label for="endDateInput">إلى تاريخ</label>
                             <input type="date" id="endDateInput" onchange="onDateChanged()">
+                        </div>
+                        <div class="form-group">
+                            <label for="startDateInput">من تاريخ</label>
+                            <input type="date" id="startDateInput" onchange="onDateChanged()">
                         </div>
                     </div>
                     <button onclick="showReport()">عرض التقرير</button>
@@ -215,12 +215,13 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private void loadInitialData() {
+        // تعيين تاريخ النهاية (اليوم الحالي)
         Calendar calendar = Calendar.getInstance();
+        endDate = dateFormat.format(calendar.getTime());
+        
+        // تعيين تاريخ البداية (قبل 3 أيام)
         calendar.add(Calendar.DAY_OF_MONTH, -3);
         startDate = dateFormat.format(calendar.getTime());
-        
-        calendar = Calendar.getInstance();
-        endDate = dateFormat.format(calendar.getTime());
 
         String js = String.format("updateDates('%s', '%s');", startDate, endDate);
         webView.evaluateJavascript(js, null);
@@ -303,7 +304,6 @@ public class AccountStatementActivity extends AppCompatActivity {
             html.append("<table>");
             html.append("<tr><th>التاريخ</th><th>الوصف</th><th>عليه</th><th>له</th><th>الرصيد</th></tr>");
             
-            // Add previous balance row
             html.append("<tr>");
             html.append("<td>").append(dateFormat.format(new Date(firstTransactionDate))).append("</td>");
             html.append("<td>الرصيد السابق</td>");
@@ -336,7 +336,6 @@ public class AccountStatementActivity extends AppCompatActivity {
                 html.append("</tr>");
             }
 
-            // Add totals row
             html.append("<tr style='font-weight: bold;'>");
             html.append("<td colspan='2'>المجموع</td>");
             html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", totalDebit)).append("</td>");
