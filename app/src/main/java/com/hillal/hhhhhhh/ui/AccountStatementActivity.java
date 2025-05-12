@@ -14,6 +14,7 @@ import com.hillal.hhhhhhh.viewmodel.AccountStatementViewModel;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import android.view.MenuItem;
 
 public class AccountStatementActivity extends AppCompatActivity {
     private WebView webView;
@@ -29,6 +30,12 @@ public class AccountStatementActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account_statement);
 
+        // إعداد شريط التطبيق
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("كشف الحساب التفصيلي");
+        }
+
         webView = findViewById(R.id.webView);
         viewModel = new ViewModelProvider(this).get(AccountStatementViewModel.class);
         dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
@@ -40,6 +47,8 @@ public class AccountStatementActivity extends AppCompatActivity {
 
     private void setupWebView() {
         webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setBuiltInZoomControls(true);
+        webView.getSettings().setDisplayZoomControls(false);
         webView.addJavascriptInterface(new WebAppInterface(), "Android");
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -376,5 +385,14 @@ public class AccountStatementActivity extends AppCompatActivity {
         public void showReport() {
             updateReport();
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 } 
