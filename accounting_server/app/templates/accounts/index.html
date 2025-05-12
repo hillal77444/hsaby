@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="card">
+        <button onclick="refreshContent()" class="refresh-button">
+            <span>🔄</span> تحديث المحتوى
+        </button>
+        <div class="form-group">
+            <label for="accountName">اسم الحساب</label>
+            <input type="text" id="accountName" placeholder="أدخل اسم الحساب">
+        </div>
+        <div class="form-group">
+            <label for="accountNumber">رقم الحساب</label>
+            <input type="text" id="accountNumber" placeholder="أدخل رقم الحساب">
+        </div>
+        <div class="form-group">
+            <label for="phoneNumber">رقم الهاتف</label>
+            <input type="tel" id="phoneNumber" placeholder="أدخل رقم الهاتف">
+        </div>
+        <div class="form-group">
+            <label for="initialBalance">الرصيد الافتتاحي</label>
+            <input type="number" id="initialBalance" placeholder="أدخل الرصيد الافتتاحي">
+        </div>
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="isDebtor">
+                حساب مدين
+            </label>
+        </div>
+        <button onclick="saveAccount()">حفظ الحساب</button>
+    </div>
+    <div id="accountsList"></div>
+    <script src="script.js"></script>
+</body>
+</html> 
