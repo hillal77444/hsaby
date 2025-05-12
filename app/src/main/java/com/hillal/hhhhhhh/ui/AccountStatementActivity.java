@@ -74,8 +74,12 @@ public class AccountStatementActivity extends AppCompatActivity {
                "<style>" +
                "body { font-family: Arial, sans-serif; padding: 20px; }" +
                ".controls { background: #f5f5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px; }" +
-               "select, input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; }" +
-               "button { background: #2196F3; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }" +
+               "select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; }" +
+               ".date-container { display: flex; gap: 10px; margin: 10px 0; }" +
+               ".date-input { flex: 1; }" +
+               ".date-input input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }" +
+               ".date-input label { display: block; margin-bottom: 5px; color: #666; }" +
+               "button { background: #2196F3; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 10px; }" +
                "button:hover { background: #1976D2; }" +
                "#reportContent { margin-top: 20px; }" +
                "</style>" +
@@ -85,8 +89,16 @@ public class AccountStatementActivity extends AppCompatActivity {
                "<select id='accountSelect' onchange='Android.onAccountSelected(this.value)'>" +
                "<option value=''>اختر الحساب</option>" +
                "</select>" +
+               "<div class='date-container'>" +
+               "<div class='date-input'>" +
+               "<label>من تاريخ</label>" +
                "<input type='date' id='startDate' onchange='Android.onDateChanged()'>" +
+               "</div>" +
+               "<div class='date-input'>" +
+               "<label>إلى تاريخ</label>" +
                "<input type='date' id='endDate' onchange='Android.onDateChanged()'>" +
+               "</div>" +
+               "</div>" +
                "<button onclick='Android.showReport()'>عرض التقرير</button>" +
                "</div>" +
                "<div id='reportContent'></div>" +
@@ -135,64 +147,108 @@ public class AccountStatementActivity extends AppCompatActivity {
         String startDate = getStartDate();
         String endDate = getEndDate();
 
-        if (accountId.isEmpty() || startDate.isEmpty() || endDate.isEmpty()) {
+        if (accountId.isEmpty()) {
+            Toast.makeText(this, "الرجاء اختيار الحساب", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        viewModel.getTransactionsForAccountInDateRange(
-            Long.parseLong(accountId),
-            parseDate(startDate),
-            parseDate(endDate)
-        ).observe(this, transactions -> {
-            String reportHtml = generateReportHtml(transactions);
-            webView.evaluateJavascript(
-                "document.getElementById('reportContent').innerHTML = '" + reportHtml + "'",
-                null
-            );
-        });
+        if (startDate.isEmpty() || endDate.isEmpty()) {
+            Toast.makeText(this, "الرجاء تحديد الفترة الزمنية", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            Date start = parseDate(startDate);
+            Date end = parseDate(endDate);
+
+            // اجعل endDate نهاية اليوم
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(end);
+            cal.set(Calendar.HOUR_OF_DAY, 23);
+            cal.set(Calendar.MINUTE, 59);
+            cal.set(Calendar.SECOND, 59);
+            cal.set(Calendar.MILLISECOND, 999);
+            Date endOfDay = cal.getTime();
+
+            if (start.after(endOfDay)) {
+                Toast.makeText(this, "تاريخ البداية يجب أن يكون قبل تاريخ النهاية", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            viewModel.getTransactionsForAccountInDateRange(
+                Long.parseLong(accountId),
+                start,
+                endOfDay
+            ).observe(this, transactions -> {
+                if (transactions != null && !transactions.isEmpty()) {
+                    String reportHtml = generateReportHtml(transactions);
+                    webView.evaluateJavascript(
+                        "document.getElementById('reportContent').innerHTML = '" + reportHtml + "'",
+                        null
+                    );
+                } else {
+                    webView.evaluateJavascript(
+                        "document.getElementById('reportContent').innerHTML = '<p style=\"text-align: center; color: #666;\">لا توجد عمليات في الفترة المحددة</p>'",
+                        null
+                    );
+                }
+            });
+        } catch (Exception e) {
+            Toast.makeText(this, "خطأ في تنسيق التاريخ", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void loadInitialData() {
         // تعيين التواريخ الافتراضية
         Calendar cal = Calendar.getInstance();
-        String toDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(cal.getTime());
+        String toDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(cal.getTime());
         cal.add(Calendar.DATE, -3); // أول أمس
-        String fromDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(cal.getTime());
+        String fromDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(cal.getTime());
         
         // تعيين التواريخ في حقول الإدخال
-        webView.evaluateJavascript(
-            "document.getElementById('startDate').value = '" + fromDate + "';" +
-            "document.getElementById('endDate').value = '" + toDate + "';",
-            null
+        String js = String.format(
+            "document.getElementById('startDate').value = '%s';" +
+            "document.getElementById('endDate').value = '%s';",
+            fromDate, toDate
         );
+        webView.evaluateJavascript(js, null);
     }
 
     private String getSelectedAccountId() {
-        // الحصول على معرف الحساب المحدد من WebView
         final String[] accountId = {""};
         webView.evaluateJavascript(
             "document.getElementById('accountSelect').value",
-            value -> accountId[0] = value.replace("\"", "")
+            value -> {
+                if (value != null && !value.equals("null")) {
+                    accountId[0] = value.replace("\"", "");
+                }
+            }
         );
         return accountId[0];
     }
 
     private String getStartDate() {
-        // الحصول على تاريخ البداية من WebView
         final String[] startDate = {""};
         webView.evaluateJavascript(
             "document.getElementById('startDate').value",
-            value -> startDate[0] = value.replace("\"", "")
+            value -> {
+                if (value != null && !value.equals("null")) {
+                    startDate[0] = value.replace("\"", "");
+                }
+            }
         );
         return startDate[0];
     }
 
     private String getEndDate() {
-        // الحصول على تاريخ النهاية من WebView
         final String[] endDate = {""};
         webView.evaluateJavascript(
             "document.getElementById('endDate').value",
-            value -> endDate[0] = value.replace("\"", "")
+            value -> {
+                if (value != null && !value.equals("null")) {
+                    endDate[0] = value.replace("\"", "");
+                }
+            }
         );
         return endDate[0];
     }
@@ -297,7 +353,7 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private String formatDate(long timestamp) {
-        return new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        return new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
             .format(new Date(timestamp));
     }
 
