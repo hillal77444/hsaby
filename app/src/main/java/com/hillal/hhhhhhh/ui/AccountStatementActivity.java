@@ -120,12 +120,12 @@ public class AccountStatementActivity extends AppCompatActivity {
 
         @JavascriptInterface
         public void onDateChanged() {
-            runOnUiThread(this::updateReport);
+            runOnUiThread(() -> AccountStatementActivity.this.updateReport());
         }
 
         @JavascriptInterface
         public void showReport() {
-            runOnUiThread(this::updateReport);
+            runOnUiThread(() -> AccountStatementActivity.this.updateReport());
         }
     }
 
