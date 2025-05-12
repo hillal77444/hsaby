@@ -122,11 +122,11 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
 
             // ربط عليه وله بالأرقام الإنجليزية
             if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
-                binding.transactionDebit.setText(String.format(Locale.US, "%.2f %s", transaction.getAmount(), getCurrencySymbol(transaction.getCurrency())));
+                binding.transactionDebit.setText(String.format(Locale.US, "%.2f \n %s", transaction.getAmount(), getCurrencySymbol(transaction.getCurrency())));
                 binding.transactionCredit.setText("0");
             } else {
                 binding.transactionDebit.setText("0");
-                binding.transactionCredit.setText(String.format(Locale.US, "%.2f %s", transaction.getAmount(), getCurrencySymbol(transaction.getCurrency())));
+                binding.transactionCredit.setText(String.format(Locale.US, "%.2f\n %s", transaction.getAmount(), getCurrencySymbol(transaction.getCurrency())));
             }
 
             // زر إرسال واتساب
