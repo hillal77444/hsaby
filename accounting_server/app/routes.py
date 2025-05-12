@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_tok
 from datetime import datetime
 import logging
 import json
+import os
 
 main = Blueprint('main', __name__)
 logger = logging.getLogger(__name__)
@@ -358,4 +359,106 @@ def debug_public():
         })
     except Exception as e:
         logger.error(f"Public debug data error: {str(e)}")
-        return jsonify({'error': f'حدث خطأ أثناء جلب بيانات التصحيح: {str(e)}'}), 500 
+        return jsonify({'error': f'حدث خطأ أثناء جلب بيانات التصحيح: {str(e)}'}), 500
+
+@main.route('/api/html-content', methods=['GET'])
+def get_html_content():
+    try:
+        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'account_statement')
+        
+        # قراءة ملف HTML
+        with open(os.path.join(template_dir, 'index.html'), 'r', encoding='utf-8') as f:
+            html_content = f.read()
+            
+        return html_content, 200, {'Content-Type': 'text/html; charset=utf-8'}
+    except Exception as e:
+        logger.error(f"Error getting HTML content: {str(e)}")
+        return jsonify({'error': 'حدث خطأ أثناء جلب المحتوى'}), 500
+
+@main.route('/api/html-content/styles.css', methods=['GET'])
+def get_styles():
+    try:
+        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'account_statement')
+        with open(os.path.join(template_dir, 'styles.css'), 'r', encoding='utf-8') as f:
+            css_content = f.read()
+        return css_content, 200, {'Content-Type': 'text/css; charset=utf-8'}
+    except Exception as e:
+        logger.error(f"Error getting CSS content: {str(e)}")
+        return jsonify({'error': 'حدث خطأ أثناء جلب التنسيقات'}), 500
+
+@main.route('/api/html-content/script.js', methods=['GET'])
+def get_script():
+    try:
+        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'account_statement')
+        with open(os.path.join(template_dir, 'script.js'), 'r', encoding='utf-8') as f:
+            js_content = f.read()
+        return js_content, 200, {'Content-Type': 'application/javascript; charset=utf-8'}
+    except Exception as e:
+        logger.error(f"Error getting JavaScript content: {str(e)}")
+        return jsonify({'error': 'حدث خطأ أثناء جلب السكربت'}), 500
+
+@main.route('/api/accounts/html-content', methods=['GET'])
+def get_accounts_html_content():
+    try:
+        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'accounts')
+        with open(os.path.join(template_dir, 'index.html'), 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        return html_content, 200, {'Content-Type': 'text/html; charset=utf-8'}
+    except Exception as e:
+        logger.error(f"Error getting accounts HTML content: {str(e)}")
+        return jsonify({'error': 'حدث خطأ أثناء جلب محتوى الحسابات'}), 500
+
+@main.route('/api/accounts/html-content/styles.css', methods=['GET'])
+def get_accounts_styles():
+    try:
+        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'accounts')
+        with open(os.path.join(template_dir, 'styles.css'), 'r', encoding='utf-8') as f:
+            css_content = f.read()
+        return css_content, 200, {'Content-Type': 'text/css; charset=utf-8'}
+    except Exception as e:
+        logger.error(f"Error getting accounts CSS content: {str(e)}")
+        return jsonify({'error': 'حدث خطأ أثناء جلب تنسيقات الحسابات'}), 500
+
+@main.route('/api/accounts/html-content/script.js', methods=['GET'])
+def get_accounts_script():
+    try:
+        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'accounts')
+        with open(os.path.join(template_dir, 'script.js'), 'r', encoding='utf-8') as f:
+            js_content = f.read()
+        return js_content, 200, {'Content-Type': 'application/javascript; charset=utf-8'}
+    except Exception as e:
+        logger.error(f"Error getting accounts JavaScript content: {str(e)}")
+        return jsonify({'error': 'حدث خطأ أثناء جلب سكربت الحسابات'}), 500
+
+@main.route('/api/transactions/html-content', methods=['GET'])
+def get_transactions_html_content():
+    try:
+        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'transactions')
+        with open(os.path.join(template_dir, 'index.html'), 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        return html_content, 200, {'Content-Type': 'text/html; charset=utf-8'}
+    except Exception as e:
+        logger.error(f"Error getting transactions HTML content: {str(e)}")
+        return jsonify({'error': 'حدث خطأ أثناء جلب محتوى المعاملات'}), 500
+
+@main.route('/api/transactions/html-content/styles.css', methods=['GET'])
+def get_transactions_styles():
+    try:
+        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'transactions')
+        with open(os.path.join(template_dir, 'styles.css'), 'r', encoding='utf-8') as f:
+            css_content = f.read()
+        return css_content, 200, {'Content-Type': 'text/css; charset=utf-8'}
+    except Exception as e:
+        logger.error(f"Error getting transactions CSS content: {str(e)}")
+        return jsonify({'error': 'حدث خطأ أثناء جلب تنسيقات المعاملات'}), 500
+
+@main.route('/api/transactions/html-content/script.js', methods=['GET'])
+def get_transactions_script():
+    try:
+        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'transactions')
+        with open(os.path.join(template_dir, 'script.js'), 'r', encoding='utf-8') as f:
+            js_content = f.read()
+        return js_content, 200, {'Content-Type': 'application/javascript; charset=utf-8'}
+    except Exception as e:
+        logger.error(f"Error getting transactions JavaScript content: {str(e)}")
+        return jsonify({'error': 'حدث خطأ أثناء جلب سكربت المعاملات'}), 500 
