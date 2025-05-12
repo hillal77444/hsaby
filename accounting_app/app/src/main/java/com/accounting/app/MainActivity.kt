@@ -29,14 +29,16 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import android.content.SharedPreferences
+import android.Manifest
+import android.os.Build
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
-    private lateinit var swipeRefresh: SwipeRefreshLayout
-    private lateinit var progressBar: ProgressBar
-    private var isOnline = false
-    private val handler = Handler(Looper.getMainLooper())
-    private val syncInterval = 15 * 60 * 1000 // 15 minutes
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private lateinit var dbHelper: DatabaseHelper
+    private var isFirstLoad = true
+    private var lastSyncTime: Long = 0
+    private val SYNC_INTERVAL = 5 * 60 * 1000 // 5 minutes
     private lateinit var sharedPreferences: SharedPreferences
 
     companion object {
@@ -50,18 +52,20 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Initialize database
+        dbHelper = DatabaseHelper(this)
+
+        // Initialize WebView
+        webView = findViewById(R.id.webView)
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
+
         // تهيئة SharedPreferences
         sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-        // تهيئة WebView
-        webView = findViewById(R.id.webView)
-        swipeRefresh = findViewById(R.id.swipeRefresh)
-        progressBar = findViewById(R.id.progressBar)
-
         setupWebView()
         setupSwipeRefresh()
-        checkConnectivity()
-        startSyncService()
+        checkPermissions()
+        loadContent()
     }
 
     private fun setupWebView() {
@@ -72,9 +76,7 @@ class MainActivity : AppCompatActivity() {
             allowContentAccess = true
             allowFileAccessFromFileURLs = true
             allowUniversalAccessFromFileURLs = true
-            databaseEnabled = true
-            setGeolocationEnabled(true)
-            mediaPlaybackRequiresUserGesture = false
+            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
         }
 
         // إعداد معالجات المسارات
@@ -94,8 +96,11 @@ class MainActivity : AppCompatActivity() {
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                progressBar.visibility = View.GONE
-                swipeRefresh.isRefreshing = false
+                swipeRefreshLayout.isRefreshing = false
+                if (isFirstLoad) {
+                    isFirstLoad = false
+                    injectJavaScript()
+                }
 
                 // التحقق من حالة تسجيل الدخول
                 if (isLoggedIn()) {
@@ -126,62 +131,75 @@ class MainActivity : AppCompatActivity() {
         }
 
         // إضافة واجهة JavaScript
-        webView.addJavascriptInterface(WebAppInterface(this), "Android")
-
-        // تحميل الصفحة الرئيسية
-        loadInitialPage()
+        webView.addJavascriptInterface(WebAppInterface(this, dbHelper), "Android")
     }
 
     private fun setupSwipeRefresh() {
-        swipeRefresh.setOnRefreshListener {
+        swipeRefreshLayout.setOnRefreshListener {
             refreshContent()
         }
     }
 
-    private fun loadInitialPage() {
-        progressBar.visibility = View.VISIBLE
-        if (isOnline) {
-            webView.loadUrl("http://your-server-url/")
-        } else {
-            webView.loadUrl("file:///android_asset/offline/index.html")
-        }
-    }
-
-    private fun refreshContent() {
-        if (isOnline) {
+    fun refreshContent() {
+        if (isOnline()) {
             webView.reload()
         } else {
-            Toast.makeText(this, "لا يوجد اتصال بالإنترنت", Toast.LENGTH_SHORT).show()
-            swipeRefresh.isRefreshing = false
+            loadLocalContent()
         }
     }
 
-    private fun checkConnectivity() {
+    fun isOnline(): Boolean {
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val network = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(network)
-        
-        isOnline = capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
-        
-        if (isOnline) {
-            syncData()
+        val networkCapabilities = connectivityManager.activeNetwork ?: return false
+        val actNw = connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
+        return actNw.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
+    private fun loadContent() {
+        if (isOnline()) {
+            loadRemoteContent()
+        } else {
+            loadLocalContent()
         }
     }
 
-    private fun startSyncService() {
-        handler.postDelayed(object : Runnable {
-            override fun run() {
-                if (isOnline) {
-                    syncData()
-                }
-                handler.postDelayed(this, syncInterval.toLong())
-            }
-        }, syncInterval.toLong())
+    private fun loadRemoteContent() {
+        webView.loadUrl("https://accounting.example.com")
     }
 
-    private fun syncData() {
-        // تنفيذ المزامنة مع السيرفر
-        // TODO: إضافة كود المزامنة
+    private fun loadLocalContent() {
+        val localFile = File(filesDir, "index.html")
+        if (localFile.exists()) {
+            webView.loadUrl("file://${localFile.absolutePath}")
+        } else {
+            webView.loadUrl("file:///android_asset/index.html")
+        }
+    }
+
+    private fun injectJavaScript() {
+        val js = """
+            window.addEventListener('load', function() {
+                if (typeof Android !== 'undefined') {
+                    Android.onPageLoaded();
+                }
+            });
+        """.trimIndent()
+        webView.evaluateJavascript(js, null)
+    }
+
+    private fun checkPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(
+                arrayOf(
+                    Manifest.permission.INTERNET,
+                    Manifest.permission.ACCESS_NETWORK_STATE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.CAMERA
+                ),
+                1
+            )
+        }
     }
 
     // وظائف حفظ تسجيل الدخول
@@ -225,6 +243,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
+        dbHelper.close()
     }
 } 
