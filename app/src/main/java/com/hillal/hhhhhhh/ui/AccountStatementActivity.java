@@ -269,12 +269,12 @@ public class AccountStatementActivity extends AppCompatActivity {
 
     private void updateReport() {
         if (selectedAccountId == null || selectedAccountId.isEmpty()) {
-            Toast.makeText(this, "الرجاء اختيار حساب", Toast.LENGTH_SHORT).show();
+            runOnUiThread(() -> Toast.makeText(this, "الرجاء اختيار حساب", Toast.LENGTH_SHORT).show());
             return;
         }
 
         if (startDate == null || startDate.isEmpty() || endDate == null || endDate.isEmpty()) {
-            Toast.makeText(this, "الرجاء تحديد الفترة الزمنية", Toast.LENGTH_SHORT).show();
+            runOnUiThread(() -> Toast.makeText(this, "الرجاء تحديد الفترة الزمنية", Toast.LENGTH_SHORT).show());
             return;
         }
 
@@ -312,15 +312,17 @@ public class AccountStatementActivity extends AppCompatActivity {
                 start,
                 endOfDay
             ).observe(this, transactions -> {
-                String html = generateReportHtml(transactions);
-                String js = String.format("updateReport('%s');", html.replace("'", "\\'"));
-                webView.evaluateJavascript(js, null);
+                runOnUiThread(() -> {
+                    String html = generateReportHtml(transactions);
+                    String js = String.format("updateReport('%s');", html.replace("'", "\\'"));
+                    webView.evaluateJavascript(js, null);
+                });
             });
         } catch (NumberFormatException e) {
-            Toast.makeText(this, "خطأ في معرف الحساب", Toast.LENGTH_SHORT).show();
+            runOnUiThread(() -> Toast.makeText(this, "خطأ في معرف الحساب", Toast.LENGTH_SHORT).show());
             e.printStackTrace();
         } catch (Exception e) {
-            Toast.makeText(this, "خطأ في تنسيق التاريخ: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            runOnUiThread(() -> Toast.makeText(this, "خطأ في تنسيق التاريخ: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             e.printStackTrace();
         }
     }
