@@ -3,34 +3,17 @@ package com.accounting.app
 import android.os.Bundle
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.webkit.WebChromeClient
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
+import android.webkit.WebSettings
 import android.webkit.CookieManager
-import android.webkit.ValueCallback
-import android.net.Uri
-import android.content.Intent
-import android.os.Environment
-import android.provider.MediaStore
-import androidx.appcompat.app.AppCompatActivity
-import androidx.webkit.WebViewAssetLoader
-import androidx.webkit.WebViewAssetLoader.AssetsPathHandler
-import androidx.webkit.WebViewAssetLoader.ResourcesPathHandler
-import androidx.webkit.WebViewAssetLoader.InternalStoragePathHandler
-import java.io.File
-import android.util.Log
-import android.widget.Toast
 import android.net.ConnectivityManager
 import android.content.Context
 import android.net.NetworkCapabilities
-import android.os.Handler
-import android.os.Looper
-import android.view.View
-import android.widget.ProgressBar
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import android.content.SharedPreferences
 import android.Manifest
 import android.os.Build
+import androidx.appcompat.app.AppCompatActivity
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
