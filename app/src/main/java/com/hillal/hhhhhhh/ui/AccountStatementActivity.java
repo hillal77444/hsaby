@@ -87,15 +87,23 @@ public class AccountStatementActivity extends AppCompatActivity {
                     }
                     select, input {
                         width: 100%;
-                        padding: 8px;
+                        padding: 12px;
                         border: 1px solid #ddd;
-                        border-radius: 4px;
-                        margin-top: 4px;
+                        border-radius: 8px;
+                        margin-top: 8px;
                         font-size: 16px;
+                        background-color: #fff;
+                        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                    }
+                    select:focus, input:focus {
+                        outline: none;
+                        border-color: #2196F3;
+                        box-shadow: 0 0 0 2px rgba(33,150,243,0.2);
                     }
                     .date-container {
                         display: flex;
-                        gap: 8px;
+                        gap: 16px;
+                        margin-bottom: 20px;
                     }
                     .date-container > div {
                         flex: 1;
@@ -104,37 +112,54 @@ public class AccountStatementActivity extends AppCompatActivity {
                         background-color: #2196F3;
                         color: white;
                         border: none;
-                        padding: 12px;
-                        border-radius: 4px;
+                        padding: 14px;
+                        border-radius: 8px;
                         width: 100%;
                         cursor: pointer;
                         font-size: 16px;
+                        font-weight: bold;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        transition: all 0.3s ease;
                     }
                     button:hover {
                         background-color: #1976D2;
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                    }
+                    button:active {
+                        transform: translateY(1px);
                     }
                     table {
                         width: 100%;
                         border-collapse: collapse;
                         margin-top: 16px;
+                        background-color: white;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                     }
                     th, td {
                         border: 1px solid #ddd;
-                        padding: 8px;
+                        padding: 12px;
                         text-align: right;
                     }
                     th {
                         background-color: #f5f5f5;
+                        font-weight: bold;
                     }
                     .currency-header {
                         background-color: #e3f2fd;
-                        padding: 8px;
-                        margin-top: 16px;
-                        border-radius: 4px;
+                        padding: 12px;
+                        margin-top: 20px;
+                        border-radius: 8px;
+                        font-weight: bold;
+                        color: #1976D2;
                     }
                     label {
                         font-size: 16px;
                         color: #333;
+                        font-weight: bold;
+                        display: block;
+                        margin-bottom: 4px;
                     }
                 </style>
             </head>
@@ -148,12 +173,12 @@ public class AccountStatementActivity extends AppCompatActivity {
                     </div>
                     <div class="date-container">
                         <div class="form-group">
-                            <label for="endDateInput">إلى تاريخ</label>
-                            <input type="date" id="endDateInput" onchange="onDateChanged()">
-                        </div>
-                        <div class="form-group">
                             <label for="startDateInput">من تاريخ</label>
                             <input type="date" id="startDateInput" onchange="onDateChanged()">
+                        </div>
+                        <div class="form-group">
+                            <label for="endDateInput">إلى تاريخ</label>
+                            <input type="date" id="endDateInput" onchange="onDateChanged()">
                         </div>
                     </div>
                     <button onclick="showReport()">عرض التقرير</button>
@@ -183,7 +208,6 @@ public class AccountStatementActivity extends AppCompatActivity {
 
                     function updateDates(startDate, endDate) {
                         document.getElementById('startDateInput').value = startDate;
-                        
                         document.getElementById('endDateInput').value = endDate;
                     }
 
