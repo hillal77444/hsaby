@@ -60,13 +60,6 @@ android {
         maxProcessCount 8
         javaMaxHeapSize "4g"
     }
-
-    // Enable parallel execution
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-        kotlinOptions {
-            jvmTarget = "1.8"
-        }
-    }
 }
 
 // Enable parallel execution for all tasks
