@@ -34,6 +34,16 @@ jobs:
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
         working-directory: accounting_app
 
+      - name: Generate gradle wrapper if missing
+        run: |
+          if [ ! -f "gradlew" ]; then
+            echo "gradlew not found, generating wrapper..."
+            gradle wrapper
+          else
+            echo "gradlew already exists."
+          fi
+        working-directory: accounting_app
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
         working-directory: accounting_app
