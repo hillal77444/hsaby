@@ -22,6 +22,8 @@ import retrofit2.Response
 import okhttp3.ResponseBody
 import androidx.lifecycle.lifecycleScope
 import com.accounting.app.database.AppDatabase
+import com.accounting.app.database.AccountDao
+import com.accounting.app.database.TransactionDao
 
 class WebAppInterface(
     private val context: MainActivity,
@@ -288,7 +290,7 @@ class WebAppInterface(
             if (response.isSuccessful) {
                 // حفظ الحسابات في قاعدة البيانات المحلية
                 response.body()?.data?.let { accounts ->
-                    lifecycleScope.launch(Dispatchers.IO) {
+                    coroutineScope.launch(Dispatchers.IO) {
                         db.accountDao().insertAll(accounts)
                     }
                 }
@@ -304,11 +306,11 @@ class WebAppInterface(
     suspend fun getEntries(): Response<ApiResponse<List<Transaction>>> {
         return try {
             val token = context.getAuthToken() ?: throw Exception("No auth token")
-            val response = apiService.getEntries("Bearer $token")
+            val response = apiService.getTransactions("Bearer $token")
             if (response.isSuccessful) {
                 // حفظ القيود في قاعدة البيانات المحلية
                 response.body()?.data?.let { entries ->
-                    lifecycleScope.launch(Dispatchers.IO) {
+                    coroutineScope.launch(Dispatchers.IO) {
                         db.transactionDao().insertAll(entries)
                     }
                 }
