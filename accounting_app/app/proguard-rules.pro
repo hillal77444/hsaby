@@ -18,6 +18,11 @@
 -keep class org.conscrypt.Conscrypt$Version { *; }
 -keep class org.conscrypt.ConscryptHostnameVerifier { *; }
 -keep class org.conscrypt.ConscryptProvider { *; }
+-keep class org.conscrypt.KitKatPlatformOpenSSLSocketImplAdapter { *; }
+-keep class org.conscrypt.PreKitKatPlatformOpenSSLSocketImplAdapter { *; }
+-keep class org.conscrypt.AbstractConscryptSocket { *; }
+-keep class com.android.org.conscrypt.SSLParametersImpl { *; }
+-keep class org.apache.harmony.xnet.provider.jsse.SSLParametersImpl { *; }
 -dontwarn org.codehaus.mojo.animal_sniffer.*
 -dontwarn okhttp3.internal.platform.ConscryptPlatform
 -dontwarn org.conscrypt.ConscryptHostnameVerifier
@@ -89,4 +94,8 @@
 -keep class javax.net.ssl.** { *; }
 -keep class javax.net.** { *; }
 -keep class java.security.** { *; }
--keep class java.security.cert.** { *; } 
+-keep class java.security.cert.** { *; }
+
+# Keep Android SSL implementation
+-keep class com.android.org.conscrypt.** { *; }
+-keep class org.apache.harmony.xnet.provider.jsse.** { *; } 
