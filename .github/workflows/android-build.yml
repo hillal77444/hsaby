@@ -37,9 +37,18 @@ jobs:
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
         working-directory: accounting_app
 
+      - name: Generate Gradle Wrapper
+        run: |
+          cd accounting_app
+          gradle wrapper
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-        working-directory: accounting_app
+        run: |
+          cd accounting_app
+          chmod +x gradlew
+          ls -la gradlew
 
       - name: Check keystore exists
         run: |
@@ -59,8 +68,9 @@ jobs:
         working-directory: accounting_app
 
       - name: Build Release APK
-        run: ./gradlew assembleRelease --parallel --max-workers=8 --build-cache --no-daemon
-        working-directory: accounting_app
+        run: |
+          cd accounting_app
+          ./gradlew assembleRelease --parallel --max-workers=8 --build-cache --no-daemon
         env:
           RELEASE_STORE_FILE: keystore.jks
           RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
