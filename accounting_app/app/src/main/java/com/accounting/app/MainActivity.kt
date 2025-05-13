@@ -37,7 +37,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Call
 import okhttp3.Callback
-import okhttp3.Response
+import okhttp3.Response as OkHttpResponse
 import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
@@ -562,7 +562,7 @@ class MainActivity : AppCompatActivity() {
                 override fun onFailure(call: Call, e: IOException) {
                     Log.e("CachePages", "Failed to load $url: ${e.message}")
                 }
-                override fun onResponse(call: Call, response: Response) {
+                override fun onResponse(call: Call, response: OkHttpResponse) {
                     if (response.isSuccessful) {
                         var content = response.body?.string() ?: ""
                         // استبدال روابط CSS/JS في HTML بروابط محلية
