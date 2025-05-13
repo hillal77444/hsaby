@@ -6,6 +6,9 @@
 </head>
 <body>
     <h2>تسجيل الدخول</h2>
+    {% if error %}
+        <div style="color:red;">{{ error }}</div>
+    {% endif %}
     <form method="post" action="/api/login">
         <label>رقم الجوال:</label>
         <input type="text" name="phone"><br>
