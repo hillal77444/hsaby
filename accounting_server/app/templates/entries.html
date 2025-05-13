@@ -6,7 +6,28 @@
 </head>
 <body>
     <h2>صفحة القيود المحاسبية</h2>
-    <p>هنا يمكنك عرض وإدارة القيود المحاسبية.</p>
+    {% if entries %}
+        <table border="1" cellpadding="6" style="width:100%;text-align:center;">
+            <tr>
+                <th>التاريخ</th>
+                <th>المبلغ</th>
+                <th>الوصف</th>
+                <th>نوع القيد</th>
+                <th>الحساب</th>
+            </tr>
+            {% for entry in entries %}
+            <tr>
+                <td>{{ entry.date.strftime('%Y-%m-%d') if entry.date else '' }}</td>
+                <td>{{ entry.amount }}</td>
+                <td>{{ entry.description }}</td>
+                <td>{{ entry.type }}</td>
+                <td>{{ entry.account_id }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>لا توجد قيود محاسبية.</p>
+    {% endif %}
     <a href="/dashboard">العودة للوحة التحكم</a>
 </body>
 </html> 
