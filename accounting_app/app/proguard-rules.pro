@@ -11,8 +11,13 @@
     @retrofit2.http.* <methods>;
 }
 
-# OkHttp
+# OkHttp and Conscrypt
 -keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+-keep class org.conscrypt.** { *; }
+-keep class org.conscrypt.Conscrypt { *; }
+-keep class org.conscrypt.Conscrypt$Version { *; }
+-keep class org.conscrypt.ConscryptHostnameVerifier { *; }
+-keep class org.conscrypt.ConscryptProvider { *; }
 -dontwarn org.codehaus.mojo.animal_sniffer.*
 -dontwarn okhttp3.internal.platform.ConscryptPlatform
 -dontwarn org.conscrypt.ConscryptHostnameVerifier
@@ -78,4 +83,10 @@
 # Keep JavaScript interface methods
 -keepclassmembers class * {
     @android.webkit.JavascriptInterface <methods>;
-} 
+}
+
+# Keep SSL/TLS related classes
+-keep class javax.net.ssl.** { *; }
+-keep class javax.net.** { *; }
+-keep class java.security.** { *; }
+-keep class java.security.cert.** { *; } 
