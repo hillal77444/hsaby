@@ -11,6 +11,7 @@ import java.io.FileInputStream
 import java.nio.charset.StandardCharsets
 import com.google.gson.Gson
 import org.json.JSONArray
+import kotlinx.coroutines.launch
 
 class WebAppInterface(private val context: MainActivity, private val dbHelper: DatabaseHelper) {
     private val TAG = "WebAppInterface"
@@ -186,6 +187,29 @@ class WebAppInterface(private val context: MainActivity, private val dbHelper: D
 
     @JavascriptInterface
     fun syncData(): Boolean {
-        return dbHelper.syncData()
+        return try {
+            val dbHelper = DatabaseHelper(context)
+            val syncData = dbHelper.syncData()
+            lifecycleScope.launch {
+                try {
+                    val response = apiClient.getApiService().syncData("Bearer $token", syncData)
+                    if (response.isSuccessful) {
+                        response.body()?.let { apiResponse ->
+                            if (apiResponse.success) {
+                                apiResponse.data?.let { syncResponse ->
+                                    updateLocalData(syncResponse)
+                                }
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error syncing data: ${e.message}")
+                }
+            }
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error preparing sync data: ${e.message}")
+            false
+        }
     }
 } 
