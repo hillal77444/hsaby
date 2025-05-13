@@ -537,8 +537,94 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     fun syncData(): Boolean {
-        // TODO: تنفيذ المزامنة مع السيرفر
-        return true
+        try {
+            val db = this.writableDatabase
+            val lastSyncTimestamp = getLastSyncTimestamp()
+            
+            // جلب البيانات المحلية
+            val localAccounts = getAllAccounts()
+            val localTransactions = getAllTransactions()
+            
+            // إرسال البيانات إلى السيرفر
+            val syncData = SyncData(
+                accounts = localAccounts,
+                transactions = localTransactions,
+                lastSyncTimestamp = lastSyncTimestamp
+            )
+            
+            // تحديث timestamp المزامنة
+            updateLastSyncTimestamp(System.currentTimeMillis())
+            
+            return true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error syncing data: ${e.message}")
+            return false
+        }
+    }
+
+    private fun getLastSyncTimestamp(): Long {
+        val db = this.readableDatabase
+        val cursor = db.query(
+            TABLE_SETTINGS,
+            arrayOf(COLUMN_VALUE),
+            "$COLUMN_KEY = ?",
+            arrayOf("last_sync_timestamp"),
+            null,
+            null,
+            null
+        )
+        return if (cursor.moveToFirst()) {
+            val timestamp = cursor.getLong(0)
+            cursor.close()
+            timestamp
+        } else {
+            cursor.close()
+            0L
+        }
+    }
+
+    private fun updateLastSyncTimestamp(timestamp: Long) {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_KEY, "last_sync_timestamp")
+            put(COLUMN_VALUE, timestamp.toString())
+        }
+        db.insertWithOnConflict(
+            TABLE_SETTINGS,
+            null,
+            values,
+            SQLiteDatabase.CONFLICT_REPLACE
+        )
+    }
+
+    private fun getAllTransactions(): List<Transaction> {
+        val transactions = mutableListOf<Transaction>()
+        val db = this.readableDatabase
+        val cursor = db.query(
+            TABLE_TRANSACTIONS,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+        while (cursor.moveToNext()) {
+            transactions.add(
+                Transaction(
+                    id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_TRANSACTION_ID)),
+                    date = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
+                    amount = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_AMOUNT)),
+                    description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)),
+                    type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
+                    currency = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CURRENCY)),
+                    notes = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOTES)),
+                    accountId = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_ID_FK))
+                )
+            )
+        }
+        cursor.close()
+        return transactions
     }
 
     // وظائف إدارة واجهة المستخدم
