@@ -59,17 +59,19 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Initialize database
+        // تهيئة SharedPreferences
+        sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+        // تهيئة database
         dbHelper = DatabaseHelper(this)
         db = AppDatabase.getDatabase(this)
+
+        // تهيئة WebAppInterface بعد sharedPreferences
         webAppInterface = WebAppInterface(this, dbHelper, sharedPreferences)
 
         // Initialize WebView and SwipeRefreshLayout
         webView = findViewById(R.id.webView)
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
-
-        // تهيئة SharedPreferences
-        sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
         // تهيئة API Service
         apiService = ApiClient.getApiService()
