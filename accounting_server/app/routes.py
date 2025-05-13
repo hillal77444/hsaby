@@ -73,21 +73,35 @@ def login():
             data = request.form.to_dict()
         # التحقق من البيانات المطلوبة
         if 'phone' not in data or 'password' not in data:
-            return jsonify({'error': 'يرجى إدخال رقم الهاتف وكلمة المرور'}), 400
+            if request.content_type == 'application/json':
+                return jsonify({'error': 'يرجى إدخال رقم الهاتف وكلمة المرور'}), 400
+            else:
+                return redirect('/login')
         # البحث عن المستخدم برقم الهاتف
         user = User.query.filter_by(phone=data['phone']).first()
         if user and verify_password(user.password_hash, data['password']):
             access_token = create_access_token(identity=user.id)
+            # إذا كان الطلب من form (وليس JSON)، أعد توجيه المستخدم للـ Dashboard
+            if request.content_type != 'application/json':
+                return redirect('/dashboard')
+            # إذا كان الطلب JSON (تطبيق موبايل)، أرجع JSON
             return jsonify({
                 'message': 'تم تسجيل الدخول بنجاح',
                 'token': access_token,
                 'user_id': user.id,
                 'username': user.username
             })
-        return jsonify({'error': 'رقم الهاتف أو كلمة المرور غير صحيحة'}), 401
+        # بيانات الدخول خاطئة
+        if request.content_type == 'application/json':
+            return jsonify({'error': 'رقم الهاتف أو كلمة المرور غير صحيحة'}), 401
+        else:
+            return redirect('/login')
     except Exception as e:
         logger.error(f"Login error: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء تسجيل الدخول'}), 500
+        if request.content_type == 'application/json':
+            return jsonify({'error': 'حدث خطأ أثناء تسجيل الدخول'}), 500
+        else:
+            return redirect('/login')
 
 @main.route('/api/sync', methods=['POST'])
 @jwt_required()
