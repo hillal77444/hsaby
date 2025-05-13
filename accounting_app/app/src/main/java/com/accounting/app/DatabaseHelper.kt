@@ -9,6 +9,7 @@ import android.util.Log
 import org.json.JSONObject
 import java.security.MessageDigest
 import org.json.JSONArray
+import com.accounting.app.models.*
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
@@ -543,7 +544,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             val lastSyncTimestamp = getLastSyncTimestamp()
             
             // جلب البيانات المحلية
-            val localAccounts = getAllAccounts()
+            val localAccounts = getAllAccounts().map { jsonToAccount(it) }
             val localTransactions = getAllTransactions()
             
             // إرسال البيانات إلى السيرفر
@@ -561,6 +562,20 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             Log.e(TAG, "Error syncing data: ${e.message}")
             return false
         }
+    }
+
+    private fun jsonToAccount(json: JSONObject): Account {
+        return Account(
+            id = json.getLong("id"),
+            accountNumber = json.getString("account_number"),
+            accountName = json.getString("account_name"),
+            balance = json.getDouble("balance"),
+            phoneNumber = if (json.has("phone_number")) json.getString("phone_number") else null,
+            isDebtor = json.getBoolean("is_debtor"),
+            notes = if (json.has("notes")) json.getString("notes") else null,
+            createdAt = json.getLong("created_at"),
+            updatedAt = json.getLong("updated_at")
+        )
     }
 
     fun getAllTransactions(): List<Transaction> {
