@@ -118,23 +118,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadContent() {
-        if (isOnline()) {
-            loadRemoteContent()
+        if (isLoggedIn()) {
+            // المستخدم مسجل دخوله
+            if (isOnline()) {
+                loadRemoteContent()
+            } else {
+                loadLocalContent()
+            }
         } else {
-            loadLocalContent()
+            // المستخدم غير مسجل دخوله
+            if (isOnline()) {
+                webView.loadUrl("http://212.224.88.122:5007/login")
+            } else {
+                webView.loadUrl("file:///android_asset/login.html")
+            }
         }
     }
 
     private fun loadRemoteContent() {
-        webView.loadUrl("http://212.224.88.122:5007/")
+        webView.loadUrl("http://212.224.88.122:5007/dashboard")
     }
 
     private fun loadLocalContent() {
-        val localFile = File(filesDir, "index.html")
+        val localFile = File(filesDir, "dashboard.html")
         if (localFile.exists()) {
             webView.loadUrl("file://${localFile.absolutePath}")
         } else {
-            webView.loadUrl("file:///android_asset/index.html")
+            webView.loadUrl("file:///android_asset/dashboard.html")
         }
     }
 
