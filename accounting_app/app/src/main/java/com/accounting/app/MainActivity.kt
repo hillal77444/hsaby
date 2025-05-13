@@ -440,6 +440,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun loadDashboard() {
+        webView.loadUrl("http://212.224.88.122:5007/dashboard")
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         dbHelper.close()
