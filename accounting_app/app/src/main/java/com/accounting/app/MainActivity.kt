@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
         sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
         // تهيئة API Service
-        apiService = ApiClient.getApiService(this)
+        apiService = ApiClient.getApiService()
 
         setupWebView()
         setupSwipeRefresh()
@@ -263,6 +263,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 val dbHelper = DatabaseHelper(this@MainActivity)
                 val syncData = dbHelper.syncData()
+                val token = getAuthToken() ?: return@launch
                 val response = apiService.syncData("Bearer $token", syncData)
                 if (response.isSuccessful) {
                     response.body()?.let { apiResponse ->
