@@ -16,8 +16,10 @@ import com.accounting.app.models.SyncResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.lifecycle.lifecycleScope
+import android.content.SharedPreferences
 
-class WebAppInterface(private val context: MainActivity, private val dbHelper: DatabaseHelper) {
+class WebAppInterface(private val context: MainActivity, private val dbHelper: DatabaseHelper, private val sharedPreferences: SharedPreferences) {
     private val TAG = "WebAppInterface"
     private val gson = Gson()
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
@@ -43,8 +45,31 @@ class WebAppInterface(private val context: MainActivity, private val dbHelper: D
     }
 
     @JavascriptInterface
-    fun login(username: String, password: String): Boolean {
-        return dbHelper.verifyLogin(username, password)
+    fun login(username: String, password: String) {
+        lifecycleScope.launch {
+            try {
+                val response = ApiClient.getApiService().login(username, password)
+                if (response.isSuccessful) {
+                    val loginResponse = response.body()
+                    if (loginResponse != null && loginResponse.success) {
+                        // حفظ حالة تسجيل الدخول
+                        sharedPreferences.edit().apply {
+                            putBoolean(KEY_IS_LOGGED_IN, true)
+                            putString(KEY_USERNAME, username)
+                            apply()
+                        }
+                        Toast.makeText(context, "تم تسجيل الدخول بنجاح", Toast.LENGTH_SHORT).show()
+                        context.webView.loadUrl("http://212.224.88.122:5007/dashboard")
+                    } else {
+                        Toast.makeText(context, "فشل تسجيل الدخول: ${loginResponse?.message}", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(context, "فشل تسجيل الدخول: ${response.message()}", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(context, "خطأ في الاتصال: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     @JavascriptInterface
@@ -217,5 +242,20 @@ class WebAppInterface(private val context: MainActivity, private val dbHelper: D
             Log.e(TAG, "Error preparing sync data: ${e.message}")
             false
         }
+    }
+
+    @JavascriptInterface
+    fun loadAccountsPage() {
+        context.loadAccountsPage()
+    }
+
+    @JavascriptInterface
+    fun loadEntriesPage() {
+        context.loadEntriesPage()
+    }
+
+    @JavascriptInterface
+    fun loadReportsPage() {
+        context.loadReportsPage()
     }
 } 
