@@ -7,7 +7,11 @@ import androidx.room.RoomDatabase
 import com.accounting.app.models.Account
 import com.accounting.app.models.Transaction
 
-@Database(entities = [Account::class, Transaction::class], version = 1)
+@Database(
+    entities = [Account::class, Transaction::class],
+    version = 1,
+    exportSchema = true
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun accountDao(): AccountDao
     abstract fun transactionDao(): TransactionDao
@@ -22,7 +26,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "accounting_database"
-                ).build()
+                )
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }
