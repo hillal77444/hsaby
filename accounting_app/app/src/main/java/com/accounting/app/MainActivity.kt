@@ -119,7 +119,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadRemoteContent() {
-        webView.loadUrl("https://accounting.example.com")
+        webView.loadUrl("http://212.224.88.122:5007/")
     }
 
     private fun loadLocalContent() {
