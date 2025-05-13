@@ -11,11 +11,16 @@ import java.io.FileInputStream
 import java.nio.charset.StandardCharsets
 import com.google.gson.Gson
 import org.json.JSONArray
+import com.accounting.app.api.ApiClient
+import com.accounting.app.models.SyncResponse
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class WebAppInterface(private val context: MainActivity, private val dbHelper: DatabaseHelper) {
     private val TAG = "WebAppInterface"
     private val gson = Gson()
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     @JavascriptInterface
     fun showToast(message: String) {
@@ -188,16 +193,17 @@ class WebAppInterface(private val context: MainActivity, private val dbHelper: D
     @JavascriptInterface
     fun syncData(): Boolean {
         return try {
-            val dbHelper = DatabaseHelper(context)
             val syncData = dbHelper.syncData()
-            lifecycleScope.launch {
+            val token = context.getAuthToken() ?: return false
+            
+            coroutineScope.launch {
                 try {
-                    val response = apiClient.getApiService().syncData("Bearer $token", syncData)
+                    val response = ApiClient.getApiService().syncData("Bearer $token", syncData)
                     if (response.isSuccessful) {
                         response.body()?.let { apiResponse ->
                             if (apiResponse.success) {
                                 apiResponse.data?.let { syncResponse ->
-                                    updateLocalData(syncResponse)
+                                    context.updateLocalData(syncResponse)
                                 }
                             }
                         }
