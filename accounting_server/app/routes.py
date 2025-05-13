@@ -62,13 +62,15 @@ def register():
         logger.error(f"Registration error: {str(e)}")
         db.session.rollback()
         return jsonify({'error': 'حدث خطأ أثناء إنشاء الحساب'}), 500
-
 @main.route('/api/login', methods=['POST'])
 def login():
     try:
-        data = request.get_json()
-        if not data:
+        # جرب الحصول على البيانات كـ JSON فقط إذا كان الهيدر application/json
+        if request.content_type == 'application/json':
+            data = request.get_json()
+        else:
             data = request.form.to_dict()
+        # التحقق من البيانات المطلوبة
         if 'phone' not in data or 'password' not in data:
             if request.content_type == 'application/json':
                 return jsonify({'error': 'يرجى إدخال رقم الهاتف وكلمة المرور'}), 400
@@ -502,14 +504,15 @@ def dashboard():
     user_id = None
     if token:
         try:
+            print("Token from cookie:", token)  # طباعة التوكن
             user_id = decode_token(token)['sub']
-        except Exception:
+        except Exception as e:
+            print("JWT decode error:", e)  # طباعة الخطأ
             user_id = None
     if user_id:
         return render_template('dashboard.html')
     else:
         return redirect('/login')
-
 @main.route('/logout', methods=['GET'])
 def logout():
     resp = make_response(redirect('/login'))
