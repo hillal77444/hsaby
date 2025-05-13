@@ -66,15 +66,16 @@ def register():
 @main.route('/api/login', methods=['POST'])
 def login():
     try:
+        # جرب الحصول على البيانات كـ JSON أولاً
         data = request.get_json()
-        
+        # إذا لم توجد بيانات، جرب الحصول عليها من الـ form
+        if not data:
+            data = request.form.to_dict()
         # التحقق من البيانات المطلوبة
         if 'phone' not in data or 'password' not in data:
             return jsonify({'error': 'يرجى إدخال رقم الهاتف وكلمة المرور'}), 400
-        
         # البحث عن المستخدم برقم الهاتف
         user = User.query.filter_by(phone=data['phone']).first()
-        
         if user and verify_password(user.password_hash, data['password']):
             access_token = create_access_token(identity=user.id)
             return jsonify({
@@ -83,9 +84,7 @@ def login():
                 'user_id': user.id,
                 'username': user.username
             })
-        
         return jsonify({'error': 'رقم الهاتف أو كلمة المرور غير صحيحة'}), 401
-        
     except Exception as e:
         logger.error(f"Login error: {str(e)}")
         return jsonify({'error': 'حدث خطأ أثناء تسجيل الدخول'}), 500
