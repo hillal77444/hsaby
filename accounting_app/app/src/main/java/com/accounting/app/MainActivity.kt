@@ -15,6 +15,8 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import java.io.File
+import kotlinx.coroutines.launch
+import android.widget.Toast
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
@@ -24,6 +26,8 @@ class MainActivity : AppCompatActivity() {
     private var lastSyncTime: Long = 0
     private val SYNC_INTERVAL = 5 * 60 * 1000 // 5 minutes
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var apiService: ApiService
+    private var authToken: String? = null
 
     companion object {
         private const val PREFS_NAME = "AccountingAppPrefs"
@@ -45,6 +49,9 @@ class MainActivity : AppCompatActivity() {
 
         // تهيئة SharedPreferences
         sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+        // تهيئة API Service
+        apiService = ApiClient.getApiService(this)
 
         setupWebView()
         setupSwipeRefresh()
@@ -185,6 +192,105 @@ class MainActivity : AppCompatActivity() {
 
     fun getStoredPhone(): String {
         return sharedPreferences.getString(KEY_PHONE, "") ?: ""
+    }
+
+    private fun login(username: String, password: String) {
+        lifecycleScope.launch {
+            try {
+                val response = apiService.login(LoginRequest(username, password))
+                if (response.isSuccessful && response.body()?.success == true) {
+                    authToken = response.body()?.data?.token
+                    // حفظ التوكن في SharedPreferences
+                    saveAuthToken(authToken!!)
+                    // تحديث واجهة المستخدم
+                    updateUIAfterLogin()
+                } else {
+                    showError("فشل تسجيل الدخول")
+                }
+            } catch (e: Exception) {
+                showError("خطأ في الاتصال بالسيرفر")
+            }
+        }
+    }
+
+    private fun register(username: String, phone: String, password: String) {
+        lifecycleScope.launch {
+            try {
+                val response = apiService.register(User(username = username, phone = phone, passwordHash = password))
+                if (response.isSuccessful && response.body()?.success == true) {
+                    showSuccess("تم التسجيل بنجاح")
+                } else {
+                    showError("فشل التسجيل")
+                }
+            } catch (e: Exception) {
+                showError("خطأ في الاتصال بالسيرفر")
+            }
+        }
+    }
+
+    private fun syncData() {
+        lifecycleScope.launch {
+            try {
+                val token = getAuthToken() ?: return@launch
+                val syncData = SyncData(
+                    accounts = dbHelper.getAllAccounts(),
+                    transactions = dbHelper.getAllTransactions(),
+                    lastSyncTimestamp = dbHelper.getLastSyncTimestamp()
+                )
+                val response = apiService.syncData("Bearer $token", syncData)
+                if (response.isSuccessful && response.body()?.success == true) {
+                    // تحديث البيانات المحلية
+                    response.body()?.data?.let { syncResponse ->
+                        updateLocalData(syncResponse)
+                    }
+                    showSuccess("تمت المزامنة بنجاح")
+                } else {
+                    showError("فشلت المزامنة")
+                }
+            } catch (e: Exception) {
+                showError("خطأ في الاتصال بالسيرفر")
+            }
+        }
+    }
+
+    private fun updateLocalData(syncResponse: SyncResponse) {
+        // تحديث الحسابات
+        syncResponse.accounts.forEach { account ->
+            dbHelper.updateAccount(account)
+        }
+        // تحديث المعاملات
+        syncResponse.transactions.forEach { transaction ->
+            dbHelper.updateTransaction(transaction)
+        }
+        // تحديث timestamp المزامنة
+        dbHelper.updateLastSyncTimestamp(syncResponse.syncTimestamp)
+    }
+
+    private fun saveAuthToken(token: String) {
+        getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+            .edit()
+            .putString("auth_token", token)
+            .apply()
+    }
+
+    private fun getAuthToken(): String? {
+        return getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+            .getString("auth_token", null)
+    }
+
+    private fun clearAuthToken() {
+        getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+            .edit()
+            .remove("auth_token")
+            .apply()
+    }
+
+    private fun showError(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showSuccess(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroy() {
