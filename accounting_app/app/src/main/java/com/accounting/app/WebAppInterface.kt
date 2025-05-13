@@ -18,11 +18,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import android.content.SharedPreferences
 import com.accounting.app.models.LoginRequest
+import retrofit2.Response
+import retrofit2.ResponseBody
+import kotlinx.coroutines.lifecycleScope
 
 class WebAppInterface(private val context: MainActivity, private val dbHelper: DatabaseHelper, private val sharedPreferences: SharedPreferences) {
     private val TAG = "WebAppInterface"
     private val gson = Gson()
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    private val lifecycleScope = androidx.lifecycle.lifecycleScope
+    private val db = AppDatabase.getDatabase(context)
+    private val apiService = ApiClient.getApiService()
 
     companion object {
         private const val KEY_IS_LOGGED_IN = "isLoggedIn"
@@ -268,5 +274,43 @@ class WebAppInterface(private val context: MainActivity, private val dbHelper: D
     fun getFilteredEntries(accountId: Long?, dateFrom: Long?, dateTo: Long?, currency: String?): String {
         val entries = dbHelper.getFilteredEntries(accountId, dateFrom, dateTo, currency)
         return Gson().toJson(entries)
+    }
+
+    @JavascriptInterface
+    fun getAccounts(): Response<List<Account>> {
+        return try {
+            val response = apiService.getAccounts()
+            if (response.isSuccessful) {
+                // حفظ الحسابات في قاعدة البيانات المحلية
+                response.body()?.let { accounts ->
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        db.accountDao().insertAll(accounts)
+                    }
+                }
+            }
+            response
+        } catch (e: Exception) {
+            Log.e("WebAppInterface", "Error getting accounts: ${e.message}")
+            Response.error(500, ResponseBody.create(null, e.message ?: "Unknown error"))
+        }
+    }
+
+    @JavascriptInterface
+    fun getEntries(): Response<List<Entry>> {
+        return try {
+            val response = apiService.getEntries()
+            if (response.isSuccessful) {
+                // حفظ القيود في قاعدة البيانات المحلية
+                response.body()?.let { entries ->
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        db.entryDao().insertAll(entries)
+                    }
+                }
+            }
+            response
+        } catch (e: Exception) {
+            Log.e("WebAppInterface", "Error getting entries: ${e.message}")
+            Response.error(500, ResponseBody.create(null, e.message ?: "Unknown error"))
+        }
     }
 } 
