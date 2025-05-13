@@ -485,7 +485,7 @@ class MainActivity : AppCompatActivity() {
                 // 1. مزامنة الحسابات
                 val accountsResponse = webAppInterface.getAccounts()
                 if (accountsResponse.isSuccessful) {
-                    val accounts = accountsResponse.body()
+                    val accounts = accountsResponse.body()?.data
                     accounts?.let { accountList ->
                         // حفظ الحسابات في قاعدة البيانات المحلية
                         db.accountDao().insertAll(accountList)
@@ -495,10 +495,10 @@ class MainActivity : AppCompatActivity() {
                 // 2. مزامنة القيود المحاسبية
                 val entriesResponse = webAppInterface.getEntries()
                 if (entriesResponse.isSuccessful) {
-                    val entries = entriesResponse.body()
+                    val entries = entriesResponse.body()?.data
                     entries?.let { entryList ->
                         // حفظ القيود في قاعدة البيانات المحلية
-                        db.entryDao().insertAll(entryList)
+                        db.transactionDao().insertAll(entryList)
                     }
                 }
 
