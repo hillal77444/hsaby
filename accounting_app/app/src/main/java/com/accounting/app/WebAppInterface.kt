@@ -24,6 +24,11 @@ class WebAppInterface(private val context: MainActivity, private val dbHelper: D
     private val gson = Gson()
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
+    companion object {
+        private const val KEY_IS_LOGGED_IN = "isLoggedIn"
+        private const val KEY_USERNAME = "username"
+    }
+
     @JavascriptInterface
     fun showToast(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -46,9 +51,9 @@ class WebAppInterface(private val context: MainActivity, private val dbHelper: D
 
     @JavascriptInterface
     fun login(username: String, password: String) {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
-                val response = ApiClient.getApiService().login(username, password)
+                val response = ApiClient.getApiService().login(LoginRequest(username, password))
                 if (response.isSuccessful) {
                     val loginResponse = response.body()
                     if (loginResponse != null && loginResponse.success) {
@@ -59,7 +64,7 @@ class WebAppInterface(private val context: MainActivity, private val dbHelper: D
                             apply()
                         }
                         Toast.makeText(context, "تم تسجيل الدخول بنجاح", Toast.LENGTH_SHORT).show()
-                        context.webView.loadUrl("http://212.224.88.122:5007/dashboard")
+                        context.loadDashboard()
                     } else {
                         Toast.makeText(context, "فشل تسجيل الدخول: ${loginResponse?.message}", Toast.LENGTH_SHORT).show()
                     }
