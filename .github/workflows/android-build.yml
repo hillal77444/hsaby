@@ -30,24 +30,12 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Create keystore from secret
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
         working-directory: accounting_app
-
-      - name: Generate gradle wrapper if missing
-        run: |
-          if [ ! -f "gradlew" ]; then
-            echo "gradlew not found, generating wrapper..."
-            gradle wrapper
-          else
-            echo "gradlew already exists."
-          fi
-        working-directory: accounting_app
-        env:
-          RELEASE_STORE_FILE: keystore.jks
-          RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -71,13 +59,14 @@ jobs:
         working-directory: accounting_app
 
       - name: Build Release APK
-        run: ./gradlew assembleRelease --stacktrace
+        run: ./gradlew assembleRelease --parallel --max-workers=8 --build-cache --no-daemon
         working-directory: accounting_app
         env:
           RELEASE_STORE_FILE: keystore.jks
           RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.caching=true -Dorg.gradle.configureondemand=true"
 
       - name: Check APK exists
         run: |
