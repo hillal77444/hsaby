@@ -47,7 +47,7 @@
         <div>
             <label>العملة:</label>
             <div class="currency-btns">
-                {% for curr in ['يمني', 'سعودي', 'دولار'] %}
+                {% for curr in ['ريال يمني', 'ريال سعودي', 'دولار أمريكي'] %}
                     <button type="submit" name="currency" value="{{ curr }}" class="currency-btn {% if request.args.get('currency', 'يمني') == curr %}active{% endif %}">{{ curr }}</button>
                 {% endfor %}
             </div>
