@@ -12,6 +12,7 @@ import org.json.JSONArray
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
+        private const val TAG = "DatabaseHelper"
         private const val DATABASE_NAME = "accounting.db"
         private const val DATABASE_VERSION = 1
 
@@ -562,42 +563,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         }
     }
 
-    private fun getLastSyncTimestamp(): Long {
-        val db = this.readableDatabase
-        val cursor = db.query(
-            TABLE_SETTINGS,
-            arrayOf(COLUMN_VALUE),
-            "$COLUMN_KEY = ?",
-            arrayOf("last_sync_timestamp"),
-            null,
-            null,
-            null
-        )
-        return if (cursor.moveToFirst()) {
-            val timestamp = cursor.getLong(0)
-            cursor.close()
-            timestamp
-        } else {
-            cursor.close()
-            0L
-        }
-    }
-
-    private fun updateLastSyncTimestamp(timestamp: Long) {
-        val db = this.writableDatabase
-        val values = ContentValues().apply {
-            put(COLUMN_KEY, "last_sync_timestamp")
-            put(COLUMN_VALUE, timestamp.toString())
-        }
-        db.insertWithOnConflict(
-            TABLE_SETTINGS,
-            null,
-            values,
-            SQLiteDatabase.CONFLICT_REPLACE
-        )
-    }
-
-    private fun getAllTransactions(): List<Transaction> {
+    fun getAllTransactions(): List<Transaction> {
         val transactions = mutableListOf<Transaction>()
         val db = this.readableDatabase
         val cursor = db.query(
@@ -625,6 +591,41 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         }
         cursor.close()
         return transactions
+    }
+
+    fun getLastSyncTimestamp(): Long {
+        val db = this.readableDatabase
+        val cursor = db.query(
+            TABLE_SETTINGS,
+            arrayOf(COLUMN_VALUE),
+            "$COLUMN_KEY = ?",
+            arrayOf("last_sync_timestamp"),
+            null,
+            null,
+            null
+        )
+        return if (cursor.moveToFirst()) {
+            val timestamp = cursor.getLong(0)
+            cursor.close()
+            timestamp
+        } else {
+            cursor.close()
+            0L
+        }
+    }
+
+    fun updateLastSyncTimestamp(timestamp: Long) {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_KEY, "last_sync_timestamp")
+            put(COLUMN_VALUE, timestamp.toString())
+        }
+        db.insertWithOnConflict(
+            TABLE_SETTINGS,
+            null,
+            values,
+            SQLiteDatabase.CONFLICT_REPLACE
+        )
     }
 
     // وظائف إدارة واجهة المستخدم
