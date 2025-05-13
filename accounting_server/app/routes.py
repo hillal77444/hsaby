@@ -666,3 +666,7 @@ def api_add_entry():
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': f'خطأ: {str(e)}'}) 
+    
+@main.route('/account-statement')
+def account_statement_page():
+    return render_template('account_statement.html')
