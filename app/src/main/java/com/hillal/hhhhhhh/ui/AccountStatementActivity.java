@@ -316,7 +316,7 @@ public class AccountStatementActivity extends AppCompatActivity {
     private void loadAccounts() {
         viewModel.getAllAccounts().observe(this, accounts -> {
             if (accounts != null && !accounts.isEmpty()) {
-                allAccounts = accounts;
+            allAccounts = accounts;
                 StringBuilder options = new StringBuilder();
                 for (Account account : accounts) {
                     options.append("<option value='").append(account.getId()).append("'>")
@@ -374,11 +374,11 @@ public class AccountStatementActivity extends AppCompatActivity {
             }
 
             long accountId = Long.parseLong(selectedAccountId);
-            viewModel.getTransactionsForAccountInDateRange(
+                    viewModel.getTransactionsForAccountInDateRange(
                 accountId,
                 start,
                 endOfDay
-            ).observe(this, transactions -> {
+                    ).observe(this, transactions -> {
                 String html = generateReportHtml(transactions);
                 String js = String.format("updateReport('%s');", html.replace("'", "\\'"));
                 webView.evaluateJavascript(js, null);
@@ -434,17 +434,17 @@ public class AccountStatementActivity extends AppCompatActivity {
             double totalCredit = 0;
 
             for (Transaction t : currencyTransactions) {
-                html.append("<tr>");
+                    html.append("<tr>");
                 html.append("<td>").append(dateFormat.format(new Date(t.getDate()))).append("</td>");
                 html.append("<td>").append(t.getDescription()).append("</td>");
                 
                 if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
                     html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", t.getAmount())).append("</td>");
-                    html.append("<td></td>");
+                        html.append("<td></td>");
                     totalDebit += t.getAmount();
                     runningBalance -= t.getAmount();
-                } else {
-                    html.append("<td></td>");
+                    } else {
+                        html.append("<td></td>");
                     html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", t.getAmount())).append("</td>");
                     totalCredit += t.getAmount();
                     runningBalance += t.getAmount();
