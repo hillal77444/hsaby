@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request, render_template, redirect
 from app import db
 from app.models import User, Account, Transaction
 from app.utils import hash_password, verify_password, generate_sync_token
-from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, verify_jwt_in_request_optional
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, verify_jwt_in_request
 from datetime import datetime
 import logging
 import json
@@ -466,14 +466,15 @@ def get_transactions_script():
 
 @main.route('/', methods=['GET'])
 def root_redirect():
+    user_id = None
     try:
-        verify_jwt_in_request_optional()
+        verify_jwt_in_request()
         user_id = get_jwt_identity()
-        if user_id:
-            return redirect('/dashboard')
-        else:
-            return redirect('/login')
     except Exception:
+        user_id = None
+    if user_id:
+        return redirect('/dashboard')
+    else:
         return redirect('/login')
 
 @main.route('/login', methods=['GET'])
