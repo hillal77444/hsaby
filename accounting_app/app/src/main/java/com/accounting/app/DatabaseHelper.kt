@@ -538,46 +538,73 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return success
     }
 
-    fun syncData(): Boolean {
+    fun syncData(): SyncData {
+        val localAccounts = mutableListOf<Account>()
+        val localTransactions = mutableListOf<Transaction>()
+        
         try {
-            val db = this.writableDatabase
-            val lastSyncTimestamp = getLastSyncTimestamp()
-            
-            // جلب البيانات المحلية
-            val accountsArray = getAllAccounts()
-            val localAccounts = mutableListOf<com.accounting.app.models.Account>()
-            for (i in 0 until accountsArray.length()) {
-                val jsonAccount = accountsArray.getJSONObject(i)
-                localAccounts.add(jsonToAccount(jsonAccount))
+            val db = this.readableDatabase
+            val cursor = db.query(
+                TABLE_ACCOUNTS,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            )
+
+            cursor.use {
+                while (it.moveToNext()) {
+                    val accountJson = JSONObject()
+                    accountJson.put("id", it.getLong(it.getColumnIndexOrThrow("id")))
+                    accountJson.put("account_number", it.getString(it.getColumnIndexOrThrow("account_number")))
+                    accountJson.put("account_name", it.getString(it.getColumnIndexOrThrow("account_name")))
+                    accountJson.put("balance", it.getDouble(it.getColumnIndexOrThrow("balance")))
+                    accountJson.put("phone_number", it.getString(it.getColumnIndexOrThrow("phone_number")))
+                    accountJson.put("is_debtor", it.getInt(it.getColumnIndexOrThrow("is_debtor")))
+                    accountJson.put("notes", it.getString(it.getColumnIndexOrThrow("notes")))
+                    accountJson.put("created_at", it.getString(it.getColumnIndexOrThrow("created_at")))
+                    accountJson.put("updated_at", it.getString(it.getColumnIndexOrThrow("updated_at")))
+                    
+                    localAccounts.add(jsonToAccount(accountJson))
+                }
             }
-            
-            val localTransactions = getAllTransactions().map { transaction ->
-                com.accounting.app.models.Transaction(
-                    id = transaction.id,
-                    date = transaction.date,
-                    amount = transaction.amount,
-                    description = transaction.description,
-                    type = transaction.type,
-                    currency = transaction.currency,
-                    notes = transaction.notes,
-                    accountId = transaction.accountId
-                )
+
+            val transactionCursor = db.query(
+                TABLE_TRANSACTIONS,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            )
+
+            transactionCursor.use {
+                while (it.moveToNext()) {
+                    val transaction = Transaction(
+                        id = it.getLong(it.getColumnIndexOrThrow("id")),
+                        date = it.getString(it.getColumnIndexOrThrow("date")),
+                        amount = it.getDouble(it.getColumnIndexOrThrow("amount")),
+                        description = it.getString(it.getColumnIndexOrThrow("description")),
+                        type = it.getString(it.getColumnIndexOrThrow("type")),
+                        currency = it.getString(it.getColumnIndexOrThrow("currency")),
+                        notes = it.getString(it.getColumnIndexOrThrow("notes")),
+                        accountId = it.getLong(it.getColumnIndexOrThrow("account_id"))
+                    )
+                    localTransactions.add(transaction)
+                }
             }
-            
-            // إرسال البيانات إلى السيرفر
-            val syncData = SyncData(
+
+            return SyncData(
                 accounts = localAccounts,
                 transactions = localTransactions,
-                lastSyncTimestamp = lastSyncTimestamp
+                lastSyncTimestamp = getLastSyncTimestamp()
             )
-            
-            // تحديث timestamp المزامنة
-            updateLastSyncTimestamp(System.currentTimeMillis())
-            
-            return true
         } catch (e: Exception) {
             Log.e(TAG, "Error syncing data: ${e.message}")
-            return false
+            throw e
         }
     }
 
