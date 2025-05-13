@@ -169,7 +169,7 @@ class WebAppInterface(
                 put("type", transaction.type)
                 put("currency", transaction.currency)
                 put("notes", transaction.notes)
-                put("account_id", transaction.accountId)
+                put("account_id", transaction.account_id)
             }
             jsonArray.put(json)
         }
