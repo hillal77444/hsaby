@@ -240,13 +240,19 @@ class MainActivity : AppCompatActivity() {
     private fun register(username: String, phone: String, password: String) {
         lifecycleScope.launch {
             try {
-                val response = apiService.register(User(username = username, phone = phone, passwordHash = password))
+                val user = com.accounting.app.models.User(
+                    username = username,
+                    phone = phone,
+                    passwordHash = password
+                )
+                val response = apiService.register(user)
                 if (response.isSuccessful && response.body()?.success == true) {
                     showSuccess("تم التسجيل بنجاح")
                 } else {
                     showError("فشل التسجيل")
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "Error registering: ${e.message}")
                 showError("خطأ في الاتصال بالسيرفر")
             }
         }
