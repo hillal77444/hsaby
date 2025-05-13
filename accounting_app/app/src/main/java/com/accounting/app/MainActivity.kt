@@ -91,6 +91,24 @@ class MainActivity : AppCompatActivity() {
                     isFirstLoad = false
                     injectJavaScript()
                 }
+                // تخزين نسخة محلية من الصفحة إذا كانت أونلاين
+                if (isOnline() && url != null) {
+                    view?.evaluateJavascript(
+                        "(function() { return document.documentElement.outerHTML; })();"
+                    ) { html ->
+                        val fileName = when {
+                            url.contains("accounts/html-content") -> "accounts.html"
+                            url.contains("transactions/html-content") -> "entries.html"
+                            url.contains("reports/html-content") -> "reports.html"
+                            url.contains("dashboard") -> "dashboard.html"
+                            else -> null
+                        }
+                        if (fileName != null) {
+                            val file = File(filesDir, fileName)
+                            file.writeText(html)
+                        }
+                    }
+                }
             }
         }
 
@@ -132,7 +150,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadContent() {
-        if (isLoggedIn()) {
+        if (sharedPreferences.getBoolean(KEY_IS_LOGGED_IN, false)) {
             // المستخدم مسجل دخوله
             if (isOnline()) {
                 loadRemoteContent()
@@ -378,6 +396,48 @@ class MainActivity : AppCompatActivity() {
     private fun updateUIAfterLogin() {
         // تحديث واجهة المستخدم بعد تسجيل الدخول
         webView.loadUrl("http://212.224.88.122:5007/dashboard")
+    }
+
+    // تحميل صفحة الحسابات ديناميكيًا
+    fun loadAccountsPage() {
+        if (isOnline()) {
+            webView.loadUrl("http://212.224.88.122:5007/api/accounts/html-content")
+        } else {
+            val localFile = File(filesDir, "accounts.html")
+            if (localFile.exists()) {
+                webView.loadUrl("file://${localFile.absolutePath}")
+            } else {
+                webView.loadUrl("file:///android_asset/accounts.html")
+            }
+        }
+    }
+
+    // تحميل صفحة القيود ديناميكيًا
+    fun loadEntriesPage() {
+        if (isOnline()) {
+            webView.loadUrl("http://212.224.88.122:5007/api/transactions/html-content")
+        } else {
+            val localFile = File(filesDir, "entries.html")
+            if (localFile.exists()) {
+                webView.loadUrl("file://${localFile.absolutePath}")
+            } else {
+                webView.loadUrl("file:///android_asset/entries.html")
+            }
+        }
+    }
+
+    // تحميل صفحة التقارير ديناميكيًا
+    fun loadReportsPage() {
+        if (isOnline()) {
+            webView.loadUrl("http://212.224.88.122:5007/api/reports/html-content")
+        } else {
+            val localFile = File(filesDir, "reports.html")
+            if (localFile.exists()) {
+                webView.loadUrl("file://${localFile.absolutePath}")
+            } else {
+                webView.loadUrl("file:///android_asset/reports.html")
+            }
+        }
     }
 
     override fun onDestroy() {
