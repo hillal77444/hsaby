@@ -261,49 +261,21 @@ class MainActivity : AppCompatActivity() {
     private fun syncData() {
         lifecycleScope.launch {
             try {
-                val token = getAuthToken() ?: return@launch
-                val db = DatabaseHelper(this@MainActivity)
-                
-                // تحويل JSONArray إلى List<Account>
-                val accountsArray = db.getAllAccounts()
-                val accounts = mutableListOf<com.accounting.app.models.Account>()
-                for (i in 0 until accountsArray.length()) {
-                    val jsonAccount = accountsArray.getJSONObject(i)
-                    accounts.add(jsonToAccount(jsonAccount))
-                }
-                
-                val transactions = db.getAllTransactions().map { transaction ->
-                    com.accounting.app.models.Transaction(
-                        id = transaction.id,
-                        date = transaction.date,
-                        amount = transaction.amount,
-                        description = transaction.description,
-                        type = transaction.type,
-                        currency = transaction.currency,
-                        notes = transaction.notes,
-                        accountId = transaction.accountId
-                    )
-                }
-                
-                val syncData = SyncData(
-                    accounts = accounts,
-                    transactions = transactions,
-                    lastSyncTimestamp = db.getLastSyncTimestamp()
-                )
-                
+                val dbHelper = DatabaseHelper(this@MainActivity)
+                val syncData = dbHelper.syncData()
                 val response = apiService.syncData("Bearer $token", syncData)
-                if (response.isSuccessful && response.body()?.success == true) {
-                    // تحديث البيانات المحلية
-                    response.body()?.data?.let { syncResponse ->
-                        updateLocalData(syncResponse)
+                if (response.isSuccessful) {
+                    response.body()?.let { apiResponse ->
+                        if (apiResponse.success) {
+                            apiResponse.data?.let { syncResponse ->
+                                updateLocalData(syncResponse)
+                                updateUIAfterLogin()
+                            }
+                        }
                     }
-                    showSuccess("تمت المزامنة بنجاح")
-                } else {
-                    showError("فشلت المزامنة")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error syncing data: ${e.message}")
-                showError("خطأ في الاتصال بالسيرفر")
             }
         }
     }
