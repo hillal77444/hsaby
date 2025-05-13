@@ -287,7 +287,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             put(COLUMN_TYPE, transaction.type)
             put(COLUMN_CURRENCY, transaction.currency)
             put(COLUMN_NOTES, transaction.notes)
-            put(COLUMN_ACCOUNT_ID_FK, transaction.accountId)
+            put(COLUMN_ACCOUNT_ID_FK, transaction.account_id)
         }
         return db.insert(TABLE_TRANSACTIONS, null, values) != -1L
     }
@@ -331,7 +331,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
                 currency = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CURRENCY)),
                 notes = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOTES)),
-                accountId = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_ID_FK))
+                account_id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_ID_FK))
             ))
         }
         cursor.close()
@@ -591,7 +591,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                         type = it.getString(it.getColumnIndexOrThrow("type")),
                         currency = it.getString(it.getColumnIndexOrThrow("currency")),
                         notes = it.getString(it.getColumnIndexOrThrow("notes")),
-                        accountId = it.getLong(it.getColumnIndexOrThrow("account_id"))
+                        account_id = it.getLong(it.getColumnIndexOrThrow("account_id"))
                     )
                     localTransactions.add(transaction)
                 }
@@ -644,7 +644,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                     type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
                     currency = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CURRENCY)),
                     notes = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOTES)),
-                    accountId = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_ID_FK))
+                    account_id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_ID_FK))
                 )
             )
         }
@@ -763,7 +763,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
                 currency = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CURRENCY)),
                 notes = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOTES)),
-                accountId = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_ID_FK))
+                account_id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_ID_FK))
             ))
         }
         cursor.close()
