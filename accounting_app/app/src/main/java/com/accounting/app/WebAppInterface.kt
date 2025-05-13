@@ -12,21 +12,25 @@ import java.nio.charset.StandardCharsets
 import com.google.gson.Gson
 import org.json.JSONArray
 import com.accounting.app.api.ApiClient
-import com.accounting.app.models.SyncResponse
+import com.accounting.app.models.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import android.content.SharedPreferences
 import com.accounting.app.models.LoginRequest
 import retrofit2.Response
-import retrofit2.ResponseBody
-import kotlinx.coroutines.lifecycleScope
+import okhttp3.ResponseBody
+import androidx.lifecycle.lifecycleScope
+import com.accounting.app.database.AppDatabase
 
-class WebAppInterface(private val context: MainActivity, private val dbHelper: DatabaseHelper, private val sharedPreferences: SharedPreferences) {
+class WebAppInterface(
+    private val context: MainActivity,
+    private val dbHelper: DatabaseHelper,
+    private val sharedPreferences: SharedPreferences
+) {
     private val TAG = "WebAppInterface"
     private val gson = Gson()
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
-    private val lifecycleScope = androidx.lifecycle.lifecycleScope
     private val db = AppDatabase.getDatabase(context)
     private val apiService = ApiClient.getApiService()
 
@@ -277,12 +281,13 @@ class WebAppInterface(private val context: MainActivity, private val dbHelper: D
     }
 
     @JavascriptInterface
-    fun getAccounts(): Response<List<Account>> {
+    suspend fun getAccounts(): Response<ApiResponse<List<Account>>> {
         return try {
-            val response = apiService.getAccounts()
+            val token = context.getAuthToken() ?: throw Exception("No auth token")
+            val response = apiService.getAccounts("Bearer $token")
             if (response.isSuccessful) {
                 // حفظ الحسابات في قاعدة البيانات المحلية
-                response.body()?.let { accounts ->
+                response.body()?.data?.let { accounts ->
                     lifecycleScope.launch(Dispatchers.IO) {
                         db.accountDao().insertAll(accounts)
                     }
@@ -296,14 +301,15 @@ class WebAppInterface(private val context: MainActivity, private val dbHelper: D
     }
 
     @JavascriptInterface
-    fun getEntries(): Response<List<Entry>> {
+    suspend fun getEntries(): Response<ApiResponse<List<Transaction>>> {
         return try {
-            val response = apiService.getEntries()
+            val token = context.getAuthToken() ?: throw Exception("No auth token")
+            val response = apiService.getEntries("Bearer $token")
             if (response.isSuccessful) {
                 // حفظ القيود في قاعدة البيانات المحلية
-                response.body()?.let { entries ->
+                response.body()?.data?.let { entries ->
                     lifecycleScope.launch(Dispatchers.IO) {
-                        db.entryDao().insertAll(entries)
+                        db.transactionDao().insertAll(entries)
                     }
                 }
             }
