@@ -9,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object ApiClient {
-    private const val BASE_URL = "http://localhost:5007/" // تغيير هذا العنوان حسب عنوان السيرفر الخاص بك
+    private const val BASE_URL = "http://212.224.88.122:5007/" // تغيير هذا العنوان حسب عنوان السيرفر الخاص بك
     private var apiService: ApiService? = null
 
     fun getApiService(context: Context): ApiService {
