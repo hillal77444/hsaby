@@ -10,10 +10,9 @@ import java.io.FileOutputStream
 import java.io.FileInputStream
 import java.nio.charset.StandardCharsets
 import com.google.gson.Gson
-import java.security.MessageDigest
 import org.json.JSONArray
 
-class WebAppInterface(private val context: Context, private val dbHelper: DatabaseHelper) {
+class WebAppInterface(private val context: MainActivity, private val dbHelper: DatabaseHelper) {
     private val TAG = "WebAppInterface"
     private val gson = Gson()
 
@@ -51,7 +50,7 @@ class WebAppInterface(private val context: Context, private val dbHelper: Databa
     @JavascriptInterface
     fun logout(): String {
         return try {
-            (context as MainActivity).clearLoginState()
+            context.clearLoginState()
             gson.toJson(mapOf(
                 "success" to true,
                 "message" to "تم تسجيل الخروج بنجاح"
@@ -188,11 +187,5 @@ class WebAppInterface(private val context: Context, private val dbHelper: Databa
     @JavascriptInterface
     fun syncData(): Boolean {
         return dbHelper.syncData()
-    }
-
-    private fun hashPassword(password: String): String {
-        return MessageDigest.getInstance("SHA-256")
-            .digest(password.toByteArray())
-            .fold("") { str, it -> str + "%02x".format(it) }
     }
 } 
