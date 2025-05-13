@@ -544,7 +544,13 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             val lastSyncTimestamp = getLastSyncTimestamp()
             
             // جلب البيانات المحلية
-            val localAccounts = getAllAccounts().map { jsonToAccount(it) }
+            val accountsArray = getAllAccounts()
+            val localAccounts = mutableListOf<Account>()
+            for (i in 0 until accountsArray.length()) {
+                val jsonAccount = accountsArray.getJSONObject(i)
+                localAccounts.add(jsonToAccount(jsonAccount))
+            }
+            
             val localTransactions = getAllTransactions()
             
             // إرسال البيانات إلى السيرفر
