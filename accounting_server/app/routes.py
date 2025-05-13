@@ -626,4 +626,43 @@ def reports_page():
         entries = Transaction.query.filter_by(user_id=user_id).all()
         return render_template('reports.html', accounts=accounts, entries=entries)
     else:
-        return redirect('/login') 
+        return redirect('/login')
+
+@main.route('/add-entry')
+def add_entry_page():
+    token = request.cookies.get('access_token')
+    user_id = None
+    accounts = []
+    if token:
+        try:
+            user_id = decode_token(token)['sub']
+        except Exception:
+            user_id = None
+    if user_id:
+        accounts = Account.query.filter_by(user_id=user_id).all()
+        return render_template('add_entry.html', accounts=accounts)
+    else:
+        return redirect('/login')
+
+@main.route('/api/add-entry', methods=['POST'])
+@jwt_required()
+def api_add_entry():
+    try:
+        user_id = get_jwt_identity()
+        data = request.get_json()
+        transaction = Transaction(
+            date=datetime.fromtimestamp(data['date']/1000),
+            amount=data['amount'],
+            description=data.get('description', ''),
+            type=data['type'],
+            currency=data['currency'],
+            notes=data.get('notes', ''),
+            user_id=user_id,
+            account_id=data['account_id']
+        )
+        db.session.add(transaction)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'تم إضافة القيد بنجاح'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'خطأ: {str(e)}'}) 
