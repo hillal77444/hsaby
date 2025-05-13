@@ -714,4 +714,59 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             0
         }.also { cursor.close() }
     }
+
+    fun getFilteredEntries(
+        accountId: Long? = null,
+        dateFrom: Long? = null,
+        dateTo: Long? = null,
+        currency: String? = null
+    ): List<Transaction> {
+        val db = this.readableDatabase
+        val selection = mutableListOf<String>()
+        val selectionArgs = mutableListOf<String>()
+
+        if (accountId != null) {
+            selection.add("$COLUMN_ACCOUNT_ID_FK = ?")
+            selectionArgs.add(accountId.toString())
+        }
+        if (dateFrom != null) {
+            selection.add("$COLUMN_DATE >= ?")
+            selectionArgs.add(dateFrom.toString())
+        }
+        if (dateTo != null) {
+            selection.add("$COLUMN_DATE <= ?")
+            selectionArgs.add(dateTo.toString())
+        }
+        if (!currency.isNullOrEmpty()) {
+            selection.add("$COLUMN_CURRENCY = ?")
+            selectionArgs.add(currency)
+        }
+
+        val whereClause = if (selection.isNotEmpty()) selection.joinToString(" AND ") else null
+
+        val cursor = db.query(
+            TABLE_TRANSACTIONS,
+            null,
+            whereClause,
+            if (selectionArgs.isNotEmpty()) selectionArgs.toTypedArray() else null,
+            null, null,
+            "$COLUMN_DATE DESC"
+        )
+
+        val entries = mutableListOf<Transaction>()
+        while (cursor.moveToNext()) {
+            entries.add(Transaction(
+                id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_TRANSACTION_ID)),
+                date = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
+                amount = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_AMOUNT)),
+                description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)),
+                type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
+                currency = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CURRENCY)),
+                notes = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOTES)),
+                accountId = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ACCOUNT_ID_FK))
+            ))
+        }
+        cursor.close()
+        return entries
+    }
 } 
