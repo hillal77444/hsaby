@@ -520,19 +520,48 @@ def login_page():
 def dashboard():
     token = request.cookies.get('access_token')
     user_id = None
+    username = None
+    total_credit = 0
+    total_debit = 0
     if token:
         try:
-            print("Token from cookie:", token)  # طباعة التوكن
             user_id = decode_token(token)['sub']
-        except Exception as e:
-            print("JWT decode error:", e)  # طباعة الخطأ
+        except Exception:
             user_id = None
     if user_id:
-        return render_template('dashboard.html')
+        user = User.query.get(user_id)
+        if user:
+            username = user.username
+        # حساب إجمالي الدائنين والمدينين من قاعدة البيانات
+        accounts = Account.query.filter_by(user_id=user_id).all()
+        for acc in accounts:
+            if acc.is_debtor:
+                total_debit += acc.balance or 0
+            else:
+                total_credit += acc.balance or 0
+        return render_template(
+            'dashboard.html',
+            username=username,
+            total_credit=total_credit,
+            total_debit=total_debit
+        )
     else:
         return redirect('/login')
+
 @main.route('/logout', methods=['GET'])
 def logout():
     resp = make_response(redirect('/login'))
     resp.delete_cookie('access_token')
-    return resp 
+    return resp
+
+@main.route('/accounts')
+def accounts_page():
+    return render_template('accounts.html')
+
+@main.route('/entries')
+def entries_page():
+    return render_template('entries.html')
+
+@main.route('/reports')
+def reports_page():
+    return render_template('reports.html') 
