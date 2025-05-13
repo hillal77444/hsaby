@@ -1,8 +1,8 @@
-from flask import Blueprint, jsonify, request, render_template, redirect
+from flask import Blueprint, jsonify, request, render_template, redirect, make_response
 from app import db
 from app.models import User, Account, Transaction
 from app.utils import hash_password, verify_password, generate_sync_token
-from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, verify_jwt_in_request
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, verify_jwt_in_request, decode_token
 from datetime import datetime
 import logging
 import json
@@ -66,32 +66,27 @@ def register():
 @main.route('/api/login', methods=['POST'])
 def login():
     try:
-        # جرب الحصول على البيانات كـ JSON أولاً
         data = request.get_json()
-        # إذا لم توجد بيانات، جرب الحصول عليها من الـ form
         if not data:
             data = request.form.to_dict()
-        # التحقق من البيانات المطلوبة
         if 'phone' not in data or 'password' not in data:
             if request.content_type == 'application/json':
                 return jsonify({'error': 'يرجى إدخال رقم الهاتف وكلمة المرور'}), 400
             else:
                 return redirect('/login')
-        # البحث عن المستخدم برقم الهاتف
         user = User.query.filter_by(phone=data['phone']).first()
         if user and verify_password(user.password_hash, data['password']):
             access_token = create_access_token(identity=user.id)
-            # إذا كان الطلب من form (وليس JSON)، أعد توجيه المستخدم للـ Dashboard
             if request.content_type != 'application/json':
-                return redirect('/dashboard')
-            # إذا كان الطلب JSON (تطبيق موبايل)، أرجع JSON
+                resp = make_response(redirect('/dashboard'))
+                resp.set_cookie('access_token', access_token, httponly=True)
+                return resp
             return jsonify({
                 'message': 'تم تسجيل الدخول بنجاح',
                 'token': access_token,
                 'user_id': user.id,
                 'username': user.username
             })
-        # بيانات الدخول خاطئة
         if request.content_type == 'application/json':
             return jsonify({'error': 'رقم الهاتف أو كلمة المرور غير صحيحة'}), 401
         else:
@@ -480,11 +475,18 @@ def get_transactions_script():
 @main.route('/', methods=['GET'])
 def root_redirect():
     user_id = None
-    try:
-        verify_jwt_in_request()
-        user_id = get_jwt_identity()
-    except Exception:
-        user_id = None
+    token = request.cookies.get('access_token')
+    if token:
+        try:
+            user_id = decode_token(token)['sub']
+        except Exception:
+            user_id = None
+    if not user_id:
+        try:
+            verify_jwt_in_request()
+            user_id = get_jwt_identity()
+        except Exception:
+            user_id = None
     if user_id:
         return redirect('/dashboard')
     else:
@@ -496,8 +498,20 @@ def login_page():
 
 @main.route('/dashboard', methods=['GET'])
 def dashboard():
-    return render_template('dashboard.html')
+    token = request.cookies.get('access_token')
+    user_id = None
+    if token:
+        try:
+            user_id = decode_token(token)['sub']
+        except Exception:
+            user_id = None
+    if user_id:
+        return render_template('dashboard.html')
+    else:
+        return redirect('/login')
 
 @main.route('/logout', methods=['GET'])
 def logout():
-    return redirect('/login') 
+    resp = make_response(redirect('/login'))
+    resp.delete_cookie('access_token')
+    return resp 
