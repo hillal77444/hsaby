@@ -260,15 +260,28 @@ class MainActivity : AppCompatActivity() {
                 
                 // تحويل JSONArray إلى List<Account>
                 val accountsArray = db.getAllAccounts()
-                val accounts = mutableListOf<Account>()
+                val accounts = mutableListOf<com.accounting.app.models.Account>()
                 for (i in 0 until accountsArray.length()) {
                     val jsonAccount = accountsArray.getJSONObject(i)
                     accounts.add(jsonToAccount(jsonAccount))
                 }
                 
+                val transactions = db.getAllTransactions().map { transaction ->
+                    com.accounting.app.models.Transaction(
+                        id = transaction.id,
+                        date = transaction.date,
+                        amount = transaction.amount,
+                        description = transaction.description,
+                        type = transaction.type,
+                        currency = transaction.currency,
+                        notes = transaction.notes,
+                        accountId = transaction.accountId
+                    )
+                }
+                
                 val syncData = SyncData(
                     accounts = accounts,
-                    transactions = db.getAllTransactions(),
+                    transactions = transactions,
                     lastSyncTimestamp = db.getLastSyncTimestamp()
                 )
                 
@@ -289,8 +302,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun jsonToAccount(json: JSONObject): Account {
-        return Account(
+    private fun jsonToAccount(json: JSONObject): com.accounting.app.models.Account {
+        return com.accounting.app.models.Account(
             id = json.getLong("id"),
             accountNumber = json.getString("account_number"),
             accountName = json.getString("account_name"),
