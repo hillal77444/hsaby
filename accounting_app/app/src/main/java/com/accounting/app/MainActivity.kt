@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        webView.addJavascriptInterface(WebAppInterface(this, dbHelper), "Android")
+        webView.addJavascriptInterface(WebAppInterface(this, dbHelper, sharedPreferences), "Android")
     }
 
     private fun setupSwipeRefresh() {
