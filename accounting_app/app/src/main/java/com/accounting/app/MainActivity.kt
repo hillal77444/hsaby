@@ -295,7 +295,12 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun updateLocalData(syncResponse: SyncResponse) {
+    fun getAuthToken(): String? {
+        return getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+            .getString("auth_token", null)
+    }
+
+    fun updateLocalData(syncResponse: SyncResponse) {
         try {
             val db = DatabaseHelper(this)
             
@@ -353,11 +358,6 @@ class MainActivity : AppCompatActivity() {
             .edit()
             .putString("auth_token", token)
             .apply()
-    }
-
-    private fun getAuthToken(): String? {
-        return getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-            .getString("auth_token", null)
     }
 
     private fun clearAuthToken() {
