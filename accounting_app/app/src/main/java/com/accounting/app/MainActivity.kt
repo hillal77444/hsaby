@@ -33,6 +33,12 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.Response
+import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
@@ -81,6 +87,10 @@ class MainActivity : AppCompatActivity() {
         setupBackPress()
         checkPermissions()
         loadContent()
+
+        if (isOnline()) {
+            cacheAllPages()
+        }
     }
 
     private fun setupWebView() {
@@ -515,5 +525,32 @@ class MainActivity : AppCompatActivity() {
     private fun loadMainPage() {
         // تحميل الصفحة الرئيسية
         webView.loadUrl("file:///android_asset/index.html")
+    }
+
+    private fun cacheAllPages() {
+        val pages = listOf(
+            "login" to "http://212.224.88.122:5007/login",
+            "dashboard" to "http://212.224.88.122:5007/dashboard",
+            "accounts" to "http://212.224.88.122:5007/api/accounts/html-content",
+            "entries" to "http://212.224.88.122:5007/api/transactions/html-content",
+            "reports" to "http://212.224.88.122:5007/api/reports/html-content"
+        )
+        val client = OkHttpClient()
+        for ((name, url) in pages) {
+            val request = Request.Builder().url(url).build()
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    Log.e("CachePages", "Failed to load $url: ${e.message}")
+                }
+                override fun onResponse(call: Call, response: Response) {
+                    if (response.isSuccessful) {
+                        val html = response.body?.string() ?: ""
+                        val file = File(filesDir, "$name.html")
+                        file.writeText(html, Charsets.UTF_8)
+                        Log.d("CachePages", "Saved $name.html")
+                    }
+                }
+            })
+        }
     }
 } 
