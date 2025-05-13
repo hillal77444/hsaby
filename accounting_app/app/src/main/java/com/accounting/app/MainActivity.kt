@@ -543,7 +543,11 @@ class MainActivity : AppCompatActivity() {
             "transactions_styles" to "http://212.224.88.122:5007/api/transactions/html-content/styles.css",
             "transactions_script" to "http://212.224.88.122:5007/api/transactions/html-content/script.js",
             "reports_styles" to "http://212.224.88.122:5007/api/reports/html-content/styles.css",
-            "reports_script" to "http://212.224.88.122:5007/api/reports/html-content/script.js"
+            "reports_script" to "http://212.224.88.122:5007/api/reports/html-content/script.js",
+            "add_entry_styles" to "http://212.224.88.122:5007/static/styles/add_entry.css",
+            "add_entry_script" to "http://212.224.88.122:5007/static/scripts/add_entry.js",
+            "account_statement_styles" to "http://212.224.88.122:5007/static/styles/account_statement.css",
+            "account_statement_script" to "http://212.224.88.122:5007/static/scripts/account_statement.js"
         )
         val client = OkHttpClient()
         for ((name, url) in pages) {
@@ -570,6 +574,10 @@ class MainActivity : AppCompatActivity() {
                                 .replace("/api/transactions/html-content/script.js", "file://${filesDir.absolutePath}/transactions_script.js")
                                 .replace("/api/reports/html-content/styles.css", "file://${filesDir.absolutePath}/reports_styles.css")
                                 .replace("/api/reports/html-content/script.js", "file://${filesDir.absolutePath}/reports_script.js")
+                                .replace("/static/styles/add_entry.css", "file://${filesDir.absolutePath}/add_entry_styles.css")
+                                .replace("/static/scripts/add_entry.js", "file://${filesDir.absolutePath}/add_entry_script.js")
+                                .replace("/static/styles/account_statement.css", "file://${filesDir.absolutePath}/account_statement_styles.css")
+                                .replace("/static/scripts/account_statement.js", "file://${filesDir.absolutePath}/account_statement_script.js")
                         }
                         file.writeText(content, Charsets.UTF_8)
                         Log.d("CachePages", "Saved ${file.name}")
