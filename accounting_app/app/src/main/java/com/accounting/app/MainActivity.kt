@@ -529,14 +529,30 @@ class MainActivity : AppCompatActivity() {
 
     private fun cacheAllPages() {
         val pages = listOf(
+            // HTML
             "login" to "http://212.224.88.122:5007/login",
             "dashboard" to "http://212.224.88.122:5007/dashboard",
             "accounts" to "http://212.224.88.122:5007/api/accounts/html-content",
             "entries" to "http://212.224.88.122:5007/api/transactions/html-content",
-            "reports" to "http://212.224.88.122:5007/api/reports/html-content"
+            "reports" to "http://212.224.88.122:5007/api/reports/html-content",
+            "add_entry" to "http://212.224.88.122:5007/add-entry",
+            "account_statement" to "http://212.224.88.122:5007/account-statement",
+            // CSS/JS
+            "accounts_styles" to "http://212.224.88.122:5007/api/accounts/html-content/styles.css",
+            "accounts_script" to "http://212.224.88.122:5007/api/accounts/html-content/script.js",
+            "transactions_styles" to "http://212.224.88.122:5007/api/transactions/html-content/styles.css",
+            "transactions_script" to "http://212.224.88.122:5007/api/transactions/html-content/script.js",
+            "reports_styles" to "http://212.224.88.122:5007/api/reports/html-content/styles.css",
+            "reports_script" to "http://212.224.88.122:5007/api/reports/html-content/script.js"
         )
         val client = OkHttpClient()
         for ((name, url) in pages) {
+            val ext = when {
+                name.endsWith("_styles") -> ".css"
+                name.endsWith("_script") -> ".js"
+                else -> ".html"
+            }
+            val file = File(filesDir, "$name$ext")
             val request = Request.Builder().url(url).build()
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
@@ -544,10 +560,19 @@ class MainActivity : AppCompatActivity() {
                 }
                 override fun onResponse(call: Call, response: Response) {
                     if (response.isSuccessful) {
-                        val html = response.body?.string() ?: ""
-                        val file = File(filesDir, "$name.html")
-                        file.writeText(html, Charsets.UTF_8)
-                        Log.d("CachePages", "Saved $name.html")
+                        var content = response.body?.string() ?: ""
+                        // استبدال روابط CSS/JS في HTML بروابط محلية
+                        if (ext == ".html") {
+                            content = content
+                                .replace("/api/accounts/html-content/styles.css", "file://${filesDir.absolutePath}/accounts_styles.css")
+                                .replace("/api/accounts/html-content/script.js", "file://${filesDir.absolutePath}/accounts_script.js")
+                                .replace("/api/transactions/html-content/styles.css", "file://${filesDir.absolutePath}/transactions_styles.css")
+                                .replace("/api/transactions/html-content/script.js", "file://${filesDir.absolutePath}/transactions_script.js")
+                                .replace("/api/reports/html-content/styles.css", "file://${filesDir.absolutePath}/reports_styles.css")
+                                .replace("/api/reports/html-content/script.js", "file://${filesDir.absolutePath}/reports_script.js")
+                        }
+                        file.writeText(content, Charsets.UTF_8)
+                        Log.d("CachePages", "Saved ${file.name}")
                     }
                 }
             })
