@@ -6,7 +6,26 @@
 </head>
 <body>
     <h2>صفحة التقارير</h2>
-    <p>هنا يمكنك عرض التقارير المالية.</p>
+    <h3>الحسابات</h3>
+    {% if accounts %}
+        <ul>
+        {% for acc in accounts %}
+            <li>{{ acc.account_name }}: {{ acc.balance }} ({{ 'مدين' if acc.is_debtor else 'دائن' }})</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>لا توجد حسابات.</p>
+    {% endif %}
+    <h3>القيود المحاسبية</h3>
+    {% if entries %}
+        <ul>
+        {% for entry in entries %}
+            <li>{{ entry.date.strftime('%Y-%m-%d') if entry.date else '' }} - {{ entry.amount }} - {{ entry.description }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>لا توجد قيود محاسبية.</p>
+    {% endif %}
     <a href="/dashboard">العودة للوحة التحكم</a>
 </body>
 </html> 
