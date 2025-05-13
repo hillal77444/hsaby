@@ -24,6 +24,12 @@ import android.widget.Toast
 import android.database.sqlite.SQLiteDatabase
 import android.content.ContentValues
 import android.util.Log
+import org.json.JSONObject
+import org.json.JSONArray
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.*
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
@@ -37,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private var authToken: String? = null
 
     companion object {
+        private const val TAG = "MainActivity"
         private const val PREFS_NAME = "AccountingAppPrefs"
         private const val KEY_IS_LOGGED_IN = "isLoggedIn"
         private const val KEY_USERNAME = "username"
@@ -249,11 +256,22 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val token = getAuthToken() ?: return@launch
+                val db = DatabaseHelper(this@MainActivity)
+                
+                // تحويل JSONArray إلى List<Account>
+                val accountsArray = db.getAllAccounts()
+                val accounts = mutableListOf<Account>()
+                for (i in 0 until accountsArray.length()) {
+                    val jsonAccount = accountsArray.getJSONObject(i)
+                    accounts.add(jsonToAccount(jsonAccount))
+                }
+                
                 val syncData = SyncData(
-                    accounts = dbHelper.getAllAccounts(),
-                    transactions = dbHelper.getAllTransactions(),
-                    lastSyncTimestamp = dbHelper.getLastSyncTimestamp()
+                    accounts = accounts,
+                    transactions = db.getAllTransactions(),
+                    lastSyncTimestamp = db.getLastSyncTimestamp()
                 )
+                
                 val response = apiService.syncData("Bearer $token", syncData)
                 if (response.isSuccessful && response.body()?.success == true) {
                     // تحديث البيانات المحلية
@@ -265,9 +283,24 @@ class MainActivity : AppCompatActivity() {
                     showError("فشلت المزامنة")
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "Error syncing data: ${e.message}")
                 showError("خطأ في الاتصال بالسيرفر")
             }
         }
+    }
+
+    private fun jsonToAccount(json: JSONObject): Account {
+        return Account(
+            id = json.getLong("id"),
+            accountNumber = json.getString("account_number"),
+            accountName = json.getString("account_name"),
+            balance = json.getDouble("balance"),
+            phoneNumber = if (json.has("phone_number")) json.getString("phone_number") else null,
+            isDebtor = json.getBoolean("is_debtor"),
+            notes = if (json.has("notes")) json.getString("notes") else null,
+            createdAt = json.getLong("created_at"),
+            updatedAt = json.getLong("updated_at")
+        )
     }
 
     private fun updateLocalData(syncResponse: SyncResponse) {
