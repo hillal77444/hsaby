@@ -539,8 +539,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     fun syncData(): SyncData {
-        val localAccounts = mutableListOf<Account>()
-        val localTransactions = mutableListOf<Transaction>()
+        val localAccounts = mutableListOf<com.accounting.app.models.Account>()
+        val localTransactions = mutableListOf<com.accounting.app.models.Transaction>()
         
         try {
             val db = this.readableDatabase
@@ -564,8 +564,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                     accountJson.put("phone_number", it.getString(it.getColumnIndexOrThrow("phone_number")))
                     accountJson.put("is_debtor", it.getInt(it.getColumnIndexOrThrow("is_debtor")))
                     accountJson.put("notes", it.getString(it.getColumnIndexOrThrow("notes")))
-                    accountJson.put("created_at", it.getString(it.getColumnIndexOrThrow("created_at")))
-                    accountJson.put("updated_at", it.getString(it.getColumnIndexOrThrow("updated_at")))
+                    accountJson.put("created_at", it.getLong(it.getColumnIndexOrThrow("created_at")))
+                    accountJson.put("updated_at", it.getLong(it.getColumnIndexOrThrow("updated_at")))
                     
                     localAccounts.add(jsonToAccount(accountJson))
                 }
@@ -583,9 +583,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
             transactionCursor.use {
                 while (it.moveToNext()) {
-                    val transaction = Transaction(
+                    val transaction = com.accounting.app.models.Transaction(
                         id = it.getLong(it.getColumnIndexOrThrow("id")),
-                        date = it.getString(it.getColumnIndexOrThrow("date")),
+                        date = it.getLong(it.getColumnIndexOrThrow("date")),
                         amount = it.getDouble(it.getColumnIndexOrThrow("amount")),
                         description = it.getString(it.getColumnIndexOrThrow("description")),
                         type = it.getString(it.getColumnIndexOrThrow("type")),
