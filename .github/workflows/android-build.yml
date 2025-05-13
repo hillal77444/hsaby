@@ -6,83 +6,103 @@ on:
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      action:
+        description: 'اختر العملية المطلوبة'
+        required: true
+        default: 'build'
+        type: choice
+        options:
+          - build
+          - download
 
 jobs:
   build:
+    if: github.event.inputs.action == 'build' || github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: gradle
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+      - name: Create keystore from secret
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
+        working-directory: accounting_app
 
-    - name: Install Android Build Tools
-      run: |
-        yes | sdkmanager --licenses
-        sdkmanager "build-tools;33.0.1"
-        sdkmanager "platforms;android-34"
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        working-directory: accounting_app
 
-    - name: Create keystore from secret
-      run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
+      - name: Check keystore exists
+        run: |
+          if [ ! -f "keystore.jks" ]; then
+            echo "Error: keystore.jks not found!"
+            exit 1
+          fi
+          echo "Keystore file exists"
+        working-directory: accounting_app
 
-    - name: Check keystore exists
-      run: |
-        if [ ! -f "keystore.jks" ]; then
-          echo "Error: keystore.jks not found!"
-          exit 1
-        fi
-        echo "Keystore file exists"
+      - name: Create gradle.properties
+        run: |
+          echo "RELEASE_STORE_FILE=keystore.jks" >> app/gradle.properties
+          echo "RELEASE_STORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> app/gradle.properties
+          echo "RELEASE_KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> app/gradle.properties
+          echo "RELEASE_KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> app/gradle.properties
+        working-directory: accounting_app
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x ./gradlew
+      - name: Build Release APK
+        run: ./gradlew assembleRelease --stacktrace
+        working-directory: accounting_app
 
-    - name: Cache Gradle packages
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          gradle-${{ runner.os }}-
+      - name: Check APK exists
+        run: |
+          if [ ! -f "app/build/outputs/apk/release/app-release.apk" ]; then
+            echo "APK file not found!"
+            ls -la app/build/outputs/apk/release/
+            exit 1
+          fi
+          echo "APK file exists"
+        working-directory: accounting_app
 
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug
+      - name: Sign APK
+        run: |
+          echo "Checking for APK..."
+          if [ ! -f "app/build/outputs/apk/release/app-release.apk" ]; then
+            echo "Error: app-release.apk not found!"
+            ls -la app/build/outputs/apk/release/
+            exit 1
+          fi
+          echo "Zipaligning APK..."
+          $ANDROID_HOME/build-tools/34.0.0/zipalign -v 4 app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/app-release-aligned.apk
+          echo "Signing APK..."
+          $ANDROID_HOME/build-tools/34.0.0/apksigner sign --ks keystore.jks --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --ks-key-alias ${{ secrets.KEY_ALIAS }} --key-pass pass:${{ secrets.KEY_PASSWORD }} app/build/outputs/apk/release/app-release-aligned.apk
+          echo "Moving final APK..."
+          mv app/build/outputs/apk/release/app-release-aligned.apk app/build/outputs/apk/release/app-release.apk
+          echo "Calculating SHA256 of signed APK..."
+          sha256sum app/build/outputs/apk/release/app-release.apk
+        working-directory: accounting_app
 
-    - name: Upload Debug APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: accounting_app/app/build/outputs/apk/release/app-release.apk
 
-    - name: Build Release APK
-      run: ./gradlew assembleRelease --no-daemon
-      env:
-        RELEASE_STORE_FILE: app/keystore.jks
-        RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-        RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-
-    - name: Sign Release APK
-      uses: r0adkll/sign-android-release@v1
-      id: sign_app
-      with:
-        releaseDirectory: app/build/outputs/apk/release
-        signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
-        alias: ${{ secrets.KEY_ALIAS }}
-        keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-        keyPassword: ${{ secrets.KEY_PASSWORD }}
-
-    - name: Upload Release APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-release-signed
-        path: ${{ steps.sign_app.outputs.signedReleaseFile }} 
+  download:
+    if: github.event.inputs.action == 'download'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create ZIP file
+        run: zip -r project.zip . -x "*.git*" "*.gradle*" "build/*" "app/build/*"
+        working-directory: accounting_app
+      - name: Upload ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: project-files
+          path: accounting_app/project.zip
