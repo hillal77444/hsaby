@@ -159,7 +159,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadContent() {
-        if (sharedPreferences.getBoolean(KEY_IS_LOGGED_IN, false)) {
+        if (isLoggedIn()) {
             // المستخدم مسجل دخوله
             if (isOnline()) {
                 loadRemoteContent()
