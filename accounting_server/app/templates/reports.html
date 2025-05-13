@@ -2,30 +2,109 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>التقارير</title>
+    <title>التقارير المالية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: 'Cairo', Arial, sans-serif; background: #f6f8fb; margin: 0; padding: 0; direction: rtl; }
+        .header { background: #1976d2; color: #fff; padding: 18px 0; text-align: center; font-size: 22px; }
+        .container { max-width: 900px; margin: 30px auto; padding: 16px; }
+        .filters { background: #fff; margin-bottom: 18px; padding: 12px 10px 8px 10px; display: flex; gap: 10px; align-items: center; box-shadow: 0 2px 8px #0001; }
+        .filters input[type="date"] { padding: 6px 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 15px; }
+        .summary { display: flex; gap: 16px; margin-bottom: 18px; }
+        .summary-card { flex: 1; background: #fff; border-radius: 12px; padding: 18px 10px; text-align: center; box-shadow: 0 2px 8px #0001; }
+        .summary-title { color: #2196f3; font-weight: bold; margin-bottom: 8px; }
+        .summary-value { font-size: 22px; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #0001; margin-bottom: 20px; }
+        th, td { padding: 10px 6px; text-align: center; border-bottom: 1px solid #eee; }
+        th { background: #f1f1f1; font-weight: bold; }
+        tr:last-child td { border-bottom: none; }
+        .currency-title { color: #1976d2; font-size: 18px; margin: 18px 0 8px 0; font-weight: bold; }
+    </style>
 </head>
 <body>
-    <h2>صفحة التقارير</h2>
-    <h3>الحسابات</h3>
-    {% if accounts %}
-        <ul>
-        {% for acc in accounts %}
-            <li>{{ acc.account_name }}: {{ acc.balance }} ({{ 'مدين' if acc.is_debtor else 'دائن' }})</li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>لا توجد حسابات.</p>
-    {% endif %}
-    <h3>القيود المحاسبية</h3>
-    {% if entries %}
-        <ul>
-        {% for entry in entries %}
-            <li>{{ entry.date.strftime('%Y-%m-%d') if entry.date else '' }} - {{ entry.amount }} - {{ entry.description }}</li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>لا توجد قيود محاسبية.</p>
-    {% endif %}
-    <a href="/dashboard">العودة للوحة التحكم</a>
+    <div class="header">التقارير المالية</div>
+    <div class="container">
+        <form class="filters" onsubmit="event.preventDefault(); renderAll();">
+            <label>من:</label>
+            <input type="date" id="dateFrom">
+            <label>إلى:</label>
+            <input type="date" id="dateTo">
+            <button type="submit" style="padding:7px 18px; background:#1976d2; color:#fff; border:none; border-radius:6px; font-size:15px;">عرض</button>
+        </form>
+        <div class="summary">
+            <div class="summary-card">
+                <div class="summary-title">إجمالي الدائنين</div>
+                <div class="summary-value" id="totalCredit">0</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-title">إجمالي المدينين</div>
+                <div class="summary-value" id="totalDebit">0</div>
+            </div>
+        </div>
+        <div id="tablesContainer"></div>
+    </div>
+    <script>
+        let accounts = [], entries = [];
+        function fetchData(callback) {
+            if (window.Android && !window.Android.isOnline()) {
+                accounts = JSON.parse(Android.getAllAccounts());
+                entries = [];
+                accounts.forEach(acc => {
+                    const accEntries = JSON.parse(Android.getTransactionsForAccount(Number(acc.id)));
+                    entries = entries.concat(accEntries.map(e => ({...e, account_id: acc.id, currency: acc.currency || acc.account_currency || 'يمني'})));
+                });
+                callback();
+            } else {
+                Promise.all([
+                    fetch('/api/accounts', {headers: {'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')}}).then(res => res.json()),
+                    fetch('/api/transactions', {headers: {'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')}}).then(res => res.json())
+                ]).then(([accs, ents]) => { accounts = accs; entries = ents; callback(); });
+            }
+        }
+        function renderAll() {
+            fetchData(() => {
+                const dateFrom = document.getElementById('dateFrom').value;
+                const dateTo = document.getElementById('dateTo').value;
+                let filteredEntries = entries;
+                if (dateFrom) filteredEntries = filteredEntries.filter(e => e.date >= new Date(dateFrom).getTime());
+                if (dateTo) filteredEntries = filteredEntries.filter(e => e.date <= new Date(dateTo).getTime());
+                // حسب العملة
+                const currencies = [...new Set(filteredEntries.map(e => e.currency || 'يمني'))];
+                let totalCredit = 0, totalDebit = 0;
+                document.getElementById('tablesContainer').innerHTML = '';
+                currencies.forEach(curr => {
+                    const currEntries = filteredEntries.filter(e => (e.currency || 'يمني') === curr);
+                    // حساب الرصيد السابق
+                    let prevBalance = 0;
+                    const table = document.createElement('table');
+                    table.innerHTML = `<tr><th colspan="7" class="currency-title">${curr}</th></tr>
+                        <tr><th>الحساب</th><th>التاريخ</th><th>الوصف</th><th>عليه</th><th>له</th><th>الرصيد السابق</th><th>الرصيد بعد الحركة</th></tr>`;
+                    currEntries.sort((a, b) => a.date - b.date);
+                    currEntries.forEach(e => {
+                        const acc = accounts.find(a => a.id == e.account_id);
+                        let debit = e.type === 'debit' ? e.amount : 0;
+                        let credit = e.type === 'credit' ? e.amount : 0;
+                        let after = prevBalance + credit - debit;
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td>${acc ? (acc.account_name || acc.accountName) : e.account_id}</td>
+                            <td>${new Date(e.date).toLocaleDateString('ar-EG')}</td>
+                            <td>${e.description || ''}</td>
+                            <td>${debit}</td>
+                            <td>${credit}</td>
+                            <td>${prevBalance}</td>
+                            <td>${after}</td>`;
+                        table.appendChild(tr);
+                        prevBalance = after;
+                        if (e.type === 'debit') totalDebit += debit;
+                        else totalCredit += credit;
+                    });
+                    document.getElementById('tablesContainer').appendChild(table);
+                });
+                document.getElementById('totalCredit').textContent = totalCredit;
+                document.getElementById('totalDebit').textContent = totalDebit;
+            });
+        }
+        renderAll();
+    </script>
 </body>
 </html> 
