@@ -2,10 +2,9 @@ name: Android Build
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
-  workflow_dispatch:
+    branches: [ main ]
 
 jobs:
   build:
@@ -21,56 +20,31 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Check project structure
-      run: |
-        echo "Current directory structure:"
-        ls -la
-        echo "Checking accounting_app directory:"
-        ls -la accounting_app || echo "accounting_app directory not found"
-        echo "Creating accounting_app directory if it doesn't exist"
-        mkdir -p accounting_app
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
 
-    - name: Initialize Gradle project
-      working-directory: accounting_app
+    - name: Install Android Build Tools
       run: |
-        if [ ! -f "gradlew" ]; then
-          echo "Initializing Gradle project..."
-          gradle wrapper
-        fi
-
-    - name: Grant execute permission for gradlew
-      working-directory: accounting_app
-      run: chmod +x gradlew
+        yes | sdkmanager --licenses
+        sdkmanager "build-tools;33.0.1"
+        sdkmanager "platforms;android-34"
 
     - name: Build with Gradle
-      working-directory: accounting_app
       run: ./gradlew build
 
-    - name: Build Debug APK
-      working-directory: accounting_app
-      run: ./gradlew assembleDebug
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-debug
-        path: accounting_app/app/build/outputs/apk/debug/app-debug.apk
-
-    - name: Build Release APK
-      working-directory: accounting_app
-      run: ./gradlew assembleRelease
-
-    - name: Sign Release APK
+    - name: Sign APK
       uses: r0adkll/sign-android-release@v1
+      id: sign_app
       with:
-        releaseDirectory: accounting_app/app/build/outputs/apk/release
+        releaseDirectory: app/build/outputs/apk/release
         signingKeyBase64: ${{ secrets.SIGNING_KEY }}
         alias: ${{ secrets.KEY_ALIAS }}
         keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
         keyPassword: ${{ secrets.KEY_PASSWORD }}
+        buildToolsVersion: "33.0.1"
 
-    - name: Upload Release APK
-      uses: actions/upload-artifact@v4
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
       with:
-        name: app-release
-        path: accounting_app/app/build/outputs/apk/release/app-release-signed.apk 
+        name: app-release-signed
+        path: ${{ steps.sign_app.outputs.signedReleaseFile }} 
