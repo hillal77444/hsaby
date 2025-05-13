@@ -1,6 +1,5 @@
 package com.accounting.app.api
 
-import android.content.Context
 import com.accounting.app.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -12,7 +11,7 @@ object ApiClient {
     private const val BASE_URL = "http://212.224.88.122:5007/"
     private var apiService: ApiService? = null
 
-    fun getApiService(context: Context): ApiService {
+    fun getApiService(): ApiService {
         if (apiService == null) {
             synchronized(this) {
                 if (apiService == null) {
