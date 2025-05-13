@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>كشف حساب تفصيلي</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: 'Cairo', Arial, sans-serif; background: #f6f8fb; margin: 0; padding: 0; direction: rtl; }
+        .header { background: #1976d2; color: #fff; padding: 18px 0; text-align: center; font-size: 22px; }
+        .container { max-width: 900px; margin: 30px auto; padding: 16px; }
+        .filters { background: #fff; margin-bottom: 18px; padding: 12px 10px 8px 10px; display: flex; gap: 10px; align-items: center; box-shadow: 0 2px 8px #0001; }
+        .filters select, .filters input[type="date"] { padding: 6px 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 15px; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #0001; margin-bottom: 20px; }
+        th, td { padding: 10px 6px; text-align: center; border-bottom: 1px solid #eee; }
+        th { background: #f1f1f1; font-weight: bold; }
+        tr:last-child td { border-bottom: none; }
+        .currency-title { color: #1976d2; font-size: 18px; margin: 18px 0 8px 0; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">كشف حساب تفصيلي</div>
+    <div class="container">
+        <form class="filters" onsubmit="event.preventDefault(); renderStatement();">
+            <label>الحساب:</label>
+            <select id="accountSelect"></select>
+            <label>من:</label>
+            <input type="date" id="dateFrom">
+            <label>إلى:</label>
+            <input type="date" id="dateTo">
+            <button type="submit" style="padding:7px 18px; background:#1976d2; color:#fff; border:none; border-radius:6px; font-size:15px;">عرض</button>
+        </form>
+        <div id="tablesContainer"></div>
+    </div>
+    <script>
+        let accounts = [], entries = [];
+        function loadAccounts(callback) {
+            if (window.Android && !window.Android.isOnline()) {
+                accounts = JSON.parse(Android.getAllAccounts());
+                fillAccounts(accounts);
+                if (callback) callback();
+            } else {
+                fetch('/api/accounts', {headers: {'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')}})
+                    .then(res => res.json())
+                    .then(data => { accounts = data; fillAccounts(accounts); if (callback) callback(); });
+            }
+        }
+        function fillAccounts(accounts) {
+            const select = document.getElementById('accountSelect');
+            select.innerHTML = '';
+            accounts.forEach(acc => {
+                const opt = document.createElement('option');
+                opt.value = acc.id || acc.account_id || acc.accountId;
+                opt.textContent = acc.account_name || acc.accountName;
+                select.appendChild(opt);
+            });
+        }
+        document.getElementById('accountSelect').onchange = function() { renderStatement(); };
+        function renderStatement() {
+            const accountId = document.getElementById('accountSelect').value;
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            let allEntries = [];
+            if (window.Android && !window.Android.isOnline()) {
+                allEntries = JSON.parse(Android.getTransactionsForAccount(Number(accountId)));
+            } else {
+                // جلب جميع القيود لهذا الحساب من السيرفر
+                // (يفضل أن يكون هناك API يدعم الفلاتر، هنا سنجلب الكل ونفلتر في الواجهة)
+                fetch('/api/transactions', {headers: {'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')}})
+                    .then(res => res.json())
+                    .then(entries => {
+                        allEntries = entries.filter(e => e.account_id == accountId);
+                        renderTable(allEntries, dateFrom, dateTo);
+                    });
+                return;
+            }
+            renderTable(allEntries, dateFrom, dateTo);
+        }
+        function renderTable(entries, dateFrom, dateTo) {
+            // تصفية حسب التاريخ
+            if (dateFrom) entries = entries.filter(e => e.date >= new Date(dateFrom).getTime());
+            if (dateTo) entries = entries.filter(e => e.date <= new Date(dateTo).getTime());
+            // حسب العملة
+            const currencies = [...new Set(entries.map(e => e.currency || 'يمني'))];
+            document.getElementById('tablesContainer').innerHTML = '';
+            currencies.forEach(curr => {
+                const currEntries = entries.filter(e => (e.currency || 'يمني') === curr);
+                let prevBalance = 0;
+                const table = document.createElement('table');
+                table.innerHTML = `<tr><th colspan="8" class="currency-title">${curr}</th></tr>
+                    <tr><th>التاريخ</th><th>الوصف</th><th>عليه</th><th>له</th><th>الرصيد السابق</th><th>الرصيد بعد الحركة</th><th>ملاحظات</th></tr>`;
+                currEntries.sort((a, b) => a.date - b.date);
+                currEntries.forEach(e => {
+                    let debit = e.type === 'debit' ? e.amount : 0;
+                    let credit = e.type === 'credit' ? e.amount : 0;
+                    let after = prevBalance + credit - debit;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${new Date(e.date).toLocaleDateString('ar-EG')}</td>
+                        <td>${e.description || ''}</td>
+                        <td>${debit}</td>
+                        <td>${credit}</td>
+                        <td>${prevBalance}</td>
+                        <td>${after}</td>
+                        <td>${e.notes || ''}</td>`;
+                    table.appendChild(tr);
+                    prevBalance = after;
+                });
+                document.getElementById('tablesContainer').appendChild(table);
+            });
+        }
+        loadAccounts(() => renderStatement());
+    </script>
+</body>
+</html> 
