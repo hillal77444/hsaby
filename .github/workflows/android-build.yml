@@ -43,6 +43,11 @@ jobs:
             echo "gradlew already exists."
           fi
         working-directory: accounting_app
+        env:
+          RELEASE_STORE_FILE: keystore.jks
+          RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
