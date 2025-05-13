@@ -6,7 +6,26 @@
 </head>
 <body>
     <h2>صفحة الحسابات</h2>
-    <p>هنا يمكنك عرض وإدارة الحسابات.</p>
+    {% if accounts %}
+        <table border="1" cellpadding="6" style="width:100%;text-align:center;">
+            <tr>
+                <th>رقم الحساب</th>
+                <th>اسم الحساب</th>
+                <th>الرصيد</th>
+                <th>مدين/دائن</th>
+            </tr>
+            {% for acc in accounts %}
+            <tr>
+                <td>{{ acc.account_number }}</td>
+                <td>{{ acc.account_name }}</td>
+                <td>{{ acc.balance }}</td>
+                <td>{{ 'مدين' if acc.is_debtor else 'دائن' }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>لا توجد حسابات.</p>
+    {% endif %}
     <a href="/dashboard">العودة للوحة التحكم</a>
 </body>
 </html> 
