@@ -1,12 +1,13 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template, redirect
 from app import db
 from app.models import User, Account, Transaction
 from app.utils import hash_password, verify_password, generate_sync_token
-from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, verify_jwt_in_request_optional
 from datetime import datetime
 import logging
 import json
 import os
+
 
 main = Blueprint('main', __name__)
 logger = logging.getLogger(__name__)
@@ -461,4 +462,28 @@ def get_transactions_script():
         return js_content, 200, {'Content-Type': 'application/javascript; charset=utf-8'}
     except Exception as e:
         logger.error(f"Error getting transactions JavaScript content: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء جلب سكربت المعاملات'}), 500 
+        return jsonify({'error': 'حدث خطأ أثناء جلب سكربت المعاملات'}), 500
+
+@main.route('/', methods=['GET'])
+def root_redirect():
+    try:
+        verify_jwt_in_request_optional()
+        user_id = get_jwt_identity()
+        if user_id:
+            return redirect('/dashboard')
+        else:
+            return redirect('/login')
+    except Exception:
+        return redirect('/login')
+
+@main.route('/login', methods=['GET'])
+def login_page():
+    return render_template('login.html')
+
+@main.route('/dashboard', methods=['GET'])
+def dashboard():
+    return render_template('dashboard.html')
+
+@main.route('/logout', methods=['GET'])
+def logout():
+    return redirect('/login') 
