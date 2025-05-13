@@ -16,8 +16,8 @@ import com.accounting.app.models.SyncResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.lifecycle.lifecycleScope
 import android.content.SharedPreferences
+import com.accounting.app.models.LoginRequest
 
 class WebAppInterface(private val context: MainActivity, private val dbHelper: DatabaseHelper, private val sharedPreferences: SharedPreferences) {
     private val TAG = "WebAppInterface"
