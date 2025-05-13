@@ -14,6 +14,10 @@ import android.os.Build
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.lifecycle.lifecycleScope
+import com.accounting.app.api.ApiService
+import com.accounting.app.api.ApiClient
+import com.accounting.app.models.*
 import java.io.File
 import kotlinx.coroutines.launch
 import android.widget.Toast
@@ -301,6 +305,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun showSuccess(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun updateUIAfterLogin() {
+        // تحديث واجهة المستخدم بعد تسجيل الدخول
+        webView.loadUrl("http://212.224.88.122:5007/dashboard")
     }
 
     override fun onDestroy() {
