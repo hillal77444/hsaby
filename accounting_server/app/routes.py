@@ -556,12 +556,50 @@ def logout():
 
 @main.route('/accounts')
 def accounts_page():
-    return render_template('accounts.html')
+    token = request.cookies.get('access_token')
+    user_id = None
+    accounts = []
+    if token:
+        try:
+            user_id = decode_token(token)['sub']
+        except Exception:
+            user_id = None
+    if user_id:
+        accounts = Account.query.filter_by(user_id=user_id).all()
+        return render_template('accounts.html', accounts=accounts)
+    else:
+        return redirect('/login')
 
 @main.route('/entries')
 def entries_page():
-    return render_template('entries.html')
+    token = request.cookies.get('access_token')
+    user_id = None
+    entries = []
+    if token:
+        try:
+            user_id = decode_token(token)['sub']
+        except Exception:
+            user_id = None
+    if user_id:
+        entries = Transaction.query.filter_by(user_id=user_id).all()
+        return render_template('entries.html', entries=entries)
+    else:
+        return redirect('/login')
 
 @main.route('/reports')
 def reports_page():
-    return render_template('reports.html') 
+    token = request.cookies.get('access_token')
+    user_id = None
+    accounts = []
+    entries = []
+    if token:
+        try:
+            user_id = decode_token(token)['sub']
+        except Exception:
+            user_id = None
+    if user_id:
+        accounts = Account.query.filter_by(user_id=user_id).all()
+        entries = Transaction.query.filter_by(user_id=user_id).all()
+        return render_template('reports.html', accounts=accounts, entries=entries)
+    else:
+        return redirect('/login') 
