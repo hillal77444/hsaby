@@ -43,6 +43,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var apiService: ApiService
     private var authToken: String? = null
+    private lateinit var webAppInterface: WebAppInterface
+    private lateinit var db: AppDatabase
 
     companion object {
         private const val TAG = "MainActivity"
@@ -58,6 +60,8 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize database
         dbHelper = DatabaseHelper(this)
+        db = AppDatabase.getDatabase(this)
+        webAppInterface = WebAppInterface(this, dbHelper, sharedPreferences)
 
         // Initialize WebView and SwipeRefreshLayout
         webView = findViewById(R.id.webView)
@@ -114,7 +118,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        webView.addJavascriptInterface(WebAppInterface(this, dbHelper, sharedPreferences), "Android")
+        webView.addJavascriptInterface(webAppInterface, "Android")
     }
 
     private fun setupSwipeRefresh() {
@@ -451,7 +455,7 @@ class MainActivity : AppCompatActivity() {
         dbHelper.close()
     }
 
-    private fun onLoginSuccess() {
+    private fun onLoginSuccess(username: String, password: String) {
         // حفظ حالة تسجيل الدخول
         sharedPreferences.edit().apply {
             putBoolean("isLoggedIn", true)
@@ -463,7 +467,7 @@ class MainActivity : AppCompatActivity() {
         // مزامنة البيانات من السيرفر
         lifecycleScope.launch {
             try {
-                syncData()
+                performSync()
                 // بعد نجاح المزامنة، انتقل للصفحة الرئيسية
                 loadMainPage()
             } catch (e: Exception) {
@@ -474,7 +478,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun syncData() {
+    private suspend fun performSync() {
         withContext(Dispatchers.IO) {
             try {
                 // 1. مزامنة الحسابات
@@ -496,9 +500,6 @@ class MainActivity : AppCompatActivity() {
                         db.entryDao().insertAll(entryList)
                     }
                 }
-
-                // 3. مزامنة أي بيانات أخرى ضرورية
-                // يمكن إضافة المزيد من عمليات المزامنة هنا
 
                 Log.d("MainActivity", "Data sync completed successfully")
             } catch (e: Exception) {
