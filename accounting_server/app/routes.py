@@ -65,17 +65,15 @@ def register():
 @main.route('/api/login', methods=['POST'])
 def login():
     try:
-        # جرب الحصول على البيانات كـ JSON فقط إذا كان الهيدر application/json
         if request.content_type == 'application/json':
             data = request.get_json()
         else:
             data = request.form.to_dict()
-        # التحقق من البيانات المطلوبة
         if 'phone' not in data or 'password' not in data:
             if request.content_type == 'application/json':
                 return jsonify({'error': 'يرجى إدخال رقم الهاتف وكلمة المرور'}), 400
             else:
-                return redirect('/login')
+                return redirect('/login?error=يرجى+إدخال+رقم+الهاتف+وكلمة+المرور')
         user = User.query.filter_by(phone=data['phone']).first()
         if user and verify_password(user.password_hash, data['password']):
             access_token = create_access_token(identity=user.id)
@@ -92,13 +90,13 @@ def login():
         if request.content_type == 'application/json':
             return jsonify({'error': 'رقم الهاتف أو كلمة المرور غير صحيحة'}), 401
         else:
-            return redirect('/login')
+            return redirect('/login?error=بيانات+الدخول+غير+صحيحة')
     except Exception as e:
         logger.error(f"Login error: {str(e)}")
         if request.content_type == 'application/json':
             return jsonify({'error': 'حدث خطأ أثناء تسجيل الدخول'}), 500
         else:
-            return redirect('/login')
+            return redirect('/login?error=حدث+خطأ+أثناء+تسجيل+الدخول')
 
 @main.route('/api/sync', methods=['POST'])
 @jwt_required()
@@ -496,7 +494,8 @@ def root_redirect():
 
 @main.route('/login', methods=['GET'])
 def login_page():
-    return render_template('login.html')
+    error = request.args.get('error')
+    return render_template('login.html', error=error)
 
 @main.route('/dashboard', methods=['GET'])
 def dashboard():
