@@ -21,6 +21,9 @@ import com.accounting.app.models.*
 import java.io.File
 import kotlinx.coroutines.launch
 import android.widget.Toast
+import android.database.sqlite.SQLiteDatabase
+import android.content.ContentValues
+import android.util.Log
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
@@ -268,16 +271,56 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateLocalData(syncResponse: SyncResponse) {
-        // تحديث الحسابات
-        syncResponse.accounts.forEach { account ->
-            dbHelper.updateAccount(account)
+        try {
+            val db = DatabaseHelper(this)
+            
+            // تحديث الحسابات
+            syncResponse.accounts.forEach { account ->
+                val values = ContentValues().apply {
+                    put("account_number", account.accountNumber)
+                    put("account_name", account.accountName)
+                    put("balance", account.balance)
+                    put("phone_number", account.phoneNumber)
+                    put("is_debtor", if (account.isDebtor) 1 else 0)
+                    put("notes", account.notes)
+                    put("created_at", account.createdAt)
+                    put("updated_at", account.updatedAt)
+                }
+                
+                db.writableDatabase.insertWithOnConflict(
+                    "accounts",
+                    null,
+                    values,
+                    SQLiteDatabase.CONFLICT_REPLACE
+                )
+            }
+            
+            // تحديث المعاملات
+            syncResponse.transactions.forEach { transaction ->
+                val values = ContentValues().apply {
+                    put("date", transaction.date)
+                    put("amount", transaction.amount)
+                    put("description", transaction.description)
+                    put("type", transaction.type)
+                    put("currency", transaction.currency)
+                    put("notes", transaction.notes)
+                    put("account_id", transaction.accountId)
+                }
+                
+                db.writableDatabase.insertWithOnConflict(
+                    "transactions",
+                    null,
+                    values,
+                    SQLiteDatabase.CONFLICT_REPLACE
+                )
+            }
+            
+            // تحديث timestamp المزامنة
+            db.updateLastSyncTimestamp(syncResponse.syncTimestamp)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating local data: ${e.message}")
         }
-        // تحديث المعاملات
-        syncResponse.transactions.forEach { transaction ->
-            dbHelper.updateTransaction(transaction)
-        }
-        // تحديث timestamp المزامنة
-        dbHelper.updateLastSyncTimestamp(syncResponse.syncTimestamp)
     }
 
     private fun saveAuthToken(token: String) {
