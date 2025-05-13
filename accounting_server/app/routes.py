@@ -569,20 +569,44 @@ def accounts_page():
         return render_template('accounts.html', accounts=accounts)
     else:
         return redirect('/login')
+    
 
 @main.route('/entries')
 def entries_page():
     token = request.cookies.get('access_token')
     user_id = None
     entries = []
+    accounts = []
     if token:
         try:
             user_id = decode_token(token)['sub']
         except Exception:
             user_id = None
     if user_id:
-        entries = Transaction.query.filter_by(user_id=user_id).all()
-        return render_template('entries.html', entries=entries)
+        # جلب الحسابات لعرضها في الفلتر
+        accounts = Account.query.filter_by(user_id=user_id).all()
+
+        # جلب الفلاتر من الرابط
+        account_id = request.args.get('account_id')
+        date_from = request.args.get('date_from')
+        date_to = request.args.get('date_to')
+        currency = request.args.get('currency')
+
+        # بناء الاستعلام مع الفلاتر
+        query = Transaction.query.filter_by(user_id=user_id)
+        if account_id:
+            query = query.filter_by(account_id=account_id)
+        if currency:
+            query = query.filter_by(currency=currency)
+        if date_from:
+            query = query.filter(Transaction.date >= date_from)
+        if date_to:
+            query = query.filter(Transaction.date <= date_to)
+
+        # ترتيب النتائج من الأحدث للأقدم
+        entries = query.order_by(Transaction.date.desc()).all()
+
+        return render_template('entries.html', entries=entries, accounts=accounts)
     else:
         return redirect('/login')
 
