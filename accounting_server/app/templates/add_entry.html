@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>إضافة قيد حسابي</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: 'Cairo', Arial, sans-serif; background: #f6f8fb; margin: 0; padding: 0; direction: rtl; }
+        .container { max-width: 400px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #0001; padding: 24px; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; margin-bottom: 16px; border-radius: 6px; border: 1px solid #ccc; font-size: 15px; }
+        button { width: 100%; padding: 10px; background: #1976d2; color: #fff; border: none; border-radius: 8px; font-size: 17px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>إضافة قيد حسابي</h2>
+        <form id="addEntryForm">
+            <label>الحساب</label>
+            <select id="accountId" required></select>
+
+            <label>التاريخ</label>
+            <input type="date" id="date" required>
+
+            <label>المبلغ</label>
+            <input type="number" id="amount" required>
+
+            <label>العملة</label>
+            <select id="currency">
+                <option value="يمني">يمني</option>
+                <option value="سعودي">سعودي</option>
+                <option value="دولار">دولار</option>
+            </select>
+
+            <label>نوع القيد</label>
+            <select id="type">
+                <option value="debit">عليه</option>
+                <option value="credit">له</option>
+            </select>
+
+            <label>ملاحظات</label>
+            <textarea id="notes"></textarea>
+
+            <button type="submit">حفظ القيد</button>
+        </form>
+        <div id="result" style="color:green;text-align:center;margin-top:10px;"></div>
+    </div>
+    <script>
+        // تحميل الحسابات من Android أو من الخادم
+        function loadAccounts() {
+            let accounts = [];
+            if (window.Android && !window.Android.isOnline()) {
+                accounts = JSON.parse(Android.getAllAccounts());
+                fillAccounts(accounts);
+            } else {
+                fetch('/api/accounts', {headers: {'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')}})
+                    .then(res => res.json())
+                    .then(data => {
+                        accounts = data;
+                        fillAccounts(accounts);
+                    });
+            }
+        }
+        function fillAccounts(accounts) {
+            const select = document.getElementById('accountId');
+            select.innerHTML = '';
+            accounts.forEach(acc => {
+                const opt = document.createElement('option');
+                opt.value = acc.id || acc.account_id || acc.accountId;
+                opt.textContent = acc.account_name || acc.accountName;
+                select.appendChild(opt);
+            });
+        }
+        loadAccounts();
+
+        document.getElementById('addEntryForm').onsubmit = function(e) {
+            e.preventDefault();
+            const entry = {
+                account_id: document.getElementById('accountId').value,
+                date: new Date(document.getElementById('date').value).getTime(),
+                amount: parseFloat(document.getElementById('amount').value),
+                currency: document.getElementById('currency').value,
+                type: document.getElementById('type').value,
+                notes: document.getElementById('notes').value
+            };
+            if (window.Android && !window.Android.isOnline()) {
+                // أوفلاين: حفظ محلي
+                const ok = Android.addTransaction(JSON.stringify(entry));
+                document.getElementById('result').textContent = ok ? 'تم حفظ القيد محلياً' : 'حدث خطأ بالحفظ';
+            } else {
+                // أونلاين: إرسال للسيرفر
+                fetch('/api/add-entry', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')},
+                    body: JSON.stringify(entry)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('result').textContent = data.success ? 'تم إضافة القيد بنجاح' : (data.message || 'حدث خطأ');
+                });
+            }
+        }
+    </script>
+</body>
+</html> 
