@@ -258,4 +258,10 @@ class WebAppInterface(private val context: MainActivity, private val dbHelper: D
     fun loadReportsPage() {
         context.loadReportsPage()
     }
+
+    @JavascriptInterface
+    fun getFilteredEntries(accountId: Long?, dateFrom: Long?, dateTo: Long?, currency: String?): String {
+        val entries = dbHelper.getFilteredEntries(accountId, dateFrom, dateTo, currency)
+        return Gson().toJson(entries)
+    }
 } 
