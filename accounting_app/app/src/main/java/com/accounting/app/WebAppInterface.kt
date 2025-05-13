@@ -186,7 +186,7 @@ class WebAppInterface(
             type = transaction.getString("type"),
             currency = transaction.getString("currency"),
             notes = if (transaction.has("notes")) transaction.getString("notes") else null,
-            accountId = transaction.getLong("account_id")
+            account_id = transaction.getLong("account_id")
         )
         return dbHelper.addTransaction(newTransaction)
     }
@@ -202,7 +202,7 @@ class WebAppInterface(
             type = transaction.getString("type"),
             currency = transaction.getString("currency"),
             notes = if (transaction.has("notes")) transaction.getString("notes") else null,
-            accountId = transaction.getLong("account_id")
+            account_id = transaction.getLong("account_id")
         )
         return dbHelper.updateTransaction(updatedTransaction)
     }
