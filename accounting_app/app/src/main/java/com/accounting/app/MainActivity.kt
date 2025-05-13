@@ -11,6 +11,7 @@ import android.net.NetworkCapabilities
 import android.content.SharedPreferences
 import android.Manifest
 import android.os.Build
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import java.io.File
@@ -47,6 +48,7 @@ class MainActivity : AppCompatActivity() {
 
         setupWebView()
         setupSwipeRefresh()
+        setupBackPress()
         checkPermissions()
         loadContent()
     }
@@ -57,8 +59,6 @@ class MainActivity : AppCompatActivity() {
             domStorageEnabled = true
             allowFileAccess = true
             allowContentAccess = true
-            allowFileAccessFromFileURLs = true
-            allowUniversalAccessFromFileURLs = true
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
         }
 
@@ -80,6 +80,19 @@ class MainActivity : AppCompatActivity() {
         swipeRefreshLayout.setOnRefreshListener {
             refreshContent()
         }
+    }
+
+    private fun setupBackPress() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (webView.canGoBack()) {
+                    webView.goBack()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 
     fun refreshContent() {
@@ -136,8 +149,7 @@ class MainActivity : AppCompatActivity() {
                     Manifest.permission.INTERNET,
                     Manifest.permission.ACCESS_NETWORK_STATE,
                     Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.CAMERA
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
                 ),
                 1
             )
@@ -173,14 +185,6 @@ class MainActivity : AppCompatActivity() {
 
     fun getStoredPhone(): String {
         return sharedPreferences.getString(KEY_PHONE, "") ?: ""
-    }
-
-    override fun onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            super.onBackPressed()
-        }
     }
 
     override fun onDestroy() {
