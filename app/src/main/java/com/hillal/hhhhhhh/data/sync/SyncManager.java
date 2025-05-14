@@ -236,8 +236,17 @@ public class SyncManager {
                 // إرسال البيانات إلى السيرفر
                 Response<ApiService.SyncResponse> response = apiService.syncData("Bearer " + token, syncRequest).execute();
                 
-                if (response.isSuccessful() && response.body() != null) {
+                if (response.isSuccessful()) {
                     ApiService.SyncResponse syncResponse = response.body();
+                    if (syncResponse == null) {
+                        // إذا كانت الاستجابة فارغة، نعتبر أن المزامنة نجحت
+                        updateLastSyncTime();
+                        handler.post(() -> {
+                            Toast.makeText(context, "تمت المزامنة بنجاح", Toast.LENGTH_SHORT).show();
+                            callback.onSuccess();
+                        });
+                        return;
+                    }
                     
                     // تحديث معرفات السيرفر للحسابات الجديدة
                     for (Account account : newAccounts) {
