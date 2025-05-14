@@ -8,12 +8,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.hillal.hhhhhhh.R;
@@ -29,7 +29,7 @@ public class AddAccountFragment extends Fragment {
     private TextInputEditText notesEditText;
     private TextInputEditText openingBalanceEditText;
     private MaterialButton saveButton;
-    private MaterialSwitch whatsappSwitch;
+    private SwitchCompat whatsappSwitch;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,6 +57,8 @@ public class AddAccountFragment extends Fragment {
         saveButton = binding.saveButton;
         whatsappSwitch = binding.whatsappSwitch;
 
+        whatsappSwitch.setText(getString(R.string.whatsapp_enabled));
+        
         saveButton.setOnClickListener(v -> saveAccount());
         binding.cancelButton.setOnClickListener(v -> requireActivity().onBackPressed());
     }
