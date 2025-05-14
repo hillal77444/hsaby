@@ -73,12 +73,12 @@ public interface TransactionDao {
     @Query("SELECT SUM(amount) FROM transactions WHERE accountId = :accountId AND type = 'credit'")
     LiveData<Double> getTotalCredit(long accountId);
 
-    @Query("SELECT * FROM transactions WHERE updatedAt > :timestamp")
+    @Query("SELECT * FROM transactions WHERE updatedAt > :timestamp AND serverId != 0")
     List<Transaction> getModifiedTransactions(long timestamp);
 
     @Query("SELECT * FROM transactions WHERE serverId = 0")
     List<Transaction> getNewTransactions();
 
-    @Query("SELECT * FROM transactions WHERE updatedAt > :timestamp")
+    @Query("SELECT * FROM transactions WHERE updatedAt > :timestamp AND serverId != 0")
     List<Transaction> getTransactionsModifiedAfter(long timestamp);
 } 
