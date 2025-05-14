@@ -234,21 +234,29 @@ public class SyncManager {
                 Log.d(TAG, "بيانات المزامنة: " + syncRequestJson);
 
                 // إرسال البيانات إلى السيرفر
-                Response<Void> response = apiService.syncData("Bearer " + token, syncRequest).execute();
+                Response<ApiService.SyncResponse> response = apiService.syncData("Bearer " + token, syncRequest).execute();
                 
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiService.SyncResponse syncResponse = response.body();
+                    
                     // تحديث معرفات السيرفر للحسابات الجديدة
                     for (Account account : newAccounts) {
-                        account.setServerId(account.getId());
-                        accountDao.update(account);
-                        Log.d(TAG, "تم تحديث معرف السيرفر للحساب الجديد: " + account.getName());
+                        Long serverId = syncResponse.getAccountServerId(account.getId());
+                        if (serverId != null) {
+                            account.setServerId(serverId);
+                            accountDao.update(account);
+                            Log.d(TAG, "تم تحديث معرف السيرفر للحساب الجديد: " + account.getName());
+                        }
                     }
                     
                     // تحديث معرفات السيرفر للمعاملات الجديدة
                     for (Transaction transaction : newTransactions) {
-                        transaction.setServerId(transaction.getId());
-                        transactionDao.update(transaction);
-                        Log.d(TAG, "تم تحديث معرف السيرفر للمعاملة الجديدة: " + transaction.getDescription());
+                        Long serverId = syncResponse.getTransactionServerId(transaction.getId());
+                        if (serverId != null) {
+                            transaction.setServerId(serverId);
+                            transactionDao.update(transaction);
+                            Log.d(TAG, "تم تحديث معرف السيرفر للمعاملة الجديدة: " + transaction.getId());
+                        }
                     }
 
                     // تحديث حالة المزامنة للحسابات المعدلة
