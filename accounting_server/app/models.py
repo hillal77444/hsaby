@@ -18,6 +18,7 @@ class Account(db.Model):
     is_debtor = db.Column(db.Boolean, default=False)
     phone_number = db.Column(db.String(20))
     notes = db.Column(db.Text)
+    whatsapp_enabled = db.Column(db.Boolean, default=True)  # إضافة حقل واتساب
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     transactions = db.relationship('Transaction', backref='account', lazy=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
