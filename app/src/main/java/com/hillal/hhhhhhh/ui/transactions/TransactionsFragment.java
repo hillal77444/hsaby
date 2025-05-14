@@ -29,6 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import com.hillal.hhhhhhh.App;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class TransactionsFragment extends Fragment {
     private FragmentTransactionsBinding binding;
@@ -125,24 +129,22 @@ public class TransactionsFragment extends Fragment {
         updateDateInputs();
 
         // إعداد مستمعي النقر على حقول التاريخ
-        binding.startDateFilter.setOnClickListener(v -> showDatePicker(true));
-        binding.endDateFilter.setOnClickListener(v -> showDatePicker(false));
+        binding.startDateFilter.setOnClickListener(v -> showMaterialDatePicker(true));
+        binding.endDateFilter.setOnClickListener(v -> showMaterialDatePicker(false));
     }
 
-    private void showDatePicker(boolean isStartDate) {
+    private void showMaterialDatePicker(boolean isStartDate) {
         Calendar calendar = isStartDate ? startDate : endDate;
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-            requireContext(),
-            (view, year, month, dayOfMonth) -> {
-                calendar.set(year, month, dayOfMonth);
-                updateDateInputs();
-                viewModel.loadTransactionsByDateRange(startDate.getTime(), endDate.getTime());
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        );
-        datePickerDialog.show();
+        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("اختر التاريخ")
+                .setSelection(calendar.getTimeInMillis())
+                .build();
+        datePicker.show(getParentFragmentManager(), isStartDate ? "START_DATE_PICKER" : "END_DATE_PICKER");
+        datePicker.addOnPositiveButtonClickListener(selection -> {
+            calendar.setTimeInMillis((Long) selection);
+            updateDateInputs();
+            viewModel.loadTransactionsByDateRange(startDate.getTime(), endDate.getTime());
+        });
     }
 
     private void updateDateInputs() {
