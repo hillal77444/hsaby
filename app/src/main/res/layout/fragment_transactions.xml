@@ -6,15 +6,16 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/white">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
             app:title="@string/transactions"
-            app:titleTextColor="@color/white" />
+            app:titleTextColor="@color/primary"
+            app:menu="@menu/transactions_menu" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -27,41 +28,31 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:padding="16dp">
 
             <!-- قسم التصفية -->
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="#F8F9FA"
-                android:padding="12dp"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
 
-                <!-- تصفية حسب الحساب -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="الحساب:"
-                        android:textColor="#1976D2"
-                        android:textSize="14sp"
-                        android:fontFamily="sans-serif-medium"
-                        android:layout_marginEnd="8dp"/>
-
+                    <!-- تصفية حسب الحساب -->
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
                         android:hint="اختر الحساب"
-                        app:boxStrokeColor="#1976D2"
-                        app:hintTextColor="#1976D2">
+                        app:boxStrokeColor="@color/primary"
+                        app:hintTextColor="@color/primary">
 
                         <AutoCompleteTextView
                             android:id="@+id/accountFilterDropdown"
@@ -71,43 +62,25 @@
                             android:inputType="text"
                             android:maxLines="1"
                             android:singleLine="true"
-                            android:paddingStart="12dp"
-                            android:paddingEnd="12dp"
                             android:textSize="14sp"
-                            android:textColor="#212121"
-                            android:fontFamily="sans-serif-medium" />
+                            android:textColor="@color/text_primary" />
 
                     </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
 
-                <!-- تصفية حسب العملة -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="العملة:"
-                        android:textColor="#1976D2"
-                        android:textSize="14sp"
-                        android:fontFamily="sans-serif-medium"
-                        android:layout_marginEnd="8dp"/>
-
+                    <!-- تصفية العملة -->
                     <com.google.android.material.chip.ChipGroup
                         android:id="@+id/currencyChipGroup"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
                         app:singleSelection="true">
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipYer"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/currency_yer" />
+                            android:text="@string/currency_yer"
+                            android:checked="true" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipSar"
@@ -122,165 +95,68 @@
                             android:text="@string/currency_usd" />
 
                     </com.google.android.material.chip.ChipGroup>
-                </LinearLayout>
 
-                <!-- تصفية حسب التاريخ -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <!-- تصفية التاريخ -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="التاريخ:"
-                        android:textColor="#1976D2"
-                        android:textSize="14sp"
-                        android:fontFamily="sans-serif-medium"
-                        android:layout_marginEnd="8dp"/>
+                        android:orientation="horizontal">
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="8dp"
-                        android:hint="من تاريخ"
-                        app:boxStrokeColor="#1976D2"
-                        app:hintTextColor="#1976D2">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/startDateFilter"
-                            android:layout_width="match_parent"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/startDateLayout"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:focusable="false"
-                            android:inputType="none"
-                            android:textSize="14sp"
-                            android:textColor="#212121"
-                            android:paddingStart="12dp"
-                            android:paddingEnd="12dp"
-                            android:paddingTop="12dp"
-                            android:paddingBottom="12dp"
-                            android:gravity="center_vertical|start"
-                            android:minHeight="48dp"
-                            android:textAlignment="viewStart"
-                            android:fontFamily="sans-serif-medium" />
+                            android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
+                            android:hint="@string/from_date">
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/startDateInput"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:focusable="false"
+                                android:clickable="true" />
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="إلى تاريخ"
-                        app:boxStrokeColor="#1976D2"
-                        app:hintTextColor="#1976D2">
+                        </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/endDateFilter"
-                            android:layout_width="match_parent"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/endDateLayout"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:focusable="false"
-                            android:inputType="none"
-                            android:textSize="14sp"
-                            android:textColor="#212121"
-                            android:paddingStart="12dp"
-                            android:paddingEnd="12dp"
-                            android:paddingTop="12dp"
-                            android:paddingBottom="12dp"
-                            android:gravity="center_vertical|start"
-                            android:minHeight="48dp"
-                            android:textAlignment="viewStart"
-                            android:fontFamily="sans-serif-medium" />
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:hint="@string/to_date">
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/endDateInput"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:focusable="false"
+                                android:clickable="true" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
-            </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:orientation="horizontal"
-                android:background="#F1F6FA"
-                android:padding="0dp"
-                android:gravity="center_vertical"
-                android:showDividers="middle"
-                android:divider="@drawable/divider_vertical_light">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="2"
-                    android:text="الحساب"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:textColor="#2196F3"
-                    android:textSize="15sp"/>
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1.2"
-                    android:text="التاريخ"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:textColor="#2196F3"
-                    android:textSize="15sp"/>
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="عليه"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:textColor="#2196F3"
-                    android:textSize="15sp"/>
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="له"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:textColor="#2196F3"
-                    android:textSize="15sp"/>
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="2"
-                    android:text="ملاحظات"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:textColor="#2196F3"
-                    android:textSize="15sp"/>
-
-                <TextView
-                    android:layout_width="64dp"
-                    android:layout_height="match_parent"
-                    android:text="تفاعل"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:textColor="#2196F3"
-                    android:textSize="15sp"/>
-            </LinearLayout>
-
+            <!-- قائمة القيود -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/transactionsRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false" />
+                android:clipToPadding="false"
+                android:paddingBottom="80dp" />
 
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
 
+    <!-- زر إضافة قيد جديد -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddTransaction"
         android:layout_width="wrap_content"
