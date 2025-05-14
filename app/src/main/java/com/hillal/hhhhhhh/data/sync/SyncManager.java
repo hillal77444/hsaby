@@ -57,6 +57,16 @@ public class SyncManager {
     // إضافة جدول لتتبع عمليات المزامنة
     private final Map<String, Long> syncInProgress = new ConcurrentHashMap<>();
 
+    // إضافة متغيرات لتخزين البيانات الحالية
+    private List<Account> currentNewAccounts;
+    private List<Account> currentModifiedAccounts;
+    private List<Transaction> currentNewTransactions;
+    private List<Transaction> currentModifiedTransactions;
+
+    // إضافة قفل للمزامنة
+    private final Object syncLock = new Object();
+    private boolean isSyncing = false;
+
     public SyncManager(Context context, AccountDao accountDao, TransactionDao transactionDao) {
         this.context = context;
         this.apiService = RetrofitClient.getInstance().getApiService();
@@ -195,6 +205,43 @@ public class SyncManager {
         handler.post(() -> Toast.makeText(context, "تم نسخ رسالة الخطأ إلى الحافظة", Toast.LENGTH_SHORT).show());
     }
 
+    private static class SyncSession {
+        private final List<Account> newAccounts;
+        private final List<Account> modifiedAccounts;
+        private final List<Transaction> newTransactions;
+        private final List<Transaction> modifiedTransactions;
+        private final long startTime;
+
+        public SyncSession(List<Account> newAccounts, List<Account> modifiedAccounts,
+                         List<Transaction> newTransactions, List<Transaction> modifiedTransactions) {
+            this.newAccounts = newAccounts;
+            this.modifiedAccounts = modifiedAccounts;
+            this.newTransactions = newTransactions;
+            this.modifiedTransactions = modifiedTransactions;
+            this.startTime = System.currentTimeMillis();
+        }
+
+        public List<Account> getNewAccounts() {
+            return newAccounts;
+        }
+
+        public List<Account> getModifiedAccounts() {
+            return modifiedAccounts;
+        }
+
+        public List<Transaction> getNewTransactions() {
+            return newTransactions;
+        }
+
+        public List<Transaction> getModifiedTransactions() {
+            return modifiedTransactions;
+        }
+
+        public long getStartTime() {
+            return startTime;
+        }
+    }
+
     public void syncData(SyncCallback callback) {
         String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
                 .getString("token", null);
@@ -209,35 +256,69 @@ public class SyncManager {
             return;
         }
 
+        // التحقق من حالة المزامنة
+        synchronized (syncLock) {
+            if (isSyncing) {
+                callback.onError("جاري تنفيذ عملية مزامنة أخرى، يرجى الانتظار");
+                return;
+            }
+            isSyncing = true;
+        }
+
         executor.execute(() -> {
             try {
-                // جلب الحسابات الجديدة والمعدلة
-                List<Account> newAccounts = accountDao.getNewAccounts();
-                List<Account> modifiedAccounts = accountDao.getModifiedAccounts(lastSyncTime);
-                
-                // جلب المعاملات الجديدة والمعدلة
-                List<Transaction> newTransactions = transactionDao.getNewTransactions();
-                List<Transaction> modifiedTransactions = transactionDao.getModifiedTransactions(lastSyncTime);
+                // إنشاء جلسة مزامنة جديدة
+                SyncSession session = new SyncSession(
+                    accountDao.getNewAccounts(),
+                    accountDao.getModifiedAccounts(lastSyncTime),
+                    transactionDao.getNewTransactions(),
+                    transactionDao.getModifiedTransactions(lastSyncTime)
+                );
 
-                // تصفية العناصر التي قيد المزامنة
-                newAccounts = filterSyncingItems(newAccounts);
-                modifiedAccounts = filterSyncingItems(modifiedAccounts);
-                newTransactions = filterSyncingItems(newTransactions);
-                modifiedTransactions = filterSyncingItems(modifiedTransactions);
+                // التحقق من العناصر التي قيد المزامنة
+                List<Account> filteredNewAccounts = filterSyncingItems(session.getNewAccounts());
+                List<Account> filteredModifiedAccounts = filterSyncingItems(session.getModifiedAccounts());
+                List<Transaction> filteredNewTransactions = filterSyncingItems(session.getNewTransactions());
+                List<Transaction> filteredModifiedTransactions = filterSyncingItems(session.getModifiedTransactions());
+
+                // تحديث حالة المزامنة للعناصر
+                for (Account account : filteredNewAccounts) {
+                    account.setSyncStatus(SYNC_STATUS_SYNCING);
+                    accountDao.update(account);
+                    syncInProgress.put(getItemKey(account), System.currentTimeMillis());
+                }
+                for (Account account : filteredModifiedAccounts) {
+                    account.setSyncStatus(SYNC_STATUS_SYNCING);
+                    accountDao.update(account);
+                    syncInProgress.put(getItemKey(account), System.currentTimeMillis());
+                }
+                for (Transaction transaction : filteredNewTransactions) {
+                    transaction.setSyncStatus(SYNC_STATUS_SYNCING);
+                    transactionDao.update(transaction);
+                    syncInProgress.put(getItemKey(transaction), System.currentTimeMillis());
+                }
+                for (Transaction transaction : filteredModifiedTransactions) {
+                    transaction.setSyncStatus(SYNC_STATUS_SYNCING);
+                    transactionDao.update(transaction);
+                    syncInProgress.put(getItemKey(transaction), System.currentTimeMillis());
+                }
 
                 // دمج الحسابات الجديدة والمعدلة
                 List<Account> allAccounts = new ArrayList<>();
-                allAccounts.addAll(newAccounts);
-                allAccounts.addAll(modifiedAccounts);
+                allAccounts.addAll(filteredNewAccounts);
+                allAccounts.addAll(filteredModifiedAccounts);
 
                 // دمج المعاملات الجديدة والمعدلة
                 List<Transaction> allTransactions = new ArrayList<>();
-                allTransactions.addAll(newTransactions);
-                allTransactions.addAll(modifiedTransactions);
+                allTransactions.addAll(filteredNewTransactions);
+                allTransactions.addAll(filteredModifiedTransactions);
 
                 if (allAccounts.isEmpty() && allTransactions.isEmpty()) {
                     Log.d(TAG, "لا توجد بيانات جديدة للمزامنة");
                     updateLastSyncTime();
+                    synchronized (syncLock) {
+                        isSyncing = false;
+                    }
                     handler.post(() -> callback.onSuccess());
                     return;
                 }
@@ -255,8 +336,10 @@ public class SyncManager {
                 if (response.isSuccessful()) {
                     ApiService.SyncResponse syncResponse = response.body();
                     if (syncResponse == null) {
-                        // إذا كانت الاستجابة فارغة، نعتبر أن المزامنة نجحت
                         updateLastSyncTime();
+                        synchronized (syncLock) {
+                            isSyncing = false;
+                        }
                         handler.post(() -> {
                             Toast.makeText(context, "تمت المزامنة بنجاح", Toast.LENGTH_SHORT).show();
                             callback.onSuccess();
@@ -265,51 +348,47 @@ public class SyncManager {
                     }
                     
                     // تحديث معرفات السيرفر للحسابات الجديدة
-                    for (Account account : newAccounts) {
+                    for (Account account : filteredNewAccounts) {
                         Long serverId = syncResponse.getAccountServerId(account.getId());
                         if (serverId != null) {
                             account.setServerId(serverId);
                             account.setSyncStatus(SYNC_STATUS_SYNCED);
                             accountDao.update(account);
                             syncInProgress.remove(getItemKey(account));
-                            Log.d(TAG, "تم تحديث معرف السيرفر للحساب الجديد: " + account.getName());
                         }
                     }
                     
                     // تحديث معرفات السيرفر للمعاملات الجديدة
-                    for (Transaction transaction : newTransactions) {
+                    for (Transaction transaction : filteredNewTransactions) {
                         Long serverId = syncResponse.getTransactionServerId(transaction.getId());
                         if (serverId != null) {
                             transaction.setServerId(serverId);
                             transaction.setSyncStatus(SYNC_STATUS_SYNCED);
                             transactionDao.update(transaction);
                             syncInProgress.remove(getItemKey(transaction));
-                            Log.d(TAG, "تم تحديث معرف السيرفر للمعاملة الجديدة: " + transaction.getId());
                         }
                     }
 
                     // تحديث حالة المزامنة للحسابات المعدلة
-                    for (Account account : modifiedAccounts) {
+                    for (Account account : filteredModifiedAccounts) {
                         account.setLastSyncTime(System.currentTimeMillis());
                         account.setSyncStatus(SYNC_STATUS_SYNCED);
                         accountDao.update(account);
                         syncInProgress.remove(getItemKey(account));
-                        Log.d(TAG, "تم تحديث حالة المزامنة للحساب المعدل: " + account.getName());
                     }
 
                     // تحديث حالة المزامنة للمعاملات المعدلة
-                    for (Transaction transaction : modifiedTransactions) {
+                    for (Transaction transaction : filteredModifiedTransactions) {
                         transaction.setLastSyncTime(System.currentTimeMillis());
                         transaction.setSyncStatus(SYNC_STATUS_SYNCED);
                         transactionDao.update(transaction);
                         syncInProgress.remove(getItemKey(transaction));
-                        Log.d(TAG, "تم تحديث حالة المزامنة للمعاملة المعدلة: " + transaction.getDescription());
                     }
                     
-                    // تحديث وقت آخر مزامنة
                     updateLastSyncTime();
-                    
-                    Log.d(TAG, "تمت المزامنة بنجاح");
+                    synchronized (syncLock) {
+                        isSyncing = false;
+                    }
                     handler.post(() -> {
                         Toast.makeText(context, "تمت المزامنة بنجاح", Toast.LENGTH_SHORT).show();
                         callback.onSuccess();
@@ -322,8 +401,12 @@ public class SyncManager {
                     copyToClipboard("Sync Request JSON:\n" + syncRequestJson + "\n\nError Response:\n" + errorBody);
                     
                     // تحديث حالة المزامنة في حالة الفشل
-                    updateSyncStatusOnFailure(newAccounts, modifiedAccounts, newTransactions, modifiedTransactions);
+                    updateSyncStatusOnFailure(filteredNewAccounts, filteredModifiedAccounts, 
+                        filteredNewTransactions, filteredModifiedTransactions);
                     
+                    synchronized (syncLock) {
+                        isSyncing = false;
+                    }
                     handler.post(() -> {
                         Toast.makeText(context, "تم نسخ بيانات المزامنة إلى الحافظة", Toast.LENGTH_LONG).show();
                         callback.onError("فشلت المزامنة: " + errorBody);
@@ -331,7 +414,9 @@ public class SyncManager {
                 }
             } catch (Exception e) {
                 // تحديث حالة المزامنة في حالة الفشل
-                updateSyncStatusOnFailure(newAccounts, modifiedAccounts, newTransactions, modifiedTransactions);
+                synchronized (syncLock) {
+                    isSyncing = false;
+                }
                 Log.e(TAG, "خطأ في المزامنة: " + e.getMessage());
                 handler.post(() -> callback.onError("خطأ في المزامنة: " + e.getMessage()));
             }
@@ -340,22 +425,20 @@ public class SyncManager {
 
     private <T> List<T> filterSyncingItems(List<T> items) {
         return items.stream()
-                .filter(item -> !isItemSyncing(item))
+                .filter(item -> {
+                    String key = getItemKey(item);
+                    Long syncStartTime = syncInProgress.get(key);
+                    if (syncStartTime == null) {
+                        return true;
+                    }
+                    // إذا كانت المزامنة تستغرق أكثر من 5 دقائق، نعتبرها فاشلة
+                    if (System.currentTimeMillis() - syncStartTime > 5 * 60 * 1000) {
+                        syncInProgress.remove(key);
+                        return true;
+                    }
+                    return false;
+                })
                 .collect(Collectors.toList());
-    }
-
-    private <T> boolean isItemSyncing(T item) {
-        String key = getItemKey(item);
-        Long syncStartTime = syncInProgress.get(key);
-        if (syncStartTime == null) {
-            return false;
-        }
-        // إذا كانت المزامنة تستغرق أكثر من 5 دقائق، نعتبرها فاشلة
-        if (System.currentTimeMillis() - syncStartTime > 5 * 60 * 1000) {
-            syncInProgress.remove(key);
-            return false;
-        }
-        return true;
     }
 
     private <T> String getItemKey(T item) {
