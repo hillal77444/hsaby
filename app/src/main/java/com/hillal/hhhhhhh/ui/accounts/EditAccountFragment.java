@@ -8,11 +8,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
-import com.google.android.material.materialswitch.MaterialSwitch;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
@@ -22,7 +22,7 @@ public class EditAccountFragment extends Fragment {
     private FragmentAddAccountBinding binding;
     private AccountViewModel accountViewModel;
     private long accountId;
-    private MaterialSwitch whatsappSwitch;
+    private SwitchCompat whatsappSwitch;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,6 +48,10 @@ public class EditAccountFragment extends Fragment {
 
     private void setupViews() {
         whatsappSwitch = binding.whatsappSwitch;
+        
+        // تعيين النص بشكل صريح
+        whatsappSwitch.setText(getString(R.string.whatsapp_enabled));
+        
         binding.saveButton.setOnClickListener(v -> updateAccount());
         binding.cancelButton.setOnClickListener(v -> requireActivity().onBackPressed());
     }
