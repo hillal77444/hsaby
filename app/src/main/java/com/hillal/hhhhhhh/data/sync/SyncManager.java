@@ -67,6 +67,11 @@ public class SyncManager {
     private final Object syncLock = new Object();
     private boolean isSyncing = false;
 
+    private static final int MAX_OFFLINE_RETRY_COUNT = 3;
+    private static final long OFFLINE_RETRY_INTERVAL = 5 * 60 * 1000; // 5 دقائق
+    private int offlineRetryCount = 0;
+    private long lastOfflineRetryTime = 0;
+
     public SyncManager(Context context, AccountDao accountDao, TransactionDao transactionDao) {
         this.context = context;
         this.apiService = RetrofitClient.getInstance().getApiService();
@@ -190,10 +195,11 @@ public class SyncManager {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager != null) {
             NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
-            return capabilities != null && (
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
+            if (capabilities != null) {
+                boolean hasInternet = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+                boolean hasValidConnection = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+                return hasInternet && hasValidConnection;
+            }
         }
         return false;
     }
@@ -252,7 +258,7 @@ public class SyncManager {
         }
 
         if (!isNetworkAvailable()) {
-            callback.onError("لا يوجد اتصال بالإنترنت");
+            handleOfflineSync(callback);
             return;
         }
 
@@ -419,6 +425,66 @@ public class SyncManager {
                 }
                 Log.e(TAG, "خطأ في المزامنة: " + e.getMessage());
                 handler.post(() -> callback.onError("خطأ في المزامنة: " + e.getMessage()));
+            }
+        });
+    }
+
+    private void handleOfflineSync(SyncCallback callback) {
+        long currentTime = System.currentTimeMillis();
+        
+        // التحقق من عدد محاولات إعادة المحاولة
+        if (offlineRetryCount >= MAX_OFFLINE_RETRY_COUNT) {
+            // إعادة تعيين العداد بعد فترة
+            if (currentTime - lastOfflineRetryTime > OFFLINE_RETRY_INTERVAL) {
+                offlineRetryCount = 0;
+            } else {
+                callback.onError("لا يوجد اتصال بالإنترنت. سيتم إعادة المحاولة تلقائياً عند توفر الاتصال.");
+                return;
+            }
+        }
+
+        // تحديث حالة العناصر إلى PENDING
+        executor.execute(() -> {
+            try {
+                List<Account> newAccounts = accountDao.getNewAccounts();
+                List<Account> modifiedAccounts = accountDao.getModifiedAccounts(lastSyncTime);
+                List<Transaction> newTransactions = transactionDao.getNewTransactions();
+                List<Transaction> modifiedTransactions = transactionDao.getModifiedTransactions(lastSyncTime);
+
+                // تحديث حالة العناصر إلى PENDING
+                for (Account account : newAccounts) {
+                    account.setSyncStatus(SYNC_STATUS_PENDING);
+                    accountDao.update(account);
+                }
+                for (Account account : modifiedAccounts) {
+                    account.setSyncStatus(SYNC_STATUS_PENDING);
+                    accountDao.update(account);
+                }
+                for (Transaction transaction : newTransactions) {
+                    transaction.setSyncStatus(SYNC_STATUS_PENDING);
+                    transactionDao.update(transaction);
+                }
+                for (Transaction transaction : modifiedTransactions) {
+                    transaction.setSyncStatus(SYNC_STATUS_PENDING);
+                    transactionDao.update(transaction);
+                }
+
+                // تخزين وقت آخر محاولة
+                lastOfflineRetryTime = currentTime;
+                offlineRetryCount++;
+
+                // جدولة محاولة إعادة المزامنة
+                handler.postDelayed(() -> {
+                    if (isNetworkAvailable()) {
+                        syncData(callback);
+                    } else {
+                        callback.onError("لا يوجد اتصال بالإنترنت. سيتم إعادة المحاولة تلقائياً عند توفر الاتصال.");
+                    }
+                }, OFFLINE_RETRY_INTERVAL);
+
+            } catch (Exception e) {
+                Log.e(TAG, "خطأ في معالجة المزامنة بدون إنترنت: " + e.getMessage());
+                callback.onError("حدث خطأ أثناء محاولة المزامنة بدون إنترنت");
             }
         });
     }
