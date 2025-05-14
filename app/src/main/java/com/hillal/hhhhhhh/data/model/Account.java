@@ -48,6 +48,9 @@ public class Account {
     @SerializedName("whatsapp_enabled")
     private boolean whatsappEnabled;
 
+    @SerializedName("sync_status")
+    private int syncStatus;
+
     // Constructor
     @Ignore
     public Account(String accountNumber, String name, double balance, String phoneNumber, boolean isDebtor) {
@@ -59,6 +62,7 @@ public class Account {
         this.whatsappEnabled = true; // تفعيل واتساب افتراضياً
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
+        this.syncStatus = 0; // PENDING
     }
 
     // Empty constructor for Room
@@ -66,6 +70,7 @@ public class Account {
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
         this.whatsappEnabled = true; // تفعيل واتساب افتراضياً
+        this.syncStatus = 0; // PENDING
     }
 
     // Getters and Setters
@@ -171,6 +176,14 @@ public class Account {
 
     public void setWhatsappEnabled(boolean whatsappEnabled) {
         this.whatsappEnabled = whatsappEnabled;
+    }
+
+    public int getSyncStatus() {
+        return syncStatus;
+    }
+
+    public void setSyncStatus(int syncStatus) {
+        this.syncStatus = syncStatus;
     }
 
     @Override
