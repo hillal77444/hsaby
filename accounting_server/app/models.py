@@ -33,6 +33,7 @@ class Transaction(db.Model):
     type = db.Column(db.String(50), default='debit')
     currency = db.Column(db.String(50), default='ريال يمني')
     notes = db.Column(db.Text)
+    whatsapp_enabled = db.Column(db.Boolean, default=True)  # إضافة حقل whatsapp_enabled
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     account_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
