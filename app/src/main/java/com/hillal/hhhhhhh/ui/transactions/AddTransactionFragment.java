@@ -142,21 +142,27 @@ public class AddTransactionFragment extends Fragment {
         try {
             double amount = Double.parseDouble(amountStr);
 
-            Transaction transaction = new Transaction(
-                selectedAccountId,
-                amount,
-                isDebit ? "debit" : "credit",
-                description,
-                currency
-            );
-            transaction.setNotes(notes);
-            transaction.setDate(calendar.getTimeInMillis());
-            transaction.setUpdatedAt(System.currentTimeMillis());
-            transaction.setServerId(0); // تعيين serverId إلى 0 للمعاملات الجديدة
+            // الحصول على معلومات الحساب
+            accountViewModel.getAccountById(selectedAccountId).observe(getViewLifecycleOwner(), account -> {
+                if (account != null) {
+                    Transaction transaction = new Transaction(
+                        selectedAccountId,
+                        amount,
+                        isDebit ? "debit" : "credit",
+                        description,
+                        currency
+                    );
+                    transaction.setNotes(notes);
+                    transaction.setDate(calendar.getTimeInMillis());
+                    transaction.setUpdatedAt(System.currentTimeMillis());
+                    transaction.setServerId(0); // تعيين serverId إلى 0 للمعاملات الجديدة
+                    transaction.setWhatsappEnabled(account.isWhatsappEnabled()); // تعيين حالة واتساب الحساب
 
-            transactionsViewModel.insertTransaction(transaction);
-            Toast.makeText(requireContext(), R.string.transaction_saved, Toast.LENGTH_SHORT).show();
-            Navigation.findNavController(requireView()).navigateUp();
+                    transactionsViewModel.insertTransaction(transaction);
+                    Toast.makeText(requireContext(), R.string.transaction_saved, Toast.LENGTH_SHORT).show();
+                    Navigation.findNavController(requireView()).navigateUp();
+                }
+            });
         } catch (NumberFormatException e) {
             binding.amountEditText.setError(getString(R.string.error_invalid_amount));
         }
