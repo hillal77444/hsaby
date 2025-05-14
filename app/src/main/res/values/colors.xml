@@ -40,4 +40,8 @@
     <color name="success">#4CAF50</color>
     <color name="warning">#FFC107</color>
     <color name="info">#2196F3</color>
+    
+    <!-- Error colors -->
+    <color name="red">#FF0000</color>
+    <color name="error_red">#B00020</color>
 </resources>
