@@ -173,7 +173,6 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                  + "نود اشعاركم أنه تم قيد مبلغ: \n"
                  + amount + " " + actionText + "\n"
                  + "البيان/ " + description + "\n"
-                 + "نوع القيد/ " + type + "\n"
                  + "رصيدكم/ " + balanceText + balanceAmount;
         }
 
