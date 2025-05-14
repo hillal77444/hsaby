@@ -87,6 +87,7 @@ def login():
     except Exception as e:
         logger.error(f"Login error: {str(e)}")
         return jsonify({'error': 'حدث خطأ أثناء تسجيل الدخول'}), 500
+
 @main.route('/api/sync', methods=['POST'])
 @jwt_required()
 def sync_data():
