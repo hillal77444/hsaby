@@ -3,57 +3,61 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F6F8FA">
+    android:background="#F8F9FA">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="4dp">
+        android:padding="8dp">
 
         <!-- صف اختيار الحساب -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            app:cardCornerRadius="4dp"
-            app:cardElevation="2dp">
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#FFFFFF">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="8dp">
+                android:padding="12dp">
 
                 <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="12dp"
                     android:contentDescription="أيقونة حساب"
                     android:scaleType="fitCenter"
                     android:src="@android:drawable/ic_menu_myplaces"
-                    app:tint="#2196F3" />
+                    app:tint="#1976D2" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="اختر الحساب">
+                    android:hint="اختر الحساب"
+                    app:boxStrokeColor="#1976D2"
+                    app:hintTextColor="#1976D2">
 
                     <AutoCompleteTextView
                         android:id="@+id/accountDropdown"
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
+                        android:layout_height="56dp"
                         android:completionThreshold="1"
                         android:imeOptions="actionSearch"
                         android:inputType="text"
                         android:maxLines="1"
                         android:singleLine="true"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
                         android:textSize="16sp"
-                        android:textColor="#000" />
+                        android:textColor="#212121"
+                        android:fontFamily="sans-serif-medium" />
 
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
@@ -63,46 +67,49 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="2dp">
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#FFFFFF">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="8dp">
+                android:padding="12dp">
 
                 <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="12dp"
                     android:contentDescription="أيقونة تقويم"
                     android:scaleType="fitCenter"
                     android:src="@android:drawable/ic_menu_month"
-                    app:tint="#2196F3" />
+                    app:tint="#1976D2" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_weight="1"
-                    android:hint="من تاريخ">
+                    android:hint="من تاريخ"
+                    app:boxStrokeColor="#1976D2"
+                    app:hintTextColor="#1976D2">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/startDateInput"
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
+                        android:layout_height="56dp"
                         android:focusable="false"
                         android:inputType="none"
                         android:textSize="16sp"
-                        android:textColor="#000"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp"
+                        android:textColor="#212121"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
                         android:gravity="center_vertical|start"
-                        android:minHeight="48dp"
+                        android:minHeight="56dp"
                         android:textAlignment="viewStart"
                         android:fontFamily="sans-serif-medium" />
 
@@ -112,22 +119,24 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_weight="1"
-                    android:hint="إلى تاريخ">
+                    android:hint="إلى تاريخ"
+                    app:boxStrokeColor="#1976D2"
+                    app:hintTextColor="#1976D2">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/endDateInput"
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
+                        android:layout_height="56dp"
                         android:focusable="false"
                         android:inputType="none"
                         android:textSize="16sp"
-                        android:textColor="#000"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp"
+                        android:textColor="#212121"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
                         android:gravity="center_vertical|start"
-                        android:minHeight="48dp"
+                        android:minHeight="56dp"
                         android:textAlignment="viewStart"
                         android:fontFamily="sans-serif-medium" />
 
@@ -137,17 +146,18 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnShowReport"
                     android:layout_width="wrap_content"
-                    android:layout_height="48dp"
+                    android:layout_height="56dp"
                     android:text="تقرير"
                     android:textColor="#FFFFFF"
-                    android:textSize="14sp"
-                    android:minWidth="60dp"
-                    app:backgroundTint="#2196F3"
-                    app:cornerRadius="8dp"
+                    android:textSize="16sp"
+                    android:minWidth="80dp"
+                    app:backgroundTint="#1976D2"
+                    app:cornerRadius="12dp"
                     app:icon="@android:drawable/ic_menu_view"
                     app:iconGravity="textStart"
-                    app:iconPadding="4dp"
-                    android:layout_marginStart="4dp" />
+                    app:iconPadding="8dp"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="sans-serif-medium" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -157,14 +167,15 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="2dp">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#FFFFFF">
 
             <WebView
                 android:id="@+id/webView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#fff"
+                android:background="#FFFFFF"
                 android:overScrollMode="never" />
         </androidx.cardview.widget.CardView>
 
