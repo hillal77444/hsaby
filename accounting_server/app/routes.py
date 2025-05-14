@@ -140,6 +140,7 @@ def sync_data():
                             is_debtor=account_data.get('is_debtor', False),
                             phone_number=account_data.get('phone_number'),
                             notes=account_data.get('notes'),
+                            whatsapp_enabled=account_data.get('whatsapp_enabled', False),
                             user_id=user_id
                         )
                         db.session.add(account)
@@ -155,6 +156,8 @@ def sync_data():
                             account.phone_number = account_data['phone_number']
                         if 'notes' in account_data:
                             account.notes = account_data['notes']
+                        if 'whatsapp_enabled' in account_data:
+                            account.whatsapp_enabled = account_data['whatsapp_enabled']
                         account_id_map[account_data.get('id')] = account.id
                         logger.info(f"Updated account: {account.account_number}")
                 except Exception as e:
@@ -201,6 +204,7 @@ def sync_data():
                             type=transaction_data.get('type', 'debit'),
                             currency=transaction_data.get('currency', 'ريال يمني'),
                             notes=transaction_data.get('notes', ''),
+                            whatsapp_enabled=transaction_data.get('whatsapp_enabled', True),
                             user_id=user_id,
                             account_id=transaction_data['account_id']
                         )
@@ -220,6 +224,8 @@ def sync_data():
                             transaction.currency = transaction_data['currency']
                         if 'notes' in transaction_data:
                             transaction.notes = transaction_data['notes']
+                        if 'whatsapp_enabled' in transaction_data:
+                            transaction.whatsapp_enabled = transaction_data['whatsapp_enabled']
                         transaction_id_map[transaction_data['id']] = transaction.id
                         logger.info(f"Updated transaction: {transaction.id}")
                 except Exception as e:
@@ -281,7 +287,8 @@ def get_transactions():
             'account_id': trans.account_id,
             'type': trans.type,
             'currency': trans.currency,
-            'notes': trans.notes
+            'notes': trans.notes,
+            'whatsapp_enabled': trans.whatsapp_enabled  # إضافة حقل whatsapp_enabled
         } for trans in transactions])
     except Exception as e:
         logger.error(f"Get transactions error: {str(e)}")
@@ -340,6 +347,7 @@ def debug_public():
             'balance': acc.balance,
             'user_id': acc.user_id,
             'phone_number': acc.phone_number,
+            'whatsapp_enabled': acc.whatsapp_enabled,  # إضافة حقل whatsapp_enabled
             'created_at': str(acc.created_at) if acc.created_at else None
         } for acc in accounts]
         
@@ -354,6 +362,7 @@ def debug_public():
             'type': trans.type,
             'currency': trans.currency,
             'notes': trans.notes,
+            'whatsapp_enabled': trans.whatsapp_enabled,  # إضافة حقل whatsapp_enabled
             'account_id': trans.account_id,
             'user_id': trans.user_id
         } for trans in transactions]
