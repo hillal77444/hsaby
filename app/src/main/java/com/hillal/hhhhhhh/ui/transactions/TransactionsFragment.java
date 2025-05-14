@@ -204,8 +204,8 @@ public class TransactionsFragment extends Fragment {
                 boolean match = true;
                 if (selectedAccount != null && !selectedAccount.isEmpty()) {
                     Account account = null;
-                    if (adapter != null && adapter.accountMap != null) {
-                        account = adapter.accountMap.get(t.getAccountId());
+                    if (adapter != null && adapter.getAccountMap() != null) {
+                        account = adapter.getAccountMap().get(t.getAccountId());
                     }
                     String accountName = (account != null) ? account.getName() : null;
                     if (accountName == null || !accountName.equals(selectedAccount)) match = false;
