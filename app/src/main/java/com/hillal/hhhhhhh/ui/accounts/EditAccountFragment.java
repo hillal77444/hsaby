@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import com.google.android.material.materialswitch.MaterialSwitch;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
@@ -21,6 +22,7 @@ public class EditAccountFragment extends Fragment {
     private FragmentAddAccountBinding binding;
     private AccountViewModel accountViewModel;
     private long accountId;
+    private MaterialSwitch whatsappSwitch;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,6 +47,7 @@ public class EditAccountFragment extends Fragment {
     }
 
     private void setupViews() {
+        whatsappSwitch = binding.whatsappSwitch;
         binding.saveButton.setOnClickListener(v -> updateAccount());
         binding.cancelButton.setOnClickListener(v -> requireActivity().onBackPressed());
     }
@@ -57,6 +60,7 @@ public class EditAccountFragment extends Fragment {
                     binding.phoneEditText.setText(account.getPhoneNumber());
                     binding.openingBalanceEditText.setText(String.valueOf(account.getBalance()));
                     binding.notesEditText.setText(account.getNotes());
+                    whatsappSwitch.setChecked(account.isWhatsappEnabled());
                 }
             });
         }
@@ -67,6 +71,7 @@ public class EditAccountFragment extends Fragment {
         String phone = binding.phoneEditText.getText().toString();
         String notes = binding.notesEditText.getText().toString();
         String balanceStr = binding.openingBalanceEditText.getText().toString();
+        boolean whatsappEnabled = whatsappSwitch.isChecked();
 
         if (name.isEmpty()) {
             binding.nameEditText.setError("الرجاء إدخال اسم الحساب");
@@ -81,6 +86,7 @@ public class EditAccountFragment extends Fragment {
                     account.setPhoneNumber(phone);
                     account.setBalance(balance);
                     account.setNotes(notes);
+                    account.setWhatsappEnabled(whatsappEnabled);
                     account.setUpdatedAt(System.currentTimeMillis());
                     accountViewModel.updateAccount(account);
                     Toast.makeText(getContext(), R.string.account_saved, Toast.LENGTH_SHORT).show();
