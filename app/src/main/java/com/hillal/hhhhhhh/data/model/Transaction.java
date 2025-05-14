@@ -52,6 +52,9 @@ public class Transaction {
     @SerializedName("whatsapp_enabled")
     private boolean whatsappEnabled;
 
+    @SerializedName("sync_status")
+    private int syncStatus;
+
     // Constructor
     @Ignore
     public Transaction(long accountId, double amount, String type, String description, String currency) {
@@ -63,6 +66,7 @@ public class Transaction {
         this.date = System.currentTimeMillis();
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
+        this.syncStatus = 0; // PENDING
     }
 
     // Empty constructor for Room
@@ -70,6 +74,7 @@ public class Transaction {
         this.date = System.currentTimeMillis();
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
+        this.syncStatus = 0; // PENDING
     }
 
     // Helper method to convert server date to timestamp
@@ -213,6 +218,14 @@ public class Transaction {
 
     public void setWhatsappEnabled(boolean whatsappEnabled) {
         this.whatsappEnabled = whatsappEnabled;
+    }
+
+    public int getSyncStatus() {
+        return syncStatus;
+    }
+
+    public void setSyncStatus(int syncStatus) {
+        this.syncStatus = syncStatus;
     }
 
     @Override
