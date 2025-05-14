@@ -15,6 +15,7 @@ import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.model.Settings;
 import com.hillal.hhhhhhh.data.model.PendingOperation;
+import com.hillal.hhhhhhh.data.room.migrations.Migration_2;
 
 @Database(entities = {Account.class, Transaction.class, Settings.class, PendingOperation.class}, version = 2, exportSchema = false)
 @TypeConverters({Converters.class})
