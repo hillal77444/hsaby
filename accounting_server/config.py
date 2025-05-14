@@ -2,15 +2,14 @@ import os
 from datetime import timedelta
 
 class Config:
-    # إعدادات قاعدة البيانات
+    # مسار قاعدة البيانات
     SQLALCHEMY_DATABASE_URI = 'sqlite:////root/accounting_server/data/accounting.db'
+    
+    # إعدادات SQLAlchemy
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    # مسار قاعدة البيانات
-    DATABASE_PATH = '/root/accounting_server/data'
-    
     # إعدادات JWT
-    JWT_SECRET_KEY = 'accounting-app-secure-jwt-key-2024'  # مفتاح آمن للإنتاج
+    JWT_SECRET_KEY = 'your-secret-key-here'  # مفتاح آمن للإنتاج
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)  # زيادة مدة صلاحية التوكن
     
     # إعدادات الأمان
@@ -21,4 +20,10 @@ class Config:
     
     # إعدادات السيرفر
     SERVER_NAME = '212.224.88.122:5007'
-    PREFERRED_URL_SCHEME = 'http' 
+    PREFERRED_URL_SCHEME = 'http'
+    
+    # إعدادات CORS
+    CORS_HEADERS = 'Content-Type'
+    
+    # إعدادات التطبيق
+    DEBUG = True  # تغيير إلى False في الإنتاج 
