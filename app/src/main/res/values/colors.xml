@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Modern color palette -->
-    <color name="primary_blue">#2563EB</color>
-    <color name="primary_blue_dark">#1D4ED8</color>
+    <color name="primary">#2563EB</color>
+    <color name="primary_dark">#1D4ED8</color>
+    <color name="primary_light">#BBDEFB</color>
+    <color name="accent">#10B981</color>
     <color name="accent_green">#10B981</color>
     <color name="accent_green_dark">#059669</color>
     
@@ -13,55 +15,34 @@
     <!-- Background colors -->
     <color name="background_light">#F8FAFC</color>
     <color name="background_dark">#0F172A</color>
+    <color name="background">#F5F5F5</color>
+    <color name="surface">#FFFFFF</color>
     
     <!-- Utility colors -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="ripple_light">#1A000000</color>
+    <color name="divider">#BDBDBD</color>
     
-    <!-- Keep existing colors for backward compatibility -->
+    <!-- ألوان القيود المحاسبية -->
+    <color name="debit_color">#E53935</color>  <!-- أحمر للقيد المدين -->
+    <color name="credit_color">#43A047</color> <!-- أخضر للقيد الدائن -->
+    <color name="debit">#D32F2F</color>
+    <color name="credit">#388E3C</color>
+    
+    <!-- حالة النظام -->
+    <color name="error">#F44336</color>
+    <color name="success">#4CAF50</color>
+    <color name="warning">#FFC107</color>
+    <color name="info">#2196F3</color>
+    <color name="error_red">#B00020</color>
+    <color name="red">#FF0000</color>
+    <color name="green">#4CAF50</color>
+    
+    <!-- ألوان قديمة للتوافق مع الكود القديم فقط (يمكن حذفها لاحقاً إذا لم تعد مستخدمة) -->
     <color name="purple_200">#BB86FC</color>
     <color name="purple_500">#6200EE</color>
     <color name="purple_700">#3700B3</color>
     <color name="teal_200">#03DAC5</color>
     <color name="teal_700">#018786</color>
-    <color name="primary">#2563EB</color>
-    <color name="primary_dark">#1D4ED8</color>
-    <color name="accent">#10B981</color>
-    <color name="primary_text">#1E293B</color>
-    <color name="secondary_text">#64748B</color>
-    
-    <!-- ألوان القيود المحاسبية -->
-    <color name="debit_color">#E53935</color>  <!-- أحمر للقيد المدين -->
-    <color name="credit_color">#43A047</color> <!-- أخضر للقيد الدائن -->
-    <color name="icons">#FFFFFF</color>
-    <color name="divider">#BDBDBD</color>
-    <color name="error">#F44336</color>
-    <color name="success">#4CAF50</color>
-    <color name="warning">#FFC107</color>
-    <color name="info">#2196F3</color>
-    
-    <!-- Error colors -->
-    <color name="red">#FF0000</color>
-    <color name="error_red">#B00020</color>
-    
-    <!-- Additional colors -->
-    <color name="green">#4CAF50</color>
-    
-    <color name="primary">#1976D2</color>
-    <color name="primary_dark">#1565C0</color>
-    <color name="primary_light">#BBDEFB</color>
-    <color name="accent">#FF4081</color>
-    <color name="primary_text">#212121</color>
-    <color name="secondary_text">#757575</color>
-    <color name="error">#D32F2F</color>
-    <color name="success">#388E3C</color>
-    <color name="warning">#FFA000</color>
-    <color name="info">#1976D2</color>
-    <color name="background">#F5F5F5</color>
-    <color name="surface">#FFFFFF</color>
-    <color name="text_primary">#212121</color>
-    <color name="text_secondary">#757575</color>
-    <color name="debit">#D32F2F</color>
-    <color name="credit">#388E3C</color>
 </resources>
