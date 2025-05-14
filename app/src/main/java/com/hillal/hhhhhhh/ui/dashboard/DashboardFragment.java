@@ -19,6 +19,7 @@ import com.hillal.hhhhhhh.databinding.FragmentDashboardBinding;
 import com.hillal.hhhhhhh.App;
 import com.hillal.hhhhhhh.data.sync.SyncManager;
 import com.hillal.hhhhhhh.data.preferences.UserPreferences;
+import com.hillal.hhhhhhh.data.database.AppDatabase;
 
 public class DashboardFragment extends Fragment {
     private static final String TAG = "DashboardFragment";
@@ -33,7 +34,9 @@ public class DashboardFragment extends Fragment {
 
         try {
             // Initialize ViewModel
-            AccountRepository accountRepository = new AccountRepository(requireActivity().getApplication());
+            App app = (App) requireActivity().getApplication();
+            AppDatabase db = app.getDatabase();
+            AccountRepository accountRepository = new AccountRepository(db.accountDao(), db);
             TransactionRepository transactionRepository = new TransactionRepository(requireActivity().getApplication());
             dashboardViewModel = new ViewModelProvider(this, new DashboardViewModelFactory(accountRepository, transactionRepository))
                     .get(DashboardViewModel.class);
