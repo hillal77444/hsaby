@@ -5,6 +5,7 @@ import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 
 import java.util.List;
+import java.util.Map;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
@@ -77,6 +78,19 @@ public interface ApiService {
 
         public List<Transaction> getTransactions() {
             return transactions;
+        }
+    }
+
+    public static class SyncResponse {
+        private Map<Long, Long> accountIdMap;
+        private Map<Long, Long> transactionIdMap;
+
+        public Long getAccountServerId(Long localId) {
+            return accountIdMap != null ? accountIdMap.get(localId) : null;
+        }
+
+        public Long getTransactionServerId(Long localId) {
+            return transactionIdMap != null ? transactionIdMap.get(localId) : null;
         }
     }
 } 
