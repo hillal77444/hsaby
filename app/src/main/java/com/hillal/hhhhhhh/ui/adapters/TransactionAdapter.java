@@ -226,4 +226,8 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
     public interface OnItemLongClickListener {
         boolean onItemLongClick(Transaction transaction);
     }
+
+    public Map<Long, Account> getAccountMap() {
+        return accountMap;
+    }
 } 
