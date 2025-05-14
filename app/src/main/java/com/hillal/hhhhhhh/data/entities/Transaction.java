@@ -21,6 +21,7 @@ public class Transaction {
     private double amount;
     private String description;
     private Date date;
+    private boolean whatsappEnabled = true;
 
     public Transaction(long accountId, String type, double amount, String description, Date date) {
         this.accountId = accountId;
@@ -28,6 +29,7 @@ public class Transaction {
         this.amount = amount;
         this.description = description;
         this.date = date;
+        this.whatsappEnabled = true;
     }
 
     public long getId() {
@@ -76,5 +78,13 @@ public class Transaction {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public boolean isWhatsappEnabled() {
+        return whatsappEnabled;
+    }
+
+    public void setWhatsappEnabled(boolean whatsappEnabled) {
+        this.whatsappEnabled = whatsappEnabled;
     }
 } 
