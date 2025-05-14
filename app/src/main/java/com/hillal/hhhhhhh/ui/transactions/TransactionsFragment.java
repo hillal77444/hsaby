@@ -139,7 +139,6 @@ public class TransactionsFragment extends Fragment {
             .displayHours(false)
             .displayMinutes(false)
             .displayMonthNumbers(true)
-            .displayMonthNames(false)
             .displayYears(true)
             .defaultDate(calendar.getTime())
             .displayListener(picker -> {
