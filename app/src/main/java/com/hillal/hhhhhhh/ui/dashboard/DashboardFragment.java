@@ -19,7 +19,7 @@ import com.hillal.hhhhhhh.databinding.FragmentDashboardBinding;
 import com.hillal.hhhhhhh.App;
 import com.hillal.hhhhhhh.data.sync.SyncManager;
 import com.hillal.hhhhhhh.data.preferences.UserPreferences;
-import com.hillal.hhhhhhh.data.database.AppDatabase;
+import com.hillal.hhhhhhh.data.room.AppDatabase;
 
 public class DashboardFragment extends Fragment {
     private static final String TAG = "DashboardFragment";
