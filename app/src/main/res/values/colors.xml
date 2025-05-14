@@ -10,7 +10,7 @@
     
     <!-- Text colors -->
     <color name="text_primary">#1E293B</color>
-    <color name="text_secondary">#64748B</color>
+    <color name="text_secondary">#757575</color>
     
     <!-- Background colors -->
     <color name="background_light">#F8FAFC</color>
