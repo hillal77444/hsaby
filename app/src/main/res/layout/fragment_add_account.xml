@@ -112,7 +112,7 @@
                 android:id="@+id/whatsapp_switch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="تفعيل واتساب"
+                android:text="@string/whatsapp_enabled"
                 android:textColor="@color/primary"
                 android:checked="true" />
 
