@@ -1,9 +1,11 @@
 package com.hillal.hhhhhhh.ui.transactions;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -15,16 +17,17 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.chip.Chip;
-import com.google.android.material.tabs.TabLayout;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.databinding.FragmentTransactionsBinding;
 import com.hillal.hhhhhhh.ui.adapters.TransactionAdapter;
 import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
 import com.hillal.hhhhhhh.data.model.Account;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 import com.hillal.hhhhhhh.App;
 
 public class TransactionsFragment extends Fragment {
@@ -32,12 +35,19 @@ public class TransactionsFragment extends Fragment {
     private TransactionsViewModel viewModel;
     private TransactionAdapter adapter;
     private AccountViewModel accountViewModel;
+    private Calendar startDate;
+    private Calendar endDate;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this).get(TransactionsViewModel.class);
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
+        
+        // تهيئة التواريخ الافتراضية
+        startDate = Calendar.getInstance();
+        startDate.add(Calendar.DAY_OF_MONTH, -4); // قبل 4 أيام
+        endDate = Calendar.getInstance(); // اليوم الحالي
     }
 
     @Nullable
@@ -51,8 +61,9 @@ public class TransactionsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setupRecyclerView();
-        setupTabLayout();
+        setupAccountFilter();
         setupCurrencyFilter();
+        setupDateFilter();
         setupFab();
         observeAccountsAndTransactions();
     }
@@ -60,7 +71,6 @@ public class TransactionsFragment extends Fragment {
     private void setupRecyclerView() {
         adapter = new TransactionAdapter(new TransactionAdapter.TransactionDiffCallback());
         adapter.setOnItemClickListener(transaction -> {
-            // Navigate to edit transaction
             Bundle args = new Bundle();
             args.putLong("transactionId", transaction.getId());
             Navigation.findNavController(requireView())
@@ -75,28 +85,24 @@ public class TransactionsFragment extends Fragment {
         binding.transactionsRecyclerView.setAdapter(adapter);
     }
 
-    private void setupTabLayout() {
-        binding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                switch (tab.getPosition()) {
-                    case 0: // All transactions
-                        viewModel.loadAllTransactions();
-                        break;
-                    case 1: // Debit
-                        viewModel.loadTransactionsByType("عليه");
-                        break;
-                    case 2: // Credit
-                        viewModel.loadTransactionsByType("له");
-                        break;
-                }
+    private void setupAccountFilter() {
+        accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
+            List<String> accountNames = new ArrayList<>();
+            for (Account account : accounts) {
+                accountNames.add(account.getName());
             }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
+            
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_dropdown_item_1line,
+                accountNames
+            );
+            
+            binding.accountFilterDropdown.setAdapter(adapter);
+            binding.accountFilterDropdown.setOnItemClickListener((parent, view, position, id) -> {
+                String selectedAccount = accountNames.get(position);
+                viewModel.loadTransactionsByAccount(selectedAccount);
+            });
         });
     }
 
@@ -114,6 +120,44 @@ public class TransactionsFragment extends Fragment {
         });
     }
 
+    private void setupDateFilter() {
+        // تعيين التواريخ الافتراضية
+        updateDateInputs();
+
+        // إعداد مستمعي النقر على حقول التاريخ
+        binding.startDateFilter.setOnClickListener(v -> showDatePicker(true));
+        binding.endDateFilter.setOnClickListener(v -> showDatePicker(false));
+    }
+
+    private void showDatePicker(boolean isStartDate) {
+        Calendar calendar = isStartDate ? startDate : endDate;
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+            requireContext(),
+            (view, year, month, dayOfMonth) -> {
+                calendar.set(year, month, dayOfMonth);
+                updateDateInputs();
+                viewModel.loadTransactionsByDateRange(startDate.getTime(), endDate.getTime());
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        );
+        datePickerDialog.show();
+    }
+
+    private void updateDateInputs() {
+        // تحديث نص حقول التاريخ
+        binding.startDateFilter.setText(formatDate(startDate));
+        binding.endDateFilter.setText(formatDate(endDate));
+    }
+
+    private String formatDate(Calendar calendar) {
+        return String.format("%d/%d/%d",
+            calendar.get(Calendar.DAY_OF_MONTH),
+            calendar.get(Calendar.MONTH) + 1,
+            calendar.get(Calendar.YEAR));
+    }
+
     private void setupFab() {
         binding.fabAddTransaction.setOnClickListener(v -> {
             Navigation.findNavController(requireView())
@@ -128,7 +172,10 @@ public class TransactionsFragment extends Fragment {
                 accountMap.put(account.getId(), account);
             }
             adapter.setAccountMap(accountMap);
-            // بعد تعيين الخريطة، راقب المعاملات
+            
+            // تحميل المعاملات مع التصفية الافتراضية
+            viewModel.loadTransactionsByDateRange(startDate.getTime(), endDate.getTime());
+            
             viewModel.getTransactions().observe(getViewLifecycleOwner(), transactions -> {
                 adapter.submitList(transactions);
                 binding.transactionsRecyclerView.setVisibility(
@@ -151,7 +198,6 @@ public class TransactionsFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        // تنفيذ المزامنة عند الخروج من الصفحة
         try {
             App app = (App) requireActivity().getApplication();
             com.hillal.hhhhhhh.data.sync.SyncManager syncManager = new com.hillal.hhhhhhh.data.sync.SyncManager(
