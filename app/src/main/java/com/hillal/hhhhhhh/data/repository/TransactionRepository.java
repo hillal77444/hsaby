@@ -99,4 +99,12 @@ public class TransactionRepository {
     public void delete(Transaction transaction) {
         executorService.execute(() -> transactionDao.delete(transaction));
     }
+
+    public LiveData<Double> getTotalDebtors() {
+        return transactionDao.getTotalDebtors();
+    }
+
+    public LiveData<Double> getTotalCreditors() {
+        return transactionDao.getTotalCreditors();
+    }
 }
