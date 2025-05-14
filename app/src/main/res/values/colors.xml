@@ -44,4 +44,7 @@
     <!-- Error colors -->
     <color name="red">#FF0000</color>
     <color name="error_red">#B00020</color>
+    
+    <!-- Additional colors -->
+    <color name="green">#4CAF50</color>
 </resources>
