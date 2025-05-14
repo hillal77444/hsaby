@@ -14,6 +14,7 @@ import androidx.navigation.Navigation;
 
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
+import com.hillal.hhhhhhh.data.repository.TransactionRepository;
 import com.hillal.hhhhhhh.databinding.FragmentDashboardBinding;
 import com.hillal.hhhhhhh.App;
 import com.hillal.hhhhhhh.data.sync.SyncManager;
@@ -32,9 +33,10 @@ public class DashboardFragment extends Fragment {
 
         try {
             // Initialize ViewModel
-            AccountRepository accountRepository = App.getInstance().getAccountRepository();
-            dashboardViewModel = new ViewModelProvider(this, 
-                new DashboardViewModelFactory(accountRepository)).get(DashboardViewModel.class);
+            AccountRepository accountRepository = new AccountRepository(requireActivity().getApplication());
+            TransactionRepository transactionRepository = new TransactionRepository(requireActivity().getApplication());
+            dashboardViewModel = new ViewModelProvider(this, new DashboardViewModelFactory(accountRepository, transactionRepository))
+                    .get(DashboardViewModel.class);
             userPreferences = new UserPreferences(requireContext());
             Log.d(TAG, "DashboardViewModel initialized successfully");
         } catch (Exception e) {
@@ -115,13 +117,13 @@ public class DashboardFragment extends Fragment {
     private void observeData() {
         dashboardViewModel.getTotalDebtors().observe(getViewLifecycleOwner(), total -> {
             if (total != null) {
-                binding.totalDebtors.setText(String.format("%.2f %s", total, getString(R.string.currency_symbol)));
+                binding.totalDebtors.setText(String.format("%.2f ريال يمني", total));
             }
         });
 
         dashboardViewModel.getTotalCreditors().observe(getViewLifecycleOwner(), total -> {
             if (total != null) {
-                binding.totalCreditors.setText(String.format("%.2f %s", total, getString(R.string.currency_symbol)));
+                binding.totalCreditors.setText(String.format("%.2f ريال يمني", total));
             }
         });
     }
