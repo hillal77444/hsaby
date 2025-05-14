@@ -143,11 +143,7 @@ public class TransactionsFragment extends Fragment {
             .defaultDate(calendar.getTime())
             .displayListener(picker -> {
                 picker.setIsAmPm(false);
-                picker.setDayTextSize(20);
-                picker.setMonthTextSize(20);
-                picker.setYearTextSize(20);
                 picker.setSelectedTextColor(getResources().getColor(R.color.primary_blue));
-                picker.setUnselectedTextColor(getResources().getColor(R.color.text_secondary));
             })
             .listener(date -> {
                 Calendar cal = Calendar.getInstance();
