@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import com.hillal.hhhhhhh.App;
-import com.google.android.material.datepicker.MaterialDatePicker;
+import com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePickerDialog;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -127,22 +127,22 @@ public class TransactionsFragment extends Fragment {
 
     private void setupDateFilter() {
         updateDateInputs();
-        binding.startDateFilter.setOnClickListener(v -> showMaterialDatePicker(true));
-        binding.endDateFilter.setOnClickListener(v -> showMaterialDatePicker(false));
+        binding.startDateFilter.setOnClickListener(v -> showWheelDatePicker(true));
+        binding.endDateFilter.setOnClickListener(v -> showWheelDatePicker(false));
     }
 
-    private void showMaterialDatePicker(boolean isStartDate) {
+    private void showWheelDatePicker(boolean isStartDate) {
         Calendar calendar = isStartDate ? startDate : endDate;
-        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
-                .setTitleText("اختر التاريخ")
-                .setSelection(calendar.getTimeInMillis())
-                .build();
-        datePicker.show(getParentFragmentManager(), isStartDate ? "START_DATE_PICKER" : "END_DATE_PICKER");
-        datePicker.addOnPositiveButtonClickListener(selection -> {
-            calendar.setTimeInMillis((Long) selection);
-            updateDateInputs();
-            applyAllFilters();
-        });
+        new SingleDateAndTimePickerDialog.Builder(requireContext())
+            .title("اختر التاريخ")
+            .defaultDate(calendar.getTime())
+            .displayListener(picker -> picker.setIsAmPm(false))
+            .listener(date -> {
+                calendar.setTime(date);
+                updateDateInputs();
+                applyAllFilters();
+            })
+            .display();
     }
 
     private void updateDateInputs() {
