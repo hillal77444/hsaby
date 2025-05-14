@@ -49,6 +49,9 @@ public class Transaction {
     @SerializedName("is_modified")
     private boolean isModified;
 
+    @SerializedName("whatsapp_enabled")
+    private boolean whatsappEnabled;
+
     // Constructor
     @Ignore
     public Transaction(long accountId, double amount, String type, String description, String currency) {
@@ -204,6 +207,14 @@ public class Transaction {
         isModified = modified;
     }
 
+    public boolean isWhatsappEnabled() {
+        return whatsappEnabled;
+    }
+
+    public void setWhatsappEnabled(boolean whatsappEnabled) {
+        this.whatsappEnabled = whatsappEnabled;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -248,6 +259,7 @@ public class Transaction {
                 ", type='" + type + '\'' +
                 ", amount=" + amount +
                 ", description='" + description + '\'' +
+                ", whatsappEnabled=" + whatsappEnabled +
                 ", date=" + date +
                 ", lastSyncTime=" + lastSyncTime +
                 ", isModified=" + isModified +
