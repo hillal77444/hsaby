@@ -41,6 +41,8 @@ public class TransactionsFragment extends Fragment {
     private AccountViewModel accountViewModel;
     private Calendar startDate;
     private Calendar endDate;
+    private String selectedAccount = null;
+    private String selectedCurrency = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -95,40 +97,36 @@ public class TransactionsFragment extends Fragment {
             for (Account account : accounts) {
                 accountNames.add(account.getName());
             }
-            
             ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
                 android.R.layout.simple_dropdown_item_1line,
                 accountNames
             );
-            
             binding.accountFilterDropdown.setAdapter(adapter);
             binding.accountFilterDropdown.setOnItemClickListener((parent, view, position, id) -> {
-                String selectedAccount = accountNames.get(position);
-                viewModel.loadTransactionsByAccount(selectedAccount);
+                selectedAccount = accountNames.get(position);
+                applyAllFilters();
             });
         });
     }
 
     private void setupCurrencyFilter() {
         binding.currencyChipGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            String currency = null;
             if (checkedId == R.id.chipYer) {
-                currency = getString(R.string.currency_yer);
+                selectedCurrency = getString(R.string.currency_yer);
             } else if (checkedId == R.id.chipSar) {
-                currency = getString(R.string.currency_sar);
+                selectedCurrency = getString(R.string.currency_sar);
             } else if (checkedId == R.id.chipUsd) {
-                currency = getString(R.string.currency_usd);
+                selectedCurrency = getString(R.string.currency_usd);
+            } else {
+                selectedCurrency = null;
             }
-            viewModel.loadTransactionsByCurrency(currency);
+            applyAllFilters();
         });
     }
 
     private void setupDateFilter() {
-        // تعيين التواريخ الافتراضية
         updateDateInputs();
-
-        // إعداد مستمعي النقر على حقول التاريخ
         binding.startDateFilter.setOnClickListener(v -> showMaterialDatePicker(true));
         binding.endDateFilter.setOnClickListener(v -> showMaterialDatePicker(false));
     }
@@ -143,7 +141,7 @@ public class TransactionsFragment extends Fragment {
         datePicker.addOnPositiveButtonClickListener(selection -> {
             calendar.setTimeInMillis((Long) selection);
             updateDateInputs();
-            viewModel.loadTransactionsByDateRange(startDate.getTime(), endDate.getTime());
+            applyAllFilters();
         });
     }
 
@@ -196,6 +194,29 @@ public class TransactionsFragment extends Fragment {
                 })
                 .setNegativeButton(R.string.no, null)
                 .show();
+    }
+
+    private void applyAllFilters() {
+        viewModel.getAllTransactions().observe(getViewLifecycleOwner(), transactionList -> {
+            if (transactionList == null) return;
+            List<Transaction> filtered = new ArrayList<>();
+            for (Transaction t : transactionList) {
+                boolean match = true;
+                if (selectedAccount != null && !selectedAccount.isEmpty()) {
+                    if (!t.getAccountName().equals(selectedAccount)) match = false;
+                }
+                if (selectedCurrency != null && !selectedCurrency.isEmpty()) {
+                    if (!selectedCurrency.equals(t.getCurrency())) match = false;
+                }
+                Date transactionDate = new Date(t.getDate());
+                if (transactionDate.before(startDate.getTime()) || transactionDate.after(endDate.getTime())) {
+                    match = false;
+                }
+                if (match) filtered.add(t);
+            }
+            adapter.submitList(filtered);
+            binding.transactionsRecyclerView.setVisibility(filtered.isEmpty() ? View.GONE : View.VISIBLE);
+        });
     }
 
     @Override
