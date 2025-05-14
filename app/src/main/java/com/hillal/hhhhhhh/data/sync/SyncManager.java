@@ -369,25 +369,33 @@ public class SyncManager {
 
     private void updateSyncStatusOnFailure(List<Account> newAccounts, List<Account> modifiedAccounts,
                                          List<Transaction> newTransactions, List<Transaction> modifiedTransactions) {
-        for (Account account : newAccounts) {
-            account.setSyncStatus(SYNC_STATUS_FAILED);
-            accountDao.update(account);
-            syncInProgress.remove(getItemKey(account));
+        if (newAccounts != null) {
+            for (Account account : newAccounts) {
+                account.setSyncStatus(SYNC_STATUS_FAILED);
+                accountDao.update(account);
+                syncInProgress.remove(getItemKey(account));
+            }
         }
-        for (Account account : modifiedAccounts) {
-            account.setSyncStatus(SYNC_STATUS_FAILED);
-            accountDao.update(account);
-            syncInProgress.remove(getItemKey(account));
+        if (modifiedAccounts != null) {
+            for (Account account : modifiedAccounts) {
+                account.setSyncStatus(SYNC_STATUS_FAILED);
+                accountDao.update(account);
+                syncInProgress.remove(getItemKey(account));
+            }
         }
-        for (Transaction transaction : newTransactions) {
-            transaction.setSyncStatus(SYNC_STATUS_FAILED);
-            transactionDao.update(transaction);
-            syncInProgress.remove(getItemKey(transaction));
+        if (newTransactions != null) {
+            for (Transaction transaction : newTransactions) {
+                transaction.setSyncStatus(SYNC_STATUS_FAILED);
+                transactionDao.update(transaction);
+                syncInProgress.remove(getItemKey(transaction));
+            }
         }
-        for (Transaction transaction : modifiedTransactions) {
-            transaction.setSyncStatus(SYNC_STATUS_FAILED);
-            transactionDao.update(transaction);
-            syncInProgress.remove(getItemKey(transaction));
+        if (modifiedTransactions != null) {
+            for (Transaction transaction : modifiedTransactions) {
+                transaction.setSyncStatus(SYNC_STATUS_FAILED);
+                transactionDao.update(transaction);
+                syncInProgress.remove(getItemKey(transaction));
+            }
         }
     }
 
