@@ -135,10 +135,29 @@ public class TransactionsFragment extends Fragment {
         Calendar calendar = isStartDate ? startDate : endDate;
         new SingleDateAndTimePickerDialog.Builder(requireContext())
             .title("اختر التاريخ")
+            .displayDays(true)
+            .displayHours(false)
+            .displayMinutes(false)
             .defaultDate(calendar.getTime())
             .displayListener(picker -> picker.setIsAmPm(false))
             .listener(date -> {
-                calendar.setTime(date);
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(date);
+                if (isStartDate) {
+                    // بداية اليوم
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    startDate.setTime(cal.getTime());
+                } else {
+                    // نهاية اليوم
+                    cal.set(Calendar.HOUR_OF_DAY, 23);
+                    cal.set(Calendar.MINUTE, 59);
+                    cal.set(Calendar.SECOND, 59);
+                    cal.set(Calendar.MILLISECOND, 999);
+                    endDate.setTime(cal.getTime());
+                }
                 updateDateInputs();
                 applyAllFilters();
             })
@@ -146,16 +165,10 @@ public class TransactionsFragment extends Fragment {
     }
 
     private void updateDateInputs() {
-        // تحديث نص حقول التاريخ
-        binding.startDateFilter.setText(formatDate(startDate));
-        binding.endDateFilter.setText(formatDate(endDate));
-    }
-
-    private String formatDate(Calendar calendar) {
-        return String.format("%d/%d/%d",
-            calendar.get(Calendar.DAY_OF_MONTH),
-            calendar.get(Calendar.MONTH) + 1,
-            calendar.get(Calendar.YEAR));
+        // عرض التاريخ بالأرقام الإنجليزية فقط
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
+        binding.startDateFilter.setText(sdf.format(startDate.getTime()));
+        binding.endDateFilter.setText(sdf.format(endDate.getTime()));
     }
 
     private void setupFab() {
