@@ -44,7 +44,6 @@ public class SyncManager {
     private int currentRetryCount = 0;
     private static final String SYNC_TAG = "sync_task";
     private Runnable currentSyncTask;
-    private boolean isSyncing = false; // إضافة متغير للتحكم في حالة المزامنة
 
     public SyncManager(Context context, AccountDao accountDao, TransactionDao transactionDao) {
         this.context = context;
@@ -185,11 +184,6 @@ public class SyncManager {
     }
 
     public void syncData(SyncCallback callback) {
-        if (isSyncing) { // التحقق من عدم وجود مزامنة قيد التنفيذ
-            Log.d(TAG, "Sync already in progress, skipping...");
-            return;
-        }
-
         String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
                 .getString("token", null);
 
@@ -203,7 +197,6 @@ public class SyncManager {
             return;
         }
 
-        isSyncing = true; // تعيين حالة المزامنة إلى قيد التنفيذ
         executor.execute(() -> {
             try {
                 // جلب الحسابات الجديدة والمعدلة
@@ -296,7 +289,6 @@ public class SyncManager {
                     handler.post(() -> {
                         Toast.makeText(context, "تمت المزامنة بنجاح", Toast.LENGTH_SHORT).show();
                         callback.onSuccess();
-                        isSyncing = false; // إعادة تعيين حالة المزامنة
                     });
                 } else {
                     String errorBody = response.errorBody() != null ? response.errorBody().string() : "خطأ غير معروف";
@@ -308,15 +300,11 @@ public class SyncManager {
                     handler.post(() -> {
                         Toast.makeText(context, "تم نسخ بيانات المزامنة إلى الحافظة", Toast.LENGTH_LONG).show();
                         callback.onError("فشلت المزامنة: " + errorBody);
-                        isSyncing = false; // إعادة تعيين حالة المزامنة في حالة الخطأ
                     });
                 }
             } catch (Exception e) {
                 Log.e(TAG, "خطأ في المزامنة: " + e.getMessage());
-                handler.post(() -> {
-                    callback.onError("خطأ في المزامنة: " + e.getMessage());
-                    isSyncing = false; // إعادة تعيين حالة المزامنة في حالة الخطأ
-                });
+                handler.post(() -> callback.onError("خطأ في المزامنة: " + e.getMessage()));
             }
         });
     }
@@ -345,12 +333,11 @@ public class SyncManager {
     }
 
     private void performInitialSync() {
-        if (!isNetworkAvailable() || isSyncing) { // التحقق من عدم وجود مزامنة قيد التنفيذ
-            Log.d(TAG, "No network available or sync in progress, skipping initial sync");
+        if (!isNetworkAvailable()) {
+            Log.d(TAG, "No network available, skipping initial sync");
             return;
         }
 
-        isSyncing = true; // تعيين حالة المزامنة إلى قيد التنفيذ
         DataManager dataManager = new DataManager(
             context,
             accountDao,
@@ -365,13 +352,11 @@ public class SyncManager {
                     public void onSuccess() {
                         Log.d(TAG, "Initial sync successful");
                         updateLastSyncTime();
-                        isSyncing = false; // إعادة تعيين حالة المزامنة
                     }
 
                     @Override
                     public void onError(String error) {
                         Log.e(TAG, "Initial sync failed: " + error);
-                        isSyncing = false; // إعادة تعيين حالة المزامنة في حالة الخطأ
                     }
                 });
             }
@@ -379,7 +364,6 @@ public class SyncManager {
             @Override
             public void onError(String error) {
                 Log.e(TAG, "Initial fetch failed: " + error);
-                isSyncing = false; // إعادة تعيين حالة المزامنة في حالة الخطأ
             }
         });
     }
@@ -404,7 +388,7 @@ public class SyncManager {
 
     // دالة جديدة لتفعيل المزامنة عند دخول لوحة التحكم
     public void onDashboardEntered() {
-        if (isNetworkAvailable() && !isSyncing) { // التحقق من عدم وجود مزامنة قيد التنفيذ
+        if (isNetworkAvailable()) {
             Log.d(TAG, "Dashboard entered, performing sync...");
             performInitialSync();
         }
