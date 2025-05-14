@@ -100,6 +100,32 @@
                 android:minLines="3" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- خيار واتساب -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/whatsapp_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="تفعيل واتساب"
+                android:textColor="@color/primary"
+                android:checked="true" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="4dp"
+                android:text="سيتم إرسال إشعارات واتساب للعميل عند إضافة معاملات جديدة"
+                android:textSize="12sp"
+                android:textColor="#757575" />
+        </LinearLayout>
+
         <!-- أزرار -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/save_button"
