@@ -87,7 +87,6 @@ def login():
     except Exception as e:
         logger.error(f"Login error: {str(e)}")
         return jsonify({'error': 'حدث خطأ أثناء تسجيل الدخول'}), 500
-
 @main.route('/api/sync', methods=['POST'])
 @jwt_required()
 def sync_data():
@@ -107,42 +106,47 @@ def sync_data():
             logger.warning("No accounts or transactions in sync data")
             return json_response({'error': 'يجب إرسال بيانات الحسابات أو المعاملات'}, 400)
         
-        # التحقق من صحة بيانات الحسابات
+        # إنشاء خرائط لتخزين المعرفات الجديدة
+        account_id_map = {}
+        transaction_id_map = {}
+        
+        # معالجة الحسابات
         if 'accounts' in data:
             if not isinstance(data['accounts'], list):
                 logger.error("Accounts data is not a list")
                 return json_response({'error': 'بيانات الحسابات غير صحيحة'}, 400)
             
-            logger.info(f"Processing {len(data['accounts'])} accounts")
             for account_data in data['accounts']:
                 try:
-                    # التحقق من البيانات المطلوبة للحساب
+                    # التحقق من البيانات المطلوبة
                     required_fields = ['account_number', 'account_name', 'balance']
                     missing_fields = [field for field in required_fields if field not in account_data]
                     if missing_fields:
-                        logger.error(f"Missing required fields for account: {missing_fields}")
                         return json_response({'error': f'بيانات الحساب غير مكتملة: {", ".join(missing_fields)}'}, 400)
                     
+                    # البحث عن الحساب
                     account = Account.query.filter_by(
                         account_number=account_data['account_number'],
                         user_id=user_id
                     ).first()
                     
                     if not account:
-                        # حساب جديد - نستخدم القيم المرسلة من التطبيق
+                        # حساب جديد
                         account = Account(
                             account_number=account_data['account_number'],
                             account_name=account_data['account_name'],
                             balance=account_data['balance'],
                             is_debtor=account_data.get('is_debtor', False),
-                            phone_number=account_data.get('phone_number'),  # إضافة رقم الهاتف
-                            notes=account_data.get('notes'),  # إضافة الملاحظات
+                            phone_number=account_data.get('phone_number'),
+                            notes=account_data.get('notes'),
                             user_id=user_id
                         )
                         db.session.add(account)
+                        db.session.flush()  # للحصول على المعرف الجديد
+                        account_id_map[account_data.get('id')] = account.id
                         logger.info(f"Added new account: {account.account_number}")
                     else:
-                        # حساب موجود - نحدث القيم
+                        # تحديث الحساب الموجود
                         account.balance = account_data['balance']
                         if 'is_debtor' in account_data:
                             account.is_debtor = account_data['is_debtor']
@@ -150,51 +154,46 @@ def sync_data():
                             account.phone_number = account_data['phone_number']
                         if 'notes' in account_data:
                             account.notes = account_data['notes']
+                        account_id_map[account_data.get('id')] = account.id
                         logger.info(f"Updated account: {account.account_number}")
-                except KeyError as e:
-                    logger.error(f"Missing account field: {str(e)}")
-                    return json_response({'error': f'بيانات الحساب غير مكتملة: {str(e)}'}, 400)
                 except Exception as e:
                     logger.error(f"Error processing account: {str(e)}")
                     return json_response({'error': f'خطأ في معالجة بيانات الحساب: {str(e)}'}, 400)
         
-        # التحقق من صحة بيانات المعاملات
+        # معالجة المعاملات
         if 'transactions' in data:
             if not isinstance(data['transactions'], list):
                 logger.error("Transactions data is not a list")
                 return json_response({'error': 'بيانات المعاملات غير صحيحة'}, 400)
             
-            logger.info(f"Processing {len(data['transactions'])} transactions")
             for transaction_data in data['transactions']:
                 try:
-                    # التحقق من البيانات المطلوبة للمعاملة
-                    required_fields = ['id', 'date', 'amount', 'description', 'account_id']
+                    # التحقق من البيانات المطلوبة
+                    required_fields = ['date', 'amount', 'description', 'account_id']
                     missing_fields = [field for field in required_fields if field not in transaction_data]
                     if missing_fields:
-                        logger.error(f"Missing required fields for transaction: {missing_fields}")
                         return json_response({'error': f'بيانات المعاملة غير مكتملة: {", ".join(missing_fields)}'}, 400)
                     
                     # معالجة التاريخ
                     try:
                         if isinstance(transaction_data['date'], (int, float)):
-                            # إذا كان التاريخ timestamp
-                            date = datetime.fromtimestamp(transaction_data['date'] / 1000)  # تحويل من milliseconds إلى seconds
+                            date = datetime.fromtimestamp(transaction_data['date'] / 1000)
                         else:
-                            # إذا كان التاريخ نص ISO
                             date = datetime.fromisoformat(transaction_data['date'].replace('Z', '+00:00'))
                     except (ValueError, TypeError) as e:
-                        logger.error(f"Invalid date format: {str(e)}")
                         return json_response({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}, 400)
                     
-                    transaction = Transaction.query.filter_by(
-                        id=transaction_data['id'],
-                        user_id=user_id
-                    ).first()
+                    # البحث عن المعاملة
+                    transaction = None
+                    if 'id' in transaction_data:
+                        transaction = Transaction.query.filter_by(
+                            id=transaction_data['id'],
+                            user_id=user_id
+                        ).first()
                     
                     if not transaction:
-                        # معاملة جديدة - نستخدم القيم المرسلة من التطبيق
+                        # معاملة جديدة
                         transaction = Transaction(
-                            id=transaction_data['id'],
                             date=date,
                             amount=transaction_data['amount'],
                             description=transaction_data['description'],
@@ -205,9 +204,12 @@ def sync_data():
                             account_id=transaction_data['account_id']
                         )
                         db.session.add(transaction)
+                        db.session.flush()  # للحصول على المعرف الجديد
+                        if 'id' in transaction_data:
+                            transaction_id_map[transaction_data['id']] = transaction.id
                         logger.info(f"Added new transaction: {transaction.id}")
                     else:
-                        # معاملة موجودة - نحدث فقط القيم الأساسية
+                        # تحديث المعاملة الموجودة
                         transaction.date = date
                         transaction.amount = transaction_data['amount']
                         transaction.description = transaction_data['description']
@@ -217,10 +219,8 @@ def sync_data():
                             transaction.currency = transaction_data['currency']
                         if 'notes' in transaction_data:
                             transaction.notes = transaction_data['notes']
+                        transaction_id_map[transaction_data['id']] = transaction.id
                         logger.info(f"Updated transaction: {transaction.id}")
-                except KeyError as e:
-                    logger.error(f"Missing transaction field: {str(e)}")
-                    return json_response({'error': f'بيانات المعاملة غير مكتملة: {str(e)}'}, 400)
                 except Exception as e:
                     logger.error(f"Error processing transaction: {str(e)}")
                     return json_response({'error': f'خطأ في معالجة بيانات المعاملة: {str(e)}'}, 400)
@@ -228,7 +228,11 @@ def sync_data():
         try:
             db.session.commit()
             logger.info("Sync completed successfully")
-            return json_response({'message': 'تمت المزامنة بنجاح'})
+            return json_response({
+                'message': 'تمت المزامنة بنجاح',
+                'accountIdMap': account_id_map,
+                'transactionIdMap': transaction_id_map
+            })
         except Exception as e:
             logger.error(f"Database commit error: {str(e)}")
             db.session.rollback()
@@ -238,7 +242,7 @@ def sync_data():
         logger.error(f"Unexpected sync error: {str(e)}")
         db.session.rollback()
         return json_response({'error': f'حدث خطأ غير متوقع أثناء المزامنة: {str(e)}'}, 500)
-
+    
 @main.route('/api/accounts', methods=['GET'])
 @jwt_required()
 def get_accounts():
