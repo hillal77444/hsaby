@@ -4,36 +4,38 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7FA"
+    android:background="@color/background_light"
     tools:context=".ui.dashboard.DashboardFragment">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        android:scrollbars="none">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="@dimen/screen_padding">
 
             <!-- شريط معلومات المستخدم -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="5dp"
-                app:strokeColor="#E0E0E0"
-                app:strokeWidth="0dp">
+                android:layout_marginBottom="@dimen/card_margin"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardElevation="0dp"
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="20dp">
+                    android:padding="@dimen/card_padding">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -45,16 +47,18 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="مرحباً"
-                            android:textAppearance="?attr/textAppearanceCaption"
-                            android:textColor="#757575" />
+                            android:textAppearance="?attr/textAppearanceBody1"
+                            android:textColor="@color/text_secondary" />
 
                         <TextView
                             android:id="@+id/userNameText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:textAppearance="?attr/textAppearanceSubtitle1"
-                            android:textColor="#212121"
+                            android:textAppearance="?attr/textAppearanceHeadline6"
+                            android:textColor="@color/text_primary"
+                            android:maxLines="1"
+                            android:ellipsize="end"
                             tools:text="أحمد محمد" />
 
                     </LinearLayout>
@@ -66,10 +70,12 @@
                         android:layout_height="wrap_content"
                         android:text="تعديل"
                         android:textSize="14sp"
+                        android:minHeight="48dp"
                         app:cornerRadius="30dp"
                         app:icon="@drawable/ic_edit"
                         app:iconGravity="textStart"
-                        app:iconPadding="10dp" />
+                        app:iconPadding="10dp"
+                        app:strokeColor="@color/primary_blue" />
 
                 </LinearLayout>
 
@@ -79,53 +85,59 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:orientation="horizontal">
+                android:layout_marginBottom="@dimen/card_margin"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
 
                 <!-- بطاقة القيود المحاسبية -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/transactionsCard"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="12dp"
+                    android:layout_marginEnd="@dimen/card_spacing"
                     android:layout_weight="1"
-                    app:cardCornerRadius="18dp"
-                    app:cardElevation="3dp"
-                    app:strokeColor="#E0E0E0"
-                    app:strokeWidth="0dp">
+                    app:cardCornerRadius="@dimen/card_corner_radius"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#E2E8F0"
+                    app:strokeWidth="1dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="20dp">
+                        android:padding="@dimen/card_padding">
 
                         <ImageView
-                            android:layout_width="60dp"
-                            android:layout_height="60dp"
+                            android:layout_width="@dimen/icon_size"
+                            android:layout_height="@dimen/icon_size"
                             android:background="@drawable/circle_background"
                             android:padding="16dp"
                             android:src="@drawable/ic_transactions"
-                            app:tint="#2196F3" />
+                            app:tint="@color/primary_blue" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
+                            android:layout_marginTop="16dp"
                             android:text="@string/transactions"
                             android:textAppearance="?attr/textAppearanceSubtitle1"
-                            android:textColor="#2196F3" />
+                            android:textColor="@color/primary_blue"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/viewTransactionsButton"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
+                            android:layout_marginTop="16dp"
                             android:text="@string/view_transactions"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
+                            android:minHeight="48dp"
                             android:textColor="@android:color/white"
-                            android:backgroundTint="#2196F3"  />
+                            app:cornerRadius="16dp"
+                            app:backgroundTint="@color/primary_blue" />
+
                     </LinearLayout>
 
                 </com.google.android.material.card.MaterialCardView>
@@ -135,45 +147,49 @@
                     android:id="@+id/accountsCard"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="@dimen/card_spacing"
                     android:layout_weight="1"
-                    app:cardCornerRadius="18dp"
-                    app:cardElevation="3dp"
-                    app:strokeColor="#E0E0E0"
-                    app:strokeWidth="0dp">
+                    app:cardCornerRadius="@dimen/card_corner_radius"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#E2E8F0"
+                    app:strokeWidth="1dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="20dp">
+                        android:padding="@dimen/card_padding">
 
                         <ImageView
-                            android:layout_width="60dp"
-                            android:layout_height="60dp"
+                            android:layout_width="@dimen/icon_size"
+                            android:layout_height="@dimen/icon_size"
                             android:background="@drawable/circle_background"
                             android:padding="16dp"
                             android:src="@drawable/ic_accounts"
-                            app:tint="#4CAF50" />
+                            app:tint="@color/accent_green" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
+                            android:layout_marginTop="16dp"
                             android:text="@string/accounts"
                             android:textAppearance="?attr/textAppearanceSubtitle1"
-                            android:textColor="#4CAF50" />
+                            android:textColor="@color/accent_green"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/viewAccountsButton"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
+                            android:layout_marginTop="16dp"
                             android:text="@string/view_accounts"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
+                            android:minHeight="48dp"
                             android:textColor="@android:color/white"
-                            android:backgroundTint="#4CAF50" />
+                            app:cornerRadius="16dp"
+                            app:backgroundTint="@color/accent_green" />
 
                     </LinearLayout>
 
@@ -186,16 +202,16 @@
                 android:id="@+id/reportsCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="18dp"
-                app:cardElevation="3dp"
-                app:strokeColor="#E0E0E0"
-                app:strokeWidth="0dp">
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardElevation="0dp"
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/card_padding">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -204,8 +220,8 @@
                         android:orientation="horizontal">
 
                         <ImageView
-                            android:layout_width="60dp"
-                            android:layout_height="60dp"
+                            android:layout_width="@dimen/icon_size"
+                            android:layout_height="@dimen/icon_size"
                             android:background="@drawable/circle_background"
                             android:padding="16dp"
                             android:src="@drawable/ic_reports"
@@ -218,7 +234,9 @@
                             android:layout_weight="1"
                             android:text="@string/reports"
                             android:textAppearance="?attr/textAppearanceHeadline6"
-                            android:textColor="#FF9800" />
+                            android:textColor="#FF9800"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
 
                     </LinearLayout>
 
@@ -226,40 +244,45 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:orientation="horizontal">
+                        android:layout_marginTop="24dp"
+                        android:orientation="horizontal"
+                        android:baselineAligned="false">
 
                         <!-- إجمالي المدينين -->
                         <com.google.android.material.card.MaterialCardView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="12dp"
+                            android:layout_marginEnd="@dimen/card_spacing"
                             android:layout_weight="1"
-                            app:cardCornerRadius="15dp"
+                            app:cardCornerRadius="20dp"
                             app:cardElevation="0dp"
-                            app:strokeColor="#E0E0E0"
+                            app:strokeColor="#E2E8F0"
                             app:strokeWidth="1dp">
 
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical"
-                                android:padding="14dp">
+                                android:padding="20dp">
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="إجمالي المدينين"
-                                    android:textAppearance="?attr/textAppearanceCaption"
-                                    android:textColor="#757575" />
+                                    android:textAppearance="?attr/textAppearanceBody2"
+                                    android:textColor="@color/text_secondary"
+                                    android:maxLines="1"
+                                    android:ellipsize="end" />
 
                                 <TextView
                                     android:id="@+id/totalDebtors"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginTop="6dp"
+                                    android:layout_marginTop="8dp"
                                     android:textAppearance="?attr/textAppearanceSubtitle1"
-                                    android:textColor="#F44336"
+                                    android:textColor="@color/debit_color"
+                                    android:maxLines="1"
+                                    android:ellipsize="end"
                                     tools:text="1000 ريال يمني" />
 
                             </LinearLayout>
@@ -270,33 +293,37 @@
                         <com.google.android.material.card.MaterialCardView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
+                            android:layout_marginStart="@dimen/card_spacing"
                             android:layout_weight="1"
-                            app:cardCornerRadius="15dp"
+                            app:cardCornerRadius="20dp"
                             app:cardElevation="0dp"
-                            app:strokeColor="#E0E0E0"
+                            app:strokeColor="#E2E8F0"
                             app:strokeWidth="1dp">
 
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical"
-                                android:padding="14dp">
+                                android:padding="20dp">
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="إجمالي الدائنين"
-                                    android:textAppearance="?attr/textAppearanceCaption"
-                                    android:textColor="#757575" />
+                                    android:textAppearance="?attr/textAppearanceBody2"
+                                    android:textColor="@color/text_secondary"
+                                    android:maxLines="1"
+                                    android:ellipsize="end" />
 
                                 <TextView
                                     android:id="@+id/totalCreditors"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginTop="6dp"
+                                    android:layout_marginTop="8dp"
                                     android:textAppearance="?attr/textAppearanceSubtitle1"
-                                    android:textColor="#4CAF50"
+                                    android:textColor="@color/credit_color"
+                                    android:maxLines="1"
+                                    android:ellipsize="end"
                                     tools:text="500 ريال يمني" />
 
                             </LinearLayout>
@@ -309,13 +336,15 @@
                         android:id="@+id/viewReportsButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
+                        android:layout_marginTop="24dp"
                         android:text="@string/view_reports"
                         android:textSize="14sp"
-                        app:cornerRadius="25dp"
+                        android:minHeight="48dp"
+                        app:cornerRadius="20dp"
                         app:icon="@drawable/ic_reports"
                         app:iconGravity="textStart"
-                        app:iconPadding="10dp" />
+                        app:iconPadding="10dp"
+                        app:backgroundTint="#FF9800" />
 
                 </LinearLayout>
 
