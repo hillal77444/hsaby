@@ -23,7 +23,7 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:id="@+id/accountNameText"
+                android:id="@+id/accountNameTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -33,7 +33,7 @@
                 tools:text="اسم الحساب" />
 
             <TextView
-                android:id="@+id/dateText"
+                android:id="@+id/transactionDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
@@ -63,7 +63,7 @@
                     android:textColor="@color/text_secondary" />
 
                 <TextView
-                    android:id="@+id/debitAmountText"
+                    android:id="@+id/transactionDebit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
@@ -87,7 +87,7 @@
                     android:textColor="@color/text_secondary" />
 
                 <TextView
-                    android:id="@+id/creditAmountText"
+                    android:id="@+id/transactionCredit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
@@ -101,7 +101,7 @@
 
         <!-- صف الملاحظات -->
         <TextView
-            android:id="@+id/notesText"
+            android:id="@+id/transactionDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="14sp"
@@ -118,9 +118,8 @@
             android:gravity="end"
             android:layout_marginTop="8dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/sendButton"
-                style="@style/Widget.MaterialComponents.Button"
+            <Button
+                android:id="@+id/btnSendWhatsApp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="إرسال"
