@@ -5,7 +5,6 @@ from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from config import Config
 import logging
-import secrets
 
 db = SQLAlchemy()
 jwt = JWTManager()
@@ -14,12 +13,6 @@ migrate = Migrate()
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-    
-    # تكوين التطبيق
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///accounting.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    # توليد مفتاح سري آمن
-    app.config['JWT_SECRET_KEY'] = secrets.token_hex(32)  # توليد مفتاح عشوائي 64 حرف
     
     # إعداد التسجيل
     logging.basicConfig(level=logging.INFO)
