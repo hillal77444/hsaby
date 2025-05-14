@@ -108,14 +108,17 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp">
 
-            <com.google.android.material.materialswitch.MaterialSwitch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/whatsapp_switch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/whatsapp_enabled"
                 android:textColor="@color/primary"
                 android:checked="true"
-                android:textAppearance="?attr/textAppearanceBody1" />
+                android:textAppearance="?attr/textAppearanceBody1"
+                android:minHeight="48dp"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp" />
 
             <TextView
                 android:layout_width="match_parent"
