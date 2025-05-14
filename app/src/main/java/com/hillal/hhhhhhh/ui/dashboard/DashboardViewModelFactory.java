@@ -5,12 +5,15 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
+import com.hillal.hhhhhhh.data.repository.TransactionRepository;
 
 public class DashboardViewModelFactory implements ViewModelProvider.Factory {
     private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
 
-    public DashboardViewModelFactory(AccountRepository accountRepository) {
+    public DashboardViewModelFactory(AccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     @NonNull
@@ -18,8 +21,7 @@ public class DashboardViewModelFactory implements ViewModelProvider.Factory {
     @SuppressWarnings("unchecked")
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(DashboardViewModel.class)) {
-            DashboardViewModel viewModel = new DashboardViewModel(accountRepository);
-            return modelClass.cast(viewModel);
+            return (T) new DashboardViewModel(accountRepository, transactionRepository);
         }
         throw new IllegalArgumentException("Unknown ViewModel class: " + modelClass.getName());
     }
