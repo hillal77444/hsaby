@@ -142,15 +142,17 @@ public class AddTransactionFragment extends Fragment {
         try {
             double amount = Double.parseDouble(amountStr);
 
-            Transaction transaction = new Transaction();
-            transaction.setAccountId(selectedAccountId);
-            transaction.setAmount(amount);
-            transaction.setType(isDebit ? "debit" : "credit");
-            transaction.setDescription(description);
+            Transaction transaction = new Transaction(
+                selectedAccountId,
+                amount,
+                isDebit ? "debit" : "credit",
+                description,
+                currency
+            );
             transaction.setNotes(notes);
-            transaction.setCurrency(currency);
             transaction.setDate(calendar.getTimeInMillis());
             transaction.setUpdatedAt(System.currentTimeMillis());
+            transaction.setServerId(0); // تعيين serverId إلى 0 للمعاملات الجديدة
 
             transactionsViewModel.insertTransaction(transaction);
             Toast.makeText(requireContext(), R.string.transaction_saved, Toast.LENGTH_SHORT).show();
