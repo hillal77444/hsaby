@@ -34,7 +34,7 @@ public class TransactionsViewModel extends AndroidViewModel {
             if (transactionList != null) {
                 List<Transaction> filteredTransactions = new ArrayList<>();
                 for (Transaction t : transactionList) {
-                    if (accountName.equals(t.getAccountName())) {
+                    if (accountName.equals(String.valueOf(t.getAccountId()))) {
                         filteredTransactions.add(t);
                     }
                 }
@@ -48,7 +48,7 @@ public class TransactionsViewModel extends AndroidViewModel {
             if (transactionList != null) {
                 List<Transaction> filteredTransactions = new ArrayList<>();
                 for (Transaction t : transactionList) {
-                    Date transactionDate = t.getDate();
+                    Date transactionDate = new Date(t.getDate());
                     if (transactionDate != null && 
                         !transactionDate.before(startDate) && 
                         !transactionDate.after(endDate)) {
