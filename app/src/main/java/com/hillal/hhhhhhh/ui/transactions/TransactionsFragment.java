@@ -197,13 +197,18 @@ public class TransactionsFragment extends Fragment {
     }
 
     private void applyAllFilters() {
-        viewModel.getAllTransactions().observe(getViewLifecycleOwner(), transactionList -> {
+        viewModel.getTransactions().observe(getViewLifecycleOwner(), transactionList -> {
             if (transactionList == null) return;
             List<Transaction> filtered = new ArrayList<>();
             for (Transaction t : transactionList) {
                 boolean match = true;
                 if (selectedAccount != null && !selectedAccount.isEmpty()) {
-                    if (!t.getAccountName().equals(selectedAccount)) match = false;
+                    Account account = null;
+                    if (adapter != null && adapter.accountMap != null) {
+                        account = adapter.accountMap.get(t.getAccountId());
+                    }
+                    String accountName = (account != null) ? account.getName() : null;
+                    if (accountName == null || !accountName.equals(selectedAccount)) match = false;
                 }
                 if (selectedCurrency != null && !selectedCurrency.isEmpty()) {
                     if (!selectedCurrency.equals(t.getCurrency())) match = false;
