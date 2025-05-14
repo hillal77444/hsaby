@@ -1,37 +1,46 @@
 package com.hillal.hhhhhhh.ui;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.webkit.JavascriptInterface;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.viewmodel.AccountStatementViewModel;
+
 import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-import android.view.MenuItem;
-import android.content.SharedPreferences;
-import java.net.HttpURLConnection;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.text.ParseException;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Collections;
 
 public class AccountStatementActivity extends AppCompatActivity {
-    private WebView webView;
     private AccountStatementViewModel viewModel;
-    private List<Account> allAccounts;
+    private AutoCompleteTextView accountDropdown;
+    private TextInputEditText startDateInput, endDateInput;
+    private MaterialButton btnShowReport;
+    private WebView webView;
+    private Calendar calendar;
     private SimpleDateFormat dateFormat;
-    private String selectedAccountId;
-    private String startDate;
-    private String endDate;
-    private static final String PREF_NAME = "AccountStatementPrefs";
-    private static final String KEY_HTML_CONTENT = "html_content";
-    private static final String SERVER_URL = "http://10.0.2.2:5000/api/html-content";
+    // قائمة الحسابات للاستخدام الداخلي
+    private List<Account> allAccounts = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,314 +53,106 @@ public class AccountStatementActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("كشف الحساب التفصيلي");
         }
 
-        webView = findViewById(R.id.webView);
-        viewModel = new ViewModelProvider(this).get(AccountStatementViewModel.class);
-        dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-        allAccounts = new ArrayList<>();
+        // تهيئة المتغيرات
+        calendar = Calendar.getInstance();
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
-        setupWebView();
+        // تهيئة ViewModel
+        viewModel = new ViewModelProvider(this).get(AccountStatementViewModel.class);
+
+        // تهيئة واجهة المستخدم
+        initializeViews();
+        setupDatePickers();
         loadAccounts();
-        loadHtmlContent();
+        setupWebView();
+
+        // تعيين التواريخ الافتراضية
+        setDefaultDates();
+    }
+
+    private void initializeViews() {
+        accountDropdown = findViewById(R.id.accountDropdown);
+        startDateInput = findViewById(R.id.startDateInput);
+        endDateInput = findViewById(R.id.endDateInput);
+        btnShowReport = findViewById(R.id.btnShowReport);
+        webView = findViewById(R.id.webView);
+
+        btnShowReport.setOnClickListener(v -> showReport());
+    }
+
+    private void setupDatePickers() {
+        startDateInput.setOnClickListener(v -> showDatePicker(startDateInput));
+        endDateInput.setOnClickListener(v -> showDatePicker(endDateInput));
+    }
+
+    private void showDatePicker(TextInputEditText input) {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+            this,
+            (view, year, month, dayOfMonth) -> {
+                calendar.set(year, month, dayOfMonth);
+                input.setText(dateFormat.format(calendar.getTime()));
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        );
+        datePickerDialog.show();
+    }
+
+    private void loadAccounts() {
+        viewModel.getAllAccounts().observe(this, accounts -> {
+            if (accounts == null) return;
+            allAccounts = accounts;
+            List<String> accountNames = new ArrayList<>();
+            for (Account acc : accounts) {
+                accountNames.add(acc.getName());
+            }
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                accountNames
+            );
+            accountDropdown.setAdapter(adapter);
+            
+            // تفعيل البحث الفوري
+            accountDropdown.setOnItemClickListener((parent, view, position, id) -> {
+                String selectedAccountName = (String) parent.getItemAtPosition(position);
+                // يمكنك إضافة أي إجراء إضافي هنا عند اختيار الحساب
+            });
+            
+            // تفعيل البحث أثناء الكتابة
+            accountDropdown.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    adapter.getFilter().filter(s);
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {}
+            });
+        });
     }
 
     private void setupWebView() {
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setBuiltInZoomControls(true);
         webView.getSettings().setDisplayZoomControls(false);
-        webView.addJavascriptInterface(new WebAppInterface(), "Android");
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                loadInitialData();
-            }
-        });
     }
 
-    private void loadHtmlContent() {
-        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        String savedHtml = prefs.getString(KEY_HTML_CONTENT, null);
-        
-        if (savedHtml != null) {
-            webView.loadDataWithBaseURL(null, savedHtml, "text/html", "UTF-8", null);
-        } else {
-            webView.loadDataWithBaseURL(null, generateInitialHtml(), "text/html", "UTF-8", null);
-        }
-    }
+    private void showReport() {
+        String selectedAccountName = accountDropdown.getText().toString();
+        String startDate = startDateInput.getText().toString();
+        String endDate = endDateInput.getText().toString();
 
-    private void saveHtmlContent(String html) {
-        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        prefs.edit().putString(KEY_HTML_CONTENT, html).apply();
-    }
-
-    private void fetchUpdatedHtmlFromServer() {
-        new Thread(() -> {
-            try {
-                URL url = new URL(SERVER_URL);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                
-                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    StringBuilder response = new StringBuilder();
-                    String line;
-                    
-                    while ((line = reader.readLine()) != null) {
-                        response.append(line);
-                    }
-                    reader.close();
-                    
-                    String newHtml = response.toString();
-                    saveHtmlContent(newHtml);
-                    
-                    runOnUiThread(() -> {
-                        webView.evaluateJavascript("updateContent('" + newHtml + "')", null);
-                    });
-                }
-                
-                conn.disconnect();
-            } catch (Exception e) {
-                e.printStackTrace();
-                runOnUiThread(() -> {
-                    Toast.makeText(this, "فشل تحديث المحتوى", Toast.LENGTH_SHORT).show();
-                });
-            }
-        }).start();
-    }
-
-    private String generateInitialHtml() {
-        return """
-            <!DOCTYPE html>
-            <html dir="rtl">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        margin: 0;
-                        padding: 16px;
-                        background-color: #f5f5f5;
-                    }
-                    .card {
-                        background: white;
-                        border-radius: 8px;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                        padding: 16px;
-                        margin-bottom: 16px;
-                    }
-                    .form-group {
-                        margin-bottom: 16px;
-                    }
-                    select, input {
-                        width: 100%;
-                        padding: 12px;
-                        border: 1px solid #ddd;
-                        border-radius: 8px;
-                        margin-top: 8px;
-                        font-size: 16px;
-                        background-color: #fff;
-                        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                    }
-                    select:focus, input:focus {
-                        outline: none;
-                        border-color: #2196F3;
-                        box-shadow: 0 0 0 2px rgba(33,150,243,0.2);
-                    }
-                    .date-container {
-                        display: flex;
-                        gap: 16px;
-                        margin-bottom: 20px;
-                    }
-                    .date-container > div {
-                        flex: 1;
-                    }
-                    button {
-                        background-color: #2196F3;
-                        color: white;
-                        border: none;
-                        padding: 14px;
-                        border-radius: 8px;
-                        width: 100%;
-                        cursor: pointer;
-                        font-size: 16px;
-                        font-weight: bold;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                        transition: all 0.3s ease;
-                    }
-                    button:hover {
-                        background-color: #1976D2;
-                        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-                    }
-                    button:active {
-                        transform: translateY(1px);
-                    }
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-top: 16px;
-                        background-color: white;
-                        border-radius: 8px;
-                        overflow: hidden;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    }
-                    th, td {
-                        border: 1px solid #ddd;
-                        padding: 12px;
-                        text-align: right;
-                    }
-                    th {
-                        background-color: #f5f5f5;
-                        font-weight: bold;
-                    }
-                    .currency-header {
-                        background-color: #e3f2fd;
-                        padding: 12px;
-                        margin-top: 20px;
-                        border-radius: 8px;
-                        font-weight: bold;
-                        color: #1976D2;
-                    }
-                    label {
-                        font-size: 16px;
-                        color: #333;
-                        font-weight: bold;
-                        display: block;
-                        margin-bottom: 4px;
-                    }
-                    .refresh-button {
-                        background-color: #4CAF50;
-                        color: white;
-                        border: none;
-                        padding: 10px 20px;
-                        border-radius: 8px;
-                        cursor: pointer;
-                        margin-bottom: 16px;
-                        width: 100%;
-                        font-size: 16px;
-                        font-weight: bold;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        gap: 8px;
-                    }
-                    .refresh-button:hover {
-                        background-color: #45a049;
-                    }
-                    .refresh-button:active {
-                        transform: translateY(1px);
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="card">
-                    <button onclick="refreshContent()" class="refresh-button">
-                        <span>🔄</span> تحديث المحتوى
-                    </button>
-                    <div class="form-group">
-                        <label for="accountDropdown">اختر الحساب</label>
-                        <select id="accountDropdown" onchange="onAccountSelected()">
-                            <option value="">-- اختر الحساب --</option>
-                        </select>
-                    </div>
-                    <div class="date-container">
-                        <div class="form-group">
-                            <label for="startDateInput">من تاريخ</label>
-                            <input type="date" id="startDateInput" onchange="onDateChanged()">
-                        </div>
-                        <div class="form-group">
-                            <label for="endDateInput">إلى تاريخ</label>
-                            <input type="date" id="endDateInput" onchange="onDateChanged()">
-                        </div>
-                    </div>
-                    <button onclick="showReport()">عرض التقرير</button>
-                </div>
-                <div id="reportContainer"></div>
-
-                <script>
-                    function onAccountSelected() {
-                        const accountId = document.getElementById('accountDropdown').value;
-                        if (accountId) {
-                            Android.onAccountSelected(accountId);
-                        }
-                    }
-
-                    function onDateChanged() {
-                        Android.onDateChanged();
-                    }
-
-                    function showReport() {
-                        Android.showReport();
-                    }
-
-                    function updateAccounts(accounts) {
-                        const dropdown = document.getElementById('accountDropdown');
-                        dropdown.innerHTML = '<option value="">-- اختر الحساب --</option>' + accounts;
-                    }
-
-                    function updateDates(startDate, endDate) {
-                        document.getElementById('startDateInput').value = startDate;
-                        document.getElementById('endDateInput').value = endDate;
-                    }
-
-                    function updateReport(html) {
-                        document.getElementById('reportContainer').innerHTML = html;
-                    }
-
-                    function refreshContent() {
-                        Android.refreshContent();
-                    }
-
-                    function updateContent(newHtml) {
-                        const parser = new DOMParser();
-                        const newDoc = parser.parseFromString(newHtml, 'text/html');
-                        const newContent = newDoc.querySelector('.card').innerHTML;
-                        document.querySelector('.card').innerHTML = newContent;
-                    }
-                </script>
-            </body>
-            </html>
-            """;
-    }
-
-    private void loadAccounts() {
-        viewModel.getAllAccounts().observe(this, accounts -> {
-            if (accounts != null && !accounts.isEmpty()) {
-            allAccounts = accounts;
-                StringBuilder options = new StringBuilder();
-                for (Account account : accounts) {
-                    options.append("<option value='").append(account.getId()).append("'>")
-                           .append(account.getName())
-                           .append("</option>");
-                }
-                
-                String js = String.format("updateAccounts('%s');", options.toString().replace("'", "\\'"));
-                webView.evaluateJavascript(js, null);
-            } else {
-                Toast.makeText(this, "لا توجد حسابات متاحة", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void loadInitialData() {
-        // تعيين تاريخ النهاية (اليوم الحالي)
-        Calendar calendar = Calendar.getInstance();
-        endDate = dateFormat.format(calendar.getTime());
-        
-        // تعيين تاريخ البداية (قبل 3 أيام)
-        calendar.add(Calendar.DAY_OF_MONTH, -3);
-        startDate = dateFormat.format(calendar.getTime());
-
-        String js = String.format("updateDates('%s', '%s');", startDate, endDate);
-        webView.evaluateJavascript(js, null);
-    }
-
-    private void updateReport() {
-        if (selectedAccountId == null || selectedAccountId.isEmpty()) {
-            Toast.makeText(this, "الرجاء اختيار حساب", Toast.LENGTH_SHORT).show();
+        if (selectedAccountName.isEmpty()) {
+            Toast.makeText(this, "الرجاء اختيار الحساب", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (startDate == null || endDate == null) {
+        if (startDate.isEmpty() || endDate.isEmpty()) {
             Toast.makeText(this, "الرجاء تحديد الفترة الزمنية", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -360,6 +161,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             Date start = dateFormat.parse(startDate);
             Date end = dateFormat.parse(endDate);
 
+            // اجعل endDate نهاية اليوم
             Calendar cal = Calendar.getInstance();
             cal.setTime(end);
             cal.set(Calendar.HOUR_OF_DAY, 23);
@@ -373,42 +175,68 @@ public class AccountStatementActivity extends AppCompatActivity {
                 return;
             }
 
-            long accountId = Long.parseLong(selectedAccountId);
+            // البحث عن الحساب المحدد
+            viewModel.getAllAccounts().observe(this, accounts -> {
+                final Account selectedAccount = getSelectedAccount(accounts, selectedAccountName);
+                final Date startFinal = start;
+                final Date endFinal = endOfDay;
+
+                if (selectedAccount != null) {
                     viewModel.getTransactionsForAccountInDateRange(
-                accountId,
-                start,
-                endOfDay
+                        selectedAccount.getId(),
+                        startFinal,
+                        endFinal
                     ).observe(this, transactions -> {
-                String html = generateReportHtml(transactions);
-                String js = String.format("updateReport('%s');", html.replace("'", "\\'"));
-                webView.evaluateJavascript(js, null);
+                        String htmlContent = generateReportHtml(selectedAccount, startFinal, endFinal, transactions);
+                        webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
+                    });
+                } else {
+                    Toast.makeText(this, "لم يتم العثور على الحساب المحدد", Toast.LENGTH_SHORT).show();
+                }
             });
-        } catch (Exception e) {
+        } catch (ParseException e) {
             Toast.makeText(this, "خطأ في تنسيق التاريخ", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
         }
     }
 
-    private String generateReportHtml(List<Transaction> transactions) {
-        if (transactions.isEmpty()) {
-            return "<div class='card'>لا توجد معاملات في هذه الفترة</div>";
+    private String generateReportHtml(Account account, Date startDate, Date endDate, List<Transaction> transactions) {
+        StringBuilder html = new StringBuilder();
+        html.append("<!DOCTYPE html>");
+        html.append("<html dir='rtl' lang='ar'>");
+        html.append("<head>");
+        html.append("<meta charset='UTF-8'>");
+        html.append("<style>");
+        html.append("body { font-family: Arial, sans-serif; margin: 20px; }");
+        html.append("table { width: 100%; border-collapse: collapse; margin-top: 20px; }");
+        html.append("th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }");
+        html.append("th { background-color: #f5f5f5; }");
+        html.append("</style>");
+        html.append("</head>");
+        html.append("<body>");
+        
+        // عنوان التقرير
+        html.append("<h2>كشف الحساب التفصيلي</h2>");
+        html.append("<p>الحساب: ").append(account.getName()).append("</p>");
+        html.append("<p>الفترة: من ").append(dateFormat.format(startDate)).append(" إلى ").append(dateFormat.format(endDate)).append("</p>");
+
+        // افصل المعاملات حسب العملة
+        Map<String, List<Transaction>> currencyMap = new HashMap<>();
+        for (Transaction transaction : transactions) {
+            String currency = transaction.getCurrency();
+            if (!currencyMap.containsKey(currency)) {
+                currencyMap.put(currency, new ArrayList<>());
+            }
+            currencyMap.get(currency).add(transaction);
         }
 
-        Map<String, List<Transaction>> transactionsByCurrency = transactions.stream()
-            .collect(Collectors.groupingBy(Transaction::getCurrency));
-
-        StringBuilder html = new StringBuilder();
-        
-        for (Map.Entry<String, List<Transaction>> entry : transactionsByCurrency.entrySet()) {
-            String currency = entry.getKey();
-            List<Transaction> currencyTransactions = entry.getValue();
-            
-            Collections.sort(currencyTransactions, (t1, t2) -> Long.compare(t1.getDate(), t2.getDate()));
-            
+        for (String currency : currencyMap.keySet()) {
+            List<Transaction> allCurrencyTransactions = currencyMap.get(currency);
+            // رتب العمليات من الأقدم إلى الأحدث
+            sortTransactionsByDate(allCurrencyTransactions);
+            // احسب الرصيد السابق (كل العمليات قبل startDate)
             double previousBalance = 0;
-            long firstTransactionDate = currencyTransactions.get(0).getDate();
-            for (Transaction t : currencyTransactions) {
-                if (t.getDate() < firstTransactionDate) {
+            for (Transaction t : allCurrencyTransactions) {
+                if (t.getDate() < startDate.getTime()) {
                     if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
                         previousBalance -= t.getAmount();
                     } else {
@@ -416,99 +244,103 @@ public class AccountStatementActivity extends AppCompatActivity {
                     }
                 }
             }
-
-            html.append("<div class='card'>");
-            html.append("<div class='currency-header'>").append(currency).append("</div>");
-            html.append("<table>");
-            html.append("<tr><th>التاريخ</th><th>الوصف</th><th>عليه</th><th>له</th><th>الرصيد</th></tr>");
-            
-            html.append("<tr>");
-            html.append("<td>").append(dateFormat.format(new Date(firstTransactionDate))).append("</td>");
-            html.append("<td>الرصيد السابق</td>");
-            html.append("<td></td><td></td>");
-            html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", previousBalance)).append("</td>");
-            html.append("</tr>");
-
-            double runningBalance = previousBalance;
+            // احسب إجمالي المدين والدائن خلال الفترة
             double totalDebit = 0;
             double totalCredit = 0;
-
-            for (Transaction t : currencyTransactions) {
+            for (Transaction t : allCurrencyTransactions) {
+                if (t.getDate() >= startDate.getTime() && t.getDate() <= endDate.getTime()) {
+                    if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
+                        totalDebit += t.getAmount();
+                    } else {
+                        totalCredit += t.getAmount();
+                    }
+                }
+            }
+            html.append("<h3>العملة: ").append(currency).append("</h3>");
+            html.append("<table>");
+            html.append("<tr>");
+            html.append("<th>التاريخ</th>");
+            html.append("<th>الوصف</th>");
+            html.append("<th>عليه</th>");
+            html.append("<th>له</th>");
+            html.append("<th>الرصيد</th>");
+            html.append("</tr>");
+            // صف الرصيد السابق
+            html.append("<tr>");
+            html.append("<td>").append(dateFormat.format(startDate)).append("</td>");
+            html.append("<td>الرصيد السابق</td>");
+            html.append("<td></td><td></td>");
+            html.append("<td>").append(String.format(Locale.US, "%.2f", previousBalance)).append("</td>");
+            html.append("</tr>");
+            // العمليات خلال الفترة
+            double runningBalance = previousBalance;
+            for (Transaction transaction : allCurrencyTransactions) {
+                if (transaction.getDate() >= startDate.getTime() && transaction.getDate() <= endDate.getTime()) {
                     html.append("<tr>");
-                html.append("<td>").append(dateFormat.format(new Date(t.getDate()))).append("</td>");
-                html.append("<td>").append(t.getDescription()).append("</td>");
-                
-                if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
-                    html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", t.getAmount())).append("</td>");
+                    html.append("<td>").append(dateFormat.format(transaction.getDate())).append("</td>");
+                    html.append("<td>").append(transaction.getDescription()).append("</td>");
+                    if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
+                        html.append("<td>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
                         html.append("<td></td>");
-                    totalDebit += t.getAmount();
-                    runningBalance -= t.getAmount();
+                        runningBalance -= transaction.getAmount();
                     } else {
                         html.append("<td></td>");
-                    html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", t.getAmount())).append("</td>");
-                    totalCredit += t.getAmount();
-                    runningBalance += t.getAmount();
+                        html.append("<td>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
+                        runningBalance += transaction.getAmount();
+                    }
+                    html.append("<td>").append(String.format(Locale.US, "%.2f", runningBalance)).append("</td>");
+                    html.append("</tr>");
                 }
-                
-                html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", runningBalance)).append("</td>");
-                html.append("</tr>");
             }
-
-            html.append("<tr style='font-weight: bold;'>");
-            html.append("<td colspan='2'>المجموع</td>");
-            html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", totalDebit)).append("</td>");
-            html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", totalCredit)).append("</td>");
-            html.append("<td>").append(String.format(Locale.ENGLISH, "%.2f", runningBalance)).append("</td>");
+            // صف الإجمالي
+            html.append("<tr style='font-weight:bold;background:#f0f0f0;'>");
+            html.append("<td colspan='2'>الإجمالي خلال الفترة</td>");
+            html.append("<td>").append(String.format(Locale.US, "%.2f", totalDebit)).append("</td>");
+            html.append("<td>").append(String.format(Locale.US, "%.2f", totalCredit)).append("</td>");
+            html.append("<td></td>");
             html.append("</tr>");
-            
             html.append("</table>");
-            html.append("</div>");
         }
 
+        html.append("</body>");
+        html.append("</html>");
         return html.toString();
     }
 
-    private class WebAppInterface {
-        @JavascriptInterface
-        public void onAccountSelected(String accountId) {
-            selectedAccountId = accountId;
-            updateReport();
-        }
+    private String formatAmount(double amount) {
+        return String.format(Locale.getDefault(), "%.2f", amount);
+    }
 
-        @JavascriptInterface
-        public void onDateChanged() {
-            runOnUiThread(() -> {
-                webView.evaluateJavascript(
-                    "(function() { return { endDate: document.getElementById('endDateInput').value, startDate: document.getElementById('startDateInput').value }; })();",
-                    value -> {
-                        try {
-                            value = value.replace("\\", "");
-                            if (value.startsWith("\"") && value.endsWith("\"")) {
-                                value = value.substring(1, value.length() - 1);
-                            }
-                            String[] dates = value.split(",");
-                            endDate = dates[0].split(":")[1].replace("\"", "");
-                            startDate = dates[1].split(":")[1].replace("\"", "");
-                            updateReport();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                );
-            });
-        }
+    private void setDefaultDates() {
+        Calendar cal = Calendar.getInstance();
+        String toDate = dateFormat.format(cal.getTime());
+        cal.add(Calendar.DATE, -3); // أول أمس
+        String fromDate = dateFormat.format(cal.getTime());
+        startDateInput.setText(fromDate);
+        endDateInput.setText(toDate);
+    }
 
-        @JavascriptInterface
-        public void showReport() {
-            updateReport();
+    private Account getSelectedAccount(List<Account> accounts, String selectedAccountName) {
+        // استخدم القائمة الداخلية للبحث عن الحساب بالاسم
+        for (Account acc : allAccounts) {
+            if (acc.getName().equals(selectedAccountName)) {
+                return acc;
+            }
         }
+        return null;
+    }
 
-        @JavascriptInterface
-        public void refreshContent() {
-            runOnUiThread(() -> {
-                fetchUpdatedHtmlFromServer();
-            });
-        }
+    private void sortTransactionsByDate(List<Transaction> transactions) {
+        Collections.sort(transactions, (a, b) -> Long.compare(a.getDate(), b.getDate()));
+    }
+
+    private boolean isTransactionInDateRange(Transaction transaction, Date startDate, Date endDate) {
+        long transactionDate = transaction.getDate();
+        return transactionDate >= startDate.getTime() && transactionDate <= endDate.getTime();
+    }
+
+    private void filterTransactionsByDateRange(List<Transaction> transactions, Date startDate, Date endDate) {
+        transactions.removeIf(t -> !isTransactionInDateRange(t, startDate, endDate));
     }
 
     @Override
