@@ -1,13 +1,11 @@
-from flask import Blueprint, jsonify, request, render_template, redirect, make_response
+from flask import Blueprint, jsonify, request
 from app import db
 from app.models import User, Account, Transaction
 from app.utils import hash_password, verify_password, generate_sync_token
-from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, verify_jwt_in_request, decode_token
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 from datetime import datetime
 import logging
 import json
-import os
-
 
 main = Blueprint('main', __name__)
 logger = logging.getLogger(__name__)
@@ -62,61 +60,34 @@ def register():
         logger.error(f"Registration error: {str(e)}")
         db.session.rollback()
         return jsonify({'error': 'حدث خطأ أثناء إنشاء الحساب'}), 500
-    
+
 @main.route('/api/login', methods=['POST'])
 def login():
     try:
-        # جلب البيانات من الطلب
-        if request.content_type == 'application/json':
-            data = request.get_json()
-        else:
-            data = request.form.to_dict()
-
-        # طباعة البيانات المستلمة
-        print("Login data:", data)
-
-        # التحقق من وجود الحقول المطلوبة
+        data = request.get_json()
+        
+        # التحقق من البيانات المطلوبة
         if 'phone' not in data or 'password' not in data:
-            if request.content_type == 'application/json':
-                return jsonify({'error': 'يرجى إدخال رقم الهاتف وكلمة المرور'}), 400
-            else:
-                return redirect('/login?error=يرجى+إدخال+رقم+الهاتف+وكلمة+المرور')
-
-        # جلب المستخدم من قاعدة البيانات
+            return jsonify({'error': 'يرجى إدخال رقم الهاتف وكلمة المرور'}), 400
+        
+        # البحث عن المستخدم برقم الهاتف
         user = User.query.filter_by(phone=data['phone']).first()
-        print("User from DB:", user)
-        if user:
-            print("Password hash in DB:", user.password_hash)
-            print("Password entered:", data['password'])
-            print("Password verify result:", verify_password(user.password_hash, data['password']))
-
-        # التحقق من صحة كلمة المرور
+        
         if user and verify_password(user.password_hash, data['password']):
             access_token = create_access_token(identity=user.id)
-            if request.content_type != 'application/json':
-                resp = make_response(redirect('/dashboard'))
-                resp.set_cookie('access_token', access_token, httponly=True)
-                return resp
             return jsonify({
                 'message': 'تم تسجيل الدخول بنجاح',
                 'token': access_token,
                 'user_id': user.id,
                 'username': user.username
             })
-
-        # بيانات الدخول خاطئة
-        if request.content_type == 'application/json':
-            return jsonify({'error': 'رقم الهاتف أو كلمة المرور غير صحيحة'}), 401
-        else:
-            return redirect('/login?error=بيانات+الدخول+غير+صحيحة')
-
+        
+        return jsonify({'error': 'رقم الهاتف أو كلمة المرور غير صحيحة'}), 401
+        
     except Exception as e:
         logger.error(f"Login error: {str(e)}")
-        if request.content_type == 'application/json':
-            return jsonify({'error': 'حدث خطأ أثناء تسجيل الدخول'}), 500
-        else:
-            return redirect('/login?error=حدث+خطأ+أثناء+تسجيل+الدخول')
-        
+        return jsonify({'error': 'حدث خطأ أثناء تسجيل الدخول'}), 500
+
 @main.route('/api/sync', methods=['POST'])
 @jwt_required()
 def sync_data():
@@ -164,19 +135,21 @@ def sync_data():
                             account_name=account_data['account_name'],
                             balance=account_data['balance'],
                             is_debtor=account_data.get('is_debtor', False),
+                            phone_number=account_data.get('phone_number'),  # إضافة رقم الهاتف
+                            notes=account_data.get('notes'),  # إضافة الملاحظات
                             user_id=user_id
                         )
                         db.session.add(account)
                         logger.info(f"Added new account: {account.account_number}")
                     else:
-                        # حساب موجود - نحدث القيم الأساسية
+                        # حساب موجود - نحدث القيم
                         account.balance = account_data['balance']
                         if 'is_debtor' in account_data:
                             account.is_debtor = account_data['is_debtor']
-                        if 'account_name' in account_data:
-                            account.account_name = account_data['account_name']
                         if 'phone_number' in account_data:
                             account.phone_number = account_data['phone_number']
+                        if 'notes' in account_data:
+                            account.notes = account_data['notes']
                         logger.info(f"Updated account: {account.account_number}")
                 except KeyError as e:
                     logger.error(f"Missing account field: {str(e)}")
@@ -361,6 +334,7 @@ def debug_public():
             'account_name': acc.account_name,
             'balance': acc.balance,
             'user_id': acc.user_id,
+            'phone_number': acc.phone_number,
             'created_at': str(acc.created_at) if acc.created_at else None
         } for acc in accounts]
         
@@ -387,286 +361,4 @@ def debug_public():
         })
     except Exception as e:
         logger.error(f"Public debug data error: {str(e)}")
-        return jsonify({'error': f'حدث خطأ أثناء جلب بيانات التصحيح: {str(e)}'}), 500
-
-@main.route('/api/html-content', methods=['GET'])
-def get_html_content():
-    try:
-        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'account_statement')
-        
-        # قراءة ملف HTML
-        with open(os.path.join(template_dir, 'index.html'), 'r', encoding='utf-8') as f:
-            html_content = f.read()
-            
-        return html_content, 200, {'Content-Type': 'text/html; charset=utf-8'}
-    except Exception as e:
-        logger.error(f"Error getting HTML content: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء جلب المحتوى'}), 500
-
-@main.route('/api/html-content/styles.css', methods=['GET'])
-def get_styles():
-    try:
-        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'account_statement')
-        with open(os.path.join(template_dir, 'styles.css'), 'r', encoding='utf-8') as f:
-            css_content = f.read()
-        return css_content, 200, {'Content-Type': 'text/css; charset=utf-8'}
-    except Exception as e:
-        logger.error(f"Error getting CSS content: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء جلب التنسيقات'}), 500
-
-@main.route('/api/html-content/script.js', methods=['GET'])
-def get_script():
-    try:
-        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'account_statement')
-        with open(os.path.join(template_dir, 'script.js'), 'r', encoding='utf-8') as f:
-            js_content = f.read()
-        return js_content, 200, {'Content-Type': 'application/javascript; charset=utf-8'}
-    except Exception as e:
-        logger.error(f"Error getting JavaScript content: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء جلب السكربت'}), 500
-
-@main.route('/api/accounts/html-content', methods=['GET'])
-def get_accounts_html_content():
-    try:
-        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'accounts')
-        with open(os.path.join(template_dir, 'index.html'), 'r', encoding='utf-8') as f:
-            html_content = f.read()
-        return html_content, 200, {'Content-Type': 'text/html; charset=utf-8'}
-    except Exception as e:
-        logger.error(f"Error getting accounts HTML content: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء جلب محتوى الحسابات'}), 500
-
-@main.route('/api/accounts/html-content/styles.css', methods=['GET'])
-def get_accounts_styles():
-    try:
-        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'accounts')
-        with open(os.path.join(template_dir, 'styles.css'), 'r', encoding='utf-8') as f:
-            css_content = f.read()
-        return css_content, 200, {'Content-Type': 'text/css; charset=utf-8'}
-    except Exception as e:
-        logger.error(f"Error getting accounts CSS content: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء جلب تنسيقات الحسابات'}), 500
-
-@main.route('/api/accounts/html-content/script.js', methods=['GET'])
-def get_accounts_script():
-    try:
-        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'accounts')
-        with open(os.path.join(template_dir, 'script.js'), 'r', encoding='utf-8') as f:
-            js_content = f.read()
-        return js_content, 200, {'Content-Type': 'application/javascript; charset=utf-8'}
-    except Exception as e:
-        logger.error(f"Error getting accounts JavaScript content: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء جلب سكربت الحسابات'}), 500
-
-@main.route('/api/transactions/html-content', methods=['GET'])
-def get_transactions_html_content():
-    try:
-        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'transactions')
-        with open(os.path.join(template_dir, 'index.html'), 'r', encoding='utf-8') as f:
-            html_content = f.read()
-        return html_content, 200, {'Content-Type': 'text/html; charset=utf-8'}
-    except Exception as e:
-        logger.error(f"Error getting transactions HTML content: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء جلب محتوى المعاملات'}), 500
-
-@main.route('/api/transactions/html-content/styles.css', methods=['GET'])
-def get_transactions_styles():
-    try:
-        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'transactions')
-        with open(os.path.join(template_dir, 'styles.css'), 'r', encoding='utf-8') as f:
-            css_content = f.read()
-        return css_content, 200, {'Content-Type': 'text/css; charset=utf-8'}
-    except Exception as e:
-        logger.error(f"Error getting transactions CSS content: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء جلب تنسيقات المعاملات'}), 500
-
-@main.route('/api/transactions/html-content/script.js', methods=['GET'])
-def get_transactions_script():
-    try:
-        template_dir = os.path.join(os.path.dirname(__file__), 'templates', 'transactions')
-        with open(os.path.join(template_dir, 'script.js'), 'r', encoding='utf-8') as f:
-            js_content = f.read()
-        return js_content, 200, {'Content-Type': 'application/javascript; charset=utf-8'}
-    except Exception as e:
-        logger.error(f"Error getting transactions JavaScript content: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء جلب سكربت المعاملات'}), 500
-
-@main.route('/', methods=['GET'])
-def root_redirect():
-    user_id = None
-    token = request.cookies.get('access_token')
-    if token:
-        try:
-            user_id = decode_token(token)['sub']
-        except Exception:
-            user_id = None
-    if not user_id:
-        try:
-            verify_jwt_in_request()
-            user_id = get_jwt_identity()
-        except Exception:
-            user_id = None
-    if user_id:
-        return redirect('/dashboard')
-    else:
-        return redirect('/login')
-
-@main.route('/login', methods=['GET'])
-def login_page():
-    error = request.args.get('error')
-    return render_template('login.html', error=error)
-
-@main.route('/dashboard', methods=['GET'])
-def dashboard():
-    token = request.cookies.get('access_token')
-    user_id = None
-    username = None
-    total_credit = 0
-    total_debit = 0
-    if token:
-        try:
-            user_id = decode_token(token)['sub']
-        except Exception:
-            user_id = None
-    if user_id:
-        user = User.query.get(user_id)
-        if user:
-            username = user.username
-        # حساب إجمالي الدائنين والمدينين من قاعدة البيانات
-        accounts = Account.query.filter_by(user_id=user_id).all()
-        for acc in accounts:
-            if acc.is_debtor:
-                total_debit += acc.balance or 0
-            else:
-                total_credit += acc.balance or 0
-        return render_template(
-            'dashboard.html',
-            username=username,
-            total_credit=total_credit,
-            total_debit=total_debit
-        )
-    else:
-        return redirect('/login')
-
-@main.route('/logout', methods=['GET'])
-def logout():
-    resp = make_response(redirect('/login'))
-    resp.delete_cookie('access_token')
-    return resp
-
-@main.route('/accounts')
-def accounts_page():
-    token = request.cookies.get('access_token')
-    user_id = None
-    accounts = []
-    if token:
-        try:
-            user_id = decode_token(token)['sub']
-        except Exception:
-            user_id = None
-    if user_id:
-        accounts = Account.query.filter_by(user_id=user_id).all()
-        return render_template('accounts.html', accounts=accounts)
-    else:
-        return redirect('/login')
-    
-
-@main.route('/entries')
-def entries_page():
-    token = request.cookies.get('access_token')
-    user_id = None
-    entries = []
-    accounts = []
-    if token:
-        try:
-            user_id = decode_token(token)['sub']
-        except Exception:
-            user_id = None
-    if user_id:
-        # جلب الحسابات لعرضها في الفلتر
-        accounts = Account.query.filter_by(user_id=user_id).all()
-
-        # جلب الفلاتر من الرابط
-        account_id = request.args.get('account_id')
-        date_from = request.args.get('date_from')
-        date_to = request.args.get('date_to')
-        currency = request.args.get('currency')
-
-        # بناء الاستعلام مع الفلاتر
-        query = Transaction.query.filter_by(user_id=user_id)
-        if account_id:
-            query = query.filter_by(account_id=account_id)
-        if currency:
-            query = query.filter_by(currency=currency)
-        if date_from:
-            query = query.filter(Transaction.date >= date_from)
-        if date_to:
-            query = query.filter(Transaction.date <= date_to)
-
-        # ترتيب النتائج من الأحدث للأقدم
-        entries = query.order_by(Transaction.date.desc()).all()
-
-        return render_template('entries.html', entries=entries, accounts=accounts)
-    else:
-        return redirect('/login')
-
-@main.route('/reports')
-def reports_page():
-    token = request.cookies.get('access_token')
-    user_id = None
-    accounts = []
-    entries = []
-    if token:
-        try:
-            user_id = decode_token(token)['sub']
-        except Exception:
-            user_id = None
-    if user_id:
-        accounts = Account.query.filter_by(user_id=user_id).all()
-        entries = Transaction.query.filter_by(user_id=user_id).all()
-        return render_template('reports.html', accounts=accounts, entries=entries)
-    else:
-        return redirect('/login')
-
-@main.route('/add-entry')
-def add_entry_page():
-    token = request.cookies.get('access_token')
-    user_id = None
-    accounts = []
-    if token:
-        try:
-            user_id = decode_token(token)['sub']
-        except Exception:
-            user_id = None
-    if user_id:
-        accounts = Account.query.filter_by(user_id=user_id).all()
-        return render_template('add_entry.html', accounts=accounts)
-    else:
-        return redirect('/login')
-
-@main.route('/api/add-entry', methods=['POST'])
-@jwt_required()
-def api_add_entry():
-    try:
-        user_id = get_jwt_identity()
-        data = request.get_json()
-        transaction = Transaction(
-            date=datetime.fromtimestamp(data['date']/1000),
-            amount=data['amount'],
-            description=data.get('description', ''),
-            type=data['type'],
-            currency=data['currency'],
-            notes=data.get('notes', ''),
-            user_id=user_id,
-            account_id=data['account_id']
-        )
-        db.session.add(transaction)
-        db.session.commit()
-        return jsonify({'success': True, 'message': 'تم إضافة القيد بنجاح'})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'success': False, 'message': f'خطأ: {str(e)}'}) 
-    
-@main.route('/account-statement')
-def account_statement_page():
-    return render_template('account_statement.html')
+        return jsonify({'error': f'حدث خطأ أثناء جلب بيانات التصحيح: {str(e)}'}), 500 
