@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.hillal.hhhhhhh.R;
@@ -28,6 +29,7 @@ public class AddAccountFragment extends Fragment {
     private TextInputEditText notesEditText;
     private TextInputEditText openingBalanceEditText;
     private MaterialButton saveButton;
+    private MaterialSwitch whatsappSwitch;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -53,6 +55,7 @@ public class AddAccountFragment extends Fragment {
         notesEditText = binding.notesEditText;
         openingBalanceEditText = binding.openingBalanceEditText;
         saveButton = binding.saveButton;
+        whatsappSwitch = binding.whatsappSwitch;
 
         saveButton.setOnClickListener(v -> saveAccount());
         binding.cancelButton.setOnClickListener(v -> requireActivity().onBackPressed());
@@ -63,6 +66,7 @@ public class AddAccountFragment extends Fragment {
         String phone = binding.phoneEditText.getText().toString();
         String notes = binding.notesEditText.getText().toString();
         String balanceStr = binding.openingBalanceEditText.getText().toString();
+        boolean whatsappEnabled = binding.whatsappSwitch.isChecked();
 
         if (name.isEmpty()) {
             binding.nameEditText.setError("الرجاء إدخال اسم الحساب");
@@ -79,6 +83,7 @@ public class AddAccountFragment extends Fragment {
                 false // isDebtor
             );
             account.setNotes(notes);
+            account.setWhatsappEnabled(whatsappEnabled);
             accountViewModel.insertAccount(account);
             Toast.makeText(getContext(), R.string.account_saved, Toast.LENGTH_SHORT).show();
             Navigation.findNavController(requireView()).navigateUp();
