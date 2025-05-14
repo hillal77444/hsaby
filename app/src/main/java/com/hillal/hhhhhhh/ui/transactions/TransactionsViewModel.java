@@ -9,6 +9,7 @@ import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.repository.TransactionRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 public class TransactionsViewModel extends AndroidViewModel {
     private final TransactionRepository repository;
@@ -28,8 +29,35 @@ public class TransactionsViewModel extends AndroidViewModel {
         repository.getAllTransactions().observeForever(transactions::setValue);
     }
 
-    public void loadTransactionsByType(String type) {
-        repository.getTransactionsByType(type).observeForever(transactions::setValue);
+    public void loadTransactionsByAccount(String accountName) {
+        repository.getAllTransactions().observeForever(transactionList -> {
+            if (transactionList != null) {
+                List<Transaction> filteredTransactions = new ArrayList<>();
+                for (Transaction t : transactionList) {
+                    if (accountName.equals(t.getAccountName())) {
+                        filteredTransactions.add(t);
+                    }
+                }
+                transactions.setValue(filteredTransactions);
+            }
+        });
+    }
+
+    public void loadTransactionsByDateRange(Date startDate, Date endDate) {
+        repository.getAllTransactions().observeForever(transactionList -> {
+            if (transactionList != null) {
+                List<Transaction> filteredTransactions = new ArrayList<>();
+                for (Transaction t : transactionList) {
+                    Date transactionDate = t.getDate();
+                    if (transactionDate != null && 
+                        !transactionDate.before(startDate) && 
+                        !transactionDate.after(endDate)) {
+                        filteredTransactions.add(t);
+                    }
+                }
+                transactions.setValue(filteredTransactions);
+            }
+        });
     }
 
     public void loadTransactionsByCurrency(String currency) {
