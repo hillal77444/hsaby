@@ -45,6 +45,9 @@ public class Account {
     @SerializedName("is_modified")
     private boolean isModified;
 
+    @SerializedName("whatsapp_enabled")
+    private boolean whatsappEnabled;
+
     // Constructor
     @Ignore
     public Account(String accountNumber, String name, double balance, String phoneNumber, boolean isDebtor) {
@@ -53,6 +56,7 @@ public class Account {
         this.balance = balance;
         this.phoneNumber = phoneNumber;
         this.isDebtor = isDebtor;
+        this.whatsappEnabled = true; // تفعيل واتساب افتراضياً
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
     }
@@ -61,6 +65,7 @@ public class Account {
     public Account() {
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
+        this.whatsappEnabled = true; // تفعيل واتساب افتراضياً
     }
 
     // Getters and Setters
@@ -160,6 +165,14 @@ public class Account {
         isModified = modified;
     }
 
+    public boolean isWhatsappEnabled() {
+        return whatsappEnabled;
+    }
+
+    public void setWhatsappEnabled(boolean whatsappEnabled) {
+        this.whatsappEnabled = whatsappEnabled;
+    }
+
     @Override
     public String toString() {
         return "Account{" +
@@ -169,6 +182,7 @@ public class Account {
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", balance=" + balance +
                 ", isDebtor=" + isDebtor +
+                ", whatsappEnabled=" + whatsappEnabled +
                 ", lastSyncTime=" + lastSyncTime +
                 ", isModified=" + isModified +
                 '}';
