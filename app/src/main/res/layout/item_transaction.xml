@@ -6,49 +6,24 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="8dp"
     android:layout_marginVertical="4dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp">
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="#E0E0E0">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
 
-        <!-- صف العنوان -->
+        <!-- صف العنوان والمبلغ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            android:padding="16dp">
 
-            <TextView
-                android:id="@+id/accountNameTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_primary"
-                tools:text="اسم الحساب" />
-
-            <TextView
-                android:id="@+id/transactionDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textColor="@color/text_secondary"
-                tools:text="2024/03/20" />
-
-        </LinearLayout>
-
-        <!-- صف المبالغ -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
-
+            <!-- معلومات الحساب -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -56,101 +31,126 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/accountNameTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/debit"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_secondary" />
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    tools:text="اسم الحساب" />
+
+                <TextView
+                    android:id="@+id/transactionDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textSize="13sp"
+                    android:textColor="@color/text_secondary"
+                    tools:text="2024/03/20" />
+
+            </LinearLayout>
+
+            <!-- المبلغ -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="end">
 
                 <TextView
                     android:id="@+id/transactionDebit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="16sp"
-                    android:textColor="@color/debit"
+                    android:textSize="18sp"
                     android:textStyle="bold"
-                    tools:text="1,000 ريال يمني" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/credit"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_secondary" />
+                    android:textColor="@color/debit_color"
+                    tools:text="1,000,000 ريال" />
 
                 <TextView
                     android:id="@+id/transactionCredit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="16sp"
-                    android:textColor="@color/credit"
-                    android:textStyle="bold"
-                    tools:text="500 ريال يمني" />
+                    android:layout_marginTop="2dp"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary"
+                    tools:text="ريال يمني" />
 
             </LinearLayout>
 
         </LinearLayout>
 
-        <!-- صف الملاحظات -->
-        <TextView
-            android:id="@+id/transactionDescription"
+        <!-- خط فاصل -->
+        <View
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textColor="@color/text_secondary"
-            android:maxLines="2"
-            android:ellipsize="end"
-            tools:text="ملاحظات القيد المحاسبي" />
+            android:layout_height="1dp"
+            android:background="#F5F5F5" />
 
-        <!-- صف الأزرار -->
+        <!-- صف الوصف والأزرار -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="end"
-            android:layout_marginTop="8dp">
+            android:padding="12dp">
 
-            <Button
-                android:id="@+id/btnSendWhatsApp"
+            <!-- الوصف -->
+            <TextView
+                android:id="@+id/transactionDescription"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:maxLines="2"
+                android:ellipsize="end"
+                tools:text="وصف القيد المحاسبي" />
+
+            <!-- أزرار الإجراءات -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="إرسال"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/success"
-                android:layout_marginEnd="8dp"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:padding="8dp" />
+                android:orientation="horizontal"
+                android:layout_marginStart="8dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/editButton"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/edit"
-                android:textColor="@color/primary"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:padding="8dp" />
+                <!-- زر تعديل -->
+                <ImageButton
+                    android:id="@+id/editButton"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_edit"
+                    android:contentDescription="تعديل"
+                    app:tint="@color/primary" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/deleteButton"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/delete"
-                android:textColor="@color/error"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:padding="8dp" />
+                <!-- زر واتساب -->
+                <ImageButton
+                    android:id="@+id/whatsappButton"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_whatsapp"
+                    android:contentDescription="إرسال عبر واتساب"
+                    app:tint="@color/accent_green" />
+
+                <!-- زر إرسال -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSendWhatsApp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="إرسال"
+                    android:textSize="12sp"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/success"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="0dp"
+                    app:cornerRadius="18dp" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
