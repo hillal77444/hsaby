@@ -49,27 +49,35 @@ public class TransactionsAdapter extends ListAdapter<Transaction, TransactionsAd
 
     static class TransactionViewHolder extends RecyclerView.ViewHolder {
         private final TextView dateTextView;
-        private final TextView debitTextView;
-        private final TextView creditTextView;
+        private final TextView amountTextView;
         private final TextView descriptionTextView;
 
         public TransactionViewHolder(@NonNull View itemView) {
             super(itemView);
             dateTextView = itemView.findViewById(R.id.transactionDate);
-            debitTextView = itemView.findViewById(R.id.transactionDebit);
-            creditTextView = itemView.findViewById(R.id.transactionCredit);
+            amountTextView = itemView.findViewById(R.id.transactionAmount);
             descriptionTextView = itemView.findViewById(R.id.transactionDescription);
         }
 
         public void bind(Transaction transaction) {
             dateTextView.setText(dateFormat.format(transaction.getDate()));
             descriptionTextView.setText(transaction.getDescription());
-            if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
-                debitTextView.setText(String.format("%.2f %s", transaction.getAmount(), transaction.getCurrency()));
-                creditTextView.setText(String.format("0 %s", transaction.getCurrency()));
+            
+            double amount = transaction.getAmount();
+            String type = transaction.getType() != null ? transaction.getType().trim() : "";
+
+            if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
+                amountTextView.setText(String.format("%.2f %s", amount, transaction.getCurrency()));
+                amountTextView.setTextColor(itemView.getContext().getResources().getColor(R.color.debit_color));
+                itemView.setBackgroundColor(itemView.getContext().getResources().getColor(R.color.red_100));
+            } else if ((type.equals("له") || type.equalsIgnoreCase("credit")) && amount != 0) {
+                amountTextView.setText(String.format("%.2f %s", amount, transaction.getCurrency()));
+                amountTextView.setTextColor(itemView.getContext().getResources().getColor(R.color.credit_color));
+                itemView.setBackgroundColor(itemView.getContext().getResources().getColor(R.color.green_100));
             } else {
-                debitTextView.setText(String.format("0 %s", transaction.getCurrency()));
-                creditTextView.setText(String.format("%.2f %s", transaction.getAmount(), transaction.getCurrency()));
+                amountTextView.setText("");
+                amountTextView.setTextColor(itemView.getContext().getResources().getColor(R.color.text_primary));
+                itemView.setBackgroundColor(itemView.getContext().getResources().getColor(R.color.white));
             }
         }
     }
