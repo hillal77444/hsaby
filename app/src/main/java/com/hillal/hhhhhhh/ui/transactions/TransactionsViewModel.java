@@ -10,6 +10,7 @@ import com.hillal.hhhhhhh.data.repository.TransactionRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 public class TransactionsViewModel extends AndroidViewModel {
     private final TransactionRepository repository;
@@ -43,7 +44,7 @@ public class TransactionsViewModel extends AndroidViewModel {
         });
     }
 
-    public void loadTransactionsByDateRange(Date startDate, Date endDate) {
+    public void loadTransactionsByDateRange(long startDate, long endDate) {
         repository.getTransactionsByDateRange(startDate, endDate).observeForever(transactions::setValue);
     }
 
@@ -75,5 +76,26 @@ public class TransactionsViewModel extends AndroidViewModel {
 
     public LiveData<Transaction> getTransactionById(long id) {
         return repository.getTransactionById(id);
+    }
+
+    public void filterTransactionsByCurrency(String currency) {
+        List<Transaction> currentList = transactions.getValue();
+        if (currentList != null) {
+            List<Transaction> filteredList = currentList.stream()
+                .filter(t -> t.getCurrency() != null && 
+                           t.getCurrency().trim().equalsIgnoreCase(currency.trim()))
+                .collect(Collectors.toList());
+            transactions.setValue(filteredList);
+        }
+    }
+
+    public void filterTransactionsByAccount(long accountId) {
+        List<Transaction> currentList = transactions.getValue();
+        if (currentList != null) {
+            List<Transaction> filteredList = currentList.stream()
+                .filter(t -> t.getAccountId() == accountId)
+                .collect(Collectors.toList());
+            transactions.setValue(filteredList);
+        }
     }
 } 
