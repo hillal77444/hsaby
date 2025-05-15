@@ -57,7 +57,7 @@ public class AccountStatementActivity extends AppCompatActivity {
 
         // تهيئة المتغيرات
         calendar = Calendar.getInstance();
-        dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
 
         // تهيئة ViewModel
         viewModel = new ViewModelProvider(this).get(AccountStatementViewModel.class);
