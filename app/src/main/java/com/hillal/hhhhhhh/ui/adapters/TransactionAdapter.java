@@ -59,19 +59,6 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
         holder.bind(getItem(position));
     }
 
-    private String getCurrencySymbol(String currency) {
-        switch (currency.toLowerCase()) {
-            case "ريال يمني":
-                return "YER";
-            case "ريال سعودي":
-                return "SAR";
-            case "دولار أمريكي":
-                return "USD";
-            default:
-                return currency;
-        }
-    }
-
     class TransactionViewHolder extends RecyclerView.ViewHolder {
         private final ItemTransactionBinding binding;
         private final SimpleDateFormat dateFormat;
@@ -118,15 +105,21 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             // ربط البيان
             binding.transactionDescription.setText(transaction.getDescription());
 
-            
+            double amount = transaction.getAmount();
+            String type = transaction.getType() != null ? transaction.getType().trim() : "";
 
-            // ربط عليه وله بالأرقام الإنجليزية
-            if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
-                binding.transactionDebit.setText(String.format(Locale.US, "%.2f \n %s", transaction.getAmount(), getCurrencySymbol(transaction.getCurrency())));
+            if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
+                binding.transactionDebit.setText(String.format(Locale.US, "%.2f \n %s", amount, transaction.getCurrency()));
                 binding.transactionCredit.setText("0");
+                binding.getRoot().setBackgroundColor(itemView.getContext().getResources().getColor(R.color.red_100));
+            } else if ((type.equals("له") || type.equalsIgnoreCase("credit")) && amount != 0) {
+                binding.transactionDebit.setText("0");
+                binding.transactionCredit.setText(String.format(Locale.US, "%.2f\n %s", amount, transaction.getCurrency()));
+                binding.getRoot().setBackgroundColor(itemView.getContext().getResources().getColor(R.color.green_100));
             } else {
                 binding.transactionDebit.setText("0");
-                binding.transactionCredit.setText(String.format(Locale.US, "%.2f\n %s", transaction.getAmount(), getCurrencySymbol(transaction.getCurrency())));
+                binding.transactionCredit.setText("0");
+                binding.getRoot().setBackgroundColor(itemView.getContext().getResources().getColor(R.color.white));
             }
 
             // زر إرسال واتساب
