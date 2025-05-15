@@ -19,6 +19,8 @@ import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.viewmodel.AccountStatementViewModel;
+import com.bigkoo.pickerview.builder.TimePickerBuilder;
+import com.bigkoo.pickerview.view.TimePickerView;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -86,17 +88,27 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private void showDatePicker(TextInputEditText input) {
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-            this,
-            (view, year, month, dayOfMonth) -> {
-                calendar.set(year, month, dayOfMonth);
-                input.setText(dateFormat.format(calendar.getTime()));
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        );
-        datePickerDialog.show();
+        Calendar cal = Calendar.getInstance();
+        try {
+            String dateStr = input.getText().toString();
+            if (!dateStr.isEmpty()) {
+                Date parsed = dateFormat.parse(dateStr);
+                cal.setTime(parsed);
+            }
+        } catch (Exception ignored) {}
+
+        TimePickerView pvTime = new TimePickerBuilder(this, (date, v) -> {
+            cal.setTime(date);
+            input.setText(dateFormat.format(cal.getTime()));
+        })
+        .setType(new boolean[]{true, true, true, false, false, false}) // سنة، شهر، يوم فقط
+        .setTitleText("اختر التاريخ")
+        .setSubmitText("تأكيد")
+        .setTitleSize(30)
+        .setDate(cal)
+        .setLabel("سنة", "شهر", "يوم", "", "", "")
+        .build();
+        pvTime.show();
     }
 
     private void loadAccounts() {
