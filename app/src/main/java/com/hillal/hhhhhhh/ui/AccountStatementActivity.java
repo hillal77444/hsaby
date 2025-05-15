@@ -13,6 +13,7 @@ import android.print.PrintAttributes;
 import android.print.PrintDocumentAdapter;
 import android.print.PrintManager;
 import android.content.Context;
+import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -105,19 +106,27 @@ public class AccountStatementActivity extends AppCompatActivity {
             }
         } catch (Exception ignored) {}
 
-        TimePickerView pvTime = new TimePickerBuilder(this, (date, v) -> {
+        TimePickerView[] pvTimeHolder = new TimePickerView[1];
+        pvTimeHolder[0] = new TimePickerBuilder(this, (date, v) -> {
             cal.setTime(date);
             input.setText(dateFormat.format(cal.getTime()));
         })
-        .setType(new boolean[]{true, true, true, false, false, false}) // سنة، شهر، يوم فقط
+        .setType(new boolean[]{true, true, true, false, false, false})
         .setTitleText("اختر التاريخ")
-        .setCancelText("الغاء")
-        .setSubmitText("تأكيد")
         .setTitleSize(30)
+        .setLayoutRes(R.layout.dialog_picker_custom_buttons, view -> {
+            Button btnCancel = view.findViewById(R.id.btnCancel);
+            Button btnSubmit = view.findViewById(R.id.btnSubmit);
+            btnCancel.setOnClickListener(v1 -> pvTimeHolder[0].dismiss());
+            btnSubmit.setOnClickListener(v2 -> {
+                pvTimeHolder[0].returnData();
+                pvTimeHolder[0].dismiss();
+            });
+        })
         .setDate(cal)
         .setLabel("سنة", "شهر", "يوم", "", "", "")
         .build();
-        pvTime.show();
+        pvTimeHolder[0].show();
     }
 
     private void loadAccounts() {
