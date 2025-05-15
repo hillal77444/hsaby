@@ -106,27 +106,26 @@ public class AccountStatementActivity extends AppCompatActivity {
             }
         } catch (Exception ignored) {}
 
-        TimePickerView[] pvTimeHolder = new TimePickerView[1];
-        pvTimeHolder[0] = new TimePickerBuilder(this, (date, v) -> {
+        TimePickerView pvTime = new TimePickerBuilder(this, (date, v) -> {
             cal.setTime(date);
             input.setText(dateFormat.format(cal.getTime()));
         })
         .setType(new boolean[]{true, true, true, false, false, false})
         .setTitleText("اختر التاريخ")
         .setTitleSize(30)
-        .setLayoutRes(R.layout.dialog_picker_custom_buttons, view -> {
-            Button btnCancel = view.findViewById(R.id.btnCancel);
-            Button btnSubmit = view.findViewById(R.id.btnSubmit);
-            btnCancel.setOnClickListener(v1 -> pvTimeHolder[0].dismiss());
+        .setLayoutRes(R.layout.dialog_picker_custom_buttons, v -> {
+            Button btnCancel = v.findViewById(R.id.btnCancel);
+            Button btnSubmit = v.findViewById(R.id.btnSubmit);
+            btnCancel.setOnClickListener(v1 -> pvTime.dismiss());
             btnSubmit.setOnClickListener(v2 -> {
-                pvTimeHolder[0].returnData();
-                pvTimeHolder[0].dismiss();
+                pvTime.returnData();
+                pvTime.dismiss();
             });
         })
         .setDate(cal)
         .setLabel("سنة", "شهر", "يوم", "", "", "")
         .build();
-        pvTimeHolder[0].show();
+        pvTime.show();
     }
 
     private void loadAccounts() {
