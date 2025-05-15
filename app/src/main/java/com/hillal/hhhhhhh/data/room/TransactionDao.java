@@ -29,7 +29,7 @@ public interface TransactionDao {
     LiveData<List<Transaction>> getTransactionsForAccount(long accountId);
 
     @Query("SELECT * FROM transactions WHERE accountId = :accountId AND date BETWEEN :startDate AND :endDate ORDER BY date DESC")
-    LiveData<List<Transaction>> getTransactionsForAccountInDateRange(long accountId, Date startDate, Date endDate);
+    LiveData<List<Transaction>> getTransactionsForAccountInDateRange(long accountId, long startDate, long endDate);
 
     @Query("SELECT SUM(amount) FROM transactions WHERE accountId = :accountId AND type = 'credit'")
     LiveData<Double> getTotalCredits(long accountId);
@@ -41,10 +41,10 @@ public interface TransactionDao {
     LiveData<Transaction> getLastTransaction(long accountId);
 
     @Query("SELECT SUM(amount) FROM transactions WHERE accountId = :accountId AND type = 'credit' AND date BETWEEN :startDate AND :endDate")
-    LiveData<Double> getTotalCreditsInDateRange(long accountId, Date startDate, Date endDate);
+    LiveData<Double> getTotalCreditsInDateRange(long accountId, long startDate, long endDate);
 
     @Query("SELECT SUM(amount) FROM transactions WHERE accountId = :accountId AND type = 'debit' AND date BETWEEN :startDate AND :endDate")
-    LiveData<Double> getTotalDebitsInDateRange(long accountId, Date startDate, Date endDate);
+    LiveData<Double> getTotalDebitsInDateRange(long accountId, long startDate, long endDate);
 
     @Query("SELECT * FROM transactions ORDER BY date DESC")
     LiveData<List<Transaction>> getAllTransactions();
