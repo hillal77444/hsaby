@@ -64,7 +64,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
             String type = transaction.getType() != null ? transaction.getType().trim() : "";
 
             String amountStr;
-            if (amount % 1 == 0) {
+            if (Math.abs(amount - Math.round(amount)) < 0.00001) {
                 amountStr = String.format("%.0f", amount);
             } else {
                 amountStr = String.format("%.2f", amount);
