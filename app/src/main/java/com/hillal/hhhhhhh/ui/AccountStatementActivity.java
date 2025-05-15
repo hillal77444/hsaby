@@ -75,10 +75,6 @@ public class AccountStatementActivity extends AppCompatActivity {
 
         // تعيين التواريخ الافتراضية
         setDefaultDates();
-
-        // زر الطباعة
-        btnPrint = findViewById(R.id.btnPrint);
-        btnPrint.setOnClickListener(v -> printWebView());
     }
 
     private void initializeViews() {
@@ -379,13 +375,6 @@ public class AccountStatementActivity extends AppCompatActivity {
 
     private void filterTransactionsByDateRange(List<Transaction> transactions, Date startDate, Date endDate) {
         transactions.removeIf(t -> !isTransactionInDateRange(t, startDate, endDate));
-    }
-
-    private void printWebView() {
-        PrintManager printManager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
-        PrintDocumentAdapter printAdapter = webView.createPrintDocumentAdapter("كشف الحساب");
-        String jobName = getString(R.string.app_name) + " كشف الحساب";
-        printManager.print(jobName, printAdapter, new PrintAttributes.Builder().build());
     }
 
     @Override
