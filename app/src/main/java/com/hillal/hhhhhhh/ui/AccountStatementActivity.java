@@ -184,8 +184,8 @@ public class AccountStatementActivity extends AppCompatActivity {
                 if (selectedAccount != null) {
                     viewModel.getTransactionsForAccountInDateRange(
                         selectedAccount.getId(),
-                        startFinal,
-                        endFinal
+                        startFinal.getTime(),
+                        endFinal.getTime()
                     ).observe(this, transactions -> {
                         String htmlContent = generateReportHtml(selectedAccount, startFinal, endFinal, transactions);
                         webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
