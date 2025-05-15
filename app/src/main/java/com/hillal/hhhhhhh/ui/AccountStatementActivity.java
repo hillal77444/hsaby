@@ -1,6 +1,7 @@
 package com.hillal.hhhhhhh.ui;
 
 import android.app.DatePickerDialog;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -102,17 +103,33 @@ public class AccountStatementActivity extends AppCompatActivity {
             }
         } catch (Exception ignored) {}
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-            this,
-            (view, year, month, dayOfMonth) -> {
-                cal.set(year, month, dayOfMonth);
-                input.setText(dateFormat.format(cal.getTime()));
-            },
-            cal.get(Calendar.YEAR),
-            cal.get(Calendar.MONTH),
-            cal.get(Calendar.DAY_OF_MONTH)
-        );
-        datePickerDialog.show();
+        final TimePickerView[] pvTimeHolder = new TimePickerView[1];
+        pvTimeHolder[0] = new TimePickerBuilder(this, (date, v) -> {
+            cal.setTime(date);
+            input.setText(dateFormat.format(cal.getTime()));
+        })
+        .setType(new boolean[]{true, true, true, false, false, false})
+        .setTitleText("اختر التاريخ")
+        .setTitleSize(30)
+        .setLayoutRes(R.layout.dialog_picker_custom_buttons, v -> {
+            Button btnCancel = v.findViewById(R.id.btnCancel);
+            Button btnSubmit = v.findViewById(R.id.btnSubmit);
+            btnCancel.setOnClickListener(v1 -> pvTimeHolder[0].dismiss());
+            btnSubmit.setOnClickListener(v2 -> {
+                pvTimeHolder[0].returnData();
+                pvTimeHolder[0].dismiss();
+            });
+        })
+        .setDate(cal)
+        .setLabel("سنة", "شهر", "يوم", "", "", "")
+        .setBgColor(Color.WHITE)
+        .setCancelColor(Color.parseColor("#1976D2"))
+        .setSubmitColor(Color.parseColor("#1976D2"))
+        .setTextColorCenter(Color.parseColor("#1976D2"))
+        .setTextColorOut(Color.parseColor("#999999"))
+        .setDividerColor(Color.parseColor("#1976D2"))
+        .build();
+        pvTimeHolder[0].show();
     }
 
     private void loadAccounts() {
