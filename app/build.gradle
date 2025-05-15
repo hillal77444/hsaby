@@ -128,5 +128,5 @@ dependencies {
 
     implementation 'com.github.florent37:singledateandtimepicker:2.2.7'
 
-    implementation 'com.github.vikramezhil:WheelPicker:1.0.3'
+    implementation 'cn.aigestudio.wheelpicker:WheelPicker:1.1.3'
 } 
