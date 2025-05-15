@@ -133,8 +133,16 @@ public class TransactionsFragment extends Fragment {
 
     private void setupDateFilter() {
         updateDateInputs();
-        binding.startDateFilter.setOnClickListener(v -> showWheelDatePicker(true));
-        binding.endDateFilter.setOnClickListener(v -> showWheelDatePicker(false));
+        binding.startDateFilter.setOnClickListener(v -> {
+            showWheelDatePicker(true);
+            // تحميل المعاملات بعد تغيير التاريخ
+            viewModel.loadTransactionsByDateRange(startDate.getTime(), endDate.getTime());
+        });
+        binding.endDateFilter.setOnClickListener(v -> {
+            showWheelDatePicker(false);
+            // تحميل المعاملات بعد تغيير التاريخ
+            viewModel.loadTransactionsByDateRange(startDate.getTime(), endDate.getTime());
+        });
     }
 
     private void showWheelDatePicker(boolean isStartDate) {
