@@ -2,6 +2,7 @@ package com.hillal.hhhhhhh.ui.transactions;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,6 +39,7 @@ import java.util.Date;
 import java.util.Locale;
 import com.bigkoo.pickerview.view.TimePickerView;
 import com.bigkoo.pickerview.builder.TimePickerBuilder;
+import com.bigkoo.pickerview.builder.TimePickerType;
 
 public class TransactionsFragment extends Fragment {
     private FragmentTransactionsBinding binding;
@@ -134,47 +136,38 @@ public class TransactionsFragment extends Fragment {
     private void setupDateFilter() {
         updateDateInputs();
         binding.startDateFilter.setOnClickListener(v -> {
-            showWheelDatePicker(true);
-            // تحميل المعاملات بعد تغيير التاريخ
-            viewModel.loadTransactionsByDateRange(startDate.getTime(), endDate.getTime());
+            showDatePicker();
         });
         binding.endDateFilter.setOnClickListener(v -> {
-            showWheelDatePicker(false);
-            // تحميل المعاملات بعد تغيير التاريخ
-            viewModel.loadTransactionsByDateRange(startDate.getTime(), endDate.getTime());
+            showDatePicker();
         });
     }
 
-    private void showWheelDatePicker(boolean isStartDate) {
-        Calendar calendar = isStartDate ? startDate : endDate;
-        TimePickerView pvTime = new TimePickerBuilder(requireContext(), (date, v) -> {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(date);
-            if (isStartDate) {
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                startDate.setTime(cal.getTime());
-            } else {
-                cal.set(Calendar.HOUR_OF_DAY, 23);
-                cal.set(Calendar.MINUTE, 59);
-                cal.set(Calendar.SECOND, 59);
-                cal.set(Calendar.MILLISECOND, 999);
-                endDate.setTime(cal.getTime());
-            }
-            updateDateInputs();
-            applyAllFilters();
-        })
-        .setType(new boolean[]{true, true, true, false, false, false}) // سنة، شهر، يوم فقط
-        .setTitleText("اختر التاريخ")
-        .setSubmitText("تأكيد")
-        .setContentSize(20)
-        .setDate(calendar)
-        .setLabel("سنة", "شهر", "يوم", "", "", "")
+    private void showDatePicker() {
+        TimePickerBuilder timePickerBuilder = new TimePickerBuilder()
+            .setTimePickerType(TimePickerType.YEAR_MONTH_DAY)
+            .setTitleText("اختر التاريخ")
+            .setTitleTextColor(Color.BLACK)
+            .setSubmitText("تأكيد")
+            .setCancelText("إلغاء")
+            .setTitleSize(20)
+            .setSubmitTextColor(Color.BLUE)
+            .setCancelTextColor(Color.RED)
+            .setCyclic(false)
+            .setDate(Calendar.getInstance())
+            .setRangDate(startDate, endDate)
+            .setLayoutRes(R.layout.dialog_wheel_date_picker, v -> {
+                final TimePickerView timePickerView = v.findViewById(R.id.timepicker);
+                timePickerView.setTimePickerBuilder(timePickerBuilder);
+            })
+            .setTimeSelectListener(date -> {
+                startDate = date;
+                endDate = date;
+                updateDateRangeText();
+                viewModel.loadTransactionsByDateRange(startDate.getTime(), endDate.getTime());
+            });
 
-        .build();
-        pvTime.show();
+        timePickerBuilder.build().show(getChildFragmentManager(), "timepicker");
     }
 
     private void updateDateInputs() {
