@@ -15,7 +15,9 @@
         android:textColor="#1976D2"
         android:background="@android:color/transparent"
         android:textSize="18sp"
-        android:gravity="start"/>
+        android:gravity="start"
+        android:drawableStart="@drawable/ic_close"
+        android:drawablePadding="8dp"/>
 
     <View
         android:layout_width="0dp"
@@ -31,5 +33,7 @@
         android:textColor="#1976D2"
         android:background="@android:color/transparent"
         android:textSize="18sp"
-        android:gravity="end"/>
+        android:gravity="end"
+        android:drawableEnd="@drawable/ic_check"
+        android:drawablePadding="8dp"/>
 </LinearLayout> 
