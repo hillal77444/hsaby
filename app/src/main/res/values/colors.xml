@@ -47,4 +47,6 @@
     <color name="teal_700">#018786</color>
     <color name="primary_blue">#2563EB</color>
     <color name="primary_blue_dark">#1D4ED8</color>
+    <color name="red_100">#FFCDD2</color>
+    <color name="green_100">#C8E6C9</color>
 </resources>
