@@ -63,9 +63,12 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
             double amount = transaction.getAmount();
             String type = transaction.getType() != null ? transaction.getType().trim() : "";
 
-            String amountStr = (amount == Math.floor(amount)) ?
-                    String.format("%.0f", amount) :
-                    String.format("%.2f", amount);
+            String amountStr;
+            if (amount % 1 == 0) {
+                amountStr = String.format("%.0f", amount);
+            } else {
+                amountStr = String.format("%.2f", amount);
+            }
 
             if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
                 amountTextView.setText(amountStr + " " + transaction.getCurrency());
