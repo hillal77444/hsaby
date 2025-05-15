@@ -1,11 +1,15 @@
 package com.hillal.hhhhhhh.ui.transactions;
 
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -33,6 +37,7 @@ import com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePick
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import com.github.vikramezhil.wheelpicker.view.WheelPicker;
 
 public class TransactionsFragment extends Fragment {
     private FragmentTransactionsBinding binding;
@@ -132,41 +137,87 @@ public class TransactionsFragment extends Fragment {
     }
 
     private void showWheelDatePicker(boolean isStartDate) {
+        Dialog dialog = new Dialog(requireContext());
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_wheel_date_picker);
+
+        WheelPicker yearPicker = dialog.findViewById(R.id.yearPicker);
+        WheelPicker monthPicker = dialog.findViewById(R.id.monthPicker);
+        WheelPicker dayPicker = dialog.findViewById(R.id.dayPicker);
+        Button confirmButton = dialog.findViewById(R.id.confirmButton);
+        TextView titleTextView = dialog.findViewById(R.id.titleTextView);
+
+        // إعداد البيانات
         Calendar calendar = isStartDate ? startDate : endDate;
-        new SingleDateAndTimePickerDialog.Builder(requireContext())
-            .title("اختر التاريخ")
-            .displayDays(true)
-            .displayHours(false)
-            .displayMinutes(false)
-            .displayMonthNumbers(true)
-            .displayYears(true)
-            .defaultDate(calendar.getTime())
-            .displayListener(picker -> {
-                picker.setIsAmPm(false);
-                picker.setSelectedTextColor(getResources().getColor(R.color.primary_blue));
-                picker.setWheelItemCount(5);
-                picker.setMustBeOnFuture(false);
-            })
-            .listener(date -> {
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(date);
-                if (isStartDate) {
-                    cal.set(Calendar.HOUR_OF_DAY, 0);
-                    cal.set(Calendar.MINUTE, 0);
-                    cal.set(Calendar.SECOND, 0);
-                    cal.set(Calendar.MILLISECOND, 0);
-                    startDate.setTime(cal.getTime());
-                } else {
-                    cal.set(Calendar.HOUR_OF_DAY, 23);
-                    cal.set(Calendar.MINUTE, 59);
-                    cal.set(Calendar.SECOND, 59);
-                    cal.set(Calendar.MILLISECOND, 999);
-                    endDate.setTime(cal.getTime());
-                }
-                updateDateInputs();
-                applyAllFilters();
-            })
-            .display();
+        int currentYear = calendar.get(Calendar.YEAR);
+        int currentMonth = calendar.get(Calendar.MONTH); // 0-based
+        int currentDay = calendar.get(Calendar.DAY_OF_MONTH);
+
+        // سنوات من 2000 إلى 2100
+        java.util.List<String> years = new java.util.ArrayList<>();
+        for (int y = 2000; y <= 2100; y++) years.add(String.valueOf(y));
+        yearPicker.setData(years);
+        yearPicker.setSelectedItemPosition(currentYear - 2000);
+
+        // الأشهر
+        java.util.List<String> months = new java.util.ArrayList<>();
+        String[] monthNames = {"يناير", "فبراير", "مارس", "ابريل", "مايو", "يونيو", "يوليو", "اغسطس", "سبتمبر", "اكتوبر", "نوفمبر", "ديسمبر"};
+        for (String m : monthNames) months.add(m);
+        monthPicker.setData(months);
+        monthPicker.setSelectedItemPosition(currentMonth);
+
+        // الأيام (سيتم تحديثها عند تغيير الشهر أو السنة)
+        java.util.List<String> days = new java.util.ArrayList<>();
+        int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        for (int d = 1; d <= maxDay; d++) days.add(String.valueOf(d));
+        dayPicker.setData(days);
+        dayPicker.setSelectedItemPosition(currentDay - 1);
+
+        // تحديث الأيام عند تغيير الشهر أو السنة
+        WheelPicker.OnItemSelectedListener updateDaysListener = (picker, data, position) -> {
+            int selectedYear = Integer.parseInt(years.get(yearPicker.getCurrentItemPosition()));
+            int selectedMonth = monthPicker.getCurrentItemPosition();
+            Calendar tempCal = Calendar.getInstance();
+            tempCal.set(Calendar.YEAR, selectedYear);
+            tempCal.set(Calendar.MONTH, selectedMonth);
+            int max = tempCal.getActualMaximum(Calendar.DAY_OF_MONTH);
+            java.util.List<String> newDays = new java.util.ArrayList<>();
+            for (int d = 1; d <= max; d++) newDays.add(String.valueOf(d));
+            dayPicker.setData(newDays);
+            if (dayPicker.getCurrentItemPosition() >= max) {
+                dayPicker.setSelectedItemPosition(max - 1);
+            }
+        };
+        yearPicker.setOnItemSelectedListener(updateDaysListener);
+        monthPicker.setOnItemSelectedListener(updateDaysListener);
+
+        confirmButton.setOnClickListener(v -> {
+            int selectedYear = Integer.parseInt(years.get(yearPicker.getCurrentItemPosition()));
+            int selectedMonth = monthPicker.getCurrentItemPosition();
+            int selectedDay = Integer.parseInt((String) dayPicker.getData().get(dayPicker.getCurrentItemPosition()));
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.YEAR, selectedYear);
+            cal.set(Calendar.MONTH, selectedMonth);
+            cal.set(Calendar.DAY_OF_MONTH, selectedDay);
+            if (isStartDate) {
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                startDate.setTime(cal.getTime());
+            } else {
+                cal.set(Calendar.HOUR_OF_DAY, 23);
+                cal.set(Calendar.MINUTE, 59);
+                cal.set(Calendar.SECOND, 59);
+                cal.set(Calendar.MILLISECOND, 999);
+                endDate.setTime(cal.getTime());
+            }
+            updateDateInputs();
+            applyAllFilters();
+            dialog.dismiss();
+        });
+
+        dialog.show();
     }
 
     private void updateDateInputs() {
