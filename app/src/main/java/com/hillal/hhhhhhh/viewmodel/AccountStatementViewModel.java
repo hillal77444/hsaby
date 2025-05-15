@@ -9,65 +9,66 @@ import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.repository.AccountStatementRepository;
 
-import java.util.Date;
 import java.util.List;
 
 public class AccountStatementViewModel extends AndroidViewModel {
     private final AccountStatementRepository repository;
-    private long currentAccountId;
-    private Date startDate;
-    private Date endDate;
+    private long currentAccountId = -1;
+    private long startDate;
+    private long endDate;
 
     public AccountStatementViewModel(Application application) {
         super(application);
         repository = new AccountStatementRepository(application);
     }
 
-    public void setAccountId(long accountId) {
+    public void setCurrentAccount(long accountId) {
         this.currentAccountId = accountId;
     }
 
-    public void setDateRange(Date startDate, Date endDate) {
+    public void setDateRange(long startDate, long endDate) {
         this.startDate = startDate;
         this.endDate = endDate;
     }
 
-    public LiveData<Account> getAccount() {
+    public LiveData<Account> getCurrentAccount() {
         return repository.getAccount(currentAccountId);
     }
 
-    public LiveData<List<Transaction>> getTransactions() {
-        if (startDate != null && endDate != null) {
-            return repository.getTransactionsForAccountInDateRange(currentAccountId, startDate, endDate);
+    public LiveData<List<Transaction>> getTransactionsForCurrentAccount() {
+        if (currentAccountId == -1) {
+            return null;
         }
-        return repository.getTransactionsForAccount(currentAccountId);
+        return repository.getTransactionsForAccountInDateRange(currentAccountId, startDate, endDate);
     }
 
-    public LiveData<Double> getTotalCredits() {
-        return repository.getTotalCredits(currentAccountId);
+    public LiveData<Double> getTotalCreditsForCurrentAccount() {
+        if (currentAccountId == -1) {
+            return null;
+        }
+        return repository.getTotalCreditsInDateRange(currentAccountId, startDate, endDate);
     }
 
-    public LiveData<Double> getTotalDebits() {
-        return repository.getTotalDebits(currentAccountId);
+    public LiveData<Double> getTotalDebitsForCurrentAccount() {
+        if (currentAccountId == -1) {
+            return null;
+        }
+        return repository.getTotalDebitsInDateRange(currentAccountId, startDate, endDate);
     }
 
-    public LiveData<Transaction> getLastTransaction() {
-        return repository.getLastTransaction(currentAccountId);
+    public LiveData<List<Transaction>> getTransactionsForAccount(long accountId) {
+        return repository.getTransactionsForAccountInDateRange(accountId, startDate, endDate);
+    }
+
+    public LiveData<Double> getTotalCreditsForAccount(long accountId) {
+        return repository.getTotalCreditsInDateRange(accountId, startDate, endDate);
+    }
+
+    public LiveData<Double> getTotalDebitsForAccount(long accountId) {
+        return repository.getTotalDebitsInDateRange(accountId, startDate, endDate);
     }
 
     public LiveData<List<Account>> getAllAccounts() {
         return repository.getAllAccounts();
-    }
-
-    public LiveData<List<Transaction>> getTransactionsForAccountInDateRange(long accountId, Date startDate, Date endDate) {
-        return repository.getTransactionsForAccountInDateRange(accountId, startDate, endDate);
-    }
-
-    public LiveData<Double> getTotalCredits(long accountId, Date startDate, Date endDate) {
-        return repository.getTotalCredits(accountId, startDate, endDate);
-    }
-
-    public LiveData<Double> getTotalDebits(long accountId, Date startDate, Date endDate) {
-        return repository.getTotalDebits(accountId, startDate, endDate);
     }
 } 
