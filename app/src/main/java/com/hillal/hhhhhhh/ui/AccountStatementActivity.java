@@ -9,6 +9,10 @@ import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
+import android.print.PrintAttributes;
+import android.print.PrintDocumentAdapter;
+import android.print.PrintManager;
+import android.content.Context;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -37,7 +41,7 @@ public class AccountStatementActivity extends AppCompatActivity {
     private AccountStatementViewModel viewModel;
     private AutoCompleteTextView accountDropdown;
     private TextInputEditText startDateInput, endDateInput;
-    private MaterialButton btnShowReport;
+    private MaterialButton btnShowReport, btnPrint;
     private WebView webView;
     private Calendar calendar;
     private SimpleDateFormat dateFormat;
@@ -70,6 +74,10 @@ public class AccountStatementActivity extends AppCompatActivity {
 
         // تعيين التواريخ الافتراضية
         setDefaultDates();
+
+        // زر الطباعة
+        btnPrint = findViewById(R.id.btnPrint);
+        btnPrint.setOnClickListener(v -> printWebView());
     }
 
     private void initializeViews() {
@@ -103,6 +111,7 @@ public class AccountStatementActivity extends AppCompatActivity {
         })
         .setType(new boolean[]{true, true, true, false, false, false}) // سنة، شهر، يوم فقط
         .setTitleText("اختر التاريخ")
+        .setCancelText("الغاء")
         .setSubmitText("تأكيد")
         .setTitleSize(30)
         .setDate(cal)
@@ -222,18 +231,15 @@ public class AccountStatementActivity extends AppCompatActivity {
         html.append(".report-header { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #eee; padding: 24px 20px 16px 20px; margin-bottom: 24px; text-align: center; }");
         html.append(".report-header h2 { color: #1976d2; margin-bottom: 8px; font-size: 2em; }");
         html.append(".report-header p { color: #333; margin: 4px 0; font-size: 1.1em; }");
-        html.append(".print-btn { background: #1976d2; color: #fff; border: none; border-radius: 6px; padding: 10px 24px; font-size: 1em; cursor: pointer; margin-bottom: 18px; transition: background 0.2s; }");
-        html.append(".print-btn:hover { background: #125ea2; }");
         html.append("table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px #eee; }");
         html.append("th, td { border: 1px solid #ddd; padding: 10px 8px; text-align: right; font-size: 1em; }");
         html.append("th { background-color: #e3eafc; color: #1976d2; font-weight: bold; }");
         html.append("tr:nth-child(even) { background: #f7faff; }");
         html.append("tr:hover { background: #e3eafc33; }");
-        html.append("@media print { .print-btn { display: none; } .report-header { box-shadow: none; } table { box-shadow: none; } body { background: #fff; } }");
+        html.append("@media print { .report-header { box-shadow: none; } table { box-shadow: none; } body { background: #fff; } }");
         html.append("</style>");
         html.append("</head>");
         html.append("<body>");
-        html.append("<button class='print-btn' onclick='window.print()'>🖨️ طباعة / حفظ PDF</button>");
         html.append("<div class='report-header'>");
         html.append("<h2>كشف الحساب التفصيلي</h2>");
         html.append("<p>الحساب: <b>").append(account.getName()).append("</b></p>");
@@ -362,6 +368,13 @@ public class AccountStatementActivity extends AppCompatActivity {
 
     private void filterTransactionsByDateRange(List<Transaction> transactions, Date startDate, Date endDate) {
         transactions.removeIf(t -> !isTransactionInDateRange(t, startDate, endDate));
+    }
+
+    private void printWebView() {
+        PrintManager printManager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
+        PrintDocumentAdapter printAdapter = webView.createPrintDocumentAdapter("كشف الحساب");
+        String jobName = getString(R.string.app_name) + " كشف الحساب";
+        printManager.print(jobName, printAdapter, new PrintAttributes.Builder().build());
     }
 
     @Override
