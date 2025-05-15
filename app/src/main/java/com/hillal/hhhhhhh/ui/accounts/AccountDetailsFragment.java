@@ -210,12 +210,16 @@ public class AccountDetailsFragment extends Fragment {
                 double amount = transaction.getAmount();
                 String type = transaction.getType() != null ? transaction.getType().trim() : "";
 
+                String amountStr = (amount == Math.floor(amount)) ?
+                        String.format("%.0f", amount) :
+                        String.format("%.2f", amount);
+
                 if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
-                    amountTextView.setText(String.format("%.2f %s", amount, transaction.getCurrency()));
+                    amountTextView.setText(amountStr + " " + transaction.getCurrency());
                     amountTextView.setTextColor(itemView.getContext().getResources().getColor(R.color.debit_color));
                     itemView.setBackgroundColor(itemView.getContext().getResources().getColor(R.color.red_100));
                 } else if ((type.equals("له") || type.equalsIgnoreCase("credit")) && amount != 0) {
-                    amountTextView.setText(String.format("%.2f %s", amount, transaction.getCurrency()));
+                    amountTextView.setText(amountStr + " " + transaction.getCurrency());
                     amountTextView.setTextColor(itemView.getContext().getResources().getColor(R.color.credit_color));
                     itemView.setBackgroundColor(itemView.getContext().getResources().getColor(R.color.green_100));
                 } else {
