@@ -33,6 +33,9 @@ public interface TransactionDao {
     @Query("SELECT SUM(amount) FROM transactions WHERE accountId = :accountId AND type = 'debit' AND date BETWEEN :startDate AND :endDate")
     LiveData<Double> getTotalDebitsInDateRange(long accountId, Date startDate, Date endDate);
 
+    @Query("SELECT * FROM transactions WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
+    LiveData<List<Transaction>> getTransactionsByDateRange(Date startDate, Date endDate);
+
     @Insert
     void insert(Transaction transaction);
 
