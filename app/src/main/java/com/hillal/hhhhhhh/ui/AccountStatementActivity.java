@@ -84,8 +84,10 @@ public class AccountStatementActivity extends AppCompatActivity {
         endDateInput = findViewById(R.id.endDateInput);
         btnShowReport = findViewById(R.id.btnShowReport);
         webView = findViewById(R.id.webView);
+        btnPrint = findViewById(R.id.btnPrintInCard);
 
         btnShowReport.setOnClickListener(v -> showReport());
+        btnPrint.setOnClickListener(v -> printReport());
     }
 
     private void setupDatePickers() {
@@ -383,6 +385,20 @@ public class AccountStatementActivity extends AppCompatActivity {
 
     private void filterTransactionsByDateRange(List<Transaction> transactions, Date startDate, Date endDate) {
         transactions.removeIf(t -> !isTransactionInDateRange(t, startDate, endDate));
+    }
+
+    private void printReport() {
+        if (webView.getContentHeight() == 0) {
+            Toast.makeText(this, "لا يوجد تقرير للطباعة", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        PrintManager printManager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
+        String jobName = getString(R.string.app_name) + " Document";
+
+        PrintDocumentAdapter printAdapter = webView.createPrintDocumentAdapter(jobName);
+
+        printManager.print(jobName, printAdapter, new PrintAttributes.Builder().build());
     }
 
     @Override
