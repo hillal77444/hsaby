@@ -29,9 +29,8 @@ import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.viewmodel.AccountStatementViewModel;
-import com.contrarywind.view.WheelView;
-import com.contrarywind.adapter.ArrayWheelAdapter;
-import com.contrarywind.listener.OnItemSelectedListener;
+import com.bigkoo.pickerview.builder.TimePickerBuilder;
+import com.bigkoo.pickerview.view.TimePickerView;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -110,58 +109,33 @@ public class AccountStatementActivity extends AppCompatActivity {
             }
         } catch (Exception ignored) {}
 
-        Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.dialog_date_picker);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-        WheelView yearWheel = dialog.findViewById(R.id.year_wheel);
-        WheelView monthWheel = dialog.findViewById(R.id.month_wheel);
-        WheelView dayWheel = dialog.findViewById(R.id.day_wheel);
-        Button btnCancel = dialog.findViewById(R.id.btnCancel);
-        Button btnSubmit = dialog.findViewById(R.id.btnSubmit);
-
-        // إعداد قوائم السنوات والأشهر والأيام
-        List<String> years = new ArrayList<>();
-        List<String> months = new ArrayList<>();
-        List<String> days = new ArrayList<>();
-
-        int currentYear = cal.get(Calendar.YEAR);
-        for (int i = currentYear - 100; i <= currentYear + 100; i++) {
-            years.add(String.valueOf(i));
-        }
-
-        for (int i = 1; i <= 12; i++) {
-            months.add(String.format(Locale.getDefault(), "%02d", i));
-        }
-
-        for (int i = 1; i <= 31; i++) {
-            days.add(String.format(Locale.getDefault(), "%02d", i));
-        }
-
-        // تعيين البيانات للعجلات
-        yearWheel.setAdapter(new ArrayWheelAdapter(years));
-        monthWheel.setAdapter(new ArrayWheelAdapter(months));
-        dayWheel.setAdapter(new ArrayWheelAdapter(days));
-
-        // تعيين القيم الحالية
-        yearWheel.setCurrentItem(years.indexOf(String.valueOf(cal.get(Calendar.YEAR))));
-        monthWheel.setCurrentItem(cal.get(Calendar.MONTH));
-        dayWheel.setCurrentItem(cal.get(Calendar.DAY_OF_MONTH) - 1);
-
-        // إعداد مستمعي الأحداث
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
-
-        btnSubmit.setOnClickListener(v -> {
-            int year = Integer.parseInt(years.get(yearWheel.getCurrentItem()));
-            int month = Integer.parseInt(months.get(monthWheel.getCurrentItem()));
-            int day = Integer.parseInt(days.get(dayWheel.getCurrentItem()));
-
-            cal.set(year, month - 1, day);
+        final TimePickerView[] pvTimeHolder = new TimePickerView[1];
+        pvTimeHolder[0] = new TimePickerBuilder(this, (date, v) -> {
+            cal.setTime(date);
             input.setText(dateFormat.format(cal.getTime()));
-            dialog.dismiss();
-        });
-
-        dialog.show();
+        })
+        .setType(new boolean[]{true, true, true, false, false, false})
+        .setTitleText("اختر التاريخ")
+        .setTitleSize(30)
+        .setLayoutRes(R.layout.dialog_picker_custom_buttons, v -> {
+            Button btnCancel = v.findViewById(R.id.btnCancel);
+            Button btnSubmit = v.findViewById(R.id.btnSubmit);
+            btnCancel.setOnClickListener(v1 -> pvTimeHolder[0].dismiss());
+            btnSubmit.setOnClickListener(v2 -> {
+                pvTimeHolder[0].returnData();
+                pvTimeHolder[0].dismiss();
+            });
+        })
+        .setDate(cal)
+        .setLabel("سنة", "شهر", "يوم", "", "", "")
+        .setBgColor(Color.WHITE)
+        .setCancelColor(Color.parseColor("#1976D2"))
+        .setSubmitColor(Color.parseColor("#1976D2"))
+        .setTextColorCenter(Color.parseColor("#1976D2"))
+        .setTextColorOut(Color.parseColor("#999999"))
+        .setDividerColor(Color.parseColor("#1976D2"))
+        .build();
+        pvTimeHolder[0].show();
     }
 
     private void loadAccounts() {
