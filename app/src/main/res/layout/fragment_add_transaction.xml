@@ -337,7 +337,6 @@
                 android:layout_weight="1"
                 android:text="@string/save"
                 android:icon="@android:drawable/ic_menu_save"
-                app:iconPadding="4dp"
                 android:layout_marginEnd="2dp"/>
 
             <com.google.android.material.button.MaterialButton
@@ -347,8 +346,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/cancel"
-                android:icon="@android:drawable/ic_menu_close_clear_cancel"
-                app:iconPadding="4dp"/>
+                android:icon="@android:drawable/ic_menu_close_clear_cancel"/>
         </LinearLayout>
 
     </LinearLayout>
