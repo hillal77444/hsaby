@@ -62,6 +62,9 @@ public class AddTransactionFragment extends Fragment {
     private void setupViews() {
         // Set initial date
         updateDateField();
+
+        // تعيين ريال يمني كخيار افتراضي
+        binding.radioYer.setChecked(true);
         
         // إضافة اسم المستخدم في الملاحظات
         String userName = userPreferences.getUserName();
