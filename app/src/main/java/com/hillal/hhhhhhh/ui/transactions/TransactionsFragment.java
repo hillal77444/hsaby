@@ -1,16 +1,11 @@
 package com.hillal.hhhhhhh.ui.transactions;
 
 import android.app.DatePickerDialog;
-import android.app.Dialog;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,7 +16,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.google.android.material.chip.Chip;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.databinding.FragmentTransactionsBinding;
@@ -37,9 +31,8 @@ import com.hillal.hhhhhhh.App;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import com.bigkoo.pickerview.view.TimePickerView;
 import com.bigkoo.pickerview.builder.TimePickerBuilder;
-import com.bigkoo.pickerview.builder.TimePickerType;
+import com.bigkoo.pickerview.view.TimePickerView;
 
 public class TransactionsFragment extends Fragment {
     private FragmentTransactionsBinding binding;
@@ -144,34 +137,26 @@ public class TransactionsFragment extends Fragment {
     }
 
     private void showDatePicker() {
-        TimePickerBuilder timePickerBuilder = new TimePickerBuilder()
-            .setTimePickerType(TimePickerType.YEAR_MONTH_DAY)
-            .setTitleText("اختر التاريخ")
-            .setTitleTextColor(Color.BLACK)
-            .setSubmitText("تأكيد")
-            .setCancelText("إلغاء")
-            .setTitleSize(20)
-            .setSubmitTextColor(Color.BLUE)
-            .setCancelTextColor(Color.RED)
-            .setCyclic(false)
-            .setDate(Calendar.getInstance())
-            .setRangDate(startDate, endDate)
-            .setLayoutRes(R.layout.dialog_wheel_date_picker, v -> {
-                final TimePickerView timePickerView = v.findViewById(R.id.timepicker);
-                timePickerView.setTimePickerBuilder(timePickerBuilder);
-            })
-            .setTimeSelectListener(date -> {
-                startDate = date;
-                endDate = date;
-                updateDateRangeText();
-                viewModel.loadTransactionsByDateRange(startDate.getTime(), endDate.getTime());
-            });
-
-        timePickerBuilder.build().show(getChildFragmentManager(), "timepicker");
+        TimePickerView pvTime = new TimePickerBuilder(requireContext(), (date, v) -> {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            startDate = cal;
+            endDate = cal;
+            updateDateInputs();
+            viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
+        })
+        .setType(new boolean[]{true, true, true, false, false, false}) // سنة، شهر، يوم فقط
+        .setTitleText("اختر التاريخ")
+        .setSubmitText("تأكيد")
+        .setCancelText("إلغاء")
+        .setContentSize(20)
+        .setDate(startDate)
+        .setLabel("سنة", "شهر", "يوم", "", "", "")
+        .build();
+        pvTime.show();
     }
 
     private void updateDateInputs() {
-        // عرض التاريخ بالأرقام الإنجليزية فقط
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH);
         binding.startDateFilter.setText(sdf.format(startDate.getTime()));
         binding.endDateFilter.setText(sdf.format(endDate.getTime()));
