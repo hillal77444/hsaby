@@ -195,7 +195,7 @@ public class TransactionsFragment extends Fragment {
             }
             adapter.setAccountMap(accountMap);
             // تحميل المعاملات مع التصفية الافتراضية
-            viewModel.loadTransactionsByDateRange(startDate.getTime(), endDate.getTime());
+            viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
             viewModel.getTransactions().observe(getViewLifecycleOwner(), transactions -> {
                 allTransactions = transactions != null ? transactions : new ArrayList<>();
                 applyAllFilters();
@@ -230,8 +230,8 @@ public class TransactionsFragment extends Fragment {
             if (selectedCurrency != null && !selectedCurrency.isEmpty()) {
                 if (!selectedCurrency.equals(t.getCurrency())) match = false;
             }
-            Date transactionDate = new Date(t.getDate());
-            if (transactionDate.before(startDate.getTime()) || transactionDate.after(endDate.getTime())) {
+            long transactionDate = t.getDate();
+            if (transactionDate < startDate.getTimeInMillis() || transactionDate > endDate.getTimeInMillis()) {
                 match = false;
             }
             if (match) filtered.add(t);
