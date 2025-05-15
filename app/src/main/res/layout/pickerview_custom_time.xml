@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:padding="16dp">
 
     <TextView
@@ -11,8 +13,7 @@
         android:text="إلغاء"
         android:textColor="@color/primary"
         android:textSize="16sp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"/>
+        android:layout_gravity="start"/>
 
     <TextView
         android:id="@+id/tv_finish"
@@ -21,13 +22,11 @@
         android:text="تأكيد"
         android:textColor="@color/primary"
         android:textSize="16sp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"/>
+        android:layout_gravity="end"/>
 
     <FrameLayout
         android:id="@+id/timepicker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tv_cancel"
         android:layout_marginTop="16dp"/>
-</RelativeLayout> 
+</LinearLayout> 
