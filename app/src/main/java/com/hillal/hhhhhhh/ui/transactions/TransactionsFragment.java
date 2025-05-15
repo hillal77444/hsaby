@@ -166,8 +166,7 @@ public class TransactionsFragment extends Fragment {
         .setType(new boolean[]{true, true, true, false, false, false}) // سنة، شهر، يوم فقط
         .setTitleText(isStart ? "اختر تاريخ البداية" : "اختر تاريخ النهاية")
         .setSubmitText("تأكيد")
-        .setCancelText("إلغاء")
-        .setTitleSize(20)
+        .setTitleSize(35)
         .setDate(calendar)
         .setLabel("سنة", "شهر", "يوم", "", "", "")
         .build();
