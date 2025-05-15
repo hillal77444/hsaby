@@ -144,6 +144,8 @@ public class TransactionsFragment extends Fragment {
             .displayListener(picker -> {
                 picker.setIsAmPm(false);
                 picker.setSelectedTextColor(getResources().getColor(R.color.primary_blue));
+                picker.setWheelItemCount(5);
+                picker.setMustBeOnFuture(false);
             })
             .listener(date -> {
                 Calendar cal = Calendar.getInstance();
