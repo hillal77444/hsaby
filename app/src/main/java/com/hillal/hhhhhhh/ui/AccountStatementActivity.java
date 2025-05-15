@@ -218,19 +218,28 @@ public class AccountStatementActivity extends AppCompatActivity {
         html.append("<head>");
         html.append("<meta charset='UTF-8'>");
         html.append("<style>");
-        html.append("body { font-family: Arial, sans-serif; margin: 20px; }");
-        html.append("table { width: 100%; border-collapse: collapse; margin-top: 20px; }");
-        html.append("th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }");
-        html.append("th { background-color: #f5f5f5; }");
+        html.append("body { font-family: 'Cairo', Arial, sans-serif; margin: 20px; background: #f9f9f9; }");
+        html.append(".report-header { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #eee; padding: 24px 20px 16px 20px; margin-bottom: 24px; text-align: center; }");
+        html.append(".report-header h2 { color: #1976d2; margin-bottom: 8px; font-size: 2em; }");
+        html.append(".report-header p { color: #333; margin: 4px 0; font-size: 1.1em; }");
+        html.append(".print-btn { background: #1976d2; color: #fff; border: none; border-radius: 6px; padding: 10px 24px; font-size: 1em; cursor: pointer; margin-bottom: 18px; transition: background 0.2s; }");
+        html.append(".print-btn:hover { background: #125ea2; }");
+        html.append("table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px #eee; }");
+        html.append("th, td { border: 1px solid #ddd; padding: 10px 8px; text-align: right; font-size: 1em; }");
+        html.append("th { background-color: #e3eafc; color: #1976d2; font-weight: bold; }");
+        html.append("tr:nth-child(even) { background: #f7faff; }");
+        html.append("tr:hover { background: #e3eafc33; }");
+        html.append("@media print { .print-btn { display: none; } .report-header { box-shadow: none; } table { box-shadow: none; } body { background: #fff; } }");
         html.append("</style>");
         html.append("</head>");
         html.append("<body>");
-        
-        // عنوان التقرير
+        html.append("<button class='print-btn' onclick='window.print()'>🖨️ طباعة / حفظ PDF</button>");
+        html.append("<div class='report-header'>");
         html.append("<h2>كشف الحساب التفصيلي</h2>");
-        html.append("<p>الحساب: ").append(account.getName()).append("</p>");
-        html.append("<p>الفترة: من ").append(dateFormat.format(startDate)).append(" إلى ").append(dateFormat.format(endDate)).append("</p>");
-
+        html.append("<p>الحساب: <b>").append(account.getName()).append("</b></p>");
+        html.append("<p>الفترة: من <b>").append(dateFormat.format(startDate)).append("</b> إلى <b>").append(dateFormat.format(endDate)).append("</b></p>");
+        html.append("</div>");
+        
         // افصل المعاملات حسب العملة
         Map<String, List<Transaction>> currencyMap = new HashMap<>();
         for (Transaction transaction : transactions) {
