@@ -60,22 +60,13 @@
                 android:gravity="end">
 
                 <TextView
-                    android:id="@+id/transactionDebit"
+                    android:id="@+id/transactionAmount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/debit_color"
+                    android:textColor="@color/text_primary"
                     tools:text="1,000,000 ريال" />
-
-                <TextView
-                    android:id="@+id/transactionCredit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_secondary"
-                    tools:text="ريال يمني" />
 
             </LinearLayout>
 
