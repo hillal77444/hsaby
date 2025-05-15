@@ -217,4 +217,6 @@
     <string name="delete_account_confirmation">هل أنت متأكد من حذف هذا الحساب؟</string>
     <string name="account_deleted">تم حذف الحساب بنجاح</string>
     <string name="whatsapp_enabled">تفعيل واتساب</string>
+
+    <string name="add_transaction_subtitle">أضف تفاصيل المعاملة الجديدة أدناه</string>
 </resources>
