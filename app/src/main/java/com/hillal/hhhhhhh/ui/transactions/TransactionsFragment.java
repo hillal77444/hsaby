@@ -159,14 +159,12 @@ public class TransactionsFragment extends Fragment {
             applyAllFilters();
         })
         .setType(new boolean[]{true, true, true, false, false, false}) // سنة، شهر، يوم فقط
-        .setTitleText("اختر التاريخ")
         .setCancelText("إلغاء")
+        .setTitleText("اختر التاريخ")
         .setSubmitText("تأكيد")
         .setDate(calendar)
         .setLabel("سنة", "شهر", "يوم", "", "", "")
-        .setLayoutRes(R.layout.pickerview_custom_time, v -> {
-            // لا نحتاج إلى تخصيص الأحداث هنا
-        })
+
         .build();
         pvTime.show();
     }
