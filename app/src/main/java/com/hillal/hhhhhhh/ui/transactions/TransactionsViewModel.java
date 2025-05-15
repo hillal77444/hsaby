@@ -44,20 +44,7 @@ public class TransactionsViewModel extends AndroidViewModel {
     }
 
     public void loadTransactionsByDateRange(Date startDate, Date endDate) {
-        repository.getAllTransactions().observeForever(transactionList -> {
-            if (transactionList != null) {
-                List<Transaction> filteredTransactions = new ArrayList<>();
-                for (Transaction t : transactionList) {
-                    Date transactionDate = new Date(t.getDate());
-                    if (transactionDate != null && 
-                        !transactionDate.before(startDate) && 
-                        !transactionDate.after(endDate)) {
-                        filteredTransactions.add(t);
-                    }
-                }
-                transactions.setValue(filteredTransactions);
-            }
-        });
+        repository.getTransactionsByDateRange(startDate, endDate).observeForever(transactions::setValue);
     }
 
     public void loadTransactionsByCurrency(String currency) {
