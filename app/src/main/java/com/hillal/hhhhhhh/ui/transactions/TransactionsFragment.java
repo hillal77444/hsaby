@@ -48,6 +48,7 @@ public class TransactionsFragment extends Fragment {
     private Calendar endDate;
     private String selectedAccount = null;
     private String selectedCurrency = null;
+    private List<Transaction> allTransactions = new ArrayList<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -191,14 +192,11 @@ public class TransactionsFragment extends Fragment {
                 accountMap.put(account.getId(), account);
             }
             adapter.setAccountMap(accountMap);
-            
             // تحميل المعاملات مع التصفية الافتراضية
             viewModel.loadTransactionsByDateRange(startDate.getTime(), endDate.getTime());
-            
             viewModel.getTransactions().observe(getViewLifecycleOwner(), transactions -> {
-                adapter.submitList(transactions);
-                binding.transactionsRecyclerView.setVisibility(
-                        transactions.isEmpty() ? View.GONE : View.VISIBLE);
+                allTransactions = transactions != null ? transactions : new ArrayList<>();
+                applyAllFilters();
             });
         });
     }
@@ -216,31 +214,28 @@ public class TransactionsFragment extends Fragment {
     }
 
     private void applyAllFilters() {
-        viewModel.getTransactions().observe(getViewLifecycleOwner(), transactionList -> {
-            if (transactionList == null) return;
-            List<Transaction> filtered = new ArrayList<>();
-            for (Transaction t : transactionList) {
-                boolean match = true;
-                if (selectedAccount != null && !selectedAccount.isEmpty()) {
-                    Account account = null;
-                    if (adapter != null && adapter.getAccountMap() != null) {
-                        account = adapter.getAccountMap().get(t.getAccountId());
-                    }
-                    String accountName = (account != null) ? account.getName() : null;
-                    if (accountName == null || !accountName.equals(selectedAccount)) match = false;
+        List<Transaction> filtered = new ArrayList<>();
+        for (Transaction t : allTransactions) {
+            boolean match = true;
+            if (selectedAccount != null && !selectedAccount.isEmpty()) {
+                Account account = null;
+                if (adapter != null && adapter.getAccountMap() != null) {
+                    account = adapter.getAccountMap().get(t.getAccountId());
                 }
-                if (selectedCurrency != null && !selectedCurrency.isEmpty()) {
-                    if (!selectedCurrency.equals(t.getCurrency())) match = false;
-                }
-                Date transactionDate = new Date(t.getDate());
-                if (transactionDate.before(startDate.getTime()) || transactionDate.after(endDate.getTime())) {
-                    match = false;
-                }
-                if (match) filtered.add(t);
+                String accountName = (account != null) ? account.getName() : null;
+                if (accountName == null || !accountName.equals(selectedAccount)) match = false;
             }
-            adapter.submitList(filtered);
-            binding.transactionsRecyclerView.setVisibility(filtered.isEmpty() ? View.GONE : View.VISIBLE);
-        });
+            if (selectedCurrency != null && !selectedCurrency.isEmpty()) {
+                if (!selectedCurrency.equals(t.getCurrency())) match = false;
+            }
+            Date transactionDate = new Date(t.getDate());
+            if (transactionDate.before(startDate.getTime()) || transactionDate.after(endDate.getTime())) {
+                match = false;
+            }
+            if (match) filtered.add(t);
+        }
+        adapter.submitList(filtered);
+        binding.transactionsRecyclerView.setVisibility(filtered.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     @Override
