@@ -102,7 +102,8 @@ public class AccountStatementActivity extends AppCompatActivity {
             }
         } catch (Exception ignored) {}
 
-        TimePickerView pvTime = new TimePickerBuilder(this, (date, v) -> {
+        final TimePickerView[] pvTimeHolder = new TimePickerView[1];
+        pvTimeHolder[0] = new TimePickerBuilder(this, (date, v) -> {
             cal.setTime(date);
             input.setText(dateFormat.format(cal.getTime()));
         })
@@ -112,16 +113,16 @@ public class AccountStatementActivity extends AppCompatActivity {
         .setLayoutRes(R.layout.dialog_picker_custom_buttons, v -> {
             Button btnCancel = v.findViewById(R.id.btnCancel);
             Button btnSubmit = v.findViewById(R.id.btnSubmit);
-            btnCancel.setOnClickListener(v1 -> pvTime.dismiss());
+            btnCancel.setOnClickListener(v1 -> pvTimeHolder[0].dismiss());
             btnSubmit.setOnClickListener(v2 -> {
-                pvTime.returnData();
-                pvTime.dismiss();
+                pvTimeHolder[0].returnData();
+                pvTimeHolder[0].dismiss();
             });
         })
         .setDate(cal)
         .setLabel("سنة", "شهر", "يوم", "", "", "")
         .build();
-        pvTime.show();
+        pvTimeHolder[0].show();
     }
 
     private void loadAccounts() {
