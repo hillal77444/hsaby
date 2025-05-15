@@ -11,6 +11,19 @@
         android:orientation="vertical"
         android:padding="8dp">
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPrint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="��️ طباعة / حفظ PDF"
+            app:icon="@drawable/ic_print"
+            app:iconPadding="8dp"
+            app:iconTint="@color/white"
+            android:backgroundTint="@color/colorPrimary"
+            android:textColor="@color/white"
+            android:layout_gravity="end"
+            android:layout_marginBottom="12dp" />
+
         <!-- صف اختيار الحساب -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
