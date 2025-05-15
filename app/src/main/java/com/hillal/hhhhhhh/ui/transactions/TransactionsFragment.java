@@ -165,7 +165,7 @@ public class TransactionsFragment extends Fragment {
         .setDate(calendar)
         .setLabel("سنة", "شهر", "يوم", "", "", "")
         .setLayoutRes(R.layout.pickerview_custom_time, v -> {
-            // تخصيص الأحداث للأزرار إذا لزم الأمر
+            // لا نحتاج إلى تخصيص الأحداث هنا
         })
         .build();
         pvTime.show();
@@ -173,7 +173,7 @@ public class TransactionsFragment extends Fragment {
 
     private void updateDateInputs() {
         // عرض التاريخ بالأرقام الإنجليزية فقط
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH);
         binding.startDateFilter.setText(sdf.format(startDate.getTime()));
         binding.endDateFilter.setText(sdf.format(endDate.getTime()));
     }
