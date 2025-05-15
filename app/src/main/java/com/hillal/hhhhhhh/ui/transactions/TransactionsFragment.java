@@ -158,7 +158,7 @@ public class TransactionsFragment extends Fragment {
             applyAllFilters();
         })
         .setType(new boolean[]{true, true, true, false, false, false}) // سنة، شهر، يوم فقط
-        .setTitleText("أختر التاريخ")
+        .setTitleText("اختر التاريخ")
         .setCancelText("إلغاء")
         .setSubmitText("تأكيد")
         .setDate(calendar)
