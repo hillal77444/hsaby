@@ -71,4 +71,8 @@ public class AccountStatementViewModel extends AndroidViewModel {
     public LiveData<List<Account>> getAllAccounts() {
         return repository.getAllAccounts();
     }
+
+    public LiveData<List<Transaction>> getTransactionsForAccountInDateRange(long accountId, long startDate, long endDate) {
+        return repository.getTransactionsForAccountInDateRange(accountId, startDate, endDate);
+    }
 } 
