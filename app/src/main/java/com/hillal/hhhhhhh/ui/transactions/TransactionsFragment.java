@@ -44,6 +44,7 @@ public class TransactionsFragment extends Fragment {
     private String selectedAccount = null;
     private String selectedCurrency = null;
     private List<Transaction> allTransactions = new ArrayList<>();
+    private boolean isStartDate = true; // متغير لتتبع أي تاريخ يتم تعديله
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -129,28 +130,45 @@ public class TransactionsFragment extends Fragment {
     private void setupDateFilter() {
         updateDateInputs();
         binding.startDateFilter.setOnClickListener(v -> {
-            showDatePicker();
+            showDatePicker(true);
         });
         binding.endDateFilter.setOnClickListener(v -> {
-            showDatePicker();
+            showDatePicker(false);
         });
     }
 
-    private void showDatePicker() {
+    private void showDatePicker(boolean isStart) {
+        Calendar calendar = isStart ? startDate : endDate;
+        
         TimePickerView pvTime = new TimePickerBuilder(requireContext(), (date, v) -> {
             Calendar cal = Calendar.getInstance();
             cal.setTime(date);
-            startDate = cal;
-            endDate = cal;
+            
+            if (isStart) {
+                // إذا كان تاريخ البداية، نضبط الساعة على 00:00:00
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                startDate = cal;
+            } else {
+                // إذا كان تاريخ النهاية، نضبط الساعة على 23:59:59
+                cal.set(Calendar.HOUR_OF_DAY, 23);
+                cal.set(Calendar.MINUTE, 59);
+                cal.set(Calendar.SECOND, 59);
+                cal.set(Calendar.MILLISECOND, 999);
+                endDate = cal;
+            }
+            
             updateDateInputs();
             viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
         })
         .setType(new boolean[]{true, true, true, false, false, false}) // سنة، شهر، يوم فقط
-        .setTitleText("اختر التاريخ")
+        .setTitleText(isStart ? "اختر تاريخ البداية" : "اختر تاريخ النهاية")
         .setSubmitText("تأكيد")
         .setCancelText("إلغاء")
         .setContentSize(20)
-        .setDate(startDate)
+        .setDate(calendar)
         .setLabel("سنة", "شهر", "يوم", "", "", "")
         .build();
         pvTime.show();
