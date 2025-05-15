@@ -162,6 +162,10 @@ public class TransactionsFragment extends Fragment {
         .setCancelText("إلغاء")
         .setSubmitText("تأكيد")
         .setDate(calendar)
+        .setLabel("سنة", "شهر", "يوم", "", "", "")
+        .setLayoutRes(R.layout.pickerview_custom_time, v -> {
+            // تخصيص الأحداث للأزرار إذا لزم الأمر
+        })
         .build();
         pvTime.show();
     }
