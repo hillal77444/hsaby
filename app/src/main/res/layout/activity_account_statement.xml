@@ -15,7 +15,7 @@
             android:id="@+id/btnPrint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="��️ طباعة / حفظ PDF"
+            android:text="طباعة"
             app:icon="@drawable/ic_print"
             app:iconPadding="8dp"
             app:iconTint="@color/white"
@@ -24,7 +24,7 @@
             android:layout_gravity="end"
             android:layout_marginBottom="12dp" />
 
-        <!-- صف اختيار الحساب -->
+        <!-- صف اختيار الحساب مع زر الطباعة -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -51,8 +51,9 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:hint="اختر الحساب"
                     app:boxStrokeColor="#1976D2"
                     app:hintTextColor="#1976D2">
@@ -73,6 +74,21 @@
                         android:fontFamily="sans-serif-medium" />
 
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPrint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:text="طباعة"
+                    app:icon="@drawable/ic_print"
+                    app:iconPadding="8dp"
+                    app:iconTint="@color/white"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:textColor="@color/white"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="0dp"
+                    android:fontFamily="sans-serif-medium" />
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
