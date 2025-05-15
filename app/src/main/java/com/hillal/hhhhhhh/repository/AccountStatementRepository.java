@@ -31,7 +31,7 @@ public class AccountStatementRepository {
         return transactionDao.getTransactionsForAccount(accountId);
     }
 
-    public LiveData<List<Transaction>> getTransactionsForAccountInDateRange(long accountId, Date startDate, Date endDate) {
+    public LiveData<List<Transaction>> getTransactionsForAccountInDateRange(long accountId, long startDate, long endDate) {
         return transactionDao.getTransactionsForAccountInDateRange(accountId, startDate, endDate);
     }
 
@@ -51,11 +51,11 @@ public class AccountStatementRepository {
         return accountDao.getAllAccounts();
     }
 
-    public LiveData<Double> getTotalCredits(long accountId, Date startDate, Date endDate) {
+    public LiveData<Double> getTotalCreditsInDateRange(long accountId, long startDate, long endDate) {
         return transactionDao.getTotalCreditsInDateRange(accountId, startDate, endDate);
     }
 
-    public LiveData<Double> getTotalDebits(long accountId, Date startDate, Date endDate) {
+    public LiveData<Double> getTotalDebitsInDateRange(long accountId, long startDate, long endDate) {
         return transactionDao.getTotalDebitsInDateRange(accountId, startDate, endDate);
     }
 } 
