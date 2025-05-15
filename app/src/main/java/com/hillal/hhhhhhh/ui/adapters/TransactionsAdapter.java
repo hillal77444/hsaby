@@ -64,10 +64,10 @@ public class TransactionsAdapter extends ListAdapter<Transaction, TransactionsAd
             String type = transaction.getType() != null ? transaction.getType().trim() : "";
 
             String amountStr;
-            if (amount % 1 == 0) {
-                amountStr = String.format("%.0f", amount);
+            if (Math.abs(amount - Math.round(amount)) < 0.00001) {
+                amountStr = String.format(Locale.US, "%.0f", amount);
             } else {
-                amountStr = String.format("%.2f", amount);
+                amountStr = String.format(Locale.US, "%.2f", amount);
             }
 
             if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
