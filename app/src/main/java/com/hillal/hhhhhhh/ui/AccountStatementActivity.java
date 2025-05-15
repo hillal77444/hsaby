@@ -296,16 +296,16 @@ public class AccountStatementActivity extends AppCompatActivity {
             html.append("<table>");
             html.append("<tr>");
             html.append("<th>التاريخ</th>");
-            html.append("<th>الوصف</th>");
-            html.append("<th>عليه</th>");
             html.append("<th>له</th>");
+            html.append("<th>عليه</th>");
+            html.append("<th>الوصف</th>");
             html.append("<th>الرصيد</th>");
             html.append("</tr>");
             // صف الرصيد السابق
             html.append("<tr>");
             html.append("<td>").append(dateFormat.format(startDate)).append("</td>");
-            html.append("<td>الرصيد السابق</td>");
             html.append("<td></td><td></td>");
+            html.append("<td>الرصيد السابق</td>");
             html.append("<td>").append(String.format(Locale.US, "%.2f", previousBalance)).append("</td>");
             html.append("</tr>");
             // العمليات خلال الفترة
@@ -314,14 +314,17 @@ public class AccountStatementActivity extends AppCompatActivity {
                 if (transaction.getDate() >= startDate.getTime() && transaction.getDate() <= endDate.getTime()) {
                     html.append("<tr>");
                     html.append("<td>").append(dateFormat.format(transaction.getDate())).append("</td>");
+                    if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
+                        html.append("<td></td>");
+                        html.append("<td>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
+                    } else {
+                        html.append("<td>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
+                        html.append("<td></td>");
+                    }
                     html.append("<td>").append(transaction.getDescription()).append("</td>");
                     if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
-                        html.append("<td>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
-                        html.append("<td></td>");
                         runningBalance -= transaction.getAmount();
                     } else {
-                        html.append("<td></td>");
-                        html.append("<td>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
                         runningBalance += transaction.getAmount();
                     }
                     html.append("<td>").append(String.format(Locale.US, "%.2f", runningBalance)).append("</td>");
