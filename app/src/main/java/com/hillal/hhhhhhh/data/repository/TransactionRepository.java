@@ -24,7 +24,7 @@ public class TransactionRepository {
         return transactionDao.getTransactionsForAccount(accountId);
     }
 
-    public LiveData<List<Transaction>> getTransactionsForAccountInDateRange(long accountId, Date startDate, Date endDate) {
+    public LiveData<List<Transaction>> getTransactionsForAccountInDateRange(long accountId, long startDate, long endDate) {
         return transactionDao.getTransactionsForAccountInDateRange(accountId, startDate, endDate);
     }
 
@@ -40,11 +40,11 @@ public class TransactionRepository {
         return transactionDao.getLastTransaction(accountId);
     }
 
-    public LiveData<Double> getTotalCreditsInDateRange(long accountId, Date startDate, Date endDate) {
+    public LiveData<Double> getTotalCreditsInDateRange(long accountId, long startDate, long endDate) {
         return transactionDao.getTotalCreditsInDateRange(accountId, startDate, endDate);
     }
 
-    public LiveData<Double> getTotalDebitsInDateRange(long accountId, Date startDate, Date endDate) {
+    public LiveData<Double> getTotalDebitsInDateRange(long accountId, long startDate, long endDate) {
         return transactionDao.getTotalDebitsInDateRange(accountId, startDate, endDate);
     }
 
@@ -64,7 +64,7 @@ public class TransactionRepository {
         return transactionDao.getTransactionsByType(type);
     }
 
-    public LiveData<List<Transaction>> getTransactionsByDateRange(Date startDate, Date endDate) {
+    public LiveData<List<Transaction>> getTransactionsByDateRange(long startDate, long endDate) {
         return transactionDao.getTransactionsByDateRange(startDate, endDate);
     }
 
