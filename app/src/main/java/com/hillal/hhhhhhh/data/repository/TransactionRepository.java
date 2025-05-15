@@ -64,8 +64,8 @@ public class TransactionRepository {
         return transactionDao.getTransactionsByType(type);
     }
 
-    public LiveData<List<Transaction>> getTransactionsByDateRange(long fromDate, long toDate) {
-        return transactionDao.getTransactionsByDateRange(fromDate, toDate);
+    public LiveData<List<Transaction>> getTransactionsByDateRange(Date startDate, Date endDate) {
+        return transactionDao.getTransactionsByDateRange(startDate, endDate);
     }
 
     public LiveData<List<Transaction>> getTransactionsByAccount(long accountId) {
