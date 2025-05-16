@@ -39,6 +39,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        // إذا كنت تحتاج JitPack لمكتبات أخرى أبقه، وإلا يمكنك حذفه
+        // maven { url 'https://jitpack.io' }
     }
 }
