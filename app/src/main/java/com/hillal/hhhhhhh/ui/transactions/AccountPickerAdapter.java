@@ -65,8 +65,8 @@ public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdap
     @Override
     public void onBindViewHolder(@NonNull AccountViewHolder holder, int position) {
         Account account = accounts.get(position);
-        holder.accountNameTextView.setText("اختبار: " + (account.getName() != null ? account.getName() : "بدون اسم"));
-        holder.accountNameTextView.setTextColor(0xFFFF0000);
+        holder.accountNameTextView.setText(account.getName() != null ? account.getName() : "بدون اسم");
+        holder.accountNameTextView.setTextColor(0xFF222222);
         String icon = account.getName() != null && !account.getName().isEmpty() ? account.getName().substring(0, 1) : "?";
         holder.accountIconTextView.setText(icon);
         holder.balancesContainer.removeAllViews();
@@ -75,21 +75,32 @@ public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdap
             for (String currency : currencyBalances.keySet()) {
                 double balance = currencyBalances.get(currency);
                 String label;
-                int color;
+                int bgColor;
+                int textColor;
                 if (balance > 0) {
-                    label = context.getString(R.string.label_credit) + " " + String.format(Locale.US, "%.2f", balance) + " " + currency;
-                    color = context.getResources().getColor(R.color.green_700);
+                    label = "له " + String.format(Locale.US, "%.2f", balance) + " " + currency;
+                    bgColor = 0xFFE8F5E9;
+                    textColor = 0xFF388E3C;
                 } else if (balance < 0) {
-                    label = context.getString(R.string.label_debit) + " " + String.format(Locale.US, "%.2f", Math.abs(balance)) + " " + currency;
-                    color = context.getResources().getColor(R.color.red_700);
+                    label = "عليه " + String.format(Locale.US, "%.2f", Math.abs(balance)) + " " + currency;
+                    bgColor = 0xFFFFEBEE;
+                    textColor = 0xFFD32F2F;
                 } else {
-                    label = context.getString(R.string.label_zero_balance) + " " + currency;
-                    color = context.getResources().getColor(R.color.text_secondary);
+                    label = "رصيد صفر " + currency;
+                    bgColor = 0xFFECEFF1;
+                    textColor = 0xFF607D8B;
                 }
                 TextView tv = new TextView(context);
                 tv.setText(label);
-                tv.setTextSize(15f);
-                tv.setTextColor(color);
+                tv.setTextSize(14f);
+                tv.setTextColor(textColor);
+                tv.setPadding(18, 6, 18, 6);
+                tv.setBackgroundResource(R.drawable.bg_balance_chip);
+                tv.setBackgroundTintList(android.content.res.ColorStateList.valueOf(bgColor));
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                params.setMarginEnd(12);
+                tv.setLayoutParams(params);
                 holder.balancesContainer.addView(tv);
             }
         }
