@@ -112,7 +112,7 @@ public class AccountStatementActivity extends AppCompatActivity {
         TimePickerView pvTime = new TimePickerBuilder(this, (date, v) -> {
             input.setText(dateFormat.format(date));
         })
-        .setType(new boolean[]{true, true, true, false, false, false}) // فقط السنة والشهر واليوم
+        .setType(new boolean[]{true, true, true, false, false, false}) // السنة، الشهر، اليوم فقط
         .setTitleText("اختر التاريخ")
         .setTitleSize(20)
         .setContentSize(18)
@@ -127,7 +127,7 @@ public class AccountStatementActivity extends AppCompatActivity {
         .isCyclic(true) // للتمرير المستمر
         .isDialog(true) // لعرضه كنافذة منبثقة
         .build();
-        
+
         pvTime.show();
     }
 
