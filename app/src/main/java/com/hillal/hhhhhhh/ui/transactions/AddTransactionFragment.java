@@ -192,12 +192,17 @@ public class AddTransactionFragment extends Fragment {
     }
 
     private void showAccountPickerBottomSheet() {
+        if (allAccounts == null || allAccounts.isEmpty()) {
+            Toast.makeText(requireContext(), "جاري تحميل الحسابات...", Toast.LENGTH_SHORT).show();
+            return;
+        }
         BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
         View sheetView = getLayoutInflater().inflate(R.layout.bottomsheet_account_picker, null);
         dialog.setContentView(sheetView);
         EditText searchEditText = sheetView.findViewById(R.id.searchEditText);
         RecyclerView accountsRecyclerView = sheetView.findViewById(R.id.accountsRecyclerView);
         accountsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+
         Map<Long, List<Transaction>> accountTxMap = new HashMap<>();
         for (Transaction t : allTransactions) {
             if (!accountTxMap.containsKey(t.getAccountId())) accountTxMap.put(t.getAccountId(), new ArrayList<>());
@@ -210,6 +215,14 @@ public class AddTransactionFragment extends Fragment {
         });
         adapter.setBalancesMap(accountBalancesMap);
         accountsRecyclerView.setAdapter(adapter);
+
+        // مراقبة تحديث الأرصدة أثناء فتح الصفحة
+        transactionsViewModel.getAccountBalancesMap().observe(getViewLifecycleOwner(), balancesMap -> {
+            adapter.setBalancesMap(balancesMap != null ? balancesMap : new HashMap<>());
+            adapter.notifyDataSetChanged();
+        });
+
+        // البحث
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
