@@ -95,8 +95,4 @@ public interface TransactionDao {
            "AND date <= :transactionDate " +
            "ORDER BY date")
     LiveData<Double> getBalanceUntilDate(long accountId, long transactionDate, String currency);
-
-    @Query("CREATE INDEX IF NOT EXISTS idx_transactions_account_currency_date " +
-           "ON transactions(accountId, currency, date)")
-    void createIndex();
 } 
