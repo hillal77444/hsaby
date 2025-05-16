@@ -32,7 +32,7 @@ import com.hillal.hhhhhhh.viewmodel.AccountStatementViewModel;
 import com.bigkoo.pickerview.builder.TimePickerBuilder;
 import com.bigkoo.pickerview.view.TimePickerView;
 import com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePickerDialog;
-import cn.aigestudio.wheelpicker.WheelPicker;
+import com.contrarywind.view.WheelView;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -113,28 +113,28 @@ public class AccountStatementActivity extends AppCompatActivity {
 
         // إنشاء Dialog مخصص
         Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.dialog_wheel_date_picker);
+        dialog.setContentView(R.layout.dialog_wheelview_date_picker);
         dialog.setTitle("اختر التاريخ");
 
-        WheelPicker yearPicker = dialog.findViewById(R.id.yearPicker);
-        WheelPicker monthPicker = dialog.findViewById(R.id.monthPicker);
-        WheelPicker dayPicker = dialog.findViewById(R.id.dayPicker);
+        WheelView yearWheel = dialog.findViewById(R.id.yearWheel);
+        WheelView monthWheel = dialog.findViewById(R.id.monthWheel);
+        WheelView dayWheel = dialog.findViewById(R.id.dayWheel);
         Button btnOk = dialog.findViewById(R.id.btnOk);
         Button btnCancel = dialog.findViewById(R.id.btnCancel);
 
-        yearPicker.setData(years);
-        monthPicker.setData(months);
-        dayPicker.setData(days);
+        yearWheel.setItems(years);
+        monthWheel.setItems(months);
+        dayWheel.setItems(days);
 
         // تعيين القيم الافتراضية
-        yearPicker.setSelectedItemPosition(years.indexOf(String.valueOf(currentYear)));
-        monthPicker.setSelectedItemPosition(Calendar.getInstance().get(Calendar.MONTH));
-        dayPicker.setSelectedItemPosition(Calendar.getInstance().get(Calendar.DAY_OF_MONTH) - 1);
+        yearWheel.setCurrentItem(years.indexOf(String.valueOf(currentYear)));
+        monthWheel.setCurrentItem(Calendar.getInstance().get(Calendar.MONTH));
+        dayWheel.setCurrentItem(Calendar.getInstance().get(Calendar.DAY_OF_MONTH) - 1);
 
         btnOk.setOnClickListener(v -> {
-            String date = years.get(yearPicker.getCurrentItemPosition()) + "-" +
-                    months.get(monthPicker.getCurrentItemPosition()) + "-" +
-                    days.get(dayPicker.getCurrentItemPosition());
+            String date = years.get(yearWheel.getCurrentItem()) + "-" +
+                    months.get(monthWheel.getCurrentItem()) + "-" +
+                    days.get(dayWheel.getCurrentItem());
             input.setText(date);
             dialog.dismiss();
         });
