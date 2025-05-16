@@ -112,26 +112,36 @@ public class AccountStatementActivity extends AppCompatActivity {
         TextView btnOk = dialog.findViewById(R.id.btnOk);
         TextView btnCancel = dialog.findViewById(R.id.btnCancel);
 
-        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-        yearPicker.setMinValue(currentYear - 50);
-        yearPicker.setMaxValue(currentYear + 10);
-        yearPicker.setValue(currentYear);
-        // الأرقام بالإنجليزي
+        // جلب التاريخ من الحقل إذا كان موجودًا
+        Calendar cal = Calendar.getInstance();
+        String currentText = input.getText() != null ? input.getText().toString() : "";
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+            Date parsed = sdf.parse(toEnglishDigits(currentText));
+            if (parsed != null) {
+                cal.setTime(parsed);
+            }
+        } catch (Exception ignored) {}
+
+        int selectedYear = cal.get(Calendar.YEAR);
+        int selectedMonth = cal.get(Calendar.MONTH) + 1; // Calendar.MONTH يبدأ من 0
+        int selectedDay = cal.get(Calendar.DAY_OF_MONTH);
+
+        yearPicker.setMinValue(selectedYear - 50);
+        yearPicker.setMaxValue(selectedYear + 10);
+        yearPicker.setValue(selectedYear);
         yearPicker.setFormatter(value -> String.format(java.util.Locale.ENGLISH, "%d", value));
 
-        // أسماء الشهور بالعربي
         String[] arabicMonths = {"يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"};
         monthPicker.setMinValue(1);
         monthPicker.setMaxValue(12);
         monthPicker.setDisplayedValues(arabicMonths);
-        monthPicker.setValue(Calendar.getInstance().get(Calendar.MONTH) + 1);
-        // الأرقام بالإنجليزي (للشهر)
+        monthPicker.setValue(selectedMonth);
         monthPicker.setFormatter(value -> String.format(java.util.Locale.ENGLISH, "%d", value));
 
         dayPicker.setMinValue(1);
-        dayPicker.setMaxValue(31);
-        dayPicker.setValue(Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
-        // الأرقام بالإنجليزي (لليوم)
+        dayPicker.setMaxValue(getDaysInMonth(selectedYear, selectedMonth));
+        dayPicker.setValue(selectedDay);
         dayPicker.setFormatter(value -> String.format(java.util.Locale.ENGLISH, "%d", value));
 
         // تحديث الأيام حسب الشهر والسنة المختارة
@@ -145,10 +155,13 @@ public class AccountStatementActivity extends AppCompatActivity {
         });
 
         btnOk.setOnClickListener(v -> {
-            String date = yearPicker.getValue() + "-" +
-                    String.format("%02d", monthPicker.getValue()) + "-" +
-                    String.format("%02d", dayPicker.getValue());
-            input.setText(date);
+            Calendar selectedCal = Calendar.getInstance();
+            selectedCal.set(Calendar.YEAR, yearPicker.getValue());
+            selectedCal.set(Calendar.MONTH, monthPicker.getValue() - 1);
+            selectedCal.set(Calendar.DAY_OF_MONTH, dayPicker.getValue());
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+            String date = sdf.format(selectedCal.getTime());
+            input.setText(toEnglishDigits(date));
             dialog.dismiss();
         });
         btnCancel.setOnClickListener(v -> dialog.dismiss());
@@ -164,7 +177,6 @@ public class AccountStatementActivity extends AppCompatActivity {
 
         dialog.show();
 
-        // تلوين العنصر المختار في كل NumberPicker بخلفية مخصصة
         setNumberPickerSelectionBg(dayPicker);
         setNumberPickerSelectionBg(monthPicker);
         setNumberPickerSelectionBg(yearPicker);
@@ -461,5 +473,18 @@ public class AccountStatementActivity extends AppCompatActivity {
         } catch (Exception e) {
             // تجاهل أي خطأ (قد لا يعمل على كل الأجهزة)
         }
+    }
+
+    private String toEnglishDigits(String value) {
+        return value.replace("٠", "0")
+                    .replace("١", "1")
+                    .replace("٢", "2")
+                    .replace("٣", "3")
+                    .replace("٤", "4")
+                    .replace("٥", "5")
+                    .replace("٦", "6")
+                    .replace("٧", "7")
+                    .replace("٨", "8")
+                    .replace("٩", "9");
     }
 } 
