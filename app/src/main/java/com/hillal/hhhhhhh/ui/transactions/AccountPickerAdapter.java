@@ -65,7 +65,8 @@ public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdap
     @Override
     public void onBindViewHolder(@NonNull AccountViewHolder holder, int position) {
         Account account = accounts.get(position);
-        holder.accountNameTextView.setText(account.getName() != null ? account.getName() : "بدون اسم");
+        holder.accountNameTextView.setText("اختبار: " + (account.getName() != null ? account.getName() : "بدون اسم"));
+        holder.accountNameTextView.setTextColor(0xFFFF0000);
         String icon = account.getName() != null && !account.getName().isEmpty() ? account.getName().substring(0, 1) : "?";
         holder.accountIconTextView.setText(icon);
         holder.balancesContainer.removeAllViews();
