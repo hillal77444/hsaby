@@ -46,6 +46,7 @@ public class AddTransactionFragment extends Fragment {
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", new Locale("ar"));
     private List<Account> allAccounts = new ArrayList<>();
     private List<Transaction> allTransactions = new ArrayList<>();
+    private Map<Long, Map<String, Double>> accountBalancesMap = new HashMap<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,6 +71,9 @@ public class AddTransactionFragment extends Fragment {
         loadAccounts();
         loadAllTransactions();
         setupAccountPicker();
+        transactionsViewModel.getAccountBalancesMap().observe(getViewLifecycleOwner(), balancesMap -> {
+            accountBalancesMap = balancesMap != null ? balancesMap : new HashMap<>();
+        });
     }
 
     private void setupViews() {
@@ -194,7 +198,6 @@ public class AddTransactionFragment extends Fragment {
         EditText searchEditText = sheetView.findViewById(R.id.searchEditText);
         RecyclerView accountsRecyclerView = sheetView.findViewById(R.id.accountsRecyclerView);
         accountsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        // بناء خريطة الحسابات -> المعاملات
         Map<Long, List<Transaction>> accountTxMap = new HashMap<>();
         for (Transaction t : allTransactions) {
             if (!accountTxMap.containsKey(t.getAccountId())) accountTxMap.put(t.getAccountId(), new ArrayList<>());
@@ -205,8 +208,8 @@ public class AddTransactionFragment extends Fragment {
             selectedAccountId = account.getId();
             dialog.dismiss();
         });
+        adapter.setBalancesMap(accountBalancesMap);
         accountsRecyclerView.setAdapter(adapter);
-        // تصفية عند البحث
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
