@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.HashSet;
+import java.util.HashMap;
 
 public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdapter.AccountViewHolder> {
     public interface OnAccountClickListener {
@@ -30,6 +31,7 @@ public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdap
     private Context context;
     private TransactionRepository transactionRepository;
     private LifecycleOwner lifecycleOwner;
+    private Map<Long, Map<String, Double>> balancesMap = new HashMap<>();
 
     public AccountPickerAdapter(Context context, List<Account> accounts, Map<Long, List<Transaction>> accountTransactions, OnAccountClickListener listener) {
         this.context = context;
@@ -49,6 +51,10 @@ public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdap
         notifyDataSetChanged();
     }
 
+    public void setBalancesMap(Map<Long, Map<String, Double>> balancesMap) {
+        this.balancesMap = balancesMap;
+    }
+
     @NonNull
     @Override
     public AccountViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -63,33 +69,27 @@ public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdap
         String icon = account.getName() != null && !account.getName().isEmpty() ? account.getName().substring(0, 1) : "?";
         holder.accountIconTextView.setText(icon);
         holder.balancesContainer.removeAllViews();
-        List<Transaction> transactions = accountTransactions.get(account.getId());
-        if (transactions != null && !transactions.isEmpty()) {
-            HashSet<String> currencies = new HashSet<>();
-            for (Transaction t : transactions) {
-                if (t.getCurrency() != null) currencies.add(t.getCurrency());
-            }
-            for (String currency : currencies) {
-                LiveData<Double> balanceLiveData = transactionRepository.getBalanceUntilDate(account.getId(), System.currentTimeMillis(), currency);
-                balanceLiveData.observe(lifecycleOwner, balance -> {
-                    String label;
-                    int color;
-                    if (balance != null && balance > 0) {
-                        label = context.getString(R.string.label_credit) + " " + String.format(Locale.US, "%.2f", balance) + " " + currency;
-                        color = context.getResources().getColor(R.color.green_700);
-                    } else if (balance != null && balance < 0) {
-                        label = context.getString(R.string.label_debit) + " " + String.format(Locale.US, "%.2f", Math.abs(balance)) + " " + currency;
-                        color = context.getResources().getColor(R.color.red_700);
-                    } else {
-                        label = context.getString(R.string.label_zero_balance) + " " + currency;
-                        color = context.getResources().getColor(R.color.text_secondary);
-                    }
-                    TextView tv = new TextView(context);
-                    tv.setText(label);
-                    tv.setTextSize(15f);
-                    tv.setTextColor(color);
-                    holder.balancesContainer.addView(tv);
-                });
+        Map<String, Double> currencyBalances = balancesMap.get(account.getId());
+        if (currencyBalances != null && !currencyBalances.isEmpty()) {
+            for (String currency : currencyBalances.keySet()) {
+                double balance = currencyBalances.get(currency);
+                String label;
+                int color;
+                if (balance > 0) {
+                    label = context.getString(R.string.label_credit) + " " + String.format(Locale.US, "%.2f", balance) + " " + currency;
+                    color = context.getResources().getColor(R.color.green_700);
+                } else if (balance < 0) {
+                    label = context.getString(R.string.label_debit) + " " + String.format(Locale.US, "%.2f", Math.abs(balance)) + " " + currency;
+                    color = context.getResources().getColor(R.color.red_700);
+                } else {
+                    label = context.getString(R.string.label_zero_balance) + " " + currency;
+                    color = context.getResources().getColor(R.color.text_secondary);
+                }
+                TextView tv = new TextView(context);
+                tv.setText(label);
+                tv.setTextSize(15f);
+                tv.setTextColor(color);
+                holder.balancesContainer.addView(tv);
             }
         } else {
             TextView tv = new TextView(context);
