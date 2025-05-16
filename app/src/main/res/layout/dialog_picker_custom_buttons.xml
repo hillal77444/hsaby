@@ -2,78 +2,35 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:background="@android:color/white">
 
-    <LinearLayout
-        android:id="@+id/timepicker"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/btnCancel"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:text="إلغاء"
+        android:textColor="#1976D2"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:textSize="18sp"
+        android:gravity="start" />
 
-        <!-- Header -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="12dp"
-            android:gravity="center_vertical">
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="6" />
 
-            <Button
-                android:id="@+id/btnCancel"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="إلغاء"
-                android:textColor="#1976D2"
-                android:background="@android:color/transparent"
-                android:textSize="18sp"
-                android:gravity="start"
-                android:drawableStart="@drawable/ic_close"
-                android:drawablePadding="8dp"/>
+    <Button
+        android:id="@+id/btnSubmit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="تأكيد"
+        android:textColor="#1976D2"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:textSize="18sp"
+        android:gravity="end" />
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="2" />
-
-            <Button
-                android:id="@+id/btnSubmit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="تأكيد"
-                android:textColor="#1976D2"
-                android:background="@android:color/transparent"
-                android:textSize="18sp"
-                android:gravity="end"
-                android:drawableEnd="@drawable/ic_check"
-                android:drawablePadding="8dp"/>
-        </LinearLayout>
-
-        <!-- Wheel Views -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp">
-
-            <com.contrarywind.view.WheelView
-                android:id="@+id/year"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-
-            <com.contrarywind.view.WheelView
-                android:id="@+id/month"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-
-            <com.contrarywind.view.WheelView
-                android:id="@+id/day"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-        </LinearLayout>
-    </LinearLayout>
 </LinearLayout> 
