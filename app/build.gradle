@@ -129,5 +129,5 @@ dependencies {
     implementation 'com.github.florent37:singledateandtimepicker:2.2.7'
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
 
-    implementation 'com.github.Bigkoo:Android-PickerView:be6baf1b5a'
+    implementation 'com.github.Bigkoo:Android-PickerView:9345964d40'
 } 
