@@ -109,23 +109,13 @@ public class AccountStatementActivity extends AppCompatActivity {
             }
         } catch (Exception ignored) {}
 
-        final TimePickerView[] pvTimeHolder = new TimePickerView[1];
-        pvTimeHolder[0] = new TimePickerBuilder(this, (date, v) -> {
-            cal.setTime(date);
-            input.setText(dateFormat.format(cal.getTime()));
+        TimePickerView pvTime = new TimePickerBuilder(this, (date, v) -> {
+            input.setText(dateFormat.format(date));
         })
-        .setType(new boolean[]{true, true, true, false, false, false})
+        .setType(new boolean[]{true, true, true, false, false, false}) // فقط السنة والشهر واليوم
         .setTitleText("اختر التاريخ")
-        .setTitleSize(30)
-        .setLayoutRes(R.layout.dialog_picker_custom_buttons, v -> {
-            Button btnCancel = v.findViewById(R.id.btnCancel);
-            Button btnSubmit = v.findViewById(R.id.btnSubmit);
-            btnCancel.setOnClickListener(v1 -> pvTimeHolder[0].dismiss());
-            btnSubmit.setOnClickListener(v2 -> {
-                pvTimeHolder[0].returnData();
-                pvTimeHolder[0].dismiss();
-            });
-        })
+        .setTitleSize(20)
+        .setContentSize(18)
         .setDate(cal)
         .setLabel("سنة", "شهر", "يوم", "", "", "")
         .setBgColor(Color.WHITE)
@@ -134,8 +124,11 @@ public class AccountStatementActivity extends AppCompatActivity {
         .setTextColorCenter(Color.parseColor("#1976D2"))
         .setTextColorOut(Color.parseColor("#999999"))
         .setDividerColor(Color.parseColor("#1976D2"))
+        .isCyclic(true) // للتمرير المستمر
+        .isDialog(true) // لعرضه كنافذة منبثقة
         .build();
-        pvTimeHolder[0].show();
+        
+        pvTime.show();
     }
 
     private void loadAccounts() {
