@@ -107,4 +107,8 @@ public class TransactionRepository {
     public LiveData<Double> getTotalCreditors() {
         return transactionDao.getTotalCreditors();
     }
+
+    public LiveData<Double> getBalanceUntilDate(long accountId, long transactionDate, String currency) {
+        return transactionDao.getBalanceUntilDate(accountId, transactionDate, currency);
+    }
 }
