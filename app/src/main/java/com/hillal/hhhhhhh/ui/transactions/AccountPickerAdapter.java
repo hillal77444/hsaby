@@ -65,7 +65,7 @@ public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdap
     @Override
     public void onBindViewHolder(@NonNull AccountViewHolder holder, int position) {
         Account account = accounts.get(position);
-        holder.accountNameTextView.setText(account.getName());
+        holder.accountNameTextView.setText(account.getName() != null ? account.getName() : "بدون اسم");
         String icon = account.getName() != null && !account.getName().isEmpty() ? account.getName().substring(0, 1) : "?";
         holder.accountIconTextView.setText(icon);
         holder.balancesContainer.removeAllViews();
@@ -91,12 +91,6 @@ public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdap
                 tv.setTextColor(color);
                 holder.balancesContainer.addView(tv);
             }
-        } else {
-            TextView tv = new TextView(context);
-            tv.setText(context.getString(R.string.label_zero_balance));
-            tv.setTextSize(15f);
-            tv.setTextColor(context.getResources().getColor(R.color.text_secondary));
-            holder.balancesContainer.addView(tv);
         }
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onAccountClick(account);
