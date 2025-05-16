@@ -5,10 +5,11 @@ import androidx.room.PrimaryKey;
 import androidx.room.Ignore;
 import androidx.room.ColumnInfo;
 import com.google.gson.annotations.SerializedName;
+import androidx.room.Index;
 
 import java.util.Date;
 
-@Entity(tableName = "transactions")
+@Entity(tableName = "transactions", indices = {@Index(value = {"accountId", "currency", "date"})})
 public class Transaction {
     @PrimaryKey(autoGenerate = true)
     private long id;
