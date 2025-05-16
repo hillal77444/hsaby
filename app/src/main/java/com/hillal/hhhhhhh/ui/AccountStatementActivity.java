@@ -115,7 +115,6 @@ public class AccountStatementActivity extends AppCompatActivity {
         .setType(new boolean[]{true, true, true, false, false, false}) // السنة، الشهر، اليوم فقط
         .setTitleText("اختر التاريخ")
         .setTitleSize(20)
-        .setContentSize(18)
         .setDate(cal)
         .setLabel("سنة", "شهر", "يوم", "", "", "")
         .setBgColor(Color.WHITE)
