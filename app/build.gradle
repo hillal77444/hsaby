@@ -127,6 +127,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
 
     implementation 'com.github.florent37:singledateandtimepicker:2.2.7'
+    implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
 
-    implementation 'com.contrarywind:Android-PickerView:4.1.9'
+    implementation 'com.contrarywind:Android-PickerView:4.1.8'
 } 
