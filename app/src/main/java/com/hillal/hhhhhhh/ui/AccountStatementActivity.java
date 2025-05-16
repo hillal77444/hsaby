@@ -100,47 +100,23 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private void showDatePicker(TextInputEditText input) {
-        Calendar cal = Calendar.getInstance();
-        try {
-            String dateStr = input.getText().toString();
-            if (!dateStr.isEmpty()) {
-                Date parsed = dateFormat.parse(dateStr);
-                cal.setTime(parsed);
-            }
-        } catch (Exception ignored) {}
-
-        final TimePickerView[] pvTimeHolder = new TimePickerView[1];
-        pvTimeHolder[0] = new TimePickerBuilder(this, (date, v) -> {
-            input.setText(dateFormat.format(date));
-        })
-        .setType(new boolean[]{true, true, true, false, false, false})
-        .setTitleText("اختر التاريخ")
-        .setTitleSize(20)
-        .setContentTextSize(22) // تكبير حجم العجلة
-        .setLayoutRes(R.layout.dialog_picker_custom_buttons, v -> {
-            Button btnCancel = v.findViewById(R.id.btnCancel);
-            Button btnSubmit = v.findViewById(R.id.btnSubmit);
-            btnCancel.setText("إلغاء");
-            btnSubmit.setText("تأكيد");
-            btnCancel.setOnClickListener(v1 -> pvTimeHolder[0].dismiss());
-            btnSubmit.setOnClickListener(v2 -> {
-                pvTimeHolder[0].returnData();
-                pvTimeHolder[0].dismiss();
-            });
-        })
-        .setDate(cal)
-        .setLabel("سنة", "شهر", "يوم", "", "", "")
-        .setBgColor(Color.WHITE)
-        .setCancelColor(Color.parseColor("#1976D2"))
-        .setSubmitColor(Color.parseColor("#1976D2"))
-        .setTextColorCenter(Color.parseColor("#1976D2"))
-        .setTextColorOut(Color.parseColor("#999999"))
-        .setDividerColor(Color.parseColor("#1976D2"))
-        .isCyclic(true)
-        .isDialog(true)
-        .build();
-
-        pvTimeHolder[0].show();
+        new com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePickerDialog.Builder(this)
+            .title("اختر التاريخ")
+            .bottomSheet()
+            .curved()
+            .displayYears(true)
+            .displayDays(true)
+            .displayMonths(true)
+            .displayHours(false)
+            .displayMinutes(false)
+            .mainColor(Color.parseColor("#1976D2"))
+            .titleTextColor(Color.parseColor("#1976D2"))
+            .backgroundColor(Color.WHITE)
+            .listener(date -> {
+                java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+                input.setText(dateFormat.format(date));
+            })
+            .display();
     }
 
     private void loadAccounts() {
