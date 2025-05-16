@@ -32,6 +32,7 @@ import com.hillal.hhhhhhh.viewmodel.AccountStatementViewModel;
 import com.bigkoo.pickerview.builder.TimePickerBuilder;
 import com.bigkoo.pickerview.view.TimePickerView;
 import com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePickerDialog;
+import cn.aigestudio.wheelpicker.WheelPicker;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -101,23 +102,45 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private void showDatePicker(TextInputEditText input) {
-        new com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePickerDialog.Builder(this)
-            .title("اختر التاريخ")
-            .bottomSheet()
-            .curved()
-            .displayYears(true)
-            .displayDays(true)
-            .displayMonths(true)
-            .displayHours(false)
-            .displayMinutes(false)
-            .mainColor(Color.parseColor("#1976D2"))
-            .titleTextColor(Color.parseColor("#1976D2"))
-            .backgroundColor(Color.WHITE)
-            .listener(date -> {
-                java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
-                input.setText(dateFormat.format(date));
-            })
-            .display();
+        // إعداد البيانات
+        List<String> years = new ArrayList<>();
+        List<String> months = new ArrayList<>();
+        List<String> days = new ArrayList<>();
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+        for (int i = currentYear - 50; i <= currentYear + 10; i++) years.add(String.valueOf(i));
+        for (int i = 1; i <= 12; i++) months.add(String.format("%02d", i));
+        for (int i = 1; i <= 31; i++) days.add(String.format("%02d", i));
+
+        // إنشاء Dialog مخصص
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_wheel_date_picker);
+        dialog.setTitle("اختر التاريخ");
+
+        WheelPicker yearPicker = dialog.findViewById(R.id.yearPicker);
+        WheelPicker monthPicker = dialog.findViewById(R.id.monthPicker);
+        WheelPicker dayPicker = dialog.findViewById(R.id.dayPicker);
+        Button btnOk = dialog.findViewById(R.id.btnOk);
+        Button btnCancel = dialog.findViewById(R.id.btnCancel);
+
+        yearPicker.setData(years);
+        monthPicker.setData(months);
+        dayPicker.setData(days);
+
+        // تعيين القيم الافتراضية
+        yearPicker.setSelectedItemPosition(years.indexOf(String.valueOf(currentYear)));
+        monthPicker.setSelectedItemPosition(Calendar.getInstance().get(Calendar.MONTH));
+        dayPicker.setSelectedItemPosition(Calendar.getInstance().get(Calendar.DAY_OF_MONTH) - 1);
+
+        btnOk.setOnClickListener(v -> {
+            String date = years.get(yearPicker.getCurrentItemPosition()) + "-" +
+                    months.get(monthPicker.getCurrentItemPosition()) + "-" +
+                    days.get(dayPicker.getCurrentItemPosition());
+            input.setText(date);
+            dialog.dismiss();
+        });
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 
     private void loadAccounts() {
