@@ -70,9 +70,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             super(binding.getRoot());
             this.binding = binding;
             this.dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
-            this.transactionRepository = new TransactionRepository(
-                // AppDatabase.getInstance(binding.getRoot().getContext()).transactionDao()
-            );
+            this.transactionRepository = new TransactionRepository((android.app.Application) binding.getRoot().getContext().getApplicationContext());
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
