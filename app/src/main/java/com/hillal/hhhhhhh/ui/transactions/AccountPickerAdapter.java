@@ -49,11 +49,12 @@ public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdap
     public void onBindViewHolder(@NonNull AccountViewHolder holder, int position) {
         Account account = accounts.get(position);
         holder.accountNameTextView.setText(account.getName());
+        String icon = account.getName() != null && !account.getName().isEmpty() ? account.getName().substring(0, 1) : "?";
+        holder.accountIconTextView.setText(icon);
         holder.balancesContainer.removeAllViews();
         List<Transaction> transactions = accountTransactions.get(account.getId());
         if (transactions != null && !transactions.isEmpty()) {
             Map<String, Double> currencyBalances = new HashMap<>();
-            Map<String, String> currencyType = new HashMap<>();
             for (Transaction t : transactions) {
                 String currency = t.getCurrency();
                 double amount = t.getAmount();
@@ -69,17 +70,21 @@ public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdap
             for (String currency : currencyBalances.keySet()) {
                 double balance = currencyBalances.get(currency);
                 String label;
+                int color;
                 if (balance > 0) {
                     label = context.getString(R.string.label_credit) + " " + String.format(Locale.US, "%.2f", balance) + " " + currency;
+                    color = context.getResources().getColor(R.color.green_700);
                 } else if (balance < 0) {
                     label = context.getString(R.string.label_debit) + " " + String.format(Locale.US, "%.2f", Math.abs(balance)) + " " + currency;
+                    color = context.getResources().getColor(R.color.red_700);
                 } else {
                     label = context.getString(R.string.label_zero_balance) + " " + currency;
+                    color = context.getResources().getColor(R.color.text_secondary);
                 }
                 TextView tv = new TextView(context);
                 tv.setText(label);
                 tv.setTextSize(15f);
-                tv.setTextColor(context.getResources().getColor(R.color.text_secondary));
+                tv.setTextColor(color);
                 holder.balancesContainer.addView(tv);
             }
         } else {
@@ -102,10 +107,12 @@ public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdap
     static class AccountViewHolder extends RecyclerView.ViewHolder {
         TextView accountNameTextView;
         LinearLayout balancesContainer;
+        TextView accountIconTextView;
         public AccountViewHolder(@NonNull View itemView) {
             super(itemView);
             accountNameTextView = itemView.findViewById(R.id.accountNameTextView);
             balancesContainer = itemView.findViewById(R.id.balancesContainer);
+            accountIconTextView = itemView.findViewById(R.id.accountIconTextView);
         }
     }
 } 
