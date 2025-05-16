@@ -7,19 +7,19 @@
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/tv_cancel"
+        android:id="@+id/tv_finish"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="إلغاء"
+        android:text="تأكيد"
         android:textColor="@color/primary"
         android:textSize="16sp"
         android:layout_gravity="start"/>
 
     <TextView
-        android:id="@+id/tv_finish"
+        android:id="@+id/tv_cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="تأكيد"
+        android:text="إلغاء"
         android:textColor="@color/primary"
         android:textSize="16sp"
         android:layout_gravity="end"/>
