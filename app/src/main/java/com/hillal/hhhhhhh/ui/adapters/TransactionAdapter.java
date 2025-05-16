@@ -66,7 +66,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
         TransactionViewHolder(ItemTransactionBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
-            this.dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            this.dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH());
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
