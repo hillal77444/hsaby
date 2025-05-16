@@ -16,7 +16,6 @@ import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.databinding.ItemTransactionBinding;
 import com.hillal.hhhhhhh.data.repository.TransactionRepository;
-import com.hillal.hhhhhhh.data.database.AppDatabase;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -72,7 +71,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             this.binding = binding;
             this.dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
             this.transactionRepository = new TransactionRepository(
-                AppDatabase.getInstance(binding.getRoot().getContext()).transactionDao()
+                // AppDatabase.getInstance(binding.getRoot().getContext()).transactionDao()
             );
 
             itemView.setOnClickListener(v -> {
