@@ -25,13 +25,15 @@
             android:text="إنهاء"
             android:textColor="#444"
             android:textSize="16sp"
-            android:layout_weight="1"
-            android:gravity="start"/>
+            android:gravity="start"
+            android:layout_gravity="start|center_vertical"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"/>
 
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="6" />
+            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/btnOk"
@@ -41,7 +43,9 @@
             android:textColor="#1976D2"
             android:textSize="16sp"
             android:gravity="end"
-            android:layout_weight="1"/>
+            android:layout_gravity="end|center_vertical"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"/>
     </LinearLayout>
 
     <!-- عجلات التاريخ -->
@@ -53,7 +57,7 @@
         android:padding="8dp">
 
         <NumberPicker
-            android:id="@+id/yearPicker"
+            android:id="@+id/dayPicker"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -67,7 +71,7 @@
             android:layout_margin="4dp"/>
 
         <NumberPicker
-            android:id="@+id/dayPicker"
+            android:id="@+id/yearPicker"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
