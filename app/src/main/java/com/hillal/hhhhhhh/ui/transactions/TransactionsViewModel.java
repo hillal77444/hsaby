@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TransactionsViewModel extends AndroidViewModel {
     private final TransactionRepository repository;
@@ -97,5 +99,33 @@ public class TransactionsViewModel extends AndroidViewModel {
                 .collect(Collectors.toList());
             transactions.setValue(filteredList);
         }
+    }
+
+    public LiveData<Map<Long, Map<String, Double>>> getAccountBalancesMap() {
+        MutableLiveData<Map<Long, Map<String, Double>>> balancesLiveData = new MutableLiveData<>();
+        getTransactions().observeForever(transactionsList -> {
+            Map<Long, Map<String, Double>> balancesMap = new HashMap<>();
+            if (transactionsList != null) {
+                for (Transaction t : transactionsList) {
+                    long accountId = t.getAccountId();
+                    String currency = t.getCurrency();
+                    double amount = t.getAmount();
+                    String type = t.getType();
+                    if (!balancesMap.containsKey(accountId)) {
+                        balancesMap.put(accountId, new HashMap<>());
+                    }
+                    Map<String, Double> currencyMap = balancesMap.get(accountId);
+                    double prev = currencyMap.getOrDefault(currency, 0.0);
+                    if (type.equals("عليه") || type.equalsIgnoreCase("debit")) {
+                        prev -= amount;
+                    } else {
+                        prev += amount;
+                    }
+                    currencyMap.put(currency, prev);
+                }
+            }
+            balancesLiveData.postValue(balancesMap);
+        });
+        return balancesLiveData;
     }
 } 
