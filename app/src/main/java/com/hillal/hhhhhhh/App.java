@@ -70,7 +70,7 @@ public class App extends Application {
             Log.d(TAG, "Initializing database...");
             database = Room.databaseBuilder(getApplicationContext(),
                     AppDatabase.class, "accounting_database")
-                    .fallbackToDestructiveMigration()
+                    //.fallbackToDestructiveMigration() // تم التعطيل لحماية البيانات
                     .build();
             Log.d(TAG, "Database initialized successfully");
             
