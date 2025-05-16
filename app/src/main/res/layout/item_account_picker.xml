@@ -1,59 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="0dp"
-    android:background="@drawable/bg_account_picker_item"
-    android:layout_marginBottom="10dp">
-
-    <!-- دائرة أيقونة الحساب -->
-    <TextView
-        android:id="@+id/accountIconTextView"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="center_vertical"
-        android:gravity="center"
-        android:text="م"
-        android:textSize="18sp"
-        android:textColor="#fff"
-        android:background="@drawable/bg_account_icon_circle"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="8dp"/>
+    android:layout_marginBottom="12dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:background="@android:color/transparent"
+    android:elevation="4dp"
+    android:radius="18dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:paddingEnd="12dp"
-        android:background="#FFF8E1">
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical">
 
+        <!-- دائرة أيقونة الحساب -->
         <TextView
-            android:id="@+id/accountNameTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="اسم الحساب"
-            android:textSize="18sp"
-            android:textColor="#222"
-            android:textStyle="bold"
-            android:ellipsize="end"
-            android:maxLines="1"/>
+            android:id="@+id/accountIconTextView"
+            android:layout_width="54dp"
+            android:layout_height="54dp"
+            android:gravity="center"
+            android:text="م"
+            android:textSize="22sp"
+            android:textColor="#fff"
+            android:background="@drawable/bg_account_icon_circle"
+            android:elevation="2dp"
+            android:layout_marginEnd="14dp"/>
 
         <LinearLayout
-            android:id="@+id/balancesContainer"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginTop="4dp"/>
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/accountNameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="اسم الحساب"
+                android:textSize="19sp"
+                android:textColor="#222"
+                android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:layout_marginBottom="4dp"/>
+
+            <LinearLayout
+                android:id="@+id/balancesContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="2dp"/>
+        </LinearLayout>
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#EEE"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="2dp"/>
-
-</LinearLayout> 
+</androidx.cardview.widget.CardView> 
