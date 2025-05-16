@@ -292,7 +292,7 @@ public class AccountStatementActivity extends AppCompatActivity {
                         Map<String, Double> previousBalances = new HashMap<>();
                         final int[] counter = {0};
                         if (currencyMap.isEmpty()) {
-                            String htmlContent = generateReportHtml(selectedAccount, startFinal, endFinal, transactions, previousBalances);
+                            String htmlContent = generateReportHtml(selectedAccount, startFinal, endFinal, transactions, previousBalances, currencyMap);
                             webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
                         }
                         for (String currency : currencyMap.keySet()) {
@@ -301,7 +301,7 @@ public class AccountStatementActivity extends AppCompatActivity {
                                 previousBalances.put(currency, prevBalance != null ? prevBalance : 0.0);
                                 counter[0]++;
                                 if (counter[0] == currencyMap.size()) {
-                                    String htmlContent = generateReportHtml(selectedAccount, startFinal, endFinal, transactions, previousBalances);
+                                    String htmlContent = generateReportHtml(selectedAccount, startFinal, endFinal, transactions, previousBalances, currencyMap);
                                     webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
                                 }
                             });
@@ -316,7 +316,7 @@ public class AccountStatementActivity extends AppCompatActivity {
         }
     }
 
-    private String generateReportHtml(Account account, Date startDate, Date endDate, List<Transaction> transactions, Map<String, Double> previousBalances) {
+    private String generateReportHtml(Account account, Date startDate, Date endDate, List<Transaction> transactions, Map<String, Double> previousBalances, Map<String, List<Transaction>> currencyMap) {
         StringBuilder html = new StringBuilder();
         html.append("<!DOCTYPE html>");
         html.append("<html dir='rtl' lang='ar'>");
