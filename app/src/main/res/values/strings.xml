@@ -219,4 +219,8 @@
     <string name="whatsapp_enabled">تفعيل واتساب</string>
 
     <string name="add_transaction_subtitle">أضف تفاصيل المعاملة الجديدة أدناه</string>
+
+    <string name="label_credit">له</string>
+    <string name="label_debit">عليه</string>
+    <string name="label_zero_balance">لا يوجد رصيد</string>
 </resources>
