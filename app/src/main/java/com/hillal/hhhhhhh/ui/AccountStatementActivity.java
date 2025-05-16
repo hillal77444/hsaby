@@ -24,6 +24,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.LiveData;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -32,6 +33,7 @@ import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.viewmodel.AccountStatementViewModel;
 import com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePickerDialog;
+import com.hillal.hhhhhhh.data.repository.TransactionRepository;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -54,6 +56,7 @@ public class AccountStatementActivity extends AppCompatActivity {
     private SimpleDateFormat dateFormat;
     // قائمة الحسابات للاستخدام الداخلي
     private List<Account> allAccounts = new ArrayList<>();
+    private TransactionRepository transactionRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +84,8 @@ public class AccountStatementActivity extends AppCompatActivity {
 
         // تعيين التواريخ الافتراضية
         setDefaultDates();
+
+        transactionRepository = new TransactionRepository(getApplication());
     }
 
     private void initializeViews() {
@@ -274,8 +279,33 @@ public class AccountStatementActivity extends AppCompatActivity {
                         startFinal.getTime(),
                         endFinal.getTime()
                     ).observe(this, transactions -> {
-                        String htmlContent = generateReportHtml(selectedAccount, startFinal, endFinal, transactions);
-                        webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
+                        // افصل المعاملات حسب العملة
+                        Map<String, List<Transaction>> currencyMap = new HashMap<>();
+                        for (Transaction transaction : transactions) {
+                            String currency = transaction.getCurrency();
+                            if (!currencyMap.containsKey(currency)) {
+                                currencyMap.put(currency, new ArrayList<>());
+                            }
+                            currencyMap.get(currency).add(transaction);
+                        }
+                        // سنبني التقرير بعد جلب جميع أرصدة العملات
+                        Map<String, Double> previousBalances = new HashMap<>();
+                        final int[] counter = {0};
+                        if (currencyMap.isEmpty()) {
+                            String htmlContent = generateReportHtml(selectedAccount, startFinal, endFinal, transactions, previousBalances);
+                            webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
+                        }
+                        for (String currency : currencyMap.keySet()) {
+                            LiveData<Double> prevBalanceLive = transactionRepository.getBalanceUntilDate(selectedAccount.getId(), startFinal.getTime() - 1, currency);
+                            prevBalanceLive.observe(this, prevBalance -> {
+                                previousBalances.put(currency, prevBalance != null ? prevBalance : 0.0);
+                                counter[0]++;
+                                if (counter[0] == currencyMap.size()) {
+                                    String htmlContent = generateReportHtml(selectedAccount, startFinal, endFinal, transactions, previousBalances);
+                                    webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
+                                }
+                            });
+                        }
                     });
                 } else {
                     Toast.makeText(this, "لم يتم العثور على الحساب المحدد", Toast.LENGTH_SHORT).show();
@@ -286,7 +316,7 @@ public class AccountStatementActivity extends AppCompatActivity {
         }
     }
 
-    private String generateReportHtml(Account account, Date startDate, Date endDate, List<Transaction> transactions) {
+    private String generateReportHtml(Account account, Date startDate, Date endDate, List<Transaction> transactions, Map<String, Double> previousBalances) {
         StringBuilder html = new StringBuilder();
         html.append("<!DOCTYPE html>");
         html.append("<html dir='rtl' lang='ar'>");
@@ -312,31 +342,11 @@ public class AccountStatementActivity extends AppCompatActivity {
         html.append("<p>الفترة: من <b>").append(dateFormat.format(startDate)).append("</b> إلى <b>").append(dateFormat.format(endDate)).append("</b></p>");
         html.append("</div>");
         
-        // افصل المعاملات حسب العملة
-        Map<String, List<Transaction>> currencyMap = new HashMap<>();
-        for (Transaction transaction : transactions) {
-            String currency = transaction.getCurrency();
-            if (!currencyMap.containsKey(currency)) {
-                currencyMap.put(currency, new ArrayList<>());
-            }
-            currencyMap.get(currency).add(transaction);
-        }
-
         for (String currency : currencyMap.keySet()) {
             List<Transaction> allCurrencyTransactions = currencyMap.get(currency);
-            // رتب العمليات من الأقدم إلى الأحدث
             sortTransactionsByDate(allCurrencyTransactions);
-            // احسب الرصيد السابق (كل العمليات قبل startDate)
-            double previousBalance = 0;
-            for (Transaction t : allCurrencyTransactions) {
-                if (t.getDate() < startDate.getTime()) {
-                    if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
-                        previousBalance -= t.getAmount();
-                    } else {
-                        previousBalance += t.getAmount();
-                    }
-                }
-            }
+            // الرصيد السابق من قاعدة البيانات
+            double previousBalance = previousBalances != null && previousBalances.containsKey(currency) ? previousBalances.get(currency) : 0;
             // احسب إجمالي المدين والدائن خلال الفترة
             double totalDebit = 0;
             double totalCredit = 0;
