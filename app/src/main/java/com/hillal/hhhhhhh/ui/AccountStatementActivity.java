@@ -106,9 +106,9 @@ public class AccountStatementActivity extends AppCompatActivity {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_simple_date_picker);
 
-        NumberPicker yearPicker = dialog.findViewById(R.id.yearPicker);
-        NumberPicker monthPicker = dialog.findViewById(R.id.monthPicker);
         NumberPicker dayPicker = dialog.findViewById(R.id.dayPicker);
+        NumberPicker monthPicker = dialog.findViewById(R.id.monthPicker);
+        NumberPicker yearPicker = dialog.findViewById(R.id.yearPicker);
         TextView btnOk = dialog.findViewById(R.id.btnOk);
         TextView btnCancel = dialog.findViewById(R.id.btnCancel);
 
@@ -116,6 +116,8 @@ public class AccountStatementActivity extends AppCompatActivity {
         yearPicker.setMinValue(currentYear - 50);
         yearPicker.setMaxValue(currentYear + 10);
         yearPicker.setValue(currentYear);
+        // الأرقام بالإنجليزي
+        yearPicker.setFormatter(value -> String.format(java.util.Locale.ENGLISH, "%d", value));
 
         // أسماء الشهور بالعربي
         String[] arabicMonths = {"يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"};
@@ -123,10 +125,14 @@ public class AccountStatementActivity extends AppCompatActivity {
         monthPicker.setMaxValue(12);
         monthPicker.setDisplayedValues(arabicMonths);
         monthPicker.setValue(Calendar.getInstance().get(Calendar.MONTH) + 1);
+        // الأرقام بالإنجليزي (للشهر)
+        monthPicker.setFormatter(value -> String.format(java.util.Locale.ENGLISH, "%d", value));
 
         dayPicker.setMinValue(1);
         dayPicker.setMaxValue(31);
         dayPicker.setValue(Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
+        // الأرقام بالإنجليزي (لليوم)
+        dayPicker.setFormatter(value -> String.format(java.util.Locale.ENGLISH, "%d", value));
 
         // تحديث الأيام حسب الشهر والسنة المختارة
         monthPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
@@ -147,7 +153,21 @@ public class AccountStatementActivity extends AppCompatActivity {
         });
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 
+        // جعل الـ Dialog يظهر من أسفل الشاشة
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            android.view.WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+            params.width = android.view.WindowManager.LayoutParams.MATCH_PARENT;
+            params.gravity = android.view.Gravity.BOTTOM;
+            dialog.getWindow().setAttributes(params);
+        }
+
         dialog.show();
+
+        // تلوين العنصر المختار في كل NumberPicker بخلفية مخصصة
+        setNumberPickerSelectionBg(dayPicker);
+        setNumberPickerSelectionBg(monthPicker);
+        setNumberPickerSelectionBg(yearPicker);
     }
 
     private int getDaysInMonth(int year, int month) {
@@ -430,5 +450,16 @@ public class AccountStatementActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    // أضف هذه الدالة للمساعدة في تلوين العنصر المختار
+    private void setNumberPickerSelectionBg(NumberPicker picker) {
+        try {
+            java.lang.reflect.Field selectionDividerField = NumberPicker.class.getDeclaredField("mSelectionDivider") ;
+            selectionDividerField.setAccessible(true);
+            selectionDividerField.set(picker, getDrawable(R.drawable.picker_selected_bg));
+        } catch (Exception e) {
+            // تجاهل أي خطأ (قد لا يعمل على كل الأجهزة)
+        }
     }
 } 
