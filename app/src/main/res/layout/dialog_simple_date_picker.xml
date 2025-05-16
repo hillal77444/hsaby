@@ -16,8 +16,10 @@
         android:paddingBottom="8dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:layoutDirection="rtl">
 
+        <!-- زر إنهاء في أقصى الشمال -->
         <TextView
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
@@ -27,6 +29,7 @@
             android:textSize="16sp"
             android:gravity="start"
             android:layout_gravity="start|center_vertical"
+            android:textAlignment="viewStart"
             android:paddingStart="4dp"
             android:paddingEnd="4dp"/>
 
@@ -35,6 +38,7 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
+        <!-- زر تأكيد في أقصى اليمين -->
         <TextView
             android:id="@+id/btnOk"
             android:layout_width="wrap_content"
@@ -44,6 +48,7 @@
             android:textSize="16sp"
             android:gravity="end"
             android:layout_gravity="end|center_vertical"
+            android:textAlignment="viewEnd"
             android:paddingStart="4dp"
             android:paddingEnd="4dp"/>
     </LinearLayout>
