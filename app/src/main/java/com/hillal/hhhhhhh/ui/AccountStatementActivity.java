@@ -32,7 +32,6 @@ import com.hillal.hhhhhhh.viewmodel.AccountStatementViewModel;
 import com.bigkoo.pickerview.builder.TimePickerBuilder;
 import com.bigkoo.pickerview.view.TimePickerView;
 import com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePickerDialog;
-import com.contrarywind.view.WheelView;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -102,45 +101,35 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private void showDatePicker(TextInputEditText input) {
-        // إعداد البيانات
-        List<String> years = new ArrayList<>();
-        List<String> months = new ArrayList<>();
-        List<String> days = new ArrayList<>();
-        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-        for (int i = currentYear - 50; i <= currentYear + 10; i++) years.add(String.valueOf(i));
-        for (int i = 1; i <= 12; i++) months.add(String.format("%02d", i));
-        for (int i = 1; i <= 31; i++) days.add(String.format("%02d", i));
+        Calendar cal = Calendar.getInstance();
+        try {
+            String dateStr = input.getText().toString();
+            if (!dateStr.isEmpty()) {
+                Date parsed = dateFormat.parse(dateStr);
+                cal.setTime(parsed);
+            }
+        } catch (Exception ignored) {}
 
-        // إنشاء Dialog مخصص
-        Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.dialog_wheelview_date_picker);
-        dialog.setTitle("اختر التاريخ");
+        TimePickerView pvTime = new TimePickerBuilder(this, (date, v) -> {
+            input.setText(dateFormat.format(date));
+        })
+        .setType(new boolean[]{true, true, true, false, false, false}) // السنة، الشهر، اليوم فقط
+        .setTitleText("اختر التاريخ")
+        .setTitleSize(20)
+        .setContentTextSize(22)
+        .setDate(cal)
+        .setLabel("سنة", "شهر", "يوم", "", "", "")
+        .setBgColor(Color.WHITE)
+        .setCancelColor(Color.parseColor("#1976D2"))
+        .setSubmitColor(Color.parseColor("#1976D2"))
+        .setTextColorCenter(Color.parseColor("#1976D2"))
+        .setTextColorOut(Color.parseColor("#999999"))
+        .setDividerColor(Color.parseColor("#1976D2"))
+        .isCyclic(true)
+        .isDialog(true)
+        .build();
 
-        WheelView yearWheel = dialog.findViewById(R.id.yearWheel);
-        WheelView monthWheel = dialog.findViewById(R.id.monthWheel);
-        WheelView dayWheel = dialog.findViewById(R.id.dayWheel);
-        Button btnOk = dialog.findViewById(R.id.btnOk);
-        Button btnCancel = dialog.findViewById(R.id.btnCancel);
-
-        yearWheel.setItems(years);
-        monthWheel.setItems(months);
-        dayWheel.setItems(days);
-
-        // تعيين القيم الافتراضية
-        yearWheel.setCurrentItem(years.indexOf(String.valueOf(currentYear)));
-        monthWheel.setCurrentItem(Calendar.getInstance().get(Calendar.MONTH));
-        dayWheel.setCurrentItem(Calendar.getInstance().get(Calendar.DAY_OF_MONTH) - 1);
-
-        btnOk.setOnClickListener(v -> {
-            String date = years.get(yearWheel.getCurrentItem()) + "-" +
-                    months.get(monthWheel.getCurrentItem()) + "-" +
-                    days.get(dayWheel.getCurrentItem());
-            input.setText(date);
-            dialog.dismiss();
-        });
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
-
-        dialog.show();
+        pvTime.show();
     }
 
     private void loadAccounts() {
