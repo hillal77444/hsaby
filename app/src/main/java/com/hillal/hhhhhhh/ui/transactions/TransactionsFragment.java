@@ -138,39 +138,107 @@ public class TransactionsFragment extends Fragment {
     }
 
     private void showDatePicker(boolean isStart) {
-        Calendar calendar = isStart ? startDate : endDate;
-        
-        TimePickerView pvTime = new TimePickerBuilder(requireContext(), (date, v) -> {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(date);
-            
+        // استخدم Dialog عجلة التاريخ مثل AccountStatementActivity
+        android.app.Dialog dialog = new android.app.Dialog(requireContext());
+        dialog.setContentView(R.layout.dialog_simple_date_picker);
+
+        android.widget.NumberPicker dayPicker = dialog.findViewById(R.id.dayPicker);
+        android.widget.NumberPicker monthPicker = dialog.findViewById(R.id.monthPicker);
+        android.widget.NumberPicker yearPicker = dialog.findViewById(R.id.yearPicker);
+        android.widget.TextView btnOk = dialog.findViewById(R.id.btnOk);
+        android.widget.TextView btnCancel = dialog.findViewById(R.id.btnCancel);
+
+        // جلب التاريخ الحالي (بداية أو نهاية)
+        java.util.Calendar cal = isStart ? (Calendar) startDate.clone() : (Calendar) endDate.clone();
+        int selectedYear = cal.get(Calendar.YEAR);
+        int selectedMonth = cal.get(Calendar.MONTH) + 1;
+        int selectedDay = cal.get(Calendar.DAY_OF_MONTH);
+
+        yearPicker.setMinValue(selectedYear - 50);
+        yearPicker.setMaxValue(selectedYear + 10);
+        yearPicker.setValue(selectedYear);
+        yearPicker.setFormatter(value -> String.format(java.util.Locale.ENGLISH, "%d", value));
+
+        String[] arabicMonths = {"يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"};
+        monthPicker.setMinValue(1);
+        monthPicker.setMaxValue(12);
+        monthPicker.setDisplayedValues(arabicMonths);
+        monthPicker.setValue(selectedMonth);
+        monthPicker.setFormatter(value -> String.format(java.util.Locale.ENGLISH, "%d", value));
+
+        dayPicker.setMinValue(1);
+        dayPicker.setMaxValue(getDaysInMonth(selectedYear, selectedMonth));
+        dayPicker.setValue(selectedDay);
+        dayPicker.setFormatter(value -> String.format(java.util.Locale.ENGLISH, "%d", value));
+
+        monthPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
+            int maxDay = getDaysInMonth(yearPicker.getValue(), newVal);
+            dayPicker.setMaxValue(maxDay);
+        });
+        yearPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
+            int maxDay = getDaysInMonth(newVal, monthPicker.getValue());
+            dayPicker.setMaxValue(maxDay);
+        });
+
+        btnOk.setOnClickListener(v -> {
+            Calendar selectedCal = Calendar.getInstance();
+            selectedCal.set(Calendar.YEAR, yearPicker.getValue());
+            selectedCal.set(Calendar.MONTH, monthPicker.getValue() - 1);
+            selectedCal.set(Calendar.DAY_OF_MONTH, dayPicker.getValue());
             if (isStart) {
-                // إذا كان تاريخ البداية، نضبط الساعة على 00:00:00
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                startDate = cal;
+                // بداية اليوم
+                selectedCal.set(Calendar.HOUR_OF_DAY, 0);
+                selectedCal.set(Calendar.MINUTE, 0);
+                selectedCal.set(Calendar.SECOND, 0);
+                selectedCal.set(Calendar.MILLISECOND, 0);
+                startDate = selectedCal;
             } else {
-                // إذا كان تاريخ النهاية، نضبط الساعة على 23:59:59
-                cal.set(Calendar.HOUR_OF_DAY, 23);
-                cal.set(Calendar.MINUTE, 59);
-                cal.set(Calendar.SECOND, 59);
-                cal.set(Calendar.MILLISECOND, 999);
-                endDate = cal;
+                // نهاية اليوم
+                selectedCal.set(Calendar.HOUR_OF_DAY, 23);
+                selectedCal.set(Calendar.MINUTE, 59);
+                selectedCal.set(Calendar.SECOND, 59);
+                selectedCal.set(Calendar.MILLISECOND, 999);
+                endDate = selectedCal;
             }
-            
             updateDateInputs();
             viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
-        })
-        .setType(new boolean[]{true, true, true, false, false, false}) // سنة، شهر، يوم فقط
-        .setTitleText(isStart ? "اختر تاريخ البداية" : "اختر تاريخ النهاية")
-        .setSubmitText("تأكيد")
-        .setTitleSize(35)
-        .setDate(calendar)
-        .setLabel("سنة", "شهر", "يوم", "", "", "")
-        .build();
-        pvTime.show();
+            dialog.dismiss();
+        });
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        // جعل الـ Dialog يظهر من أسفل الشاشة
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            android.view.WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+            params.width = android.view.WindowManager.LayoutParams.MATCH_PARENT;
+            params.gravity = android.view.Gravity.BOTTOM;
+            dialog.getWindow().setAttributes(params);
+        }
+
+        dialog.show();
+
+        // تلوين العنصر المختار في كل NumberPicker بخلفية مخصصة (نفس الدالة)
+        setNumberPickerSelectionBg(dayPicker);
+        setNumberPickerSelectionBg(monthPicker);
+        setNumberPickerSelectionBg(yearPicker);
+    }
+
+    // دالة لحساب عدد الأيام في الشهر
+    private int getDaysInMonth(int year, int month) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(year, month - 1, 1);
+        return cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+    }
+
+    // دالة تلوين العنصر المختار في NumberPicker
+    private void setNumberPickerSelectionBg(android.widget.NumberPicker picker) {
+        try {
+            java.lang.reflect.Field selectionDividerField = android.widget.NumberPicker.class.getDeclaredField("mSelectionDivider") ;
+            selectionDividerField.setAccessible(true);
+            selectionDividerField.set(picker, requireContext().getDrawable(R.drawable.picker_selected_bg));
+        } catch (Exception e) {
+            // تجاهل أي خطأ
+        }
     }
 
     private void updateDateInputs() {
