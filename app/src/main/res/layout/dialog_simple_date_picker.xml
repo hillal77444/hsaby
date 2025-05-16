@@ -21,11 +21,11 @@
 
         <!-- زر إنهاء في أقصى الشمال -->
         <TextView
-            android:id="@+id/btnCancel"
+            android:id="@+id/btnOk"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="إنهاء"
-            android:textColor="#444"
+            android:text="تاكيد"
+            android:textColor="#1976D2"
             android:textSize="16sp"
             android:gravity="start"
             android:layout_gravity="start|center_vertical"
@@ -40,11 +40,11 @@
 
         <!-- زر تأكيد في أقصى اليمين -->
         <TextView
-            android:id="@+id/btnOk"
+            android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="تأكيد"
-            android:textColor="#1976D2"
+            android:text="إنهاء"
+            android:textColor="#444"
             android:textSize="16sp"
             android:gravity="end"
             android:layout_gravity="end|center_vertical"
