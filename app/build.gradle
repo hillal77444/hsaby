@@ -131,5 +131,5 @@ dependencies {
 
     implementation 'com.github.Bigkoo:Android-PickerView:dd43726414'
     
-    implementation 'com.contrarywind:wheelview:4.1.0'
+    implementation 'com.github.contrarywind:WheelView:4.1.0'
 } 
