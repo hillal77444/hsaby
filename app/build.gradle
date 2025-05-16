@@ -128,7 +128,7 @@ dependencies {
 
     implementation 'com.github.florent37:singledateandtimepicker:2.2.7'
 
-    implementation 'com.github.Bigkoo:Android-PickerView:4.1.9'
+    implementation 'com.github.Bigkoo:Android-PickerView:4.1.8'
 
-    implementation 'com.contrarywind:wheelview:4.1.9'
+    implementation 'com.contrarywind:wheelview:4.1.8'
 } 
