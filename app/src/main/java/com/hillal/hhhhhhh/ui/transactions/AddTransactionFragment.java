@@ -20,12 +20,20 @@ import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.databinding.FragmentAddTransactionBinding;
 import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
 import com.hillal.hhhhhhh.data.preferences.UserPreferences;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 public class AddTransactionFragment extends Fragment {
     private FragmentAddTransactionBinding binding;
@@ -35,6 +43,8 @@ public class AddTransactionFragment extends Fragment {
     private long selectedAccountId = -1;
     private final Calendar calendar = Calendar.getInstance();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", new Locale("ar"));
+    private List<Account> allAccounts = new ArrayList<>();
+    private List<Transaction> allTransactions = new ArrayList<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,6 +67,8 @@ public class AddTransactionFragment extends Fragment {
         setupViews();
         setupListeners();
         loadAccounts();
+        loadAllTransactions();
+        setupAccountPicker();
     }
 
     private void setupViews() {
@@ -84,27 +96,14 @@ public class AddTransactionFragment extends Fragment {
     private void loadAccounts() {
         accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
             if (accounts != null && !accounts.isEmpty()) {
+                allAccounts = accounts;
                 setupAccountDropdown(accounts);
             }
         });
     }
 
     private void setupAccountDropdown(List<Account> accounts) {
-        String[] accountNames = new String[accounts.size()];
-        for (int i = 0; i < accounts.size(); i++) {
-            accountNames[i] = accounts.get(i).getName();
-        }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                requireContext(),
-                android.R.layout.simple_dropdown_item_1line,
-                accountNames
-        );
-
-        binding.accountAutoComplete.setAdapter(adapter);
-        binding.accountAutoComplete.setOnItemClickListener((parent, view, position, id) -> {
-            selectedAccountId = accounts.get(position).getId();
-        });
+        // لم يعد هناك داعي للـ AutoComplete التقليدي
     }
 
     private void showDatePicker() {
@@ -180,6 +179,60 @@ public class AddTransactionFragment extends Fragment {
         } else {
             return getString(R.string.currency_usd);
         }
+    }
+
+    private void setupAccountPicker() {
+        binding.accountAutoComplete.setFocusable(false);
+        binding.accountAutoComplete.setOnClickListener(v -> showAccountPickerBottomSheet());
+    }
+
+    private void showAccountPickerBottomSheet() {
+        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+        View sheetView = getLayoutInflater().inflate(R.layout.bottomsheet_account_picker, null);
+        dialog.setContentView(sheetView);
+        EditText searchEditText = sheetView.findViewById(R.id.searchEditText);
+        RecyclerView accountsRecyclerView = sheetView.findViewById(R.id.accountsRecyclerView);
+        accountsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        // بناء خريطة الحسابات -> المعاملات
+        Map<Long, List<Transaction>> accountTxMap = new HashMap<>();
+        for (Transaction t : allTransactions) {
+            if (!accountTxMap.containsKey(t.getAccountId())) accountTxMap.put(t.getAccountId(), new ArrayList<>());
+            accountTxMap.get(t.getAccountId()).add(t);
+        }
+        AccountPickerAdapter adapter = new AccountPickerAdapter(requireContext(), allAccounts, accountTxMap, account -> {
+            binding.accountAutoComplete.setText(account.getName());
+            selectedAccountId = account.getId();
+            dialog.dismiss();
+        });
+        accountsRecyclerView.setAdapter(adapter);
+        // تصفية عند البحث
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String query = s.toString().trim();
+                if (query.isEmpty()) {
+                    adapter.updateList(allAccounts);
+                } else {
+                    List<Account> filtered = new ArrayList<>();
+                    for (Account acc : allAccounts) {
+                        if (acc.getName() != null && acc.getName().contains(query)) {
+                            filtered.add(acc);
+                        }
+                    }
+                    adapter.updateList(filtered);
+                }
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+        dialog.show();
+    }
+
+    private void loadAllTransactions() {
+        TransactionsViewModel txViewModel = new ViewModelProvider(this).get(TransactionsViewModel.class);
+        txViewModel.getTransactions().observe(getViewLifecycleOwner(), txs -> {
+            if (txs != null) allTransactions = txs;
+        });
+        txViewModel.loadAllTransactions();
     }
 
     @Override
