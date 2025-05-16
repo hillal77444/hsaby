@@ -3,11 +3,75 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@android:color/white">
 
-    <View
-        android:id="@+id/timepicker"
+    <TextView
+        android:id="@+id/tvTitle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="اختر التاريخ"
+        android:textAlignment="center"
+        android:textColor="#1976D2"
+        android:textSize="20sp"
+        android:layout_marginBottom="12dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <cn.aigestudio.wheelpicker.WheelPicker
+            android:id="@+id/yearPicker"
+            android:layout_width="0dp"
+            android:layout_height="150dp"
+            android:layout_weight="1"
+            android:textColor="#1976D2"
+            android:textSize="18sp" />
+
+        <cn.aigestudio.wheelpicker.WheelPicker
+            android:id="@+id/monthPicker"
+            android:layout_width="0dp"
+            android:layout_height="150dp"
+            android:layout_weight="1"
+            android:textColor="#1976D2"
+            android:textSize="18sp" />
+
+        <cn.aigestudio.wheelpicker.WheelPicker
+            android:id="@+id/dayPicker"
+            android:layout_width="0dp"
+            android:layout_height="150dp"
+            android:layout_weight="1"
+            android:textColor="#1976D2"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="إلغاء"
+            android:textColor="#1976D2"
+            android:background="@android:color/transparent"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btnOk"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="تأكيد"
+            android:textColor="#1976D2"
+            android:background="@android:color/transparent"
+            android:textSize="18sp" />
+    </LinearLayout>
 
 </LinearLayout> 
