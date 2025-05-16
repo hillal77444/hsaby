@@ -7,6 +7,7 @@ import android.widget.Toast;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,6 +15,8 @@ import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.databinding.ItemTransactionBinding;
+import com.hillal.hhhhhhh.data.repository.TransactionRepository;
+import com.hillal.hhhhhhh.data.database.AppDatabase;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -62,11 +65,15 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
     class TransactionViewHolder extends RecyclerView.ViewHolder {
         private final ItemTransactionBinding binding;
         private final SimpleDateFormat dateFormat;
+        private final TransactionRepository transactionRepository;
 
         TransactionViewHolder(ItemTransactionBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
             this.dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
+            this.transactionRepository = new TransactionRepository(
+                AppDatabase.getInstance(binding.getRoot().getContext()).transactionDao()
+            );
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
@@ -124,33 +131,15 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
 
             // زر إرسال واتساب
             binding.btnSendWhatsApp.setOnClickListener(v -> {
-                double balanceAfter = calculateBalance(transaction.getAccountId(), transaction.getId());
-                String message = buildWhatsAppMessage(accountName, transaction, balanceAfter);
-                sendWhatsAppMessage(itemView.getContext(), phoneNumber, message);
+                transactionRepository.getBalanceUntilDate(
+                    transaction.getAccountId(),
+                    transaction.getDate(),
+                    transaction.getCurrency()
+                ).observe((LifecycleOwner) itemView.getContext(), balance -> {
+                    String message = buildWhatsAppMessage(accountName, transaction, balance);
+                    sendWhatsAppMessage(itemView.getContext(), phoneNumber, message);
+                });
             });
-        }
-
-        // حساب الرصيد بعد القيد (يمكنك تحسينه حسب منطقك)
-        private double calculateBalance(long accountId, long transactionId) {
-            double balance = 0;
-            // تأكد من الترتيب من الأقدم إلى الأحدث
-            List<Transaction> sortedList = new ArrayList<>();
-            for (int i = 0; i < getItemCount(); i++) {
-                Transaction t = getItem(i);
-                if (t.getAccountId() == accountId) {
-                    sortedList.add(t);
-                }
-            }
-            Collections.sort(sortedList, Comparator.comparing(Transaction::getDate));
-            for (Transaction t : sortedList) {
-                if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
-                    balance -= t.getAmount();
-                } else {
-                    balance += t.getAmount();
-                }
-                if (t.getId() == transactionId) break;
-            }
-            return balance;
         }
 
         private String buildWhatsAppMessage(String accountName, Transaction transaction, double balanceAfter) {
