@@ -19,6 +19,8 @@ import android.app.Dialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -101,35 +103,57 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private void showDatePicker(TextInputEditText input) {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_simple_date_picker);
+
+        NumberPicker yearPicker = dialog.findViewById(R.id.yearPicker);
+        NumberPicker monthPicker = dialog.findViewById(R.id.monthPicker);
+        NumberPicker dayPicker = dialog.findViewById(R.id.dayPicker);
+        TextView btnOk = dialog.findViewById(R.id.btnOk);
+        TextView btnCancel = dialog.findViewById(R.id.btnCancel);
+
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+        yearPicker.setMinValue(currentYear - 50);
+        yearPicker.setMaxValue(currentYear + 10);
+        yearPicker.setValue(currentYear);
+
+        // أسماء الشهور بالعربي
+        String[] arabicMonths = {"يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"};
+        monthPicker.setMinValue(1);
+        monthPicker.setMaxValue(12);
+        monthPicker.setDisplayedValues(arabicMonths);
+        monthPicker.setValue(Calendar.getInstance().get(Calendar.MONTH) + 1);
+
+        dayPicker.setMinValue(1);
+        dayPicker.setMaxValue(31);
+        dayPicker.setValue(Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
+
+        // تحديث الأيام حسب الشهر والسنة المختارة
+        monthPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
+            int maxDay = getDaysInMonth(yearPicker.getValue(), newVal);
+            dayPicker.setMaxValue(maxDay);
+        });
+        yearPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
+            int maxDay = getDaysInMonth(newVal, monthPicker.getValue());
+            dayPicker.setMaxValue(maxDay);
+        });
+
+        btnOk.setOnClickListener(v -> {
+            String date = yearPicker.getValue() + "-" +
+                    String.format("%02d", monthPicker.getValue()) + "-" +
+                    String.format("%02d", dayPicker.getValue());
+            input.setText(date);
+            dialog.dismiss();
+        });
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+
+    private int getDaysInMonth(int year, int month) {
         Calendar cal = Calendar.getInstance();
-        try {
-            String dateStr = input.getText().toString();
-            if (!dateStr.isEmpty()) {
-                Date parsed = dateFormat.parse(dateStr);
-                cal.setTime(parsed);
-            }
-        } catch (Exception ignored) {}
-
-        TimePickerView pvTime = new TimePickerBuilder(this, (date, v) -> {
-            input.setText(dateFormat.format(date));
-        })
-        .setType(new boolean[]{true, true, true, false, false, false}) // السنة، الشهر، اليوم فقط
-        .setTitleText("اختر التاريخ")
-        .setTitleSize(20)
-        .setContentTextSize(22)
-        .setDate(cal)
-        .setLabel("سنة", "شهر", "يوم", "", "", "")
-        .setBgColor(Color.WHITE)
-        .setCancelColor(Color.parseColor("#1976D2"))
-        .setSubmitColor(Color.parseColor("#1976D2"))
-        .setTextColorCenter(Color.parseColor("#1976D2"))
-        .setTextColorOut(Color.parseColor("#999999"))
-        .setDividerColor(Color.parseColor("#1976D2"))
-        .isCyclic(true)
-        .isDialog(true)
-        .build();
-
-        pvTime.show();
+        cal.set(year, month - 1, 1);
+        return cal.getActualMaximum(Calendar.DAY_OF_MONTH);
     }
 
     private void loadAccounts() {
