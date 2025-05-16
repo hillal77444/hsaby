@@ -7,15 +7,18 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
 import androidx.recyclerview.widget.RecyclerView;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
+import com.hillal.hhhhhhh.data.repository.TransactionRepository;
+import com.hillal.hhhhhhh.data.room.AppDatabase;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
+import java.util.HashSet;
 
 public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdapter.AccountViewHolder> {
     public interface OnAccountClickListener {
@@ -25,12 +28,20 @@ public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdap
     private Map<Long, List<Transaction>> accountTransactions;
     private OnAccountClickListener listener;
     private Context context;
+    private TransactionRepository transactionRepository;
+    private LifecycleOwner lifecycleOwner;
 
     public AccountPickerAdapter(Context context, List<Account> accounts, Map<Long, List<Transaction>> accountTransactions, OnAccountClickListener listener) {
         this.context = context;
         this.accounts = accounts;
         this.accountTransactions = accountTransactions;
         this.listener = listener;
+        this.transactionRepository = new TransactionRepository((android.app.Application) context.getApplicationContext());
+        if (context instanceof LifecycleOwner) {
+            this.lifecycleOwner = (LifecycleOwner) context;
+        } else {
+            throw new IllegalArgumentException("Context must be a LifecycleOwner");
+        }
     }
 
     public void updateList(List<Account> filtered) {
@@ -54,38 +65,31 @@ public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdap
         holder.balancesContainer.removeAllViews();
         List<Transaction> transactions = accountTransactions.get(account.getId());
         if (transactions != null && !transactions.isEmpty()) {
-            Map<String, Double> currencyBalances = new HashMap<>();
+            HashSet<String> currencies = new HashSet<>();
             for (Transaction t : transactions) {
-                String currency = t.getCurrency();
-                double amount = t.getAmount();
-                String type = t.getType();
-                double prev = currencyBalances.getOrDefault(currency, 0.0);
-                if (type.equals("عليه") || type.equalsIgnoreCase("debit")) {
-                    prev -= amount;
-                } else {
-                    prev += amount;
-                }
-                currencyBalances.put(currency, prev);
+                if (t.getCurrency() != null) currencies.add(t.getCurrency());
             }
-            for (String currency : currencyBalances.keySet()) {
-                double balance = currencyBalances.get(currency);
-                String label;
-                int color;
-                if (balance > 0) {
-                    label = context.getString(R.string.label_credit) + " " + String.format(Locale.US, "%.2f", balance) + " " + currency;
-                    color = context.getResources().getColor(R.color.green_700);
-                } else if (balance < 0) {
-                    label = context.getString(R.string.label_debit) + " " + String.format(Locale.US, "%.2f", Math.abs(balance)) + " " + currency;
-                    color = context.getResources().getColor(R.color.red_700);
-                } else {
-                    label = context.getString(R.string.label_zero_balance) + " " + currency;
-                    color = context.getResources().getColor(R.color.text_secondary);
-                }
-                TextView tv = new TextView(context);
-                tv.setText(label);
-                tv.setTextSize(15f);
-                tv.setTextColor(color);
-                holder.balancesContainer.addView(tv);
+            for (String currency : currencies) {
+                LiveData<Double> balanceLiveData = transactionRepository.getBalanceUntilDate(account.getId(), System.currentTimeMillis(), currency);
+                balanceLiveData.observe(lifecycleOwner, balance -> {
+                    String label;
+                    int color;
+                    if (balance != null && balance > 0) {
+                        label = context.getString(R.string.label_credit) + " " + String.format(Locale.US, "%.2f", balance) + " " + currency;
+                        color = context.getResources().getColor(R.color.green_700);
+                    } else if (balance != null && balance < 0) {
+                        label = context.getString(R.string.label_debit) + " " + String.format(Locale.US, "%.2f", Math.abs(balance)) + " " + currency;
+                        color = context.getResources().getColor(R.color.red_700);
+                    } else {
+                        label = context.getString(R.string.label_zero_balance) + " " + currency;
+                        color = context.getResources().getColor(R.color.text_secondary);
+                    }
+                    TextView tv = new TextView(context);
+                    tv.setText(label);
+                    tv.setTextSize(15f);
+                    tv.setTextColor(color);
+                    holder.balancesContainer.addView(tv);
+                });
             }
         } else {
             TextView tv = new TextView(context);
