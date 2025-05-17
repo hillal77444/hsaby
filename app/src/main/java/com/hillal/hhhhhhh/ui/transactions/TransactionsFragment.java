@@ -44,6 +44,10 @@ public class TransactionsFragment extends Fragment {
     private String selectedCurrency = null;
     private List<Transaction> allTransactions = new ArrayList<>();
     private boolean isStartDate = true; // متغير لتتبع أي تاريخ يتم تعديله
+    private boolean isFirstLoad = true;
+    private long lastSyncTime = 0;
+    private android.os.Handler syncHandler;
+    private static final long SYNC_INTERVAL = 30 * 1000; // 30 ثانية
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,6 +84,12 @@ public class TransactionsFragment extends Fragment {
         setupCurrencyFilter();
         setupDateFilter();
         setupFab();
+        
+        // بدء المزامنة المستمرة فقط إذا كان المستخدم مسجل الدخول
+        if (isUserLoggedIn()) {
+            startContinuousSync();
+        }
+        
         observeAccountsAndTransactions();
     }
 
@@ -297,8 +307,58 @@ public class TransactionsFragment extends Fragment {
         binding.transactionsRecyclerView.setVisibility(filtered.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
-    @Override
-    public void onDestroyView() {
+    private boolean isUserLoggedIn() {
+        try {
+            // التحقق من البيانات المحفوظة في SharedPreferences
+            android.content.SharedPreferences prefs = requireContext().getSharedPreferences("user_prefs", android.content.Context.MODE_PRIVATE);
+            String savedToken = prefs.getString("auth_token", null);
+            String savedUserId = prefs.getString("user_id", null);
+            
+            // إذا كانت البيانات موجودة، نعتبر المستخدم مسجل الدخول
+            if (savedToken != null && savedUserId != null) {
+                return true;
+            }
+
+            // إذا لم تكن البيانات موجودة، نتحقق من قاعدة البيانات
+            App app = (App) requireActivity().getApplication();
+            return app.getDatabase().userDao().getCurrentUser() != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void startContinuousSync() {
+        // تأكد من أن المستخدم مسجل الدخول قبل بدء المزامنة
+        if (!isUserLoggedIn()) {
+            return;
+        }
+
+        syncHandler = new android.os.Handler();
+        syncHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // تأكد من أن المستخدم لا يزال مسجل الدخول
+                if (isUserLoggedIn()) {
+                    syncWithServer();
+                    // جدولة المزامنة التالية
+                    syncHandler.postDelayed(this, SYNC_INTERVAL);
+                }
+            }
+        }, SYNC_INTERVAL);
+    }
+
+    private void stopContinuousSync() {
+        if (syncHandler != null) {
+            syncHandler.removeCallbacksAndMessages(null);
+        }
+    }
+
+    private void syncWithServer() {
+        // تأكد من أن المستخدم مسجل الدخول
+        if (!isUserLoggedIn()) {
+            return;
+        }
+
         try {
             App app = (App) requireActivity().getApplication();
             com.hillal.hhhhhhh.data.sync.SyncManager syncManager = new com.hillal.hhhhhhh.data.sync.SyncManager(
@@ -306,20 +366,78 @@ public class TransactionsFragment extends Fragment {
                 app.getDatabase().accountDao(),
                 app.getDatabase().transactionDao()
             );
-            syncManager.syncData(new com.hillal.hhhhhhh.data.sync.SyncManager.SyncCallback() {
+
+            // التحقق من وجود اتصال بالإنترنت
+            if (!isNetworkAvailable()) {
+                // في وضع افلاين، نعرض البيانات المحلية فقط
+                viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
+                return;
+            }
+
+            // أولاً: مزامنة التغييرات المحلية إلى الخادم
+            syncManager.syncChanges(new com.hillal.hhhhhhh.data.sync.SyncManager.SyncCallback() {
                 @Override
                 public void onSuccess() {
-                    // لا تفعل شيء إضافي
+                    // ثانياً: استقبال التغييرات من الخادم
+                    syncManager.receiveChanges(new com.hillal.hhhhhhh.data.sync.SyncManager.SyncCallback() {
+                        @Override
+                        public void onSuccess() {
+                            // تحديث البيانات بعد استقبال التغييرات
+                            viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
+                        }
+                        @Override
+                        public void onError(String error) {
+                            // في حالة الخطأ، نعرض البيانات المحلية
+                            viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
+                        }
+                    });
                 }
                 @Override
                 public void onError(String error) {
-                    // لا تفعل شيء إضافي
+                    // في حالة الخطأ، نعرض البيانات المحلية
+                    viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
                 }
             });
         } catch (Exception e) {
-            // تجاهل أي خطأ هنا حتى لا يتأثر الخروج من الصفحة
+            // في حالة أي خطأ، نعرض البيانات المحلية
+            viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
         }
+    }
+
+    // دالة للتحقق من وجود اتصال بالإنترنت
+    private boolean isNetworkAvailable() {
+        try {
+            android.net.ConnectivityManager connectivityManager = (android.net.ConnectivityManager) 
+                requireContext().getSystemService(android.content.Context.CONNECTIVITY_SERVICE);
+            if (connectivityManager != null) {
+                android.net.NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+                return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+            }
+        } catch (Exception e) {
+            // تجاهل أي خطأ
+        }
+        return false;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // إعادة بدء المزامنة المستمرة فقط إذا كان المستخدم مسجل الدخول
+        if (isUserLoggedIn()) {
+            startContinuousSync();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        stopContinuousSync();
+    }
+
+    @Override
+    public void onDestroyView() {
         super.onDestroyView();
+        stopContinuousSync();
         binding = null;
     }
 } 
