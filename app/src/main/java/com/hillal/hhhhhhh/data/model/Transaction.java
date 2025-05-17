@@ -6,10 +6,15 @@ import androidx.room.Ignore;
 import androidx.room.ColumnInfo;
 import com.google.gson.annotations.SerializedName;
 import androidx.room.Index;
+import androidx.room.ForeignKey;
 
 import java.util.Date;
 
-@Entity(tableName = "transactions", indices = {@Index(value = {"accountId", "currency", "date"})})
+@Entity(tableName = "transactions",
+        foreignKeys = @ForeignKey(entity = Account.class,
+                                parentColumns = "id",
+                                childColumns = "accountId",
+                                onDelete = ForeignKey.CASCADE))
 public class Transaction {
     @PrimaryKey(autoGenerate = true)
     private long id;
