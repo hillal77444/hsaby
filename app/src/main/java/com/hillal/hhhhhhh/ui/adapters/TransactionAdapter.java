@@ -86,6 +86,27 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                 }
                 return false;
             });
+
+            // إضافة معالج حدث لزر الحذف
+            binding.deleteButton.setOnClickListener(v -> {
+                if (onItemLongClickListener != null) {
+                    onItemLongClickListener.onItemLongClick(getItem(getAdapterPosition()));
+                }
+            });
+
+            // زر إرسال واتساب
+            binding.btnSendWhatsApp.setOnClickListener(v -> {
+                v.setEnabled(false); // تعطيل الزر مؤقتاً
+                transactionRepository.getBalanceUntilDate(
+                    getItem(getAdapterPosition()).getAccountId(),
+                    getItem(getAdapterPosition()).getDate(),
+                    getItem(getAdapterPosition()).getCurrency()
+                ).observe((LifecycleOwner) itemView.getContext(), balance -> {
+                    String message = buildWhatsAppMessage(getItem(getAdapterPosition()).getName(), getItem(getAdapterPosition()), balance);
+                    sendWhatsAppMessage(itemView.getContext(), getItem(getAdapterPosition()).getPhoneNumber(), message);
+                    v.setEnabled(true); // إعادة تفعيل الزر
+                });
+            });
         }
 
         void bind(Transaction transaction) {
@@ -125,6 +146,13 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                 binding.transactionAmount.setTextColor(itemView.getContext().getResources().getColor(R.color.text_primary));
                 binding.getRoot().setBackgroundColor(itemView.getContext().getResources().getColor(R.color.white));
             }
+
+            // إضافة معالج حدث لزر الحذف
+            binding.deleteButton.setOnClickListener(v -> {
+                if (onItemLongClickListener != null) {
+                    onItemLongClickListener.onItemLongClick(transaction);
+                }
+            });
 
             // زر إرسال واتساب
             binding.btnSendWhatsApp.setOnClickListener(v -> {
