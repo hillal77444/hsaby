@@ -2,6 +2,7 @@ package com.hillal.hhhhhhh.data.model;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.Ignore;
 
 @Entity(tableName = "users")
 public class User {
@@ -15,12 +16,14 @@ public class User {
 
     public User() {}
 
+    @Ignore
     public User(String username, String phone, String passwordHash) {
         this.username = username;
         this.phone = phone;
         this.passwordHash = passwordHash;
     }
 
+    @Ignore
     public User(long id, String username, String phone, String passwordHash) {
         this.id = id;
         this.username = username;
