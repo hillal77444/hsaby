@@ -29,11 +29,11 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
     private OnItemClickListener onItemClickListener;
     private OnItemLongClickListener onItemLongClickListener;
     private Map<Long, Account> accountMap;
+    private final TransactionRepository transactionRepository;
 
-
-
-    public TransactionAdapter(@NonNull DiffUtil.ItemCallback<Transaction> diffCallback) {
+    public TransactionAdapter(@NonNull DiffUtil.ItemCallback<Transaction> diffCallback, Context context) {
         super(diffCallback);
+        this.transactionRepository = new TransactionRepository((android.app.Application) context.getApplicationContext());
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -72,7 +72,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             });
 
             // إضافة مستمع النقر لزر الحذف
-            holder.binding.btnDelete.setOnClickListener(v -> {
+            holder.binding.deleteButton.setOnClickListener(v -> {
                 if (onItemLongClickListener != null) {
                     onItemLongClickListener.onItemLongClick(transaction);
                 }
@@ -90,8 +90,8 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                     transactionRepository.getBalanceUntilDate(transaction.getAccountId(), transaction.getDate(), transaction.getCurrency())
                             .observe((LifecycleOwner) holder.itemView.getContext(), balance -> {
                                 if (balance != null) {
-                                    String message = buildWhatsAppMessage(account.getName(), transaction, balance);
-                                    sendWhatsAppMessage(holder.itemView.getContext(), account.getPhoneNumber(), message);
+                                    String message = holder.buildWhatsAppMessage(account.getName(), transaction, balance);
+                                    holder.sendWhatsAppMessage(holder.itemView.getContext(), account.getPhoneNumber(), message);
                                 }
                                 // إعادة تفعيل الزر
                                 holder.binding.btnSendWhatsApp.setEnabled(true);
