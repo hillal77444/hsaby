@@ -18,7 +18,7 @@ public class Settings {
     public Settings() {
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
-        this.defaultCurrency = "USD";
+        this.defaultCurrency = "دولار";
         this.theme = "light";
         this.notificationsEnabled = true;
         this.language = "en";
