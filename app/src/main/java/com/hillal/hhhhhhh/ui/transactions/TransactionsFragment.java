@@ -69,7 +69,7 @@ public class TransactionsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // تهيئة RecyclerView
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
+        RecyclerView recyclerView = view.findViewById(R.id.transactionsRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         
         // إنشاء المحول مع تمرير السياق
