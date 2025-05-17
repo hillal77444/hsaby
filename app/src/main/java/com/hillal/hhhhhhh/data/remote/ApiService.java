@@ -14,6 +14,7 @@ import retrofit2.http.PUT;
 import retrofit2.http.DELETE;
 import retrofit2.http.Path;
 import retrofit2.http.Header;
+import retrofit2.http.Query;
 
 public interface ApiService {
     @POST("api/login")
@@ -39,6 +40,12 @@ public interface ApiService {
     @DELETE("api/transactions/{id}")
     Call<Void> deleteTransaction(@Header("Authorization") String token, 
                                @Path("id") long transactionId);
+
+    @POST("/api/sync/changes")
+    Call<Map<String, Object>> syncChanges(@Body Map<String, Object> changes);
+
+    @GET("/api/sync/changes")
+    Call<Map<String, Object>> getChanges(@Query("last_sync") long lastSyncTime);
 
     class LoginRequest {
         private String phone;
