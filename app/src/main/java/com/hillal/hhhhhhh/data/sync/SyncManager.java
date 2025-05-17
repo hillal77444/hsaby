@@ -9,6 +9,8 @@ import android.content.ClipboardManager;
 import android.widget.Toast;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.content.SharedPreferences;
 
 import com.hillal.hhhhhhh.data.remote.ApiService;
 import com.hillal.hhhhhhh.data.remote.RetrofitClient;
@@ -17,6 +19,8 @@ import com.hillal.hhhhhhh.data.room.AccountDao;
 import com.hillal.hhhhhhh.data.room.TransactionDao;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
+import com.hillal.hhhhhhh.data.room.AppDatabase;
+import com.hillal.hhhhhhh.data.model.App;
 
 import java.util.List;
 import retrofit2.Call;
@@ -31,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.HashMap;
 
 public class SyncManager {
     private static final String TAG = "SyncManager";
@@ -72,6 +77,8 @@ public class SyncManager {
     private int offlineRetryCount = 0;
     private long lastOfflineRetryTime = 0;
 
+    private final AppDatabase database;
+
     public SyncManager(Context context, AccountDao accountDao, TransactionDao transactionDao) {
         this.context = context;
         this.apiService = RetrofitClient.getInstance().getApiService();
@@ -91,6 +98,8 @@ public class SyncManager {
         startAutoSync();
         // تنفيذ مزامنة فورية
         performInitialSync();
+
+        this.database = ((App) context.getApplicationContext()).getDatabase();
     }
 
     private long getLastSyncTime() {
@@ -641,5 +650,114 @@ public class SyncManager {
             this.accounts = accounts;
             this.transactions = transactions;
         }
+    }
+
+    public void startPeriodicSync() {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                syncChanges(new SyncCallback() {
+                    @Override
+                    public void onSuccess() {
+                        handler.postDelayed(this, SYNC_INTERVAL);
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        handler.postDelayed(this, SYNC_INTERVAL);
+                    }
+                });
+            }
+        }, SYNC_INTERVAL);
+    }
+
+    public void stopPeriodicSync() {
+        handler.removeCallbacksAndMessages(null);
+    }
+
+    public void syncChanges(SyncCallback callback) {
+        if (!isNetworkAvailable()) {
+            callback.onError("No internet connection");
+            return;
+        }
+
+        // إرسال التغييرات المحلية إلى الخادم
+        List<Transaction> localTransactions = database.transactionDao().getAllTransactions();
+        List<Account> localAccounts = database.accountDao().getAllAccounts();
+
+        Map<String, Object> changes = new HashMap<>();
+        changes.put("transactions", localTransactions);
+        changes.put("accounts", localAccounts);
+
+        apiService.syncChanges(changes).enqueue(new Callback<Map<String, Object>>() {
+            @Override
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                if (response.isSuccessful()) {
+                    // استقبال التغييرات من الخادم
+                    receiveChanges(callback);
+                } else {
+                    callback.onError("Failed to sync changes");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void receiveChanges(SyncCallback callback) {
+        if (!isNetworkAvailable()) {
+            callback.onError("No internet connection");
+            return;
+        }
+
+        long lastSyncTime = getLastSyncTime();
+        apiService.getChanges(lastSyncTime).enqueue(new Callback<Map<String, Object>>() {
+            @Override
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Map<String, Object> changes = response.body();
+                    updateLocalData(changes);
+                    saveLastSyncTime(System.currentTimeMillis());
+                    callback.onSuccess();
+                } else {
+                    callback.onError("Failed to receive changes");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    private void updateLocalData(Map<String, Object> changes) {
+        // تحديث المعاملات
+        List<Map<String, Object>> transactions = (List<Map<String, Object>>) changes.get("transactions");
+        if (transactions != null) {
+            for (Map<String, Object> transaction : transactions) {
+                Transaction localTransaction = new Transaction();
+                // تعيين قيم المعاملة
+                database.transactionDao().insert(localTransaction);
+            }
+        }
+
+        // تحديث الحسابات
+        List<Map<String, Object>> accounts = (List<Map<String, Object>>) changes.get("accounts");
+        if (accounts != null) {
+            for (Map<String, Object> account : accounts) {
+                Account localAccount = new Account();
+                // تعيين قيم الحساب
+                database.accountDao().insert(localAccount);
+            }
+        }
+    }
+
+    private void saveLastSyncTime(long time) {
+        SharedPreferences prefs = context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE);
+        prefs.edit().putLong("last_sync_time", time).apply();
     }
 } 
