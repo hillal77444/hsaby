@@ -13,6 +13,7 @@ import android.widget.Toast;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import androidx.room.Room;
+import androidx.room.migration.Migration;
 
 import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
@@ -70,7 +71,11 @@ public class App extends Application {
             Log.d(TAG, "Initializing database...");
             database = Room.databaseBuilder(getApplicationContext(),
                     AppDatabase.class, "accounting_database")
-                    //.fallbackToDestructiveMigration() // تم التعطيل لحماية البيانات
+                    .addMigrations(
+                        new Migration_2(),
+                        new Migration_3(),
+                        new Migration_4()
+                    )
                     .build();
             Log.d(TAG, "Database initialized successfully");
             
