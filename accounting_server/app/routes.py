@@ -397,9 +397,129 @@ def delete_transaction(transaction_id):
         db.session.commit()
         
         logger.info(f"Transaction {transaction_id} deleted successfully by user {user_id}")
-        return json_response({'message': 'تم حذف المعاملة بنجاح'})
+        return json_response({'message': 'تم حذف القيد بنجاح'})
         
     except Exception as e:
         logger.error(f"Error deleting transaction: {str(e)}")
         db.session.rollback()
-        return json_response({'error': 'حدث خطأ أثناء حذف المعاملة'}, 500) 
+        return json_response({'error': 'حدث خطأ أثناء حذف المعاملة'}, 500)
+
+@main.route('/api/sync/changes', methods=['POST', 'GET'])
+@jwt_required()
+def sync_changes():
+    try:
+        current_user_id = get_jwt_identity()
+        
+        if request.method == 'POST':
+            # استقبال التغييرات من التطبيق
+            data = request.get_json()
+            changes = data.get('changes', [])
+            
+            # معالجة كل تغيير
+            for change in changes:
+                change_type = change.get('type')  # 'add', 'update', 'delete'
+                entity_type = change.get('entity')  # 'transaction', 'account'
+                entity_data = change.get('data')
+                
+                if entity_type == 'transaction':
+                    if change_type == 'add':
+                        new_transaction = Transaction(
+                            user_id=current_user_id,
+                            account_id=entity_data['account_id'],
+                            amount=entity_data['amount'],
+                            type=entity_data['type'],
+                            description=entity_data['description'],
+                            date=entity_data['date'],
+                            currency=entity_data['currency']
+                        )
+                        db.session.add(new_transaction)
+                    elif change_type == 'update':
+                        transaction = Transaction.query.filter_by(
+                            id=entity_data['id'],
+                            user_id=current_user_id
+                        ).first()
+                        if transaction:
+                            for key, value in entity_data.items():
+                                setattr(transaction, key, value)
+                    elif change_type == 'delete':
+                        Transaction.query.filter_by(
+                            id=entity_data['id'],
+                            user_id=current_user_id
+                        ).delete()
+                
+                elif entity_type == 'account':
+                    if change_type == 'add':
+                        new_account = Account(
+                            user_id=current_user_id,
+                            name=entity_data['name'],
+                            phone_number=entity_data['phone_number'],
+                            currency=entity_data['currency']
+                        )
+                        db.session.add(new_account)
+                    elif change_type == 'update':
+                        account = Account.query.filter_by(
+                            id=entity_data['id'],
+                            user_id=current_user_id
+                        ).first()
+                        if account:
+                            for key, value in entity_data.items():
+                                setattr(account, key, value)
+                    elif change_type == 'delete':
+                        Account.query.filter_by(
+                            id=entity_data['id'],
+                            user_id=current_user_id
+                        ).delete()
+            
+            db.session.commit()
+            return jsonify({'message': 'Changes synced successfully'}), 200
+            
+        elif request.method == 'GET':
+            # إرسال التغييرات إلى التطبيق
+            last_sync = request.args.get('last_sync', 0)
+            last_sync = int(last_sync)
+            
+            # جلب التغييرات الجديدة
+            changes = {
+                'transactions': [],
+                'accounts': []
+            }
+            
+            # جلب المعاملات الجديدة
+            new_transactions = Transaction.query.filter(
+                Transaction.user_id == current_user_id,
+                Transaction.updated_at > last_sync
+            ).all()
+            
+            for transaction in new_transactions:
+                changes['transactions'].append({
+                    'id': transaction.id,
+                    'account_id': transaction.account_id,
+                    'amount': transaction.amount,
+                    'type': transaction.type,
+                    'description': transaction.description,
+                    'date': transaction.date,
+                    'currency': transaction.currency,
+                    'updated_at': transaction.updated_at
+                })
+            
+            # جلب الحسابات الجديدة
+            new_accounts = Account.query.filter(
+                Account.user_id == current_user_id,
+                Account.updated_at > last_sync
+            ).all()
+            
+            for account in new_accounts:
+                changes['accounts'].append({
+                    'id': account.id,
+                    'name': account.name,
+                    'phone_number': account.phone_number,
+                    'currency': account.currency,
+                    'updated_at': account.updated_at
+                })
+            
+            return jsonify(changes), 200
+            
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error in sync_changes: {str(e)}")
+        return jsonify({'error': str(e)}), 500 
