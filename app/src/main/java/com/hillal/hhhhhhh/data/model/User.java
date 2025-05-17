@@ -11,10 +11,18 @@ public class User {
     private String phone;
     private String passwordHash;
     private long lastSyncTime;
+    private String token;
 
     public User() {}
 
     public User(String username, String phone, String passwordHash) {
+        this.username = username;
+        this.phone = phone;
+        this.passwordHash = passwordHash;
+    }
+
+    public User(long id, String username, String phone, String passwordHash) {
+        this.id = id;
         this.username = username;
         this.phone = phone;
         this.passwordHash = passwordHash;
@@ -58,5 +66,13 @@ public class User {
 
     public void setLastSyncTime(long lastSyncTime) {
         this.lastSyncTime = lastSyncTime;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 } 
