@@ -20,6 +20,9 @@ import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.data.repository.TransactionRepository;
 import com.hillal.hhhhhhh.data.repository.SettingsRepository;
 import com.hillal.hhhhhhh.data.room.TransactionDao;
+import com.hillal.hhhhhhh.data.room.migrations.Migration_2;
+import com.hillal.hhhhhhh.data.room.migrations.Migration_3;
+import com.hillal.hhhhhhh.data.room.migrations.Migration_4;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
