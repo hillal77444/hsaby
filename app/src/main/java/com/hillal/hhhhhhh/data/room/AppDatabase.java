@@ -40,9 +40,9 @@ public abstract class AppDatabase extends RoomDatabase {
                             AppDatabase.class,
                             DATABASE_NAME)
                             .addMigrations(
-                                Migration_2.getInstance(),
-                                Migration_3.getInstance(),
-                                Migration_4.getInstance()
+                                new Migration_2(),
+                                new Migration_3(),
+                                new Migration_4()
                             )
                             .addCallback(roomCallback)
                             .build();
