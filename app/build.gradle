@@ -130,4 +130,20 @@ dependencies {
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
     // implementation 'com.github.Bigkoo:Android-PickerView:9345964d40'
 
+    // Room components
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    
+    // Optional - RxJava2 support for Room
+    implementation "androidx.room:room-rxjava2:$room_version"
+    
+    // Optional - RxJava3 support for Room
+    implementation "androidx.room:room-rxjava3:$room_version"
+    
+    // Optional - Guava support for Room, including Optional and ListenableFuture
+    implementation "androidx.room:room-guava:$room_version"
+    
+    // Test helpers
+    testImplementation "androidx.room:room-testing:$room_version"
 } 
