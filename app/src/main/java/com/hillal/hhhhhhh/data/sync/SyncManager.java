@@ -48,7 +48,7 @@ public class SyncManager {
     private boolean isAutoSyncEnabled = true;
     private long lastSyncTime = 0;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private static final int SYNC_INTERVAL = 5 * 60 * 1000; // 5 دقائق
+    private static final int SYNC_INTERVAL = 30 * 1000; // 30 ثانية
     private static final int MAX_RETRY_COUNT = 3;
     private int currentRetryCount = 0;
     private static final String SYNC_TAG = "sync_task";
@@ -656,26 +656,36 @@ public class SyncManager {
     private Runnable syncRunnable = new Runnable() {
         @Override
         public void run() {
-            syncChanges(new SyncCallback() {
-                @Override
-                public void onSuccess() {
-                    handler.postDelayed(syncRunnable, SYNC_INTERVAL);
-                }
+            if (isNetworkAvailable()) {
+                Log.d(TAG, "Executing periodic sync...");
+                receiveChanges(new SyncCallback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(TAG, "Periodic sync successful");
+                        handler.postDelayed(syncRunnable, SYNC_INTERVAL);
+                    }
 
-                @Override
-                public void onError(String error) {
-                    handler.postDelayed(syncRunnable, SYNC_INTERVAL);
-                }
-            });
+                    @Override
+                    public void onError(String error) {
+                        Log.e(TAG, "Periodic sync failed: " + error);
+                        handler.postDelayed(syncRunnable, SYNC_INTERVAL);
+                    }
+                });
+            } else {
+                Log.d(TAG, "No network available, retrying in 30 seconds...");
+                handler.postDelayed(syncRunnable, SYNC_INTERVAL);
+            }
         }
     };
 
     public void startPeriodicSync() {
+        Log.d(TAG, "Starting periodic sync...");
         handler.postDelayed(syncRunnable, SYNC_INTERVAL);
     }
 
     public void stopPeriodicSync() {
-        handler.removeCallbacksAndMessages(null);
+        Log.d(TAG, "Stopping periodic sync...");
+        handler.removeCallbacks(syncRunnable);
     }
 
     public void syncChanges(SyncCallback callback) {
@@ -698,47 +708,84 @@ public class SyncManager {
             return;
         }
 
+        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("token", null);
+
+        if (token == null) {
+            callback.onError("User not authenticated");
+            return;
+        }
+
         long lastSyncTime = getLastSyncTime();
-        apiService.getChanges(lastSyncTime).enqueue(new Callback<Map<String, Object>>() {
+        Log.d(TAG, "Fetching changes since: " + lastSyncTime);
+
+        apiService.getChanges("Bearer " + token, lastSyncTime).enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Map<String, Object> changes = response.body();
-                    updateLocalData(changes);
-                    saveLastSyncTime(System.currentTimeMillis());
-                    callback.onSuccess();
+                    executor.execute(() -> {
+                        try {
+                            // تحديث الحسابات
+                            List<Map<String, Object>> accounts = (List<Map<String, Object>>) changes.get("accounts");
+                            if (accounts != null && !accounts.isEmpty()) {
+                                Log.d(TAG, "Received " + accounts.size() + " account changes");
+                                for (Map<String, Object> accountData : accounts) {
+                                    Account account = new Account();
+                                    account.setServerId(((Number) accountData.get("id")).longValue());
+                                    account.setName((String) accountData.get("name"));
+                                    account.setPhoneNumber((String) accountData.get("phone_number"));
+                                    account.setBalance(((Number) accountData.get("balance")).doubleValue());
+                                    account.setCurrency((String) accountData.get("currency"));
+                                    account.setNotes((String) accountData.get("notes"));
+                                    account.setWhatsappEnabled((Boolean) accountData.get("whatsapp_enabled"));
+                                    account.setLastSyncTime(System.currentTimeMillis());
+                                    account.setSyncStatus(2); // SYNCED
+                                    database.accountDao().insert(account);
+                                }
+                            }
+
+                            // تحديث المعاملات
+                            List<Map<String, Object>> transactions = (List<Map<String, Object>>) changes.get("transactions");
+                            if (transactions != null && !transactions.isEmpty()) {
+                                Log.d(TAG, "Received " + transactions.size() + " transaction changes");
+                                for (Map<String, Object> transactionData : transactions) {
+                                    Transaction transaction = new Transaction();
+                                    transaction.setServerId(((Number) transactionData.get("id")).longValue());
+                                    transaction.setAccountId(((Number) transactionData.get("account_id")).longValue());
+                                    transaction.setAmount(((Number) transactionData.get("amount")).doubleValue());
+                                    transaction.setType((String) transactionData.get("type"));
+                                    transaction.setDescription((String) transactionData.get("description"));
+                                    transaction.setCurrency((String) transactionData.get("currency"));
+                                    transaction.setDate(((Number) transactionData.get("date")).longValue());
+                                    transaction.setNotes((String) transactionData.get("notes"));
+                                    transaction.setWhatsappEnabled((Boolean) transactionData.get("whatsapp_enabled"));
+                                    transaction.setLastSyncTime(System.currentTimeMillis());
+                                    transaction.setSyncStatus(2); // SYNCED
+                                    database.transactionDao().insert(transaction);
+                                }
+                            }
+
+                            saveLastSyncTime(System.currentTimeMillis());
+                            handler.post(() -> callback.onSuccess());
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error updating local data: " + e.getMessage());
+                            handler.post(() -> callback.onError("Error updating local data: " + e.getMessage()));
+                        }
+                    });
                 } else {
-                    callback.onError("Failed to receive changes");
+                    String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
+                    Log.e(TAG, "Failed to receive changes: " + errorBody);
+                    callback.onError("Failed to receive changes: " + errorBody);
                 }
             }
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                callback.onError(t.getMessage());
+                Log.e(TAG, "Network error: " + t.getMessage());
+                callback.onError("Network error: " + t.getMessage());
             }
         });
-    }
-
-    private void updateLocalData(Map<String, Object> changes) {
-        // تحديث المعاملات
-        List<Map<String, Object>> transactions = (List<Map<String, Object>>) changes.get("transactions");
-        if (transactions != null) {
-            for (Map<String, Object> transaction : transactions) {
-                Transaction localTransaction = new Transaction();
-                // تعيين قيم المعاملة
-                database.transactionDao().insert(localTransaction);
-            }
-        }
-
-        // تحديث الحسابات
-        List<Map<String, Object>> accounts = (List<Map<String, Object>>) changes.get("accounts");
-        if (accounts != null) {
-            for (Map<String, Object> account : accounts) {
-                Account localAccount = new Account();
-                // تعيين قيم الحساب
-                database.accountDao().insert(localAccount);
-            }
-        }
     }
 
     private void saveLastSyncTime(long time) {
