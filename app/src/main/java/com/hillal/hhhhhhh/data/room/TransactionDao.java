@@ -49,6 +49,9 @@ public interface TransactionDao {
     @Query("SELECT * FROM transactions ORDER BY date DESC")
     LiveData<List<Transaction>> getAllTransactions();
 
+    @Query("SELECT * FROM transactions")
+    List<Transaction> getAllTransactionsSync();
+
     @Query("SELECT SUM(CASE WHEN type = 'debit' THEN amount ELSE -amount END) FROM transactions WHERE accountId = :accountId")
     LiveData<Double> getAccountBalance(long accountId);
 
