@@ -1054,6 +1054,19 @@ public class SyncManager {
                                 }
                             }
 
+                            // التعامل مع القيود المحذوفة
+                            List<Long> deletedTransactionIds = (List<Long>) changes.get("deleted_transactions");
+                            if (deletedTransactionIds != null && !deletedTransactionIds.isEmpty()) {
+                                Log.d(TAG, "Received " + deletedTransactionIds.size() + " deleted transactions");
+                                for (Long serverId : deletedTransactionIds) {
+                                    Transaction transaction = database.transactionDao().getTransactionByServerId(serverId);
+                                    if (transaction != null) {
+                                        database.transactionDao().delete(transaction);
+                                        Log.d(TAG, "Deleted transaction with server ID: " + serverId);
+                                    }
+                                }
+                            }
+
                             saveLastSyncTime(System.currentTimeMillis());
                             Log.d(TAG, "Successfully updated local data for user: " + currentUserId);
                             handler.post(() -> callback.onSuccess());
@@ -1087,5 +1100,74 @@ public class SyncManager {
     private void saveLastSyncTime(long time) {
         SharedPreferences prefs = context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE);
         prefs.edit().putLong("last_sync_time", time).apply();
+    }
+
+    // إضافة دالة لحذف القيد
+    public void deleteTransaction(long transactionId, SyncCallback callback) {
+        if (!isNetworkAvailable()) {
+            callback.onError("No internet connection");
+            return;
+        }
+
+        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("token", null);
+
+        if (token == null) {
+            callback.onError("User not authenticated");
+            return;
+        }
+
+        executor.execute(() -> {
+            try {
+                // الحصول على القيد من قاعدة البيانات المحلية
+                Transaction transaction = database.transactionDao().getTransactionById(transactionId);
+                if (transaction == null) {
+                    handler.post(() -> callback.onError("Transaction not found"));
+                    return;
+                }
+
+                // إذا كان القيد له معرف سيرفر، نقوم بحذفه من السيرفر
+                if (transaction.getServerId() != null) {
+                    apiService.deleteTransaction("Bearer " + token, transaction.getServerId()).enqueue(new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            if (response.isSuccessful()) {
+                                // حذف القيد من قاعدة البيانات المحلية
+                                executor.execute(() -> {
+                                    database.transactionDao().delete(transaction);
+                                    Log.d(TAG, "Transaction deleted successfully from server and local database");
+                                    handler.post(() -> callback.onSuccess());
+                                });
+                            } else {
+                                String errorBody = "Unknown error";
+                                try {
+                                    if (response.errorBody() != null) {
+                                        errorBody = response.errorBody().string();
+                                    }
+                                } catch (IOException e) {
+                                    Log.e(TAG, "Error reading error body: " + e.getMessage());
+                                }
+                                Log.e(TAG, "Failed to delete transaction from server: " + errorBody);
+                                handler.post(() -> callback.onError("Failed to delete transaction: " + errorBody));
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Void> call, Throwable t) {
+                            Log.e(TAG, "Network error while deleting transaction: " + t.getMessage());
+                            handler.post(() -> callback.onError("Network error: " + t.getMessage()));
+                        }
+                    });
+                } else {
+                    // إذا لم يكن للقيد معرف سيرفر، نقوم بحذفه محلياً فقط
+                    database.transactionDao().delete(transaction);
+                    Log.d(TAG, "Transaction deleted from local database only");
+                    handler.post(() -> callback.onSuccess());
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error deleting transaction: " + e.getMessage());
+                handler.post(() -> callback.onError("Error deleting transaction: " + e.getMessage()));
+            }
+        });
     }
 } 
