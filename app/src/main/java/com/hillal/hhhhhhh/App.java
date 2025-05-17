@@ -72,14 +72,7 @@ public class App extends Application {
             
             // Initialize database
             Log.d(TAG, "Initializing database...");
-            database = Room.databaseBuilder(getApplicationContext(),
-                    AppDatabase.class, "accounting_database")
-                    .addMigrations(
-                        new Migration_2(),
-                        new Migration_3(),
-                        new Migration_4()
-                    )
-                    .build();
+            database = AppDatabase.getInstance(getApplicationContext());
             Log.d(TAG, "Database initialized successfully");
             
             // Initialize repositories
