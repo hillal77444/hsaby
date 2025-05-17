@@ -14,7 +14,8 @@ import java.util.Date;
         foreignKeys = @ForeignKey(entity = Account.class,
                                 parentColumns = "id",
                                 childColumns = "accountId",
-                                onDelete = ForeignKey.CASCADE))
+                                onDelete = ForeignKey.CASCADE),
+        indices = {@Index("accountId")})
 public class Transaction {
     @PrimaryKey(autoGenerate = true)
     private long id;
