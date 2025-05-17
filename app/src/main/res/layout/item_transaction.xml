@@ -141,6 +141,17 @@
                     android:paddingVertical="0dp"
                     app:cornerRadius="18dp" />
 
+                <!-- زر حذف -->
+                <ImageButton
+                    android:id="@+id/deleteButton"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_delete"
+                    android:contentDescription="حذف"
+                    app:tint="@color/error" />
+
             </LinearLayout>
 
         </LinearLayout>
