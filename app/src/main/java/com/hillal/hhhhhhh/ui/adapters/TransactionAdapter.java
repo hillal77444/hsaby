@@ -58,7 +58,50 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
 
     @Override
     public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
-        holder.bind(getItem(position));
+        Transaction transaction = getItem(position);
+        if (transaction != null) {
+            holder.bind(transaction);
+            
+            // إضافة مستمع النقر الطويل
+            holder.itemView.setOnLongClickListener(v -> {
+                if (onItemLongClickListener != null) {
+                    onItemLongClickListener.onItemLongClick(transaction);
+                    return true;
+                }
+                return false;
+            });
+
+            // إضافة مستمع النقر لزر الحذف
+            holder.binding.btnDelete.setOnClickListener(v -> {
+                if (onItemLongClickListener != null) {
+                    onItemLongClickListener.onItemLongClick(transaction);
+                }
+            });
+
+            // إضافة مستمع النقر لزر إرسال واتساب
+            holder.binding.btnSendWhatsApp.setOnClickListener(v -> {
+                // تعطيل الزر مؤقتاً لمنع النقرات المتكررة
+                holder.binding.btnSendWhatsApp.setEnabled(false);
+                
+                // الحصول على معلومات الحساب
+                Account account = accountMap.get(transaction.getAccountId());
+                if (account != null) {
+                    // مراقبة الرصيد حتى التاريخ
+                    transactionRepository.getBalanceUntilDate(transaction.getAccountId(), transaction.getDate(), transaction.getCurrency())
+                            .observe((LifecycleOwner) holder.itemView.getContext(), balance -> {
+                                if (balance != null) {
+                                    String message = buildWhatsAppMessage(account.getName(), transaction, balance);
+                                    sendWhatsAppMessage(holder.itemView.getContext(), account.getPhoneNumber(), message);
+                                }
+                                // إعادة تفعيل الزر
+                                holder.binding.btnSendWhatsApp.setEnabled(true);
+                            });
+                } else {
+                    // إعادة تفعيل الزر في حالة عدم وجود حساب
+                    holder.binding.btnSendWhatsApp.setEnabled(true);
+                }
+            });
+        }
     }
 
     class TransactionViewHolder extends RecyclerView.ViewHolder {
@@ -77,35 +120,6 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                 if (position != RecyclerView.NO_POSITION && onItemClickListener != null) {
                     onItemClickListener.onItemClick(getItem(position));
                 }
-            });
-
-            itemView.setOnLongClickListener(v -> {
-                int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION && onItemLongClickListener != null) {
-                    return onItemLongClickListener.onItemLongClick(getItem(position));
-                }
-                return false;
-            });
-
-            // إضافة معالج حدث لزر الحذف
-            binding.deleteButton.setOnClickListener(v -> {
-                if (onItemLongClickListener != null) {
-                    onItemLongClickListener.onItemLongClick(getItem(getAdapterPosition()));
-                }
-            });
-
-            // زر إرسال واتساب
-            binding.btnSendWhatsApp.setOnClickListener(v -> {
-                v.setEnabled(false); // تعطيل الزر مؤقتاً
-                transactionRepository.getBalanceUntilDate(
-                    getItem(getAdapterPosition()).getAccountId(),
-                    getItem(getAdapterPosition()).getDate(),
-                    getItem(getAdapterPosition()).getCurrency()
-                ).observe((LifecycleOwner) itemView.getContext(), balance -> {
-                    String message = buildWhatsAppMessage(getItem(getAdapterPosition()).getName(), getItem(getAdapterPosition()), balance);
-                    sendWhatsAppMessage(itemView.getContext(), getItem(getAdapterPosition()).getPhoneNumber(), message);
-                    v.setEnabled(true); // إعادة تفعيل الزر
-                });
             });
         }
 
@@ -146,25 +160,6 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                 binding.transactionAmount.setTextColor(itemView.getContext().getResources().getColor(R.color.text_primary));
                 binding.getRoot().setBackgroundColor(itemView.getContext().getResources().getColor(R.color.white));
             }
-
-            // إضافة معالج حدث لزر الحذف
-            binding.deleteButton.setOnClickListener(v -> {
-                if (onItemLongClickListener != null) {
-                    onItemLongClickListener.onItemLongClick(transaction);
-                }
-            });
-
-            // زر إرسال واتساب
-            binding.btnSendWhatsApp.setOnClickListener(v -> {
-                transactionRepository.getBalanceUntilDate(
-                    transaction.getAccountId(),
-                    transaction.getDate(),
-                    transaction.getCurrency()
-                ).observe((LifecycleOwner) itemView.getContext(), balance -> {
-                    String message = buildWhatsAppMessage(accountName, transaction, balance);
-                    sendWhatsAppMessage(itemView.getContext(), phoneNumber, message);
-                });
-            });
         }
 
         private String buildWhatsAppMessage(String accountName, Transaction transaction, double balanceAfter) {
