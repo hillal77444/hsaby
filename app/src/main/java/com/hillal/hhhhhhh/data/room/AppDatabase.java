@@ -15,11 +15,12 @@ import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.model.Settings;
 import com.hillal.hhhhhhh.data.model.PendingOperation;
+import com.hillal.hhhhhhh.data.model.User;
 import com.hillal.hhhhhhh.data.room.migrations.Migration_2;
 import com.hillal.hhhhhhh.data.room.migrations.Migration_3;
 import com.hillal.hhhhhhh.data.room.migrations.Migration_4;
 
-@Database(entities = {Account.class, Transaction.class, Settings.class, PendingOperation.class}, version = 4, exportSchema = false)
+@Database(entities = {Account.class, Transaction.class, Settings.class, PendingOperation.class, User.class}, version = 4, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG = "AppDatabase";
@@ -30,6 +31,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract TransactionDao transactionDao();
     public abstract SettingsDao settingsDao();
     public abstract PendingOperationDao pendingOperationDao();
+    public abstract UserDao userDao();
 
     public static synchronized AppDatabase getInstance(Context context) {
         if (instance == null) {
