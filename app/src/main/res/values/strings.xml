@@ -100,9 +100,9 @@
     <string name="transaction_reference">رقم المرجع</string>
     <string name="transaction_notes">ملاحظات</string>
     <string name="filter_by_currency">تصفية حسب العملة</string>
-    <string name="currency_yer">ريال يمني</string>
-    <string name="currency_sar">ريال سعودي</string>
-    <string name="currency_usd">دولار أمريكي</string>
+    <string name="currency_yer">يمني</string>
+    <string name="currency_sar">سعودي</string>
+    <string name="currency_usd">دولار</string>
     <string name="no_transactions">لا توجد قيود محاسبية</string>
     <string name="confirm_delete">هل أنت متأكد من حذف هذا القيد؟</string>
     <string name="transaction_updated">تم تحديث القيد بنجاح</string>
