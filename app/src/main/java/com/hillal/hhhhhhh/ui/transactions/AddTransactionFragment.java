@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 import android.widget.EditText;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -199,6 +200,12 @@ public class AddTransactionFragment extends Fragment {
         BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
         View sheetView = getLayoutInflater().inflate(R.layout.bottomsheet_account_picker, null);
         dialog.setContentView(sheetView);
+        
+        // تعديل إعدادات الـ BottomSheetDialog
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
+        
         EditText searchEditText = sheetView.findViewById(R.id.searchEditText);
         RecyclerView accountsRecyclerView = sheetView.findViewById(R.id.accountsRecyclerView);
         accountsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
