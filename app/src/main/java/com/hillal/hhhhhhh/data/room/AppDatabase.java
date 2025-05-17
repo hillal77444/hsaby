@@ -17,8 +17,9 @@ import com.hillal.hhhhhhh.data.model.Settings;
 import com.hillal.hhhhhhh.data.model.PendingOperation;
 import com.hillal.hhhhhhh.data.room.migrations.Migration_2;
 import com.hillal.hhhhhhh.data.room.migrations.Migration_3;
+import com.hillal.hhhhhhh.data.room.migrations.Migration_4;
 
-@Database(entities = {Account.class, Transaction.class, Settings.class, PendingOperation.class}, version = 3, exportSchema = false)
+@Database(entities = {Account.class, Transaction.class, Settings.class, PendingOperation.class}, version = 4, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG = "AppDatabase";
@@ -38,7 +39,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             context.getApplicationContext(),
                             AppDatabase.class,
                             DATABASE_NAME)
-                            .addMigrations(new Migration_2(), new Migration_3())
+                            .addMigrations(new Migration_2(), new Migration_3(), new Migration_4())
                             .addCallback(roomCallback)
                             .build();
                     Log.d(TAG, "Database instance created");
