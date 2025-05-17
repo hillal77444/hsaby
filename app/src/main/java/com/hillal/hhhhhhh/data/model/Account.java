@@ -2,11 +2,13 @@ package com.hillal.hhhhhhh.data.model;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.Index;
 import androidx.room.Ignore;
 import androidx.room.ColumnInfo;
 import com.google.gson.annotations.SerializedName;
 
-@Entity(tableName = "accounts")
+@Entity(tableName = "accounts",
+        indices = {@Index(value = {"phoneNumber"}, unique = true)})
 public class Account {
     @PrimaryKey(autoGenerate = true)
     private long id;
@@ -50,6 +52,9 @@ public class Account {
 
     @SerializedName("sync_status")
     private int syncStatus;
+
+    @SerializedName("currency")
+    private String currency;
 
     // Constructor
     @Ignore
@@ -120,6 +125,14 @@ public class Account {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
     public String getNotes() {
