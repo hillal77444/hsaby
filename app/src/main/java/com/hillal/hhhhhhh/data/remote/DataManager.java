@@ -181,38 +181,7 @@ public class DataManager {
 
     public void deleteTransaction(long transactionId, DataCallback callback) {
         if (!isNetworkAvailable()) {
-            // حفظ العملية في قائمة العمليات المعلقة
-            executor.execute(() -> {
-                try {
-                    // التحقق مما إذا كان القيد موجوداً في قاعدة البيانات المحلية
-                    Transaction transaction = transactionDao.getTransactionById(transactionId).getValue();
-                    if (transaction == null) {
-                        // إذا كان القيد غير موجود، نتجاهل عملية الحذف
-                        Log.d(TAG, "تم تجاهل عملية الحذف لأن القيد غير موجود محلياً");
-                        handler.post(() -> callback.onSuccess());
-                        return;
-                    }
-
-                    // التحقق مما إذا كان القيد تم إنشاؤه محلياً ولم يتم مزامنته بعد
-                    if (transaction.getServerId() == 0) {
-                        // إذا كان القيد تم إنشاؤه محلياً، نحذفه مباشرة من قاعدة البيانات المحلية
-                        transactionDao.delete(transaction);
-                        Log.d(TAG, "تم حذف القيد المحلي مباشرة");
-                        handler.post(() -> callback.onSuccess());
-                        return;
-                    }
-
-                    // إذا كان القيد موجوداً في السيرفر، نحفظ عملية الحذف في قائمة العمليات المعلقة
-                    PendingOperation operation = new PendingOperation("DELETE", transactionId, null);
-                    pendingOperationDao.insert(operation);
-                    transactionDao.delete(transaction);
-                    Log.d(TAG, "تم حفظ عملية الحذف في قائمة العمليات المعلقة");
-                    handler.post(() -> callback.onSuccess());
-                } catch (Exception e) {
-                    Log.e(TAG, "خطأ في حفظ العملية المعلقة: " + e.getMessage());
-                    handler.post(() -> callback.onError("خطأ في حفظ العملية المعلقة: " + e.getMessage()));
-                }
-            });
+            handler.post(() -> callback.onError("يرجى الاتصال بالإنترنت لحذف المعاملة"));
             return;
         }
 
@@ -224,34 +193,47 @@ public class DataManager {
             return;
         }
 
-        apiService.deleteTransaction("Bearer " + token, transactionId)
-                .enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (response.isSuccessful()) {
-                            // حذف القيد من قاعدة البيانات المحلية
-                            executor.execute(() -> {
-                                try {
-                                    Transaction transaction = new Transaction();
-                                    transaction.setId(transactionId);
-                                    transactionDao.delete(transaction);
-                                    Log.d(TAG, "تم حذف القيد بنجاح");
-                                    handler.post(() -> callback.onSuccess());
-                                } catch (Exception e) {
-                                    Log.e(TAG, "خطأ في حذف القيد: " + e.getMessage());
-                                    handler.post(() -> callback.onError("خطأ في حذف القيد: " + e.getMessage()));
-                                }
-                            });
-                        } else {
-                            handler.post(() -> callback.onError("فشل في حذف القيد"));
-                        }
-                    }
+        // التحقق من وجود المعاملة في قاعدة البيانات المحلية
+        executor.execute(() -> {
+            try {
+                Transaction transaction = transactionDao.getTransactionById(transactionId).getValue();
+                if (transaction == null) {
+                    handler.post(() -> callback.onError("المعاملة غير موجودة"));
+                    return;
+                }
 
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        handler.post(() -> callback.onError("خطأ في الاتصال: " + t.getMessage()));
-                    }
-                });
+                // إرسال طلب الحذف إلى السيرفر
+                apiService.deleteTransaction("Bearer " + token, transactionId)
+                        .enqueue(new Callback<Void>() {
+                            @Override
+                            public void onResponse(Call<Void> call, Response<Void> response) {
+                                if (response.isSuccessful()) {
+                                    // حذف القيد من قاعدة البيانات المحلية
+                                    executor.execute(() -> {
+                                        try {
+                                            transactionDao.delete(transaction);
+                                            Log.d(TAG, "تم حذف القيد بنجاح");
+                                            handler.post(() -> callback.onSuccess());
+                                        } catch (Exception e) {
+                                            Log.e(TAG, "خطأ في حذف القيد: " + e.getMessage());
+                                            handler.post(() -> callback.onError("خطأ في حذف القيد: " + e.getMessage()));
+                                        }
+                                    });
+                                } else {
+                                    handler.post(() -> callback.onError("فشل في حذف القيد من الخادم"));
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<Void> call, Throwable t) {
+                                handler.post(() -> callback.onError("خطأ في الاتصال: " + t.getMessage()));
+                            }
+                        });
+            } catch (Exception e) {
+                Log.e(TAG, "خطأ في التحقق من المعاملة: " + e.getMessage());
+                handler.post(() -> callback.onError("خطأ في التحقق من المعاملة: " + e.getMessage()));
+            }
+        });
     }
 
     public void syncPendingOperations(DataCallback callback) {
