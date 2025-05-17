@@ -375,4 +375,31 @@ def debug_public():
         })
     except Exception as e:
         logger.error(f"Public debug data error: {str(e)}")
-        return jsonify({'error': f'حدث خطأ أثناء جلب بيانات التصحيح: {str(e)}'}), 500 
+        return jsonify({'error': f'حدث خطأ أثناء جلب بيانات التصحيح: {str(e)}'}), 500
+
+@main.route('/api/transactions/<int:transaction_id>', methods=['DELETE'])
+@jwt_required()
+def delete_transaction(transaction_id):
+    try:
+        user_id = get_jwt_identity()
+        
+        # البحث عن المعاملة
+        transaction = Transaction.query.filter_by(
+            id=transaction_id,
+            user_id=user_id
+        ).first()
+        
+        if not transaction:
+            return json_response({'error': 'المعاملة غير موجودة'}, 404)
+        
+        # حذف المعاملة
+        db.session.delete(transaction)
+        db.session.commit()
+        
+        logger.info(f"Transaction {transaction_id} deleted successfully by user {user_id}")
+        return json_response({'message': 'تم حذف المعاملة بنجاح'})
+        
+    except Exception as e:
+        logger.error(f"Error deleting transaction: {str(e)}")
+        db.session.rollback()
+        return json_response({'error': 'حدث خطأ أثناء حذف المعاملة'}, 500) 
