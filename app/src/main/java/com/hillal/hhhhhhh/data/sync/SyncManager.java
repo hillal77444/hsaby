@@ -19,6 +19,7 @@ import com.hillal.hhhhhhh.data.room.AccountDao;
 import com.hillal.hhhhhhh.data.room.TransactionDao;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
+import com.hillal.hhhhhhh.data.model.User;
 import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.App;
 
@@ -652,23 +653,25 @@ public class SyncManager {
         }
     }
 
-    public void startPeriodicSync() {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                syncChanges(new SyncCallback() {
-                    @Override
-                    public void onSuccess() {
-                        handler.postDelayed(this, SYNC_INTERVAL);
-                    }
+    private Runnable syncRunnable = new Runnable() {
+        @Override
+        public void run() {
+            syncChanges(new SyncCallback() {
+                @Override
+                public void onSuccess() {
+                    handler.postDelayed(syncRunnable, SYNC_INTERVAL);
+                }
 
-                    @Override
-                    public void onError(String error) {
-                        handler.postDelayed(this, SYNC_INTERVAL);
-                    }
-                });
-            }
-        }, SYNC_INTERVAL);
+                @Override
+                public void onError(String error) {
+                    handler.postDelayed(syncRunnable, SYNC_INTERVAL);
+                }
+            });
+        }
+    };
+
+    public void startPeriodicSync() {
+        handler.postDelayed(syncRunnable, SYNC_INTERVAL);
     }
 
     public void stopPeriodicSync() {
