@@ -20,7 +20,7 @@ import com.hillal.hhhhhhh.data.room.TransactionDao;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.room.AppDatabase;
-import com.hillal.hhhhhhh.data.model.App;
+import com.hillal.hhhhhhh.App;
 
 import java.util.List;
 import retrofit2.Call;
@@ -681,30 +681,12 @@ public class SyncManager {
             return;
         }
 
-        // إرسال التغييرات المحلية إلى الخادم
-        List<Transaction> localTransactions = database.transactionDao().getAllTransactions();
-        List<Account> localAccounts = database.accountDao().getAllAccounts();
+        // Get local changes
+        List<Transaction> localTransactions = database.transactionDao().getAllTransactionsSync();
+        List<Account> localAccounts = database.accountDao().getAllAccountsSync();
+        List<User> localUsers = database.userDao().getAllUsers();
 
-        Map<String, Object> changes = new HashMap<>();
-        changes.put("transactions", localTransactions);
-        changes.put("accounts", localAccounts);
-
-        apiService.syncChanges(changes).enqueue(new Callback<Map<String, Object>>() {
-            @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                if (response.isSuccessful()) {
-                    // استقبال التغييرات من الخادم
-                    receiveChanges(callback);
-                } else {
-                    callback.onError("Failed to sync changes");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                callback.onError(t.getMessage());
-            }
-        });
+        // ... rest of the code ...
     }
 
     public void receiveChanges(SyncCallback callback) {
