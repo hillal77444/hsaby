@@ -1,16 +1,23 @@
 package com.hillal.hhhhhhh.data.model;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "users")
 public class User {
+    @PrimaryKey(autoGenerate = true)
     private long id;
     private String username;
     private String phone;
-    private String token;
+    private String passwordHash;
+    private long lastSyncTime;
 
-    public User(long id, String username, String phone, String token) {
-        this.id = id;
+    public User() {}
+
+    public User(String username, String phone, String passwordHash) {
         this.username = username;
         this.phone = phone;
-        this.token = token;
+        this.passwordHash = passwordHash;
     }
 
     public long getId() {
@@ -37,11 +44,19 @@ public class User {
         this.phone = phone;
     }
 
-    public String getToken() {
-        return token;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public long getLastSyncTime() {
+        return lastSyncTime;
+    }
+
+    public void setLastSyncTime(long lastSyncTime) {
+        this.lastSyncTime = lastSyncTime;
     }
 } 
