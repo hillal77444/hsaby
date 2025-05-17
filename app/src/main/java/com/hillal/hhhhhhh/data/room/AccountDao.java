@@ -31,8 +31,11 @@ public interface AccountDao {
     @Query("SELECT * FROM accounts WHERE id = :id")
     LiveData<Account> getAccountById(long id);
 
-    @Query("SELECT * FROM accounts ORDER BY name ASC")
+    @Query("SELECT * FROM accounts")
     LiveData<List<Account>> getAllAccounts();
+
+    @Query("SELECT * FROM accounts")
+    List<Account> getAllAccountsSync();
 
     @Query("SELECT * FROM accounts WHERE isDebtor = 0 ORDER BY balance DESC")
     LiveData<List<Account>> getCreditors();
