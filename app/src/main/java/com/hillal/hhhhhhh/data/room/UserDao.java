@@ -18,6 +18,9 @@ public interface UserDao {
     @Query("SELECT * FROM users WHERE phone = :phone LIMIT 1")
     User getUserByPhone(String phone);
 
+    @Query("SELECT * FROM users LIMIT 1")
+    User getCurrentUser();
+
     @Insert
     long insert(User user);
 
