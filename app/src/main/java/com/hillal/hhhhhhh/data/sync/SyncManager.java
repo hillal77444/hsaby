@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.HashMap;
+import java.io.IOException;
 
 public class SyncManager {
     private static final String TAG = "SyncManager";
@@ -774,7 +775,14 @@ public class SyncManager {
                         }
                     });
                 } else {
-                    String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
+                    String errorBody = "Unknown error";
+                    try {
+                        if (response.errorBody() != null) {
+                            errorBody = response.errorBody().string();
+                        }
+                    } catch (IOException e) {
+                        Log.e(TAG, "Error reading error body: " + e.getMessage());
+                    }
                     Log.e(TAG, "Failed to receive changes: " + errorBody);
                     callback.onError("Failed to receive changes: " + errorBody);
                 }
