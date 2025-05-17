@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Transaction;
@@ -66,29 +67,20 @@ public class TransactionsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setupRecyclerView();
+
+        // تهيئة RecyclerView
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        
+        // إنشاء المحول مع تمرير السياق
+        adapter = new TransactionAdapter(new TransactionAdapter.TransactionDiffCallback(), requireContext());
+        recyclerView.setAdapter(adapter);
+
         setupAccountFilter();
         setupCurrencyFilter();
         setupDateFilter();
         setupFab();
         observeAccountsAndTransactions();
-    }
-
-    private void setupRecyclerView() {
-        adapter = new TransactionAdapter(new TransactionAdapter.TransactionDiffCallback());
-        adapter.setOnItemClickListener(transaction -> {
-            Bundle args = new Bundle();
-            args.putLong("transactionId", transaction.getId());
-            Navigation.findNavController(requireView())
-                    .navigate(R.id.action_transactions_to_editTransaction, args);
-        });
-        adapter.setOnItemLongClickListener(transaction -> {
-            showDeleteConfirmationDialog(transaction);
-            return true;
-        });
-
-        binding.transactionsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        binding.transactionsRecyclerView.setAdapter(adapter);
     }
 
     private void setupAccountFilter() {
