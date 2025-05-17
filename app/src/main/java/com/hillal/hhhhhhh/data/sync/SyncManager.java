@@ -588,32 +588,134 @@ public class SyncManager {
             return;
         }
 
-        DataManager dataManager = new DataManager(
-            context,
-            accountDao,
-            transactionDao,
-            null
-        );
-        dataManager.fetchDataFromServer(new DataManager.DataCallback() {
-            @Override
-            public void onSuccess() {
-                syncData(new SyncCallback() {
-                    @Override
-                    public void onSuccess() {
-                        Log.d(TAG, "Initial sync successful");
-                        updateLastSyncTime();
-                    }
+        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("token", null);
 
-                    @Override
-                    public void onError(String error) {
-                        Log.e(TAG, "Initial sync failed: " + error);
-                    }
-                });
+        if (token == null) {
+            Log.e(TAG, "No authentication token found");
+            return;
+        }
+
+        long currentUserId = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getLong("user_id", -1);
+
+        if (currentUserId == -1) {
+            Log.e(TAG, "No user ID found");
+            return;
+        }
+
+        Log.d(TAG, "Starting initial sync for user: " + currentUserId);
+
+        // جلب جميع الحسابات
+        apiService.getAccounts("Bearer " + token).enqueue(new Callback<List<Account>>() {
+            @Override
+            public void onResponse(Call<List<Account>> call, Response<List<Account>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Account> accounts = response.body();
+                    executor.execute(() -> {
+                        try {
+                            Log.d(TAG, "Received " + accounts.size() + " accounts");
+                            for (Account account : accounts) {
+                                // التحقق من أن الحساب ينتمي للمستخدم الحالي
+                                if (account.getUserId() != currentUserId) {
+                                    continue;
+                                }
+                                
+                                // البحث عن الحساب في قاعدة البيانات المحلية
+                                Account existingAccount = database.accountDao().getAccountByNumber(account.getAccountNumber());
+                                if (existingAccount != null) {
+                                    // تحديث الحساب الموجود
+                                    existingAccount.setName(account.getName());
+                                    existingAccount.setPhoneNumber(account.getPhoneNumber());
+                                    existingAccount.setBalance(account.getBalance());
+                                    existingAccount.setCurrency(account.getCurrency());
+                                    existingAccount.setNotes(account.getNotes());
+                                    existingAccount.setWhatsappEnabled(account.isWhatsappEnabled());
+                                    existingAccount.setIsDebtor(account.isDebtor());
+                                    existingAccount.setLastSyncTime(System.currentTimeMillis());
+                                    existingAccount.setSyncStatus(2); // SYNCED
+                                    database.accountDao().update(existingAccount);
+                                } else {
+                                    // إضافة حساب جديد
+                                    account.setUserId(currentUserId);
+                                    account.setLastSyncTime(System.currentTimeMillis());
+                                    account.setSyncStatus(2); // SYNCED
+                                    database.accountDao().insert(account);
+                                }
+                            }
+
+                            // بعد اكتمال جلب الحسابات، نقوم بجلب المعاملات
+                            fetchTransactions(token, currentUserId);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error saving accounts: " + e.getMessage());
+                        }
+                    });
+                } else {
+                    Log.e(TAG, "Failed to fetch accounts");
+                }
             }
 
             @Override
-            public void onError(String error) {
-                Log.e(TAG, "Initial fetch failed: " + error);
+            public void onFailure(Call<List<Account>> call, Throwable t) {
+                Log.e(TAG, "Network error while fetching accounts: " + t.getMessage());
+            }
+        });
+    }
+
+    private void fetchTransactions(String token, long currentUserId) {
+        apiService.getTransactions("Bearer " + token).enqueue(new Callback<List<Transaction>>() {
+            @Override
+            public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Transaction> transactions = response.body();
+                    executor.execute(() -> {
+                        try {
+                            Log.d(TAG, "Received " + transactions.size() + " transactions");
+                            for (Transaction transaction : transactions) {
+                                // التحقق من أن المعاملة تنتمي للمستخدم الحالي
+                                if (transaction.getUserId() != currentUserId) {
+                                    continue;
+                                }
+
+                                // البحث عن المعاملة في قاعدة البيانات المحلية
+                                Transaction existingTransaction = database.transactionDao().getTransactionByServerId(transaction.getServerId());
+                                if (existingTransaction != null) {
+                                    // تحديث المعاملة الموجودة
+                                    existingTransaction.setAccountId(transaction.getAccountId());
+                                    existingTransaction.setAmount(transaction.getAmount());
+                                    existingTransaction.setType(transaction.getType());
+                                    existingTransaction.setDescription(transaction.getDescription());
+                                    existingTransaction.setCurrency(transaction.getCurrency());
+                                    existingTransaction.setDate(transaction.getDate());
+                                    existingTransaction.setNotes(transaction.getNotes());
+                                    existingTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
+                                    existingTransaction.setLastSyncTime(System.currentTimeMillis());
+                                    existingTransaction.setSyncStatus(2); // SYNCED
+                                    database.transactionDao().update(existingTransaction);
+                                } else {
+                                    // إضافة معاملة جديدة
+                                    transaction.setUserId(currentUserId);
+                                    transaction.setLastSyncTime(System.currentTimeMillis());
+                                    transaction.setSyncStatus(2); // SYNCED
+                                    database.transactionDao().insert(transaction);
+                                }
+                            }
+
+                            // بعد اكتمال جلب جميع البيانات، نقوم بحفظ وقت المزامنة
+                            saveLastSyncTime(System.currentTimeMillis());
+                            Log.d(TAG, "Initial sync completed successfully");
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error saving transactions: " + e.getMessage());
+                        }
+                    });
+                } else {
+                    Log.e(TAG, "Failed to fetch transactions");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Transaction>> call, Throwable t) {
+                Log.e(TAG, "Network error while fetching transactions: " + t.getMessage());
             }
         });
     }
@@ -659,16 +761,35 @@ public class SyncManager {
         public void run() {
             if (isNetworkAvailable()) {
                 Log.d(TAG, "Executing periodic sync...");
-                receiveChanges(new SyncCallback() {
+                
+                // أولاً: إرسال التغييرات المحلية إلى السيرفر
+                syncChanges(new SyncCallback() {
                     @Override
                     public void onSuccess() {
-                        Log.d(TAG, "Periodic sync successful");
-                        handler.postDelayed(syncRunnable, SYNC_INTERVAL);
+                        Log.d(TAG, "Local changes synced successfully");
+                        
+                        // ثانياً: جلب التغييرات من السيرفر
+                        receiveChanges(new SyncCallback() {
+                            @Override
+                            public void onSuccess() {
+                                Log.d(TAG, "Server changes received successfully");
+                                // جدولة المزامنة التالية
+                                handler.postDelayed(syncRunnable, SYNC_INTERVAL);
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                Log.e(TAG, "Failed to receive server changes: " + error);
+                                // إعادة المحاولة بعد فترة
+                                handler.postDelayed(syncRunnable, SYNC_INTERVAL);
+                            }
+                        });
                     }
 
                     @Override
                     public void onError(String error) {
-                        Log.e(TAG, "Periodic sync failed: " + error);
+                        Log.e(TAG, "Failed to sync local changes: " + error);
+                        // إعادة المحاولة بعد فترة
                         handler.postDelayed(syncRunnable, SYNC_INTERVAL);
                     }
                 });
@@ -679,28 +800,118 @@ public class SyncManager {
         }
     };
 
-    public void startPeriodicSync() {
-        Log.d(TAG, "Starting periodic sync...");
-        handler.postDelayed(syncRunnable, SYNC_INTERVAL);
-    }
-
-    public void stopPeriodicSync() {
-        Log.d(TAG, "Stopping periodic sync...");
-        handler.removeCallbacks(syncRunnable);
-    }
-
     public void syncChanges(SyncCallback callback) {
         if (!isNetworkAvailable()) {
             callback.onError("No internet connection");
             return;
         }
 
-        // Get local changes
-        List<Transaction> localTransactions = database.transactionDao().getAllTransactionsSync();
-        List<Account> localAccounts = database.accountDao().getAllAccountsSync();
-        List<User> localUsers = database.userDao().getAllUsers();
+        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("token", null);
 
-        // ... rest of the code ...
+        if (token == null) {
+            callback.onError("User not authenticated");
+            return;
+        }
+
+        long currentUserId = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getLong("user_id", -1);
+
+        if (currentUserId == -1) {
+            callback.onError("User ID not found");
+            return;
+        }
+
+        executor.execute(() -> {
+            try {
+                // جلب التغييرات المحلية
+                List<Account> modifiedAccounts = database.accountDao().getModifiedAccounts(getLastSyncTime());
+                List<Transaction> modifiedTransactions = database.transactionDao().getModifiedTransactions(getLastSyncTime());
+
+                if (modifiedAccounts.isEmpty() && modifiedTransactions.isEmpty()) {
+                    Log.d(TAG, "No local changes to sync");
+                    handler.post(() -> callback.onSuccess());
+                    return;
+                }
+
+                Log.d(TAG, "Syncing " + modifiedAccounts.size() + " accounts and " + modifiedTransactions.size() + " transactions");
+
+                // تجهيز البيانات للمزامنة
+                Map<String, Object> changes = new HashMap<>();
+                changes.put("accounts", modifiedAccounts);
+                changes.put("transactions", modifiedTransactions);
+
+                // إرسال التغييرات إلى السيرفر
+                apiService.syncChanges("Bearer " + token, changes).enqueue(new Callback<Map<String, Object>>() {
+                    @Override
+                    public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Map<String, Object> result = response.body();
+                            executor.execute(() -> {
+                                try {
+                                    // تحديث معرفات السيرفر للحسابات
+                                    List<Map<String, Object>> accountMappings = (List<Map<String, Object>>) result.get("accountIdMap");
+                                    if (accountMappings != null) {
+                                        for (Map<String, Object> mapping : accountMappings) {
+                                            long localId = ((Number) mapping.get("localId")).longValue();
+                                            long serverId = ((Number) mapping.get("serverId")).longValue();
+                                            Account account = database.accountDao().getAccountById(localId);
+                                            if (account != null) {
+                                                account.setServerId(serverId);
+                                                account.setSyncStatus(2); // SYNCED
+                                                database.accountDao().update(account);
+                                            }
+                                        }
+                                    }
+
+                                    // تحديث معرفات السيرفر للمعاملات
+                                    List<Map<String, Object>> transactionMappings = (List<Map<String, Object>>) result.get("transactionIdMap");
+                                    if (transactionMappings != null) {
+                                        for (Map<String, Object> mapping : transactionMappings) {
+                                            long localId = ((Number) mapping.get("localId")).longValue();
+                                            long serverId = ((Number) mapping.get("serverId")).longValue();
+                                            Transaction transaction = database.transactionDao().getTransactionById(localId);
+                                            if (transaction != null) {
+                                                transaction.setServerId(serverId);
+                                                transaction.setSyncStatus(2); // SYNCED
+                                                database.transactionDao().update(transaction);
+                                            }
+                                        }
+                                    }
+
+                                    saveLastSyncTime(System.currentTimeMillis());
+                                    Log.d(TAG, "Local changes synced successfully");
+                                    handler.post(() -> callback.onSuccess());
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error processing sync response: " + e.getMessage());
+                                    handler.post(() -> callback.onError("Error processing sync response: " + e.getMessage()));
+                                }
+                            });
+                        } else {
+                            String errorBody = "Unknown error";
+                            try {
+                                if (response.errorBody() != null) {
+                                    errorBody = response.errorBody().string();
+                                }
+                            } catch (IOException e) {
+                                Log.e(TAG, "Error reading error body: " + e.getMessage());
+                            }
+                            Log.e(TAG, "Failed to sync changes: " + errorBody);
+                            handler.post(() -> callback.onError("Failed to sync changes: " + errorBody));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                        Log.e(TAG, "Network error while syncing: " + t.getMessage());
+                        handler.post(() -> callback.onError("Network error: " + t.getMessage()));
+                    }
+                });
+            } catch (Exception e) {
+                Log.e(TAG, "Error preparing sync data: " + e.getMessage());
+                handler.post(() -> callback.onError("Error preparing sync data: " + e.getMessage()));
+            }
+        });
     }
 
     public void receiveChanges(SyncCallback callback) {
@@ -717,8 +928,17 @@ public class SyncManager {
             return;
         }
 
+        // الحصول على معرف المستخدم الحالي
+        long currentUserId = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getLong("user_id", -1);
+
+        if (currentUserId == -1) {
+            callback.onError("User ID not found");
+            return;
+        }
+
         long lastSyncTime = getLastSyncTime();
-        Log.d(TAG, "Fetching changes since: " + lastSyncTime);
+        Log.d(TAG, "Fetching changes since: " + lastSyncTime + " for user: " + currentUserId);
 
         apiService.getChanges("Bearer " + token, lastSyncTime).enqueue(new Callback<Map<String, Object>>() {
             @Override
@@ -732,17 +952,44 @@ public class SyncManager {
                             if (accounts != null && !accounts.isEmpty()) {
                                 Log.d(TAG, "Received " + accounts.size() + " account changes");
                                 for (Map<String, Object> accountData : accounts) {
-                                    Account account = new Account();
-                                    account.setServerId(((Number) accountData.get("id")).longValue());
-                                    account.setName((String) accountData.get("name"));
+                                    // التحقق من أن الحساب ينتمي للمستخدم الحالي
+                                    Long accountUserId = ((Number) accountData.get("user_id")).longValue();
+                                    if (accountUserId != currentUserId) {
+                                        Log.d(TAG, "Skipping account not belonging to current user");
+                                        continue;
+                                    }
+
+                                    String accountNumber = (String) accountData.get("account_number");
+                                    if (accountNumber == null) continue;
+
+                                    // البحث عن الحساب باستخدام رقم الحساب
+                                    Account existingAccount = database.accountDao().getAccountByNumber(accountNumber);
+                                    Account account;
+                                    
+                                    if (existingAccount != null) {
+                                        account = existingAccount;
+                                    } else {
+                                        account = new Account();
+                                        account.setAccountNumber(accountNumber);
+                                    }
+                                    
+                                    // تحديث بيانات الحساب
+                                    account.setName((String) accountData.get("account_name"));
                                     account.setPhoneNumber((String) accountData.get("phone_number"));
                                     account.setBalance(((Number) accountData.get("balance")).doubleValue());
                                     account.setCurrency((String) accountData.get("currency"));
                                     account.setNotes((String) accountData.get("notes"));
                                     account.setWhatsappEnabled((Boolean) accountData.get("whatsapp_enabled"));
+                                    account.setIsDebtor((Boolean) accountData.get("is_debtor"));
+                                    account.setUserId(currentUserId);
                                     account.setLastSyncTime(System.currentTimeMillis());
                                     account.setSyncStatus(2); // SYNCED
-                                    database.accountDao().insert(account);
+                                    
+                                    if (existingAccount != null) {
+                                        database.accountDao().update(account);
+                                    } else {
+                                        database.accountDao().insert(account);
+                                    }
                                 }
                             }
 
@@ -751,23 +998,64 @@ public class SyncManager {
                             if (transactions != null && !transactions.isEmpty()) {
                                 Log.d(TAG, "Received " + transactions.size() + " transaction changes");
                                 for (Map<String, Object> transactionData : transactions) {
-                                    Transaction transaction = new Transaction();
-                                    transaction.setServerId(((Number) transactionData.get("id")).longValue());
+                                    // التحقق من أن المعاملة تنتمي للمستخدم الحالي
+                                    Long transactionUserId = ((Number) transactionData.get("user_id")).longValue();
+                                    if (transactionUserId != currentUserId) {
+                                        Log.d(TAG, "Skipping transaction not belonging to current user");
+                                        continue;
+                                    }
+
+                                    long serverId = ((Number) transactionData.get("id")).longValue();
+                                    
+                                    // البحث عن المعاملة
+                                    Transaction existingTransaction = database.transactionDao().getTransactionByServerId(serverId);
+                                    Transaction transaction;
+                                    
+                                    if (existingTransaction != null) {
+                                        transaction = existingTransaction;
+                                    } else {
+                                        transaction = new Transaction();
+                                        transaction.setServerId(serverId);
+                                    }
+                                    
+                                    // تحديث بيانات المعاملة
                                     transaction.setAccountId(((Number) transactionData.get("account_id")).longValue());
                                     transaction.setAmount(((Number) transactionData.get("amount")).doubleValue());
                                     transaction.setType((String) transactionData.get("type"));
                                     transaction.setDescription((String) transactionData.get("description"));
                                     transaction.setCurrency((String) transactionData.get("currency"));
-                                    transaction.setDate(((Number) transactionData.get("date")).longValue());
+                                    
+                                    // معالجة التاريخ
+                                    Object dateObj = transactionData.get("date");
+                                    if (dateObj instanceof Number) {
+                                        transaction.setDate(((Number) dateObj).longValue());
+                                    } else if (dateObj instanceof String) {
+                                        try {
+                                            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                                            java.util.Date date = sdf.parse((String) dateObj);
+                                            transaction.setDate(date.getTime());
+                                        } catch (Exception e) {
+                                            Log.e(TAG, "Error parsing date: " + e.getMessage());
+                                            transaction.setDate(System.currentTimeMillis());
+                                        }
+                                    }
+                                    
                                     transaction.setNotes((String) transactionData.get("notes"));
                                     transaction.setWhatsappEnabled((Boolean) transactionData.get("whatsapp_enabled"));
+                                    transaction.setUserId(currentUserId);
                                     transaction.setLastSyncTime(System.currentTimeMillis());
                                     transaction.setSyncStatus(2); // SYNCED
-                                    database.transactionDao().insert(transaction);
+                                    
+                                    if (existingTransaction != null) {
+                                        database.transactionDao().update(transaction);
+                                    } else {
+                                        database.transactionDao().insert(transaction);
+                                    }
                                 }
                             }
 
                             saveLastSyncTime(System.currentTimeMillis());
+                            Log.d(TAG, "Successfully updated local data for user: " + currentUserId);
                             handler.post(() -> callback.onSuccess());
                         } catch (Exception e) {
                             Log.e(TAG, "Error updating local data: " + e.getMessage());
