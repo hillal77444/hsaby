@@ -40,7 +40,6 @@ public abstract class AppDatabase extends RoomDatabase {
                             AppDatabase.class,
                             DATABASE_NAME)
                             .addMigrations(new Migration_2(), new Migration_3(), new Migration_4())
-                            .fallbackToDestructiveMigration()
                             .addCallback(roomCallback)
                             .build();
                     Log.d(TAG, "Database instance created");
