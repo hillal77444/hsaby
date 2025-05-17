@@ -41,11 +41,11 @@ public interface ApiService {
     Call<Void> deleteTransaction(@Header("Authorization") String token, 
                                @Path("id") long transactionId);
 
-    @POST("/api/sync/changes")
-    Call<Map<String, Object>> syncChanges(@Body Map<String, Object> changes);
+    @GET("api/sync/changes")
+    Call<Map<String, Object>> getChanges(@Header("Authorization") String token, @Query("last_sync") long lastSyncTime);
 
-    @GET("/api/sync/changes")
-    Call<Map<String, Object>> getChanges(@Query("last_sync") long lastSyncTime);
+    @POST("api/sync/changes")
+    Call<Map<String, Object>> syncChanges(@Header("Authorization") String token, @Body Map<String, Object> changes);
 
     class LoginRequest {
         private String phone;
