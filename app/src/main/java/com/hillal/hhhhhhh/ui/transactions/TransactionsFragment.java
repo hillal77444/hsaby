@@ -42,7 +42,7 @@ public class TransactionsFragment extends Fragment {
     private TransactionAdapter adapter;
     private AccountViewModel accountViewModel;
     private TransactionViewModel transactionViewModel;
-    private TransactionRepository transactionRepository;
+    private com.hillal.hhhhhhh.data.repository.TransactionRepository transactionRepository;
     private Calendar startDate;
     private Calendar endDate;
     private String selectedAccount = null;
@@ -60,7 +60,8 @@ public class TransactionsFragment extends Fragment {
         viewModel = new ViewModelProvider(this).get(TransactionsViewModel.class);
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
         transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
-        transactionRepository = new TransactionRepository();
+        App app = (App) requireActivity().getApplication();
+        transactionRepository = new com.hillal.hhhhhhh.data.repository.TransactionRepository(app.getDatabase());
         
         // تهيئة التواريخ الافتراضية
         startDate = Calendar.getInstance();
@@ -116,7 +117,7 @@ public class TransactionsFragment extends Fragment {
             // التنقل إلى صفحة تعديل القيد
             Bundle args = new Bundle();
             args.putLong("transactionId", transaction.getId());
-            Navigation.findNavController(view).navigate(R.id.action_transactionsFragment_to_editTransactionFragment, args);
+            Navigation.findNavController(view).navigate(R.id.action_transactions_to_editTransaction, args);
         });
 
         adapter.setOnWhatsAppClickListener((transaction, phoneNumber) -> {
@@ -125,26 +126,19 @@ public class TransactionsFragment extends Fragment {
                 return;
             }
 
-            // تعطيل الزر مؤقتاً لمنع النقرات المتكررة
-            binding.btnSendWhatsApp.setEnabled(false);
-
             // الحصول على معلومات الحساب
-            Account account = accountViewModel.getAccountById(transaction.getAccountId());
-            if (account != null) {
-                // مراقبة الرصيد حتى التاريخ
-                transactionRepository.getBalanceUntilDate(transaction.getAccountId(), transaction.getTransactionDate(), transaction.getCurrency())
-                    .observe(getViewLifecycleOwner(), balance -> {
-                        if (balance != null) {
-                            String message = buildWhatsAppMessage(account.getName(), transaction, balance);
-                            sendWhatsAppMessage(requireContext(), phoneNumber, message);
-                        }
-                        // إعادة تفعيل الزر
-                        binding.btnSendWhatsApp.setEnabled(true);
-                    });
-            } else {
-                // إعادة تفعيل الزر في حالة عدم وجود حساب
-                binding.btnSendWhatsApp.setEnabled(true);
-            }
+            accountViewModel.getAccountById(transaction.getAccountId()).observe(getViewLifecycleOwner(), account -> {
+                if (account != null) {
+                    // مراقبة الرصيد حتى التاريخ
+                    transactionRepository.getBalanceUntilDate(transaction.getAccountId(), transaction.getTransactionDate(), transaction.getCurrency())
+                        .observe(getViewLifecycleOwner(), balance -> {
+                            if (balance != null) {
+                                String message = buildWhatsAppMessage(account.getName(), transaction, balance);
+                                sendWhatsAppMessage(requireContext(), phoneNumber, message);
+                            }
+                        });
+                }
+            });
         });
     }
 
