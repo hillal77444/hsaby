@@ -40,8 +40,8 @@ import androidx.fragment.app.Fragment;
 import com.hillal.hhhhhhh.ui.dashboard.DashboardFragment;
 import com.hillal.hhhhhhh.ui.settings.SettingsFragment;
 import com.hillal.hhhhhhh.ui.transactions.TransactionsFragment;
-import com.hillal.hhhhhhh.ui.addAccount.AddAccountFragment;
-import com.hillal.hhhhhhh.ui.accountStatement.AccountStatementFragment;
+import com.hillal.hhhhhhh.ui.accounts.AddAccountFragment;
+import com.hillal.hhhhhhh.ui.reports.AccountStatementFragment;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
