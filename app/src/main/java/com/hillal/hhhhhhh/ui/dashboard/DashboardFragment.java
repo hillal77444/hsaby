@@ -37,7 +37,7 @@ public class DashboardFragment extends Fragment {
             App app = (App) requireActivity().getApplication();
             AppDatabase db = app.getDatabase();
             AccountRepository accountRepository = new AccountRepository(db.accountDao(), db);
-            TransactionRepository transactionRepository = new TransactionRepository(requireActivity().getApplication());
+            TransactionRepository transactionRepository = new TransactionRepository(((App) requireActivity().getApplication()).getDatabase());
             dashboardViewModel = new ViewModelProvider(this, new DashboardViewModelFactory(accountRepository, transactionRepository))
                     .get(DashboardViewModel.class);
             userPreferences = new UserPreferences(requireContext());
