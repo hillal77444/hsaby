@@ -889,8 +889,8 @@ public class SyncManager {
 
                     @Override
                     public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                        Log.e(TAG, "Network error while syncing: " + t.getMessage());
-                        handler.post(() -> callback.onError("Network error: " + t.getMessage()));
+                        final String errorBody = t.getMessage();
+                        handler.post(() -> callback.onError("Failed to sync changes: " + errorBody));
                     }
                 });
             } catch (Exception e) {
@@ -1054,8 +1054,8 @@ public class SyncManager {
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                Log.e(TAG, "Network error: " + t.getMessage());
-                callback.onError("Network error: " + t.getMessage());
+                final String errorBody = t.getMessage();
+                handler.post(() -> callback.onError("Failed to receive changes: " + errorBody));
             }
         });
     }
@@ -1113,8 +1113,8 @@ public class SyncManager {
 
                                 @Override
                                 public void onFailure(Call<Void> call, Throwable t) {
-                                    Log.e(TAG, "Network error while deleting transaction: " + t.getMessage());
-                                    handler.post(() -> callback.onError("Network error: " + t.getMessage()));
+                                    final String errorBody = t.getMessage();
+                                    handler.post(() -> callback.onError("Failed to delete transaction: " + errorBody));
                                 }
                             });
                         } else {
