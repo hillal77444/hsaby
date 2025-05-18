@@ -155,7 +155,7 @@ public class EditTransactionFragment extends Fragment {
         }
 
         // Set date
-        calendar.setTimeInMillis(transaction.getDate());
+        calendar.setTimeInMillis(transaction.getTransactionDate());
         updateDateField();
     }
 
@@ -205,7 +205,7 @@ public class EditTransactionFragment extends Fragment {
             transaction.setDescription(description);
             transaction.setNotes(notes);
             transaction.setCurrency(currency);
-            transaction.setDate(calendar.getTimeInMillis());
+            transaction.setTransactionDate(calendar.getTimeInMillis());
             transaction.setUpdatedAt(System.currentTimeMillis());
 
             transactionsViewModel.updateTransaction(transaction);
