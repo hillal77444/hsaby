@@ -69,8 +69,8 @@ public interface TransactionDao {
     @Query("SELECT SUM(amount) FROM transactions WHERE account_id = :accountId")
     double getAccountBalanceSync(long accountId);
 
-    @Query("SELECT * FROM transactions WHERE sync_status != :syncStatus")
-    List<Transaction> getModifiedTransactions(long lastSyncTime);
+    @Query("SELECT * FROM transactions WHERE sync_status != :syncStatus AND last_sync_time > :lastSyncTime")
+    List<Transaction> getModifiedTransactions(long lastSyncTime, int syncStatus);
 
     @Query("SELECT * FROM transactions WHERE server_id = 0")
     List<Transaction> getNewTransactions();
