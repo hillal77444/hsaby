@@ -286,22 +286,40 @@ def get_accounts():
 def get_transactions():
     try:
         user_id = get_jwt_identity()
+        logger.info(f"Fetching transactions for user {user_id}")
+        
+        # جلب المعاملات
         transactions = Transaction.query.filter_by(user_id=user_id).all()
-        return jsonify([{
-            'id': trans.id,
-            'server_id': trans.server_id,  # استخدام server_id الفعلي
-            'date': int(trans.date.timestamp() * 1000),
-            'amount': trans.amount,
-            'description': trans.description,
-            'account_id': trans.account_id,
-            'type': trans.type,
-            'currency': trans.currency,
-            'notes': trans.notes,
-            'whatsapp_enabled': trans.whatsapp_enabled
-        } for trans in transactions])
+        logger.info(f"Found {len(transactions)} transactions for user {user_id}")
+        
+        # تحويل المعاملات إلى JSON
+        transactions_json = []
+        for trans in transactions:
+            transaction_data = {
+                'id': trans.id,
+                'server_id': trans.server_id,
+                'date': int(trans.date.timestamp() * 1000),
+                'amount': trans.amount,
+                'description': trans.description,
+                'account_id': trans.account_id,
+                'type': trans.type,
+                'currency': {
+                    'ريال يمني': 'يمني',
+                    'ريال سعودي': 'سعودي',
+                    'دولار أمريكي': 'دولار'
+                }.get(trans.currency, trans.currency),
+                'notes': trans.notes,
+                'whatsapp_enabled': trans.whatsapp_enabled,
+                'user_id': trans.user_id
+            }
+            transactions_json.append(transaction_data)
+            logger.debug(f"Transaction data: {transaction_data}")
+        
+        logger.info(f"Returning {len(transactions_json)} transactions")
+        return jsonify(transactions_json)
     except Exception as e:
-        logger.error(f"Get transactions error: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء جلب المعاملات'}), 500
+        logger.error(f"Error fetching transactions: {str(e)}")
+        return json_response({'error': str(e)}, 500)
 
 @main.route('/api/debug/data', methods=['GET'])
 @jwt_required()
@@ -350,70 +368,46 @@ def debug_public():
         # جلب جميع الحسابات
         accounts = Account.query.all()
         accounts_data = [{
-            'رقم_التعريف_المحلي': {'id': acc.id},  # المعرف المحلي
-            'رقم_التعريف_السيرفر': {'server_id': acc.server_id if hasattr(acc, 'server_id') else None},  # معرف السيرفر
-            'رقم_الحساب': {'account_number': acc.account_number},
-            'اسم_الحساب': {'account_name': acc.account_name},
-            'الرصيد': {'balance': acc.balance},
-            'رقم_المستخدم': {'user_id': acc.user_id},
-            'رقم_الهاتف': {'phone_number': acc.phone_number},
-            'حالة_المدين': {'is_debtor': acc.is_debtor},
-            'ملاحظات': {'notes': acc.notes},
-            'تفعيل_واتساب': {'whatsapp_enabled': acc.whatsapp_enabled},
-            'حالة_المزامنة': {'sync_status': acc.sync_status if hasattr(acc, 'sync_status') else None},
-            'آخر_مزامنة': {'last_sync_time': int(acc.last_sync_time.timestamp() * 1000) if hasattr(acc, 'last_sync_time') and acc.last_sync_time else None},
-            'تاريخ_الإنشاء': {'created_at': str(acc.created_at) if acc.created_at else None},
-            'تاريخ_التحديث': {'updated_at': str(acc.updated_at) if acc.updated_at else None}
+            'id': acc.id,
+            'server_id': acc.server_id,
+            'account_number': acc.account_number,
+            'account_name': acc.account_name,
+            'balance': acc.balance,
+            'user_id': acc.user_id,
+            'phone_number': acc.phone_number,
+            'is_debtor': acc.is_debtor,
+            'notes': acc.notes,
+            'whatsapp_enabled': acc.whatsapp_enabled,
+            'created_at': str(acc.created_at) if acc.created_at else None,
+            'updated_at': str(acc.updated_at) if acc.updated_at else None
         } for acc in accounts]
         
         # جلب جميع المعاملات
         transactions = Transaction.query.all()
         transactions_data = [{
-            'رقم_التعريف_المحلي': {'id': trans.id},  # المعرف المحلي
-            'رقم_التعريف_السيرفر': {'server_id': trans.server_id if hasattr(trans, 'server_id') else None},  # معرف السيرفر
-            'تاريخ_المعاملة': {'date': str(trans.date)},
-            'تاريخ_المعاملة_رقمي': {'date_timestamp': int(trans.date.timestamp() * 1000)},
-            'قيمة_المعاملة': {'amount': trans.amount},
-            'وصف_المعاملة': {'description': trans.description},
-            'نوع_المعاملة': {'type': trans.type},
-            'العملة': {'currency': trans.currency},
-            'ملاحظات': {'notes': trans.notes},
-            'تفعيل_واتساب': {'whatsapp_enabled': trans.whatsapp_enabled},
-            'رقم_الحساب': {'account_id': trans.account_id},
-            'رقم_المستخدم': {'user_id': trans.user_id},
-            'حالة_المزامنة': {'sync_status': trans.sync_status if hasattr(trans, 'sync_status') else None},
-            'آخر_مزامنة': {'last_sync_time': int(trans.last_sync_time.timestamp() * 1000) if hasattr(trans, 'last_sync_time') and trans.last_sync_time else None},
-            'تاريخ_الإنشاء': {'created_at': str(trans.created_at) if hasattr(trans, 'created_at') and trans.created_at else None},
-            'تاريخ_التحديث': {'updated_at': str(trans.updated_at) if hasattr(trans, 'updated_at') and trans.updated_at else None}
+            'id': trans.id,
+            'server_id': trans.server_id,
+            'date': str(trans.date),
+            'date_timestamp': int(trans.date.timestamp() * 1000),
+            'amount': trans.amount,
+            'description': trans.description,
+            'type': trans.type,
+            'currency': trans.currency,
+            'account_id': trans.account_id,
+            'user_id': trans.user_id,
+            'notes': trans.notes,
+            'whatsapp_enabled': trans.whatsapp_enabled,
+            'created_at': str(trans.created_at) if hasattr(trans, 'created_at') and trans.created_at else None,
+            'updated_at': str(trans.updated_at) if hasattr(trans, 'updated_at') and trans.updated_at else None
         } for trans in transactions]
         
-        # إضافة معلومات المزامنة العامة
-        sync_info = {
-            'آخر_مزامنة': {'last_sync_time': int(datetime.now().timestamp() * 1000)},
-            'إجمالي_الحسابات': {'total_accounts': len(accounts)},
-            'إجمالي_المعاملات': {'total_transactions': len(transactions)},
-            'حالة_مزامنة_الحسابات': {
-                'في_الانتظار': {'pending': len([acc for acc in accounts if hasattr(acc, 'sync_status') and acc.sync_status == 0])},
-                'قيد_المزامنة': {'syncing': len([acc for acc in accounts if hasattr(acc, 'sync_status') and acc.sync_status == 1])},
-                'تمت_المزامنة': {'synced': len([acc for acc in accounts if hasattr(acc, 'sync_status') and acc.sync_status == 2])},
-                'فشلت_المزامنة': {'failed': len([acc for acc in accounts if hasattr(acc, 'sync_status') and acc.sync_status == 3])}
-            },
-            'حالة_مزامنة_المعاملات': {
-                'في_الانتظار': {'pending': len([trans for trans in transactions if hasattr(trans, 'sync_status') and trans.sync_status == 0])},
-                'قيد_المزامنة': {'syncing': len([trans for trans in transactions if hasattr(trans, 'sync_status') and trans.sync_status == 1])},
-                'تمت_المزامنة': {'synced': len([trans for trans in transactions if hasattr(trans, 'sync_status') and trans.sync_status == 2])},
-                'فشلت_المزامنة': {'failed': len([trans for trans in transactions if hasattr(trans, 'sync_status') and trans.sync_status == 3])}
-            }
-        }
-        
         return jsonify({
-            'الحسابات': accounts_data,
-            'المعاملات': transactions_data,
-            'معلومات_المزامنة': sync_info
+            'accounts': accounts_data,
+            'transactions': transactions_data
         })
     except Exception as e:
         logger.error(f"Public debug data error: {str(e)}")
-        return jsonify({'خطأ': f'حدث خطأ أثناء جلب بيانات التصحيح: {str(e)}'}), 500
+        return jsonify({'error': f'Error fetching debug data: {str(e)}'}), 500
 
 @main.route('/api/transactions/<int:transaction_id>', methods=['DELETE'])
 @jwt_required()
