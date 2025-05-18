@@ -652,8 +652,9 @@ public class SyncManager {
                                     continue;
                                 }
 
-                                // البحث عن الحساب في قاعدة البيانات المحلية
+                                // البحث عن الحساب في قاعدة البيانات المحلية باستخدام رقم الحساب
                                 Account existingAccount = accountDao.getAccountByNumberSync(account.getAccountNumber());
+
                                 if (existingAccount != null) {
                                     // تحديث الحساب الموجود
                                     existingAccount.setName(account.getName());
