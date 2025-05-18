@@ -764,12 +764,21 @@ public class SyncManager {
 
                                 // البحث عن الحساب في قاعدة البيانات المحلية
                                 Account account = null;
-                                if (transaction.getServerId() > 0) {
-                                    // إذا كان معرف السيرفر أكبر من صفر، نبحث باستخدام معرف السيرفر
-                                    account = accountDao.getAccountByServerIdSync(transaction.getServerId());
-                                } else {
-                                    // إذا كان معرف السيرفر صفر أو سالب أو null، نبحث باستخدام المعرف المحلي
-                                    account = accountDao.getAccountByIdSync(transaction.getAccountId());
+                                // جلب جميع الحسابات
+                                List<Account> accounts = accountDao.getAllAccountsSync();
+                                // البحث عن الحساب المناسب
+                                for (Account acc : accounts) {
+                                    if (transaction.getServerId() > 0) {
+                                        if (acc.getServerId() == transaction.getServerId()) {
+                                            account = acc;
+                                            break;
+                                        }
+                                    } else {
+                                        if (acc.getId() == transaction.getAccountId()) {
+                                            account = acc;
+                                            break;
+                                        }
+                                    }
                                 }
                                 if (account == null) {
                                     Log.d(TAG, "Skipping transaction: account not found. Account ID: " + 
