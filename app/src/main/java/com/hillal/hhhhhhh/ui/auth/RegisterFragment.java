@@ -16,7 +16,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.databinding.FragmentRegisterBinding;
 import com.hillal.hhhhhhh.viewmodel.AuthViewModel;
-import com.hillal.hhhhhhh.ui.MainActivity;
+import com.hillal.hhhhhhh.MainActivity;
 
 public class RegisterFragment extends Fragment {
     private static final String TAG = "RegisterFragment";
