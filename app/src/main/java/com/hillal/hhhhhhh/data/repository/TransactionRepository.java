@@ -14,8 +14,8 @@ public class TransactionRepository {
     private final TransactionDao transactionDao;
     private final ExecutorService executorService;
 
-    public TransactionRepository(TransactionDao transactionDao) {
-        this.transactionDao = transactionDao;
+    public TransactionRepository(AppDatabase database) {
+        this.transactionDao = database.transactionDao();
         this.executorService = Executors.newSingleThreadExecutor();
     }
 
