@@ -40,6 +40,8 @@ import androidx.fragment.app.Fragment;
 import com.hillal.hhhhhhh.ui.dashboard.DashboardFragment;
 import com.hillal.hhhhhhh.ui.settings.SettingsFragment;
 import com.hillal.hhhhhhh.ui.transactions.TransactionsFragment;
+import com.hillal.hhhhhhh.ui.addAccount.AddAccountFragment;
+import com.hillal.hhhhhhh.ui.accountStatement.AccountStatementFragment;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -241,10 +243,12 @@ public class MainActivity extends AppCompatActivity {
                     int itemId = item.getItemId();
                     if (itemId == R.id.nav_dashboard) {
                         selectedFragment = new DashboardFragment();
+                    } else if (itemId == R.id.nav_add_account) {
+                        selectedFragment = new AddAccountFragment();
                     } else if (itemId == R.id.nav_transactions) {
                         selectedFragment = new TransactionsFragment();
-                    } else if (itemId == R.id.nav_settings) {
-                        selectedFragment = new SettingsFragment();
+                    } else if (itemId == R.id.nav_reports) {
+                        selectedFragment = new AccountStatementFragment();
                     }
 
                     if (selectedFragment != null) {
