@@ -341,41 +341,70 @@ def debug_public():
         # جلب جميع الحسابات
         accounts = Account.query.all()
         accounts_data = [{
-            'id': acc.id,
-            'account_number': acc.account_number,
-            'account_name': acc.account_name,
-            'balance': acc.balance,
-            'user_id': acc.user_id,
-            'phone_number': acc.phone_number,
-            'whatsapp_enabled': acc.whatsapp_enabled,  # إضافة حقل whatsapp_enabled
-            'created_at': str(acc.created_at) if acc.created_at else None
+            'رقم_التعريف': {'account_id': acc.id},
+            'رقم_السيرفر': {'account_id': acc.id},
+            'رقم_الحساب': {'account_id': acc.account_number},
+            'اسم_الحساب': {'account_id': acc.account_name},
+            'الرصيد': {'account_id': acc.balance},
+            'رقم_المستخدم': {'account_id': acc.user_id},
+            'رقم_الهاتف': {'account_id': acc.phone_number},
+            'حالة_المدين': {'account_id': acc.is_debtor},
+            'ملاحظات': {'account_id': acc.notes},
+            'تفعيل_واتساب': {'account_id': acc.whatsapp_enabled},
+            'حالة_المزامنة': {'account_id': acc.sync_status if hasattr(acc, 'sync_status') else None},
+            'آخر_مزامنة': {'account_id': int(acc.last_sync_time.timestamp() * 1000) if hasattr(acc, 'last_sync_time') and acc.last_sync_time else None},
+            'تاريخ_الإنشاء': {'account_id': str(acc.created_at) if acc.created_at else None},
+            'تاريخ_التحديث': {'account_id': str(acc.updated_at) if acc.updated_at else None}
         } for acc in accounts]
         
         # جلب جميع المعاملات
         transactions = Transaction.query.all()
         transactions_data = [{
-            'id': trans.id,
-            'date': str(trans.date),  # التاريخ الخام من قاعدة البيانات
-            'date_timestamp': int(trans.date.timestamp() * 1000),  # التاريخ كـ timestamp
-            'amount': trans.amount,
-            'description': trans.description,
-            'type': trans.type,
-            'currency': trans.currency,
-            'notes': trans.notes,
-            'whatsapp_enabled': trans.whatsapp_enabled,  # إضافة حقل whatsapp_enabled
-            'account_id': trans.account_id,
-            'user_id': trans.user_id
+            'رقم_التعريف': {'account_id': trans.id},
+            'رقم_السيرفر': {'account_id': trans.server_id if hasattr(trans, 'server_id') else trans.id},
+            'تاريخ_المعاملة': {'account_id': str(trans.date)},
+            'تاريخ_المعاملة_رقمي': {'account_id': int(trans.date.timestamp() * 1000)},
+            'قيمة_المعاملة': {'account_id': trans.amount},
+            'وصف_المعاملة': {'account_id': trans.description},
+            'نوع_المعاملة': {'account_id': trans.type},
+            'العملة': {'account_id': trans.currency},
+            'ملاحظات': {'account_id': trans.notes},
+            'تفعيل_واتساب': {'account_id': trans.whatsapp_enabled},
+            'رقم_الحساب': {'account_id': trans.account_id},
+            'رقم_المستخدم': {'account_id': trans.user_id},
+            'حالة_المزامنة': {'account_id': trans.sync_status if hasattr(trans, 'sync_status') else None},
+            'آخر_مزامنة': {'account_id': int(trans.last_sync_time.timestamp() * 1000) if hasattr(trans, 'last_sync_time') and trans.last_sync_time else None},
+            'تاريخ_الإنشاء': {'account_id': str(trans.created_at) if hasattr(trans, 'created_at') and trans.created_at else None},
+            'تاريخ_التحديث': {'account_id': str(trans.updated_at) if hasattr(trans, 'updated_at') and trans.updated_at else None}
         } for trans in transactions]
         
+        # إضافة معلومات المزامنة العامة
+        sync_info = {
+            'آخر_مزامنة': {'account_id': int(datetime.now().timestamp() * 1000)},
+            'إجمالي_الحسابات': {'account_id': len(accounts)},
+            'إجمالي_المعاملات': {'account_id': len(transactions)},
+            'حالة_مزامنة_الحسابات': {
+                'في_الانتظار': {'account_id': len([acc for acc in accounts if hasattr(acc, 'sync_status') and acc.sync_status == 0])},
+                'قيد_المزامنة': {'account_id': len([acc for acc in accounts if hasattr(acc, 'sync_status') and acc.sync_status == 1])},
+                'تمت_المزامنة': {'account_id': len([acc for acc in accounts if hasattr(acc, 'sync_status') and acc.sync_status == 2])},
+                'فشلت_المزامنة': {'account_id': len([acc for acc in accounts if hasattr(acc, 'sync_status') and acc.sync_status == 3])}
+            },
+            'حالة_مزامنة_المعاملات': {
+                'في_الانتظار': {'account_id': len([trans for trans in transactions if hasattr(trans, 'sync_status') and trans.sync_status == 0])},
+                'قيد_المزامنة': {'account_id': len([trans for trans in transactions if hasattr(trans, 'sync_status') and trans.sync_status == 1])},
+                'تمت_المزامنة': {'account_id': len([trans for trans in transactions if hasattr(trans, 'sync_status') and trans.sync_status == 2])},
+                'فشلت_المزامنة': {'account_id': len([trans for trans in transactions if hasattr(trans, 'sync_status') and trans.sync_status == 3])}
+            }
+        }
+        
         return jsonify({
-            'accounts': accounts_data,
-            'transactions': transactions_data,
-            'total_accounts': len(accounts),
-            'total_transactions': len(transactions)
+            'الحسابات': accounts_data,
+            'المعاملات': transactions_data,
+            'معلومات_المزامنة': sync_info
         })
     except Exception as e:
         logger.error(f"Public debug data error: {str(e)}")
-        return jsonify({'error': f'حدث خطأ أثناء جلب بيانات التصحيح: {str(e)}'}), 500
+        return jsonify({'خطأ': f'حدث خطأ أثناء جلب بيانات التصحيح: {str(e)}'}), 500
 
 @main.route('/api/transactions/<int:transaction_id>', methods=['DELETE'])
 @jwt_required()
