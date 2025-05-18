@@ -53,7 +53,7 @@ public class Transaction {
     private String currency;
 
     @ColumnInfo(name = "transaction_date")
-    @SerializedName("transaction_date")
+    @SerializedName("date")
     private long transactionDate;
 
     @ColumnInfo(name = "created_at")
