@@ -98,4 +98,7 @@ public interface TransactionDao {
            "AND transaction_date <= :transactionDate " +
            "ORDER BY transaction_date")
     LiveData<Double> getBalanceUntilDate(long accountId, long transactionDate, String currency);
+
+    @Query("SELECT * FROM transactions WHERE server_id = :serverId")
+    Transaction getTransactionByServerIdSync(long serverId);
 } 
