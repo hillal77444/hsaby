@@ -33,7 +33,7 @@ public interface AccountDao {
     Account getAccountByNumberSync(String accountNumber);
 
     @Query("SELECT * FROM accounts WHERE sync_status != :syncStatus")
-    List<Account> getModifiedAccounts(int syncStatus);
+    List<Account> getModifiedAccounts(long lastSyncTime);
 
     @Query("SELECT * FROM accounts WHERE server_id = 0")
     List<Account> getNewAccounts();
