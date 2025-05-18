@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.hillal.hhhhhhh.data.model.Account;
+import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.data.repository.TransactionRepository;
 
@@ -13,6 +14,8 @@ import java.util.List;
 public class DashboardViewModel extends ViewModel {
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
+    private final MutableLiveData<List<Account>> accounts = new MutableLiveData<>();
+    private final MutableLiveData<List<Transaction>> transactions = new MutableLiveData<>();
     private final MutableLiveData<List<Account>> recentAccounts = new MutableLiveData<>();
     private final MutableLiveData<Double> totalDebtors = new MutableLiveData<>(0.0);
     private final MutableLiveData<Double> totalCreditors = new MutableLiveData<>(0.0);
@@ -21,10 +24,20 @@ public class DashboardViewModel extends ViewModel {
     public DashboardViewModel(AccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
-        loadDashboardData();
+        loadData();
     }
 
-    private void loadDashboardData() {
+    private void loadData() {
+        // جلب الحسابات
+        accountRepository.getAllAccounts().observeForever(accountsList -> {
+            accounts.setValue(accountsList);
+        });
+
+        // جلب المعاملات
+        transactionRepository.getAllTransactions().observeForever(transactionsList -> {
+            transactions.setValue(transactionsList);
+        });
+
         // Load recent accounts
         accountRepository.getRecentAccounts().observeForever(accounts -> {
             recentAccounts.setValue(accounts);
@@ -50,6 +63,14 @@ public class DashboardViewModel extends ViewModel {
         }
     }
 
+    public LiveData<List<Account>> getAccounts() {
+        return accounts;
+    }
+
+    public LiveData<List<Transaction>> getTransactions() {
+        return transactions;
+    }
+
     public LiveData<List<Account>> getRecentAccounts() {
         return recentAccounts;
     }
@@ -64,5 +85,13 @@ public class DashboardViewModel extends ViewModel {
 
     public LiveData<Double> getNetBalance() {
         return netBalance;
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        // إزالة المراقبين عند تدمير ViewModel
+        accountRepository.getAllAccounts().removeObserver(accounts::setValue);
+        transactionRepository.getAllTransactions().removeObserver(transactions::setValue);
     }
 } 
