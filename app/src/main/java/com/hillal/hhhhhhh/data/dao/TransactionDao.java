@@ -58,10 +58,19 @@ public interface TransactionDao {
     Transaction getTransactionByServerIdSync(long serverId);
 
     @Query("SELECT * FROM transactions WHERE account_id = :accountId")
-    LiveData<List<Transaction>> getTransactionsByAccountId(long accountId);
+    LiveData<List<Transaction>> getTransactionsByAccount(long accountId);
+
+    @Query("SELECT * FROM transactions WHERE account_id = :accountId")
+    List<Transaction> getTransactionsByAccountSync(long accountId);
+
+    @Query("SELECT SUM(amount) FROM transactions WHERE account_id = :accountId")
+    double getAccountBalance(long accountId);
 
     @Query("SELECT * FROM transactions WHERE sync_status != :syncStatus")
     List<Transaction> getModifiedTransactions(int syncStatus);
+
+    @Query("SELECT * FROM transactions WHERE server_id = 0")
+    List<Transaction> getNewTransactions();
 
     @Query("SELECT * FROM transactions WHERE type = :type ORDER BY transaction_date DESC")
     LiveData<List<Transaction>> getTransactionsByType(String type);
