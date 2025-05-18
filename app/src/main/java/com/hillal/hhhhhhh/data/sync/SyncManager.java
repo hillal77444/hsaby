@@ -874,19 +874,17 @@ public class SyncManager {
                                 }
                             });
                         } else {
-                            final String errorBody;
+                            String errorBody;
                             try {
-                                if (response.errorBody() != null) {
-                                    errorBody = response.errorBody().string();
-                                } else {
-                                    errorBody = "Unknown error";
-                                }
+                                errorBody = response.errorBody() != null ? 
+                                    response.errorBody().string() : "Unknown error";
                             } catch (IOException e) {
                                 Log.e(TAG, "Error reading error body: " + e.getMessage());
                                 errorBody = "Error reading response";
                             }
-                            Log.e(TAG, "Failed to sync changes: " + errorBody);
-                            handler.post(() -> callback.onError("Failed to sync changes: " + errorBody));
+                            final String finalErrorBody = errorBody;
+                            Log.e(TAG, "Failed to sync changes: " + finalErrorBody);
+                            handler.post(() -> callback.onError("Failed to sync changes: " + finalErrorBody));
                         }
                     }
 
@@ -1042,19 +1040,17 @@ public class SyncManager {
                         }
                     });
                 } else {
-                    final String errorBody;
+                    String errorBody;
                     try {
-                        if (response.errorBody() != null) {
-                            errorBody = response.errorBody().string();
-                        } else {
-                            errorBody = "Unknown error";
-                        }
+                        errorBody = response.errorBody() != null ? 
+                            response.errorBody().string() : "Unknown error";
                     } catch (IOException e) {
                         Log.e(TAG, "Error reading error body: " + e.getMessage());
                         errorBody = "Error reading response";
                     }
-                    Log.e(TAG, "Failed to receive changes: " + errorBody);
-                    callback.onError("Failed to receive changes: " + errorBody);
+                    final String finalErrorBody = errorBody;
+                    Log.e(TAG, "Failed to receive changes: " + finalErrorBody);
+                    callback.onError("Failed to receive changes: " + finalErrorBody);
                 }
             }
 
@@ -1104,19 +1100,17 @@ public class SyncManager {
                                             handler.post(() -> callback.onSuccess());
                                         });
                                     } else {
-                                        final String errorBody;
+                                        String errorBody;
                                         try {
-                                            if (response.errorBody() != null) {
-                                                errorBody = response.errorBody().string();
-                                            } else {
-                                                errorBody = "Unknown error";
-                                            }
+                                            errorBody = response.errorBody() != null ? 
+                                                response.errorBody().string() : "Unknown error";
                                         } catch (IOException e) {
                                             Log.e(TAG, "Error reading error body: " + e.getMessage());
                                             errorBody = "Error reading response";
                                         }
-                                        Log.e(TAG, "Failed to delete transaction from server: " + errorBody);
-                                        handler.post(() -> callback.onError("Failed to delete transaction: " + errorBody));
+                                        final String finalErrorBody = errorBody;
+                                        Log.e(TAG, "Failed to delete transaction from server: " + finalErrorBody);
+                                        handler.post(() -> callback.onError("Failed to delete transaction: " + finalErrorBody));
                                     }
                                 }
 
