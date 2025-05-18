@@ -1,5 +1,6 @@
 package com.hillal.hhhhhhh.data.repository;
 
+import androidx.lifecycle.LiveData;
 import com.hillal.hhhhhhh.data.dao.AccountDao;
 import com.hillal.hhhhhhh.data.dao.TransactionDao;
 import com.hillal.hhhhhhh.data.model.Account;
@@ -18,5 +19,25 @@ public class AccountStatementRepository {
 
     public double getAccountBalance(long accountId) {
         return transactionDao.getAccountBalanceSync(accountId);
+    }
+
+    public LiveData<List<Transaction>> getTransactionsForAccount(long accountId) {
+        return transactionDao.getTransactionsForAccount(accountId);
+    }
+
+    public LiveData<List<Transaction>> getTransactionsForAccountInDateRange(long accountId, long startDate, long endDate) {
+        return transactionDao.getTransactionsForAccountInDateRange(accountId, startDate, endDate);
+    }
+
+    public LiveData<Double> getTotalCredits(long accountId) {
+        return transactionDao.getTotalCredits(accountId);
+    }
+
+    public LiveData<Double> getTotalDebits(long accountId) {
+        return transactionDao.getTotalDebits(accountId);
+    }
+
+    public LiveData<Account> getAccountById(long accountId) {
+        return accountDao.getAccountById(accountId);
     }
 } 
