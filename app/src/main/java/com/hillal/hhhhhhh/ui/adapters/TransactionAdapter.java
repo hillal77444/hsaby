@@ -35,6 +35,11 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
     private Map<Long, Account> accountMap;
     private final TransactionRepository transactionRepository;
 
+    public TransactionAdapter(@NonNull DiffUtil.ItemCallback<Transaction> diffCallback, Context context) {
+        super(diffCallback);
+        this.transactionRepository = new TransactionRepository(((App) context.getApplicationContext()).getDatabase());
+    }
+
     public interface OnDeleteClickListener {
         void onDeleteClick(Transaction transaction);
     }
