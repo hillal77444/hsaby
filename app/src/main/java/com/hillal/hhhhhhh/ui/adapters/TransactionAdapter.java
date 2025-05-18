@@ -87,7 +87,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                 Account account = accountMap.get(transaction.getAccountId());
                 if (account != null) {
                     // مراقبة الرصيد حتى التاريخ
-                    transactionRepository.getBalanceUntilDate(transaction.getAccountId(), transaction.getDate(), transaction.getCurrency())
+                    transactionRepository.getBalanceUntilDate(transaction.getAccountId(), transaction.getTransactionDate(), transaction.getCurrency())
                             .observe((LifecycleOwner) holder.itemView.getContext(), balance -> {
                                 if (balance != null) {
                                     String message = holder.buildWhatsAppMessage(account.getName(), transaction, balance);
@@ -139,7 +139,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
 
             // ربط التاريخ بالإنجليزي
             SimpleDateFormat dateFormatEn = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
-            binding.transactionDate.setText(dateFormatEn.format(transaction.getDate()));
+            binding.transactionDate.setText(dateFormatEn.format(new Date(transaction.getTransactionDate())));
 
             // ربط البيان
             binding.transactionDescription.setText(transaction.getDescription());
