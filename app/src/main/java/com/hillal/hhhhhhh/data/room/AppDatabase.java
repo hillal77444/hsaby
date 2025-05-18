@@ -10,8 +10,6 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-import com.hillal.hhhhhhh.data.dao.AccountDao;
-import com.hillal.hhhhhhh.data.dao.TransactionDao;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.model.Settings;
@@ -35,8 +33,8 @@ public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG = "AppDatabase";
     private static volatile AppDatabase INSTANCE;
 
-    public abstract AccountDao accountDao();
-    public abstract TransactionDao transactionDao();
+    public abstract com.hillal.hhhhhhh.data.room.AccountDao accountDao();
+    public abstract com.hillal.hhhhhhh.data.room.TransactionDao transactionDao();
     public abstract SettingsDao settingsDao();
     public abstract PendingOperationDao pendingOperationDao();
     public abstract UserDao userDao();
