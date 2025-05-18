@@ -282,9 +282,9 @@ public class SyncManager {
                 // إنشاء جلسة مزامنة جديدة
                 SyncSession session = new SyncSession(
                     accountDao.getNewAccounts(),
-                    accountDao.getModifiedAccounts(lastSyncTime),
+                    accountDao.getModifiedAccounts(lastSyncTime, SYNC_STATUS_SYNCED),
                     transactionDao.getNewTransactions(),
-                    transactionDao.getModifiedTransactions(lastSyncTime)
+                    transactionDao.getModifiedTransactions(lastSyncTime, SYNC_STATUS_SYNCED)
                 );
 
                 // التحقق من العناصر التي قيد المزامنة
@@ -453,9 +453,9 @@ public class SyncManager {
         executor.execute(() -> {
             try {
                 List<Account> newAccounts = accountDao.getNewAccounts();
-                List<Account> modifiedAccounts = accountDao.getModifiedAccounts(lastSyncTime);
+                List<Account> modifiedAccounts = accountDao.getModifiedAccounts(lastSyncTime, SYNC_STATUS_SYNCED);
                 List<Transaction> newTransactions = transactionDao.getNewTransactions();
-                List<Transaction> modifiedTransactions = transactionDao.getModifiedTransactions(lastSyncTime);
+                List<Transaction> modifiedTransactions = transactionDao.getModifiedTransactions(lastSyncTime, SYNC_STATUS_SYNCED);
 
                 // تحديث حالة العناصر إلى PENDING
                 for (Account account : newAccounts) {
@@ -809,8 +809,8 @@ public class SyncManager {
         executor.execute(() -> {
             try {
                 // جلب التغييرات المحلية
-                List<Account> modifiedAccounts = accountDao.getModifiedAccounts(getLastSyncTime());
-                List<Transaction> modifiedTransactions = transactionDao.getModifiedTransactions(getLastSyncTime());
+                List<Account> modifiedAccounts = accountDao.getModifiedAccounts(getLastSyncTime(), SYNC_STATUS_SYNCED);
+                List<Transaction> modifiedTransactions = transactionDao.getModifiedTransactions(getLastSyncTime(), SYNC_STATUS_SYNCED);
 
                 if (modifiedAccounts.isEmpty() && modifiedTransactions.isEmpty()) {
                     Log.d(TAG, "No local changes to sync");
@@ -1135,10 +1135,10 @@ public class SyncManager {
     }
 
     private List<Account> getModifiedAccounts(long lastSyncTime) {
-        return accountDao.getModifiedAccounts(lastSyncTime);
+        return accountDao.getModifiedAccounts(lastSyncTime, SYNC_STATUS_SYNCED);
     }
 
     private List<Transaction> getModifiedTransactions(long lastSyncTime) {
-        return transactionDao.getModifiedTransactions(lastSyncTime);
+        return transactionDao.getModifiedTransactions(lastSyncTime, SYNC_STATUS_SYNCED);
     }
 } 
