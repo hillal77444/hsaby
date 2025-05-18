@@ -732,102 +732,72 @@ public class SyncManager {
     }
 
     private void fetchAllTransactions(String token, long currentUserId, SyncCallback callback) {
+        Log.d(TAG, "Starting fetchAllTransactions for user: " + currentUserId);
         apiService.getTransactions("Bearer " + token).enqueue(new Callback<List<Transaction>>() {
             @Override
             public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Transaction> transactions = response.body();
+                    Log.d(TAG, "Received " + transactions.size() + " transactions from server");
+                    Log.d(TAG, "Current user ID: " + currentUserId);
+                    
                     executor.execute(() -> {
                         try {
-                            Log.d(TAG, "Received " + transactions.size() + " transactions");
+                            int processedCount = 0;
+                            int skippedCount = 0;
+                            
                             for (Transaction transaction : transactions) {
+                                Log.d(TAG, "Processing transaction: id=" + transaction.getId() + 
+                                          ", server_id=" + transaction.getServerId() + 
+                                          ", user_id=" + transaction.getUserId() +
+                                          ", amount=" + transaction.getAmount() +
+                                          ", type=" + transaction.getType() +
+                                          ", currency=" + transaction.getCurrency());
+                                
                                 // التحقق من أن المعاملة تنتمي للمستخدم الحالي
                                 if (transaction.getUserId() != currentUserId) {
+                                    Log.d(TAG, "Skipping transaction: user_id mismatch. Expected: " + 
+                                              currentUserId + ", Got: " + transaction.getUserId());
+                                    skippedCount++;
                                     continue;
                                 }
 
                                 // البحث عن الحساب في قاعدة البيانات المحلية
-                                Account account = null;
-                                try {
-                                    account = accountDao.getAccountById(transaction.getAccountId()).getValue();
-                                } catch (Exception e) {
-                                    Log.e(TAG, "Error getting account: " + e.getMessage());
-                                }
-                                
+                                Account account = accountDao.getAccountByServerIdSync(transaction.getAccountId());
                                 if (account == null) {
-                                    Log.e(TAG, "Account not found for transaction: " + transaction.getId());
+                                    Log.d(TAG, "Skipping transaction: account not found. Account ID: " + 
+                                              transaction.getAccountId());
+                                    skippedCount++;
                                     continue;
                                 }
 
-                                // البحث عن المعاملة في قاعدة البيانات المحلية
-                                Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
-                                if (existingTransaction != null) {
-                                    // تحديث المعاملة الموجودة
-                                    existingTransaction.setAmount(transaction.getAmount());
-                                    existingTransaction.setType(transaction.getType());
-                                    existingTransaction.setDescription(transaction.getDescription());
-                                    existingTransaction.setNotes(transaction.getNotes());
-                                    existingTransaction.setTransactionDate(transaction.getTransactionDate());
-                                    existingTransaction.setCurrency(transaction.getCurrency());
-                                    existingTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
-                                    existingTransaction.setAccountId(transaction.getAccountId());
-                                    existingTransaction.setLastSyncTime(System.currentTimeMillis());
-                                    existingTransaction.setSyncStatus(SYNC_STATUS_SYNCED);
-                                    transactionDao.update(existingTransaction);
-                                } else {
-                                    // إضافة معاملة جديدة
-                                    transaction.setUserId(currentUserId);
-                                    transaction.setLastSyncTime(System.currentTimeMillis());
-                                    transaction.setSyncStatus(SYNC_STATUS_SYNCED);
-                                    try {
-                                        transactionDao.insert(transaction);
-                                    } catch (Exception e) {
-                                        Log.e(TAG, "Error inserting transaction: " + e.getMessage());
-                                        // إذا فشل الإدخال، نحاول التحديث
-                                        existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
-                                        if (existingTransaction != null) {
-                                            existingTransaction.setAmount(transaction.getAmount());
-                                            existingTransaction.setType(transaction.getType());
-                                            existingTransaction.setDescription(transaction.getDescription());
-                                            existingTransaction.setNotes(transaction.getNotes());
-                                            existingTransaction.setTransactionDate(transaction.getTransactionDate());
-                                            existingTransaction.setCurrency(transaction.getCurrency());
-                                            existingTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
-                                            existingTransaction.setAccountId(transaction.getAccountId());
-                                            existingTransaction.setLastSyncTime(System.currentTimeMillis());
-                                            existingTransaction.setSyncStatus(SYNC_STATUS_SYNCED);
-                                            transactionDao.update(existingTransaction);
-                                        }
-                                    }
-                                }
+                                // حفظ المعاملة في قاعدة البيانات المحلية
+                                transaction.setSyncStatus(SYNC_STATUS_SYNCED);
+                                transaction.setLastSyncTime(System.currentTimeMillis());
+                                transactionDao.insert(transaction);
+                                processedCount++;
+                                Log.d(TAG, "Successfully saved transaction: " + transaction.getId());
                             }
-
-                            // بعد اكتمال جلب جميع البيانات، نقوم بحفظ وقت المزامنة
-                            saveLastSyncTime(System.currentTimeMillis());
-                            Log.d(TAG, "Full sync completed successfully");
+                            
+                            Log.d(TAG, "Transaction processing complete. Processed: " + processedCount + 
+                                      ", Skipped: " + skippedCount);
+                            
                             handler.post(() -> callback.onSuccess());
                         } catch (Exception e) {
-                            Log.e(TAG, "Error saving transactions: " + e.getMessage());
-                            handler.post(() -> callback.onError("Error saving transactions: " + e.getMessage()));
+                            Log.e(TAG, "Error processing transactions", e);
+                            handler.post(() -> callback.onError(e.getMessage()));
                         }
                     });
                 } else {
-                    String errorBody;
-                    try {
-                        errorBody = response.errorBody() != null ? 
-                            response.errorBody().string() : "Unknown error";
-                    } catch (IOException e) {
-                        Log.e(TAG, "Error reading error body: " + e.getMessage());
-                        errorBody = "Error reading response";
-                    }
-                    final String finalErrorBody = errorBody;
-                    handler.post(() -> callback.onError("Failed to fetch transactions: " + finalErrorBody));
+                    Log.e(TAG, "Failed to fetch transactions. Code: " + response.code());
+                    handler.post(() -> callback.onError("Failed to fetch transactions"));
                 }
             }
 
             @Override
             public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                handler.post(() -> callback.onError("Network error while fetching transactions: " + t.getMessage()));
+                Log.e(TAG, "Network error while fetching transactions", t);
+                handler.post(() -> callback.onError(t.getMessage()));
             }
         });
     }
