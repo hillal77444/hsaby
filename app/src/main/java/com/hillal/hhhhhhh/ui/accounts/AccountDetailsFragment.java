@@ -30,6 +30,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import java.util.ArrayList;
 import java.util.List;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class AccountDetailsFragment extends Fragment {
     private FragmentAccountDetailsBinding binding;
@@ -204,7 +205,7 @@ public class AccountDetailsFragment extends Fragment {
             }
 
             void bind(Transaction transaction) {
-                dateTextView.setText(DATE_FORMAT.format(transaction.getDate()));
+                dateTextView.setText(DATE_FORMAT.format(new Date(transaction.getTransactionDate())));
                 descriptionTextView.setText(transaction.getDescription());
                 
                 double amount = transaction.getAmount();
