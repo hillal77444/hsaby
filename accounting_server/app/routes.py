@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_tok
 from datetime import datetime
 import logging
 import json
+import uuid
 
 main = Blueprint('main', __name__)
 logger = logging.getLogger(__name__)
@@ -13,6 +14,10 @@ logger = logging.getLogger(__name__)
 def json_response(data, status_code=200):
     response = json.dumps(data, ensure_ascii=False)
     return response, status_code, {'Content-Type': 'application/json; charset=utf-8'}
+
+def generate_server_id():
+    """توليد معرف فريد للسيرفر"""
+    return int(uuid.uuid4().int % (10 ** 9))  # توليد رقم فريد من 9 أرقام
 
 @main.route('/api/register', methods=['POST'])
 def register():
@@ -92,153 +97,157 @@ def login():
 @jwt_required()
 def sync_data():
     try:
-        user_id = get_jwt_identity()
         data = request.get_json()
+        current_user_id = get_jwt_identity()
         
-        logger.info(f"Received sync request from user {user_id}")
+        logger.info(f"Received sync request from user {current_user_id}")
         logger.debug(f"Sync data: {data}")
         
         if not data:
             logger.warning("Empty sync data received")
             return json_response({'error': 'لا توجد بيانات للمزامنة'}, 400)
         
-        # التحقق من صحة البيانات
+        # التحقق من البيانات
         if 'accounts' not in data and 'transactions' not in data:
             logger.warning("No accounts or transactions in sync data")
             return json_response({'error': 'يجب إرسال بيانات الحسابات أو المعاملات'}, 400)
         
-        # إنشاء خرائط لتخزين المعرفات الجديدة
-        account_id_map = {}
-        transaction_id_map = {}
-        
         # معالجة الحسابات
-        if 'accounts' in data:
-            if not isinstance(data['accounts'], list):
-                logger.error("Accounts data is not a list")
-                return json_response({'error': 'بيانات الحسابات غير صحيحة'}, 400)
-            
-            for account_data in data['accounts']:
-                try:
-                    # التحقق من البيانات المطلوبة
-                    required_fields = ['account_number', 'account_name', 'balance']
-                    missing_fields = [field for field in required_fields if field not in account_data]
-                    if missing_fields:
-                        return json_response({'error': f'بيانات الحساب غير مكتملة: {", ".join(missing_fields)}'}, 400)
-                    
-                    # البحث عن الحساب
-                    account = Account.query.filter_by(
-                        account_number=account_data['account_number'],
-                        user_id=user_id
-                    ).first()
-                    
-                    if not account:
-                        # حساب جديد
-                        account = Account(
-                            account_number=account_data['account_number'],
-                            account_name=account_data['account_name'],
-                            balance=account_data['balance'],
-                            is_debtor=account_data.get('is_debtor', False),
-                            phone_number=account_data.get('phone_number'),
-                            notes=account_data.get('notes'),
-                            whatsapp_enabled=account_data.get('whatsapp_enabled', False),
-                            user_id=user_id
-                        )
-                        db.session.add(account)
-                        db.session.flush()  # للحصول على المعرف الجديد
-                        account_id_map[account_data.get('id')] = account.id
-                        logger.info(f"Added new account: {account.account_number}")
-                    else:
-                        # تحديث الحساب الموجود
-                        account.balance = account_data['balance']
-                        if 'is_debtor' in account_data:
-                            account.is_debtor = account_data['is_debtor']
-                        if 'phone_number' in account_data:
-                            account.phone_number = account_data['phone_number']
-                        if 'notes' in account_data:
-                            account.notes = account_data['notes']
-                        if 'whatsapp_enabled' in account_data:
-                            account.whatsapp_enabled = account_data['whatsapp_enabled']
-                        account_id_map[account_data.get('id')] = account.id
-                        logger.info(f"Updated account: {account.account_number}")
-                except Exception as e:
-                    logger.error(f"Error processing account: {str(e)}")
-                    return json_response({'error': f'خطأ في معالجة بيانات الحساب: {str(e)}'}, 400)
+        accounts = data.get('accounts', [])
+        account_mappings = []
+        
+        for acc_data in accounts:
+            try:
+                # التحقق من البيانات المطلوبة للحساب
+                required_fields = ['name', 'balance']
+                missing_fields = [field for field in required_fields if field not in acc_data]
+                if missing_fields:
+                    return json_response({'error': f'بيانات الحساب غير مكتملة: {", ".join(missing_fields)}'}, 400)
+                
+                # البحث عن الحساب باستخدام server_id إذا كان موجوداً
+                account = None
+                if acc_data.get('server_id'):
+                    account = Account.query.filter_by(server_id=acc_data['server_id']).first()
+                
+                # إذا لم يتم العثور على الحساب، ابحث باستخدام المعرف المحلي
+                if not account and acc_data.get('id'):
+                    account = Account.query.filter_by(id=acc_data['id']).first()
+                
+                if account:
+                    # تحديث الحساب الموجود
+                    account.name = acc_data.get('name', account.name)
+                    account.balance = acc_data.get('balance', account.balance)
+                    account.phone_number = acc_data.get('phone_number', account.phone_number)
+                    account.notes = acc_data.get('notes', account.notes)
+                    account.is_debtor = acc_data.get('is_debtor', account.is_debtor)
+                    account.whatsapp_enabled = acc_data.get('whatsapp_enabled', account.whatsapp_enabled)
+                    account.user_id = current_user_id
+                    # لا نقوم بتحديث server_id إذا كان موجوداً بالفعل
+                    if not account.server_id:
+                        account.server_id = acc_data.get('server_id')
+                    logger.info(f"Updated account: {account.name}")
+                else:
+                    # إنشاء حساب جديد
+                    account = Account(
+                        name=acc_data.get('name'),
+                        balance=acc_data.get('balance', 0),
+                        phone_number=acc_data.get('phone_number'),
+                        notes=acc_data.get('notes'),
+                        is_debtor=acc_data.get('is_debtor', False),
+                        whatsapp_enabled=acc_data.get('whatsapp_enabled', False),
+                        user_id=current_user_id,
+                        server_id=acc_data.get('server_id')  # استخدام server_id من الطلب إذا كان موجوداً
+                    )
+                    db.session.add(account)
+                    db.session.flush()  # للحصول على معرف الحساب
+                    logger.info(f"Added new account: {account.name}")
+                
+                account_mappings.append({
+                    'local_id': acc_data.get('id'),
+                    'server_id': account.id  # استخدام معرف الحساب كـ server_id
+                })
+            except Exception as e:
+                logger.error(f"Error processing account: {str(e)}")
+                return json_response({'error': f'خطأ في معالجة بيانات الحساب: {str(e)}'}, 400)
         
         # معالجة المعاملات
-        if 'transactions' in data:
-            if not isinstance(data['transactions'], list):
-                logger.error("Transactions data is not a list")
-                return json_response({'error': 'بيانات المعاملات غير صحيحة'}, 400)
-            
-            for transaction_data in data['transactions']:
+        transactions = data.get('transactions', [])
+        transaction_mappings = []
+        
+        for trans_data in transactions:
+            try:
+                # التحقق من البيانات المطلوبة للمعاملة
+                required_fields = ['amount', 'type', 'description', 'account_id']
+                missing_fields = [field for field in required_fields if field not in trans_data]
+                if missing_fields:
+                    return json_response({'error': f'بيانات المعاملة غير مكتملة: {", ".join(missing_fields)}'}, 400)
+                
+                # معالجة التاريخ
                 try:
-                    # التحقق من البيانات المطلوبة
-                    required_fields = ['date', 'amount', 'description', 'account_id']
-                    missing_fields = [field for field in required_fields if field not in transaction_data]
-                    if missing_fields:
-                        return json_response({'error': f'بيانات المعاملة غير مكتملة: {", ".join(missing_fields)}'}, 400)
-                    
-                    # معالجة التاريخ
-                    try:
-                        if isinstance(transaction_data['date'], (int, float)):
-                            date = datetime.fromtimestamp(transaction_data['date'] / 1000)
-                        else:
-                            date = datetime.fromisoformat(transaction_data['date'].replace('Z', '+00:00'))
-                    except (ValueError, TypeError) as e:
-                        return json_response({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}, 400)
-                    
-                    # البحث عن المعاملة
-                    transaction = None
-                    if 'id' in transaction_data:
-                        transaction = Transaction.query.filter_by(
-                            id=transaction_data['id'],
-                            user_id=user_id
-                        ).first()
-                    
-                    if not transaction:
-                        # معاملة جديدة
-                        transaction = Transaction(
-                            date=date,
-                            amount=transaction_data['amount'],
-                            description=transaction_data['description'],
-                            type=transaction_data.get('type', 'debit'),
-                            currency=transaction_data.get('currency', 'ريال يمني'),
-                            notes=transaction_data.get('notes', ''),
-                            whatsapp_enabled=transaction_data.get('whatsapp_enabled', True),
-                            user_id=user_id,
-                            account_id=transaction_data['account_id']
-                        )
-                        db.session.add(transaction)
-                        db.session.flush()  # للحصول على المعرف الجديد
-                        if 'id' in transaction_data:
-                            transaction_id_map[transaction_data['id']] = transaction.id
-                        logger.info(f"Added new transaction: {transaction.id}")
+                    if isinstance(trans_data.get('transaction_date'), (int, float)):
+                        date = datetime.fromtimestamp(trans_data['transaction_date'] / 1000)
                     else:
-                        # تحديث المعاملة الموجودة
-                        transaction.date = date
-                        transaction.amount = transaction_data['amount']
-                        transaction.description = transaction_data['description']
-                        if 'type' in transaction_data:
-                            transaction.type = transaction_data['type']
-                        if 'currency' in transaction_data:
-                            transaction.currency = transaction_data['currency']
-                        if 'notes' in transaction_data:
-                            transaction.notes = transaction_data['notes']
-                        if 'whatsapp_enabled' in transaction_data:
-                            transaction.whatsapp_enabled = transaction_data['whatsapp_enabled']
-                        transaction_id_map[transaction_data['id']] = transaction.id
-                        logger.info(f"Updated transaction: {transaction.id}")
-                except Exception as e:
-                    logger.error(f"Error processing transaction: {str(e)}")
-                    return json_response({'error': f'خطأ في معالجة بيانات المعاملة: {str(e)}'}, 400)
+                        date = datetime.fromisoformat(trans_data['transaction_date'].replace('Z', '+00:00'))
+                except (ValueError, TypeError) as e:
+                    return json_response({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}, 400)
+                
+                # البحث عن المعاملة باستخدام server_id إذا كان موجوداً
+                transaction = None
+                if trans_data.get('server_id'):
+                    transaction = Transaction.query.filter_by(server_id=trans_data['server_id']).first()
+                
+                # إذا لم يتم العثور على المعاملة، ابحث باستخدام المعرف المحلي
+                if not transaction and trans_data.get('id'):
+                    transaction = Transaction.query.filter_by(id=trans_data['id']).first()
+                
+                if transaction:
+                    # تحديث المعاملة الموجودة
+                    transaction.amount = trans_data.get('amount', transaction.amount)
+                    transaction.type = trans_data.get('type', transaction.type)
+                    transaction.description = trans_data.get('description', transaction.description)
+                    transaction.notes = trans_data.get('notes', transaction.notes)
+                    transaction.transaction_date = date
+                    transaction.currency = trans_data.get('currency', transaction.currency)
+                    transaction.whatsapp_enabled = trans_data.get('whatsapp_enabled', transaction.whatsapp_enabled)
+                    transaction.account_id = trans_data.get('account_id', transaction.account_id)
+                    transaction.user_id = current_user_id
+                    # لا نقوم بتحديث server_id إذا كان موجوداً بالفعل
+                    if not transaction.server_id:
+                        transaction.server_id = trans_data.get('server_id')
+                    logger.info(f"Updated transaction: {transaction.id}")
+                else:
+                    # إنشاء معاملة جديدة
+                    transaction = Transaction(
+                        amount=trans_data.get('amount'),
+                        type=trans_data.get('type'),
+                        description=trans_data.get('description'),
+                        notes=trans_data.get('notes'),
+                        transaction_date=date,
+                        currency=trans_data.get('currency'),
+                        whatsapp_enabled=trans_data.get('whatsapp_enabled', False),
+                        account_id=trans_data.get('account_id'),
+                        user_id=current_user_id,
+                        server_id=trans_data.get('server_id')  # استخدام server_id من الطلب إذا كان موجوداً
+                    )
+                    db.session.add(transaction)
+                    db.session.flush()  # للحصول على معرف المعاملة
+                    logger.info(f"Added new transaction: {transaction.id}")
+                
+                transaction_mappings.append({
+                    'local_id': trans_data.get('id'),
+                    'server_id': transaction.id  # استخدام معرف المعاملة كـ server_id
+                })
+            except Exception as e:
+                logger.error(f"Error processing transaction: {str(e)}")
+                return json_response({'error': f'خطأ في معالجة بيانات المعاملة: {str(e)}'}, 400)
         
         try:
             db.session.commit()
             logger.info("Sync completed successfully")
-            return json_response({
+            return jsonify({
                 'message': 'تمت المزامنة بنجاح',
-                'accountIdMap': account_id_map,
-                'transactionIdMap': transaction_id_map
+                'account_mappings': account_mappings,
+                'transaction_mappings': transaction_mappings
             })
         except Exception as e:
             logger.error(f"Database commit error: {str(e)}")
@@ -249,7 +258,7 @@ def sync_data():
         logger.error(f"Unexpected sync error: {str(e)}")
         db.session.rollback()
         return json_response({'error': f'حدث خطأ غير متوقع أثناء المزامنة: {str(e)}'}, 500)
-    
+
 @main.route('/api/accounts', methods=['GET'])
 @jwt_required()
 def get_accounts():
