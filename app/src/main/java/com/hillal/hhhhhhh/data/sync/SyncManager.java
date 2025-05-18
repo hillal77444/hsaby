@@ -623,7 +623,7 @@ public class SyncManager {
                                 }
 
                                 // البحث عن الحساب في قاعدة البيانات المحلية
-                                Account existingAccount = database.accountDao().getAccountByNumberSync(account.getAccountNumber());
+                                Account existingAccount = database.accountDao().getAccountByNumber(account.getAccountNumber());
                                 if (existingAccount != null) {
                                     existingAccount.setName(account.getName());
                                     existingAccount.setBalance(account.getBalance());
@@ -675,7 +675,7 @@ public class SyncManager {
                                 }
 
                                 // البحث عن المعاملة في قاعدة البيانات المحلية
-                                Transaction existingTransaction = database.transactionDao().getTransactionByServerIdSync(transaction.getServerId());
+                                Transaction existingTransaction = database.transactionDao().getTransactionByServerId(transaction.getServerId());
                                 if (existingTransaction != null) {
                                     existingTransaction.setAmount(transaction.getAmount());
                                     existingTransaction.setType(transaction.getType());
@@ -954,7 +954,7 @@ public class SyncManager {
                                     if (accountNumber == null) continue;
 
                                     // البحث عن الحساب في قاعدة البيانات المحلية
-                                    Account existingAccount = database.accountDao().getAccountByNumberSync(accountNumber);
+                                    Account existingAccount = database.accountDao().getAccountByNumber(accountNumber);
                                     if (existingAccount != null) {
                                         existingAccount.setName((String) accountData.get("account_name"));
                                         existingAccount.setPhoneNumber((String) accountData.get("phone_number"));
@@ -996,7 +996,7 @@ public class SyncManager {
                                     long serverId = ((Number) transactionData.get("id")).longValue();
                                     
                                     // البحث عن المعاملة في قاعدة البيانات المحلية
-                                    Transaction existingTransaction = database.transactionDao().getTransactionByServerIdSync(serverId);
+                                    Transaction existingTransaction = database.transactionDao().getTransactionByServerId(serverId);
                                     if (existingTransaction != null) {
                                         existingTransaction.setAmount(((Number) transactionData.get("amount")).doubleValue());
                                         existingTransaction.setType((String) transactionData.get("type"));
