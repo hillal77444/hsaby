@@ -1,5 +1,7 @@
 package com.hillal.hhhhhhh.ui.dashboard;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,6 +30,7 @@ public class DashboardFragment extends Fragment {
     private DashboardViewModel dashboardViewModel;
     private UserPreferences userPreferences;
     private SyncManager syncManager;
+    private ProgressDialog progressDialog;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -155,9 +158,58 @@ public class DashboardFragment extends Fragment {
         }
     }
 
+    private void showLoadingDialog(String message) {
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(requireContext());
+            progressDialog.setCancelable(false);
+        }
+        progressDialog.setMessage(message);
+        progressDialog.show();
+    }
+
+    private void hideLoadingDialog() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+    }
+
+    private void showSuccessDialog(String message) {
+        new AlertDialog.Builder(requireContext())
+            .setTitle("نجاح")
+            .setMessage(message)
+            .setPositiveButton("حسناً", null)
+            .show();
+    }
+
+    private void showErrorDialog(String message) {
+        new AlertDialog.Builder(requireContext())
+            .setTitle("خطأ")
+            .setMessage(message)
+            .setPositiveButton("حسناً", null)
+            .show();
+    }
+
+    private void loadAccounts() {
+        dashboardViewModel.getAccounts().observe(getViewLifecycleOwner(), accounts -> {
+            // تحديث واجهة المستخدم بالحسابات الجديدة
+            // يمكنك إضافة الكود الخاص بك هنا
+        });
+    }
+
+    private void loadTransactions() {
+        dashboardViewModel.getTransactions().observe(getViewLifecycleOwner(), transactions -> {
+            // تحديث واجهة المستخدم بالمعاملات الجديدة
+            // يمكنك إضافة الكود الخاص بك هنا
+        });
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
         binding = null;
     }
 } 
