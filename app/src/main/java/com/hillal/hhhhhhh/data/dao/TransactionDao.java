@@ -72,7 +72,7 @@ public interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE sync_status != :syncStatus AND last_sync_time > :lastSyncTime")
     List<Transaction> getModifiedTransactions(long lastSyncTime, int syncStatus);
 
-    @Query("SELECT * FROM transactions WHERE server_id = 0")
+    @Query("SELECT * FROM transactions WHERE server_id = -1")
     List<Transaction> getNewTransactions();
 
     @Query("SELECT * FROM transactions WHERE type = :type ORDER BY transaction_date DESC")
