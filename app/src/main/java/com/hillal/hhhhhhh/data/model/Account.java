@@ -8,54 +8,68 @@ import androidx.room.ColumnInfo;
 import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "accounts",
-        indices = {@Index(value = {"phoneNumber"}, unique = true)})
+        indices = {@Index(value = {"phone_number"}, unique = true)})
 public class Account {
     @PrimaryKey(autoGenerate = true)
     private long id;
 
-    @ColumnInfo(name = "serverId")
+    @ColumnInfo(name = "server_id")
     @SerializedName("server_id")
     private long serverId;
 
+    @ColumnInfo(name = "user_id")
     @SerializedName("user_id")
     private long userId;
 
+    @ColumnInfo(name = "account_number")
     @SerializedName("account_number")
     private String accountNumber;
 
+    @ColumnInfo(name = "account_name")
     @SerializedName("account_name")
     private String name;
 
+    @ColumnInfo(name = "balance")
     @SerializedName("balance")
     private double balance;
 
+    @ColumnInfo(name = "phone_number")
     @SerializedName("phone_number")
     private String phoneNumber;
 
+    @ColumnInfo(name = "notes")
     @SerializedName("notes")
     private String notes;
 
+    @ColumnInfo(name = "is_debtor")
     @SerializedName("is_debtor")
     private boolean isDebtor;
 
+    @ColumnInfo(name = "created_at")
     @SerializedName("created_at")
     private long createdAt;
 
+    @ColumnInfo(name = "updated_at")
     @SerializedName("updated_at")
     private long updatedAt;
 
+    @ColumnInfo(name = "last_sync_time")
     @SerializedName("last_sync_time")
     private long lastSyncTime;
 
+    @ColumnInfo(name = "is_modified")
     @SerializedName("is_modified")
     private boolean isModified;
 
+    @ColumnInfo(name = "whatsapp_enabled")
     @SerializedName("whatsapp_enabled")
     private boolean whatsappEnabled;
 
+    @ColumnInfo(name = "sync_status")
     @SerializedName("sync_status")
     private int syncStatus;
 
+    @ColumnInfo(name = "currency")
     @SerializedName("currency")
     private String currency;
 
