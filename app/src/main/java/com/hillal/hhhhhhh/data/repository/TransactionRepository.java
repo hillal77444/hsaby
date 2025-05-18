@@ -14,10 +14,9 @@ public class TransactionRepository {
     private final TransactionDao transactionDao;
     private final ExecutorService executorService;
 
-    public TransactionRepository(Application application) {
-        AppDatabase db = AppDatabase.getInstance(application);
-        transactionDao = db.transactionDao();
-        executorService = Executors.newSingleThreadExecutor();
+    public TransactionRepository(TransactionDao transactionDao) {
+        this.transactionDao = transactionDao;
+        this.executorService = Executors.newSingleThreadExecutor();
     }
 
     public LiveData<List<Transaction>> getTransactionsForAccount(long accountId) {
