@@ -238,11 +238,11 @@ public class MainActivity extends AppCompatActivity {
                     Fragment selectedFragment = null;
 
                     int itemId = item.getItemId();
-                    if (itemId == R.id.navigation_dashboard) {
+                    if (itemId == R.id.nav_dashboard) {
                         selectedFragment = new DashboardFragment();
-                    } else if (itemId == R.id.navigation_transactions) {
+                    } else if (itemId == R.id.nav_transactions) {
                         selectedFragment = new TransactionsFragment();
-                    } else if (itemId == R.id.navigation_settings) {
+                    } else if (itemId == R.id.nav_settings) {
                         selectedFragment = new SettingsFragment();
                     }
 
