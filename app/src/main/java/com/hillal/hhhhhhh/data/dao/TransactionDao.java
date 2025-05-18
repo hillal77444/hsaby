@@ -19,7 +19,7 @@ public interface TransactionDao {
     LiveData<List<Transaction>> getTransactionsForAccount(long accountId);
 
     @Query("SELECT * FROM transactions WHERE accountId = :accountId AND transaction_date BETWEEN :startDate AND :endDate ORDER BY transaction_date DESC")
-    LiveData<List<Transaction>> getTransactionsForAccountInDateRange(long accountId, Date startDate, Date endDate);
+    LiveData<List<Transaction>> getTransactionsForAccountInDateRange(long accountId, long startDate, long endDate);
 
     @Query("SELECT SUM(amount) FROM transactions WHERE accountId = :accountId AND type = 'credit'")
     LiveData<Double> getTotalCredits(long accountId);
@@ -31,13 +31,13 @@ public interface TransactionDao {
     LiveData<Transaction> getLastTransaction(long accountId);
 
     @Query("SELECT SUM(amount) FROM transactions WHERE accountId = :accountId AND type = 'credit' AND transaction_date BETWEEN :startDate AND :endDate")
-    LiveData<Double> getTotalCreditsInDateRange(long accountId, Date startDate, Date endDate);
+    LiveData<Double> getTotalCreditsInDateRange(long accountId, long startDate, long endDate);
 
     @Query("SELECT SUM(amount) FROM transactions WHERE accountId = :accountId AND type = 'debit' AND transaction_date BETWEEN :startDate AND :endDate")
-    LiveData<Double> getTotalDebitsInDateRange(long accountId, Date startDate, Date endDate);
+    LiveData<Double> getTotalDebitsInDateRange(long accountId, long startDate, long endDate);
 
     @Query("SELECT * FROM transactions WHERE transaction_date BETWEEN :startDate AND :endDate ORDER BY transaction_date DESC")
-    LiveData<List<Transaction>> getTransactionsByDateRange(Date startDate, Date endDate);
+    LiveData<List<Transaction>> getTransactionsByDateRange(long startDate, long endDate);
 
     @Query("SELECT * FROM transactions")
     LiveData<List<Transaction>> getAllTransactions();
@@ -62,6 +62,15 @@ public interface TransactionDao {
 
     @Query("SELECT * FROM transactions WHERE sync_status != :syncStatus")
     List<Transaction> getModifiedTransactions(int syncStatus);
+
+    @Query("SELECT * FROM transactions WHERE type = :type ORDER BY transaction_date DESC")
+    LiveData<List<Transaction>> getTransactionsByType(String type);
+
+    @Query("SELECT * FROM transactions WHERE account_id = :accountId AND transaction_date BETWEEN :fromDate AND :toDate ORDER BY transaction_date DESC")
+    LiveData<List<Transaction>> getTransactionsByAccountAndDateRange(long accountId, long fromDate, long toDate);
+
+    @Query("SELECT SUM(CASE WHEN type = 'credit' THEN amount ELSE -amount END) FROM transactions WHERE account_id = :accountId AND transaction_date <= :transactionDate AND currency = :currency")
+    LiveData<Double> getBalanceUntilDate(long accountId, long transactionDate, String currency);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(Transaction transaction);
