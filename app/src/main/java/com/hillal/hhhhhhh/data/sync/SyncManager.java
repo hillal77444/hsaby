@@ -38,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.HashMap;
 import java.io.IOException;
+import androidx.lifecycle.LifecycleOwner;
 
 public class SyncManager {
     private static final String TAG = "SyncManager";
@@ -621,22 +622,24 @@ public class SyncManager {
                                     continue;
                                 }
 
-                                Account existingAccount = database.accountDao().getAccountByNumber(account.getAccountNumber());
-                                if (existingAccount != null) {
-                                    existingAccount.setName(account.getName());
-                                    existingAccount.setBalance(account.getBalance());
-                                    existingAccount.setPhoneNumber(account.getPhoneNumber());
-                                    existingAccount.setNotes(account.getNotes());
-                                    existingAccount.setIsDebtor(account.isDebtor());
-                                    existingAccount.setWhatsappEnabled(account.isWhatsappEnabled());
-                                    existingAccount.setServerId(account.getServerId());
-                                    existingAccount.setSyncStatus(1); // SYNCED
-                                    database.accountDao().update(existingAccount);
-                                } else {
-                                    account.setUserId(currentUserId);
-                                    account.setSyncStatus(1); // SYNCED
-                                    database.accountDao().insert(account);
-                                }
+                                // البحث عن الحساب في قاعدة البيانات المحلية
+                                database.accountDao().getAccountByNumber(account.getAccountNumber()).observe((LifecycleOwner) context, existingAccount -> {
+                                    if (existingAccount != null) {
+                                        existingAccount.setName(account.getName());
+                                        existingAccount.setBalance(account.getBalance());
+                                        existingAccount.setPhoneNumber(account.getPhoneNumber());
+                                        existingAccount.setNotes(account.getNotes());
+                                        existingAccount.setIsDebtor(account.isDebtor());
+                                        existingAccount.setWhatsappEnabled(account.isWhatsappEnabled());
+                                        existingAccount.setServerId(account.getServerId());
+                                        existingAccount.setSyncStatus(1); // SYNCED
+                                        database.accountDao().update(existingAccount);
+                                    } else {
+                                        account.setUserId(currentUserId);
+                                        account.setSyncStatus(1); // SYNCED
+                                        database.accountDao().insert(account);
+                                    }
+                                });
                             }
 
                             // بعد اكتمال جلب الحسابات، نقوم بجلب المعاملات
@@ -672,20 +675,22 @@ public class SyncManager {
                                     continue;
                                 }
 
-                                Transaction existingTransaction = database.transactionDao().getTransactionByServerId(transaction.getServerId());
-                                if (existingTransaction != null) {
-                                    existingTransaction.setAmount(transaction.getAmount());
-                                    existingTransaction.setType(transaction.getType());
-                                    existingTransaction.setDescription(transaction.getDescription());
-                                    existingTransaction.setNotes(transaction.getNotes());
-                                    existingTransaction.setTransactionDate(transaction.getTransactionDate());
-                                    existingTransaction.setSyncStatus(1); // SYNCED
-                                    database.transactionDao().update(existingTransaction);
-                                } else {
-                                    transaction.setUserId(currentUserId);
-                                    transaction.setSyncStatus(1); // SYNCED
-                                    database.transactionDao().insert(transaction);
-                                }
+                                // البحث عن المعاملة في قاعدة البيانات المحلية
+                                database.transactionDao().getTransactionByServerId(transaction.getServerId()).observe((LifecycleOwner) context, existingTransaction -> {
+                                    if (existingTransaction != null) {
+                                        existingTransaction.setAmount(transaction.getAmount());
+                                        existingTransaction.setType(transaction.getType());
+                                        existingTransaction.setDescription(transaction.getDescription());
+                                        existingTransaction.setNotes(transaction.getNotes());
+                                        existingTransaction.setTransactionDate(transaction.getTransactionDate());
+                                        existingTransaction.setSyncStatus(1); // SYNCED
+                                        database.transactionDao().update(existingTransaction);
+                                    } else {
+                                        transaction.setUserId(currentUserId);
+                                        transaction.setSyncStatus(1); // SYNCED
+                                        database.transactionDao().insert(transaction);
+                                    }
+                                });
                             }
 
                             // بعد اكتمال جلب جميع البيانات، نقوم بحفظ وقت المزامنة
@@ -842,12 +847,13 @@ public class SyncManager {
                                         for (Map<String, Object> mapping : accountMappings) {
                                             long localId = ((Number) mapping.get("localId")).longValue();
                                             long serverId = ((Number) mapping.get("serverId")).longValue();
-                                            Account account = database.accountDao().getAccountById(localId);
-                                            if (account != null) {
-                                                account.setServerId(serverId);
-                                                account.setSyncStatus(2); // SYNCED
-                                                database.accountDao().update(account);
-                                            }
+                                            database.accountDao().getAccountById(localId).observe((LifecycleOwner) context, account -> {
+                                                if (account != null) {
+                                                    account.setServerId(serverId);
+                                                    account.setSyncStatus(2); // SYNCED
+                                                    database.accountDao().update(account);
+                                                }
+                                            });
                                         }
                                     }
 
@@ -857,12 +863,13 @@ public class SyncManager {
                                         for (Map<String, Object> mapping : transactionMappings) {
                                             long localId = ((Number) mapping.get("localId")).longValue();
                                             long serverId = ((Number) mapping.get("serverId")).longValue();
-                                            Transaction transaction = database.transactionDao().getTransactionById(localId);
-                                            if (transaction != null) {
-                                                transaction.setServerId(serverId);
-                                                transaction.setSyncStatus(2); // SYNCED
-                                                database.transactionDao().update(transaction);
-                                            }
+                                            database.transactionDao().getTransactionById(localId).observe((LifecycleOwner) context, transaction -> {
+                                                if (transaction != null) {
+                                                    transaction.setServerId(serverId);
+                                                    transaction.setSyncStatus(2); // SYNCED
+                                                    database.transactionDao().update(transaction);
+                                                }
+                                            });
                                         }
                                     }
 
@@ -949,38 +956,39 @@ public class SyncManager {
                                     if (accountNumber == null) continue;
 
                                     // البحث عن الحساب في قاعدة البيانات المحلية
-                                    Account existingAccount = null;
-                                    List<Account> existingAccounts = database.accountDao().getAllAccounts();
-                                    for (Account acc : existingAccounts) {
-                                        if (acc.getAccountNumber().equals(accountNumber)) {
-                                            existingAccount = acc;
-                                            break;
+                                    database.accountDao().getAllAccounts().observe((LifecycleOwner) context, existingAccounts -> {
+                                        Account existingAccount = null;
+                                        for (Account acc : existingAccounts) {
+                                            if (acc.getAccountNumber().equals(accountNumber)) {
+                                                existingAccount = acc;
+                                                break;
+                                            }
                                         }
-                                    }
 
-                                    Account account;
-                                    if (existingAccount != null) {
-                                        account = existingAccount;
-                                    } else {
-                                        account = new Account();
-                                        account.setAccountNumber(accountNumber);
-                                    }
+                                        Account account;
+                                        if (existingAccount != null) {
+                                            account = existingAccount;
+                                        } else {
+                                            account = new Account();
+                                            account.setAccountNumber(accountNumber);
+                                        }
 
-                                    // تحديث بيانات الحساب
-                                    account.setName((String) accountData.get("account_name"));
-                                    account.setPhoneNumber((String) accountData.get("phone_number"));
-                                    account.setBalance(((Number) accountData.get("balance")).doubleValue());
-                                    account.setCurrency((String) accountData.get("currency"));
-                                    account.setNotes((String) accountData.get("notes"));
-                                    account.setWhatsappEnabled((Boolean) accountData.get("whatsapp_enabled"));
-                                    account.setLastSyncTime(System.currentTimeMillis());
-                                    account.setSyncStatus(2); // SYNCED
+                                        // تحديث بيانات الحساب
+                                        account.setName((String) accountData.get("account_name"));
+                                        account.setPhoneNumber((String) accountData.get("phone_number"));
+                                        account.setBalance(((Number) accountData.get("balance")).doubleValue());
+                                        account.setCurrency((String) accountData.get("currency"));
+                                        account.setNotes((String) accountData.get("notes"));
+                                        account.setWhatsappEnabled((Boolean) accountData.get("whatsapp_enabled"));
+                                        account.setLastSyncTime(System.currentTimeMillis());
+                                        account.setSyncStatus(2); // SYNCED
 
-                                    if (existingAccount != null) {
-                                        database.accountDao().update(account);
-                                    } else {
-                                        database.accountDao().insert(account);
-                                    }
+                                        if (existingAccount != null) {
+                                            database.accountDao().update(account);
+                                        } else {
+                                            database.accountDao().insert(account);
+                                        }
+                                    });
                                 }
                             }
 
@@ -999,55 +1007,56 @@ public class SyncManager {
                                     long serverId = ((Number) transactionData.get("id")).longValue();
                                     
                                     // البحث عن المعاملة في قاعدة البيانات المحلية
-                                    Transaction existingTransaction = null;
-                                    List<Transaction> existingTransactions = database.transactionDao().getAllTransactions();
-                                    for (Transaction trans : existingTransactions) {
-                                        if (trans.getServerId() == serverId) {
-                                            existingTransaction = trans;
-                                            break;
+                                    database.transactionDao().getAllTransactions().observe((LifecycleOwner) context, existingTransactions -> {
+                                        Transaction existingTransaction = null;
+                                        for (Transaction trans : existingTransactions) {
+                                            if (trans.getServerId() == serverId) {
+                                                existingTransaction = trans;
+                                                break;
+                                            }
                                         }
-                                    }
 
-                                    Transaction transaction;
-                                    if (existingTransaction != null) {
-                                        transaction = existingTransaction;
-                                    } else {
-                                        transaction = new Transaction();
-                                        transaction.setServerId(serverId);
-                                    }
-
-                                    // تحديث بيانات المعاملة
-                                    transaction.setAccountId(((Number) transactionData.get("account_id")).longValue());
-                                    transaction.setAmount(((Number) transactionData.get("amount")).doubleValue());
-                                    transaction.setType((String) transactionData.get("type"));
-                                    transaction.setDescription((String) transactionData.get("description"));
-                                    transaction.setCurrency((String) transactionData.get("currency"));
-                                    
-                                    // معالجة التاريخ
-                                    Object dateObj = transactionData.get("date");
-                                    if (dateObj instanceof Number) {
-                                        transaction.setTransactionDate(((Number) dateObj).longValue());
-                                    } else if (dateObj instanceof String) {
-                                        try {
-                                            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                                            java.util.Date date = sdf.parse((String) dateObj);
-                                            transaction.setTransactionDate(date.getTime());
-                                        } catch (Exception e) {
-                                            Log.e(TAG, "Error parsing date: " + e.getMessage());
-                                            transaction.setTransactionDate(System.currentTimeMillis());
+                                        Transaction transaction;
+                                        if (existingTransaction != null) {
+                                            transaction = existingTransaction;
+                                        } else {
+                                            transaction = new Transaction();
+                                            transaction.setServerId(serverId);
                                         }
-                                    }
-                                    
-                                    transaction.setNotes((String) transactionData.get("notes"));
-                                    transaction.setWhatsappEnabled((Boolean) transactionData.get("whatsapp_enabled"));
-                                    transaction.setLastSyncTime(System.currentTimeMillis());
-                                    transaction.setSyncStatus(2); // SYNCED
 
-                                    if (existingTransaction != null) {
-                                        database.transactionDao().update(transaction);
-                                    } else {
-                                        database.transactionDao().insert(transaction);
-                                    }
+                                        // تحديث بيانات المعاملة
+                                        transaction.setAccountId(((Number) transactionData.get("account_id")).longValue());
+                                        transaction.setAmount(((Number) transactionData.get("amount")).doubleValue());
+                                        transaction.setType((String) transactionData.get("type"));
+                                        transaction.setDescription((String) transactionData.get("description"));
+                                        transaction.setCurrency((String) transactionData.get("currency"));
+                                        
+                                        // معالجة التاريخ
+                                        Object dateObj = transactionData.get("date");
+                                        if (dateObj instanceof Number) {
+                                            transaction.setTransactionDate(((Number) dateObj).longValue());
+                                        } else if (dateObj instanceof String) {
+                                            try {
+                                                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                                                java.util.Date date = sdf.parse((String) dateObj);
+                                                transaction.setTransactionDate(date.getTime());
+                                            } catch (Exception e) {
+                                                Log.e(TAG, "Error parsing date: " + e.getMessage());
+                                                transaction.setTransactionDate(System.currentTimeMillis());
+                                            }
+                                        }
+                                        
+                                        transaction.setNotes((String) transactionData.get("notes"));
+                                        transaction.setWhatsappEnabled((Boolean) transactionData.get("whatsapp_enabled"));
+                                        transaction.setLastSyncTime(System.currentTimeMillis());
+                                        transaction.setSyncStatus(2); // SYNCED
+
+                                        if (existingTransaction != null) {
+                                            database.transactionDao().update(transaction);
+                                        } else {
+                                            database.transactionDao().insert(transaction);
+                                        }
+                                    });
                                 }
                             }
 
