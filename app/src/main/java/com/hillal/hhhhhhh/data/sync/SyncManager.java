@@ -746,8 +746,8 @@ public class SyncManager {
                                     continue;
                                 }
 
-                                // التحقق من وجود الحساب
-                                Account account = accountDao.getAccountByIdSync(transaction.getAccountId());
+                                // البحث عن الحساب في قاعدة البيانات المحلية
+                                Account account = accountDao.getAccountByNumberSync(transaction.getAccountNumber());
                                 if (account == null) {
                                     Log.e(TAG, "Account not found for transaction: " + transaction.getId());
                                     continue;
