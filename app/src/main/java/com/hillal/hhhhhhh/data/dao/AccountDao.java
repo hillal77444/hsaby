@@ -35,7 +35,7 @@ public interface AccountDao {
     @Query("SELECT * FROM accounts WHERE sync_status != :syncStatus AND last_sync_time > :lastSyncTime")
     List<Account> getModifiedAccounts(long lastSyncTime, int syncStatus);
 
-    @Query("SELECT * FROM accounts WHERE server_id = 0")
+    @Query("SELECT * FROM accounts WHERE server_id = -1")
     List<Account> getNewAccounts();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
