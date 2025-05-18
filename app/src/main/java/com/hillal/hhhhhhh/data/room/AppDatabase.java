@@ -21,9 +21,10 @@ import com.hillal.hhhhhhh.data.room.migrations.Migration_2;
 import com.hillal.hhhhhhh.data.room.migrations.Migration_3;
 import com.hillal.hhhhhhh.data.room.migrations.Migration_4;
 import com.hillal.hhhhhhh.data.room.migrations.Migration_5;
+import com.hillal.hhhhhhh.data.room.Converters;
 
 @Database(entities = {Account.class, Transaction.class, Settings.class, PendingOperation.class, User.class}, version = 5, exportSchema = false)
-@TypeConverters({Converters.class})
+@TypeConverters(Converters.class)
 public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG = "AppDatabase";
     private static final String DATABASE_NAME = "accounting_database";
