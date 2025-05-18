@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.room.AccountDao;
+import com.hillal.hhhhhhh.data.room.TransactionDao;
 import com.hillal.hhhhhhh.data.room.AppDatabase;
 
 import java.util.List;
@@ -14,12 +15,14 @@ import java.util.concurrent.Executors;
 
 public class AccountRepository {
     private final AccountDao accountDao;
+    private final TransactionDao transactionDao;
     private final ExecutorService executorService;
     private final MutableLiveData<List<Account>> recentAccounts = new MutableLiveData<>();
     private final AppDatabase database;
 
     public AccountRepository(AccountDao accountDao, AppDatabase database) {
         this.accountDao = accountDao;
+        this.transactionDao = database.transactionDao();
         this.executorService = Executors.newSingleThreadExecutor();
         this.database = database;
         loadRecentAccounts();
