@@ -938,15 +938,18 @@ public class SyncManager {
             try {
                 // جلب التغييرات المحلية
                 List<Account> modifiedAccounts = accountDao.getModifiedAccounts(getLastSyncTime());
+                List<Transaction> newTransactions = transactionDao.getNewTransactions(); // القيود الجديدة فقط
                 List<Transaction> modifiedTransactions = transactionDao.getModifiedTransactions(getLastSyncTime());
 
-                if (modifiedAccounts.isEmpty() && modifiedTransactions.isEmpty()) {
+                if (modifiedAccounts.isEmpty() && newTransactions.isEmpty() && modifiedTransactions.isEmpty()) {
                     Log.d(TAG, "No local changes to sync");
                     handler.post(() -> callback.onSuccess());
                     return;
                 }
 
-                Log.d(TAG, "Syncing " + modifiedAccounts.size() + " accounts and " + modifiedTransactions.size() + " transactions");
+                Log.d(TAG, "Syncing " + modifiedAccounts.size() + " accounts, " + 
+                          newTransactions.size() + " new transactions, and " + 
+                          modifiedTransactions.size() + " modified transactions");
 
                 // تجهيز البيانات للمزامنة
                 Map<String, Object> changes = new HashMap<>();
@@ -970,9 +973,9 @@ public class SyncManager {
                 }
                 changes.put("accounts", accountsList);
 
-                // تحضير قائمة المعاملات
-                List<Map<String, Object>> transactionsList = new ArrayList<>();
-                for (Transaction transaction : modifiedTransactions) {
+                // تحضير قائمة المعاملات الجديدة
+                List<Map<String, Object>> newTransactionsList = new ArrayList<>();
+                for (Transaction transaction : newTransactions) {
                     Map<String, Object> transactionMap = new HashMap<>();
                     transactionMap.put("date", transaction.getTransactionDate());
                     transactionMap.put("amount", transaction.getAmount());
@@ -983,12 +986,27 @@ public class SyncManager {
                     transactionMap.put("notes", transaction.getNotes());
                     transactionMap.put("whatsapp_enabled", transaction.isWhatsappEnabled());
                     transactionMap.put("user_id", currentUserId);
-                    if (transaction.getServerId() > 0) {
-                        transactionMap.put("id", transaction.getServerId());
-                    }
-                    transactionsList.add(transactionMap);
+                    newTransactionsList.add(transactionMap);
                 }
-                changes.put("transactions", transactionsList);
+                changes.put("new_transactions", newTransactionsList);
+
+                // تحضير قائمة المعاملات المعدلة
+                List<Map<String, Object>> modifiedTransactionsList = new ArrayList<>();
+                for (Transaction transaction : modifiedTransactions) {
+                    Map<String, Object> transactionMap = new HashMap<>();
+                    transactionMap.put("id", transaction.getServerId());
+                    transactionMap.put("date", transaction.getTransactionDate());
+                    transactionMap.put("amount", transaction.getAmount());
+                    transactionMap.put("description", transaction.getDescription());
+                    transactionMap.put("account_id", transaction.getAccountId());
+                    transactionMap.put("type", transaction.getType());
+                    transactionMap.put("currency", transaction.getCurrency());
+                    transactionMap.put("notes", transaction.getNotes());
+                    transactionMap.put("whatsapp_enabled", transaction.isWhatsappEnabled());
+                    transactionMap.put("user_id", currentUserId);
+                    modifiedTransactionsList.add(transactionMap);
+                }
+                changes.put("modified_transactions", modifiedTransactionsList);
 
                 // تحويل البيانات إلى JSON للنسخ
                 String syncRequestJson = new Gson().toJson(changes);
@@ -1018,7 +1036,7 @@ public class SyncManager {
                                         }
                                     }
 
-                                    // تحديث معرفات السيرفر للمعاملات
+                                    // تحديث معرفات السيرفر للمعاملات الجديدة
                                     List<Map<String, Object>> transactionMappings = (List<Map<String, Object>>) result.get("transactionIdMap");
                                     if (transactionMappings != null) {
                                         for (Map<String, Object> mapping : transactionMappings) {
@@ -1059,8 +1077,8 @@ public class SyncManager {
 
                     @Override
                     public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                        final String errorBody = t.getMessage();
-                        handler.post(() -> callback.onError("Failed to sync changes: " + errorBody));
+                        Log.e(TAG, "Network error during sync: " + t.getMessage());
+                        handler.post(() -> callback.onError("Network error: " + t.getMessage()));
                     }
                 });
             } catch (Exception e) {
