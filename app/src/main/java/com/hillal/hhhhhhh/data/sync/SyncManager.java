@@ -822,8 +822,49 @@ public class SyncManager {
 
                 // تجهيز البيانات للمزامنة
                 Map<String, Object> changes = new HashMap<>();
-                changes.put("accounts", modifiedAccounts);
-                changes.put("transactions", modifiedTransactions);
+                
+                // تحضير قائمة الحسابات
+                List<Map<String, Object>> accountsList = new ArrayList<>();
+                for (Account account : modifiedAccounts) {
+                    Map<String, Object> accountMap = new HashMap<>();
+                    accountMap.put("account_number", account.getAccountNumber());
+                    accountMap.put("account_name", account.getName());
+                    accountMap.put("balance", account.getBalance());
+                    accountMap.put("is_debtor", account.isDebtor());
+                    accountMap.put("phone_number", account.getPhoneNumber());
+                    accountMap.put("notes", account.getNotes());
+                    accountMap.put("whatsapp_enabled", account.isWhatsappEnabled());
+                    accountMap.put("user_id", currentUserId);
+                    if (account.getServerId() > 0) {
+                        accountMap.put("id", account.getServerId());
+                    }
+                    accountsList.add(accountMap);
+                }
+                changes.put("accounts", accountsList);
+
+                // تحضير قائمة المعاملات
+                List<Map<String, Object>> transactionsList = new ArrayList<>();
+                for (Transaction transaction : modifiedTransactions) {
+                    Map<String, Object> transactionMap = new HashMap<>();
+                    transactionMap.put("date", transaction.getTransactionDate());
+                    transactionMap.put("amount", transaction.getAmount());
+                    transactionMap.put("description", transaction.getDescription());
+                    transactionMap.put("account_id", transaction.getAccountId());
+                    transactionMap.put("type", transaction.getType());
+                    transactionMap.put("currency", transaction.getCurrency());
+                    transactionMap.put("notes", transaction.getNotes());
+                    transactionMap.put("whatsapp_enabled", transaction.isWhatsappEnabled());
+                    transactionMap.put("user_id", currentUserId);
+                    if (transaction.getServerId() > 0) {
+                        transactionMap.put("id", transaction.getServerId());
+                    }
+                    transactionsList.add(transactionMap);
+                }
+                changes.put("transactions", transactionsList);
+
+                // تحويل البيانات إلى JSON للنسخ
+                String syncRequestJson = new Gson().toJson(changes);
+                Log.d(TAG, "بيانات المزامنة: " + syncRequestJson);
 
                 // إرسال التغييرات إلى السيرفر
                 apiService.syncChanges("Bearer " + token, changes).enqueue(new Callback<Map<String, Object>>() {
