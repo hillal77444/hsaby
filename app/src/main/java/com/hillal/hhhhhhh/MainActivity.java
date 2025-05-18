@@ -237,25 +237,22 @@ public class MainActivity extends AppCompatActivity {
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                     Fragment selectedFragment = null;
 
-                    switch (item.getItemId()) {
-                        case R.id.nav_dashboard:
-                            selectedFragment = new DashboardFragment();
-                            break;
-                        case R.id.nav_transactions:
-                            selectedFragment = new TransactionsFragment();
-                            break;
-                        case R.id.nav_settings:
-                            selectedFragment = new SettingsFragment();
-                            break;
+                    int itemId = item.getItemId();
+                    if (itemId == R.id.navigation_dashboard) {
+                        selectedFragment = new DashboardFragment();
+                    } else if (itemId == R.id.navigation_transactions) {
+                        selectedFragment = new TransactionsFragment();
+                    } else if (itemId == R.id.navigation_settings) {
+                        selectedFragment = new SettingsFragment();
                     }
 
                     if (selectedFragment != null) {
                         getSupportFragmentManager().beginTransaction()
                                 .replace(R.id.fragment_container, selectedFragment)
                                 .commit();
+                        return true;
                     }
-
-                    return true;
+                    return false;
                 }
             };
 }
