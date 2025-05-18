@@ -161,7 +161,7 @@ public class AddTransactionFragment extends Fragment {
                         currency
                     );
                     transaction.setNotes(notes);
-                    transaction.setDate(calendar.getTimeInMillis());
+                    transaction.setTransactionDate(calendar.getTimeInMillis());
                     transaction.setUpdatedAt(System.currentTimeMillis());
                     transaction.setServerId(0); // تعيين serverId إلى 0 للمعاملات الجديدة
                     transaction.setWhatsappEnabled(account.isWhatsappEnabled()); // تعيين حالة واتساب الحساب
