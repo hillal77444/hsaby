@@ -746,6 +746,13 @@ public class SyncManager {
                                     continue;
                                 }
 
+                                // التحقق من وجود الحساب
+                                Account account = accountDao.getAccountByIdSync(transaction.getAccountId());
+                                if (account == null) {
+                                    Log.e(TAG, "Account not found for transaction: " + transaction.getId());
+                                    continue;
+                                }
+
                                 // البحث عن المعاملة في قاعدة البيانات المحلية
                                 Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
                                 if (existingTransaction != null) {
@@ -766,7 +773,26 @@ public class SyncManager {
                                     transaction.setUserId(currentUserId);
                                     transaction.setLastSyncTime(System.currentTimeMillis());
                                     transaction.setSyncStatus(SYNC_STATUS_SYNCED);
-                                    transactionDao.insert(transaction);
+                                    try {
+                                        transactionDao.insert(transaction);
+                                    } catch (Exception e) {
+                                        Log.e(TAG, "Error inserting transaction: " + e.getMessage());
+                                        // إذا فشل الإدخال، نحاول التحديث
+                                        existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
+                                        if (existingTransaction != null) {
+                                            existingTransaction.setAmount(transaction.getAmount());
+                                            existingTransaction.setType(transaction.getType());
+                                            existingTransaction.setDescription(transaction.getDescription());
+                                            existingTransaction.setNotes(transaction.getNotes());
+                                            existingTransaction.setTransactionDate(transaction.getTransactionDate());
+                                            existingTransaction.setCurrency(transaction.getCurrency());
+                                            existingTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
+                                            existingTransaction.setAccountId(transaction.getAccountId());
+                                            existingTransaction.setLastSyncTime(System.currentTimeMillis());
+                                            existingTransaction.setSyncStatus(SYNC_STATUS_SYNCED);
+                                            transactionDao.update(existingTransaction);
+                                        }
+                                    }
                                 }
                             }
 
