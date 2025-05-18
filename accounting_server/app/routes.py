@@ -341,59 +341,59 @@ def debug_public():
         # جلب جميع الحسابات
         accounts = Account.query.all()
         accounts_data = [{
-            'رقم_التعريف': {'account_id': acc.id},
-            'رقم_السيرفر': {'account_id': acc.id},
-            'رقم_الحساب': {'account_id': acc.account_number},
-            'اسم_الحساب': {'account_id': acc.account_name},
-            'الرصيد': {'account_id': acc.balance},
-            'رقم_المستخدم': {'account_id': acc.user_id},
-            'رقم_الهاتف': {'account_id': acc.phone_number},
-            'حالة_المدين': {'account_id': acc.is_debtor},
-            'ملاحظات': {'account_id': acc.notes},
-            'تفعيل_واتساب': {'account_id': acc.whatsapp_enabled},
-            'حالة_المزامنة': {'account_id': acc.sync_status if hasattr(acc, 'sync_status') else None},
-            'آخر_مزامنة': {'account_id': int(acc.last_sync_time.timestamp() * 1000) if hasattr(acc, 'last_sync_time') and acc.last_sync_time else None},
-            'تاريخ_الإنشاء': {'account_id': str(acc.created_at) if acc.created_at else None},
-            'تاريخ_التحديث': {'account_id': str(acc.updated_at) if acc.updated_at else None}
+            'رقم_التعريف_المحلي': {'id': acc.id},  # المعرف المحلي
+            'رقم_التعريف_السيرفر': {'server_id': acc.server_id if hasattr(acc, 'server_id') else None},  # معرف السيرفر
+            'رقم_الحساب': {'account_number': acc.account_number},
+            'اسم_الحساب': {'account_name': acc.account_name},
+            'الرصيد': {'balance': acc.balance},
+            'رقم_المستخدم': {'user_id': acc.user_id},
+            'رقم_الهاتف': {'phone_number': acc.phone_number},
+            'حالة_المدين': {'is_debtor': acc.is_debtor},
+            'ملاحظات': {'notes': acc.notes},
+            'تفعيل_واتساب': {'whatsapp_enabled': acc.whatsapp_enabled},
+            'حالة_المزامنة': {'sync_status': acc.sync_status if hasattr(acc, 'sync_status') else None},
+            'آخر_مزامنة': {'last_sync_time': int(acc.last_sync_time.timestamp() * 1000) if hasattr(acc, 'last_sync_time') and acc.last_sync_time else None},
+            'تاريخ_الإنشاء': {'created_at': str(acc.created_at) if acc.created_at else None},
+            'تاريخ_التحديث': {'updated_at': str(acc.updated_at) if acc.updated_at else None}
         } for acc in accounts]
         
         # جلب جميع المعاملات
         transactions = Transaction.query.all()
         transactions_data = [{
-            'رقم_التعريف': {'account_id': trans.id},
-            'رقم_السيرفر': {'account_id': trans.server_id if hasattr(trans, 'server_id') else trans.id},
-            'تاريخ_المعاملة': {'account_id': str(trans.date)},
-            'تاريخ_المعاملة_رقمي': {'account_id': int(trans.date.timestamp() * 1000)},
-            'قيمة_المعاملة': {'account_id': trans.amount},
-            'وصف_المعاملة': {'account_id': trans.description},
-            'نوع_المعاملة': {'account_id': trans.type},
-            'العملة': {'account_id': trans.currency},
-            'ملاحظات': {'account_id': trans.notes},
-            'تفعيل_واتساب': {'account_id': trans.whatsapp_enabled},
+            'رقم_التعريف_المحلي': {'id': trans.id},  # المعرف المحلي
+            'رقم_التعريف_السيرفر': {'server_id': trans.server_id if hasattr(trans, 'server_id') else None},  # معرف السيرفر
+            'تاريخ_المعاملة': {'date': str(trans.date)},
+            'تاريخ_المعاملة_رقمي': {'date_timestamp': int(trans.date.timestamp() * 1000)},
+            'قيمة_المعاملة': {'amount': trans.amount},
+            'وصف_المعاملة': {'description': trans.description},
+            'نوع_المعاملة': {'type': trans.type},
+            'العملة': {'currency': trans.currency},
+            'ملاحظات': {'notes': trans.notes},
+            'تفعيل_واتساب': {'whatsapp_enabled': trans.whatsapp_enabled},
             'رقم_الحساب': {'account_id': trans.account_id},
-            'رقم_المستخدم': {'account_id': trans.user_id},
-            'حالة_المزامنة': {'account_id': trans.sync_status if hasattr(trans, 'sync_status') else None},
-            'آخر_مزامنة': {'account_id': int(trans.last_sync_time.timestamp() * 1000) if hasattr(trans, 'last_sync_time') and trans.last_sync_time else None},
-            'تاريخ_الإنشاء': {'account_id': str(trans.created_at) if hasattr(trans, 'created_at') and trans.created_at else None},
-            'تاريخ_التحديث': {'account_id': str(trans.updated_at) if hasattr(trans, 'updated_at') and trans.updated_at else None}
+            'رقم_المستخدم': {'user_id': trans.user_id},
+            'حالة_المزامنة': {'sync_status': trans.sync_status if hasattr(trans, 'sync_status') else None},
+            'آخر_مزامنة': {'last_sync_time': int(trans.last_sync_time.timestamp() * 1000) if hasattr(trans, 'last_sync_time') and trans.last_sync_time else None},
+            'تاريخ_الإنشاء': {'created_at': str(trans.created_at) if hasattr(trans, 'created_at') and trans.created_at else None},
+            'تاريخ_التحديث': {'updated_at': str(trans.updated_at) if hasattr(trans, 'updated_at') and trans.updated_at else None}
         } for trans in transactions]
         
         # إضافة معلومات المزامنة العامة
         sync_info = {
-            'آخر_مزامنة': {'account_id': int(datetime.now().timestamp() * 1000)},
-            'إجمالي_الحسابات': {'account_id': len(accounts)},
-            'إجمالي_المعاملات': {'account_id': len(transactions)},
+            'آخر_مزامنة': {'last_sync_time': int(datetime.now().timestamp() * 1000)},
+            'إجمالي_الحسابات': {'total_accounts': len(accounts)},
+            'إجمالي_المعاملات': {'total_transactions': len(transactions)},
             'حالة_مزامنة_الحسابات': {
-                'في_الانتظار': {'account_id': len([acc for acc in accounts if hasattr(acc, 'sync_status') and acc.sync_status == 0])},
-                'قيد_المزامنة': {'account_id': len([acc for acc in accounts if hasattr(acc, 'sync_status') and acc.sync_status == 1])},
-                'تمت_المزامنة': {'account_id': len([acc for acc in accounts if hasattr(acc, 'sync_status') and acc.sync_status == 2])},
-                'فشلت_المزامنة': {'account_id': len([acc for acc in accounts if hasattr(acc, 'sync_status') and acc.sync_status == 3])}
+                'في_الانتظار': {'pending': len([acc for acc in accounts if hasattr(acc, 'sync_status') and acc.sync_status == 0])},
+                'قيد_المزامنة': {'syncing': len([acc for acc in accounts if hasattr(acc, 'sync_status') and acc.sync_status == 1])},
+                'تمت_المزامنة': {'synced': len([acc for acc in accounts if hasattr(acc, 'sync_status') and acc.sync_status == 2])},
+                'فشلت_المزامنة': {'failed': len([acc for acc in accounts if hasattr(acc, 'sync_status') and acc.sync_status == 3])}
             },
             'حالة_مزامنة_المعاملات': {
-                'في_الانتظار': {'account_id': len([trans for trans in transactions if hasattr(trans, 'sync_status') and trans.sync_status == 0])},
-                'قيد_المزامنة': {'account_id': len([trans for trans in transactions if hasattr(trans, 'sync_status') and trans.sync_status == 1])},
-                'تمت_المزامنة': {'account_id': len([trans for trans in transactions if hasattr(trans, 'sync_status') and trans.sync_status == 2])},
-                'فشلت_المزامنة': {'account_id': len([trans for trans in transactions if hasattr(trans, 'sync_status') and trans.sync_status == 3])}
+                'في_الانتظار': {'pending': len([trans for trans in transactions if hasattr(trans, 'sync_status') and trans.sync_status == 0])},
+                'قيد_المزامنة': {'syncing': len([trans for trans in transactions if hasattr(trans, 'sync_status') and trans.sync_status == 1])},
+                'تمت_المزامنة': {'synced': len([trans for trans in transactions if hasattr(trans, 'sync_status') and trans.sync_status == 2])},
+                'فشلت_المزامنة': {'failed': len([trans for trans in transactions if hasattr(trans, 'sync_status') and trans.sync_status == 3])}
             }
         }
         
