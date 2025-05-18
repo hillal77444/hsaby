@@ -29,7 +29,7 @@ import com.hillal.hhhhhhh.data.room.Converters;
         User.class,
         Settings.class,
         PendingOperation.class
-}, version = 5, exportSchema = true)
+}, version = 1, exportSchema = true)
 @TypeConverters(Converters.class)
 public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG = "AppDatabase";
