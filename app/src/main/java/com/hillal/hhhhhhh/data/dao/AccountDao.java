@@ -46,4 +46,10 @@ public interface AccountDao {
 
     @Query("DELETE FROM accounts")
     void deleteAll();
+
+    @Query("SELECT * FROM accounts WHERE server_id = :serverId")
+    LiveData<Account> getAccountByServerId(long serverId);
+
+    @Query("SELECT * FROM accounts WHERE server_id = :serverId")
+    Account getAccountByServerIdSync(long serverId);
 } 
