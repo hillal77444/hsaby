@@ -10,7 +10,8 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-import com.hillal.hhhhhhh.data.Converters;
+import com.hillal.hhhhhhh.data.dao.AccountDao;
+import com.hillal.hhhhhhh.data.dao.TransactionDao;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.model.Settings;
