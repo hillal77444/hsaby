@@ -1,6 +1,9 @@
 package com.hillal.hhhhhhh.ui.transactions;
 
 import android.app.DatePickerDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,6 +41,8 @@ public class TransactionsFragment extends Fragment {
     private TransactionsViewModel viewModel;
     private TransactionAdapter adapter;
     private AccountViewModel accountViewModel;
+    private TransactionViewModel transactionViewModel;
+    private TransactionRepository transactionRepository;
     private Calendar startDate;
     private Calendar endDate;
     private String selectedAccount = null;
@@ -54,6 +59,8 @@ public class TransactionsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this).get(TransactionsViewModel.class);
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
+        transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
+        transactionRepository = new TransactionRepository();
         
         // تهيئة التواريخ الافتراضية
         startDate = Calendar.getInstance();
@@ -91,6 +98,54 @@ public class TransactionsFragment extends Fragment {
         }
         
         observeAccountsAndTransactions();
+
+        // إعداد المستمعين للأزرار
+        adapter.setOnDeleteClickListener(transaction -> {
+            new AlertDialog.Builder(requireContext())
+                .setTitle("تأكيد الحذف")
+                .setMessage("هل أنت متأكد من حذف هذا القيد؟")
+                .setPositiveButton("نعم", (dialog, which) -> {
+                    transactionViewModel.deleteTransaction(transaction);
+                    Toast.makeText(requireContext(), "تم حذف القيد بنجاح", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("لا", null)
+                .show();
+        });
+
+        adapter.setOnEditClickListener(transaction -> {
+            // التنقل إلى صفحة تعديل القيد
+            Bundle args = new Bundle();
+            args.putLong("transactionId", transaction.getId());
+            Navigation.findNavController(view).navigate(R.id.action_transactionsFragment_to_editTransactionFragment, args);
+        });
+
+        adapter.setOnWhatsAppClickListener((transaction, phoneNumber) -> {
+            if (phoneNumber == null || phoneNumber.isEmpty()) {
+                Toast.makeText(requireContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // تعطيل الزر مؤقتاً لمنع النقرات المتكررة
+            binding.btnSendWhatsApp.setEnabled(false);
+
+            // الحصول على معلومات الحساب
+            Account account = accountViewModel.getAccountById(transaction.getAccountId());
+            if (account != null) {
+                // مراقبة الرصيد حتى التاريخ
+                transactionRepository.getBalanceUntilDate(transaction.getAccountId(), transaction.getTransactionDate(), transaction.getCurrency())
+                    .observe(getViewLifecycleOwner(), balance -> {
+                        if (balance != null) {
+                            String message = buildWhatsAppMessage(account.getName(), transaction, balance);
+                            sendWhatsAppMessage(requireContext(), phoneNumber, message);
+                        }
+                        // إعادة تفعيل الزر
+                        binding.btnSendWhatsApp.setEnabled(true);
+                    });
+            } else {
+                // إعادة تفعيل الزر في حالة عدم وجود حساب
+                binding.btnSendWhatsApp.setEnabled(true);
+            }
+        });
     }
 
     private void setupAccountFilter() {
@@ -439,5 +494,37 @@ public class TransactionsFragment extends Fragment {
         super.onDestroyView();
         stopContinuousSync();
         binding = null;
+    }
+
+    private String buildWhatsAppMessage(String accountName, Transaction transaction, double balance) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        String date = dateFormat.format(new Date(transaction.getTransactionDate()));
+        
+        return String.format(Locale.getDefault(),
+            "مرحباً %s\n\n" +
+            "تفاصيل القيد المحاسبي:\n" +
+            "التاريخ: %s\n" +
+            "المبلغ: %.2f %s\n" +
+            "البيان: %s\n" +
+            "الرصيد حتى التاريخ: %.2f %s",
+            accountName,
+            date,
+            transaction.getAmount(),
+            transaction.getCurrency(),
+            transaction.getDescription(),
+            balance,
+            transaction.getCurrency()
+        );
+    }
+
+    private void sendWhatsAppMessage(Context context, String phoneNumber, String message) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            String url = "https://api.whatsapp.com/send?phone=" + phoneNumber + "&text=" + Uri.encode(message);
+            intent.setData(Uri.parse(url));
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(context, "حدث خطأ أثناء فتح واتساب", Toast.LENGTH_SHORT).show();
+        }
     }
 } 
