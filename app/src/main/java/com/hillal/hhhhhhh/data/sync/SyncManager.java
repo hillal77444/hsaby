@@ -623,7 +623,7 @@ public class SyncManager {
                                 }
 
                                 // البحث عن الحساب في قاعدة البيانات المحلية
-                                database.accountDao().getAccountByNumberSync(account.getAccountNumber()).observe((LifecycleOwner) context, existingAccount -> {
+                                database.accountDao().getAccountByNumber(account.getAccountNumber()).observe((LifecycleOwner) context, existingAccount -> {
                                     if (existingAccount != null) {
                                         existingAccount.setName(account.getName());
                                         existingAccount.setBalance(account.getBalance());
@@ -676,7 +676,7 @@ public class SyncManager {
                                 }
 
                                 // البحث عن المعاملة في قاعدة البيانات المحلية
-                                database.transactionDao().getTransactionByServerIdSync(transaction.getServerId()).observe((LifecycleOwner) context, existingTransaction -> {
+                                database.transactionDao().getTransactionByServerId(transaction.getServerId()).observe((LifecycleOwner) context, existingTransaction -> {
                                     if (existingTransaction != null) {
                                         existingTransaction.setAmount(transaction.getAmount());
                                         existingTransaction.setType(transaction.getType());
