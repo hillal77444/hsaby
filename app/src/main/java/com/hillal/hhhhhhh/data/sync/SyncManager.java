@@ -652,17 +652,21 @@ public class SyncManager {
                                     continue;
                                 }
 
-                                // البحث عن الحساب في قاعدة البيانات المحلية باستخدام رقم الحساب
+                                // التحقق من صحة رقم الحساب
+                                if (account.getAccountNumber() == null || account.getAccountNumber().isEmpty()) {
+                                    Log.e(TAG, "Account number is null or empty, skipping account");
+                                    continue;
+                                }
+
+                                // البحث عن الحساب في قاعدة البيانات المحلية باستخدام رقم الحساب فقط
                                 Account existingAccount = accountDao.getAccountByNumberSync(account.getAccountNumber());
 
                                 if (existingAccount != null) {
                                     // تحديث الحساب الموجود
+                                    Log.d(TAG, "Updating existing account: " + account.getAccountNumber());
                                     existingAccount.setName(account.getName());
                                     existingAccount.setBalance(account.getBalance());
-                                    // تحديث رقم الهاتف فقط إذا كان مختلفاً
-                                    if (!account.getPhoneNumber().equals(existingAccount.getPhoneNumber())) {
-                                        existingAccount.setPhoneNumber(account.getPhoneNumber());
-                                    }
+                                    existingAccount.setPhoneNumber(account.getPhoneNumber()); // تحديث رقم الهاتف بدون قيود
                                     existingAccount.setNotes(account.getNotes());
                                     existingAccount.setIsDebtor(account.isDebtor());
                                     existingAccount.setWhatsappEnabled(account.isWhatsappEnabled());
@@ -672,18 +676,30 @@ public class SyncManager {
                                     accountDao.update(existingAccount);
                                 } else {
                                     // إضافة حساب جديد
+                                    Log.d(TAG, "Adding new account: " + account.getAccountNumber());
                                     account.setUserId(currentUserId);
                                     account.setLastSyncTime(System.currentTimeMillis());
                                     account.setSyncStatus(SYNC_STATUS_SYNCED);
-                                    // التحقق من وجود حساب بنفس رقم الهاتف
-                                    if (account.getPhoneNumber() != null && !account.getPhoneNumber().isEmpty()) {
-                                        Account accountWithSamePhone = accountDao.getAccountByPhoneNumberSync(account.getPhoneNumber());
-                                        if (accountWithSamePhone != null) {
-                                            // إذا وجد حساب بنفس رقم الهاتف، نترك رقم الهاتف فارغاً
-                                            account.setPhoneNumber("");
+                                    // نضيف الحساب مباشرة بدون التحقق من رقم الهاتف
+                                    try {
+                                        accountDao.insert(account);
+                                    } catch (Exception e) {
+                                        Log.e(TAG, "Error inserting account: " + e.getMessage());
+                                        // إذا فشل الإدخال، نحاول التحديث
+                                        existingAccount = accountDao.getAccountByNumberSync(account.getAccountNumber());
+                                        if (existingAccount != null) {
+                                            existingAccount.setName(account.getName());
+                                            existingAccount.setBalance(account.getBalance());
+                                            existingAccount.setPhoneNumber(account.getPhoneNumber());
+                                            existingAccount.setNotes(account.getNotes());
+                                            existingAccount.setIsDebtor(account.isDebtor());
+                                            existingAccount.setWhatsappEnabled(account.isWhatsappEnabled());
+                                            existingAccount.setServerId(account.getServerId());
+                                            existingAccount.setLastSyncTime(System.currentTimeMillis());
+                                            existingAccount.setSyncStatus(SYNC_STATUS_SYNCED);
+                                            accountDao.update(existingAccount);
                                         }
                                     }
-                                    accountDao.insert(account);
                                 }
                             }
 
