@@ -126,7 +126,7 @@ def sync_data():
                 
                 # البحث عن الحساب باستخدام server_id إذا كان موجوداً
                 account = None
-                if acc_data.get('server_id'):
+                if acc_data.get('server_id') and acc_data['server_id'] != -1:  # تجاهل server_id = -1
                     account = Account.query.filter_by(server_id=acc_data['server_id']).first()
                 
                 # إذا لم يتم العثور على الحساب، ابحث باستخدام المعرف المحلي
@@ -144,7 +144,7 @@ def sync_data():
                     account.user_id = current_user_id
                     # لا نقوم بتحديث server_id إذا كان موجوداً بالفعل
                     if not account.server_id:
-                        account.server_id = acc_data.get('server_id')
+                        account.server_id = generate_server_id()  # توليد معرف فريد للسيرفر
                     logger.info(f"Updated account: {account.account_name}")
                 else:
                     # إنشاء حساب جديد
@@ -156,7 +156,7 @@ def sync_data():
                         is_debtor=acc_data.get('is_debtor', False),
                         whatsapp_enabled=acc_data.get('whatsapp_enabled', False),
                         user_id=current_user_id,
-                        server_id=acc_data.get('server_id')  # استخدام server_id من الطلب إذا كان موجوداً
+                        server_id=generate_server_id()  # توليد معرف فريد للسيرفر للحساب الجديد
                     )
                     db.session.add(account)
                     db.session.flush()  # للحصول على معرف الحساب
@@ -164,7 +164,7 @@ def sync_data():
                 
                 account_mappings.append({
                     'local_id': acc_data.get('id'),
-                    'server_id': account.id  # استخدام معرف الحساب كـ server_id
+                    'server_id': account.server_id  # استخدام server_id الفعلي
                 })
             except Exception as e:
                 logger.error(f"Error processing account: {str(e)}")
@@ -177,23 +177,23 @@ def sync_data():
         for trans_data in transactions:
             try:
                 # التحقق من البيانات المطلوبة للمعاملة
-                required_fields = ['amount', 'type', 'description', 'account_id']
+                required_fields = ['amount', 'type', 'description', 'account_id', 'date']
                 missing_fields = [field for field in required_fields if field not in trans_data]
                 if missing_fields:
                     return json_response({'error': f'بيانات المعاملة غير مكتملة: {", ".join(missing_fields)}'}, 400)
                 
                 # معالجة التاريخ
                 try:
-                    if isinstance(trans_data.get('transaction_date'), (int, float)):
-                        date = datetime.fromtimestamp(trans_data['transaction_date'] / 1000)
+                    if isinstance(trans_data.get('date'), (int, float)):
+                        date = datetime.fromtimestamp(trans_data['date'] / 1000)
                     else:
-                        date = datetime.fromisoformat(trans_data['transaction_date'].replace('Z', '+00:00'))
+                        date = datetime.fromisoformat(trans_data['date'].replace('Z', '+00:00'))
                 except (ValueError, TypeError) as e:
                     return json_response({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}, 400)
                 
                 # البحث عن المعاملة باستخدام server_id إذا كان موجوداً
                 transaction = None
-                if trans_data.get('server_id'):
+                if trans_data.get('server_id') and trans_data['server_id'] != -1:  # تجاهل server_id = -1
                     transaction = Transaction.query.filter_by(server_id=trans_data['server_id']).first()
                 
                 # إذا لم يتم العثور على المعاملة، ابحث باستخدام المعرف المحلي
@@ -206,14 +206,14 @@ def sync_data():
                     transaction.type = trans_data.get('type', transaction.type)
                     transaction.description = trans_data.get('description', transaction.description)
                     transaction.notes = trans_data.get('notes', transaction.notes)
-                    transaction.transaction_date = date
+                    transaction.date = date
                     transaction.currency = trans_data.get('currency', transaction.currency)
                     transaction.whatsapp_enabled = trans_data.get('whatsapp_enabled', transaction.whatsapp_enabled)
                     transaction.account_id = trans_data.get('account_id', transaction.account_id)
                     transaction.user_id = current_user_id
                     # لا نقوم بتحديث server_id إذا كان موجوداً بالفعل
                     if not transaction.server_id:
-                        transaction.server_id = trans_data.get('server_id')
+                        transaction.server_id = generate_server_id()  # توليد معرف فريد للسيرفر
                     logger.info(f"Updated transaction: {transaction.id}")
                 else:
                     # إنشاء معاملة جديدة
@@ -222,12 +222,12 @@ def sync_data():
                         type=trans_data.get('type'),
                         description=trans_data.get('description'),
                         notes=trans_data.get('notes'),
-                        transaction_date=date,
+                        date=date,
                         currency=trans_data.get('currency'),
                         whatsapp_enabled=trans_data.get('whatsapp_enabled', False),
                         account_id=trans_data.get('account_id'),
                         user_id=current_user_id,
-                        server_id=trans_data.get('server_id')  # استخدام server_id من الطلب إذا كان موجوداً
+                        server_id=generate_server_id()  # توليد معرف فريد للسيرفر للمعاملة الجديدة
                     )
                     db.session.add(transaction)
                     db.session.flush()  # للحصول على معرف المعاملة
@@ -235,7 +235,7 @@ def sync_data():
                 
                 transaction_mappings.append({
                     'local_id': trans_data.get('id'),
-                    'server_id': transaction.id  # استخدام معرف المعاملة كـ server_id
+                    'server_id': transaction.server_id  # استخدام server_id الفعلي
                 })
             except Exception as e:
                 logger.error(f"Error processing transaction: {str(e)}")
@@ -267,15 +267,15 @@ def get_accounts():
         accounts = Account.query.filter_by(user_id=user_id).all()
         return jsonify([{
             'id': acc.id,
-            'server_id': acc.id,  # إضافة server_id للتوافق
+            'server_id': acc.server_id,  # استخدام server_id الفعلي
             'account_number': acc.account_number,
             'account_name': acc.account_name,
             'balance': acc.balance,
-            'phone_number': acc.phone_number,  # إضافة رقم الهاتف
-            'is_debtor': acc.is_debtor,  # إضافة حالة المدين
-            'notes': acc.notes,  # إضافة الملاحظات
-            'created_at': int(acc.created_at.timestamp() * 1000) if acc.created_at else None,  # إضافة تاريخ الإنشاء
-            'updated_at': int(acc.updated_at.timestamp() * 1000) if acc.updated_at else None  # إضافة تاريخ التحديث
+            'phone_number': acc.phone_number,
+            'is_debtor': acc.is_debtor,
+            'notes': acc.notes,
+            'created_at': int(acc.created_at.timestamp() * 1000) if acc.created_at else None,
+            'updated_at': int(acc.updated_at.timestamp() * 1000) if acc.updated_at else None
         } for acc in accounts])
     except Exception as e:
         logger.error(f"Get accounts error: {str(e)}")
@@ -289,15 +289,15 @@ def get_transactions():
         transactions = Transaction.query.filter_by(user_id=user_id).all()
         return jsonify([{
             'id': trans.id,
-            'server_id': trans.id,  # إضافة server_id للتوافق
-            'date': int(trans.date.timestamp() * 1000),  # تحويل التاريخ إلى timestamp بالميلي ثانية
+            'server_id': trans.server_id,  # استخدام server_id الفعلي
+            'date': int(trans.date.timestamp() * 1000),
             'amount': trans.amount,
             'description': trans.description,
             'account_id': trans.account_id,
             'type': trans.type,
             'currency': trans.currency,
             'notes': trans.notes,
-            'whatsapp_enabled': trans.whatsapp_enabled  # إضافة حقل whatsapp_enabled
+            'whatsapp_enabled': trans.whatsapp_enabled
         } for trans in transactions])
     except Exception as e:
         logger.error(f"Get transactions error: {str(e)}")
