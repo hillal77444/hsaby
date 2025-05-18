@@ -126,7 +126,7 @@ def sync_data():
                 
                 # البحث عن الحساب باستخدام server_id إذا كان موجوداً
                 account = None
-                if acc_data.get('server_id') and acc_data['server_id'] != -1:  # تجاهل server_id = -1
+                if acc_data.get('server_id') and acc_data['server_id'] > 0:  # تجاهل أي server_id سالب
                     account = Account.query.filter_by(server_id=acc_data['server_id']).first()
                 
                 # إذا لم يتم العثور على الحساب، ابحث باستخدام المعرف المحلي
@@ -193,7 +193,7 @@ def sync_data():
                 
                 # البحث عن المعاملة باستخدام server_id إذا كان موجوداً
                 transaction = None
-                if trans_data.get('server_id') and trans_data['server_id'] != -1:  # تجاهل server_id = -1
+                if trans_data.get('server_id') and trans_data['server_id'] > 0:  # تجاهل أي server_id سالب
                     transaction = Transaction.query.filter_by(server_id=trans_data['server_id']).first()
                 
                 # إذا لم يتم العثور على المعاملة، ابحث باستخدام المعرف المحلي
