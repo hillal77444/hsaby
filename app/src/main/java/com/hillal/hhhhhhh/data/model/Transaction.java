@@ -13,55 +13,70 @@ import java.util.Date;
 @Entity(tableName = "transactions",
         foreignKeys = @ForeignKey(entity = Account.class,
                                 parentColumns = "id",
-                                childColumns = "accountId",
+                                childColumns = "account_id",
                                 onDelete = ForeignKey.CASCADE),
-        indices = {@Index("accountId")})
+        indices = {@Index("account_id")})
 public class Transaction {
     @PrimaryKey(autoGenerate = true)
     private long id;
 
+    @ColumnInfo(name = "server_id")
     @SerializedName("server_id")
     private long serverId;
 
+    @ColumnInfo(name = "user_id")
     @SerializedName("user_id")
     private long userId;
 
+    @ColumnInfo(name = "account_id")
     @SerializedName("account_id")
     private long accountId;
 
+    @ColumnInfo(name = "amount")
     @SerializedName("amount")
     private double amount;
 
+    @ColumnInfo(name = "type")
     @SerializedName("type")
     private String type;
 
+    @ColumnInfo(name = "description")
     @SerializedName("description")
     private String description;
 
+    @ColumnInfo(name = "notes")
     @SerializedName("notes")
     private String notes;
 
+    @ColumnInfo(name = "currency")
     @SerializedName("currency")
     private String currency;
 
+    @ColumnInfo(name = "transaction_date")
     @SerializedName("transaction_date")
     private long transactionDate;
 
+    @ColumnInfo(name = "created_at")
     @SerializedName("created_at")
     private long createdAt;
 
+    @ColumnInfo(name = "updated_at")
     @SerializedName("updated_at")
     private long updatedAt;
 
+    @ColumnInfo(name = "last_sync_time")
     @SerializedName("last_sync_time")
     private long lastSyncTime;
 
+    @ColumnInfo(name = "is_modified")
     @SerializedName("is_modified")
     private boolean isModified;
 
+    @ColumnInfo(name = "whatsapp_enabled")
     @SerializedName("whatsapp_enabled")
     private boolean whatsappEnabled;
 
+    @ColumnInfo(name = "sync_status")
     @SerializedName("sync_status")
     private int syncStatus;
 
