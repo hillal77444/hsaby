@@ -63,4 +63,7 @@ public interface AccountDao {
 
     @Query("SELECT * FROM accounts WHERE updated_at > :timestamp AND server_id > 0")
     List<Account> getModifiedAccounts(long timestamp);
+
+    @Query("SELECT * FROM accounts WHERE account_number = :accountNumber")
+    Account getAccountByNumberSync(String accountNumber);
 } 
