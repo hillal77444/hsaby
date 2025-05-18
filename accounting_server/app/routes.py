@@ -379,7 +379,7 @@ def debug_public():
 
 @main.route('/api/transactions/<int:transaction_id>', methods=['DELETE'])
 @jwt_required()
-def delete_transaction(transaction_id):
+def delete_transaction_by_id(transaction_id):
     try:
         user_id = get_jwt_identity()
         
@@ -413,65 +413,160 @@ def sync_changes():
         if request.method == 'POST':
             # استقبال التغييرات من التطبيق
             data = request.get_json()
-            changes = data.get('changes', [])
             
-            # معالجة كل تغيير
-            for change in changes:
-                change_type = change.get('type')  # 'add', 'update', 'delete'
-                entity_type = change.get('entity')  # 'transaction', 'account'
-                entity_data = change.get('data')
-                
-                if entity_type == 'transaction':
-                    if change_type == 'add':
-                        new_transaction = Transaction(
-                            user_id=current_user_id,
-                            account_id=entity_data['account_id'],
-                            amount=entity_data['amount'],
-                            type=entity_data['type'],
-                            description=entity_data['description'],
-                            date=entity_data['date'],
-                            currency=entity_data['currency']
-                        )
-                        db.session.add(new_transaction)
-                    elif change_type == 'update':
-                        transaction = Transaction.query.filter_by(
-                            id=entity_data['id'],
-                            user_id=current_user_id
-                        ).first()
-                        if transaction:
-                            for key, value in entity_data.items():
-                                setattr(transaction, key, value)
-                    elif change_type == 'delete':
-                        Transaction.query.filter_by(
-                            id=entity_data['id'],
-                            user_id=current_user_id
-                        ).delete()
-                
-                elif entity_type == 'account':
-                    if change_type == 'add':
-                        new_account = Account(
-                            user_id=current_user_id,
-                            name=entity_data['name'],
-                            phone_number=entity_data['phone_number'],
-                            currency=entity_data['currency']
-                        )
-                        db.session.add(new_account)
-                    elif change_type == 'update':
+            # إنشاء خرائط لتخزين المعرفات الجديدة
+            account_id_map = []
+            transaction_id_map = []
+            
+            # معالجة الحسابات
+            if 'accounts' in data:
+                for account_data in data['accounts']:
+                    try:
+                        # التحقق من البيانات المطلوبة
+                        required_fields = ['account_number', 'account_name', 'balance']
+                        missing_fields = [field for field in required_fields if field not in account_data]
+                        if missing_fields:
+                            return json_response({'error': f'بيانات الحساب غير مكتملة: {", ".join(missing_fields)}'}, 400)
+                        
+                        # البحث عن الحساب
                         account = Account.query.filter_by(
-                            id=entity_data['id'],
+                            account_number=account_data['account_number'],
                             user_id=current_user_id
                         ).first()
-                        if account:
-                            for key, value in entity_data.items():
-                                setattr(account, key, value)
-                    elif change_type == 'delete':
-                        Account.query.filter_by(
-                            id=entity_data['id'],
-                            user_id=current_user_id
-                        ).delete()
+                        
+                        if not account:
+                            # حساب جديد
+                            account = Account(
+                                account_number=account_data['account_number'],
+                                account_name=account_data['account_name'],
+                                balance=account_data['balance'],
+                                is_debtor=account_data.get('is_debtor', False),
+                                phone_number=account_data.get('phone_number'),
+                                notes=account_data.get('notes'),
+                                whatsapp_enabled=account_data.get('whatsapp_enabled', False),
+                                user_id=current_user_id
+                            )
+                            db.session.add(account)
+                            db.session.flush()  # للحصول على المعرف الجديد
+                            account_id_map.append({
+                                'localId': account_data.get('id'),
+                                'serverId': account.id
+                            })
+                        else:
+                            # تحديث الحساب الموجود
+                            account.balance = account_data['balance']
+                            if 'is_debtor' in account_data:
+                                account.is_debtor = account_data['is_debtor']
+                            if 'phone_number' in account_data:
+                                account.phone_number = account_data['phone_number']
+                            if 'notes' in account_data:
+                                account.notes = account_data['notes']
+                            if 'whatsapp_enabled' in account_data:
+                                account.whatsapp_enabled = account_data['whatsapp_enabled']
+                            account_id_map.append({
+                                'localId': account_data.get('id'),
+                                'serverId': account.id
+                            })
+                    except Exception as e:
+                        logger.error(f"Error processing account: {str(e)}")
+                        return json_response({'error': f'خطأ في معالجة بيانات الحساب: {str(e)}'}, 400)
             
-            db.session.commit()
-            return jsonify({'message': 'Changes synced successfully'}), 200
+            # معالجة المعاملات الجديدة
+            if 'new_transactions' in data:
+                for transaction_data in data['new_transactions']:
+                    try:
+                        # التحقق من البيانات المطلوبة
+                        required_fields = ['date', 'amount', 'description', 'account_id']
+                        missing_fields = [field for field in required_fields if field not in transaction_data]
+                        if missing_fields:
+                            return json_response({'error': f'بيانات المعاملة غير مكتملة: {", ".join(missing_fields)}'}, 400)
+                        
+                        # معالجة التاريخ
+                        try:
+                            if isinstance(transaction_data['date'], (int, float)):
+                                date = datetime.fromtimestamp(transaction_data['date'] / 1000)
+                            else:
+                                date = datetime.fromisoformat(transaction_data['date'].replace('Z', '+00:00'))
+                        except (ValueError, TypeError) as e:
+                            return json_response({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}, 400)
+                        
+                        # إنشاء معاملة جديدة
+                        transaction = Transaction(
+                            date=date,
+                            amount=transaction_data['amount'],
+                            description=transaction_data['description'],
+                            type=transaction_data.get('type', 'debit'),
+                            currency=transaction_data.get('currency', 'ريال يمني'),
+                            notes=transaction_data.get('notes', ''),
+                            whatsapp_enabled=transaction_data.get('whatsapp_enabled', True),
+                            user_id=current_user_id,
+                            account_id=transaction_data['account_id']
+                        )
+                        db.session.add(transaction)
+                        db.session.flush()  # للحصول على المعرف الجديد
+                        transaction_id_map.append({
+                            'localId': transaction_data.get('id'),
+                            'serverId': transaction.id
+                        })
+                    except Exception as e:
+                        logger.error(f"Error processing new transaction: {str(e)}")
+                        return json_response({'error': f'خطأ في معالجة بيانات المعاملة الجديدة: {str(e)}'}, 400)
+            
+            # معالجة المعاملات المعدلة
+            if 'modified_transactions' in data:
+                for transaction_data in data['modified_transactions']:
+                    try:
+                        # التحقق من البيانات المطلوبة
+                        required_fields = ['id', 'date', 'amount', 'description', 'account_id']
+                        missing_fields = [field for field in required_fields if field not in transaction_data]
+                        if missing_fields:
+                            return json_response({'error': f'بيانات المعاملة المعدلة غير مكتملة: {", ".join(missing_fields)}'}, 400)
+                        
+                        # البحث عن المعاملة
+                        transaction = Transaction.query.filter_by(
+                            id=transaction_data['id'],
+                            user_id=current_user_id
+                        ).first()
+                        
+                        if not transaction:
+                            return json_response({'error': f'المعاملة غير موجودة: {transaction_data["id"]}'}, 404)
+                        
+                        # تحديث المعاملة
+                        try:
+                            if isinstance(transaction_data['date'], (int, float)):
+                                date = datetime.fromtimestamp(transaction_data['date'] / 1000)
+                            else:
+                                date = datetime.fromisoformat(transaction_data['date'].replace('Z', '+00:00'))
+                        except (ValueError, TypeError) as e:
+                            return json_response({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}, 400)
+                        
+                        transaction.date = date
+                        transaction.amount = transaction_data['amount']
+                        transaction.description = transaction_data['description']
+                        if 'type' in transaction_data:
+                            transaction.type = transaction_data['type']
+                        if 'currency' in transaction_data:
+                            transaction.currency = transaction_data['currency']
+                        if 'notes' in transaction_data:
+                            transaction.notes = transaction_data['notes']
+                        if 'whatsapp_enabled' in transaction_data:
+                            transaction.whatsapp_enabled = transaction_data['whatsapp_enabled']
+                        transaction.account_id = transaction_data['account_id']
+                    except Exception as e:
+                        logger.error(f"Error processing modified transaction: {str(e)}")
+                        return json_response({'error': f'خطأ في معالجة بيانات المعاملة المعدلة: {str(e)}'}, 400)
+            
+            try:
+                db.session.commit()
+                return json_response({
+                    'message': 'تمت المزامنة بنجاح',
+                    'accountIdMap': account_id_map,
+                    'transactionIdMap': transaction_id_map
+                })
+            except Exception as e:
+                logger.error(f"Database commit error: {str(e)}")
+                db.session.rollback()
+                return json_response({'error': f'خطأ في حفظ البيانات: {str(e)}'}, 500)
             
         elif request.method == 'GET':
             # إرسال التغييرات إلى التطبيق
@@ -497,9 +592,12 @@ def sync_changes():
                     'amount': transaction.amount,
                     'type': transaction.type,
                     'description': transaction.description,
-                    'date': transaction.date,
+                    'date': transaction.date.timestamp() * 1000,
                     'currency': transaction.currency,
-                    'updated_at': transaction.updated_at
+                    'notes': transaction.notes,
+                    'whatsapp_enabled': transaction.whatsapp_enabled,
+                    'user_id': transaction.user_id,
+                    'updated_at': transaction.updated_at.timestamp() * 1000
                 })
             
             # جلب الحسابات الجديدة
@@ -511,15 +609,20 @@ def sync_changes():
             for account in new_accounts:
                 changes['accounts'].append({
                     'id': account.id,
-                    'name': account.name,
+                    'account_number': account.account_number,
+                    'account_name': account.account_name,
+                    'balance': account.balance,
+                    'is_debtor': account.is_debtor,
                     'phone_number': account.phone_number,
-                    'currency': account.currency,
-                    'updated_at': account.updated_at
+                    'notes': account.notes,
+                    'whatsapp_enabled': account.whatsapp_enabled,
+                    'user_id': account.user_id,
+                    'updated_at': account.updated_at.timestamp() * 1000
                 })
             
-            return jsonify(changes), 200
+            return json_response(changes)
             
     except Exception as e:
-        db.session.rollback()
         logger.error(f"Error in sync_changes: {str(e)}")
-        return jsonify({'error': str(e)}), 500 
+        db.session.rollback()
+        return json_response({'error': str(e)}, 500) 
