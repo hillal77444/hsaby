@@ -23,6 +23,9 @@ public class Transaction {
     @SerializedName("server_id")
     private long serverId;
 
+    @SerializedName("user_id")
+    private long userId;
+
     @SerializedName("account_id")
     private long accountId;
 
@@ -41,8 +44,8 @@ public class Transaction {
     @SerializedName("currency")
     private String currency;
 
-    @SerializedName("date")
-    private long date;
+    @SerializedName("transaction_date")
+    private long transactionDate;
 
     @SerializedName("created_at")
     private long createdAt;
@@ -70,7 +73,7 @@ public class Transaction {
         this.type = type;
         this.description = description;
         this.currency = currency;
-        this.date = System.currentTimeMillis();
+        this.transactionDate = System.currentTimeMillis();
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
         this.syncStatus = 0; // PENDING
@@ -78,7 +81,7 @@ public class Transaction {
 
     // Empty constructor for Room
     public Transaction() {
-        this.date = System.currentTimeMillis();
+        this.transactionDate = System.currentTimeMillis();
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
         this.syncStatus = 0; // PENDING
@@ -123,6 +126,14 @@ public class Transaction {
 
     public void setServerId(long serverId) {
         this.serverId = serverId;
+    }
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
     }
 
     public long getAccountId() {
@@ -173,18 +184,12 @@ public class Transaction {
         this.currency = currency;
     }
 
-    public long getDate() {
-        return date;
+    public long getTransactionDate() {
+        return transactionDate;
     }
 
-    public void setDate(long date) {
-        this.date = date;
-    }
-
-    // Helper method to get formatted date
-    public String getFormattedDate() {
-        return new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-            .format(new java.util.Date(date));
+    public void setTransactionDate(long transactionDate) {
+        this.transactionDate = transactionDate;
     }
 
     public long getCreatedAt() {
@@ -243,7 +248,7 @@ public class Transaction {
         return id == that.id &&
                accountId == that.accountId &&
                Double.compare(that.amount, amount) == 0 &&
-               date == that.date &&
+               transactionDate == that.transactionDate &&
                createdAt == that.createdAt &&
                updatedAt == that.updatedAt &&
                type.equals(that.type) &&
@@ -264,7 +269,7 @@ public class Transaction {
         result = 31 * result + description.hashCode();
         result = 31 * result + (notes != null ? notes.hashCode() : 0);
         result = 31 * result + currency.hashCode();
-        result = 31 * result + (int) (date ^ (date >>> 32));
+        result = 31 * result + (int) (transactionDate ^ (transactionDate >>> 32));
         result = 31 * result + (int) (createdAt ^ (createdAt >>> 32));
         result = 31 * result + (int) (updatedAt ^ (updatedAt >>> 32));
         return result;
@@ -280,7 +285,7 @@ public class Transaction {
                 ", amount=" + amount +
                 ", description='" + description + '\'' +
                 ", whatsappEnabled=" + whatsappEnabled +
-                ", date=" + date +
+                ", transactionDate=" + transactionDate +
                 ", lastSyncTime=" + lastSyncTime +
                 ", isModified=" + isModified +
                 '}';
