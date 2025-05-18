@@ -1135,10 +1135,10 @@ public class SyncManager {
     }
 
     private List<Account> getModifiedAccounts(long lastSyncTime) {
-        return accountDao.getModifiedAccounts((int) (lastSyncTime / 1000));
+        return accountDao.getModifiedAccounts(lastSyncTime);
     }
 
     private List<Transaction> getModifiedTransactions(long lastSyncTime) {
-        return transactionDao.getModifiedTransactions((int) (lastSyncTime / 1000));
+        return transactionDao.getModifiedTransactions(lastSyncTime);
     }
 } 
