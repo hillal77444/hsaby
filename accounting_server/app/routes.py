@@ -119,7 +119,7 @@ def sync_data():
         for acc_data in accounts:
             try:
                 # التحقق من البيانات المطلوبة للحساب
-                required_fields = ['name', 'balance']
+                required_fields = ['account_name', 'balance']
                 missing_fields = [field for field in required_fields if field not in acc_data]
                 if missing_fields:
                     return json_response({'error': f'بيانات الحساب غير مكتملة: {", ".join(missing_fields)}'}, 400)
@@ -135,7 +135,7 @@ def sync_data():
                 
                 if account:
                     # تحديث الحساب الموجود
-                    account.name = acc_data.get('name', account.name)
+                    account.account_name = acc_data.get('account_name', account.account_name)
                     account.balance = acc_data.get('balance', account.balance)
                     account.phone_number = acc_data.get('phone_number', account.phone_number)
                     account.notes = acc_data.get('notes', account.notes)
@@ -145,11 +145,11 @@ def sync_data():
                     # لا نقوم بتحديث server_id إذا كان موجوداً بالفعل
                     if not account.server_id:
                         account.server_id = acc_data.get('server_id')
-                    logger.info(f"Updated account: {account.name}")
+                    logger.info(f"Updated account: {account.account_name}")
                 else:
                     # إنشاء حساب جديد
                     account = Account(
-                        name=acc_data.get('name'),
+                        account_name=acc_data.get('account_name'),
                         balance=acc_data.get('balance', 0),
                         phone_number=acc_data.get('phone_number'),
                         notes=acc_data.get('notes'),
@@ -160,7 +160,7 @@ def sync_data():
                     )
                     db.session.add(account)
                     db.session.flush()  # للحصول على معرف الحساب
-                    logger.info(f"Added new account: {account.name}")
+                    logger.info(f"Added new account: {account.account_name}")
                 
                 account_mappings.append({
                     'local_id': acc_data.get('id'),
