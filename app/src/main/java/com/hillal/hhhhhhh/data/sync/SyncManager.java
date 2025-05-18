@@ -1133,4 +1133,12 @@ public class SyncManager {
             }
         });
     }
+
+    private List<Account> getModifiedAccounts(long lastSyncTime) {
+        return accountDao.getModifiedAccounts((int) (lastSyncTime / 1000));
+    }
+
+    private List<Transaction> getModifiedTransactions(long lastSyncTime) {
+        return transactionDao.getModifiedTransactions((int) (lastSyncTime / 1000));
+    }
 } 
