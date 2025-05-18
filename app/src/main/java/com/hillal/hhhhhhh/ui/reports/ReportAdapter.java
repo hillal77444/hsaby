@@ -13,6 +13,7 @@ import com.hillal.hhhhhhh.data.model.Transaction;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -57,7 +58,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
         }
 
         void bind(Transaction transaction) {
-            dateTextView.setText(DATE_FORMAT.format(transaction.getDate()));
+            dateTextView.setText(DATE_FORMAT.format(new Date(transaction.getTransactionDate())));
             descriptionTextView.setText(transaction.getDescription());
             
             double amount = transaction.getAmount();
