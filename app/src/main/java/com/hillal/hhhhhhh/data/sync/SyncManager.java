@@ -600,6 +600,42 @@ public class SyncManager {
         }
 
         Log.d(TAG, "Starting initial sync for user: " + currentUserId);
+        performFullSync(new SyncCallback() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "Initial sync completed successfully");
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e(TAG, "Initial sync failed: " + error);
+            }
+        });
+    }
+
+    public void performFullSync(SyncCallback callback) {
+        if (!isNetworkAvailable()) {
+            callback.onError("No internet connection");
+            return;
+        }
+
+        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("token", null);
+
+        if (token == null) {
+            callback.onError("User not authenticated");
+            return;
+        }
+
+        long currentUserId = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getLong("user_id", -1);
+
+        if (currentUserId == -1) {
+            callback.onError("User ID not found");
+            return;
+        }
+
+        Log.d(TAG, "Starting full sync for user: " + currentUserId);
 
         // جلب جميع الحسابات
         apiService.getAccounts("Bearer " + token).enqueue(new Callback<List<Account>>() {
@@ -619,6 +655,7 @@ public class SyncManager {
                                 // البحث عن الحساب في قاعدة البيانات المحلية
                                 Account existingAccount = accountDao.getAccountByNumberSync(account.getAccountNumber());
                                 if (existingAccount != null) {
+                                    // تحديث الحساب الموجود
                                     existingAccount.setName(account.getName());
                                     existingAccount.setBalance(account.getBalance());
                                     existingAccount.setPhoneNumber(account.getPhoneNumber());
@@ -626,34 +663,47 @@ public class SyncManager {
                                     existingAccount.setIsDebtor(account.isDebtor());
                                     existingAccount.setWhatsappEnabled(account.isWhatsappEnabled());
                                     existingAccount.setServerId(account.getServerId());
-                                    existingAccount.setSyncStatus(1); // SYNCED
+                                    existingAccount.setLastSyncTime(System.currentTimeMillis());
+                                    existingAccount.setSyncStatus(SYNC_STATUS_SYNCED);
                                     accountDao.update(existingAccount);
                                 } else {
+                                    // إضافة حساب جديد
                                     account.setUserId(currentUserId);
-                                    account.setSyncStatus(1); // SYNCED
+                                    account.setLastSyncTime(System.currentTimeMillis());
+                                    account.setSyncStatus(SYNC_STATUS_SYNCED);
                                     accountDao.insert(account);
                                 }
                             }
 
                             // بعد اكتمال جلب الحسابات، نقوم بجلب المعاملات
-                            fetchTransactions(token, currentUserId);
+                            fetchAllTransactions(token, currentUserId, callback);
                         } catch (Exception e) {
                             Log.e(TAG, "Error saving accounts: " + e.getMessage());
+                            handler.post(() -> callback.onError("Error saving accounts: " + e.getMessage()));
                         }
                     });
                 } else {
-                    Log.e(TAG, "Failed to fetch accounts");
+                    String errorBody;
+                    try {
+                        errorBody = response.errorBody() != null ? 
+                            response.errorBody().string() : "Unknown error";
+                    } catch (IOException e) {
+                        Log.e(TAG, "Error reading error body: " + e.getMessage());
+                        errorBody = "Error reading response";
+                    }
+                    final String finalErrorBody = errorBody;
+                    handler.post(() -> callback.onError("Failed to fetch accounts: " + finalErrorBody));
                 }
             }
 
             @Override
             public void onFailure(Call<List<Account>> call, Throwable t) {
-                Log.e(TAG, "Network error while fetching accounts: " + t.getMessage());
+                handler.post(() -> callback.onError("Network error while fetching accounts: " + t.getMessage()));
             }
         });
     }
 
-    private void fetchTransactions(String token, long currentUserId) {
+    private void fetchAllTransactions(String token, long currentUserId, SyncCallback callback) {
         apiService.getTransactions("Bearer " + token).enqueue(new Callback<List<Transaction>>() {
             @Override
             public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
@@ -671,35 +721,53 @@ public class SyncManager {
                                 // البحث عن المعاملة في قاعدة البيانات المحلية
                                 Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
                                 if (existingTransaction != null) {
+                                    // تحديث المعاملة الموجودة
                                     existingTransaction.setAmount(transaction.getAmount());
                                     existingTransaction.setType(transaction.getType());
                                     existingTransaction.setDescription(transaction.getDescription());
                                     existingTransaction.setNotes(transaction.getNotes());
                                     existingTransaction.setTransactionDate(transaction.getTransactionDate());
-                                    existingTransaction.setSyncStatus(1); // SYNCED
+                                    existingTransaction.setCurrency(transaction.getCurrency());
+                                    existingTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
+                                    existingTransaction.setAccountId(transaction.getAccountId());
+                                    existingTransaction.setLastSyncTime(System.currentTimeMillis());
+                                    existingTransaction.setSyncStatus(SYNC_STATUS_SYNCED);
                                     transactionDao.update(existingTransaction);
                                 } else {
+                                    // إضافة معاملة جديدة
                                     transaction.setUserId(currentUserId);
-                                    transaction.setSyncStatus(1); // SYNCED
+                                    transaction.setLastSyncTime(System.currentTimeMillis());
+                                    transaction.setSyncStatus(SYNC_STATUS_SYNCED);
                                     transactionDao.insert(transaction);
                                 }
                             }
 
                             // بعد اكتمال جلب جميع البيانات، نقوم بحفظ وقت المزامنة
                             saveLastSyncTime(System.currentTimeMillis());
-                            Log.d(TAG, "Initial sync completed successfully");
+                            Log.d(TAG, "Full sync completed successfully");
+                            handler.post(() -> callback.onSuccess());
                         } catch (Exception e) {
                             Log.e(TAG, "Error saving transactions: " + e.getMessage());
+                            handler.post(() -> callback.onError("Error saving transactions: " + e.getMessage()));
                         }
                     });
                 } else {
-                    Log.e(TAG, "Failed to fetch transactions");
+                    String errorBody;
+                    try {
+                        errorBody = response.errorBody() != null ? 
+                            response.errorBody().string() : "Unknown error";
+                    } catch (IOException e) {
+                        Log.e(TAG, "Error reading error body: " + e.getMessage());
+                        errorBody = "Error reading response";
+                    }
+                    final String finalErrorBody = errorBody;
+                    handler.post(() -> callback.onError("Failed to fetch transactions: " + finalErrorBody));
                 }
             }
 
             @Override
             public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                Log.e(TAG, "Network error while fetching transactions: " + t.getMessage());
+                handler.post(() -> callback.onError("Network error while fetching transactions: " + t.getMessage()));
             }
         });
     }
