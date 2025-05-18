@@ -80,7 +80,7 @@ public class App extends Application {
             // Initialize repositories
             Log.d(TAG, "Initializing repositories...");
             accountRepository = new AccountRepository(database.accountDao(), database);
-            transactionRepository = new TransactionRepository(database.transactionDao());
+            transactionRepository = new TransactionRepository(database);
             settingsRepository = new SettingsRepository(this);
             Log.d(TAG, "Repositories initialized successfully");
             
