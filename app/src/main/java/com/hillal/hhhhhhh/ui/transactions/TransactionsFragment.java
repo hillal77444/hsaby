@@ -297,7 +297,7 @@ public class TransactionsFragment extends Fragment {
             if (selectedCurrency != null && !selectedCurrency.isEmpty()) {
                 if (!selectedCurrency.equals(t.getCurrency())) match = false;
             }
-            long transactionDate = t.getDate();
+            long transactionDate = t.getTransactionDate();
             if (transactionDate < startDate.getTimeInMillis() || transactionDate > endDate.getTimeInMillis()) {
                 match = false;
             }
