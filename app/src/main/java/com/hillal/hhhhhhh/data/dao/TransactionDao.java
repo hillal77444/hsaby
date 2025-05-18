@@ -15,25 +15,25 @@ import java.util.List;
 
 @Dao
 public interface TransactionDao {
-    @Query("SELECT * FROM transactions WHERE accountId = :accountId ORDER BY transaction_date DESC")
+    @Query("SELECT * FROM transactions WHERE account_id = :accountId ORDER BY transaction_date DESC")
     LiveData<List<Transaction>> getTransactionsForAccount(long accountId);
 
-    @Query("SELECT * FROM transactions WHERE accountId = :accountId AND transaction_date BETWEEN :startDate AND :endDate ORDER BY transaction_date DESC")
+    @Query("SELECT * FROM transactions WHERE account_id = :accountId AND transaction_date BETWEEN :startDate AND :endDate ORDER BY transaction_date DESC")
     LiveData<List<Transaction>> getTransactionsForAccountInDateRange(long accountId, long startDate, long endDate);
 
-    @Query("SELECT SUM(amount) FROM transactions WHERE accountId = :accountId AND type = 'credit'")
+    @Query("SELECT SUM(amount) FROM transactions WHERE account_id = :accountId AND type = 'credit'")
     LiveData<Double> getTotalCredits(long accountId);
 
-    @Query("SELECT SUM(amount) FROM transactions WHERE accountId = :accountId AND type = 'debit'")
+    @Query("SELECT SUM(amount) FROM transactions WHERE account_id = :accountId AND type = 'debit'")
     LiveData<Double> getTotalDebits(long accountId);
 
-    @Query("SELECT * FROM transactions WHERE accountId = :accountId ORDER BY transaction_date DESC LIMIT 1")
+    @Query("SELECT * FROM transactions WHERE account_id = :accountId ORDER BY transaction_date DESC LIMIT 1")
     LiveData<Transaction> getLastTransaction(long accountId);
 
-    @Query("SELECT SUM(amount) FROM transactions WHERE accountId = :accountId AND type = 'credit' AND transaction_date BETWEEN :startDate AND :endDate")
+    @Query("SELECT SUM(amount) FROM transactions WHERE account_id = :accountId AND type = 'credit' AND transaction_date BETWEEN :startDate AND :endDate")
     LiveData<Double> getTotalCreditsInDateRange(long accountId, long startDate, long endDate);
 
-    @Query("SELECT SUM(amount) FROM transactions WHERE accountId = :accountId AND type = 'debit' AND transaction_date BETWEEN :startDate AND :endDate")
+    @Query("SELECT SUM(amount) FROM transactions WHERE account_id = :accountId AND type = 'debit' AND transaction_date BETWEEN :startDate AND :endDate")
     LiveData<Double> getTotalDebitsInDateRange(long accountId, long startDate, long endDate);
 
     @Query("SELECT * FROM transactions WHERE transaction_date BETWEEN :startDate AND :endDate ORDER BY transaction_date DESC")
