@@ -20,6 +20,7 @@ import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.data.repository.TransactionRepository;
 import com.hillal.hhhhhhh.data.repository.SettingsRepository;
 import com.hillal.hhhhhhh.data.room.TransactionDao;
+import com.hillal.hhhhhhh.data.room.AccountDao;
 import com.hillal.hhhhhhh.data.room.migrations.Migration_2;
 import com.hillal.hhhhhhh.data.room.migrations.Migration_3;
 import com.hillal.hhhhhhh.data.room.migrations.Migration_4;
@@ -35,6 +36,7 @@ public class App extends Application {
     private AccountRepository accountRepository;
     private TransactionRepository transactionRepository;
     private SettingsRepository settingsRepository;
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     public void onCreate() {
@@ -61,7 +63,7 @@ public class App extends Application {
             clipboard.setPrimaryClip(clip);
             
             // Show error dialog
-            new Handler(Looper.getMainLooper()).post(() -> {
+            handler.post(() -> {
                 Toast.makeText(this, "حدث خطأ غير متوقع. تم نسخ التفاصيل إلى الحافظة.", Toast.LENGTH_LONG).show();
                 System.exit(1);
             });
@@ -72,13 +74,13 @@ public class App extends Application {
             
             // Initialize database
             Log.d(TAG, "Initializing database...");
-            database = AppDatabase.getInstance(getApplicationContext());
+            database = AppDatabase.getInstance(this);
             Log.d(TAG, "Database initialized successfully");
             
             // Initialize repositories
             Log.d(TAG, "Initializing repositories...");
             accountRepository = new AccountRepository(database.accountDao(), database);
-            transactionRepository = new TransactionRepository(this);
+            transactionRepository = new TransactionRepository(database.transactionDao());
             settingsRepository = new SettingsRepository(this);
             Log.d(TAG, "Repositories initialized successfully");
             
@@ -102,7 +104,7 @@ public class App extends Application {
             clipboard.setPrimaryClip(clip);
             
             // Show error dialog
-            new Handler(Looper.getMainLooper()).post(() -> {
+            handler.post(() -> {
                 Toast.makeText(this, "حدث خطأ أثناء تهيئة التطبيق. تم نسخ التفاصيل إلى الحافظة.", Toast.LENGTH_LONG).show();
                 System.exit(1);
             });
