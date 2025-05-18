@@ -621,7 +621,7 @@ public class SyncManager {
                                     continue;
                                 }
 
-                                Account existingAccount = database.accountDao().getAccountByNumberSync(account.getAccountNumber());
+                                Account existingAccount = database.accountDao().getAccountByNumber(account.getAccountNumber());
                                 if (existingAccount != null) {
                                     existingAccount.setName(account.getName());
                                     existingAccount.setBalance(account.getBalance());
@@ -672,7 +672,7 @@ public class SyncManager {
                                     continue;
                                 }
 
-                                Transaction existingTransaction = database.transactionDao().getTransactionByServerIdSync(transaction.getServerId());
+                                Transaction existingTransaction = database.transactionDao().getTransactionByServerId(transaction.getServerId());
                                 if (existingTransaction != null) {
                                     existingTransaction.setAmount(transaction.getAmount());
                                     existingTransaction.setType(transaction.getType());
@@ -842,7 +842,7 @@ public class SyncManager {
                                         for (Map<String, Object> mapping : accountMappings) {
                                             long localId = ((Number) mapping.get("localId")).longValue();
                                             long serverId = ((Number) mapping.get("serverId")).longValue();
-                                            Account account = database.accountDao().getAccountByIdSync(localId);
+                                            Account account = database.accountDao().getAccountById(localId);
                                             if (account != null) {
                                                 account.setServerId(serverId);
                                                 account.setSyncStatus(2); // SYNCED
@@ -857,7 +857,7 @@ public class SyncManager {
                                         for (Map<String, Object> mapping : transactionMappings) {
                                             long localId = ((Number) mapping.get("localId")).longValue();
                                             long serverId = ((Number) mapping.get("serverId")).longValue();
-                                            Transaction transaction = database.transactionDao().getTransactionByIdSync(localId);
+                                            Transaction transaction = database.transactionDao().getTransactionById(localId);
                                             if (transaction != null) {
                                                 transaction.setServerId(serverId);
                                                 transaction.setSyncStatus(2); // SYNCED
@@ -950,8 +950,8 @@ public class SyncManager {
 
                                     // البحث عن الحساب في قاعدة البيانات المحلية
                                     Account existingAccount = null;
-                                    List<Account> accounts = database.accountDao().getAllAccountsSync();
-                                    for (Account acc : accounts) {
+                                    List<Account> existingAccounts = database.accountDao().getAllAccounts();
+                                    for (Account acc : existingAccounts) {
                                         if (acc.getAccountNumber().equals(accountNumber)) {
                                             existingAccount = acc;
                                             break;
@@ -1000,8 +1000,8 @@ public class SyncManager {
                                     
                                     // البحث عن المعاملة في قاعدة البيانات المحلية
                                     Transaction existingTransaction = null;
-                                    List<Transaction> transactions = database.transactionDao().getAllTransactionsSync();
-                                    for (Transaction trans : transactions) {
+                                    List<Transaction> existingTransactions = database.transactionDao().getAllTransactions();
+                                    for (Transaction trans : existingTransactions) {
                                         if (trans.getServerId() == serverId) {
                                             existingTransaction = trans;
                                             break;
@@ -1056,7 +1056,7 @@ public class SyncManager {
                             if (deletedTransactionIds != null && !deletedTransactionIds.isEmpty()) {
                                 Log.d(TAG, "Received " + deletedTransactionIds.size() + " deleted transactions");
                                 for (Long serverId : deletedTransactionIds) {
-                                    List<Transaction> transactions = database.transactionDao().getAllTransactionsSync();
+                                    List<Transaction> transactions = database.transactionDao().getAllTransactions();
                                     for (Transaction transaction : transactions) {
                                         if (transaction.getServerId() == serverId) {
                                             database.transactionDao().delete(transaction);
