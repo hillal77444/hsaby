@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
@@ -15,6 +16,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.databinding.FragmentLoginBinding;
 import com.hillal.hhhhhhh.viewmodel.AuthViewModel;
+import com.hillal.hhhhhhh.ui.MainActivity;
 
 public class LoginFragment extends Fragment {
     private static final String TAG = "LoginFragment";
@@ -28,8 +30,14 @@ public class LoginFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        
+        // إخفاء شريط التنقل السفلي
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).setBottomNavigationVisibility(false);
+        }
+        
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
         binding.buttonLogin.setOnClickListener(v -> {
@@ -96,6 +104,10 @@ public class LoginFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        // إظهار شريط التنقل السفلي عند مغادرة الصفحة
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).setBottomNavigationVisibility(true);
+        }
         binding = null;
     }
 } 
