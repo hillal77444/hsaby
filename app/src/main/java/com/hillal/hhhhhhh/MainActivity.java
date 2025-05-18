@@ -255,4 +255,9 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }
             };
+
+    // دالة للتحكم في ظهور/إخفاء شريط التنقل السفلي
+    public void setBottomNavigationVisibility(boolean isVisible) {
+        binding.bottomNavigation.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+    }
 }
