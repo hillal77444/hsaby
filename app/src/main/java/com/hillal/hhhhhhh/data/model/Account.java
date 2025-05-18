@@ -17,6 +17,9 @@ public class Account {
     @SerializedName("server_id")
     private long serverId;
 
+    @SerializedName("user_id")
+    private long userId;
+
     @SerializedName("account_number")
     private String accountNumber;
 
@@ -95,6 +98,14 @@ public class Account {
         this.serverId = serverId;
     }
 
+    public long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
+    }
+
     public String getAccountNumber() {
         return accountNumber;
     }
@@ -147,8 +158,8 @@ public class Account {
         return isDebtor;
     }
 
-    public void setDebtor(boolean debtor) {
-        isDebtor = debtor;
+    public void setIsDebtor(boolean isDebtor) {
+        this.isDebtor = isDebtor;
     }
 
     public long getCreatedAt() {
