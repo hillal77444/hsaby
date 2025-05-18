@@ -766,7 +766,7 @@ public class SyncManager {
                                 Account account = null;
                                 if (transaction.getServerId() > 0) {
                                     // إذا كان معرف السيرفر أكبر من صفر، نبحث باستخدام معرف السيرفر
-                                    account = accountDao.getAccountByServerIdSync(transaction.getAccountId());
+                                    account = accountDao.getAccountByServerIdSync(transaction.getServerId());
                                 } else {
                                     // إذا كان معرف السيرفر صفر أو سالب أو null، نبحث باستخدام المعرف المحلي
                                     account = accountDao.getAccountByIdSync(transaction.getAccountId());
