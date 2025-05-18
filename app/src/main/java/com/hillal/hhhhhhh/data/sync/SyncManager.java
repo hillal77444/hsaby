@@ -659,7 +659,10 @@ public class SyncManager {
                                     // تحديث الحساب الموجود
                                     existingAccount.setName(account.getName());
                                     existingAccount.setBalance(account.getBalance());
-                                    existingAccount.setPhoneNumber(account.getPhoneNumber());
+                                    // تحديث رقم الهاتف فقط إذا كان مختلفاً
+                                    if (!account.getPhoneNumber().equals(existingAccount.getPhoneNumber())) {
+                                        existingAccount.setPhoneNumber(account.getPhoneNumber());
+                                    }
                                     existingAccount.setNotes(account.getNotes());
                                     existingAccount.setIsDebtor(account.isDebtor());
                                     existingAccount.setWhatsappEnabled(account.isWhatsappEnabled());
@@ -672,6 +675,14 @@ public class SyncManager {
                                     account.setUserId(currentUserId);
                                     account.setLastSyncTime(System.currentTimeMillis());
                                     account.setSyncStatus(SYNC_STATUS_SYNCED);
+                                    // التحقق من وجود حساب بنفس رقم الهاتف
+                                    if (account.getPhoneNumber() != null && !account.getPhoneNumber().isEmpty()) {
+                                        Account accountWithSamePhone = accountDao.getAccountByPhoneNumberSync(account.getPhoneNumber());
+                                        if (accountWithSamePhone != null) {
+                                            // إذا وجد حساب بنفس رقم الهاتف، نترك رقم الهاتف فارغاً
+                                            account.setPhoneNumber("");
+                                        }
+                                    }
                                     accountDao.insert(account);
                                 }
                             }
