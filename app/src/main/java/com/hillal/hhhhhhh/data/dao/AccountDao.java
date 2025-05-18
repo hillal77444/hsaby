@@ -35,6 +35,9 @@ public interface AccountDao {
     @Query("SELECT * FROM accounts WHERE sync_status != :syncStatus")
     List<Account> getModifiedAccounts(int syncStatus);
 
+    @Query("SELECT * FROM accounts WHERE server_id = 0")
+    List<Account> getNewAccounts();
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(Account account);
 
