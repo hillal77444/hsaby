@@ -15,13 +15,11 @@ import android.content.SharedPreferences;
 import com.hillal.hhhhhhh.data.remote.ApiService;
 import com.hillal.hhhhhhh.data.remote.RetrofitClient;
 import com.hillal.hhhhhhh.data.remote.DataManager;
-import com.hillal.hhhhhhh.data.room.AccountDao;
-import com.hillal.hhhhhhh.data.room.TransactionDao;
+import com.hillal.hhhhhhh.data.dao.AccountDao;
+import com.hillal.hhhhhhh.data.dao.TransactionDao;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.model.User;
-import com.hillal.hhhhhhh.data.room.AppDatabase;
-import com.hillal.hhhhhhh.App;
 
 import java.util.List;
 import retrofit2.Call;
@@ -80,8 +78,6 @@ public class SyncManager {
     private int offlineRetryCount = 0;
     private long lastOfflineRetryTime = 0;
 
-    private final AppDatabase database;
-
     public SyncManager(Context context, AccountDao accountDao, TransactionDao transactionDao) {
         this.context = context;
         this.apiService = RetrofitClient.getInstance().getApiService();
@@ -101,8 +97,6 @@ public class SyncManager {
         startAutoSync();
         // تنفيذ مزامنة فورية
         performInitialSync();
-
-        this.database = ((App) context.getApplicationContext()).getDatabase();
     }
 
     private long getLastSyncTime() {
@@ -623,7 +617,7 @@ public class SyncManager {
                                 }
 
                                 // البحث عن الحساب في قاعدة البيانات المحلية
-                                Account existingAccount = database.accountDao().getAccountByNumberSync(account.getAccountNumber());
+                                Account existingAccount = accountDao.getAccountByNumberSync(account.getAccountNumber());
                                 if (existingAccount != null) {
                                     existingAccount.setName(account.getName());
                                     existingAccount.setBalance(account.getBalance());
@@ -633,11 +627,11 @@ public class SyncManager {
                                     existingAccount.setWhatsappEnabled(account.isWhatsappEnabled());
                                     existingAccount.setServerId(account.getServerId());
                                     existingAccount.setSyncStatus(1); // SYNCED
-                                    database.accountDao().update(existingAccount);
+                                    accountDao.update(existingAccount);
                                 } else {
                                     account.setUserId(currentUserId);
                                     account.setSyncStatus(1); // SYNCED
-                                    database.accountDao().insert(account);
+                                    accountDao.insert(account);
                                 }
                             }
 
@@ -675,7 +669,7 @@ public class SyncManager {
                                 }
 
                                 // البحث عن المعاملة في قاعدة البيانات المحلية
-                                Transaction existingTransaction = database.transactionDao().getTransactionByServerIdSync(transaction.getServerId());
+                                Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
                                 if (existingTransaction != null) {
                                     existingTransaction.setAmount(transaction.getAmount());
                                     existingTransaction.setType(transaction.getType());
@@ -683,11 +677,11 @@ public class SyncManager {
                                     existingTransaction.setNotes(transaction.getNotes());
                                     existingTransaction.setTransactionDate(transaction.getTransactionDate());
                                     existingTransaction.setSyncStatus(1); // SYNCED
-                                    database.transactionDao().update(existingTransaction);
+                                    transactionDao.update(existingTransaction);
                                 } else {
                                     transaction.setUserId(currentUserId);
                                     transaction.setSyncStatus(1); // SYNCED
-                                    database.transactionDao().insert(transaction);
+                                    transactionDao.insert(transaction);
                                 }
                             }
 
@@ -815,8 +809,8 @@ public class SyncManager {
         executor.execute(() -> {
             try {
                 // جلب التغييرات المحلية
-                List<Account> modifiedAccounts = database.accountDao().getModifiedAccounts(getLastSyncTime());
-                List<Transaction> modifiedTransactions = database.transactionDao().getModifiedTransactions(getLastSyncTime());
+                List<Account> modifiedAccounts = accountDao.getModifiedAccounts(getLastSyncTime());
+                List<Transaction> modifiedTransactions = transactionDao.getModifiedTransactions(getLastSyncTime());
 
                 if (modifiedAccounts.isEmpty() && modifiedTransactions.isEmpty()) {
                     Log.d(TAG, "No local changes to sync");
@@ -845,11 +839,11 @@ public class SyncManager {
                                         for (Map<String, Object> mapping : accountMappings) {
                                             long localId = ((Number) mapping.get("localId")).longValue();
                                             long serverId = ((Number) mapping.get("serverId")).longValue();
-                                            database.accountDao().getAccountById(localId).observe((LifecycleOwner) context, account -> {
+                                            accountDao.getAccountById(localId).observe((LifecycleOwner) context, account -> {
                                                 if (account != null) {
                                                     account.setServerId(serverId);
                                                     account.setSyncStatus(2); // SYNCED
-                                                    database.accountDao().update(account);
+                                                    accountDao.update(account);
                                                 }
                                             });
                                         }
@@ -861,11 +855,11 @@ public class SyncManager {
                                         for (Map<String, Object> mapping : transactionMappings) {
                                             long localId = ((Number) mapping.get("localId")).longValue();
                                             long serverId = ((Number) mapping.get("serverId")).longValue();
-                                            database.transactionDao().getTransactionById(localId).observe((LifecycleOwner) context, transaction -> {
+                                            transactionDao.getTransactionById(localId).observe((LifecycleOwner) context, transaction -> {
                                                 if (transaction != null) {
                                                     transaction.setServerId(serverId);
                                                     transaction.setSyncStatus(2); // SYNCED
-                                                    database.transactionDao().update(transaction);
+                                                    transactionDao.update(transaction);
                                                 }
                                             });
                                         }
@@ -954,7 +948,7 @@ public class SyncManager {
                                     if (accountNumber == null) continue;
 
                                     // البحث عن الحساب في قاعدة البيانات المحلية
-                                    Account existingAccount = database.accountDao().getAccountByNumberSync(accountNumber);
+                                    Account existingAccount = accountDao.getAccountByNumberSync(accountNumber);
                                     if (existingAccount != null) {
                                         existingAccount.setName((String) accountData.get("account_name"));
                                         existingAccount.setPhoneNumber((String) accountData.get("phone_number"));
@@ -964,7 +958,7 @@ public class SyncManager {
                                         existingAccount.setWhatsappEnabled((Boolean) accountData.get("whatsapp_enabled"));
                                         existingAccount.setLastSyncTime(System.currentTimeMillis());
                                         existingAccount.setSyncStatus(2); // SYNCED
-                                        database.accountDao().update(existingAccount);
+                                        accountDao.update(existingAccount);
                                     } else {
                                         Account account = new Account();
                                         account.setAccountNumber(accountNumber);
@@ -976,7 +970,7 @@ public class SyncManager {
                                         account.setWhatsappEnabled((Boolean) accountData.get("whatsapp_enabled"));
                                         account.setLastSyncTime(System.currentTimeMillis());
                                         account.setSyncStatus(2); // SYNCED
-                                        database.accountDao().insert(account);
+                                        accountDao.insert(account);
                                     }
                                 }
                             }
@@ -996,7 +990,7 @@ public class SyncManager {
                                     long serverId = ((Number) transactionData.get("id")).longValue();
                                     
                                     // البحث عن المعاملة في قاعدة البيانات المحلية
-                                    Transaction existingTransaction = database.transactionDao().getTransactionByServerIdSync(serverId);
+                                    Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(serverId);
                                     if (existingTransaction != null) {
                                         existingTransaction.setAmount(((Number) transactionData.get("amount")).doubleValue());
                                         existingTransaction.setType((String) transactionData.get("type"));
@@ -1004,7 +998,7 @@ public class SyncManager {
                                         existingTransaction.setNotes((String) transactionData.get("notes"));
                                         existingTransaction.setTransactionDate(((Number) transactionData.get("date")).longValue());
                                         existingTransaction.setSyncStatus(2); // SYNCED
-                                        database.transactionDao().update(existingTransaction);
+                                        transactionDao.update(existingTransaction);
                                     } else {
                                         Transaction transaction = new Transaction();
                                         transaction.setServerId(serverId);
@@ -1014,7 +1008,7 @@ public class SyncManager {
                                         transaction.setNotes((String) transactionData.get("notes"));
                                         transaction.setTransactionDate(((Number) transactionData.get("date")).longValue());
                                         transaction.setSyncStatus(2); // SYNCED
-                                        database.transactionDao().insert(transaction);
+                                        transactionDao.insert(transaction);
                                     }
                                 }
                             }
@@ -1024,10 +1018,10 @@ public class SyncManager {
                             if (deletedTransactionIds != null && !deletedTransactionIds.isEmpty()) {
                                 Log.d(TAG, "Received " + deletedTransactionIds.size() + " deleted transactions");
                                 for (Long serverId : deletedTransactionIds) {
-                                    database.transactionDao().getAllTransactions().observe((LifecycleOwner) context, allTransactions -> {
+                                    transactionDao.getAllTransactions().observe((LifecycleOwner) context, allTransactions -> {
                                         for (Transaction transaction : allTransactions) {
                                             if (transaction.getServerId() == serverId) {
-                                                database.transactionDao().delete(transaction);
+                                                transactionDao.delete(transaction);
                                                 Log.d(TAG, "Deleted transaction with server ID: " + serverId);
                                                 break;
                                             }
@@ -1089,7 +1083,7 @@ public class SyncManager {
         executor.execute(() -> {
             try {
                 // الحصول على القيد من قاعدة البيانات المحلية
-                database.transactionDao().getTransactionById(transactionId).observe((LifecycleOwner) context, transaction -> {
+                transactionDao.getTransactionById(transactionId).observe((LifecycleOwner) context, transaction -> {
                     if (transaction != null) {
                         // إذا كان القيد له معرف سيرفر، نقوم بحذفه من السيرفر
                         if (transaction.getServerId() > 0) {
@@ -1099,7 +1093,7 @@ public class SyncManager {
                                     if (response.isSuccessful()) {
                                         // حذف القيد من قاعدة البيانات المحلية
                                         executor.execute(() -> {
-                                            database.transactionDao().delete(transaction);
+                                            transactionDao.delete(transaction);
                                             Log.d(TAG, "Transaction deleted successfully from server and local database");
                                             handler.post(() -> callback.onSuccess());
                                         });
@@ -1125,7 +1119,7 @@ public class SyncManager {
                             });
                         } else {
                             // إذا لم يكن للقيد معرف سيرفر، نقوم بحذفه محلياً فقط
-                            database.transactionDao().delete(transaction);
+                            transactionDao.delete(transaction);
                             Log.d(TAG, "Transaction deleted from local database only");
                             handler.post(() -> callback.onSuccess());
                         }
