@@ -107,7 +107,7 @@ public class DashboardFragment extends Fragment {
     private void setupClickListeners() {
         // زر تعديل الملف الشخصي
         binding.editProfileButton.setOnClickListener(v -> 
-            Navigation.findNavController(v).navigate(R.id.editProfileFragment));
+            Navigation.findNavController(requireView()).navigate(R.id.editProfileFragment));
 
         // زر عرض القيود المحاسبية
         binding.viewTransactionsButton.setOnClickListener(v -> {
@@ -116,25 +116,29 @@ public class DashboardFragment extends Fragment {
                 @Override
                 public void onSuccess() {
                     // بعد نجاح المزامنة، الانتقال إلى صفحة القيود
-                    Navigation.findNavController(v).navigate(R.id.transactionsFragment);
+                    if (isAdded() && getView() != null) {
+                        Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment);
+                    }
                 }
 
                 @Override
                 public void onError(String error) {
                     // في حالة حدوث خطأ، نعرض رسالة الخطأ ثم ننتقل إلى صفحة القيود
-                    android.widget.Toast.makeText(requireContext(), error, android.widget.Toast.LENGTH_SHORT).show();
-                    Navigation.findNavController(v).navigate(R.id.transactionsFragment);
+                    if (isAdded() && getView() != null) {
+                        android.widget.Toast.makeText(requireContext(), error, android.widget.Toast.LENGTH_SHORT).show();
+                        Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment);
+                    }
                 }
             });
         });
 
         // زر عرض الحسابات
         binding.viewAccountsButton.setOnClickListener(v -> 
-            Navigation.findNavController(v).navigate(R.id.navigation_accounts));
+            Navigation.findNavController(requireView()).navigate(R.id.navigation_accounts));
 
         // زر عرض التقارير
         binding.viewReportsButton.setOnClickListener(v -> 
-            Navigation.findNavController(v).navigate(R.id.navigation_reports));
+            Navigation.findNavController(requireView()).navigate(R.id.navigation_reports));
     }
 
     private void observeData() {
