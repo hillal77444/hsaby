@@ -34,6 +34,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import androidx.fragment.app.Fragment;
+import com.hillal.hhhhhhh.ui.dashboard.DashboardFragment;
+import com.hillal.hhhhhhh.ui.settings.SettingsFragment;
+import com.hillal.hhhhhhh.ui.transactions.TransactionsFragment;
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private ActivityMainBinding binding;
@@ -42,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration appBarConfiguration;
     private AuthViewModel authViewModel;
     private SyncManager syncManager;
+    private App app;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Toolbar set successfully");
 
             // Initialize App instance first
-            App app = (App) getApplication();
+            app = (App) getApplication();
             if (app == null) {
                 throw new IllegalStateException("Application instance is null");
             }
@@ -115,6 +122,16 @@ public class MainActivity extends AppCompatActivity {
             NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
             NavigationUI.setupWithNavController(binding.navView, navController);
             Log.d(TAG, "Navigation setup completed successfully");
+
+            BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+            bottomNav.setOnNavigationItemSelectedListener(navListener);
+
+            // Set default fragment
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new DashboardFragment())
+                        .commit();
+            }
 
         } catch (IllegalStateException e) {
             String errorMessage = "=== خطأ في تهيئة التطبيق ===\n\n" +
@@ -186,6 +203,9 @@ public class MainActivity extends AppCompatActivity {
         if (syncManager != null && syncManager.isAutoSyncEnabled()) {
             syncManager.startAutoSync();
         }
+        if (syncManager != null) {
+            syncManager.onDashboardEntered();
+        }
     }
 
     @Override
@@ -210,4 +230,32 @@ public class MainActivity extends AppCompatActivity {
             super.onBackPressed();
         }
     }
+
+    private BottomNavigationView.OnNavigationItemSelectedListener navListener =
+            new BottomNavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    Fragment selectedFragment = null;
+
+                    switch (item.getItemId()) {
+                        case R.id.nav_dashboard:
+                            selectedFragment = new DashboardFragment();
+                            break;
+                        case R.id.nav_transactions:
+                            selectedFragment = new TransactionsFragment();
+                            break;
+                        case R.id.nav_settings:
+                            selectedFragment = new SettingsFragment();
+                            break;
+                    }
+
+                    if (selectedFragment != null) {
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container, selectedFragment)
+                                .commit();
+                    }
+
+                    return true;
+                }
+            };
 }
