@@ -766,10 +766,10 @@ public class SyncManager {
                                 Account account = null;
                                 if (transaction.getServerId() > 0) {
                                     // إذا كان معرف السيرفر أكبر من صفر، نبحث باستخدام معرف السيرفر
-                                    account = accountDao.getAccountByServerId(transaction.getServerId()).getValue();
+                                    account = accountDao.getAccountByServerIdSync(transaction.getServerId());
                                 } else {
                                     // إذا كان معرف السيرفر صفر أو سالب أو null، نبحث باستخدام المعرف المحلي
-                                    account = accountDao.getAccountById(transaction.getAccountId()).getValue();
+                                    account = accountDao.getAccountByIdSync(transaction.getAccountId());
                                 }
                                 if (account == null) {
                                     Log.d(TAG, "Skipping transaction: account not found. Account ID: " + 
