@@ -351,7 +351,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             double totalDebit = 0;
             double totalCredit = 0;
             for (Transaction t : allCurrencyTransactions) {
-                if (t.getDate() >= startDate.getTime() && t.getDate() <= endDate.getTime()) {
+                if (t.getTransactionDate() >= startDate.getTime() && t.getTransactionDate() <= endDate.getTime()) {
                     if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
                         totalDebit += t.getAmount();
                     } else {
@@ -378,9 +378,9 @@ public class AccountStatementActivity extends AppCompatActivity {
             // العمليات خلال الفترة
             double runningBalance = previousBalance;
             for (Transaction transaction : allCurrencyTransactions) {
-                if (transaction.getDate() >= startDate.getTime() && transaction.getDate() <= endDate.getTime()) {
+                if (transaction.getTransactionDate() >= startDate.getTime() && transaction.getTransactionDate() <= endDate.getTime()) {
                     html.append("<tr>");
-                    html.append("<td>").append(dateFormat.format(transaction.getDate())).append("</td>");
+                    html.append("<td>").append(dateFormat.format(new Date(transaction.getTransactionDate()))).append("</td>");
                     if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
                         html.append("<td></td>");
                         html.append("<td>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
@@ -437,11 +437,11 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private void sortTransactionsByDate(List<Transaction> transactions) {
-        Collections.sort(transactions, (a, b) -> Long.compare(a.getDate(), b.getDate()));
+        Collections.sort(transactions, (a, b) -> Long.compare(a.getTransactionDate(), b.getTransactionDate()));
     }
 
     private boolean isTransactionInDateRange(Transaction transaction, Date startDate, Date endDate) {
-        long transactionDate = transaction.getDate();
+        long transactionDate = transaction.getTransactionDate();
         return transactionDate >= startDate.getTime() && transactionDate <= endDate.getTime();
     }
 
