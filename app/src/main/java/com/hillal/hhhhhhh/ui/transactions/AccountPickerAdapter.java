@@ -38,7 +38,7 @@ public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdap
         this.accounts = accounts;
         this.accountTransactions = accountTransactions;
         this.listener = listener;
-        this.transactionRepository = new TransactionRepository((android.app.Application) context.getApplicationContext());
+        this.transactionRepository = new TransactionRepository(((App) context.getApplicationContext()).getDatabase());
         if (context instanceof LifecycleOwner) {
             this.lifecycleOwner = (LifecycleOwner) context;
         } else {
