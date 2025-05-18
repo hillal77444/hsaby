@@ -12,6 +12,7 @@ import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.Date;
 
 public class TransactionsAdapter extends ListAdapter<Transaction, TransactionsAdapter.TransactionViewHolder> {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
@@ -57,7 +58,7 @@ public class TransactionsAdapter extends ListAdapter<Transaction, TransactionsAd
         }
 
         public void bind(Transaction transaction) {
-            dateTextView.setText(dateFormat.format(transaction.getDate()));
+            dateTextView.setText(dateFormat.format(new Date(transaction.getTransactionDate())));
             descriptionTextView.setText(transaction.getDescription());
             
             double amount = transaction.getAmount();
