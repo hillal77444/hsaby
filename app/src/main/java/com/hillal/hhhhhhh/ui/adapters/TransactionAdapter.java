@@ -29,12 +29,22 @@ import com.hillal.hhhhhhh.App;
 public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdapter.TransactionViewHolder> {
     private OnItemClickListener onItemClickListener;
     private OnItemLongClickListener onItemLongClickListener;
+    private OnDeleteClickListener onDeleteClickListener;
+    private OnEditClickListener onEditClickListener;
+    private OnWhatsAppClickListener onWhatsAppClickListener;
     private Map<Long, Account> accountMap;
     private final TransactionRepository transactionRepository;
 
-    public TransactionAdapter(@NonNull DiffUtil.ItemCallback<Transaction> diffCallback, Context context) {
-        super(diffCallback);
-        this.transactionRepository = new TransactionRepository(((App) context.getApplicationContext()).getDatabase());
+    public interface OnDeleteClickListener {
+        void onDeleteClick(Transaction transaction);
+    }
+
+    public interface OnEditClickListener {
+        void onEditClick(Transaction transaction);
+    }
+
+    public interface OnWhatsAppClickListener {
+        void onWhatsAppClick(Transaction transaction, String phoneNumber);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -43,6 +53,18 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
 
     public void setOnItemLongClickListener(OnItemLongClickListener listener) {
         this.onItemLongClickListener = listener;
+    }
+
+    public void setOnDeleteClickListener(OnDeleteClickListener listener) {
+        this.onDeleteClickListener = listener;
+    }
+
+    public void setOnEditClickListener(OnEditClickListener listener) {
+        this.onEditClickListener = listener;
+    }
+
+    public void setOnWhatsAppClickListener(OnWhatsAppClickListener listener) {
+        this.onWhatsAppClickListener = listener;
     }
 
     public void setAccountMap(Map<Long, Account> accountMap) {
@@ -74,32 +96,31 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
 
             // إضافة مستمع النقر لزر الحذف
             holder.binding.deleteButton.setOnClickListener(v -> {
-                if (onItemLongClickListener != null) {
-                    onItemLongClickListener.onItemLongClick(transaction);
+                if (onDeleteClickListener != null) {
+                    onDeleteClickListener.onDeleteClick(transaction);
                 }
             });
 
-            // إضافة مستمع النقر لزر إرسال واتساب
+            // إضافة مستمع النقر لزر التعديل
+            holder.binding.editButton.setOnClickListener(v -> {
+                if (onEditClickListener != null) {
+                    onEditClickListener.onEditClick(transaction);
+                }
+            });
+
+            // إضافة مستمع النقر لزر واتساب
+            holder.binding.whatsappButton.setOnClickListener(v -> {
+                if (onWhatsAppClickListener != null && accountMap != null && accountMap.containsKey(transaction.getAccountId())) {
+                    String phoneNumber = accountMap.get(transaction.getAccountId()).getPhoneNumber();
+                    onWhatsAppClickListener.onWhatsAppClick(transaction, phoneNumber);
+                }
+            });
+
+            // إضافة مستمع النقر لزر الإرسال
             holder.binding.btnSendWhatsApp.setOnClickListener(v -> {
-                // تعطيل الزر مؤقتاً لمنع النقرات المتكررة
-                holder.binding.btnSendWhatsApp.setEnabled(false);
-                
-                // الحصول على معلومات الحساب
-                Account account = accountMap.get(transaction.getAccountId());
-                if (account != null) {
-                    // مراقبة الرصيد حتى التاريخ
-                    transactionRepository.getBalanceUntilDate(transaction.getAccountId(), transaction.getTransactionDate(), transaction.getCurrency())
-                            .observe((LifecycleOwner) holder.itemView.getContext(), balance -> {
-                                if (balance != null) {
-                                    String message = holder.buildWhatsAppMessage(account.getName(), transaction, balance);
-                                    holder.sendWhatsAppMessage(holder.itemView.getContext(), account.getPhoneNumber(), message);
-                                }
-                                // إعادة تفعيل الزر
-                                holder.binding.btnSendWhatsApp.setEnabled(true);
-                            });
-                } else {
-                    // إعادة تفعيل الزر في حالة عدم وجود حساب
-                    holder.binding.btnSendWhatsApp.setEnabled(true);
+                if (onWhatsAppClickListener != null && accountMap != null && accountMap.containsKey(transaction.getAccountId())) {
+                    String phoneNumber = accountMap.get(transaction.getAccountId()).getPhoneNumber();
+                    onWhatsAppClickListener.onWhatsAppClick(transaction, phoneNumber);
                 }
             });
         }
