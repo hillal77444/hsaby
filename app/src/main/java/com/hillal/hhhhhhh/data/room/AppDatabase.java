@@ -23,12 +23,17 @@ import com.hillal.hhhhhhh.data.room.migrations.Migration_4;
 import com.hillal.hhhhhhh.data.room.migrations.Migration_5;
 import com.hillal.hhhhhhh.data.room.Converters;
 
-@Database(entities = {Account.class, Transaction.class, Settings.class, PendingOperation.class, User.class}, version = 5, exportSchema = false)
+@Database(entities = {
+        Account.class,
+        Transaction.class,
+        User.class,
+        Settings.class,
+        PendingOperation.class
+}, version = 5, exportSchema = true)
 @TypeConverters(Converters.class)
 public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG = "AppDatabase";
-    private static final String DATABASE_NAME = "accounting_database";
-    private static volatile AppDatabase instance;
+    private static volatile AppDatabase INSTANCE;
 
     public abstract AccountDao accountDao();
     public abstract TransactionDao transactionDao();
@@ -36,22 +41,22 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract PendingOperationDao pendingOperationDao();
     public abstract UserDao userDao();
 
-    public static synchronized AppDatabase getInstance(Context context) {
-        if (instance == null) {
+    public static AppDatabase getInstance(Context context) {
+        if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
-                if (instance == null) {
-                    instance = Room.databaseBuilder(
+                if (INSTANCE == null) {
+                    INSTANCE = Room.databaseBuilder(
                             context.getApplicationContext(),
                             AppDatabase.class,
-                            DATABASE_NAME)
-                            .addMigrations(new Migration_2(), new Migration_3(), new Migration_4(), new Migration_5())
-                            .addCallback(roomCallback)
-                            .build();
+                            "accounting_database"
+                    )
+                    .fallbackToDestructiveMigration()
+                    .build();
                     Log.d(TAG, "Database instance created");
                 }
             }
         }
-        return instance;
+        return INSTANCE;
     }
 
     private static final RoomDatabase.Callback roomCallback = new RoomDatabase.Callback() {
