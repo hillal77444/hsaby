@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
+import com.hillal.hhhhhhh.App;
 
 public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdapter.TransactionViewHolder> {
     private OnItemClickListener onItemClickListener;
@@ -33,7 +34,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
 
     public TransactionAdapter(@NonNull DiffUtil.ItemCallback<Transaction> diffCallback, Context context) {
         super(diffCallback);
-        this.transactionRepository = new TransactionRepository((android.app.Application) context.getApplicationContext());
+        this.transactionRepository = new TransactionRepository(((App) context.getApplicationContext()).getDatabase());
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -113,7 +114,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             super(binding.getRoot());
             this.binding = binding;
             this.dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
-            this.transactionRepository = new TransactionRepository((android.app.Application) binding.getRoot().getContext().getApplicationContext());
+            this.transactionRepository = new TransactionRepository(((App) binding.getRoot().getContext().getApplicationContext()).getDatabase());
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
