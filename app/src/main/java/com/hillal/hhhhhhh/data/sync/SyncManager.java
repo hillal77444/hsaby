@@ -1026,15 +1026,15 @@ public class SyncManager {
                                     // معالجة التاريخ
                                     Object dateObj = transactionData.get("date");
                                     if (dateObj instanceof Number) {
-                                        transaction.setDate(((Number) dateObj).longValue());
+                                        transaction.setTransactionDate(((Number) dateObj).longValue());
                                     } else if (dateObj instanceof String) {
                                         try {
                                             java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                                             java.util.Date date = sdf.parse((String) dateObj);
-                                            transaction.setDate(date.getTime());
+                                            transaction.setTransactionDate(date.getTime());
                                         } catch (Exception e) {
                                             Log.e(TAG, "Error parsing date: " + e.getMessage());
-                                            transaction.setDate(System.currentTimeMillis());
+                                            transaction.setTransactionDate(System.currentTimeMillis());
                                         }
                                     }
                                     
