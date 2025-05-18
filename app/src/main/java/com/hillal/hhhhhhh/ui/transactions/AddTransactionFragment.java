@@ -163,7 +163,7 @@ public class AddTransactionFragment extends Fragment {
                     transaction.setNotes(notes);
                     transaction.setTransactionDate(calendar.getTimeInMillis());
                     transaction.setUpdatedAt(System.currentTimeMillis());
-                    transaction.setServerId(0); // تعيين serverId إلى 0 للمعاملات الجديدة
+                    transaction.setServerId(-1); // تعيين serverId إلى -1 للمعاملات الجديدة
                     transaction.setWhatsappEnabled(account.isWhatsappEnabled()); // تعيين حالة واتساب الحساب
 
                     transactionsViewModel.insertTransaction(transaction);
