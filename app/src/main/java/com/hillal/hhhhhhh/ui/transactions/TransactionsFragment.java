@@ -111,8 +111,46 @@ public class TransactionsFragment extends Fragment {
                 .setTitle("تأكيد الحذف")
                 .setMessage("هل أنت متأكد من حذف هذا القيد؟")
                 .setPositiveButton("نعم", (dialog, which) -> {
-                    transactionViewModel.deleteTransaction(transaction);
-                    Toast.makeText(requireContext(), "تم حذف القيد بنجاح", Toast.LENGTH_SHORT).show();
+                    if (!isNetworkAvailable()) {
+                        Toast.makeText(requireContext(), "يرجى الاتصال بالإنترنت لحذف القيد", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    
+                    // الحصول على token المستخدم
+                    String token = requireContext().getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                            .getString("token", null);
+                    
+                    if (token == null) {
+                        Toast.makeText(requireContext(), "يرجى تسجيل الدخول أولاً", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // إرسال طلب الحذف إلى السيرفر
+                    App app = (App) requireActivity().getApplication();
+                    app.getApiService().deleteTransaction("Bearer " + token, transaction.getServerId())
+                        .enqueue(new retrofit2.Callback<Void>() {
+                            @Override
+                            public void onResponse(retrofit2.Call<Void> call, retrofit2.Response<Void> response) {
+                                if (response.isSuccessful()) {
+                                    // إذا نجح الحذف من السيرفر، نقوم بحذفه من قاعدة البيانات المحلية
+                                    transactionViewModel.deleteTransaction(transaction);
+                                    requireActivity().runOnUiThread(() -> {
+                                        Toast.makeText(requireContext(), "تم حذف القيد بنجاح", Toast.LENGTH_SHORT).show();
+                                    });
+                                } else {
+                                    requireActivity().runOnUiThread(() -> {
+                                        Toast.makeText(requireContext(), "فشل في حذف القيد من السيرفر", Toast.LENGTH_SHORT).show();
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(retrofit2.Call<Void> call, Throwable t) {
+                                requireActivity().runOnUiThread(() -> {
+                                    Toast.makeText(requireContext(), "خطأ في الاتصال بالسيرفر", Toast.LENGTH_SHORT).show();
+                                });
+                            }
+                        });
                 })
                 .setNegativeButton("لا", null)
                 .show();
