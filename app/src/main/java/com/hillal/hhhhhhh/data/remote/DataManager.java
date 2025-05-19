@@ -160,10 +160,11 @@ public class DataManager {
                                 }
                             });
                         } else {
-                            final String errorMessage;
+                            String errorMessage = "Unknown error";
                             try {
-                                errorMessage = response.errorBody() != null ? 
-                                    response.errorBody().string() : "Unknown error";
+                                if (response.errorBody() != null) {
+                                    errorMessage = response.errorBody().string();
+                                }
                             } catch (IOException e) {
                                 errorMessage = "Error reading response";
                             }
@@ -219,10 +220,11 @@ public class DataManager {
                         }
                     });
                 } else {
-                    final String errorMessage;
+                    String errorMessage = "Unknown error";
                     try {
-                        errorMessage = response.errorBody() != null ? 
-                            response.errorBody().string() : "Unknown error";
+                        if (response.errorBody() != null) {
+                            errorMessage = response.errorBody().string();
+                        }
                     } catch (IOException e) {
                         errorMessage = "Error reading response";
                     }
