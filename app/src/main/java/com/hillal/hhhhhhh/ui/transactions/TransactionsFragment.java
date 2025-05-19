@@ -36,7 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
-import com.hillal.hhhhhhh.viewmodel.TransactionViewModelFactory;
+import com.hillal.hhhhhhh.ui.transactions.TransactionViewModelFactory;
 
 public class TransactionsFragment extends Fragment {
     private FragmentTransactionsBinding binding;
@@ -64,7 +64,7 @@ public class TransactionsFragment extends Fragment {
         viewModel = new ViewModelProvider(this).get(TransactionsViewModel.class);
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
         AccountRepository accountRepository = app.getAccountRepository();
-        TransactionViewModelFactory factory = new TransactionViewModelFactory(accountRepository);
+        com.hillal.hhhhhhh.ui.transactions.TransactionViewModelFactory factory = new com.hillal.hhhhhhh.ui.transactions.TransactionViewModelFactory(accountRepository);
         transactionViewModel = new ViewModelProvider(this, factory).get(TransactionViewModel.class);
         transactionRepository = new com.hillal.hhhhhhh.data.repository.TransactionRepository(app.getDatabase());
         
