@@ -130,16 +130,14 @@ public class SettingsFragment extends Fragment {
         dataManager.fetchDataFromServer(new DataManager.DataCallback() {
             @Override
             public void onSuccess() {
-                Log.d(TAG, "Full sync completed successfully");
-                showMessage("تمت المزامنة بنجاح");
+                showMessage("تم تحديث البيانات بنجاح");
             }
 
             @Override
             public void onError(String error) {
-                Log.e(TAG, "Full sync failed: " + error);
-                showMessage("فشلت المزامنة: " + error);
+                showMessage("خطأ في تحديث البيانات: " + error);
             }
-        }, true);
+        });
     }
 
     private void setupSecuritySettings() {
