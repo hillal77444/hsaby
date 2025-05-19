@@ -179,54 +179,79 @@ public class DataManager {
                                         try {
                                             // تحديث وقت المزامنة وحالة المزامنة لجميع الحسابات
                                             for (Account account : accounts) {
-                                                account.setLastSyncTime(System.currentTimeMillis());
-                                                account.setSyncStatus(2); // SYNCED
-                                                Log.d(TAG, "Processing account: " + account.getName() + " (ID: " + account.getServerId() + ")");
+                                                try {
+                                                    account.setLastSyncTime(System.currentTimeMillis());
+                                                    account.setSyncStatus(2); // SYNCED
+                                                    Log.d(TAG, "Processing account: " + account.getName() + 
+                                                          " (ID: " + account.getServerId() + 
+                                                          ", Phone: " + account.getPhoneNumber() + ")");
+                                                    
+                                                    // التحقق من وجود حساب بنفس server_id
+                                                    Account existingAccount = accountDao.getAccountByServerIdSync(account.getServerId());
+                                                    if (existingAccount != null) {
+                                                        // تحديث الحساب الموجود
+                                                        account.setId(existingAccount.getId());
+                                                        accountDao.update(account);
+                                                        Log.d(TAG, "Updated existing account: " + account.getServerId());
+                                                    } else {
+                                                        // إضافة حساب جديد
+                                                        accountDao.insert(account);
+                                                        Log.d(TAG, "Added new account: " + account.getServerId());
+                                                    }
+                                                } catch (Exception e) {
+                                                    Log.e(TAG, "Error processing account: " + account.getServerId() + 
+                                                          "\nError: " + e.getMessage() + 
+                                                          "\nStack trace: " + Log.getStackTraceString(e));
+                                                    throw e;
+                                                }
                                             }
-                                            
-                                            // إضافة جميع الحسابات دفعة واحدة
-                                            accountDao.insertAll(accounts);
-                                            Log.d(TAG, "Added " + accounts.size() + " accounts successfully");
+                                            Log.d(TAG, "All accounts processed successfully");
 
                                             // بعد اكتمال جلب الحسابات، نقوم بجلب المعاملات
                                             fetchTransactions(newToken, callback);
                                         } catch (Exception e) {
-                                            Log.e(TAG, "Error saving accounts: " + e.getMessage());
-                                            handler.post(() -> callback.onError("Error saving accounts: " + e.getMessage()));
+                                            String errorMessage = "Error saving accounts: " + e.getMessage() + 
+                                                               "\nStack trace: " + Log.getStackTraceString(e);
+                                            Log.e(TAG, errorMessage);
+                                            handler.post(() -> callback.onError(errorMessage));
                                         }
                                     });
                                 } else {
-                                    String errorMessage = "Unknown error";
+                                    String errorMessage = "Failed to fetch accounts: " + response.code();
                                     try {
                                         if (response.errorBody() != null) {
-                                            errorMessage = response.errorBody().string();
+                                            errorMessage += "\n" + response.errorBody().string();
                                         }
                                     } catch (IOException e) {
-                                        errorMessage = "Error reading response";
+                                        errorMessage += "\nError reading response: " + e.getMessage();
                                     }
-                                    final String finalErrorMessage = errorMessage;
-                                    Log.e(TAG, "Failed to fetch accounts: " + finalErrorMessage + ", Response code: " + response.code());
-                                    handler.post(() -> callback.onError("Failed to fetch accounts: " + finalErrorMessage));
+                                    Log.e(TAG, errorMessage);
+                                    handler.post(() -> callback.onError(errorMessage));
                                 }
                             }
 
                             @Override
                             public void onFailure(Call<List<Account>> call, Throwable t) {
-                                Log.e(TAG, "Network error while fetching accounts: " + t.getMessage());
-                                handler.post(() -> callback.onError("Network error: " + t.getMessage()));
+                                String errorMessage = "Network error while fetching accounts: " + t.getMessage() + 
+                                                   "\nStack trace: " + Log.getStackTraceString(t);
+                                Log.e(TAG, errorMessage);
+                                handler.post(() -> callback.onError(errorMessage));
                             }
                         });
                     } catch (Exception e) {
-                        Log.e(TAG, "Error in fetchDataFromServer: " + e.getMessage());
-                        handler.post(() -> callback.onError("Error: " + e.getMessage()));
+                        String errorMessage = "Error in fetchDataFromServer: " + e.getMessage() + 
+                                           "\nStack trace: " + Log.getStackTraceString(e);
+                        Log.e(TAG, errorMessage);
+                        handler.post(() -> callback.onError(errorMessage));
                     }
                 });
             }
 
             @Override
             public void onError(String error) {
-                Log.e(TAG, "Error refreshing token: " + error);
-                callback.onError(error);
+                String errorMessage = "Error refreshing token: " + error;
+                Log.e(TAG, errorMessage);
+                callback.onError(errorMessage);
             }
         });
     }
@@ -318,37 +343,62 @@ public class DataManager {
                         try {
                             // إضافة جميع الحسابات
                             for (Account account : accounts) {
-                                // التحقق من وجود حساب بنفس server_id
-                                Account existingAccount = accountDao.getAccountByServerIdSync(account.getServerId());
-                                if (existingAccount != null) {
-                                    // تحديث الحساب الموجود
-                                    account.setId(existingAccount.getId());
-                                    accountDao.update(account);
-                                    Log.d(TAG, "تم تحديث حساب موجود: server_id=" + account.getServerId());
-                                } else {
-                                    // إضافة حساب جديد
-                                    accountDao.insert(account);
-                                    Log.d(TAG, "تم إضافة حساب جديد: server_id=" + account.getServerId());
+                                try {
+                                    // التحقق من وجود حساب بنفس server_id
+                                    Account existingAccount = accountDao.getAccountByServerIdSync(account.getServerId());
+                                    if (existingAccount != null) {
+                                        // تحديث الحساب الموجود
+                                        account.setId(existingAccount.getId());
+                                        accountDao.update(account);
+                                        Log.d(TAG, "تم تحديث حساب موجود: server_id=" + account.getServerId() + 
+                                              ", name=" + account.getName() + 
+                                              ", phone=" + account.getPhoneNumber());
+                                    } else {
+                                        // إضافة حساب جديد
+                                        accountDao.insert(account);
+                                        Log.d(TAG, "تم إضافة حساب جديد: server_id=" + account.getServerId() + 
+                                              ", name=" + account.getName() + 
+                                              ", phone=" + account.getPhoneNumber());
+                                    }
+                                } catch (Exception e) {
+                                    Log.e(TAG, "خطأ في معالجة الحساب: server_id=" + account.getServerId() + 
+                                          ", name=" + account.getName() + 
+                                          ", phone=" + account.getPhoneNumber() + 
+                                          "\nالخطأ: " + e.getMessage() + 
+                                          "\nStack trace: " + Log.getStackTraceString(e));
+                                    throw e; // إعادة رمي الخطأ للمعالجة في المستوى الأعلى
                                 }
                             }
                             
                             // جلب جميع المعاملات
                             fetchAllTransactions(token, callback);
                         } catch (Exception e) {
-                            Log.e(TAG, "خطأ في حفظ الحسابات: " + e.getMessage());
-                            handler.post(() -> callback.onError("خطأ في حفظ الحسابات: " + e.getMessage()));
+                            String errorMessage = "خطأ في حفظ الحسابات: " + e.getMessage() + 
+                                               "\nStack trace: " + Log.getStackTraceString(e);
+                            Log.e(TAG, errorMessage);
+                            handler.post(() -> callback.onError(errorMessage));
                         }
                     });
                 } else {
-                    Log.e(TAG, "فشل في جلب الحسابات: " + response.code());
-                    handler.post(() -> callback.onError("فشل في جلب الحسابات"));
+                    String errorMessage = "فشل في جلب الحسابات: " + response.code();
+                    try {
+                        if (response.errorBody() != null) {
+                            errorMessage += "\n" + response.errorBody().string();
+                        }
+                    } catch (IOException e) {
+                        errorMessage += "\nخطأ في قراءة رسالة الخطأ: " + e.getMessage();
+                    }
+                    Log.e(TAG, errorMessage);
+                    handler.post(() -> callback.onError(errorMessage));
                 }
             }
 
             @Override
             public void onFailure(Call<List<Account>> call, Throwable t) {
-                Log.e(TAG, "خطأ في الاتصال: " + t.getMessage());
-                handler.post(() -> callback.onError("خطأ في الاتصال"));
+                String errorMessage = "خطأ في الاتصال: " + t.getMessage() + 
+                                   "\nStack trace: " + Log.getStackTraceString(t);
+                Log.e(TAG, errorMessage);
+                handler.post(() -> callback.onError(errorMessage));
             }
         });
     }
@@ -367,17 +417,30 @@ public class DataManager {
                         try {
                             // إضافة جميع المعاملات
                             for (Transaction transaction : transactions) {
-                                // التحقق من وجود معاملة بنفس server_id
-                                Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
-                                if (existingTransaction != null) {
-                                    // تحديث المعاملة الموجودة
-                                    transaction.setId(existingTransaction.getId());
-                                    transactionDao.update(transaction);
-                                    Log.d(TAG, "تم تحديث معاملة موجودة: server_id=" + transaction.getServerId());
-                                } else {
-                                    // إضافة معاملة جديدة
-                                    transactionDao.insert(transaction);
-                                    Log.d(TAG, "تم إضافة معاملة جديدة: server_id=" + transaction.getServerId());
+                                try {
+                                    // التحقق من وجود معاملة بنفس server_id
+                                    Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
+                                    if (existingTransaction != null) {
+                                        // تحديث المعاملة الموجودة
+                                        transaction.setId(existingTransaction.getId());
+                                        transactionDao.update(transaction);
+                                        Log.d(TAG, "تم تحديث معاملة موجودة: server_id=" + transaction.getServerId() + 
+                                              ", amount=" + transaction.getAmount() + 
+                                              ", date=" + transaction.getDate());
+                                    } else {
+                                        // إضافة معاملة جديدة
+                                        transactionDao.insert(transaction);
+                                        Log.d(TAG, "تم إضافة معاملة جديدة: server_id=" + transaction.getServerId() + 
+                                              ", amount=" + transaction.getAmount() + 
+                                              ", date=" + transaction.getDate());
+                                    }
+                                } catch (Exception e) {
+                                    Log.e(TAG, "خطأ في معالجة المعاملة: server_id=" + transaction.getServerId() + 
+                                          ", amount=" + transaction.getAmount() + 
+                                          ", date=" + transaction.getDate() + 
+                                          "\nالخطأ: " + e.getMessage() + 
+                                          "\nStack trace: " + Log.getStackTraceString(e));
+                                    throw e; // إعادة رمي الخطأ للمعالجة في المستوى الأعلى
                                 }
                             }
                             
@@ -390,20 +453,32 @@ public class DataManager {
                             Log.d(TAG, "تمت المزامنة الكاملة بنجاح");
                             handler.post(() -> callback.onSuccess());
                         } catch (Exception e) {
-                            Log.e(TAG, "خطأ في حفظ المعاملات: " + e.getMessage());
-                            handler.post(() -> callback.onError("خطأ في حفظ المعاملات: " + e.getMessage()));
+                            String errorMessage = "خطأ في حفظ المعاملات: " + e.getMessage() + 
+                                               "\nStack trace: " + Log.getStackTraceString(e);
+                            Log.e(TAG, errorMessage);
+                            handler.post(() -> callback.onError(errorMessage));
                         }
                     });
                 } else {
-                    Log.e(TAG, "فشل في جلب المعاملات: " + response.code());
-                    handler.post(() -> callback.onError("فشل في جلب المعاملات"));
+                    String errorMessage = "فشل في جلب المعاملات: " + response.code();
+                    try {
+                        if (response.errorBody() != null) {
+                            errorMessage += "\n" + response.errorBody().string();
+                        }
+                    } catch (IOException e) {
+                        errorMessage += "\nخطأ في قراءة رسالة الخطأ: " + e.getMessage();
+                    }
+                    Log.e(TAG, errorMessage);
+                    handler.post(() -> callback.onError(errorMessage));
                 }
             }
 
             @Override
             public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                Log.e(TAG, "خطأ في الاتصال: " + t.getMessage());
-                handler.post(() -> callback.onError("خطأ في الاتصال"));
+                String errorMessage = "خطأ في الاتصال: " + t.getMessage() + 
+                                   "\nStack trace: " + Log.getStackTraceString(t);
+                Log.e(TAG, errorMessage);
+                handler.post(() -> callback.onError(errorMessage));
             }
         });
     }
