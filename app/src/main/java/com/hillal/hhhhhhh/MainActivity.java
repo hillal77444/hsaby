@@ -28,6 +28,7 @@ import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.data.sync.SyncManager;
 import com.hillal.hhhhhhh.data.room.AccountDao;
 import com.hillal.hhhhhhh.data.room.TransactionDao;
+import com.hillal.hhhhhhh.data.room.PendingOperationDao;
 import com.hillal.hhhhhhh.databinding.ActivityMainBinding;
 import com.hillal.hhhhhhh.viewmodel.AuthViewModel;
 
@@ -264,5 +265,17 @@ public class MainActivity extends AppCompatActivity {
     // دالة للتحكم في ظهور/إخفاء شريط التنقل السفلي
     public void setBottomNavigationVisibility(boolean isVisible) {
         binding.bottomNavigation.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+    }
+
+    public AccountDao getAccountDao() {
+        return ((App) getApplication()).getDatabase().accountDao();
+    }
+
+    public TransactionDao getTransactionDao() {
+        return ((App) getApplication()).getDatabase().transactionDao();
+    }
+
+    public PendingOperationDao getPendingOperationDao() {
+        return ((App) getApplication()).getDatabase().pendingOperationDao();
     }
 }
