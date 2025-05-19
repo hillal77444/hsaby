@@ -168,8 +168,9 @@ public class DataManager {
                             } catch (IOException e) {
                                 errorMessage = "Error reading response";
                             }
-                            Log.e(TAG, "Failed to fetch accounts: " + errorMessage);
-                            handler.post(() -> callback.onError("Failed to fetch accounts: " + errorMessage));
+                            final String finalErrorMessage = errorMessage;
+                            Log.e(TAG, "Failed to fetch accounts: " + finalErrorMessage);
+                            handler.post(() -> callback.onError("Failed to fetch accounts: " + finalErrorMessage));
                         }
                     }
 
@@ -228,8 +229,9 @@ public class DataManager {
                     } catch (IOException e) {
                         errorMessage = "Error reading response";
                     }
-                    Log.e(TAG, "Failed to fetch transactions: " + errorMessage);
-                    handler.post(() -> callback.onError("Failed to fetch transactions: " + errorMessage));
+                    final String finalErrorMessage = errorMessage;
+                    Log.e(TAG, "Failed to fetch transactions: " + finalErrorMessage);
+                    handler.post(() -> callback.onError("Failed to fetch transactions: " + finalErrorMessage));
                 }
             }
 
