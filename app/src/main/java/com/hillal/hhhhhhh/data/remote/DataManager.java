@@ -202,8 +202,14 @@ public class DataManager {
                     return;
                 }
 
-                // إرسال طلب الحذف إلى السيرفر
-                apiService.deleteTransaction("Bearer " + token, transactionId)
+                // التحقق من وجود server_id
+                if (transaction.getServerId() <= 0) {
+                    handler.post(() -> callback.onError("لا يمكن حذف المعاملة لأنها غير مزامنة مع السيرفر"));
+                    return;
+                }
+
+                // إرسال طلب الحذف إلى السيرفر باستخدام server_id
+                apiService.deleteTransaction("Bearer " + token, transaction.getServerId())
                         .enqueue(new Callback<Void>() {
                             @Override
                             public void onResponse(Call<Void> call, Response<Void> response) {
