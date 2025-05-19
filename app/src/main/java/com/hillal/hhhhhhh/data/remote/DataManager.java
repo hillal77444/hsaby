@@ -367,8 +367,18 @@ public class DataManager {
                         try {
                             // إضافة جميع المعاملات
                             for (Transaction transaction : transactions) {
-                                transactionDao.insert(transaction);
-                                Log.d(TAG, "تم إضافة معاملة: " + transaction.getServerId());
+                                // التحقق من وجود معاملة بنفس server_id
+                                Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
+                                if (existingTransaction != null) {
+                                    // تحديث المعاملة الموجودة
+                                    transaction.setId(existingTransaction.getId());
+                                    transactionDao.update(transaction);
+                                    Log.d(TAG, "تم تحديث معاملة موجودة: server_id=" + transaction.getServerId());
+                                } else {
+                                    // إضافة معاملة جديدة
+                                    transactionDao.insert(transaction);
+                                    Log.d(TAG, "تم إضافة معاملة جديدة: server_id=" + transaction.getServerId());
+                                }
                             }
                             
                             // تحديث وقت آخر مزامنة
@@ -381,7 +391,7 @@ public class DataManager {
                             handler.post(() -> callback.onSuccess());
                         } catch (Exception e) {
                             Log.e(TAG, "خطأ في حفظ المعاملات: " + e.getMessage());
-                            handler.post(() -> callback.onError("خطأ في حفظ المعاملات"));
+                            handler.post(() -> callback.onError("خطأ في حفظ المعاملات: " + e.getMessage()));
                         }
                     });
                 } else {
