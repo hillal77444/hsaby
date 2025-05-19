@@ -47,7 +47,7 @@ public interface ApiService {
     @POST("api/sync/changes")
     Call<Map<String, Object>> syncChanges(@Header("Authorization") String token, @Body Map<String, Object> changes);
 
-    @POST("refresh-token")
+    @POST("api/refresh-token")
     Call<Map<String, String>> refreshToken(@Header("Authorization") String token);
 
     class LoginRequest {
