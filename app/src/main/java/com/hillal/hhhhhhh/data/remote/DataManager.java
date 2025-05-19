@@ -318,15 +318,25 @@ public class DataManager {
                         try {
                             // إضافة جميع الحسابات
                             for (Account account : accounts) {
-                                accountDao.insert(account);
-                                Log.d(TAG, "تم إضافة حساب: " + account.getServerId());
+                                // التحقق من وجود حساب بنفس server_id
+                                Account existingAccount = accountDao.getAccountByServerIdSync(account.getServerId());
+                                if (existingAccount != null) {
+                                    // تحديث الحساب الموجود
+                                    account.setId(existingAccount.getId());
+                                    accountDao.update(account);
+                                    Log.d(TAG, "تم تحديث حساب موجود: server_id=" + account.getServerId());
+                                } else {
+                                    // إضافة حساب جديد
+                                    accountDao.insert(account);
+                                    Log.d(TAG, "تم إضافة حساب جديد: server_id=" + account.getServerId());
+                                }
                             }
                             
                             // جلب جميع المعاملات
                             fetchAllTransactions(token, callback);
                         } catch (Exception e) {
                             Log.e(TAG, "خطأ في حفظ الحسابات: " + e.getMessage());
-                            handler.post(() -> callback.onError("خطأ في حفظ الحسابات"));
+                            handler.post(() -> callback.onError("خطأ في حفظ الحسابات: " + e.getMessage()));
                         }
                     });
                 } else {
