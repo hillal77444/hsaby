@@ -65,17 +65,32 @@ public class DataManager {
             return;
         }
 
+        Log.d(TAG, "بدء عملية المزامنة...");
+
         // جلب الحسابات
         apiService.getAccounts("Bearer " + token).enqueue(new Callback<List<Account>>() {
             @Override
             public void onResponse(Call<List<Account>> call, Response<List<Account>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Account> accounts = response.body();
-                    // حفظ الحسابات في قاعدة البيانات المحلية على خيط منفصل
+                    Log.d(TAG, "تم جلب " + accounts.size() + " حساب من السيرفر");
+                    
                     executor.execute(() -> {
                         try {
-                            accountDao.insertAll(accounts);
-                            Log.d(TAG, "تم جلب " + accounts.size() + " حساب بنجاح");
+                            // تحديث الحسابات الموجودة فقط
+                            for (Account account : accounts) {
+                                Account existingAccount = accountDao.getAccountByServerId(account.getServerId());
+                                if (existingAccount != null) {
+                                    // تحديث الحساب الموجود
+                                    accountDao.update(account);
+                                    Log.d(TAG, "تم تحديث حساب: " + account.getServerId());
+                                } else {
+                                    // إضافة حساب جديد
+                                    accountDao.insert(account);
+                                    Log.d(TAG, "تم إضافة حساب جديد: " + account.getServerId());
+                                }
+                            }
+                            
                             // جلب المعاملات
                             fetchTransactions(token, callback);
                         } catch (Exception e) {
@@ -84,84 +99,78 @@ public class DataManager {
                         }
                     });
                 } else {
+                    Log.e(TAG, "فشل في جلب الحسابات: " + response.code());
                     handler.post(() -> callback.onError("فشل في جلب الحسابات"));
                 }
             }
 
             @Override
             public void onFailure(Call<List<Account>> call, Throwable t) {
+                Log.e(TAG, "خطأ في الاتصال: " + t.getMessage());
                 handler.post(() -> callback.onError("خطأ في الاتصال: " + t.getMessage()));
             }
         });
     }
 
     private void fetchTransactions(String token, DataCallback callback) {
+        Log.d(TAG, "بدء جلب المعاملات من السيرفر...");
+        
         apiService.getTransactions("Bearer " + token).enqueue(new Callback<List<Transaction>>() {
             @Override
             public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Transaction> transactions = response.body();
-                    // حفظ المعاملات في قاعدة البيانات المحلية على خيط منفصل
+                    Log.d(TAG, "تم جلب " + transactions.size() + " معاملة من السيرفر");
+                    
                     executor.execute(() -> {
                         try {
+                            // تحديث المعاملات المحدثة فقط
                             for (Transaction serverTransaction : transactions) {
-                                // التحقق من وجود server_id
-                                
-                                // البحث عن المعاملة باستخدام server_id
-                                Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(serverTransaction.getServerId());
-                                
-                                if (existingTransaction == null) {
-                                    // إذا لم تكن المعاملة موجودة، نقوم بإضافتها كمعاملة جديدة
-                                    Transaction newTransaction = new Transaction();
-                                    newTransaction.setServerId(serverTransaction.getServerId());
-                                    newTransaction.setUserId(serverTransaction.getUserId());
-                                    newTransaction.setAccountId(serverTransaction.getAccountId());
-                                    newTransaction.setAmount(serverTransaction.getAmount());
-                                    newTransaction.setType(serverTransaction.getType());
-                                    newTransaction.setDescription(serverTransaction.getDescription());
-                                    newTransaction.setNotes(serverTransaction.getNotes());
-                                    newTransaction.setCurrency(serverTransaction.getCurrency());
-                                    newTransaction.setTransactionDate(serverTransaction.getTransactionDate());
-                                    newTransaction.setCreatedAt(serverTransaction.getCreatedAt());
-                                    newTransaction.setUpdatedAt(serverTransaction.getUpdatedAt());
-                                    newTransaction.setLastSyncTime(System.currentTimeMillis());
-                                    newTransaction.setSyncStatus(2); // SYNCED
-                                    
-                                    transactionDao.insert(newTransaction);
-                                    Log.d(TAG, "تمت إضافة معاملة جديدة من السيرفر: " + serverTransaction.getServerId());
+                                Transaction existingTransaction = transactionDao.getTransactionByServerId(serverTransaction.getServerId());
+                                if (existingTransaction != null) {
+                                    // تحديث المعاملة الموجودة
+                                    transactionDao.update(serverTransaction);
+                                    Log.d(TAG, "تم تحديث معاملة: " + serverTransaction.getServerId());
                                 } else {
-                                    // إذا كانت المعاملة موجودة، نقوم بتحديثها
-                                    existingTransaction.setUserId(serverTransaction.getUserId());
-                                    existingTransaction.setAccountId(serverTransaction.getAccountId());
-                                    existingTransaction.setAmount(serverTransaction.getAmount());
-                                    existingTransaction.setType(serverTransaction.getType());
-                                    existingTransaction.setDescription(serverTransaction.getDescription());
-                                    existingTransaction.setNotes(serverTransaction.getNotes());
-                                    existingTransaction.setCurrency(serverTransaction.getCurrency());
-                                    existingTransaction.setTransactionDate(serverTransaction.getTransactionDate());
-                                    existingTransaction.setCreatedAt(serverTransaction.getCreatedAt());
-                                    existingTransaction.setUpdatedAt(serverTransaction.getUpdatedAt());
-                                    existingTransaction.setLastSyncTime(System.currentTimeMillis());
-                                    existingTransaction.setSyncStatus(2); // SYNCED
-                                    
-                                    transactionDao.update(existingTransaction);
-                                    Log.d(TAG, "تم تحديث معاملة موجودة: " + serverTransaction.getServerId());
+                                    // إضافة معاملة جديدة
+                                    transactionDao.insert(serverTransaction);
+                                    Log.d(TAG, "تم إضافة معاملة جديدة: " + serverTransaction.getServerId());
                                 }
                             }
-                            Log.d(TAG, "تم جلب " + transactions.size() + " معاملة بنجاح");
-                            handler.post(() -> callback.onSuccess());
+                            
+                            // مزامنة العمليات المعلقة فقط إذا كانت موجودة
+                            if (pendingOperationDao.getPendingOperationsCount() > 0) {
+                                syncPendingOperations(new DataCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "تمت المزامنة بنجاح");
+                                        handler.post(() -> callback.onSuccess());
+                                    }
+
+                                    @Override
+                                    public void onError(String error) {
+                                        Log.e(TAG, "خطأ في مزامنة العمليات المعلقة: " + error);
+                                        handler.post(() -> callback.onError(error));
+                                    }
+                                });
+                            } else {
+                                Log.d(TAG, "تمت المزامنة بنجاح");
+                                handler.post(() -> callback.onSuccess());
+                            }
                         } catch (Exception e) {
                             Log.e(TAG, "خطأ في حفظ المعاملات: " + e.getMessage());
                             handler.post(() -> callback.onError("خطأ في حفظ المعاملات: " + e.getMessage()));
                         }
                     });
                 } else {
+                    Log.e(TAG, "فشل في جلب المعاملات: " + response.code());
                     handler.post(() -> callback.onError("فشل في جلب المعاملات"));
                 }
             }
 
             @Override
             public void onFailure(Call<List<Transaction>> call, Throwable t) {
+                Log.e(TAG, "خطأ في الاتصال: " + t.getMessage());
                 handler.post(() -> callback.onError("خطأ في الاتصال: " + t.getMessage()));
             }
         });
