@@ -80,7 +80,7 @@ public interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE updated_at > :timestamp")
     List<Transaction> getModifiedTransactions(long timestamp);
 
-    @Query("SELECT * FROM transactions WHERE server_id = 0")
+    @Query("SELECT * FROM transactions WHERE server_id < 0")
     List<Transaction> getNewTransactions();
 
     @Query("SELECT * FROM transactions WHERE updated_at > :timestamp")
