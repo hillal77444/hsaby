@@ -104,7 +104,48 @@ public class DataManager {
                     // حفظ المعاملات في قاعدة البيانات المحلية على خيط منفصل
                     executor.execute(() -> {
                         try {
-                            transactionDao.insertAll(transactions);
+                            for (Transaction serverTransaction : transactions) {
+                                // البحث عن المعاملة باستخدام server_id
+                                Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(serverTransaction.getServerId());
+                                
+                                if (existingTransaction == null) {
+                                    // إذا لم تكن المعاملة موجودة، نقوم بإضافتها كمعاملة جديدة
+                                    Transaction newTransaction = new Transaction();
+                                    newTransaction.setServerId(serverTransaction.getServerId());
+                                    newTransaction.setUserId(serverTransaction.getUserId());
+                                    newTransaction.setAccountId(serverTransaction.getAccountId());
+                                    newTransaction.setAmount(serverTransaction.getAmount());
+                                    newTransaction.setType(serverTransaction.getType());
+                                    newTransaction.setDescription(serverTransaction.getDescription());
+                                    newTransaction.setNotes(serverTransaction.getNotes());
+                                    newTransaction.setCurrency(serverTransaction.getCurrency());
+                                    newTransaction.setTransactionDate(serverTransaction.getTransactionDate());
+                                    newTransaction.setCreatedAt(serverTransaction.getCreatedAt());
+                                    newTransaction.setUpdatedAt(serverTransaction.getUpdatedAt());
+                                    newTransaction.setLastSyncTime(System.currentTimeMillis());
+                                    newTransaction.setSyncStatus(2); // SYNCED
+                                    
+                                    transactionDao.insert(newTransaction);
+                                    Log.d(TAG, "تمت إضافة معاملة جديدة من السيرفر: " + serverTransaction.getServerId());
+                                } else {
+                                    // إذا كانت المعاملة موجودة، نقوم بتحديثها
+                                    existingTransaction.setUserId(serverTransaction.getUserId());
+                                    existingTransaction.setAccountId(serverTransaction.getAccountId());
+                                    existingTransaction.setAmount(serverTransaction.getAmount());
+                                    existingTransaction.setType(serverTransaction.getType());
+                                    existingTransaction.setDescription(serverTransaction.getDescription());
+                                    existingTransaction.setNotes(serverTransaction.getNotes());
+                                    existingTransaction.setCurrency(serverTransaction.getCurrency());
+                                    existingTransaction.setTransactionDate(serverTransaction.getTransactionDate());
+                                    existingTransaction.setCreatedAt(serverTransaction.getCreatedAt());
+                                    existingTransaction.setUpdatedAt(serverTransaction.getUpdatedAt());
+                                    existingTransaction.setLastSyncTime(System.currentTimeMillis());
+                                    existingTransaction.setSyncStatus(2); // SYNCED
+                                    
+                                    transactionDao.update(existingTransaction);
+                                    Log.d(TAG, "تم تحديث معاملة موجودة: " + serverTransaction.getServerId());
+                                }
+                            }
                             Log.d(TAG, "تم جلب " + transactions.size() + " معاملة بنجاح");
                             handler.post(() -> callback.onSuccess());
                         } catch (Exception e) {
