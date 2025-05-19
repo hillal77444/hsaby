@@ -71,12 +71,6 @@ public interface AccountDao {
     @Query("SELECT * FROM accounts WHERE server_id = :serverId")
     Account getAccountByServerIdSync(long serverId);
 
-    @Query("SELECT * FROM accounts WHERE sync_status = 0")
-    List<Account> getNewAccounts();
-
-    @Query("SELECT * FROM accounts WHERE last_sync_time > :lastSyncTime")
-    List<Account> getModifiedAccounts(long lastSyncTime);
-
     @Query("DELETE FROM accounts")
     void deleteAllAccounts();
 } 
