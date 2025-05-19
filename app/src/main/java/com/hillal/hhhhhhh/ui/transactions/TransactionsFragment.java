@@ -37,7 +37,8 @@ import java.util.Date;
 import java.util.Locale;
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.ui.transactions.TransactionViewModelFactory;
-import com.hillal.hhhhhhh.data.network.RetrofitClient;
+import com.hillal.hhhhhhh.data.remote.RetrofitClient;
+import com.hillal.hhhhhhh.data.remote.ApiService;
 
 public class TransactionsFragment extends Fragment {
     private FragmentTransactionsBinding binding;
