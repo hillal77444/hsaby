@@ -24,6 +24,7 @@ import java.util.concurrent.Executors;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import java.util.ArrayList;
 
 public class DataManager {
     private static final String TAG = "DataManager";
@@ -480,7 +481,10 @@ public class DataManager {
 
         executor.execute(() -> {
             try {
-                List<PendingOperation> operations = pendingOperationDao.getAllPendingOperations();
+                List<PendingOperation> operations = pendingOperationDao.getAllPendingOperations().getValue();
+                if (operations == null) {
+                    operations = new ArrayList<>();
+                }
                 for (PendingOperation operation : operations) {
                     if (operation.getOperationType().equals("UPDATE")) {
                         Transaction transaction = gson.fromJson(operation.getTransactionData(), Transaction.class);
