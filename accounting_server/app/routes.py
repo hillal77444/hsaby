@@ -644,4 +644,21 @@ def sync_changes():
     except Exception as e:
         logger.error(f"Error in sync_changes: {str(e)}")
         db.session.rollback()
-        return json_response({'error': str(e)}, 500) 
+        return json_response({'error': str(e)}, 500)
+
+@main.route('/api/refresh-token', methods=['POST'])
+@jwt_required()
+def refresh_token():
+    try:
+        current_user_id = get_jwt_identity()
+        # إنشاء توكن جديد
+        new_token = create_access_token(identity=current_user_id)
+        
+        return jsonify({
+            'message': 'تم تجديد التوكن بنجاح',
+            'token': new_token
+        })
+        
+    except Exception as e:
+        logger.error(f"Token refresh error: {str(e)}")
+        return jsonify({'error': 'حدث خطأ أثناء تجديد التوكن'}), 500 
