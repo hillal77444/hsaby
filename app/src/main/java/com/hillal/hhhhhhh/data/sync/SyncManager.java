@@ -479,7 +479,7 @@ public class SyncManager {
                 lastOfflineRetryTime = currentTime;
                 offlineRetryCount++;
 
-                // جدولة محاولة إعادة المزامنة
+                // إعادة جدولة المزامنة
                 handler.postDelayed(() -> {
                     if (isNetworkAvailable()) {
                         syncData(callback);
@@ -489,8 +489,8 @@ public class SyncManager {
                 }, OFFLINE_RETRY_INTERVAL);
 
             } catch (Exception e) {
-                Log.e(TAG, "خطأ في معالجة المزامنة بدون إنترنت: " + e.getMessage());
-                callback.onError("حدث خطأ أثناء محاولة المزامنة بدون إنترنت");
+                Log.e(TAG, "خطأ في المزامنة في وضع عدم الاتصال: " + e.getMessage());
+                handler.post(() -> callback.onError("خطأ في المزامنة في وضع عدم الاتصال: " + e.getMessage()));
             }
         });
     }
