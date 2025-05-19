@@ -121,70 +121,85 @@ public class DataManager {
             return;
         }
 
-        Log.d(TAG, "Starting full sync - deleting local data first...");
+        // التحقق من صلاحية التوكن وتجديده إذا لزم الأمر
+        checkAndRefreshToken(new DataCallback() {
+            @Override
+            public void onSuccess() {
+                // بعد تجديد التوكن، نقوم بجلب البيانات
+                String newToken = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                        .getString("token", null);
+                
+                Log.d(TAG, "Starting full sync - deleting local data first...");
 
-        // حذف جميع البيانات المحلية أولاً
-        executor.execute(() -> {
-            try {
-                // حذف جميع الحسابات والمعاملات
-                accountDao.deleteAllAccounts();
-                transactionDao.deleteAllTransactions();
-                if (pendingOperationDao != null) {
-                    pendingOperationDao.deleteAllPendingOperations();
-                }
-                Log.d(TAG, "Local data deleted successfully");
-
-                // جلب الحسابات من السيرفر
-                apiService.getAccounts("Bearer " + token).enqueue(new Callback<List<Account>>() {
-                    @Override
-                    public void onResponse(Call<List<Account>> call, Response<List<Account>> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            List<Account> accounts = response.body();
-                            Log.d(TAG, "Received " + accounts.size() + " accounts from server");
-                            
-                            executor.execute(() -> {
-                                try {
-                                    // تحديث وقت المزامنة وحالة المزامنة لجميع الحسابات
-                                    for (Account account : accounts) {
-                                        account.setLastSyncTime(System.currentTimeMillis());
-                                        account.setSyncStatus(2); // SYNCED
-                                    }
-                                    
-                                    // إضافة جميع الحسابات دفعة واحدة
-                                    accountDao.insertAll(accounts);
-                                    Log.d(TAG, "Added " + accounts.size() + " accounts successfully");
-
-                                    // بعد اكتمال جلب الحسابات، نقوم بجلب المعاملات
-                                    fetchTransactions(token, callback);
-                                } catch (Exception e) {
-                                    Log.e(TAG, "Error saving accounts: " + e.getMessage());
-                                    handler.post(() -> callback.onError("Error saving accounts: " + e.getMessage()));
-                                }
-                            });
-                        } else {
-                            String errorMessage = "Unknown error";
-                            try {
-                                if (response.errorBody() != null) {
-                                    errorMessage = response.errorBody().string();
-                                }
-                            } catch (IOException e) {
-                                errorMessage = "Error reading response";
-                            }
-                            final String finalErrorMessage = errorMessage;
-                            Log.e(TAG, "Failed to fetch accounts: " + finalErrorMessage);
-                            handler.post(() -> callback.onError("Failed to fetch accounts: " + finalErrorMessage));
+                // حذف جميع البيانات المحلية أولاً
+                executor.execute(() -> {
+                    try {
+                        // حذف جميع الحسابات والمعاملات
+                        accountDao.deleteAllAccounts();
+                        transactionDao.deleteAllTransactions();
+                        if (pendingOperationDao != null) {
+                            pendingOperationDao.deleteAllPendingOperations();
                         }
-                    }
+                        Log.d(TAG, "Local data deleted successfully");
 
-                    @Override
-                    public void onFailure(Call<List<Account>> call, Throwable t) {
-                        Log.e(TAG, "Network error while fetching accounts: " + t.getMessage());
-                        handler.post(() -> callback.onError("Network error: " + t.getMessage()));
+                        // جلب الحسابات من السيرفر
+                        apiService.getAccounts("Bearer " + newToken).enqueue(new Callback<List<Account>>() {
+                            @Override
+                            public void onResponse(Call<List<Account>> call, Response<List<Account>> response) {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    List<Account> accounts = response.body();
+                                    Log.d(TAG, "Received " + accounts.size() + " accounts from server");
+                                    
+                                    executor.execute(() -> {
+                                        try {
+                                            // تحديث وقت المزامنة وحالة المزامنة لجميع الحسابات
+                                            for (Account account : accounts) {
+                                                account.setLastSyncTime(System.currentTimeMillis());
+                                                account.setSyncStatus(2); // SYNCED
+                                            }
+                                            
+                                            // إضافة جميع الحسابات دفعة واحدة
+                                            accountDao.insertAll(accounts);
+                                            Log.d(TAG, "Added " + accounts.size() + " accounts successfully");
+
+                                            // بعد اكتمال جلب الحسابات، نقوم بجلب المعاملات
+                                            fetchTransactions(newToken, callback);
+                                        } catch (Exception e) {
+                                            Log.e(TAG, "Error saving accounts: " + e.getMessage());
+                                            handler.post(() -> callback.onError("Error saving accounts: " + e.getMessage()));
+                                        }
+                                    });
+                                } else {
+                                    String errorMessage = "Unknown error";
+                                    try {
+                                        if (response.errorBody() != null) {
+                                            errorMessage = response.errorBody().string();
+                                        }
+                                    } catch (IOException e) {
+                                        errorMessage = "Error reading response";
+                                    }
+                                    final String finalErrorMessage = errorMessage;
+                                    Log.e(TAG, "Failed to fetch accounts: " + finalErrorMessage);
+                                    handler.post(() -> callback.onError("Failed to fetch accounts: " + finalErrorMessage));
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<List<Account>> call, Throwable t) {
+                                Log.e(TAG, "Network error while fetching accounts: " + t.getMessage());
+                                handler.post(() -> callback.onError("Network error: " + t.getMessage()));
+                            }
+                        });
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error deleting local data: " + e.getMessage());
+                        handler.post(() -> callback.onError("Error deleting local data: " + e.getMessage()));
                     }
                 });
-            } catch (Exception e) {
-                Log.e(TAG, "Error deleting local data: " + e.getMessage());
-                handler.post(() -> callback.onError("Error deleting local data: " + e.getMessage()));
+            }
+
+            @Override
+            public void onError(String error) {
+                callback.onError("Token refresh failed: " + error);
             }
         });
     }
