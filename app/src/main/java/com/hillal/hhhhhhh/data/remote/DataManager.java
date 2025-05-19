@@ -278,6 +278,17 @@ public class DataManager {
                             // إضافة جميع المعاملات
                             for (Transaction transaction : transactions) {
                                 try {
+                                    // التحقق من وجود الحساب المرتبط بالمعاملة
+                                    Account account = accountDao.getAccountByServerIdSync(transaction.getAccountId());
+                                    if (account == null) {
+                                        Log.e(TAG, "Account not found for transaction: " + transaction.getServerId() + 
+                                              ", Account ID: " + transaction.getAccountId());
+                                        continue; // تخطي هذه المعاملة
+                                    }
+
+                                    // تحديث معرف الحساب المحلي
+                                    transaction.setAccountId(account.getId());
+
                                     // التحقق من وجود معاملة بنفس server_id
                                     Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
                                     if (existingTransaction != null) {
@@ -477,6 +488,17 @@ public class DataManager {
                             // إضافة جميع المعاملات
                             for (Transaction transaction : transactions) {
                                 try {
+                                    // التحقق من وجود الحساب المرتبط بالمعاملة
+                                    Account account = accountDao.getAccountByServerIdSync(transaction.getAccountId());
+                                    if (account == null) {
+                                        Log.e(TAG, "Account not found for transaction: " + transaction.getServerId() + 
+                                              ", Account ID: " + transaction.getAccountId());
+                                        continue; // تخطي هذه المعاملة
+                                    }
+
+                                    // تحديث معرف الحساب المحلي
+                                    transaction.setAccountId(account.getId());
+
                                     // التحقق من وجود معاملة بنفس server_id
                                     Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
                                     if (existingTransaction != null) {
