@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.Locale;
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.ui.transactions.TransactionViewModelFactory;
+import com.hillal.hhhhhhh.data.network.RetrofitClient;
 
 public class TransactionsFragment extends Fragment {
     private FragmentTransactionsBinding binding;
@@ -126,8 +127,7 @@ public class TransactionsFragment extends Fragment {
                     }
 
                     // إرسال طلب الحذف إلى السيرفر
-                    App app = (App) requireActivity().getApplication();
-                    app.getApiService().deleteTransaction("Bearer " + token, transaction.getServerId())
+                    RetrofitClient.getApiService().deleteTransaction("Bearer " + token, transaction.getServerId())
                         .enqueue(new retrofit2.Callback<Void>() {
                             @Override
                             public void onResponse(retrofit2.Call<Void> call, retrofit2.Response<Void> response) {
