@@ -217,14 +217,15 @@ public class DataManager {
                                         }
                                     });
                                 } else {
-                                    final String errorMessage = "Failed to fetch accounts: " + response.code();
+                                    StringBuilder errorBuilder = new StringBuilder("Failed to fetch accounts: " + response.code());
                                     try {
                                         if (response.errorBody() != null) {
-                                            errorMessage += "\n" + response.errorBody().string();
+                                            errorBuilder.append("\n").append(response.errorBody().string());
                                         }
                                     } catch (IOException e) {
-                                        errorMessage += "\nError reading response: " + e.getMessage();
+                                        errorBuilder.append("\nError reading response: ").append(e.getMessage());
                                     }
+                                    final String errorMessage = errorBuilder.toString();
                                     Log.e(TAG, errorMessage);
                                     handler.post(() -> callback.onError(errorMessage));
                                 }
