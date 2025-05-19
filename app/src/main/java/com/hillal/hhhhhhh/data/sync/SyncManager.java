@@ -83,6 +83,10 @@ public class SyncManager {
     private Handler syncHandler = new Handler(Looper.getMainLooper());
     private Runnable periodicSyncRunnable;
 
+    private static final String PENDING_SYNC_PREFS = "pending_sync_prefs";
+    private static final String PENDING_SYNC_DATA = "pending_sync_data";
+    private static final String PENDING_SYNC_TIME = "pending_sync_time";
+
     public SyncManager(Context context, AccountDao accountDao, TransactionDao transactionDao) {
         this.context = context;
         this.apiService = RetrofitClient.getInstance().getApiService();
@@ -597,6 +601,9 @@ public class SyncManager {
             return;
         }
 
+        // محاولة إعادة المزامنات الفاشلة أولاً
+        retryPendingSync();
+
         // التحقق من وقت آخر مزامنة
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastSyncTime < SYNC_INTERVAL) {
@@ -690,14 +697,6 @@ public class SyncManager {
             return;
         }
 
-        // التحقق من وقت آخر مزامنة
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastSyncTime < SYNC_INTERVAL) {
-            Log.d(TAG, "تمت المزامنة مؤخراً، جاري تخطي هذه المزامنة");
-            callback.onSuccess();
-            return;
-        }
-
         isSyncing = true;
         executor.execute(() -> {
             try {
@@ -708,6 +707,7 @@ public class SyncManager {
                 List<Transaction> newTransactions = transactionDao.getNewTransactions();
                 List<Transaction> modifiedTransactions = transactionDao.getModifiedTransactions(getLastSyncTime());
 
+                // التحقق من وجود تغييرات
                 if (!modifiedAccounts.isEmpty() || !newTransactions.isEmpty() || !modifiedTransactions.isEmpty()) {
                     Log.d(TAG, String.format("إرسال %d حساب معدل، %d معاملة جديدة، %d معاملة معدلة",
                         modifiedAccounts.size(), newTransactions.size(), modifiedTransactions.size()));
@@ -722,10 +722,43 @@ public class SyncManager {
                         @Override
                         public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                             if (response.isSuccessful() && response.body() != null) {
-                                // 2. جلب التغييرات من السيرفر
-                                fetchServerChanges(token, callback);
+                                Map<String, Object> responseData = response.body();
+                                
+                                // التحقق من نجاح المزامنة
+                                boolean syncSuccess = true;
+                                
+                                // تحديث معرفات السيرفر للمعاملات الجديدة
+                                if (responseData.containsKey("new_transaction_ids")) {
+                                    Map<Long, Long> newTransactionIds = (Map<Long, Long>) responseData.get("new_transaction_ids");
+                                    for (Transaction transaction : newTransactions) {
+                                        Long serverId = newTransactionIds.get(transaction.getId());
+                                        if (serverId != null) {
+                                            transaction.setServerId(serverId);
+                                            transaction.setLastSyncTime(System.currentTimeMillis());
+                                            transactionDao.update(transaction);
+                                            Log.d(TAG, "تم تحديث معرف السيرفر للمعاملة: " + transaction.getId() + " -> " + serverId);
+                                        } else {
+                                            syncSuccess = false;
+                                            Log.e(TAG, "لم يتم استلام معرف سيرفر للمعاملة: " + transaction.getId());
+                                        }
+                                    }
+                                }
+
+                                if (syncSuccess) {
+                                    // 2. جلب التغييرات من السيرفر
+                                    fetchServerChanges(token, callback);
+                                } else {
+                                    // حفظ المزامنة الفاشلة للتحميل لاحقاً
+                                    savePendingSync(changes);
+                                    String error = "فشلت مزامنة بعض التغييرات، سيتم إعادة المحاولة عند توفر الاتصال";
+                                    Log.e(TAG, error);
+                                    isSyncing = false;
+                                    handler.post(() -> callback.onError(error));
+                                }
                             } else {
-                                String error = "فشلت مزامنة التغييرات المحلية";
+                                // حفظ المزامنة الفاشلة للتحميل لاحقاً
+                                savePendingSync(changes);
+                                String error = "فشلت مزامنة التغييرات المحلية، سيتم إعادة المحاولة عند توفر الاتصال";
                                 Log.e(TAG, error);
                                 isSyncing = false;
                                 handler.post(() -> callback.onError(error));
@@ -734,7 +767,9 @@ public class SyncManager {
 
                         @Override
                         public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                            String error = "خطأ في الاتصال: " + t.getMessage();
+                            // حفظ المزامنة الفاشلة للتحميل لاحقاً
+                            savePendingSync(changes);
+                            String error = "خطأ في الاتصال: " + t.getMessage() + "، سيتم إعادة المحاولة عند توفر الاتصال";
                             Log.e(TAG, error);
                             isSyncing = false;
                             handler.post(() -> callback.onError(error));
@@ -1215,6 +1250,10 @@ public class SyncManager {
             @Override
             public void run() {
                 if (isNetworkAvailable()) {
+                    // محاولة إعادة المزامنات الفاشلة أولاً
+                    retryPendingSync();
+                    
+                    // ثم المزامنة العادية
                     syncChanges(new SyncCallback() {
                         @Override
                         public void onSuccess() {
@@ -1240,6 +1279,50 @@ public class SyncManager {
         if (periodicSyncRunnable != null) {
             syncHandler.removeCallbacks(periodicSyncRunnable);
             periodicSyncRunnable = null;
+        }
+    }
+
+    private void savePendingSync(Map<String, Object> changes) {
+        SharedPreferences prefs = context.getSharedPreferences(PENDING_SYNC_PREFS, Context.MODE_PRIVATE);
+        String changesJson = new Gson().toJson(changes);
+        prefs.edit()
+            .putString(PENDING_SYNC_DATA, changesJson)
+            .putLong(PENDING_SYNC_TIME, System.currentTimeMillis())
+            .apply();
+        Log.d(TAG, "تم حفظ بيانات المزامنة الفاشلة للتحميل لاحقاً");
+    }
+
+    private void clearPendingSync() {
+        SharedPreferences prefs = context.getSharedPreferences(PENDING_SYNC_PREFS, Context.MODE_PRIVATE);
+        prefs.edit().clear().apply();
+        Log.d(TAG, "تم مسح بيانات المزامنة الفاشلة بعد نجاح المزامنة");
+    }
+
+    private void retryPendingSync() {
+        SharedPreferences prefs = context.getSharedPreferences(PENDING_SYNC_PREFS, Context.MODE_PRIVATE);
+        String pendingData = prefs.getString(PENDING_SYNC_DATA, null);
+        long pendingTime = prefs.getLong(PENDING_SYNC_TIME, 0);
+
+        if (pendingData != null && pendingTime > 0) {
+            Log.d(TAG, "تم العثور على مزامنة فاشلة من: " + new Date(pendingTime));
+            try {
+                Map<String, Object> changes = new Gson().fromJson(pendingData, Map.class);
+                syncChanges(new SyncCallback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(TAG, "تمت إعادة مزامنة البيانات الفاشلة بنجاح");
+                        clearPendingSync();
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Log.e(TAG, "فشلت إعادة مزامنة البيانات الفاشلة: " + error);
+                    }
+                });
+            } catch (Exception e) {
+                Log.e(TAG, "خطأ في تحليل بيانات المزامنة الفاشلة: " + e.getMessage());
+                clearPendingSync();
+            }
         }
     }
 } 
