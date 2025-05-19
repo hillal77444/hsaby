@@ -17,6 +17,7 @@ import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.databinding.FragmentLoginBinding;
 import com.hillal.hhhhhhh.viewmodel.AuthViewModel;
 import com.hillal.hhhhhhh.MainActivity;
+import com.hillal.hhhhhhh.data.DataManager;
 
 public class LoginFragment extends Fragment {
     private static final String TAG = "LoginFragment";
@@ -67,9 +68,30 @@ public class LoginFragment extends Fragment {
                     binding.progressBar.setVisibility(View.GONE);
                     Toast.makeText(getContext(), "تم تسجيل الدخول بنجاح", Toast.LENGTH_SHORT).show();
                     
-                    // التنقل إلى لوحة التحكم
-                    NavHostFragment.findNavController(LoginFragment.this)
-                            .navigate(R.id.navigation_dashboard);
+                    // جلب البيانات من السيرفر بعد تسجيل الدخول
+                    DataManager dataManager = new DataManager(requireContext(), 
+                        ((MainActivity) requireActivity()).getAccountDao(),
+                        ((MainActivity) requireActivity()).getTransactionDao(),
+                        ((MainActivity) requireActivity()).getPendingOperationDao());
+                        
+                    dataManager.fetchDataFromServer(new DataManager.DataCallback() {
+                        @Override
+                        public void onSuccess() {
+                            Log.d(TAG, "Data fetched successfully");
+                            // التنقل إلى لوحة التحكم بعد جلب البيانات
+                            NavHostFragment.findNavController(LoginFragment.this)
+                                    .navigate(R.id.navigation_dashboard);
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Log.e(TAG, "Failed to fetch data: " + error);
+                            Toast.makeText(getContext(), "فشل في جلب البيانات: " + error, Toast.LENGTH_LONG).show();
+                            // التنقل إلى لوحة التحكم حتى في حالة فشل جلب البيانات
+                            NavHostFragment.findNavController(LoginFragment.this)
+                                    .navigate(R.id.navigation_dashboard);
+                        }
+                    });
                 }
 
                 @Override
