@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 import java.util.HashMap;
 import java.io.IOException;
 import androidx.lifecycle.LifecycleOwner;
+import java.util.Date;
 
 public class SyncManager {
     private static final String TAG = "SyncManager";
@@ -1178,8 +1179,8 @@ public class SyncManager {
                 Log.d(TAG, "بدء المزامنة الكاملة...");
                 
                 // حذف البيانات المحلية
-                accountDao.deleteAll();
-                transactionDao.deleteAll();
+                accountDao.deleteAllAccounts();
+                transactionDao.deleteAllTransactions();
                 Log.d(TAG, "تم حذف البيانات المحلية");
 
                 // جلب البيانات من السيرفر
