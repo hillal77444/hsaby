@@ -105,42 +105,63 @@ public class DataManager {
         });
     }
 
-    public void fetchDataFromServer(DataCallback callback, boolean forceSync) {
+    public void fetchDataFromServer(DataCallback callback) {
         String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
                 .getString("token", null);
 
         if (token == null) {
-            callback.onError("يرجى تسجيل الدخول أولاً");
+            callback.onError("User not authenticated");
             return;
         }
 
         executor.execute(() -> {
             try {
-                // جلب البيانات من السيرفر
-                Response<ApiService.DataResponse> response = apiService.getData("Bearer " + token).execute();
-                
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiService.DataResponse data = response.body();
-                    
-                    // تحديث البيانات المحلية
-                    accountDao.deleteAll();
-                    transactionDao.deleteAll();
-                    
-                    for (Account account : data.getAccounts()) {
-                        accountDao.insert(account);
+                // جلب الحسابات
+                Response<List<Account>> accountsResponse = apiService.getAccounts("Bearer " + token).execute();
+                if (accountsResponse.isSuccessful() && accountsResponse.body() != null) {
+                    List<Account> accounts = accountsResponse.body();
+                    for (Account account : accounts) {
+                        Account existingAccount = accountDao.getAccountByNumberSync(account.getAccountNumber());
+                        if (existingAccount != null) {
+                            accountDao.update(account);
+                        } else {
+                            accountDao.insert(account);
+                        }
                     }
-                    
-                    for (Transaction transaction : data.getTransactions()) {
-                        transactionDao.insert(transaction);
+                }
+
+                // جلب المعاملات
+                Response<List<Transaction>> transactionsResponse = apiService.getTransactions("Bearer " + token).execute();
+                if (transactionsResponse.isSuccessful() && transactionsResponse.body() != null) {
+                    List<Transaction> transactions = transactionsResponse.body();
+                    for (Transaction transaction : transactions) {
+                        Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
+                        if (existingTransaction != null) {
+                            transactionDao.update(transaction);
+                        } else {
+                            transactionDao.insert(transaction);
+                        }
                     }
-                    
-                    callback.onSuccess();
-                } else {
-                    String errorBody = response.errorBody() != null ? response.errorBody().string() : "خطأ غير معروف";
-                    callback.onError("فشل جلب البيانات: " + errorBody);
+                }
+
+                handler.post(() -> callback.onSuccess());
+            } catch (Exception e) {
+                Log.e(TAG, "Error fetching data: " + e.getMessage());
+                handler.post(() -> callback.onError("Error fetching data: " + e.getMessage()));
+            }
+        });
+    }
+
+    public void deleteAllData() {
+        executor.execute(() -> {
+            try {
+                accountDao.deleteAllAccounts();
+                transactionDao.deleteAllTransactions();
+                if (pendingOperationDao != null) {
+                    pendingOperationDao.deleteAllPendingOperations();
                 }
             } catch (Exception e) {
-                callback.onError("خطأ في جلب البيانات: " + e.getMessage());
+                Log.e(TAG, "Error deleting all data: " + e.getMessage());
             }
         });
     }
