@@ -25,6 +25,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import java.util.ArrayList;
+import java.io.IOException;
 
 public class DataManager {
     private static final String TAG = "DataManager";
@@ -115,40 +116,125 @@ public class DataManager {
             return;
         }
 
+        if (!isNetworkAvailable()) {
+            callback.onError("No internet connection");
+            return;
+        }
+
+        Log.d(TAG, "Starting full sync - deleting local data first...");
+
+        // حذف جميع البيانات المحلية أولاً
         executor.execute(() -> {
             try {
-                // جلب الحسابات
-                Response<List<Account>> accountsResponse = apiService.getAccounts("Bearer " + token).execute();
-                if (accountsResponse.isSuccessful() && accountsResponse.body() != null) {
-                    List<Account> accounts = accountsResponse.body();
-                    for (Account account : accounts) {
-                        Account existingAccount = accountDao.getAccountByNumberSync(account.getAccountNumber());
-                        if (existingAccount != null) {
-                            accountDao.update(account);
+                // حذف جميع الحسابات والمعاملات
+                accountDao.deleteAllAccounts();
+                transactionDao.deleteAllTransactions();
+                if (pendingOperationDao != null) {
+                    pendingOperationDao.deleteAllPendingOperations();
+                }
+                Log.d(TAG, "Local data deleted successfully");
+
+                // جلب الحسابات من السيرفر
+                apiService.getAccounts("Bearer " + token).enqueue(new Callback<List<Account>>() {
+                    @Override
+                    public void onResponse(Call<List<Account>> call, Response<List<Account>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<Account> accounts = response.body();
+                            Log.d(TAG, "Received " + accounts.size() + " accounts from server");
+                            
+                            executor.execute(() -> {
+                                try {
+                                    // إضافة جميع الحسابات الجديدة
+                                    for (Account account : accounts) {
+                                        account.setLastSyncTime(System.currentTimeMillis());
+                                        account.setSyncStatus(2); // SYNCED
+                                        accountDao.insert(account);
+                                        Log.d(TAG, "Added account: " + account.getServerId());
+                                    }
+
+                                    // بعد اكتمال جلب الحسابات، نقوم بجلب المعاملات
+                                    fetchTransactions(token, callback);
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error saving accounts: " + e.getMessage());
+                                    handler.post(() -> callback.onError("Error saving accounts: " + e.getMessage()));
+                                }
+                            });
                         } else {
-                            accountDao.insert(account);
+                            String errorBody;
+                            try {
+                                errorBody = response.errorBody() != null ? 
+                                    response.errorBody().string() : "Unknown error";
+                            } catch (IOException e) {
+                                errorBody = "Error reading response";
+                            }
+                            Log.e(TAG, "Failed to fetch accounts: " + errorBody);
+                            handler.post(() -> callback.onError("Failed to fetch accounts: " + errorBody));
                         }
                     }
-                }
 
-                // جلب المعاملات
-                Response<List<Transaction>> transactionsResponse = apiService.getTransactions("Bearer " + token).execute();
-                if (transactionsResponse.isSuccessful() && transactionsResponse.body() != null) {
-                    List<Transaction> transactions = transactionsResponse.body();
-                    for (Transaction transaction : transactions) {
-                        Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
-                        if (existingTransaction != null) {
-                            transactionDao.update(transaction);
-                        } else {
-                            transactionDao.insert(transaction);
-                        }
+                    @Override
+                    public void onFailure(Call<List<Account>> call, Throwable t) {
+                        Log.e(TAG, "Network error while fetching accounts: " + t.getMessage());
+                        handler.post(() -> callback.onError("Network error: " + t.getMessage()));
                     }
-                }
-
-                handler.post(() -> callback.onSuccess());
+                });
             } catch (Exception e) {
-                Log.e(TAG, "Error fetching data: " + e.getMessage());
-                handler.post(() -> callback.onError("Error fetching data: " + e.getMessage()));
+                Log.e(TAG, "Error deleting local data: " + e.getMessage());
+                handler.post(() -> callback.onError("Error deleting local data: " + e.getMessage()));
+            }
+        });
+    }
+
+    private void fetchTransactions(String token, DataCallback callback) {
+        Log.d(TAG, "Fetching transactions from server...");
+        
+        apiService.getTransactions("Bearer " + token).enqueue(new Callback<List<Transaction>>() {
+            @Override
+            public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Transaction> transactions = response.body();
+                    Log.d(TAG, "Received " + transactions.size() + " transactions from server");
+                    
+                    executor.execute(() -> {
+                        try {
+                            // إضافة جميع المعاملات الجديدة
+                            for (Transaction transaction : transactions) {
+                                transaction.setLastSyncTime(System.currentTimeMillis());
+                                transaction.setSyncStatus(2); // SYNCED
+                                transactionDao.insert(transaction);
+                                Log.d(TAG, "Added transaction: " + transaction.getServerId());
+                            }
+
+                            // تحديث وقت آخر مزامنة
+                            context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
+                                    .edit()
+                                    .putLong("last_sync_time", System.currentTimeMillis())
+                                    .apply();
+
+                            Log.d(TAG, "Full sync completed successfully");
+                            handler.post(() -> callback.onSuccess());
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error saving transactions: " + e.getMessage());
+                            handler.post(() -> callback.onError("Error saving transactions: " + e.getMessage()));
+                        }
+                    });
+                } else {
+                    String errorBody;
+                    try {
+                        errorBody = response.errorBody() != null ? 
+                            response.errorBody().string() : "Unknown error";
+                    } catch (IOException e) {
+                        errorBody = "Error reading response";
+                    }
+                    Log.e(TAG, "Failed to fetch transactions: " + errorBody);
+                    handler.post(() -> callback.onError("Failed to fetch transactions: " + errorBody));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Transaction>> call, Throwable t) {
+                Log.e(TAG, "Network error while fetching transactions: " + t.getMessage());
+                handler.post(() -> callback.onError("Network error: " + t.getMessage()));
             }
         });
     }
