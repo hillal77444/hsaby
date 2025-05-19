@@ -76,12 +76,23 @@ public class DataManager {
             return;
         }
 
+        // إزالة "Bearer " إذا كان موجوداً
+        if (currentToken.startsWith("Bearer ")) {
+            currentToken = currentToken.substring(7);
+        }
+
         // محاولة تجديد التوكن مباشرة
         apiService.refreshToken("Bearer " + currentToken).enqueue(new Callback<Map<String, String>>() {
             @Override
             public void onResponse(Call<Map<String, String>> call, Response<Map<String, String>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     String newToken = response.body().get("token");
+                    if (newToken == null) {
+                        Log.e(TAG, "Token is null in response");
+                        callback.onError("Token is null in response");
+                        return;
+                    }
+                    
                     long newExpiryTime = System.currentTimeMillis() + (24 * 60 * 60 * 1000); // 24 ساعة
                     
                     // حفظ التوكن الجديد ووقت انتهاء الصلاحية
@@ -94,8 +105,16 @@ public class DataManager {
                     Log.d(TAG, "تم تجديد التوكن بنجاح");
                     callback.onSuccess();
                 } else {
-                    Log.e(TAG, "فشل في تجديد التوكن: " + response.code());
-                    callback.onError("فشل في تجديد التوكن");
+                    String errorMessage = "Unknown error";
+                    try {
+                        if (response.errorBody() != null) {
+                            errorMessage = response.errorBody().string();
+                        }
+                    } catch (IOException e) {
+                        errorMessage = "Error reading response";
+                    }
+                    Log.e(TAG, "فشل في تجديد التوكن: " + errorMessage + ", Response code: " + response.code());
+                    callback.onError("فشل في تجديد التوكن: " + errorMessage);
                 }
             }
 
