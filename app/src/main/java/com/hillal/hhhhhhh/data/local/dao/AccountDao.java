@@ -1,3 +1,14 @@
+package com.hillal.hhhhhhh.data.local.dao;
+
+import androidx.room.Dao;
+import androidx.room.Delete;
+import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
+import androidx.room.Query;
+import androidx.room.Update;
+import com.hillal.hhhhhhh.data.local.entity.Account;
+import java.util.List;
+
 @Dao
 public interface AccountDao {
     @Query("SELECT * FROM accounts")
