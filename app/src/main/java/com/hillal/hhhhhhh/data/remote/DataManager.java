@@ -276,7 +276,7 @@ public class DataManager {
                             if (accounts != null) {
                                 for (Account account : accounts) {
                                     if (account.getServerId() > 0) {
-                                        Account existingAccount = accountDao.getAccountByServerId(account.getServerId());
+                                        Account existingAccount = accountDao.getAccountByServerIdSync(account.getServerId());
                                         if (existingAccount != null) {
                                             accountDao.update(account);
                                             Log.d(TAG, "تم تحديث حساب: " + account.getServerId());
@@ -296,7 +296,7 @@ public class DataManager {
                             if (transactions != null) {
                                 for (Transaction transaction : transactions) {
                                     if (transaction.getServerId() > 0) {
-                                        Transaction existingTransaction = transactionDao.getTransactionByServerId(transaction.getServerId());
+                                        Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
                                         if (existingTransaction != null) {
                                             transactionDao.update(transaction);
                                             Log.d(TAG, "تم تحديث معاملة: " + transaction.getServerId());
