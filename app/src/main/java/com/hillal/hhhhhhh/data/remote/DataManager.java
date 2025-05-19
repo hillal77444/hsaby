@@ -67,32 +67,34 @@ public class DataManager {
 
         Log.d(TAG, "بدء عملية المزامنة...");
 
-        // جلب الحسابات
-        apiService.getAccounts("Bearer " + token).enqueue(new Callback<List<Account>>() {
+        // جلب آخر وقت مزامنة
+        long lastSyncTime = context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
+                .getLong("last_sync_time", 0);
+
+        // جلب الحسابات المحدثة فقط منذ آخر مزامنة
+        apiService.getUpdatedAccounts("Bearer " + token, lastSyncTime).enqueue(new Callback<List<Account>>() {
             @Override
             public void onResponse(Call<List<Account>> call, Response<List<Account>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Account> accounts = response.body();
-                    Log.d(TAG, "تم جلب " + accounts.size() + " حساب من السيرفر");
+                    Log.d(TAG, "تم جلب " + accounts.size() + " حساب محدث من السيرفر");
                     
                     executor.execute(() -> {
                         try {
-                            // تحديث الحسابات الموجودة فقط
+                            // تحديث الحسابات المحدثة فقط
                             for (Account account : accounts) {
                                 Account existingAccount = accountDao.getAccountByServerId(account.getServerId());
                                 if (existingAccount != null) {
-                                    // تحديث الحساب الموجود
                                     accountDao.update(account);
                                     Log.d(TAG, "تم تحديث حساب: " + account.getServerId());
                                 } else {
-                                    // إضافة حساب جديد
                                     accountDao.insert(account);
                                     Log.d(TAG, "تم إضافة حساب جديد: " + account.getServerId());
                                 }
                             }
                             
-                            // جلب المعاملات
-                            fetchTransactions(token, callback);
+                            // جلب المعاملات المحدثة فقط
+                            fetchUpdatedTransactions(token, lastSyncTime, callback);
                         } catch (Exception e) {
                             Log.e(TAG, "خطأ في حفظ الحسابات: " + e.getMessage());
                             handler.post(() -> callback.onError("خطأ في حفظ الحسابات: " + e.getMessage()));
@@ -112,15 +114,16 @@ public class DataManager {
         });
     }
 
-    private void fetchTransactions(String token, DataCallback callback) {
-        Log.d(TAG, "بدء جلب المعاملات من السيرفر...");
+    private void fetchUpdatedTransactions(String token, long lastSyncTime, DataCallback callback) {
+        Log.d(TAG, "بدء جلب المعاملات المحدثة من السيرفر...");
         
-        apiService.getTransactions("Bearer " + token).enqueue(new Callback<List<Transaction>>() {
+        // جلب المعاملات المحدثة فقط منذ آخر مزامنة
+        apiService.getUpdatedTransactions("Bearer " + token, lastSyncTime).enqueue(new Callback<List<Transaction>>() {
             @Override
             public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Transaction> transactions = response.body();
-                    Log.d(TAG, "تم جلب " + transactions.size() + " معاملة من السيرفر");
+                    Log.d(TAG, "تم جلب " + transactions.size() + " معاملة محدثة من السيرفر");
                     
                     executor.execute(() -> {
                         try {
@@ -128,15 +131,19 @@ public class DataManager {
                             for (Transaction serverTransaction : transactions) {
                                 Transaction existingTransaction = transactionDao.getTransactionByServerId(serverTransaction.getServerId());
                                 if (existingTransaction != null) {
-                                    // تحديث المعاملة الموجودة
                                     transactionDao.update(serverTransaction);
                                     Log.d(TAG, "تم تحديث معاملة: " + serverTransaction.getServerId());
                                 } else {
-                                    // إضافة معاملة جديدة
                                     transactionDao.insert(serverTransaction);
                                     Log.d(TAG, "تم إضافة معاملة جديدة: " + serverTransaction.getServerId());
                                 }
                             }
+                            
+                            // تحديث وقت آخر مزامنة
+                            context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
+                                    .edit()
+                                    .putLong("last_sync_time", System.currentTimeMillis())
+                                    .apply();
                             
                             // مزامنة العمليات المعلقة فقط إذا كانت موجودة
                             if (pendingOperationDao.getPendingOperationsCount() > 0) {
