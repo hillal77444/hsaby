@@ -217,7 +217,8 @@ public class DataManager {
                                         }
                                     });
                                 } else {
-                                    StringBuilder errorBuilder = new StringBuilder("Failed to fetch accounts: " + response.code());
+                                    StringBuilder errorBuilder = new StringBuilder("Failed to fetch accounts: ")
+                                            .append(response.code());
                                     try {
                                         if (response.errorBody() != null) {
                                             errorBuilder.append("\n").append(response.errorBody().string());
@@ -288,29 +289,40 @@ public class DataManager {
                             Log.d(TAG, "Full sync completed successfully");
                             handler.post(() -> callback.onSuccess());
                         } catch (Exception e) {
-                            Log.e(TAG, "Error saving transactions: " + e.getMessage());
-                            handler.post(() -> callback.onError("Error saving transactions: " + e.getMessage()));
+                            StringBuilder errorBuilder = new StringBuilder("Error saving transactions: ")
+                                    .append(e.getMessage())
+                                    .append("\nStack trace: ")
+                                    .append(Log.getStackTraceString(e));
+                            final String errorMessage = errorBuilder.toString();
+                            Log.e(TAG, errorMessage);
+                            handler.post(() -> callback.onError(errorMessage));
                         }
                     });
                 } else {
-                    String errorMessage = "Unknown error";
+                    StringBuilder errorBuilder = new StringBuilder("Failed to fetch transactions: ")
+                            .append(response.code());
                     try {
                         if (response.errorBody() != null) {
-                            errorMessage = response.errorBody().string();
+                            errorBuilder.append("\n").append(response.errorBody().string());
                         }
                     } catch (IOException e) {
-                        errorMessage = "Error reading response";
+                        errorBuilder.append("\nError reading response: ").append(e.getMessage());
                     }
-                    final String finalErrorMessage = errorMessage;
-                    Log.e(TAG, "Failed to fetch transactions: " + finalErrorMessage);
-                    handler.post(() -> callback.onError("Failed to fetch transactions: " + finalErrorMessage));
+                    final String errorMessage = errorBuilder.toString();
+                    Log.e(TAG, errorMessage);
+                    handler.post(() -> callback.onError(errorMessage));
                 }
             }
 
             @Override
             public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                Log.e(TAG, "Network error while fetching transactions: " + t.getMessage());
-                handler.post(() -> callback.onError("Network error: " + t.getMessage()));
+                StringBuilder errorBuilder = new StringBuilder("Network error while fetching transactions: ")
+                        .append(t.getMessage())
+                        .append("\nStack trace: ")
+                        .append(Log.getStackTraceString(t));
+                final String errorMessage = errorBuilder.toString();
+                Log.e(TAG, errorMessage);
+                handler.post(() -> callback.onError(errorMessage));
             }
         });
     }
@@ -362,33 +374,45 @@ public class DataManager {
                                               ", phone=" + account.getPhoneNumber());
                                     }
                                 } catch (Exception e) {
-                                    Log.e(TAG, "خطأ في معالجة الحساب: server_id=" + account.getServerId() + 
-                                          ", name=" + account.getName() + 
-                                          ", phone=" + account.getPhoneNumber() + 
-                                          "\nالخطأ: " + e.getMessage() + 
-                                          "\nStack trace: " + Log.getStackTraceString(e));
-                                    throw e; // إعادة رمي الخطأ للمعالجة في المستوى الأعلى
+                                    StringBuilder errorBuilder = new StringBuilder("خطأ في معالجة الحساب: server_id=")
+                                            .append(account.getServerId())
+                                            .append(", name=")
+                                            .append(account.getName())
+                                            .append(", phone=")
+                                            .append(account.getPhoneNumber())
+                                            .append("\nالخطأ: ")
+                                            .append(e.getMessage())
+                                            .append("\nStack trace: ")
+                                            .append(Log.getStackTraceString(e));
+                                    final String errorMessage = errorBuilder.toString();
+                                    Log.e(TAG, errorMessage);
+                                    throw e;
                                 }
                             }
                             
                             // جلب جميع المعاملات
                             fetchAllTransactions(token, callback);
                         } catch (Exception e) {
-                            String errorMessage = "خطأ في حفظ الحسابات: " + e.getMessage() + 
-                                               "\nStack trace: " + Log.getStackTraceString(e);
+                            StringBuilder errorBuilder = new StringBuilder("خطأ في حفظ الحسابات: ")
+                                    .append(e.getMessage())
+                                    .append("\nStack trace: ")
+                                    .append(Log.getStackTraceString(e));
+                            final String errorMessage = errorBuilder.toString();
                             Log.e(TAG, errorMessage);
                             handler.post(() -> callback.onError(errorMessage));
                         }
                     });
                 } else {
-                    String errorMessage = "فشل في جلب الحسابات: " + response.code();
+                    StringBuilder errorBuilder = new StringBuilder("فشل في جلب الحسابات: ")
+                            .append(response.code());
                     try {
                         if (response.errorBody() != null) {
-                            errorMessage += "\n" + response.errorBody().string();
+                            errorBuilder.append("\n").append(response.errorBody().string());
                         }
                     } catch (IOException e) {
-                        errorMessage += "\nخطأ في قراءة رسالة الخطأ: " + e.getMessage();
+                        errorBuilder.append("\nخطأ في قراءة رسالة الخطأ: ").append(e.getMessage());
                     }
+                    final String errorMessage = errorBuilder.toString();
                     Log.e(TAG, errorMessage);
                     handler.post(() -> callback.onError(errorMessage));
                 }
@@ -396,8 +420,11 @@ public class DataManager {
 
             @Override
             public void onFailure(Call<List<Account>> call, Throwable t) {
-                String errorMessage = "خطأ في الاتصال: " + t.getMessage() + 
-                                   "\nStack trace: " + Log.getStackTraceString(t);
+                StringBuilder errorBuilder = new StringBuilder("خطأ في الاتصال: ")
+                        .append(t.getMessage())
+                        .append("\nStack trace: ")
+                        .append(Log.getStackTraceString(t));
+                final String errorMessage = errorBuilder.toString();
                 Log.e(TAG, errorMessage);
                 handler.post(() -> callback.onError(errorMessage));
             }
@@ -454,21 +481,26 @@ public class DataManager {
                             Log.d(TAG, "تمت المزامنة الكاملة بنجاح");
                             handler.post(() -> callback.onSuccess());
                         } catch (Exception e) {
-                            String errorMessage = "خطأ في حفظ المعاملات: " + e.getMessage() + 
-                                               "\nStack trace: " + Log.getStackTraceString(e);
+                            StringBuilder errorBuilder = new StringBuilder("خطأ في حفظ المعاملات: ")
+                                    .append(e.getMessage())
+                                    .append("\nStack trace: ")
+                                    .append(Log.getStackTraceString(e));
+                            final String errorMessage = errorBuilder.toString();
                             Log.e(TAG, errorMessage);
                             handler.post(() -> callback.onError(errorMessage));
                         }
                     });
                 } else {
-                    String errorMessage = "فشل في جلب المعاملات: " + response.code();
+                    StringBuilder errorBuilder = new StringBuilder("فشل في جلب المعاملات: ")
+                            .append(response.code());
                     try {
                         if (response.errorBody() != null) {
-                            errorMessage += "\n" + response.errorBody().string();
+                            errorBuilder.append("\n").append(response.errorBody().string());
                         }
                     } catch (IOException e) {
-                        errorMessage += "\nخطأ في قراءة رسالة الخطأ: " + e.getMessage();
+                        errorBuilder.append("\nخطأ في قراءة رسالة الخطأ: ").append(e.getMessage());
                     }
+                    final String errorMessage = errorBuilder.toString();
                     Log.e(TAG, errorMessage);
                     handler.post(() -> callback.onError(errorMessage));
                 }
@@ -476,8 +508,11 @@ public class DataManager {
 
             @Override
             public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                String errorMessage = "خطأ في الاتصال: " + t.getMessage() + 
-                                   "\nStack trace: " + Log.getStackTraceString(t);
+                StringBuilder errorBuilder = new StringBuilder("خطأ في الاتصال: ")
+                        .append(t.getMessage())
+                        .append("\nStack trace: ")
+                        .append(Log.getStackTraceString(t));
+                final String errorMessage = errorBuilder.toString();
                 Log.e(TAG, errorMessage);
                 handler.post(() -> callback.onError(errorMessage));
             }
