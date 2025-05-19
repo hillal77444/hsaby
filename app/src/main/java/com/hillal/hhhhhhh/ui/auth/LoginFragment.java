@@ -17,7 +17,10 @@ import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.databinding.FragmentLoginBinding;
 import com.hillal.hhhhhhh.viewmodel.AuthViewModel;
 import com.hillal.hhhhhhh.MainActivity;
-import com.hillal.hhhhhhh.data.DataManager;
+import com.hillal.hhhhhhh.data.remote.DataManager;
+import com.hillal.hhhhhhh.data.room.AccountDao;
+import com.hillal.hhhhhhh.data.room.TransactionDao;
+import com.hillal.hhhhhhh.data.room.PendingOperationDao;
 
 public class LoginFragment extends Fragment {
     private static final String TAG = "LoginFragment";
@@ -69,10 +72,11 @@ public class LoginFragment extends Fragment {
                     Toast.makeText(getContext(), "تم تسجيل الدخول بنجاح", Toast.LENGTH_SHORT).show();
                     
                     // جلب البيانات من السيرفر بعد تسجيل الدخول
+                    MainActivity mainActivity = (MainActivity) requireActivity();
                     DataManager dataManager = new DataManager(requireContext(), 
-                        ((MainActivity) requireActivity()).getAccountDao(),
-                        ((MainActivity) requireActivity()).getTransactionDao(),
-                        ((MainActivity) requireActivity()).getPendingOperationDao());
+                        mainActivity.getAccountDao(),
+                        mainActivity.getTransactionDao(),
+                        mainActivity.getPendingOperationDao());
                         
                     dataManager.fetchDataFromServer(new DataManager.DataCallback() {
                         @Override
