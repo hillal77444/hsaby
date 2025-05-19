@@ -15,7 +15,7 @@ public class Account {
 
     @ColumnInfo(name = "server_id")
     @SerializedName("server_id")
-    private long serverId;
+    private long serverId = -1;
 
     @ColumnInfo(name = "user_id")
     @SerializedName("user_id")
