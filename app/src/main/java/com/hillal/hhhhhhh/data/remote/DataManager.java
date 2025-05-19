@@ -426,18 +426,18 @@ public class DataManager {
                                         transactionDao.update(transaction);
                                         Log.d(TAG, "تم تحديث معاملة موجودة: server_id=" + transaction.getServerId() + 
                                               ", amount=" + transaction.getAmount() + 
-                                              ", date=" + transaction.getDate());
+                                              ", date=" + transaction.getTransactionDate());
                                     } else {
                                         // إضافة معاملة جديدة
                                         transactionDao.insert(transaction);
                                         Log.d(TAG, "تم إضافة معاملة جديدة: server_id=" + transaction.getServerId() + 
                                               ", amount=" + transaction.getAmount() + 
-                                              ", date=" + transaction.getDate());
+                                              ", date=" + transaction.getTransactionDate());
                                     }
                                 } catch (Exception e) {
                                     Log.e(TAG, "خطأ في معالجة المعاملة: server_id=" + transaction.getServerId() + 
                                           ", amount=" + transaction.getAmount() + 
-                                          ", date=" + transaction.getDate() + 
+                                          ", date=" + transaction.getTransactionDate() + 
                                           "\nالخطأ: " + e.getMessage() + 
                                           "\nStack trace: " + Log.getStackTraceString(e));
                                     throw e; // إعادة رمي الخطأ للمعالجة في المستوى الأعلى
