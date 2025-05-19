@@ -6,6 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,6 +29,13 @@ public class LoginFragment extends Fragment {
     private static final String TAG = "LoginFragment";
     private FragmentLoginBinding binding;
     private AuthViewModel authViewModel;
+
+    // دالة مساعدة لنسخ النص إلى الحافظة
+    private void copyToClipboard(String text) {
+        ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("Error Details", text);
+        clipboard.setPrimaryClip(clip);
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -90,7 +100,25 @@ public class LoginFragment extends Fragment {
                         @Override
                         public void onError(String error) {
                             Log.e(TAG, "Failed to fetch data: " + error);
-                            Toast.makeText(getContext(), "فشل في جلب البيانات: " + error, Toast.LENGTH_LONG).show();
+                            
+                            // تحضير رسالة الخطأ
+                            String errorMessage;
+                            if (error.contains("UNIQUE constraint failed")) {
+                                errorMessage = "حدث خطأ في قاعدة البيانات المحلية. يرجى إعادة تشغيل التطبيق.";
+                            } else if (error.contains("Network error")) {
+                                errorMessage = "فشل الاتصال بالإنترنت. يرجى التحقق من اتصالك وإعادة المحاولة.";
+                            } else if (error.contains("User not authenticated")) {
+                                errorMessage = "انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.";
+                            } else {
+                                errorMessage = "فشل في جلب البيانات: " + error;
+                            }
+                            
+                            // نسخ تفاصيل الخطأ الكاملة إلى الحافظة
+                            copyToClipboard("تفاصيل الخطأ:\n" + error);
+                            
+                            // عرض رسالة الخطأ
+                            Toast.makeText(getContext(), errorMessage + "\nتم نسخ تفاصيل الخطأ إلى الحافظة", Toast.LENGTH_LONG).show();
+                            
                             // التنقل إلى لوحة التحكم حتى في حالة فشل جلب البيانات
                             NavHostFragment.findNavController(LoginFragment.this)
                                     .navigate(R.id.navigation_dashboard);
@@ -116,7 +144,10 @@ public class LoginFragment extends Fragment {
                         errorMessage = "فشل تسجيل الدخول: " + error;
                     }
                     
-                    Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
+                    // نسخ تفاصيل الخطأ الكاملة إلى الحافظة
+                    copyToClipboard("تفاصيل الخطأ:\n" + error);
+                    
+                    Toast.makeText(getContext(), errorMessage + "\nتم نسخ تفاصيل الخطأ إلى الحافظة", Toast.LENGTH_LONG).show();
                 }
             });
         });
