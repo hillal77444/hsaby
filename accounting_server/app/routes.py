@@ -254,13 +254,15 @@ def get_accounts():
         accounts = Account.query.filter_by(user_id=user_id).all()
         return jsonify([{
             'id': acc.id,
-            'server_id': acc.server_id,  # استخدام server_id الفعلي
+            'server_id': acc.server_id,
             'account_number': acc.account_number,
             'account_name': acc.account_name,
             'balance': acc.balance,
             'phone_number': acc.phone_number,
             'is_debtor': acc.is_debtor,
             'notes': acc.notes,
+            'whatsapp_enabled': acc.whatsapp_enabled,
+            'user_id': acc.user_id,
             'created_at': int(acc.created_at.timestamp() * 1000) if acc.created_at else None,
             'updated_at': int(acc.updated_at.timestamp() * 1000) if acc.updated_at else None
         } for acc in accounts])
@@ -275,11 +277,9 @@ def get_transactions():
         user_id = get_jwt_identity()
         logger.info(f"Fetching transactions for user {user_id}")
         
-        # جلب المعاملات
         transactions = Transaction.query.filter_by(user_id=user_id).all()
         logger.info(f"Found {len(transactions)} transactions for user {user_id}")
         
-        # تحويل المعاملات إلى JSON
         transactions_json = []
         for trans in transactions:
             transaction_data = {
@@ -290,14 +290,12 @@ def get_transactions():
                 'description': trans.description,
                 'account_id': trans.account_id,
                 'type': trans.type,
-                'currency': {
-                    'ريال يمني': 'يمني',
-                    'ريال سعودي': 'سعودي',
-                    'دولار أمريكي': 'دولار'
-                }.get(trans.currency, trans.currency),
+                'currency': trans.currency,
                 'notes': trans.notes,
                 'whatsapp_enabled': trans.whatsapp_enabled,
-                'user_id': trans.user_id
+                'user_id': trans.user_id,
+                'created_at': int(trans.created_at.timestamp() * 1000) if trans.created_at else None,
+                'updated_at': int(trans.updated_at.timestamp() * 1000) if trans.updated_at else None
             }
             transactions_json.append(transaction_data)
             logger.debug(f"Transaction data: {transaction_data}")
@@ -447,11 +445,17 @@ def sync_changes():
                         if missing_fields:
                             return json_response({'error': f'بيانات الحساب غير مكتملة: {", ".join(missing_fields)}'}, 400)
                         
-                        # البحث عن الحساب
-                        account = Account.query.filter_by(
-                            account_number=account_data['account_number'],
-                            user_id=current_user_id
-                        ).first()
+                        # البحث عن الحساب باستخدام server_id إذا كان موجوداً
+                        account = None
+                        if account_data.get('server_id'):
+                            account = Account.query.filter_by(server_id=account_data['server_id']).first()
+                        
+                        # إذا لم يتم العثور على الحساب، ابحث باستخدام رقم الحساب
+                        if not account:
+                            account = Account.query.filter_by(
+                                account_number=account_data['account_number'],
+                                user_id=current_user_id
+                            ).first()
                         
                         if not account:
                             # حساب جديد
@@ -469,7 +473,7 @@ def sync_changes():
                             db.session.flush()  # للحصول على المعرف الجديد
                             account_id_map.append({
                                 'localId': account_data.get('id'),
-                                'serverId': account.id
+                                'serverId': account.server_id
                             })
                         else:
                             # تحديث الحساب الموجود
@@ -484,7 +488,7 @@ def sync_changes():
                                 account.whatsapp_enabled = account_data['whatsapp_enabled']
                             account_id_map.append({
                                 'localId': account_data.get('id'),
-                                'serverId': account.id
+                                'serverId': account.server_id
                             })
                     except Exception as e:
                         logger.error(f"Error processing account: {str(e)}")
@@ -525,7 +529,7 @@ def sync_changes():
                         db.session.flush()  # للحصول على المعرف الجديد
                         transaction_id_map.append({
                             'localId': transaction_data.get('id'),
-                            'serverId': transaction.id
+                            'serverId': transaction.server_id
                         })
                     except Exception as e:
                         logger.error(f"Error processing new transaction: {str(e)}")
@@ -541,11 +545,17 @@ def sync_changes():
                         if missing_fields:
                             return json_response({'error': f'بيانات المعاملة المعدلة غير مكتملة: {", ".join(missing_fields)}'}, 400)
                         
-                        # البحث عن المعاملة
-                        transaction = Transaction.query.filter_by(
-                            id=transaction_data['id'],
-                            user_id=current_user_id
-                        ).first()
+                        # البحث عن المعاملة باستخدام server_id إذا كان موجوداً
+                        transaction = None
+                        if transaction_data.get('server_id'):
+                            transaction = Transaction.query.filter_by(server_id=transaction_data['server_id']).first()
+                        
+                        # إذا لم يتم العثور على المعاملة، ابحث باستخدام المعرف المحلي
+                        if not transaction:
+                            transaction = Transaction.query.filter_by(
+                                id=transaction_data['id'],
+                                user_id=current_user_id
+                            ).first()
                         
                         if not transaction:
                             return json_response({'error': f'المعاملة غير موجودة: {transaction_data["id"]}'}, 404)
@@ -592,21 +602,26 @@ def sync_changes():
             last_sync = request.args.get('last_sync', 0)
             last_sync = int(last_sync)
             
+            logger.info(f"Fetching changes for user {current_user_id} since {last_sync}")
+            
             # جلب التغييرات الجديدة
             changes = {
                 'transactions': [],
                 'accounts': []
             }
             
-            # جلب المعاملات الجديدة
+            # جلب المعاملات المحدثة
             new_transactions = Transaction.query.filter(
                 Transaction.user_id == current_user_id,
                 Transaction.updated_at > last_sync
             ).all()
             
+            logger.info(f"Found {len(new_transactions)} updated transactions")
+            
             for transaction in new_transactions:
                 changes['transactions'].append({
                     'id': transaction.id,
+                    'server_id': transaction.server_id,
                     'account_id': transaction.account_id,
                     'amount': transaction.amount,
                     'type': transaction.type,
@@ -619,15 +634,18 @@ def sync_changes():
                     'updated_at': transaction.updated_at.timestamp() * 1000
                 })
             
-            # جلب الحسابات الجديدة
+            # جلب الحسابات المحدثة
             new_accounts = Account.query.filter(
                 Account.user_id == current_user_id,
                 Account.updated_at > last_sync
             ).all()
             
+            logger.info(f"Found {len(new_accounts)} updated accounts")
+            
             for account in new_accounts:
                 changes['accounts'].append({
                     'id': account.id,
+                    'server_id': account.server_id,
                     'account_number': account.account_number,
                     'account_name': account.account_name,
                     'balance': account.balance,
@@ -639,6 +657,7 @@ def sync_changes():
                     'updated_at': account.updated_at.timestamp() * 1000
                 })
             
+            logger.info(f"Returning {len(changes['transactions'])} transactions and {len(changes['accounts'])} accounts")
             return json_response(changes)
             
     except Exception as e:
