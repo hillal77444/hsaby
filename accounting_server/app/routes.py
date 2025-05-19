@@ -6,7 +6,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_tok
 from datetime import datetime
 import logging
 import json
-import uuid
 
 main = Blueprint('main', __name__)
 logger = logging.getLogger(__name__)
@@ -14,10 +13,6 @@ logger = logging.getLogger(__name__)
 def json_response(data, status_code=200):
     response = json.dumps(data, ensure_ascii=False)
     return response, status_code, {'Content-Type': 'application/json; charset=utf-8'}
-
-def generate_server_id():
-    """توليد معرف فريد للسيرفر"""
-    return int(uuid.uuid4().int % (10 ** 9))  # توليد رقم فريد من 9 أرقام
 
 @main.route('/api/register', methods=['POST'])
 def register():
@@ -142,9 +137,6 @@ def sync_data():
                     account.is_debtor = acc_data.get('is_debtor', account.is_debtor)
                     account.whatsapp_enabled = acc_data.get('whatsapp_enabled', account.whatsapp_enabled)
                     account.user_id = current_user_id
-                    # لا نقوم بتحديث server_id إذا كان موجوداً بالفعل
-                    if not account.server_id:
-                        account.server_id = generate_server_id()  # توليد معرف فريد للسيرفر
                     logger.info(f"Updated account: {account.account_name}")
                 else:
                     # إنشاء حساب جديد
@@ -155,11 +147,10 @@ def sync_data():
                         notes=acc_data.get('notes'),
                         is_debtor=acc_data.get('is_debtor', False),
                         whatsapp_enabled=acc_data.get('whatsapp_enabled', False),
-                        user_id=current_user_id,
-                        server_id=generate_server_id()  # توليد معرف فريد للسيرفر للحساب الجديد
+                        user_id=current_user_id
                     )
                     db.session.add(account)
-                    db.session.flush()  # للحصول على معرف الحساب
+                    db.session.flush()  # للحصول على server_id الجديد
                     logger.info(f"Added new account: {account.account_name}")
                 
                 account_mappings.append({
@@ -211,9 +202,6 @@ def sync_data():
                     transaction.whatsapp_enabled = trans_data.get('whatsapp_enabled', transaction.whatsapp_enabled)
                     transaction.account_id = trans_data.get('account_id', transaction.account_id)
                     transaction.user_id = current_user_id
-                    # لا نقوم بتحديث server_id إذا كان موجوداً بالفعل
-                    if not transaction.server_id:
-                        transaction.server_id = generate_server_id()  # توليد معرف فريد للسيرفر
                     logger.info(f"Updated transaction: {transaction.id}")
                 else:
                     # إنشاء معاملة جديدة
@@ -226,8 +214,7 @@ def sync_data():
                         currency=trans_data.get('currency'),
                         whatsapp_enabled=trans_data.get('whatsapp_enabled', False),
                         account_id=trans_data.get('account_id'),
-                        user_id=current_user_id,
-                        server_id=generate_server_id()  # توليد معرف فريد للسيرفر للمعاملة الجديدة
+                        user_id=current_user_id
                     )
                     db.session.add(transaction)
                     db.session.flush()  # للحصول على معرف المعاملة
