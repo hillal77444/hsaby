@@ -35,6 +35,8 @@ import com.hillal.hhhhhhh.App;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import com.hillal.hhhhhhh.data.repository.AccountRepository;
+import com.hillal.hhhhhhh.viewmodel.TransactionViewModelFactory;
 
 public class TransactionsFragment extends Fragment {
     private FragmentTransactionsBinding binding;
@@ -53,14 +55,17 @@ public class TransactionsFragment extends Fragment {
     private long lastSyncTime = 0;
     private android.os.Handler syncHandler;
     private static final long SYNC_INTERVAL = 30 * 1000; // 30 ثانية
+    private Map<Long, Account> accountMap = new HashMap<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        App app = (App) requireActivity().getApplication();
         viewModel = new ViewModelProvider(this).get(TransactionsViewModel.class);
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
-        transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
-        App app = (App) requireActivity().getApplication();
+        AccountRepository accountRepository = app.getAccountRepository();
+        TransactionViewModelFactory factory = new TransactionViewModelFactory(accountRepository);
+        transactionViewModel = new ViewModelProvider(this, factory).get(TransactionViewModel.class);
         transactionRepository = new com.hillal.hhhhhhh.data.repository.TransactionRepository(app.getDatabase());
         
         // تهيئة التواريخ الافتراضية
@@ -305,7 +310,7 @@ public class TransactionsFragment extends Fragment {
 
     private void observeAccountsAndTransactions() {
         accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
-            Map<Long, Account> accountMap = new HashMap<>();
+            accountMap.clear();
             for (Account account : accounts) {
                 accountMap.put(account.getId(), account);
             }
