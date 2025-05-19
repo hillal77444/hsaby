@@ -105,41 +105,42 @@ public class DataManager {
         });
     }
 
-    public void fetchDataFromServer(DataCallback callback, boolean isFullSync) {
+    public void fetchDataFromServer(DataCallback callback, boolean forceSync) {
         String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
                 .getString("token", null);
 
         if (token == null) {
-            handler.post(() -> callback.onError("يرجى تسجيل الدخول أولاً"));
+            callback.onError("يرجى تسجيل الدخول أولاً");
             return;
         }
 
-        // التحقق من صلاحية التوكن وتجديده إذا لزم الأمر
-        checkAndRefreshToken(new DataCallback() {
-            @Override
-            public void onSuccess() {
-                if (isFullSync) {
-                    // حذف جميع البيانات المحلية في حالة المزامنة الكاملة
-                    executor.execute(() -> {
-                        try {
-                            accountDao.deleteAll();
-                            transactionDao.deleteAll();
-                            Log.d(TAG, "تم حذف جميع البيانات المحلية");
-                            proceedWithFullSync(token, callback);
-                        } catch (Exception e) {
-                            Log.e(TAG, "خطأ في حذف البيانات المحلية: " + e.getMessage());
-                            handler.post(() -> callback.onError("خطأ في حذف البيانات المحلية"));
-                        }
-                    });
+        executor.execute(() -> {
+            try {
+                // جلب البيانات من السيرفر
+                Response<ApiService.DataResponse> response = apiService.getData("Bearer " + token).execute();
+                
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiService.DataResponse data = response.body();
+                    
+                    // تحديث البيانات المحلية
+                    accountDao.deleteAll();
+                    transactionDao.deleteAll();
+                    
+                    for (Account account : data.getAccounts()) {
+                        accountDao.insert(account);
+                    }
+                    
+                    for (Transaction transaction : data.getTransactions()) {
+                        transactionDao.insert(transaction);
+                    }
+                    
+                    callback.onSuccess();
                 } else {
-                    // مزامنة التغييرات فقط
-                    proceedWithSync(callback);
+                    String errorBody = response.errorBody() != null ? response.errorBody().string() : "خطأ غير معروف";
+                    callback.onError("فشل جلب البيانات: " + errorBody);
                 }
-            }
-
-            @Override
-            public void onError(String error) {
-                handler.post(() -> callback.onError(error));
+            } catch (Exception e) {
+                callback.onError("خطأ في جلب البيانات: " + e.getMessage());
             }
         });
     }
