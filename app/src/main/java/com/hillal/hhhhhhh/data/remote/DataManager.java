@@ -162,7 +162,7 @@ public class DataManager {
                                             for (Account account : accounts) {
                                                 account.setLastSyncTime(System.currentTimeMillis());
                                                 account.setSyncStatus(2); // SYNCED
-                                                Log.d(TAG, "Processing account: " + account.getAccountName() + " (ID: " + account.getServerId() + ")");
+                                                Log.d(TAG, "Processing account: " + account.getName() + " (ID: " + account.getServerId() + ")");
                                             }
                                             
                                             // إضافة جميع الحسابات دفعة واحدة
@@ -198,16 +198,16 @@ public class DataManager {
                             }
                         });
                     } catch (Exception e) {
-                        Log.e(TAG, "Error deleting local data: " + e.getMessage());
-                        handler.post(() -> callback.onError("Error deleting local data: " + e.getMessage()));
+                        Log.e(TAG, "Error in fetchDataFromServer: " + e.getMessage());
+                        handler.post(() -> callback.onError("Error: " + e.getMessage()));
                     }
                 });
             }
 
             @Override
             public void onError(String error) {
-                Log.e(TAG, "Token refresh failed: " + error);
-                callback.onError("Token refresh failed: " + error);
+                Log.e(TAG, "Error refreshing token: " + error);
+                callback.onError(error);
             }
         });
     }
