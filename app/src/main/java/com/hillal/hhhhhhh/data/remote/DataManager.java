@@ -194,18 +194,9 @@ public class DataManager {
                                                         accountDao.update(account);
                                                         Log.d(TAG, "Updated existing account: " + account.getServerId());
                                                     } else {
-                                                        // التحقق من وجود حساب بنفس رقم الهاتف
-                                                        Account accountWithSamePhone = accountDao.getAccountByPhoneNumber(account.getPhoneNumber());
-                                                        if (accountWithSamePhone != null) {
-                                                            // تحديث الحساب الموجود بنفس رقم الهاتف
-                                                            account.setId(accountWithSamePhone.getId());
-                                                            accountDao.update(account);
-                                                            Log.d(TAG, "Updated account with same phone number: " + account.getPhoneNumber());
-                                                        } else {
-                                                            // إضافة حساب جديد
-                                                            accountDao.insert(account);
-                                                            Log.d(TAG, "Added new account: " + account.getServerId());
-                                                        }
+                                                        // إضافة حساب جديد
+                                                        accountDao.insert(account);
+                                                        Log.d(TAG, "Added new account: " + account.getServerId());
                                                     }
                                                 } catch (Exception e) {
                                                     StringBuilder errorBuilder = new StringBuilder("Error processing account: ")
@@ -284,16 +275,42 @@ public class DataManager {
                     
                     executor.execute(() -> {
                         try {
-                            // تحديث وقت المزامنة وحالة المزامنة لجميع المعاملات
+                            // إضافة جميع المعاملات
                             for (Transaction transaction : transactions) {
-                                transaction.setLastSyncTime(System.currentTimeMillis());
-                                transaction.setSyncStatus(2); // SYNCED
+                                try {
+                                    // التحقق من وجود معاملة بنفس server_id
+                                    Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
+                                    if (existingTransaction != null) {
+                                        // تحديث المعاملة الموجودة
+                                        transaction.setId(existingTransaction.getId());
+                                        transactionDao.update(transaction);
+                                        Log.d(TAG, "تم تحديث معاملة موجودة: server_id=" + transaction.getServerId() + 
+                                              ", amount=" + transaction.getAmount() + 
+                                              ", date=" + transaction.getTransactionDate());
+                                    } else {
+                                        // إضافة معاملة جديدة
+                                        transactionDao.insert(transaction);
+                                        Log.d(TAG, "تم إضافة معاملة جديدة: server_id=" + transaction.getServerId() + 
+                                              ", amount=" + transaction.getAmount() + 
+                                              ", date=" + transaction.getTransactionDate());
+                                    }
+                                } catch (Exception e) {
+                                    StringBuilder errorBuilder = new StringBuilder("خطأ في معالجة المعاملة: server_id=")
+                                            .append(transaction.getServerId())
+                                            .append(", amount=")
+                                            .append(transaction.getAmount())
+                                            .append(", date=")
+                                            .append(transaction.getTransactionDate())
+                                            .append("\nالخطأ: ")
+                                            .append(e.getMessage())
+                                            .append("\nStack trace: ")
+                                            .append(Log.getStackTraceString(e));
+                                    final String errorMessage = errorBuilder.toString();
+                                    Log.e(TAG, errorMessage);
+                                    throw e;
+                                }
                             }
                             
-                            // إضافة جميع المعاملات دفعة واحدة
-                            transactionDao.insertAll(transactions);
-                            Log.d(TAG, "Added " + transactions.size() + " transactions successfully");
-
                             // تحديث وقت آخر مزامنة
                             context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
                                     .edit()
@@ -303,7 +320,7 @@ public class DataManager {
                             Log.d(TAG, "Full sync completed successfully");
                             handler.post(() -> callback.onSuccess());
                         } catch (Exception e) {
-                            StringBuilder errorBuilder = new StringBuilder("Error saving transactions: ")
+                            StringBuilder errorBuilder = new StringBuilder("خطأ في حفظ المعاملات: ")
                                     .append(e.getMessage())
                                     .append("\nStack trace: ")
                                     .append(Log.getStackTraceString(e));
@@ -313,14 +330,14 @@ public class DataManager {
                         }
                     });
                 } else {
-                    StringBuilder errorBuilder = new StringBuilder("Failed to fetch transactions: ")
+                    StringBuilder errorBuilder = new StringBuilder("فشل في جلب المعاملات: ")
                             .append(response.code());
                     try {
                         if (response.errorBody() != null) {
                             errorBuilder.append("\n").append(response.errorBody().string());
                         }
                     } catch (IOException e) {
-                        errorBuilder.append("\nError reading response: ").append(e.getMessage());
+                        errorBuilder.append("\nخطأ في قراءة رسالة الخطأ: ").append(e.getMessage());
                     }
                     final String errorMessage = errorBuilder.toString();
                     Log.e(TAG, errorMessage);
@@ -330,7 +347,7 @@ public class DataManager {
 
             @Override
             public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                StringBuilder errorBuilder = new StringBuilder("Network error while fetching transactions: ")
+                StringBuilder errorBuilder = new StringBuilder("خطأ في الاتصال: ")
                         .append(t.getMessage())
                         .append("\nStack trace: ")
                         .append(Log.getStackTraceString(t));
@@ -477,12 +494,19 @@ public class DataManager {
                                               ", date=" + transaction.getTransactionDate());
                                     }
                                 } catch (Exception e) {
-                                    Log.e(TAG, "خطأ في معالجة المعاملة: server_id=" + transaction.getServerId() + 
-                                          ", amount=" + transaction.getAmount() + 
-                                          ", date=" + transaction.getTransactionDate() + 
-                                          "\nالخطأ: " + e.getMessage() + 
-                                          "\nStack trace: " + Log.getStackTraceString(e));
-                                    throw e; // إعادة رمي الخطأ للمعالجة في المستوى الأعلى
+                                    StringBuilder errorBuilder = new StringBuilder("خطأ في معالجة المعاملة: server_id=")
+                                            .append(transaction.getServerId())
+                                            .append(", amount=")
+                                            .append(transaction.getAmount())
+                                            .append(", date=")
+                                            .append(transaction.getTransactionDate())
+                                            .append("\nالخطأ: ")
+                                            .append(e.getMessage())
+                                            .append("\nStack trace: ")
+                                            .append(Log.getStackTraceString(e));
+                                    final String errorMessage = errorBuilder.toString();
+                                    Log.e(TAG, errorMessage);
+                                    throw e;
                                 }
                             }
                             
