@@ -194,14 +194,28 @@ public class DataManager {
                                                         accountDao.update(account);
                                                         Log.d(TAG, "Updated existing account: " + account.getServerId());
                                                     } else {
-                                                        // إضافة حساب جديد
-                                                        accountDao.insert(account);
-                                                        Log.d(TAG, "Added new account: " + account.getServerId());
+                                                        // التحقق من وجود حساب بنفس رقم الهاتف
+                                                        Account accountWithSamePhone = accountDao.getAccountByPhoneNumber(account.getPhoneNumber());
+                                                        if (accountWithSamePhone != null) {
+                                                            // تحديث الحساب الموجود بنفس رقم الهاتف
+                                                            account.setId(accountWithSamePhone.getId());
+                                                            accountDao.update(account);
+                                                            Log.d(TAG, "Updated account with same phone number: " + account.getPhoneNumber());
+                                                        } else {
+                                                            // إضافة حساب جديد
+                                                            accountDao.insert(account);
+                                                            Log.d(TAG, "Added new account: " + account.getServerId());
+                                                        }
                                                     }
                                                 } catch (Exception e) {
-                                                    Log.e(TAG, "Error processing account: " + account.getServerId() + 
-                                                          "\nError: " + e.getMessage() + 
-                                                          "\nStack trace: " + Log.getStackTraceString(e));
+                                                    StringBuilder errorBuilder = new StringBuilder("Error processing account: ")
+                                                            .append(account.getServerId())
+                                                            .append("\nError: ")
+                                                            .append(e.getMessage())
+                                                            .append("\nStack trace: ")
+                                                            .append(Log.getStackTraceString(e));
+                                                    final String errorMessage = errorBuilder.toString();
+                                                    Log.e(TAG, errorMessage);
                                                     throw e;
                                                 }
                                             }
