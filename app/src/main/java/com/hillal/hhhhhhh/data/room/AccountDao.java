@@ -14,10 +14,10 @@ import java.util.List;
 
 @Dao
 public interface AccountDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(Account account);
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<Account> accounts);
 
     @Update
