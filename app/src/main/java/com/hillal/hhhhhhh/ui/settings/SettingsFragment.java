@@ -152,6 +152,12 @@ public class SettingsFragment extends Fragment {
         });
     }
 
+    private void showMessage(String message) {
+        if (getContext() != null) {
+            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
