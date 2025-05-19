@@ -6,6 +6,7 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.room.OnConflictStrategy;
 import com.hillal.hhhhhhh.data.model.Transaction;
 
 import java.util.Date;
@@ -101,4 +102,13 @@ public interface TransactionDao {
 
     @Query("SELECT * FROM transactions WHERE server_id = :serverId")
     Transaction getTransactionByServerIdSync(long serverId);
+
+    @Query("SELECT * FROM transactions WHERE sync_status = 0")
+    List<Transaction> getNewTransactions();
+
+    @Query("SELECT * FROM transactions WHERE last_sync_time > :lastSyncTime")
+    List<Transaction> getModifiedTransactions(long lastSyncTime);
+
+    @Query("DELETE FROM transactions")
+    void deleteAllTransactions();
 } 
