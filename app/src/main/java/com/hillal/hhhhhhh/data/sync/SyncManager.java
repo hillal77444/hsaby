@@ -167,7 +167,7 @@ public class SyncManager {
                                 Log.e(TAG, "Auto sync failed: " + error);
                                 handleSyncFailure();
                             }
-                        }, true);
+                        });
                     }
 
                     @Override
