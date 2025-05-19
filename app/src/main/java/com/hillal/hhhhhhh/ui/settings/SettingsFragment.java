@@ -94,9 +94,9 @@ public class SettingsFragment extends Fragment {
     }
 
     private void setupSyncSettings() {
-        // تفعيل المزامنة التلقائية افتراضياً
-        binding.switchAutoSync.setChecked(true);
-        syncManager.enableAutoSync(true);
+        // تعطيل المزامنة التلقائية افتراضياً
+        binding.switchAutoSync.setChecked(false);
+        syncManager.enableAutoSync(false);
         
         binding.switchAutoSync.setOnCheckedChangeListener((buttonView, isChecked) -> {
             syncManager.enableAutoSync(isChecked);
@@ -106,37 +106,25 @@ public class SettingsFragment extends Fragment {
         });
 
         binding.buttonSyncNow.setOnClickListener(v -> {
-            syncManager.syncData(new SyncManager.SyncCallback() {
+            // تنفيذ مزامنة كاملة عند الضغط على الزر
+            DataManager dataManager = new DataManager(
+                requireContext(),
+                db.accountDao(),
+                db.transactionDao(),
+                db.pendingOperationDao()
+            );
+
+            dataManager.fetchDataFromServer(new DataManager.DataCallback() {
                 @Override
                 public void onSuccess() {
-                    Toast.makeText(getContext(), R.string.msg_sync_success, Toast.LENGTH_SHORT).show();
+                    showMessage("تم تحديث البيانات بنجاح");
                 }
 
                 @Override
                 public void onError(String error) {
-                    Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                    showMessage("خطأ في تحديث البيانات: " + error);
                 }
             });
-        });
-
-        // إضافة زر جلب البيانات من السيرفر
-        DataManager dataManager = new DataManager(
-            requireContext(),
-            db.accountDao(),
-            db.transactionDao(),
-            db.pendingOperationDao()
-        );
-
-        dataManager.fetchDataFromServer(new DataManager.DataCallback() {
-            @Override
-            public void onSuccess() {
-                showMessage("تم تحديث البيانات بنجاح");
-            }
-
-            @Override
-            public void onError(String error) {
-                showMessage("خطأ في تحديث البيانات: " + error);
-            }
         });
     }
 
