@@ -112,11 +112,15 @@ public class DataManager {
                 .getString("token", null);
 
         if (token == null) {
+            Log.e(TAG, "Token is null");
             callback.onError("User not authenticated");
             return;
         }
 
+        Log.d(TAG, "Starting fetchDataFromServer with token: " + token);
+
         if (!isNetworkAvailable()) {
+            Log.e(TAG, "No network connection");
             callback.onError("No internet connection");
             return;
         }
@@ -129,6 +133,7 @@ public class DataManager {
                 String newToken = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
                         .getString("token", null);
                 
+                Log.d(TAG, "Token refreshed successfully, new token: " + newToken);
                 Log.d(TAG, "Starting full sync - deleting local data first...");
 
                 // حذف جميع البيانات المحلية أولاً
@@ -143,6 +148,7 @@ public class DataManager {
                         Log.d(TAG, "Local data deleted successfully");
 
                         // جلب الحسابات من السيرفر
+                        Log.d(TAG, "Fetching accounts from server...");
                         apiService.getAccounts("Bearer " + newToken).enqueue(new Callback<List<Account>>() {
                             @Override
                             public void onResponse(Call<List<Account>> call, Response<List<Account>> response) {
@@ -156,6 +162,7 @@ public class DataManager {
                                             for (Account account : accounts) {
                                                 account.setLastSyncTime(System.currentTimeMillis());
                                                 account.setSyncStatus(2); // SYNCED
+                                                Log.d(TAG, "Processing account: " + account.getAccountName() + " (ID: " + account.getServerId() + ")");
                                             }
                                             
                                             // إضافة جميع الحسابات دفعة واحدة
@@ -179,7 +186,7 @@ public class DataManager {
                                         errorMessage = "Error reading response";
                                     }
                                     final String finalErrorMessage = errorMessage;
-                                    Log.e(TAG, "Failed to fetch accounts: " + finalErrorMessage);
+                                    Log.e(TAG, "Failed to fetch accounts: " + finalErrorMessage + ", Response code: " + response.code());
                                     handler.post(() -> callback.onError("Failed to fetch accounts: " + finalErrorMessage));
                                 }
                             }
@@ -199,6 +206,7 @@ public class DataManager {
 
             @Override
             public void onError(String error) {
+                Log.e(TAG, "Token refresh failed: " + error);
                 callback.onError("Token refresh failed: " + error);
             }
         });
