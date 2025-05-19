@@ -144,13 +144,15 @@ public class DataManager {
                             
                             executor.execute(() -> {
                                 try {
-                                    // إضافة جميع الحسابات الجديدة
+                                    // تحديث وقت المزامنة وحالة المزامنة لجميع الحسابات
                                     for (Account account : accounts) {
                                         account.setLastSyncTime(System.currentTimeMillis());
                                         account.setSyncStatus(2); // SYNCED
-                                        accountDao.insert(account);
-                                        Log.d(TAG, "Added account: " + account.getServerId());
                                     }
+                                    
+                                    // إضافة جميع الحسابات دفعة واحدة
+                                    accountDao.insertAll(accounts);
+                                    Log.d(TAG, "Added " + accounts.size() + " accounts successfully");
 
                                     // بعد اكتمال جلب الحسابات، نقوم بجلب المعاملات
                                     fetchTransactions(token, callback);
@@ -199,13 +201,15 @@ public class DataManager {
                     
                     executor.execute(() -> {
                         try {
-                            // إضافة جميع المعاملات الجديدة
+                            // تحديث وقت المزامنة وحالة المزامنة لجميع المعاملات
                             for (Transaction transaction : transactions) {
                                 transaction.setLastSyncTime(System.currentTimeMillis());
                                 transaction.setSyncStatus(2); // SYNCED
-                                transactionDao.insert(transaction);
-                                Log.d(TAG, "Added transaction: " + transaction.getServerId());
                             }
+                            
+                            // إضافة جميع المعاملات دفعة واحدة
+                            transactionDao.insertAll(transactions);
+                            Log.d(TAG, "Added " + transactions.size() + " transactions successfully");
 
                             // تحديث وقت آخر مزامنة
                             context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
