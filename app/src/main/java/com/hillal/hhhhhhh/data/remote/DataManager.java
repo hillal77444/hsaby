@@ -160,15 +160,15 @@ public class DataManager {
                                 }
                             });
                         } else {
-                            String errorBody;
+                            final String errorMessage;
                             try {
-                                errorBody = response.errorBody() != null ? 
+                                errorMessage = response.errorBody() != null ? 
                                     response.errorBody().string() : "Unknown error";
                             } catch (IOException e) {
-                                errorBody = "Error reading response";
+                                errorMessage = "Error reading response";
                             }
-                            Log.e(TAG, "Failed to fetch accounts: " + errorBody);
-                            handler.post(() -> callback.onError("Failed to fetch accounts: " + errorBody));
+                            Log.e(TAG, "Failed to fetch accounts: " + errorMessage);
+                            handler.post(() -> callback.onError("Failed to fetch accounts: " + errorMessage));
                         }
                     }
 
@@ -219,15 +219,15 @@ public class DataManager {
                         }
                     });
                 } else {
-                    String errorBody;
+                    final String errorMessage;
                     try {
-                        errorBody = response.errorBody() != null ? 
+                        errorMessage = response.errorBody() != null ? 
                             response.errorBody().string() : "Unknown error";
                     } catch (IOException e) {
-                        errorBody = "Error reading response";
+                        errorMessage = "Error reading response";
                     }
-                    Log.e(TAG, "Failed to fetch transactions: " + errorBody);
-                    handler.post(() -> callback.onError("Failed to fetch transactions: " + errorBody));
+                    Log.e(TAG, "Failed to fetch transactions: " + errorMessage);
+                    handler.post(() -> callback.onError("Failed to fetch transactions: " + errorMessage));
                 }
             }
 
