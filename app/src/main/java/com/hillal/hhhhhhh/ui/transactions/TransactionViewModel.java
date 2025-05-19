@@ -14,11 +14,11 @@ public class TransactionViewModel extends ViewModel {
         this.accountRepository = accountRepository;
     }
 
-    public LiveData<List<Transaction>> getTransactionsForAccount(int accountId) {
+    public LiveData<List<Transaction>> getTransactionsForAccount(long accountId) {
         return accountRepository.getTransactionsForAccount(accountId);
     }
 
-    public LiveData<Double> getAccountBalance(int accountId) {
+    public LiveData<Double> getAccountBalance(long accountId) {
         return accountRepository.getAccountBalance(accountId);
     }
 
