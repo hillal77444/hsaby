@@ -45,10 +45,10 @@ public class SyncManager {
     private final AccountDao accountDao;
     private final TransactionDao transactionDao;
     private final Handler handler;
-    private boolean isAutoSyncEnabled = true;
+    private boolean isAutoSyncEnabled = false;
     private long lastSyncTime = 0;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private static final int SYNC_INTERVAL = 30 * 1000; // 30 ثانية
+    private static final int SYNC_INTERVAL = 5 * 60 * 1000; // 5 دقائق
     private static final int MAX_RETRY_COUNT = 3;
     private int currentRetryCount = 0;
     private static final String SYNC_TAG = "sync_task";
@@ -86,17 +86,12 @@ public class SyncManager {
         this.handler = new Handler(Looper.getMainLooper());
         this.lastSyncTime = getLastSyncTime();
         
-        // تفعيل المزامنة التلقائية بشكل افتراضي
-        this.isAutoSyncEnabled = true;
+        // تعطيل المزامنة التلقائية بشكل افتراضي
+        this.isAutoSyncEnabled = false;
         context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
                 .edit()
-                .putBoolean("auto_sync", true)
+                .putBoolean("auto_sync", false)
                 .apply();
-        
-        // بدء المزامنة التلقائية
-        startAutoSync();
-        // تنفيذ مزامنة فورية
-        performInitialSync();
     }
 
     private long getLastSyncTime() {
@@ -565,8 +560,6 @@ public class SyncManager {
         if (enable) {
             // بدء المزامنة التلقائية
             startAutoSync();
-            // تنفيذ مزامنة فورية
-            performInitialSync();
         } else {
             // إيقاف المزامنة التلقائية
             if (currentSyncTask != null) {
@@ -577,250 +570,9 @@ public class SyncManager {
         }
     }
 
-    private void performInitialSync() {
-        if (!isNetworkAvailable()) {
-            Log.d(TAG, "No network available, skipping initial sync");
-            return;
-        }
-
-        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                .getString("token", null);
-
-        if (token == null) {
-            Log.e(TAG, "No authentication token found");
-            return;
-        }
-
-        long currentUserId = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                .getLong("user_id", -1);
-
-        if (currentUserId == -1) {
-            Log.e(TAG, "No user ID found");
-            return;
-        }
-
-        Log.d(TAG, "Starting initial sync for user: " + currentUserId);
-        performFullSync(new SyncCallback() {
-            @Override
-            public void onSuccess() {
-                Log.d(TAG, "Initial sync completed successfully");
-            }
-
-            @Override
-            public void onError(String error) {
-                Log.e(TAG, "Initial sync failed: " + error);
-            }
-        });
-    }
-
-    public void performFullSync(SyncCallback callback) {
-        if (!isNetworkAvailable()) {
-            callback.onError("No internet connection");
-            return;
-        }
-
-        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                .getString("token", null);
-
-        if (token == null) {
-            callback.onError("User not authenticated");
-            return;
-        }
-
-        long currentUserId = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                .getLong("user_id", -1);
-
-        if (currentUserId == -1) {
-            callback.onError("User ID not found");
-            return;
-        }
-
-        Log.d(TAG, "Starting full sync for user: " + currentUserId);
-
-        // جلب جميع الحسابات
-        apiService.getAccounts("Bearer " + token).enqueue(new Callback<List<Account>>() {
-            @Override
-            public void onResponse(Call<List<Account>> call, Response<List<Account>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Account> accounts = response.body();
-                    executor.execute(() -> {
-                        try {
-                            Log.d(TAG, "Received " + accounts.size() + " accounts");
-                            for (Account account : accounts) {
-                                // التحقق من أن الحساب ينتمي للمستخدم الحالي
-                                if (account.getUserId() != currentUserId) {
-                                    continue;
-                                }
-
-                                // التحقق من صحة رقم الحساب
-                                if (account.getAccountNumber() == null || account.getAccountNumber().isEmpty()) {
-                                    Log.e(TAG, "Account number is null or empty, skipping account");
-                                    continue;
-                                }
-
-                                // البحث عن الحساب في قاعدة البيانات المحلية باستخدام رقم الحساب فقط
-                                Account existingAccount = accountDao.getAccountByNumberSync(account.getAccountNumber());
-
-                                if (existingAccount != null) {
-                                    // تحديث الحساب الموجود
-                                    Log.d(TAG, "Updating existing account: " + account.getAccountNumber());
-                                    existingAccount.setName(account.getName());
-                                    existingAccount.setBalance(account.getBalance());
-                                    existingAccount.setPhoneNumber(account.getPhoneNumber()); // تحديث رقم الهاتف بدون قيود
-                                    existingAccount.setNotes(account.getNotes());
-                                    existingAccount.setIsDebtor(account.isDebtor());
-                                    existingAccount.setWhatsappEnabled(account.isWhatsappEnabled());
-                                    existingAccount.setServerId(account.getServerId());
-                                    existingAccount.setLastSyncTime(System.currentTimeMillis());
-                                    existingAccount.setSyncStatus(SYNC_STATUS_SYNCED);
-                                    accountDao.update(existingAccount);
-                                } else {
-                                    // إضافة حساب جديد
-                                    Log.d(TAG, "Adding new account: " + account.getAccountNumber());
-                                    account.setUserId(currentUserId);
-                                    account.setLastSyncTime(System.currentTimeMillis());
-                                    account.setSyncStatus(SYNC_STATUS_SYNCED);
-                                    // نضيف الحساب مباشرة بدون التحقق من رقم الهاتف
-                                    try {
-                                        accountDao.insert(account);
-                                    } catch (Exception e) {
-                                        Log.e(TAG, "Error inserting account: " + e.getMessage());
-                                        // إذا فشل الإدخال، نحاول التحديث
-                                        existingAccount = accountDao.getAccountByNumberSync(account.getAccountNumber());
-                                        if (existingAccount != null) {
-                                            existingAccount.setName(account.getName());
-                                            existingAccount.setBalance(account.getBalance());
-                                            existingAccount.setPhoneNumber(account.getPhoneNumber());
-                                            existingAccount.setNotes(account.getNotes());
-                                            existingAccount.setIsDebtor(account.isDebtor());
-                                            existingAccount.setWhatsappEnabled(account.isWhatsappEnabled());
-                                            existingAccount.setServerId(account.getServerId());
-                                            existingAccount.setLastSyncTime(System.currentTimeMillis());
-                                            existingAccount.setSyncStatus(SYNC_STATUS_SYNCED);
-                                            accountDao.update(existingAccount);
-                                        }
-                                    }
-                                }
-                            }
-
-                            // بعد اكتمال جلب الحسابات، نقوم بجلب المعاملات
-                            fetchAllTransactions(token, currentUserId, callback);
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error saving accounts: " + e.getMessage());
-                            handler.post(() -> callback.onError("Error saving accounts: " + e.getMessage()));
-                        }
-                    });
-                } else {
-                    String errorBody;
-                    try {
-                        errorBody = response.errorBody() != null ? 
-                            response.errorBody().string() : "Unknown error";
-                    } catch (IOException e) {
-                        Log.e(TAG, "Error reading error body: " + e.getMessage());
-                        errorBody = "Error reading response";
-                    }
-                    final String finalErrorBody = errorBody;
-                    handler.post(() -> callback.onError("Failed to fetch accounts: " + finalErrorBody));
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<Account>> call, Throwable t) {
-                handler.post(() -> callback.onError("Network error while fetching accounts: " + t.getMessage()));
-            }
-        });
-    }
-
-    private void fetchAllTransactions(String token, long currentUserId, SyncCallback callback) {
-        Log.d(TAG, "Starting fetchAllTransactions for user: " + currentUserId);
-        apiService.getTransactions("Bearer " + token).enqueue(new Callback<List<Transaction>>() {
-            @Override
-            public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Transaction> transactions = response.body();
-                    Log.d(TAG, "Received " + transactions.size() + " transactions from server");
-                    Log.d(TAG, "Current user ID: " + currentUserId);
-                    
-                    executor.execute(() -> {
-                        try {
-                            int processedCount = 0;
-                            int skippedCount = 0;
-                            
-                            for (Transaction transaction : transactions) {
-                                Log.d(TAG, "Processing transaction: id=" + transaction.getId() + 
-                                          ", server_id=" + transaction.getServerId() + 
-                                          ", user_id=" + transaction.getUserId() +
-                                          ", amount=" + transaction.getAmount() +
-                                          ", type=" + transaction.getType() +
-                                          ", currency=" + transaction.getCurrency());
-                                
-                                // التحقق من أن المعاملة تنتمي للمستخدم الحالي
-                                if (transaction.getUserId() != currentUserId) {
-                                    Log.d(TAG, "Skipping transaction: user_id mismatch. Expected: " + 
-                                              currentUserId + ", Got: " + transaction.getUserId());
-                                    skippedCount++;
-                                    continue;
-                                }
-
-                                // البحث عن الحساب في قاعدة البيانات المحلية
-                                Account account = null;
-                                // جلب جميع الحسابات
-                                List<Account> accounts = accountDao.getAllAccountsSync();
-                                // البحث عن الحساب المناسب
-                                for (Account acc : accounts) {
-                                    if (transaction.getServerId() > 0) {
-                                        if (acc.getServerId() == transaction.getServerId()) {
-                                            account = acc;
-                                            break;
-                                        }
-                                    } else {
-                                        if (acc.getId() == transaction.getAccountId()) {
-                                            account = acc;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (account == null) {
-                                    Log.d(TAG, "Skipping transaction: account not found. Account ID: " + 
-                                              transaction.getAccountId() + ", Server ID: " + transaction.getServerId());
-                                    skippedCount++;
-                                    continue;
-                                }
-
-                                // حفظ المعاملة في قاعدة البيانات المحلية
-                                transaction.setSyncStatus(SYNC_STATUS_SYNCED);
-                                transaction.setLastSyncTime(System.currentTimeMillis());
-                                transactionDao.insert(transaction);
-                                processedCount++;
-                                Log.d(TAG, "Successfully saved transaction: " + transaction.getId());
-                            }
-                            
-                            Log.d(TAG, "Transaction processing complete. Processed: " + processedCount + 
-                                      ", Skipped: " + skippedCount);
-                            
-                            handler.post(() -> callback.onSuccess());
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error processing transactions", e);
-                            handler.post(() -> callback.onError(e.getMessage()));
-                        }
-                    });
-                } else {
-                    Log.e(TAG, "Failed to fetch transactions. Code: " + response.code());
-                    handler.post(() -> callback.onError("Failed to fetch transactions"));
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                Log.e(TAG, "Network error while fetching transactions", t);
-                handler.post(() -> callback.onError(t.getMessage()));
-            }
-        });
-    }
-
     public boolean isAutoSyncEnabled() {
-        // دائماً نرجع true لأن المزامنة التلقائية مفعلة بشكل افتراضي
-        return true;
+        return context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
+                .getBoolean("auto_sync", false);
     }
 
     public void setSyncInterval(int minutes) {
