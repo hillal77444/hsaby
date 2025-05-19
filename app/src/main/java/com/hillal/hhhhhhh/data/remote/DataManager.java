@@ -106,11 +106,7 @@ public class DataManager {
                         try {
                             for (Transaction serverTransaction : transactions) {
                                 // التحقق من وجود server_id
-                                if (serverTransaction.getServerId() == null || serverTransaction.getServerId() <= 0) {
-                                    Log.w(TAG, "تم تجاهل معاملة بدون server_id: " + serverTransaction.getId());
-                                    continue; // تخطي هذه المعاملة
-                                }
-
+                                
                                 // البحث عن المعاملة باستخدام server_id
                                 Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(serverTransaction.getServerId());
                                 
