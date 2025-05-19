@@ -210,14 +210,14 @@ public class DataManager {
                                             // بعد اكتمال جلب الحسابات، نقوم بجلب المعاملات
                                             fetchTransactions(newToken, callback);
                                         } catch (Exception e) {
-                                            String errorMessage = "Error saving accounts: " + e.getMessage() + 
+                                            final String errorMessage = "Error saving accounts: " + e.getMessage() + 
                                                                "\nStack trace: " + Log.getStackTraceString(e);
                                             Log.e(TAG, errorMessage);
                                             handler.post(() -> callback.onError(errorMessage));
                                         }
                                     });
                                 } else {
-                                    String errorMessage = "Failed to fetch accounts: " + response.code();
+                                    final String errorMessage = "Failed to fetch accounts: " + response.code();
                                     try {
                                         if (response.errorBody() != null) {
                                             errorMessage += "\n" + response.errorBody().string();
@@ -232,14 +232,14 @@ public class DataManager {
 
                             @Override
                             public void onFailure(Call<List<Account>> call, Throwable t) {
-                                String errorMessage = "Network error while fetching accounts: " + t.getMessage() + 
+                                final String errorMessage = "Network error while fetching accounts: " + t.getMessage() + 
                                                    "\nStack trace: " + Log.getStackTraceString(t);
                                 Log.e(TAG, errorMessage);
                                 handler.post(() -> callback.onError(errorMessage));
                             }
                         });
                     } catch (Exception e) {
-                        String errorMessage = "Error in fetchDataFromServer: " + e.getMessage() + 
+                        final String errorMessage = "Error in fetchDataFromServer: " + e.getMessage() + 
                                            "\nStack trace: " + Log.getStackTraceString(e);
                         Log.e(TAG, errorMessage);
                         handler.post(() -> callback.onError(errorMessage));
