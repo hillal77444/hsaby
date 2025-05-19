@@ -415,9 +415,9 @@ def delete_transaction_by_id(transaction_id):
     try:
         user_id = get_jwt_identity()
         
-        # البحث عن المعاملة
+        # البحث عن المعاملة باستخدام server_id
         transaction = Transaction.query.filter_by(
-            id=transaction_id,
+            server_id=transaction_id,
             user_id=user_id
         ).first()
         
@@ -428,7 +428,7 @@ def delete_transaction_by_id(transaction_id):
         db.session.delete(transaction)
         db.session.commit()
         
-        logger.info(f"Transaction {transaction_id} deleted successfully by user {user_id}")
+        logger.info(f"Transaction with server_id {transaction_id} deleted successfully by user {user_id}")
         return json_response({'message': 'تم حذف القيد بنجاح'})
         
     except Exception as e:
