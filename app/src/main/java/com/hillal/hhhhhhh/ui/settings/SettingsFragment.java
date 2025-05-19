@@ -2,6 +2,7 @@ package com.hillal.hhhhhhh.ui.settings;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.data.remote.DataManager;
 
 public class SettingsFragment extends Fragment {
+    private static final String TAG = "SettingsFragment";
     private FragmentSettingsBinding binding;
     private SettingsViewModel settingsViewModel;
     private SharedPreferences sharedPreferences;
@@ -128,14 +130,16 @@ public class SettingsFragment extends Fragment {
         dataManager.fetchDataFromServer(new DataManager.DataCallback() {
             @Override
             public void onSuccess() {
-                Toast.makeText(requireContext(), "تم جلب البيانات بنجاح", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "Full sync completed successfully");
+                showMessage("تمت المزامنة بنجاح");
             }
 
             @Override
             public void onError(String error) {
-                Toast.makeText(requireContext(), "خطأ: " + error, Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Full sync failed: " + error);
+                showMessage("فشلت المزامنة: " + error);
             }
-        });
+        }, true);
     }
 
     private void setupSecuritySettings() {
