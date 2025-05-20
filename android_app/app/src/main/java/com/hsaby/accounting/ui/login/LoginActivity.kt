@@ -39,12 +39,18 @@ class LoginActivity : AppCompatActivity() {
             val password = binding.passwordEditText.text.toString()
             
             if (validateInput(phone, password)) {
-                login(phone, password)
+                viewModel.login(phone, password)
             }
         }
         
         binding.registerButton.setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
+            val phone = binding.phoneEditText.text.toString()
+            val password = binding.passwordEditText.text.toString()
+            val name = binding.nameEditText.text.toString()
+            
+            if (validateInput(phone, password, name)) {
+                viewModel.register(name, phone, password)
+            }
         }
     }
     
@@ -52,30 +58,24 @@ class LoginActivity : AppCompatActivity() {
         viewModel.loginResult.observe(this) { result ->
             when (result) {
                 is LoginResult.Success -> {
-                    // حفظ بيانات تسجيل الدخول
-                    preferencesManager.saveLoginCredentials(
-                        phone = result.phone,
-                        password = result.password,
-                        userId = result.userId,
-                        token = result.token
-                    )
-                    
-                    // الانتقال إلى الشاشة الرئيسية
-                    startActivity(Intent(this, MainActivity::class.java))
+                    preferencesManager.saveToken(result.response.token)
+                    preferencesManager.saveRefreshToken(result.response.refreshToken)
+                    preferencesManager.saveUserId(result.response.user.id)
+                    startActivity(MainActivity.newIntent(this))
                     finish()
                 }
                 is LoginResult.Error -> {
-                    Toast.makeText(this, result.message, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, result.message, Toast.LENGTH_LONG).show()
                 }
             }
         }
     }
     
-    private fun validateInput(phone: String, password: String): Boolean {
+    private fun validateInput(phone: String, password: String, name: String = ""): Boolean {
         var isValid = true
         
         if (phone.isEmpty()) {
-            binding.phoneEditText.error = "الرجاء إدخال رقم الهاتف"
+            binding.phoneEditText.error = getString(R.string.error_phone_required)
             isValid = false
         } else if (!isValidPhoneNumber(phone)) {
             binding.phoneEditText.error = "رقم الهاتف غير صحيح"
@@ -83,7 +83,12 @@ class LoginActivity : AppCompatActivity() {
         }
         
         if (password.isEmpty()) {
-            binding.passwordEditText.error = "الرجاء إدخال كلمة المرور"
+            binding.passwordEditText.error = getString(R.string.error_password_required)
+            isValid = false
+        }
+        
+        if (name.isEmpty() && binding.registerButton.visibility == View.VISIBLE) {
+            binding.nameEditText.error = getString(R.string.error_name_required)
             isValid = false
         }
         
