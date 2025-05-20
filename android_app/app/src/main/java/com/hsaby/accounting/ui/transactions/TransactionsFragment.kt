@@ -49,7 +49,7 @@ class TransactionsFragment : Fragment() {
     
     private fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val userId = preferencesManager.userId.first()
+            val userId = preferencesManager.getUserId()
             if (userId != null) {
                 (requireActivity().application as AccountingApp)
                     .transactionRepository.getTransactionsByUserId(userId)
@@ -63,7 +63,7 @@ class TransactionsFragment : Fragment() {
     private fun refreshData() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val userId = preferencesManager.userId.first()
+                val userId = preferencesManager.getUserId()
                 if (userId != null) {
                     (requireActivity().application as AccountingApp)
                         .transactionRepository.syncTransactions(userId)
