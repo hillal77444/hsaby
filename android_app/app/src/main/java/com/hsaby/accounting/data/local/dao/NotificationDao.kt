@@ -6,33 +6,27 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NotificationDao {
-    @Query("SELECT * FROM notifications ORDER BY createdAt DESC")
+    @Query("SELECT * FROM notifications ORDER BY date DESC")
     fun getAllNotifications(): Flow<List<NotificationEntity>>
 
-    @Query("SELECT * FROM notifications WHERE isRead = 0 ORDER BY createdAt DESC")
-    fun getUnreadNotifications(): Flow<List<NotificationEntity>>
-
-    @Query("SELECT COUNT(*) FROM notifications WHERE isRead = 0")
-    fun getUnreadCount(): Flow<Int>
+    @Query("SELECT * FROM notifications WHERE id = :id")
+    suspend fun getNotificationById(id: Long): NotificationEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNotification(notification: NotificationEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertNotifications(notifications: List<NotificationEntity>)
-
     @Update
     suspend fun updateNotification(notification: NotificationEntity)
-
-    @Query("UPDATE notifications SET isRead = 1 WHERE id = :notificationId")
-    suspend fun markAsRead(notificationId: Long)
-
-    @Query("UPDATE notifications SET isRead = 1")
-    suspend fun markAllAsRead()
 
     @Delete
     suspend fun deleteNotification(notification: NotificationEntity)
 
-    @Query("DELETE FROM notifications WHERE createdAt < :cutoffTime")
-    suspend fun deleteOldNotifications(cutoffTime: Long): Int
+    @Query("UPDATE notifications SET isRead = 1 WHERE id = :id")
+    suspend fun markAsRead(id: Long)
+
+    @Query("UPDATE notifications SET isRead = 1")
+    suspend fun markAllAsRead()
+
+    @Query("SELECT COUNT(*) FROM notifications WHERE isRead = 0")
+    fun getUnreadCount(): Flow<Int>
 } 
