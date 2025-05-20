@@ -34,21 +34,21 @@ class LoginActivity : AppCompatActivity() {
     private fun setupViews() {
         binding.toolbar.title = getString(R.string.login_title)
         
-        binding.loginButton.setOnClickListener {
+        binding.btnLogin.setOnClickListener {
             if (validateInput()) {
                 viewModel.login(
-                    binding.phoneEditText.text.toString(),
-                    binding.passwordEditText.text.toString()
+                    binding.etPhone.text.toString(),
+                    binding.etPassword.text.toString()
                 )
             }
         }
         
-        binding.registerButton.setOnClickListener {
+        binding.tvRegister.setOnClickListener {
             if (validateInput()) {
                 viewModel.register(
-                    binding.nameEditText.text.toString(),
-                    binding.phoneEditText.text.toString(),
-                    binding.passwordEditText.text.toString()
+                    binding.etName.text.toString(),
+                    binding.etPhone.text.toString(),
+                    binding.etPassword.text.toString()
                 )
             }
         }
@@ -59,8 +59,8 @@ class LoginActivity : AppCompatActivity() {
             when (result) {
                 is LoginResult.Loading -> {
                     binding.progressBar.visibility = View.VISIBLE
-                    binding.loginButton.isEnabled = false
-                    binding.registerButton.isEnabled = false
+                    binding.btnLogin.isEnabled = false
+                    binding.tvRegister.isEnabled = false
                 }
                 is LoginResult.Success -> {
                     binding.progressBar.visibility = View.GONE
@@ -73,8 +73,8 @@ class LoginActivity : AppCompatActivity() {
                 is LoginResult.Error -> {
                     binding.progressBar.visibility = View.GONE
                     Toast.makeText(this, result.message, Toast.LENGTH_SHORT).show()
-                    binding.loginButton.isEnabled = true
-                    binding.registerButton.isEnabled = true
+                    binding.btnLogin.isEnabled = true
+                    binding.tvRegister.isEnabled = true
                 }
             }
         }
@@ -83,22 +83,22 @@ class LoginActivity : AppCompatActivity() {
     private fun validateInput(): Boolean {
         var isValid = true
         
-        if (binding.phoneEditText.text.isNullOrBlank()) {
-            binding.phoneEditText.error = getString(R.string.error_phone_required)
+        if (binding.etPhone.text.isNullOrBlank()) {
+            binding.etPhone.error = getString(R.string.error_phone_required)
             isValid = false
-        } else if (!isValidPhoneNumber(binding.phoneEditText.text.toString())) {
-            binding.phoneEditText.error = getString(R.string.error_invalid_phone)
-            isValid = false
-        }
-        
-        if (binding.passwordEditText.text.isNullOrBlank()) {
-            binding.passwordEditText.error = getString(R.string.error_password_required)
+        } else if (!isValidPhoneNumber(binding.etPhone.text.toString())) {
+            binding.etPhone.error = getString(R.string.error_invalid_phone)
             isValid = false
         }
         
-        if (binding.registerButton.visibility == View.VISIBLE) {
-            if (binding.nameEditText.text.isNullOrBlank()) {
-                binding.nameEditText.error = getString(R.string.error_name_required)
+        if (binding.etPassword.text.isNullOrBlank()) {
+            binding.etPassword.error = getString(R.string.error_password_required)
+            isValid = false
+        }
+        
+        if (binding.tvRegister.visibility == View.VISIBLE) {
+            if (binding.etName.text.isNullOrBlank()) {
+                binding.etName.error = getString(R.string.error_name_required)
                 isValid = false
             }
         }
