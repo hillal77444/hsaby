@@ -1,18 +1,14 @@
 package com.hsaby.accounting.data.remote
 
-import com.hsaby.accounting.data.remote.model.*
+import com.hsaby.accounting.data.model.*
 import retrofit2.Response
 import retrofit2.http.*
 
 interface ApiService {
-    companion object {
-        const val BASE_URL = "http://212.224.88.122:5007/api/"
-    }
-
-    @POST("login")
+    @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
-    @POST("register")
+    @POST("auth/register")
     suspend fun register(@Body request: RegisterRequest): Response<RegisterResponse>
 
     @GET("accounts")
@@ -28,14 +24,11 @@ interface ApiService {
     ): Response<PaginatedResponse<Transaction>>
 
     @POST("sync")
-    suspend fun syncData(@Body request: SyncRequest): Response<SyncResponse>
+    suspend fun sync(@Body request: SyncRequest): Response<SyncResponse>
 
     @POST("sync/changes")
     suspend fun syncChanges(@Body request: SyncChangesRequest): Response<SyncChangesResponse>
 
-    @POST("refresh-token")
-    suspend fun refreshToken(): Response<RefreshTokenResponse>
-
-    @DELETE("transactions/{transactionId}")
-    suspend fun deleteTransaction(@Path("transactionId") transactionId: Long): Response<Unit>
+    @POST("auth/refresh")
+    suspend fun refreshToken(@Body request: Map<String, String>): Response<RefreshTokenResponse>
 } 
