@@ -70,18 +70,32 @@ class AccountRepository @Inject constructor(
             name = name,
             balance = balance,
             isActive = isActive,
-            lastModified = lastModified
+            lastModified = lastModified,
+            currency = currency,
+            phone = phone,
+            notes = notes,
+            isDebtor = isDebtor,
+            whatsappEnabled = whatsappEnabled,
+            userId = userId,
+            lastSync = lastSync
         )
     }
 
     private fun Account.toEntity(): AccountEntity {
         return AccountEntity(
-            id = id,
+            id = id ?: 0,
             serverId = serverId,
             name = name,
             balance = balance,
             isActive = isActive,
-            lastModified = lastModified
+            lastModified = lastModified,
+            currency = currency,
+            phone = phone,
+            notes = notes,
+            isDebtor = isDebtor,
+            whatsappEnabled = whatsappEnabled,
+            userId = userId,
+            lastSync = lastSync
         )
     }
 } 
