@@ -3,20 +3,18 @@ package com.hsaby.accounting.data.model
 import com.google.gson.annotations.SerializedName
 
 // Request Models
+data class LoginRequest(
+    @SerializedName("phone") val phone: String,
+    @SerializedName("password") val password: String
+)
+
 data class RegisterRequest(
     @SerializedName("phone") val phone: String,
     @SerializedName("password") val password: String,
     @SerializedName("name") val name: String
 )
 
-data class LoginRequest(
-    @SerializedName("phone") val phone: String,
-    @SerializedName("password") val password: String
-)
-
 data class SyncRequest(
-    @SerializedName("accounts") val accounts: List<Account>,
-    @SerializedName("transactions") val transactions: List<Transaction>,
     @SerializedName("last_sync_time") val lastSyncTime: Long
 )
 
@@ -26,13 +24,13 @@ data class SyncChangesRequest(
 )
 
 // Response Models
-data class RegisterResponse(
+data class LoginResponse(
     @SerializedName("token") val token: String,
     @SerializedName("refresh_token") val refreshToken: String,
     @SerializedName("user") val user: User
 )
 
-data class LoginResponse(
+data class RegisterResponse(
     @SerializedName("token") val token: String,
     @SerializedName("refresh_token") val refreshToken: String,
     @SerializedName("user") val user: User
@@ -63,11 +61,11 @@ data class PaginatedResponse<T>(
 // Data Models
 data class Account(
     @SerializedName("id") val id: String,
-    @SerializedName("server_id") val serverId: Long,
-    @SerializedName("account_name") val accountName: String,
+    @SerializedName("server_id") val serverId: Long?,
+    @SerializedName("name") val name: String,
     @SerializedName("balance") val balance: Double,
     @SerializedName("currency") val currency: String,
-    @SerializedName("phone_number") val phoneNumber: String?,
+    @SerializedName("phone") val phone: String?,
     @SerializedName("notes") val notes: String?,
     @SerializedName("is_debtor") val isDebtor: Boolean,
     @SerializedName("whatsapp_enabled") val whatsappEnabled: Boolean,
@@ -77,7 +75,7 @@ data class Account(
 
 data class Transaction(
     @SerializedName("id") val id: String,
-    @SerializedName("server_id") val serverId: Long,
+    @SerializedName("server_id") val serverId: Long?,
     @SerializedName("account_id") val accountId: String,
     @SerializedName("amount") val amount: Double,
     @SerializedName("type") val type: String,
