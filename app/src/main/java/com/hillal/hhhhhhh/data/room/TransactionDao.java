@@ -106,15 +106,15 @@ public interface TransactionDao {
     @Query("DELETE FROM transactions")
     void deleteAllTransactions();
 
-    @Query("SELECT * FROM transactions WHERE serverId = :syncStatus ORDER BY transactionDate DESC")
+    @Query("SELECT * FROM transactions WHERE server_id = :syncStatus ORDER BY transaction_date DESC")
     LiveData<List<Transaction>> getTransactionsBySyncStatus(int syncStatus);
 
-    @Query("SELECT * FROM transactions WHERE serverId < 0 ORDER BY transactionDate DESC")
+    @Query("SELECT * FROM transactions WHERE server_id < 0 ORDER BY transaction_date DESC")
     LiveData<List<Transaction>> getPendingTransactions();
 
-    @Query("SELECT * FROM transactions WHERE serverId >= 0 ORDER BY transactionDate DESC")
+    @Query("SELECT * FROM transactions WHERE server_id >= 0 ORDER BY transaction_date DESC")
     LiveData<List<Transaction>> getSyncedTransactions();
 
-    @Query("SELECT * FROM transactions WHERE serverId = :serverId")
+    @Query("SELECT * FROM transactions WHERE server_id = :serverId")
     Transaction getTransactionByServerId(long serverId);
 } 
