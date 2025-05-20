@@ -2,9 +2,8 @@ package com.hsaby.accounting.data.repository
 
 import com.hsaby.accounting.data.local.dao.AccountDao
 import com.hsaby.accounting.data.local.entity.AccountEntity
-import com.hsaby.accounting.data.model.Account
 import com.hsaby.accounting.data.remote.ApiService
-import com.hsaby.accounting.data.remote.Result
+import com.hsaby.accounting.data.remote.model.Account
 import com.hsaby.accounting.util.PreferencesManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -17,85 +16,73 @@ class AccountRepository @Inject constructor(
     private val apiService: ApiService,
     private val preferencesManager: PreferencesManager
 ) {
-    fun getAllAccounts(): Flow<List<Account>> {
-        return accountDao.getAllAccounts().map { entities ->
-            entities.map { it.toModel() }
+    fun getAllAccounts(): Flow<List<AccountEntity>> {
+        return accountDao.getAllAccounts()
+    }
+
+    fun getAccountById(id: Long): Flow<AccountEntity?> {
+        return accountDao.getAccountById(id)
+    }
+
+    fun getAccountByServerId(serverId: String): Flow<AccountEntity?> {
+        return accountDao.getAccountByServerId(serverId)
+    }
+
+    fun getUnsyncedAccounts(): Flow<List<AccountEntity>> {
+        return accountDao.getUnsyncedAccounts()
+    }
+
+    suspend fun insertAccount(account: AccountEntity) {
+        accountDao.insertAccount(account)
+    }
+
+    suspend fun updateAccount(account: AccountEntity) {
+        accountDao.updateAccount(account)
+    }
+
+    suspend fun deleteAccount(account: AccountEntity) {
+        accountDao.deleteAccount(account)
+    }
+
+    suspend fun updateServerId(localId: Long, serverId: String) {
+        accountDao.updateServerId(localId, serverId)
+    }
+
+    suspend fun syncAccounts() {
+        val userId = preferencesManager.getUserId()
+        val lastSyncTime = preferencesManager.getLastSyncTime()
+
+        // Get accounts from server
+        val serverAccounts = apiService.getAccounts(userId, lastSyncTime)
+
+        // Update local database
+        serverAccounts.forEach { serverAccount ->
+            val localAccount = accountDao.getAccountByServerIdSync(serverAccount.id)
+            if (localAccount == null) {
+                // Insert new account
+                accountDao.insertAccount(AccountEntity(
+                    id = 0,
+                    serverId = serverAccount.id,
+                    name = serverAccount.name,
+                    balance = serverAccount.balance,
+                    isActive = serverAccount.isActive,
+                    lastModified = serverAccount.lastModified,
+                    phoneNumber = serverAccount.phoneNumber,
+                    userId = userId
+                ))
+            } else {
+                // Update existing account
+                accountDao.updateAccount(localAccount.copy(
+                    name = serverAccount.name,
+                    balance = serverAccount.balance,
+                    isActive = serverAccount.isActive,
+                    lastModified = serverAccount.lastModified,
+                    phoneNumber = serverAccount.phoneNumber
+                ))
+            }
         }
-    }
 
-    suspend fun getAccountById(id: Long): Account? {
-        return accountDao.getAccountById(id)?.toModel()
-    }
-
-    suspend fun getAccountByServerId(serverId: String): Account? {
-        return accountDao.getAccountByServerId(serverId)?.toModel()
-    }
-
-    suspend fun getUnsyncedAccounts(): List<Account> {
-        return accountDao.getUnsyncedAccounts().map { it.toModel() }
-    }
-
-    suspend fun insertAccount(account: Account) {
-        accountDao.insertAccount(account.toEntity())
-    }
-
-    suspend fun updateAccount(account: Account) {
-        accountDao.updateAccount(account.toEntity())
-    }
-
-    suspend fun deleteAccount(account: Account) {
-        accountDao.deleteAccount(account.toEntity())
-    }
-
-    suspend fun updateServerId(id: Long, serverId: String) {
-        accountDao.updateServerId(id, serverId)
-    }
-
-    fun getUserId(): String? {
-        return preferencesManager.getUserId()
-    }
-
-    fun getLastSyncTime(): Long {
-        return preferencesManager.getLastSyncTime()
-    }
-
-    fun setLastSyncTime(time: Long) {
-        preferencesManager.setLastSyncTime(time)
-    }
-
-    private fun AccountEntity.toModel(): Account {
-        return Account(
-            id = id,
-            serverId = serverId,
-            name = name,
-            balance = balance,
-            isActive = isActive,
-            lastModified = lastModified,
-            currency = currency,
-            phone = phone,
-            notes = notes,
-            isDebtor = isDebtor,
-            whatsappEnabled = whatsappEnabled,
-            userId = userId,
-            lastSync = lastSync
-        )
-    }
-
-    private fun Account.toEntity(): AccountEntity {
-        return AccountEntity(
-            id = id ?: 0,
-            serverId = serverId,
-            name = name,
-            balance = balance,
-            isActive = isActive,
-            lastModified = lastModified,
-            currency = currency,
-            phone = phone,
-            notes = notes,
-            isDebtor = isDebtor,
-            whatsappEnabled = whatsappEnabled,
-            userId = userId,
-            lastSync = lastSync
-        )
+        // Update last sync time
+        preferencesManager.setLastSyncTime(System.currentTimeMillis())
     }
 } 
