@@ -68,58 +68,6 @@ class UserRepository(
     }
 }
 
-class AccountRepository(
-    private val accountDao: AccountDao,
-    private val apiService: ApiService
-) {
-    fun getAccountsByUserId(userId: String): Flow<List<AccountEntity>> {
-        return accountDao.getAccountsByUserId(userId)
-    }
-    
-    suspend fun syncAccounts(userId: String): Result<Unit> {
-        return try {
-            val response = apiService.getAccounts()
-            if (response.isSuccessful) {
-                response.body()?.let { accounts ->
-                    val accountEntities = accounts.map { account ->
-                        AccountEntity(
-                            id = account.id,
-                            serverId = account.serverId,
-                            accountName = account.accountName,
-                            balance = account.balance,
-                            currency = account.currency,
-                            phoneNumber = account.phoneNumber,
-                            notes = account.notes,
-                            isDebtor = account.isDebtor,
-                            whatsappEnabled = account.whatsappEnabled,
-                            userId = userId,
-                            lastSync = System.currentTimeMillis()
-                        )
-                    }
-                    accountDao.insertAccounts(accountEntities)
-                    Result.success(Unit)
-                } ?: Result.failure(Exception("Empty response body"))
-            } else {
-                Result.failure(Exception("Failed to fetch accounts: ${response.code()}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-    
-    suspend fun insertAccount(account: AccountEntity) {
-        accountDao.insertAccount(account)
-    }
-    
-    suspend fun updateAccount(account: AccountEntity) {
-        accountDao.updateAccount(account)
-    }
-    
-    suspend fun deleteAccount(account: AccountEntity) {
-        accountDao.deleteAccount(account)
-    }
-}
-
 class TransactionRepository(
     private val transactionDao: TransactionDao,
     private val apiService: ApiService
