@@ -5,7 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hsaby.accounting.data.model.LoginRequest
+import com.hsaby.accounting.data.model.LoginResponse
 import com.hsaby.accounting.data.model.RegisterRequest
+import com.hsaby.accounting.data.remote.Result
 import com.hsaby.accounting.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -21,28 +23,43 @@ class LoginViewModel @Inject constructor(
 
     fun login(phone: String, password: String) {
         viewModelScope.launch {
+            _loginResult.value = LoginResult.Loading
             try {
-                val result = authRepository.login(LoginRequest(phone, password))
-                _loginResult.value = LoginResult.Success(result)
+                when (val result = authRepository.login(LoginRequest(phone, password))) {
+                    is Result.Success -> {
+                        _loginResult.value = LoginResult.Success(result.data)
+                    }
+                    is Result.Error -> {
+                        _loginResult.value = LoginResult.Error(result.message)
+                    }
+                }
             } catch (e: Exception) {
-                _loginResult.value = LoginResult.Error(e.message ?: "حدث خطأ أثناء تسجيل الدخول")
+                _loginResult.value = LoginResult.Error(e.message ?: "حدث خطأ غير متوقع")
             }
         }
     }
 
     fun register(name: String, phone: String, password: String) {
         viewModelScope.launch {
+            _loginResult.value = LoginResult.Loading
             try {
-                val result = authRepository.register(RegisterRequest(phone, password, name))
-                _loginResult.value = LoginResult.Success(result)
+                when (val result = authRepository.register(RegisterRequest(name, phone, password))) {
+                    is Result.Success -> {
+                        _loginResult.value = LoginResult.Success(result.data)
+                    }
+                    is Result.Error -> {
+                        _loginResult.value = LoginResult.Error(result.message)
+                    }
+                }
             } catch (e: Exception) {
-                _loginResult.value = LoginResult.Error(e.message ?: "حدث خطأ أثناء التسجيل")
+                _loginResult.value = LoginResult.Error(e.message ?: "حدث خطأ غير متوقع")
             }
         }
     }
 }
 
 sealed class LoginResult {
-    data class Success(val response: com.hsaby.accounting.data.model.LoginResponse) : LoginResult()
+    object Loading : LoginResult()
+    data class Success(val response: LoginResponse) : LoginResult()
     data class Error(val message: String) : LoginResult()
 } 
