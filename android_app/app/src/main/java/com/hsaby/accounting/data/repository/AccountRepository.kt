@@ -90,29 +90,28 @@ class AccountRepository @Inject constructor(
                     // Insert new account
                     accountDao.insertAccount(AccountEntity(
                         id = serverAccount.id,
-                        userId = currentUserId,
-                        name = serverAccount.name,
+                        serverId = serverAccount.serverId,
+                        accountName = serverAccount.name,
                         balance = serverAccount.balance,
-                        isActive = serverAccount.isActive,
-                        lastModified = serverAccount.lastModified,
+                        currency = serverAccount.currency,
                         phoneNumber = serverAccount.phoneNumber,
+                        notes = serverAccount.notes,
                         isDebtor = serverAccount.isDebtor,
                         whatsappEnabled = serverAccount.whatsappEnabled,
-                        currency = serverAccount.currency,
-                        notes = serverAccount.notes
+                        userId = currentUserId,
+                        lastSync = System.currentTimeMillis()
                     ))
                 } else {
                     // Update existing account
                     accountDao.updateAccount(localAccount.copy(
-                        name = serverAccount.name,
+                        accountName = serverAccount.name,
                         balance = serverAccount.balance,
-                        isActive = serverAccount.isActive,
-                        lastModified = serverAccount.lastModified,
+                        currency = serverAccount.currency,
                         phoneNumber = serverAccount.phoneNumber,
+                        notes = serverAccount.notes,
                         isDebtor = serverAccount.isDebtor,
                         whatsappEnabled = serverAccount.whatsappEnabled,
-                        currency = serverAccount.currency,
-                        notes = serverAccount.notes
+                        lastSync = System.currentTimeMillis()
                     ))
                 }
             }
