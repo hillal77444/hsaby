@@ -6,11 +6,13 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.hsaby.accounting.R
 import com.hsaby.accounting.databinding.ActivityLoginBinding
 import com.hsaby.accounting.ui.main.MainActivity
 import com.hsaby.accounting.util.PreferencesManager
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -64,11 +66,13 @@ class LoginActivity : AppCompatActivity() {
                 }
                 is LoginResult.Success -> {
                     binding.progressBar.visibility = View.GONE
-                    preferencesManager.saveToken(result.response.token)
-                    preferencesManager.saveRefreshToken(result.response.refreshToken)
-                    preferencesManager.saveUserId(result.response.userId)
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
+                    lifecycleScope.launch {
+                        preferencesManager.saveToken(result.response.token)
+                        preferencesManager.saveRefreshToken(result.response.refreshToken)
+                        preferencesManager.saveUserId(result.response.userId)
+                        startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                        finish()
+                    }
                 }
                 is LoginResult.Error -> {
                     binding.progressBar.visibility = View.GONE
