@@ -18,20 +18,20 @@ import com.hsaby.accounting.databinding.ActivityMainBinding
 import com.hsaby.accounting.ui.login.LoginActivity
 import com.hsaby.accounting.util.PreferencesManager
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
     
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var preferencesManager: PreferencesManager
+    @Inject
+    lateinit var preferencesManager: PreferencesManager
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
-        preferencesManager = PreferencesManager(this)
         
         setupNavigation()
         setupListeners()
@@ -95,20 +95,7 @@ class MainActivity : AppCompatActivity() {
     
     private fun syncData() {
         lifecycleScope.launch {
-            try {
-                val userId = preferencesManager.userId.first()
-                if (userId != null) {
-                    // Sync accounts
-                    (application as com.hsaby.accounting.AccountingApp)
-                        .accountRepository.syncAccounts(userId)
-                    
-                    // Sync transactions
-                    (application as com.hsaby.accounting.AccountingApp)
-                        .transactionRepository.syncTransactions(userId)
-                }
-            } catch (e: Exception) {
-                // Handle sync error
-            }
+            viewModel.syncAccounts()
         }
     }
     
