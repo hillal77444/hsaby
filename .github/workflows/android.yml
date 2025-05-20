@@ -7,19 +7,17 @@ on:
     branches: [ main ]
   workflow_dispatch:
     inputs:
-      action:
-        description: 'اختر العملية المطلوبة'
+      build_type:
+        description: 'نوع البناء'
         required: true
-        default: 'build'
+        default: 'debug'
         type: choice
         options:
-          - build
-          - download
-          - clean
+          - debug
+          - release
 
 jobs:
   build:
-    if: github.event.inputs.action == 'build' || github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,123 +25,101 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
           distribution: 'temurin'
-          cache: gradle
+          java-version: '17'
           
-      - name: Setup Android SDK
+      - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
           cmdline-tools-version: '9477386'
-          build-tools-version: '34.0.0'
-          platform-version: '34'
-          ndk-version: '25.2.9519653'
+          packages: |
+            build-tools;34.0.0
+            platforms;android-34
+            ndk;25.2.9519653
+          accept-android-sdk-licenses: true
           
       - name: Decode Keystore
-        env:
-          ENCODED_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 }}
+        if: github.event.inputs.build_type == 'release'
         run: |
-          echo $ENCODED_KEYSTORE | base64 -d > android_app/app/keystore.jks
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
           
-      - name: Grant execute permission for gradlew
-        run: chmod +x android_app/gradlew
-        
-      - name: Build with Gradle
-        working-directory: android_app
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+      - name: Build APK
         run: |
+          cd android_app
           ./gradlew clean
-          ./gradlew assembleRelease --stacktrace --info
-          
-      - name: Check APK exists
-        run: |
-          if [ ! -f "android_app/app/build/outputs/apk/release/app-release.apk" ]; then
-            echo "APK file not found!"
-            ls -la android_app/app/build/outputs/apk/release/
-            exit 1
+          if [ "${{ github.event.inputs.build_type }}" == "release" ]; then
+            ./gradlew assembleRelease
+          else
+            ./gradlew assembleDebug
           fi
-          echo "APK file exists"
+          
+      - name: Check APK
+        run: |
+          cd android_app/app/build/outputs/apk
+          if [ "${{ github.event.inputs.build_type }}" == "release" ]; then
+            if [ ! -f "release/app-release-unsigned.apk" ]; then
+              echo "APK not found!"
+              exit 1
+            fi
+          else
+            if [ ! -f "debug/app-debug.apk" ]; then
+              echo "APK not found!"
+              exit 1
+            fi
+          fi
           
       - name: Sign APK
-        run: |
-          echo "Checking for APK..."
-          if [ ! -f "android_app/app/build/outputs/apk/release/app-release.apk" ]; then
-            echo "Error: app-release.apk not found!"
-            ls -la android_app/app/build/outputs/apk/release/
-            exit 1
-          fi
-          
-          echo "Zipaligning APK..."
-          $ANDROID_HOME/build-tools/34.0.0/zipalign -v 4 android_app/app/build/outputs/apk/release/app-release.apk android_app/app/build/outputs/apk/release/app-release-aligned.apk
-          
-          echo "Signing APK..."
-          $ANDROID_HOME/build-tools/34.0.0/apksigner sign \
-            --ks android_app/app/keystore.jks \
-            --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} \
-            --ks-key-alias ${{ secrets.KEY_ALIAS }} \
-            --key-pass pass:${{ secrets.KEY_PASSWORD }} \
-            android_app/app/build/outputs/apk/release/app-release-aligned.apk
-          
-          echo "Moving final APK..."
-          mv android_app/app/build/outputs/apk/release/app-release-aligned.apk android_app/app/build/outputs/apk/release/app-release.apk
-          
-          echo "Verifying APK signature..."
-          $ANDROID_HOME/build-tools/34.0.0/apksigner verify --verbose android_app/app/build/outputs/apk/release/app-release.apk
-          
-          echo "Calculating SHA256 of signed APK..."
-          sha256sum android_app/app/build/outputs/apk/release/app-release.apk
+        if: github.event.inputs.build_type == 'release'
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: android_app/app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: android_app/app/build/outputs/apk/release/app-release.apk
-          
-      - name: Upload Build Logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-logs
+          name: app-${{ github.event.inputs.build_type }}
           path: |
-            android_app/app/build/outputs/logs/
-            android_app/app/build/reports/
-
+            android_app/app/build/outputs/apk/${{ github.event.inputs.build_type }}/*.apk
+            android_app/app/build/outputs/logs
+            android_app/app/build/reports
+          if-no-files-found: error
+          
   download:
-    if: github.event.inputs.action == 'download'
+    needs: build
+    if: github.event.inputs.build_type == 'release'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Create ZIP file
-        run: zip -r project.zip . -x "*.git*" "*.gradle*" "build/*" "app/build/*"
+      
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: app-release
+          path: app-release
+          
+      - name: Create ZIP
+        run: |
+          cd app-release
+          zip -r ../app-release.zip .
+          
       - name: Upload ZIP
         uses: actions/upload-artifact@v4
         with:
-          name: project-files
-          path: project.zip
-
+          name: app-release-zip
+          path: app-release.zip
+          if-no-files-found: error
+          
   clean:
-    if: github.event.inputs.action == 'clean'
+    if: always()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: gradle
-      - name: Grant execute permission for gradlew
-        run: chmod +x android_app/gradlew
-      - name: Clean Gradle cache and dependencies
-        working-directory: android_app
+      - name: Clean Gradle Cache
         run: |
-          ./gradlew clean
-          ./gradlew --stop
+          cd android_app
+          ./gradlew cleanBuildCache
           rm -rf ~/.gradle/caches/
-          rm -rf .gradle/
-          rm -rf build/
-          rm -rf app/build/
+          ./gradlew --stop
