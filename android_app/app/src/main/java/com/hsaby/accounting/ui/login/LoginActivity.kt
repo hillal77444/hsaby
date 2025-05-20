@@ -4,28 +4,30 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
-import com.hsaby.accounting.AccountingApp
-import com.hsaby.accounting.data.local.PreferencesManager
+import androidx.lifecycle.lifecycleScope
+import com.hsaby.accounting.R
 import com.hsaby.accounting.databinding.ActivityLoginBinding
 import com.hsaby.accounting.ui.main.MainActivity
-import com.hsaby.accounting.ui.register.RegisterActivity
+import com.hsaby.accounting.util.PreferencesManager
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
     
     private lateinit var binding: ActivityLoginBinding
-    private lateinit var viewModel: LoginViewModel
-    private lateinit var preferencesManager: PreferencesManager
+    private val viewModel: LoginViewModel by viewModels()
+    
+    @Inject
+    lateinit var preferencesManager: PreferencesManager
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
-        preferencesManager = PreferencesManager(this)
-        viewModel = ViewModelProvider(this)[LoginViewModel::class.java]
         
         setupViews()
         observeViewModel()
@@ -35,21 +37,21 @@ class LoginActivity : AppCompatActivity() {
         binding.toolbar.title = getString(R.string.login_title)
         
         binding.loginButton.setOnClickListener {
-            val phone = binding.phoneEditText.text.toString()
-            val password = binding.passwordEditText.text.toString()
-            
-            if (validateInput(phone, password)) {
-                viewModel.login(phone, password)
+            if (validateInput()) {
+                viewModel.login(
+                    binding.phoneEditText.text.toString(),
+                    binding.passwordEditText.text.toString()
+                )
             }
         }
         
         binding.registerButton.setOnClickListener {
-            val phone = binding.phoneEditText.text.toString()
-            val password = binding.passwordEditText.text.toString()
-            val name = binding.nameEditText.text.toString()
-            
-            if (validateInput(phone, password, name)) {
-                viewModel.register(name, phone, password)
+            if (validateInput()) {
+                viewModel.register(
+                    binding.nameEditText.text.toString(),
+                    binding.phoneEditText.text.toString(),
+                    binding.passwordEditText.text.toString()
+                )
             }
         }
     }
@@ -57,46 +59,56 @@ class LoginActivity : AppCompatActivity() {
     private fun observeViewModel() {
         viewModel.loginResult.observe(this) { result ->
             when (result) {
+                is LoginResult.Loading -> {
+                    binding.progressBar.visibility = View.VISIBLE
+                    binding.loginButton.isEnabled = false
+                    binding.registerButton.isEnabled = false
+                }
                 is LoginResult.Success -> {
+                    binding.progressBar.visibility = View.GONE
                     preferencesManager.saveToken(result.response.token)
                     preferencesManager.saveRefreshToken(result.response.refreshToken)
-                    preferencesManager.saveUserId(result.response.user.id)
-                    startActivity(MainActivity.newIntent(this))
+                    preferencesManager.saveUserId(result.response.userId)
+                    startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 }
                 is LoginResult.Error -> {
-                    Toast.makeText(this, result.message, Toast.LENGTH_LONG).show()
+                    binding.progressBar.visibility = View.GONE
+                    Toast.makeText(this, result.message, Toast.LENGTH_SHORT).show()
+                    binding.loginButton.isEnabled = true
+                    binding.registerButton.isEnabled = true
                 }
             }
         }
     }
     
-    private fun validateInput(phone: String, password: String, name: String = ""): Boolean {
+    private fun validateInput(): Boolean {
         var isValid = true
         
-        if (phone.isEmpty()) {
+        if (binding.phoneEditText.text.isNullOrBlank()) {
             binding.phoneEditText.error = getString(R.string.error_phone_required)
             isValid = false
-        } else if (!isValidPhoneNumber(phone)) {
-            binding.phoneEditText.error = "رقم الهاتف غير صحيح"
+        } else if (!isValidPhoneNumber(binding.phoneEditText.text.toString())) {
+            binding.phoneEditText.error = getString(R.string.error_invalid_phone)
             isValid = false
         }
         
-        if (password.isEmpty()) {
+        if (binding.passwordEditText.text.isNullOrBlank()) {
             binding.passwordEditText.error = getString(R.string.error_password_required)
             isValid = false
         }
         
-        if (name.isEmpty() && binding.registerButton.visibility == View.VISIBLE) {
-            binding.nameEditText.error = getString(R.string.error_name_required)
-            isValid = false
+        if (binding.registerButton.visibility == View.VISIBLE) {
+            if (binding.nameEditText.text.isNullOrBlank()) {
+                binding.nameEditText.error = getString(R.string.error_name_required)
+                isValid = false
+            }
         }
         
         return isValid
     }
     
     private fun isValidPhoneNumber(phone: String): Boolean {
-        // التحقق من صحة رقم الهاتف (يمكن تعديل النمط حسب متطلباتك)
         val phonePattern = "^[0-9]{10}$"
         return phone.matches(phonePattern.toRegex())
     }
