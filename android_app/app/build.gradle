@@ -98,6 +98,13 @@ android {
         checkReleaseBuilds true
         disable += ['ObsoleteLintCustomCheck', 'GradleDependency']
     }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            returnDefaultValues = true
+        }
+    }
 }
 
 dependencies {
