@@ -60,20 +60,32 @@ class TransactionRepository @Inject constructor(
             type = type,
             description = description,
             date = date,
-            lastModified = lastModified
+            lastModified = lastModified,
+            currency = currency,
+            notes = notes,
+            whatsappEnabled = whatsappEnabled,
+            userId = userId,
+            isSynced = isSynced,
+            lastSync = lastSync
         )
     }
 
     private fun Transaction.toEntity(): TransactionEntity {
         return TransactionEntity(
-            id = id,
+            id = id ?: 0,
             serverId = serverId,
             accountId = accountId,
             amount = amount,
             type = type,
             description = description,
             date = date,
-            lastModified = lastModified
+            lastModified = lastModified,
+            currency = currency,
+            notes = notes,
+            whatsappEnabled = whatsappEnabled,
+            userId = userId,
+            isSynced = isSynced,
+            lastSync = lastSync
         )
     }
 } 
