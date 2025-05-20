@@ -15,27 +15,48 @@ interface ApiService {
     @POST("auth/register")
     suspend fun register(@Body request: RegisterRequest): Response<RegisterResponse>
 
+    @POST("auth/refresh")
+    suspend fun refreshToken(@Body request: Map<String, String>): Response<LoginResponse>
+
     @GET("accounts")
     suspend fun getAccounts(
         @Query("user_id") userId: String,
         @Query("last_sync_time") lastSyncTime: Long? = null
-    ): Response<PaginatedResponse<Account>>
+    ): Response<List<Account>>
+
+    @POST("accounts")
+    suspend fun createAccount(@Body account: Account): Response<Account>
+
+    @PUT("accounts/{accountId}")
+    suspend fun updateAccount(
+        @Path("accountId") accountId: String,
+        @Body account: Account
+    ): Response<Account>
+
+    @DELETE("accounts/{accountId}")
+    suspend fun deleteAccount(@Path("accountId") accountId: String): Response<Unit>
 
     @GET("transactions")
     suspend fun getTransactions(
         @Query("user_id") userId: String,
         @Query("last_sync_time") lastSyncTime: Long? = null
-    ): Response<PaginatedResponse<Transaction>>
+    ): Response<List<Transaction>>
+
+    @POST("transactions")
+    suspend fun createTransaction(@Body transaction: Transaction): Response<Transaction>
+
+    @PUT("transactions/{transactionId}")
+    suspend fun updateTransaction(
+        @Path("transactionId") transactionId: String,
+        @Body transaction: Transaction
+    ): Response<Transaction>
+
+    @DELETE("transactions/{transactionId}")
+    suspend fun deleteTransaction(@Path("transactionId") transactionId: String): Response<Unit>
 
     @POST("sync")
     suspend fun sync(@Body request: SyncRequest): Response<SyncResponse>
 
     @POST("sync/changes")
     suspend fun syncChanges(@Body request: SyncChangesRequest): Response<SyncChangesResponse>
-
-    @POST("auth/refresh")
-    suspend fun refreshToken(@Body request: Map<String, String>): Response<RefreshTokenResponse>
-
-    @DELETE("transactions/{transactionId}")
-    suspend fun deleteTransaction(@Path("transactionId") transactionId: String): Response<Unit>
 } 
