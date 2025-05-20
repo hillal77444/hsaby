@@ -1,34 +1,64 @@
 package com.hsaby.accounting.ui.notifications
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hsaby.accounting.data.local.AppDatabase
-import com.hsaby.accounting.data.local.entity.NotificationEntity
-import kotlinx.coroutines.flow.Flow
+import com.hsaby.accounting.data.model.Notification
+import com.hsaby.accounting.data.repository.NotificationRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class NotificationsViewModel(application: Application) : AndroidViewModel(application) {
-    private val database = AppDatabase.getInstance(application)
-    private val notificationDao = database.notificationDao()
+@HiltViewModel
+class NotificationsViewModel @Inject constructor(
+    private val notificationRepository: NotificationRepository
+) : ViewModel() {
 
-    val notifications: Flow<List<NotificationEntity>> = notificationDao.getAllNotifications()
+    private val _uiState = MutableStateFlow<NotificationsUiState>(NotificationsUiState.Loading)
+    val uiState: StateFlow<NotificationsUiState> = _uiState.asStateFlow()
 
-    fun markAsRead(notificationId: Long) {
+    init {
+        loadNotifications()
+    }
+
+    fun refresh() {
+        loadNotifications()
+    }
+
+    fun markAsRead(notification: Notification) {
         viewModelScope.launch {
-            notificationDao.markAsRead(notificationId)
+            try {
+                notificationRepository.markAsRead(notification.id)
+            } catch (e: Exception) {
+                _uiState.value = NotificationsUiState.Error(e.message ?: "حدث خطأ أثناء تحديث حالة الإشعار")
+            }
         }
     }
 
-    fun markAllAsRead() {
+    private fun loadNotifications() {
         viewModelScope.launch {
-            notificationDao.markAllAsRead()
+            try {
+                notificationRepository.getAllNotifications()
+                    .map { notifications ->
+                        NotificationsUiState.Success(
+                            notifications = notifications.sortedByDescending { it.date }
+                        )
+                    }
+                    .catch { e ->
+                        _uiState.value = NotificationsUiState.Error(e.message ?: "حدث خطأ أثناء تحميل الإشعارات")
+                    }
+                    .collect { state ->
+                        _uiState.value = state
+                    }
+            } catch (e: Exception) {
+                _uiState.value = NotificationsUiState.Error(e.message ?: "حدث خطأ أثناء تحميل الإشعارات")
+            }
         }
     }
+}
 
-    fun deleteNotification(notification: NotificationEntity) {
-        viewModelScope.launch {
-            notificationDao.deleteNotification(notification)
-        }
-    }
+sealed class NotificationsUiState {
+    object Loading : NotificationsUiState()
+    data class Success(val notifications: List<Notification>) : NotificationsUiState()
+    data class Error(val message: String) : NotificationsUiState()
 } 
