@@ -67,10 +67,10 @@ class AccountingApp : Application() {
         
         apiService = retrofit.create(ApiService::class.java)
         
-        // Initialize Repositories
-        userRepository = UserRepository(database.userDao(), apiService)
-        accountRepository = AccountRepository(database.accountDao(), apiService)
-        transactionRepository = TransactionRepository(database.transactionDao(), apiService)
+        // Initialize Repositories with PreferencesManager
+        userRepository = UserRepository(database.userDao(), apiService, preferencesManager)
+        accountRepository = AccountRepository(database.accountDao(), apiService, preferencesManager)
+        transactionRepository = TransactionRepository(database.transactionDao(), apiService, preferencesManager)
 
         setupPeriodicSync()
     }
