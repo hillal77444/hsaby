@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">حسابي</string>
+    <string name="dashboard">لوحة التحكم</string>
+    <string name="quick_stats">إحصائيات سريعة</string>
+    <string name="total_balance">إجمالي الرصيد</string>
+    <string name="total_debtors">إجمالي المدينين</string>
+    <string name="recent_transactions">آخر المعاملات</string>
+    <string name="active_accounts">الحسابات النشطة</string>
+    <string name="add_transaction">إضافة معاملة</string>
     
     <!-- Login Screen -->
     <string name="login_title">تسجيل الدخول</string>
