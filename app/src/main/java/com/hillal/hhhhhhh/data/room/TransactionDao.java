@@ -86,10 +86,10 @@ public interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE updated_at > :timestamp")
     List<Transaction> getTransactionsModifiedAfter(long timestamp);
 
-    @Query("SELECT SUM(amount) FROM transactions WHERE type = 'debit' AND currency = 'ريال يمني'")
+    @Query("SELECT SUM(amount) FROM transactions WHERE type = 'debit' AND currency = 'يمني'")
     LiveData<Double> getTotalDebtors();
 
-    @Query("SELECT SUM(amount) FROM transactions WHERE type = 'credit' AND currency = 'ريال يمني'")
+    @Query("SELECT SUM(amount) FROM transactions WHERE type = 'credit' AND currency = 'يمني'")
     LiveData<Double> getTotalCreditors();
 
     @Query("SELECT SUM(CASE WHEN type = 'debit' THEN -amount ELSE amount END) " +
@@ -105,4 +105,16 @@ public interface TransactionDao {
 
     @Query("DELETE FROM transactions")
     void deleteAllTransactions();
+
+    @Query("SELECT * FROM transactions WHERE serverId = :syncStatus ORDER BY transactionDate DESC")
+    LiveData<List<Transaction>> getTransactionsBySyncStatus(int syncStatus);
+
+    @Query("SELECT * FROM transactions WHERE serverId < 0 ORDER BY transactionDate DESC")
+    LiveData<List<Transaction>> getPendingTransactions();
+
+    @Query("SELECT * FROM transactions WHERE serverId >= 0 ORDER BY transactionDate DESC")
+    LiveData<List<Transaction>> getSyncedTransactions();
+
+    @Query("SELECT * FROM transactions WHERE serverId = :serverId")
+    Transaction getTransactionByServerId(long serverId);
 } 
