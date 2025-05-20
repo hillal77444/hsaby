@@ -21,7 +21,7 @@ class AccountRepository @Inject constructor(
         return accountDao.getAllAccounts()
     }
 
-    fun getAccountsByUserId(userId: Long): Flow<List<AccountEntity>> {
+    fun getAccountsByUserId(userId: String): Flow<List<AccountEntity>> {
         return accountDao.getAccountsByUserId(userId)
     }
 
@@ -46,8 +46,8 @@ class AccountRepository @Inject constructor(
         return accountDao.getAccountByServerId(serverId)
     }
 
-    suspend fun insertAccount(account: AccountEntity): Long {
-        return accountDao.insertAccount(account)
+    suspend fun insertAccount(account: AccountEntity) {
+        accountDao.insertAccount(account)
     }
 
     suspend fun updateAccount(account: AccountEntity) {
@@ -56,6 +56,10 @@ class AccountRepository @Inject constructor(
 
     suspend fun deleteAccount(account: AccountEntity) {
         accountDao.deleteAccount(account)
+    }
+
+    suspend fun deleteAllAccounts(userId: String) {
+        accountDao.deleteAllAccounts(userId)
     }
 
     suspend fun updateServerId(localId: Long, serverId: String) {
@@ -71,7 +75,7 @@ class AccountRepository @Inject constructor(
     }
 
     // Sync functions
-    suspend fun syncAccounts(userId: Long? = null) {
+    suspend fun syncAccounts(userId: String? = null) {
         val currentUserId = userId ?: preferencesManager.getUserId() ?: return
         val lastSyncTime = preferencesManager.getLastSyncTime() ?: 0L
 
@@ -81,18 +85,17 @@ class AccountRepository @Inject constructor(
 
             // Update local database
             serverAccounts.forEach { serverAccount ->
-                val localAccount = accountDao.getAccountByServerIdSync(serverAccount.id)
+                val localAccount = accountDao.getAccountById(serverAccount.id)
                 if (localAccount == null) {
                     // Insert new account
                     accountDao.insertAccount(AccountEntity(
-                        id = 0,
-                        serverId = serverAccount.id,
+                        id = serverAccount.id,
+                        userId = currentUserId,
                         name = serverAccount.name,
                         balance = serverAccount.balance,
                         isActive = serverAccount.isActive,
                         lastModified = serverAccount.lastModified,
                         phoneNumber = serverAccount.phoneNumber,
-                        userId = currentUserId,
                         isDebtor = serverAccount.isDebtor,
                         whatsappEnabled = serverAccount.whatsappEnabled,
                         currency = serverAccount.currency,
