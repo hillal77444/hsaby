@@ -19,16 +19,16 @@ class TransactionRepository @Inject constructor(
         return transactionDao.getAllTransactions()
     }
 
-    fun getTransactionById(id: Long): Flow<TransactionEntity?> {
-        return transactionDao.getTransactionById(id)
+    fun getTransactionById(id: String): Flow<TransactionEntity?> {
+        return transactionDao.getTransactionById(id.toLongOrNull() ?: 0L)
     }
 
     fun getTransactionByServerId(serverId: String): Flow<TransactionEntity?> {
         return transactionDao.getTransactionByServerId(serverId)
     }
 
-    fun getTransactionsByAccountId(accountId: Long): Flow<List<TransactionEntity>> {
-        return transactionDao.getTransactionsByAccountId(accountId)
+    fun getTransactionsByAccountId(accountId: String): Flow<List<TransactionEntity>> {
+        return transactionDao.getTransactionsByAccountId(accountId.toLongOrNull() ?: 0L)
     }
 
     suspend fun insertTransaction(transaction: TransactionEntity) {
@@ -48,41 +48,46 @@ class TransactionRepository @Inject constructor(
     }
 
     suspend fun syncTransactions() {
-        val userId = preferencesManager.getUserId()
-        val lastSyncTime = preferencesManager.getLastSyncTime()
+        val userId = preferencesManager.getUserId() ?: return
+        val lastSyncTime = preferencesManager.getLastSyncTime() ?: 0L
 
-        // Get transactions from server
-        val serverTransactions = apiService.getTransactions(userId, lastSyncTime)
+        try {
+            // Get transactions from server
+            val serverTransactions = apiService.getTransactions(userId, lastSyncTime)
 
-        // Update local database
-        serverTransactions.forEach { serverTransaction ->
-            val localTransaction = transactionDao.getTransactionByServerIdSync(serverTransaction.id)
-            if (localTransaction == null) {
-                // Insert new transaction
-                transactionDao.insertTransaction(TransactionEntity(
-                    id = 0,
-                    serverId = serverTransaction.id,
-                    accountId = serverTransaction.accountId,
-                    amount = serverTransaction.amount,
-                    type = serverTransaction.type,
-                    description = serverTransaction.description,
-                    date = serverTransaction.date,
-                    lastModified = serverTransaction.lastModified,
-                    userId = userId
-                ))
-            } else {
-                // Update existing transaction
-                transactionDao.updateTransaction(localTransaction.copy(
-                    amount = serverTransaction.amount,
-                    type = serverTransaction.type,
-                    description = serverTransaction.description,
-                    date = serverTransaction.date,
-                    lastModified = serverTransaction.lastModified
-                ))
+            // Update local database
+            serverTransactions.forEach { serverTransaction ->
+                val localTransaction = transactionDao.getTransactionByServerIdSync(serverTransaction.id)
+                if (localTransaction == null) {
+                    // Insert new transaction
+                    transactionDao.insertTransaction(TransactionEntity(
+                        id = 0,
+                        serverId = serverTransaction.id,
+                        accountId = serverTransaction.accountId,
+                        amount = serverTransaction.amount,
+                        type = serverTransaction.type,
+                        description = serverTransaction.description,
+                        date = serverTransaction.date,
+                        lastModified = serverTransaction.lastModified,
+                        userId = userId
+                    ))
+                } else {
+                    // Update existing transaction
+                    transactionDao.updateTransaction(localTransaction.copy(
+                        amount = serverTransaction.amount,
+                        type = serverTransaction.type,
+                        description = serverTransaction.description,
+                        date = serverTransaction.date,
+                        lastModified = serverTransaction.lastModified
+                    ))
+                }
             }
-        }
 
-        // Update last sync time
-        preferencesManager.setLastSyncTime(System.currentTimeMillis())
+            // Update last sync time
+            preferencesManager.setLastSyncTime(System.currentTimeMillis())
+        } catch (e: Exception) {
+            // Handle error appropriately
+            e.printStackTrace()
+        }
     }
 } 
