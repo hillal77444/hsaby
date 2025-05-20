@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
             // Set default fragment
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new DashboardFragment())
+                        .replace(R.id.nav_host_fragment_content_main, new DashboardFragment())
                         .commit();
             }
 
