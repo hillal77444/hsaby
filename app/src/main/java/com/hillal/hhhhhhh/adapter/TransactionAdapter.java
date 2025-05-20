@@ -10,9 +10,12 @@ import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import java.util.ArrayList;
 import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder> {
     private List<Transaction> transactions = new ArrayList<>();
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault());
 
     @NonNull
     @Override
@@ -53,17 +56,18 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         }
 
         public void bind(Transaction transaction) {
-            amountText.setText(String.valueOf(transaction.getAmount()));
+            amountText.setText(String.format(Locale.US, "%.2f", transaction.getAmount()));
             descriptionText.setText(transaction.getDescription());
-            dateText.setText(transaction.getDate().toString());
+            dateText.setText(new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+                    .format(transaction.getTransactionDate()));
             
             // عرض حالة المزامنة
-            if (transaction.getServerId() != null) {
-                statusText.setText("مزامن");
-                statusText.setTextColor(itemView.getContext().getResources().getColor(R.color.synced));
-            } else {
+            if (transaction.getServerId() < 0) {
                 statusText.setText("في الانتظار");
                 statusText.setTextColor(itemView.getContext().getResources().getColor(R.color.pending));
+            } else {
+                statusText.setText("مزامن");
+                statusText.setTextColor(itemView.getContext().getResources().getColor(R.color.synced));
             }
         }
     }
