@@ -18,6 +18,8 @@
 │       ├── AccountsFragment (قائمة الحسابات)
 │       ├── TransactionsFragment (قائمة المعاملات)
 │       ├── ReportsFragment (التقارير)
+│       ├── SearchFragment (البحث المتقدم)
+│       ├── StatisticsFragment (الإحصائيات)
 │       └── SettingsFragment (الإعدادات)
 │
 ├── 📂 Data Layer (طبقة البيانات)
@@ -25,11 +27,17 @@
 │   │   ├── Entities
 │   │   │   ├── UserEntity
 │   │   │   ├── AccountEntity
-│   │   │   └── TransactionEntity
+│   │   │   ├── TransactionEntity
+│   │   │   ├── NotificationEntity
+│   │   │   ├── BackupEntity
+│   │   │   └── CurrencyRateEntity
 │   │   ├── DAOs
 │   │   │   ├── UserDao
 │   │   │   ├── AccountDao
-│   │   │   └── TransactionDao
+│   │   │   ├── TransactionDao
+│   │   │   ├── NotificationDao
+│   │   │   ├── BackupDao
+│   │   │   └── CurrencyRateDao
 │   │   └── AppDatabase
 │   └── Remote API
 │       ├── ApiService
@@ -37,7 +45,10 @@
 │       └── Models
 │           ├── User
 │           ├── Account
-│           └── Transaction
+│           ├── Transaction
+│           ├── Notification
+│           ├── Backup
+│           └── CurrencyRate
 │
 └── 📂 Business Logic (طبقة المنطق)
     ├── ViewModels
@@ -45,15 +56,24 @@
     │   ├── RegisterViewModel
     │   ├── MainViewModel
     │   ├── AccountsViewModel
-    │   └── TransactionsViewModel
+    │   ├── TransactionsViewModel
+    │   ├── SearchViewModel
+    │   ├── StatisticsViewModel
+    │   └── SettingsViewModel
     ├── Repositories
     │   ├── UserRepository
     │   ├── AccountRepository
-    │   └── TransactionRepository
+    │   ├── TransactionRepository
+    │   ├── NotificationRepository
+    │   ├── BackupRepository
+    │   └── CurrencyRepository
     └── Use Cases
         ├── AuthUseCase
         ├── SyncUseCase
-        └── CurrencyUseCase
+        ├── CurrencyUseCase
+        ├── NotificationUseCase
+        ├── BackupUseCase
+        └── SearchUseCase
 ```
 
 ## 2. المكونات الرئيسية
@@ -202,29 +222,36 @@
        val lastSync: Long
    )
 
-   // جدول التقارير المحفوظة
+   // جدول الإشعارات
    @Entity
-   data class SavedReportEntity(
+   data class NotificationEntity(
        @PrimaryKey val id: String,
-       val reportType: String, // "account_statement", "balance_sheet", "profit_loss"
-       val accountId: String?,
-       val startDate: Long,
-       val endDate: Long,
-       val reportData: String, // JSON string containing report data
+       val title: String,
+       val message: String,
+       val type: String, // "sync", "transaction", "reminder"
+       val isRead: Boolean,
        val createdAt: Long,
        val userId: String
    )
 
-   // جدول إعدادات التقارير
+   // جدول النسخ الاحتياطي
    @Entity
-   data class ReportSettingsEntity(
+   data class BackupEntity(
        @PrimaryKey val id: String,
-       val userId: String,
-       val defaultCurrency: String,
-       val defaultPeriod: String, // "daily", "weekly", "monthly", "yearly"
-       val showGraphs: Boolean,
-       val autoSaveReports: Boolean,
-       val reportFormat: String // "pdf", "excel"
+       val backupType: String, // "full", "accounts", "transactions"
+       val backupData: String, // JSON string containing backup data
+       val createdAt: Long,
+       val userId: String
+   )
+
+   // جدول أسعار العملات
+   @Entity
+   data class CurrencyRateEntity(
+       @PrimaryKey val id: String,
+       val fromCurrency: String,
+       val toCurrency: String,
+       val rate: Double,
+       val lastUpdate: Long
    )
    ```
 
@@ -246,6 +273,83 @@
    - وضع علامة على البيانات غير المتزامنة
    - مزامنة عند عودة الاتصال
    - إدارة صراعات المزامنة
+
+### د. نظام الإشعارات
+1. **أنواع الإشعارات**
+   - إشعارات المزامنة
+   - إشعارات المعاملات الجديدة
+   - تذكيرات المدفوعات
+   - إشعارات الأخطاء
+
+2. **إدارة الإشعارات**
+   - عرض الإشعارات في الوقت الفعلي
+   - تخزين الإشعارات محلياً
+   - تمييز الإشعارات المقروءة
+   - حذف الإشعارات القديمة
+
+### هـ. نظام النسخ الاحتياطي
+1. **أنواع النسخ الاحتياطي**
+   - نسخ كامل للبيانات
+   - نسخ الحسابات فقط
+   - نسخ المعاملات فقط
+
+2. **إدارة النسخ الاحتياطي**
+   - نسخ تلقائي دوري
+   - نسخ يدوي
+   - استعادة البيانات
+   - تصدير واستيراد البيانات
+
+### و. نظام البحث المتقدم
+1. **ميزات البحث**
+   - البحث في الحسابات
+   - البحث في المعاملات
+   - تصفية النتائج
+   - البحث المتقدم
+
+2. **خيارات التصفية**
+   - تصفية حسب التاريخ
+   - تصفية حسب العملة
+   - تصفية حسب النوع
+   - تصفية حسب المبلغ
+
+### ز. نظام الإحصائيات والرسوم البيانية
+1. **أنواع التقارير**
+   - تقارير مالية
+   - تقارير إحصائية
+   - تحليل البيانات
+   - توقعات المستقبل
+
+2. **الرسوم البيانية**
+   - رسوم بيانية تفصيلية
+   - رسوم بيانية تفاعلية
+   - تصدير الرسوم البيانية
+   - مشاركة التقارير
+
+### ح. نظام الأمان المتقدم
+1. **حماية البيانات**
+   - تشفير البيانات المحلية
+   - حماية كلمة المرور
+   - التحقق من الهوية
+   - النسخ الاحتياطي المشفر
+
+2. **إدارة الأمان**
+   - تسجيل الدخول الآمن
+   - التحقق من الهوية
+   - إدارة الصلاحيات
+   - سجل النشاطات
+
+### ط. نظام العملات المتعدد
+1. **إدارة العملات**
+   - دعم عملات متعددة
+   - تحويل العملات
+   - أسعار الصرف
+   - تحديث الأسعار تلقائياً
+
+2. **ميزات العملات**
+   - عرض الأسعار
+   - حساب التحويلات
+   - تقارير العملات
+   - إحصائيات العملات
 
 ## 3. المكتبات المقترحة
 
