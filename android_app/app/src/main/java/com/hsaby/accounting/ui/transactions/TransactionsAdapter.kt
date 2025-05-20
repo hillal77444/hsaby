@@ -13,8 +13,6 @@ import java.util.*
 
 class TransactionsAdapter : ListAdapter<TransactionEntity, TransactionsAdapter.TransactionViewHolder>(TransactionDiffCallback()) {
 
-    private val dateFormat = SimpleDateFormat(Constants.DATE_FORMAT_DISPLAY, Locale.getDefault())
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
         val binding = ItemTransactionBinding.inflate(
             LayoutInflater.from(parent.context),
@@ -31,6 +29,8 @@ class TransactionsAdapter : ListAdapter<TransactionEntity, TransactionsAdapter.T
     class TransactionViewHolder(
         private val binding: ItemTransactionBinding
     ) : RecyclerView.ViewHolder(binding.root) {
+
+        private val dateFormat = SimpleDateFormat(Constants.DATE_FORMAT_DISPLAY, Locale.getDefault())
 
         fun bind(transaction: TransactionEntity) {
             binding.tvAmount.text = "${transaction.amount} ${transaction.currency}"
