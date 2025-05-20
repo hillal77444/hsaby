@@ -187,10 +187,7 @@ def sync_data():
                 if trans_data.get('server_id') and trans_data['server_id'] > 0:  # تجاهل أي server_id سالب
                     transaction = Transaction.query.filter_by(server_id=trans_data['server_id']).first()
                 
-                # إذا لم يتم العثور على المعاملة، ابحث باستخدام المعرف المحلي
-                if not transaction and trans_data.get('id'):
-                    transaction = Transaction.query.filter_by(id=trans_data['id']).first()
-                
+
                 if transaction:
                     # تحديث المعاملة الموجودة
                     transaction.amount = trans_data.get('amount', transaction.amount)
@@ -205,6 +202,10 @@ def sync_data():
                     logger.info(f"Updated transaction: {transaction.id}")
                 else:
                     # إنشاء معاملة جديدة
+                    # الحصول على آخر server_id
+                    last_transaction = Transaction.query.order_by(Transaction.server_id.desc()).first()
+                    new_server_id = (last_transaction.server_id + 1) if last_transaction else 1
+                    
                     transaction = Transaction(
                         amount=trans_data.get('amount'),
                         type=trans_data.get('type'),
@@ -214,7 +215,8 @@ def sync_data():
                         currency=trans_data.get('currency'),
                         whatsapp_enabled=trans_data.get('whatsapp_enabled', False),
                         account_id=trans_data.get('account_id'),
-                        user_id=current_user_id
+                        user_id=current_user_id,
+                        server_id=new_server_id  # تعيين server_id الجديد
                     )
                     db.session.add(transaction)
                     db.session.flush()  # للحصول على معرف المعاملة
