@@ -1,64 +1,75 @@
 package com.hsaby.accounting.util
 
 import android.content.Context
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import android.content.SharedPreferences
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
-private val Context.dataStore by preferencesDataStore(name = Constants.PREF_NAME)
+@Singleton
+class PreferencesManager @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
+    private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-class PreferencesManager(private val context: Context) {
-    
-    val token: Flow<String?>
-        get() = context.dataStore.data.map { preferences ->
-            preferences[stringPreferencesKey(Constants.PREF_TOKEN)]
-        }
-    
-    val userId: Flow<String?>
-        get() = context.dataStore.data.map { preferences ->
-            preferences[stringPreferencesKey(Constants.PREF_USER_ID)]
-        }
-    
-    val username: Flow<String?>
-        get() = context.dataStore.data.map { preferences ->
-            preferences[stringPreferencesKey(Constants.PREF_USERNAME)]
-        }
-    
-    val rememberMe: Flow<Boolean>
-        get() = context.dataStore.data.map { preferences ->
-            preferences[booleanPreferencesKey(Constants.PREF_REMEMBER_ME)] ?: false
-        }
-    
-    suspend fun saveToken(token: String) {
-        context.dataStore.edit { preferences ->
-            preferences[stringPreferencesKey(Constants.PREF_TOKEN)] = token
+    fun saveToken(token: String) {
+        prefs.edit().putString(KEY_TOKEN, token).apply()
+    }
+
+    fun getToken(): String? {
+        return prefs.getString(KEY_TOKEN, null)
+    }
+
+    fun saveRefreshToken(token: String) {
+        prefs.edit().putString(KEY_REFRESH_TOKEN, token).apply()
+    }
+
+    fun getRefreshToken(): String? {
+        return prefs.getString(KEY_REFRESH_TOKEN, null)
+    }
+
+    fun saveUserId(userId: Long) {
+        prefs.edit().putLong(KEY_USER_ID, userId).apply()
+    }
+
+    fun getUserId(): Long? {
+        val userId = prefs.getLong(KEY_USER_ID, -1)
+        return if (userId != -1L) userId else null
+    }
+
+    fun saveUsername(username: String) {
+        prefs.edit().putString(KEY_USERNAME, username).apply()
+    }
+
+    fun getUsername(): String? {
+        return prefs.getString(KEY_USERNAME, null)
+    }
+
+    fun setLastSyncTime(time: Long) {
+        prefs.edit().putLong(KEY_LAST_SYNC_TIME, time).apply()
+    }
+
+    fun getLastSyncTime(): Long? {
+        val time = prefs.getLong(KEY_LAST_SYNC_TIME, -1)
+        return if (time != -1L) time else null
+    }
+
+    fun clearAuthData() {
+        prefs.edit().apply {
+            remove(KEY_TOKEN)
+            remove(KEY_REFRESH_TOKEN)
+            remove(KEY_USER_ID)
+            remove(KEY_USERNAME)
+            apply()
         }
     }
-    
-    suspend fun saveUserId(userId: String) {
-        context.dataStore.edit { preferences ->
-            preferences[stringPreferencesKey(Constants.PREF_USER_ID)] = userId
-        }
-    }
-    
-    suspend fun saveUsername(username: String) {
-        context.dataStore.edit { preferences ->
-            preferences[stringPreferencesKey(Constants.PREF_USERNAME)] = username
-        }
-    }
-    
-    suspend fun saveRememberMe(rememberMe: Boolean) {
-        context.dataStore.edit { preferences ->
-            preferences[booleanPreferencesKey(Constants.PREF_REMEMBER_ME)] = rememberMe
-        }
-    }
-    
-    suspend fun clearPreferences() {
-        context.dataStore.edit { preferences ->
-            preferences.clear()
-        }
+
+    companion object {
+        private const val PREFS_NAME = "hsaby_prefs"
+        private const val KEY_TOKEN = "token"
+        private const val KEY_REFRESH_TOKEN = "refresh_token"
+        private const val KEY_USER_ID = "user_id"
+        private const val KEY_USERNAME = "username"
+        private const val KEY_LAST_SYNC_TIME = "last_sync_time"
     }
 } 
