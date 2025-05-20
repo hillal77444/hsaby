@@ -22,59 +22,56 @@ jobs:
     if: github.event.inputs.action == 'build' || github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: gradle
+      - name: Decode Keystore
+        env:
+          ENCODED_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo $ENCODED_KEYSTORE | base64 -d > android_app/app/keystore.jks
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: Check keystore exists
-        run: |
-          if [ ! -f "keystore.jks" ]; then
-            echo "Error: keystore.jks not found!"
-            exit 1
-          fi
-          echo "Keystore file exists"
-      - name: Create gradle.properties
-        run: |
-          echo "RELEASE_STORE_FILE=keystore.jks" >> app/gradle.properties
-          echo "RELEASE_STORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> app/gradle.properties
-          echo "RELEASE_KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> app/gradle.properties
-          echo "RELEASE_KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> app/gradle.properties
-      - name: Build Release APK
-        run: ./gradlew assembleRelease --stacktrace
+        run: chmod +x android_app/gradlew
+      - name: Build with Gradle
+        working-directory: android_app
+        env:
+          KEYSTORE_PASSWORD: Hillal774447251
+          KEY_ALIAS: Hillal
+          KEY_PASSWORD: Hillal774447251
+        run: ./gradlew assembleRelease
       - name: Check APK exists
         run: |
-          if [ ! -f "app/build/outputs/apk/release/app-release.apk" ]; then
+          if [ ! -f "android_app/app/build/outputs/apk/release/app-release.apk" ]; then
             echo "APK file not found!"
-            ls -la app/build/outputs/apk/release/
+            ls -la android_app/app/build/outputs/apk/release/
             exit 1
           fi
           echo "APK file exists"
       - name: Sign APK
         run: |
           echo "Checking for APK..."
-          if [ ! -f "app/build/outputs/apk/release/app-release.apk" ]; then
+          if [ ! -f "android_app/app/build/outputs/apk/release/app-release.apk" ]; then
             echo "Error: app-release.apk not found!"
-            ls -la app/build/outputs/apk/release/
+            ls -la android_app/app/build/outputs/apk/release/
             exit 1
           fi
           echo "Zipaligning APK..."
-          $ANDROID_HOME/build-tools/34.0.0/zipalign -v 4 app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/app-release-aligned.apk
+          $ANDROID_HOME/build-tools/34.0.0/zipalign -v 4 android_app/app/build/outputs/apk/release/app-release.apk android_app/app/build/outputs/apk/release/app-release-aligned.apk
           echo "Signing APK..."
-          $ANDROID_HOME/build-tools/34.0.0/apksigner sign --ks keystore.jks --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --ks-key-alias ${{ secrets.KEY_ALIAS }} --key-pass pass:${{ secrets.KEY_PASSWORD }} app/build/outputs/apk/release/app-release-aligned.apk
+          $ANDROID_HOME/build-tools/34.0.0/apksigner sign --ks android_app/app/keystore.jks --ks-pass pass:Hillal774447251 --ks-key-alias Hillal --key-pass pass:Hillal774447251 android_app/app/build/outputs/apk/release/app-release-aligned.apk
           echo "Moving final APK..."
-          mv app/build/outputs/apk/release/app-release-aligned.apk app/build/outputs/apk/release/app-release.apk
+          mv android_app/app/build/outputs/apk/release/app-release-aligned.apk android_app/app/build/outputs/apk/release/app-release.apk
           echo "Calculating SHA256 of signed APK..."
-          sha256sum app/build/outputs/apk/release/app-release.apk
+          sha256sum android_app/app/build/outputs/apk/release/app-release.apk
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: app-release
-          path: app/build/outputs/apk/release/app-release.apk
+          path: android_app/app/build/outputs/apk/release/app-release.apk
 
   download:
     if: github.event.inputs.action == 'download'
