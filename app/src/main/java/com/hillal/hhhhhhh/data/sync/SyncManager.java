@@ -46,6 +46,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Queue;
 import java.lang.reflect.Type;
+import com.google.gson.reflect.TypeToken;
 
 public class SyncManager {
     private static final String TAG = "SyncManager";
@@ -114,7 +115,7 @@ public class SyncManager {
     private static final long MAX_RETRY_INTERVAL = 3600000; // ساعة واحدة
 
     // إضافة متغيرات جديدة
-    private final Queue<SyncRequest> offlineQueue = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<SyncRequest> offlineQueue = new ConcurrentLinkedQueue<>();
     private long lastRetryTime = 0;
     private int retryCount = 0;
 
@@ -129,23 +130,22 @@ public class SyncManager {
         }
 
         public Transaction resolveTransactionConflict(Transaction local, Transaction server) {
-            if (local.getLastModifiedTime() > server.getLastModifiedTime()) {
-                return local; // النسخة المحلية أحدث
-            } else if (server.getLastModifiedTime() > local.getLastModifiedTime()) {
-                return server; // نسخة السيرفر أحدث
+            if (local.getLastSyncTime() > server.getLastSyncTime()) {
+                return local;
+            } else if (server.getLastSyncTime() > local.getLastSyncTime()) {
+                return server;
             } else {
-                // إذا كان نفس الوقت، نأخذ النسخة الأحدث من حيث التعديل
-                return local.getVersion() > server.getVersion() ? local : server;
+                return local;
             }
         }
 
         public Account resolveAccountConflict(Account local, Account server) {
-            if (local.getLastModifiedTime() > server.getLastModifiedTime()) {
+            if (local.getLastSyncTime() > server.getLastSyncTime()) {
                 return local;
-            } else if (server.getLastModifiedTime() > local.getLastModifiedTime()) {
+            } else if (server.getLastSyncTime() > local.getLastSyncTime()) {
                 return server;
             } else {
-                return local.getVersion() > server.getVersion() ? local : server;
+                return local;
             }
         }
     }
@@ -306,39 +306,40 @@ public class SyncManager {
     }
 
     private static class SyncSession {
-        private final List<Account> newAccounts;
-        private final List<Account> modifiedAccounts;
-        private final List<Transaction> newTransactions;
-        private final List<Transaction> modifiedTransactions;
-        private final long startTime;
+        private final String id;
+        private final AtomicInteger completedBatches = new AtomicInteger(0);
+        private final AtomicInteger failedBatches = new AtomicInteger(0);
+        private final AtomicInteger totalBatches = new AtomicInteger(0);
 
-        public SyncSession(List<Account> newAccounts, List<Account> modifiedAccounts,
-                         List<Transaction> newTransactions, List<Transaction> modifiedTransactions) {
-            this.newAccounts = newAccounts;
-            this.modifiedAccounts = modifiedAccounts;
-            this.newTransactions = newTransactions;
-            this.modifiedTransactions = modifiedTransactions;
-            this.startTime = System.currentTimeMillis();
+        public SyncSession(String id) {
+            this.id = id;
         }
 
-        public List<Account> getNewAccounts() {
-            return newAccounts;
+        public void incrementCompletedBatches() {
+            completedBatches.incrementAndGet();
         }
 
-        public List<Account> getModifiedAccounts() {
-            return modifiedAccounts;
+        public void incrementFailedBatches() {
+            failedBatches.incrementAndGet();
         }
 
-        public List<Transaction> getNewTransactions() {
-            return newTransactions;
+        public void setTotalBatches(int total) {
+            totalBatches.set(total);
         }
 
-        public List<Transaction> getModifiedTransactions() {
-            return modifiedTransactions;
-        }
-
-        public long getStartTime() {
-            return startTime;
+        public boolean waitForCompletion(long timeout) {
+            long startTime = System.currentTimeMillis();
+            while (completedBatches.get() + failedBatches.get() < totalBatches.get()) {
+                if (System.currentTimeMillis() - startTime > timeout) {
+                    return false;
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    return false;
+                }
+            }
+            return failedBatches.get() == 0;
         }
     }
 
@@ -983,7 +984,7 @@ public class SyncManager {
                 long localId = ((Number) mapping.get("localId")).longValue();
                 long serverId = ((Number) mapping.get("serverId")).longValue();
                 
-                Transaction transaction = transactionDao.getTransactionByIdSync(localId);
+                Transaction transaction = transactionDao.getTransactionById(localId);
                 if (transaction != null) {
                     transaction.setServerId(serverId);
                     transaction.setSyncStatus(SYNC_STATUS_SYNCED);
@@ -1002,45 +1003,6 @@ public class SyncManager {
             transactionDao.update(transaction);
         }
         session.incrementFailedBatches();
-    }
-
-    // إضافة كلاس SyncSession محسن
-    private static class SyncSession {
-        private final String id;
-        private final AtomicInteger completedBatches = new AtomicInteger(0);
-        private final AtomicInteger failedBatches = new AtomicInteger(0);
-        private final AtomicInteger totalBatches = new AtomicInteger(0);
-
-        public SyncSession(String id) {
-            this.id = id;
-        }
-
-        public void incrementCompletedBatches() {
-            completedBatches.incrementAndGet();
-        }
-
-        public void incrementFailedBatches() {
-            failedBatches.incrementAndGet();
-        }
-
-        public void setTotalBatches(int total) {
-            totalBatches.set(total);
-        }
-
-        public boolean waitForCompletion(long timeout) {
-            long startTime = System.currentTimeMillis();
-            while (completedBatches.get() + failedBatches.get() < totalBatches.get()) {
-                if (System.currentTimeMillis() - startTime > timeout) {
-                    return false;
-                }
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    return false;
-                }
-            }
-            return failedBatches.get() == 0;
-        }
     }
 
     public void receiveChanges(SyncCallback callback) {
