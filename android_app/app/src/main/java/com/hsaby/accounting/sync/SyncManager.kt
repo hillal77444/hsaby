@@ -14,6 +14,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -112,8 +113,8 @@ class SyncManager @Inject constructor(
             }
 
             // Sync local changes to server
-            val unsyncedAccounts = accountRepository.getUnsyncedAccounts()
-            val unsyncedTransactions = transactionRepository.getUnsyncedTransactions(userId)
+            val unsyncedAccounts = accountRepository.getUnsyncedAccounts().first()
+            val unsyncedTransactions = transactionRepository.getUnsyncedTransactions(userId).first()
 
             if (unsyncedAccounts.isNotEmpty() || unsyncedTransactions.isNotEmpty()) {
                 val changesResponse = apiService.syncChanges(
