@@ -29,6 +29,9 @@ interface AccountDao {
     @Query("SELECT * FROM accounts WHERE id = :accountId")
     suspend fun getAccountById(accountId: String): AccountEntity?
     
+    @Query("SELECT * FROM accounts WHERE serverId = :serverId")
+    suspend fun getAccountByServerId(serverId: Long): AccountEntity?
+    
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAccount(account: AccountEntity)
     
@@ -43,6 +46,21 @@ interface AccountDao {
     
     @Query("DELETE FROM accounts WHERE userId = :userId")
     suspend fun deleteAllAccounts(userId: String)
+    
+    @Query("SELECT * FROM accounts WHERE isDebtor = 1 AND userId = :userId")
+    fun getDebtorAccounts(userId: String): Flow<List<AccountEntity>>
+    
+    @Query("SELECT * FROM accounts WHERE accountName LIKE :query AND userId = :userId")
+    fun searchAccounts(query: String, userId: String): Flow<List<AccountEntity>>
+    
+    @Query("SELECT SUM(balance) FROM accounts WHERE userId = :userId")
+    suspend fun getTotalBalance(userId: String): Double?
+    
+    @Query("SELECT SUM(balance) FROM accounts WHERE isDebtor = 1 AND userId = :userId")
+    suspend fun getTotalDebtors(userId: String): Double?
+    
+    @Query("SELECT COUNT(*) FROM accounts WHERE userId = :userId")
+    suspend fun getAccountsCount(userId: String): Int
 }
 
 @Dao
