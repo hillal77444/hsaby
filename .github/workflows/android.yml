@@ -65,9 +65,9 @@ jobs:
           chmod +x ./gradlew
           ./gradlew clean
           if [ "${{ github.event.inputs.build_type }}" == "release" ]; then
-            ./gradlew assembleRelease --stacktrace
+            ./gradlew assembleRelease --stacktrace --info
           else
-            ./gradlew assembleDebug --stacktrace
+            ./gradlew assembleDebug --stacktrace --info
           fi
           
       - name: Check APK
