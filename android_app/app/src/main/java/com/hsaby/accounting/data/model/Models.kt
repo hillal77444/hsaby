@@ -4,9 +4,9 @@ import com.google.gson.annotations.SerializedName
 
 // Request Models
 data class RegisterRequest(
-    @SerializedName("username") val username: String,
     @SerializedName("phone") val phone: String,
-    @SerializedName("password") val password: String
+    @SerializedName("password") val password: String,
+    @SerializedName("name") val name: String
 )
 
 data class LoginRequest(
@@ -16,26 +16,26 @@ data class LoginRequest(
 
 data class SyncRequest(
     @SerializedName("accounts") val accounts: List<Account>,
-    @SerializedName("transactions") val transactions: List<Transaction>
+    @SerializedName("transactions") val transactions: List<Transaction>,
+    @SerializedName("last_sync_time") val lastSyncTime: Long
 )
 
 data class SyncChangesRequest(
-    @SerializedName("last_sync") val lastSync: Long
+    @SerializedName("accounts") val accounts: List<Account>,
+    @SerializedName("transactions") val transactions: List<Transaction>
 )
 
 // Response Models
 data class RegisterResponse(
-    @SerializedName("message") val message: String,
     @SerializedName("token") val token: String,
-    @SerializedName("user_id") val userId: String,
-    @SerializedName("username") val username: String
+    @SerializedName("refresh_token") val refreshToken: String,
+    @SerializedName("user") val user: User
 )
 
 data class LoginResponse(
-    @SerializedName("message") val message: String,
     @SerializedName("token") val token: String,
-    @SerializedName("user_id") val userId: String,
-    @SerializedName("username") val username: String
+    @SerializedName("refresh_token") val refreshToken: String,
+    @SerializedName("user") val user: User
 )
 
 data class SyncResponse(
@@ -44,12 +44,13 @@ data class SyncResponse(
 )
 
 data class SyncChangesResponse(
-    @SerializedName("accounts") val accounts: List<Account>,
-    @SerializedName("transactions") val transactions: List<Transaction>
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("message") val message: String
 )
 
 data class RefreshTokenResponse(
-    @SerializedName("token") val token: String
+    @SerializedName("token") val token: String,
+    @SerializedName("refresh_token") val refreshToken: String
 )
 
 data class PaginatedResponse<T>(
@@ -88,4 +89,10 @@ data class Transaction(
     @SerializedName("user_id") val userId: String,
     @SerializedName("is_synced") val isSynced: Boolean,
     @SerializedName("last_sync") val lastSync: Long
+)
+
+data class User(
+    @SerializedName("id") val id: String,
+    @SerializedName("name") val name: String,
+    @SerializedName("phone") val phone: String
 ) 
