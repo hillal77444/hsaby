@@ -9,6 +9,7 @@ import com.hillal.hhhhhhh.data.room.AccountDao;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.sync.SyncManager;
+import com.hillal.hhhhhhh.data.room.AppDatabase;
 import java.util.List;
 
 public class MainViewModel extends AndroidViewModel {
@@ -18,10 +19,15 @@ public class MainViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> isSyncing = new MutableLiveData<>(false);
     private final MutableLiveData<String> syncError = new MutableLiveData<>();
 
+    // ثوابت حالة المزامنة
+    public static final int SYNC_STATUS_PENDING = -1;  // في الانتظار
+    public static final int SYNC_STATUS_SYNCED = 0;    // مزامن
+
     public MainViewModel(Application application) {
         super(application);
-        transactionDao = AppDatabase.getInstance(application).transactionDao();
-        accountDao = AppDatabase.getInstance(application).accountDao();
+        AppDatabase db = AppDatabase.getInstance(application);
+        transactionDao = db.transactionDao();
+        accountDao = db.accountDao();
         syncManager = new SyncManager(application, accountDao, transactionDao);
     }
 
@@ -32,12 +38,12 @@ public class MainViewModel extends AndroidViewModel {
 
     // الحصول على المعاملات المزامنة
     public LiveData<List<Transaction>> getSyncedTransactions() {
-        return transactionDao.getTransactionsBySyncStatus(SyncManager.SYNC_STATUS_SYNCED);
+        return transactionDao.getTransactionsBySyncStatus(SYNC_STATUS_SYNCED);
     }
 
     // الحصول على المعاملات في انتظار المزامنة
     public LiveData<List<Transaction>> getPendingTransactions() {
-        return transactionDao.getTransactionsBySyncStatus(SyncManager.SYNC_STATUS_PENDING);
+        return transactionDao.getTransactionsBySyncStatus(SYNC_STATUS_PENDING);
     }
 
     // الحصول على حالة المزامنة
