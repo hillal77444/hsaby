@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/navigation_dashboard">
+
+    <fragment
+        android:id="@+id/navigation_dashboard"
+        android:name="com.hsaby.accounting.ui.dashboard.DashboardFragment"
+        android:label="@string/main_dashboard" />
+
+    <fragment
+        android:id="@+id/navigation_accounts"
+        android:name="com.hsaby.accounting.ui.accounts.AccountsFragment"
+        android:label="@string/main_accounts" />
+
+    <fragment
+        android:id="@+id/navigation_transactions"
+        android:name="com.hsaby.accounting.ui.transactions.TransactionsFragment"
+        android:label="@string/main_transactions" />
+
+    <fragment
+        android:id="@+id/navigation_reports"
+        android:name="com.hsaby.accounting.ui.reports.ReportsFragment"
+        android:label="@string/main_reports" />
+
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="com.hsaby.accounting.ui.settings.SettingsFragment"
+        android:label="@string/main_settings" />
+
+</navigation> 
