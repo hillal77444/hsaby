@@ -20,8 +20,8 @@ class AccountRepository @Inject constructor(
         return accountDao.getAllAccounts()
     }
 
-    fun getAccountById(id: Long): Flow<AccountEntity?> {
-        return accountDao.getAccountById(id)
+    fun getAccountById(id: String): Flow<AccountEntity?> {
+        return accountDao.getAccountById(id.toLongOrNull() ?: 0L)
     }
 
     fun getAccountByServerId(serverId: String): Flow<AccountEntity?> {
@@ -49,40 +49,45 @@ class AccountRepository @Inject constructor(
     }
 
     suspend fun syncAccounts() {
-        val userId = preferencesManager.getUserId()
-        val lastSyncTime = preferencesManager.getLastSyncTime()
+        val userId = preferencesManager.getUserId() ?: return
+        val lastSyncTime = preferencesManager.getLastSyncTime() ?: 0L
 
-        // Get accounts from server
-        val serverAccounts = apiService.getAccounts(userId, lastSyncTime)
+        try {
+            // Get accounts from server
+            val serverAccounts = apiService.getAccounts(userId, lastSyncTime)
 
-        // Update local database
-        serverAccounts.forEach { serverAccount ->
-            val localAccount = accountDao.getAccountByServerIdSync(serverAccount.id)
-            if (localAccount == null) {
-                // Insert new account
-                accountDao.insertAccount(AccountEntity(
-                    id = 0,
-                    serverId = serverAccount.id,
-                    name = serverAccount.name,
-                    balance = serverAccount.balance,
-                    isActive = serverAccount.isActive,
-                    lastModified = serverAccount.lastModified,
-                    phoneNumber = serverAccount.phoneNumber,
-                    userId = userId
-                ))
-            } else {
-                // Update existing account
-                accountDao.updateAccount(localAccount.copy(
-                    name = serverAccount.name,
-                    balance = serverAccount.balance,
-                    isActive = serverAccount.isActive,
-                    lastModified = serverAccount.lastModified,
-                    phoneNumber = serverAccount.phoneNumber
-                ))
+            // Update local database
+            serverAccounts.forEach { serverAccount ->
+                val localAccount = accountDao.getAccountByServerIdSync(serverAccount.id)
+                if (localAccount == null) {
+                    // Insert new account
+                    accountDao.insertAccount(AccountEntity(
+                        id = 0,
+                        serverId = serverAccount.id,
+                        name = serverAccount.name,
+                        balance = serverAccount.balance,
+                        isActive = serverAccount.isActive,
+                        lastModified = serverAccount.lastModified,
+                        phoneNumber = serverAccount.phoneNumber,
+                        userId = userId
+                    ))
+                } else {
+                    // Update existing account
+                    accountDao.updateAccount(localAccount.copy(
+                        name = serverAccount.name,
+                        balance = serverAccount.balance,
+                        isActive = serverAccount.isActive,
+                        lastModified = serverAccount.lastModified,
+                        phoneNumber = serverAccount.phoneNumber
+                    ))
+                }
             }
-        }
 
-        // Update last sync time
-        preferencesManager.setLastSyncTime(System.currentTimeMillis())
+            // Update last sync time
+            preferencesManager.setLastSyncTime(System.currentTimeMillis())
+        } catch (e: Exception) {
+            // Handle error appropriately
+            e.printStackTrace()
+        }
     }
 } 
