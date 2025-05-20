@@ -13,13 +13,13 @@ class SyncWorker @Inject constructor(
     private val syncManager: SyncManager
 ) : CoroutineWorker(context, workerParams) {
 
-    override suspend fun doWork(): Result = try {
+    override suspend fun doWork(): androidx.work.Result = try {
         when (val result = syncManager.syncNow()) {
-            is Result.Success -> Result.success()
-            is Result.Error -> Result.retry()
-            else -> Result.retry()
+            is Result.Success -> androidx.work.Result.success()
+            is Result.Error -> androidx.work.Result.retry()
+            else -> androidx.work.Result.retry()
         }
     } catch (e: Exception) {
-        Result.retry()
+        androidx.work.Result.retry()
     }
 } 
