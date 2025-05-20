@@ -15,29 +15,17 @@ import javax.inject.Inject
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val accountRepository: AccountRepository,
-    private val transactionRepository: TransactionRepository,
-    private val syncManager: SyncManager
+    private val transactionRepository: TransactionRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<DashboardUiState>(DashboardUiState.Loading)
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
     init {
-        loadData()
+        loadDashboardData()
     }
 
-    fun refresh() {
-        viewModelScope.launch {
-            try {
-                syncManager.syncNow()
-                loadData()
-            } catch (e: Exception) {
-                _uiState.value = DashboardUiState.Error(e.message ?: "حدث خطأ أثناء التحديث")
-            }
-        }
-    }
-
-    private fun loadData() {
+    private fun loadDashboardData() {
         viewModelScope.launch {
             try {
                 combine(
@@ -45,22 +33,26 @@ class DashboardViewModel @Inject constructor(
                     transactionRepository.getAllTransactions()
                 ) { accounts, transactions ->
                     val totalBalance = accounts.sumOf { it.balance }
-                    val totalDebtors = accounts.count { it.balance < 0 }
+                    val totalDebtors = accounts.count { it.isDebtor }
                     val activeAccounts = accounts.count { it.isActive }
                     
                     DashboardUiState.Success(
                         totalBalance = totalBalance,
                         totalDebtors = totalDebtors,
                         activeAccounts = activeAccounts,
-                        recentTransactions = transactions.sortedByDescending { it.date }.take(5)
+                        recentTransactions = transactions.take(5)
                     )
                 }.collect { state ->
                     _uiState.value = state
                 }
             } catch (e: Exception) {
-                _uiState.value = DashboardUiState.Error(e.message ?: "حدث خطأ أثناء تحميل البيانات")
+                _uiState.value = DashboardUiState.Error(e.message ?: "حدث خطأ غير معروف")
             }
         }
+    }
+
+    fun refresh() {
+        loadDashboardData()
     }
 }
 
