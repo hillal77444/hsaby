@@ -679,7 +679,7 @@ public class SyncManager {
             return;
         }
 
-        String token = DataManager.getToken(context);
+        String token = getToken();
         if (token == null) {
             return;
         }
@@ -923,7 +923,7 @@ public class SyncManager {
         }
 
         try {
-            String token = DataManager.getToken(context);
+            String token = getToken();
             if (token == null) {
                 callback.onError("لم يتم العثور على رمز المصادقة");
                 return;
