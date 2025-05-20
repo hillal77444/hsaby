@@ -1,30 +1,24 @@
 package com.hsaby.accounting.sync
 
 import android.content.Context
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.hsaby.accounting.data.remote.Result
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
-@HiltWorker
-class SyncWorker @AssistedInject constructor(
-    @Assisted appContext: Context,
-    @Assisted workerParams: WorkerParameters,
+class SyncWorker @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val workerParams: WorkerParameters,
     private val syncManager: SyncManager
-) : CoroutineWorker(appContext, workerParams) {
+) : CoroutineWorker(context, workerParams) {
 
-    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        try {
-            when (syncManager.syncNow()) {
-                is Result.Success -> Result.success()
-                is Result.Error -> Result.retry()
-            }
-        } catch (e: Exception) {
-            Result.retry()
+    override suspend fun doWork(): Result = try {
+        when (syncManager.syncNow()) {
+            is Result.Success -> Result.success()
+            is Result.Error -> Result.retry()
         }
+    } catch (e: Exception) {
+        Result.retry()
     }
 } 
