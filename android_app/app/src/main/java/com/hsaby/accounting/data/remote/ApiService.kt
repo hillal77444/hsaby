@@ -5,6 +5,10 @@ import retrofit2.Response
 import retrofit2.http.*
 
 interface ApiService {
+    companion object {
+        const val BASE_URL = "http://212.224.88.122:5007/api/"
+    }
+
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
@@ -31,4 +35,7 @@ interface ApiService {
 
     @POST("auth/refresh")
     suspend fun refreshToken(@Body request: Map<String, String>): Response<RefreshTokenResponse>
+
+    @DELETE("transactions/{transactionId}")
+    suspend fun deleteTransaction(@Path("transactionId") transactionId: String): Response<Unit>
 } 
