@@ -30,7 +30,7 @@ class LoginViewModel @Inject constructor(
                         _loginResult.value = LoginResult.Success(result.data)
                     }
                     is Result.Error -> {
-                        _loginResult.value = LoginResult.Error(result.message)
+                        _loginResult.value = LoginResult.Error(result.message ?: "حدث خطأ أثناء تسجيل الدخول")
                     }
                 }
             } catch (e: Exception) {
@@ -48,7 +48,7 @@ class LoginViewModel @Inject constructor(
                         _loginResult.value = LoginResult.Success(result.data)
                     }
                     is Result.Error -> {
-                        _loginResult.value = LoginResult.Error(result.message)
+                        _loginResult.value = LoginResult.Error(result.message ?: "حدث خطأ أثناء التسجيل")
                     }
                 }
             } catch (e: Exception) {
