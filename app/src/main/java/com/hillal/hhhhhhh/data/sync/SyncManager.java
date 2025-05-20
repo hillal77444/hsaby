@@ -47,6 +47,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Queue;
 import java.lang.reflect.Type;
 import com.google.gson.reflect.TypeToken;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 
 public class SyncManager {
     private static final String TAG = "SyncManager";
@@ -307,12 +309,37 @@ public class SyncManager {
 
     private static class SyncSession {
         private final String id;
+        private final List<Account> newAccounts;
+        private final List<Account> modifiedAccounts;
+        private final List<Transaction> newTransactions;
+        private final List<Transaction> modifiedTransactions;
         private final AtomicInteger completedBatches = new AtomicInteger(0);
         private final AtomicInteger failedBatches = new AtomicInteger(0);
         private final AtomicInteger totalBatches = new AtomicInteger(0);
 
-        public SyncSession(String id) {
+        public SyncSession(String id, List<Account> newAccounts, List<Account> modifiedAccounts,
+                          List<Transaction> newTransactions, List<Transaction> modifiedTransactions) {
             this.id = id;
+            this.newAccounts = newAccounts;
+            this.modifiedAccounts = modifiedAccounts;
+            this.newTransactions = newTransactions;
+            this.modifiedTransactions = modifiedTransactions;
+        }
+
+        public List<Account> getNewAccounts() {
+            return newAccounts;
+        }
+
+        public List<Account> getModifiedAccounts() {
+            return modifiedAccounts;
+        }
+
+        public List<Transaction> getNewTransactions() {
+            return newTransactions;
+        }
+
+        public List<Transaction> getModifiedTransactions() {
+            return modifiedTransactions;
         }
 
         public void incrementCompletedBatches() {
@@ -344,9 +371,7 @@ public class SyncManager {
     }
 
     public void syncData(SyncCallback callback) {
-        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                .getString("token", null);
-
+        String token = getToken();
         if (token == null) {
             callback.onError("يرجى تسجيل الدخول أولاً");
             return;
@@ -357,7 +382,6 @@ public class SyncManager {
             return;
         }
 
-        // التحقق من حالة المزامنة
         synchronized (syncLock) {
             if (isSyncing) {
                 callback.onError("جاري تنفيذ عملية مزامنة أخرى، يرجى الانتظار");
@@ -368,8 +392,9 @@ public class SyncManager {
 
         executor.execute(() -> {
             try {
-                // إنشاء جلسة مزامنة جديدة
+                String syncId = UUID.randomUUID().toString();
                 SyncSession session = new SyncSession(
+                    syncId,
                     accountDao.getNewAccounts(),
                     accountDao.getModifiedAccounts(lastSyncTime),
                     transactionDao.getNewTransactions(),
@@ -879,7 +904,13 @@ public class SyncManager {
         }
 
         String syncId = UUID.randomUUID().toString();
-        SyncSession session = new SyncSession(syncId);
+        SyncSession session = new SyncSession(
+            syncId,
+            accountDao.getNewAccounts(),
+            accountDao.getModifiedAccounts(lastSyncTime),
+            transactionDao.getNewTransactions(),
+            transactionDao.getModifiedTransactions(lastSyncTime)
+        );
         
         synchronized (syncLock) {
             if (isSyncing) {
@@ -984,14 +1015,20 @@ public class SyncManager {
                 long localId = ((Number) mapping.get("localId")).longValue();
                 long serverId = ((Number) mapping.get("serverId")).longValue();
                 
-                Transaction transaction = transactionDao.getTransactionById(localId);
-                if (transaction != null) {
-                    transaction.setServerId(serverId);
-                    transaction.setSyncStatus(SYNC_STATUS_SYNCED);
-                    transaction.setLastSyncTime(System.currentTimeMillis());
-                    transactionDao.update(transaction);
-                    lastTransactionSync.put(localId, System.currentTimeMillis());
-                }
+                LiveData<Transaction> transactionLiveData = transactionDao.getTransactionById(localId);
+                transactionLiveData.observeForever(new Observer<Transaction>() {
+                    @Override
+                    public void onChanged(Transaction transaction) {
+                        if (transaction != null) {
+                            transaction.setServerId(serverId);
+                            transaction.setSyncStatus(SYNC_STATUS_SYNCED);
+                            transaction.setLastSyncTime(System.currentTimeMillis());
+                            transactionDao.update(transaction);
+                            lastTransactionSync.put(localId, System.currentTimeMillis());
+                        }
+                        transactionLiveData.removeObserver(this);
+                    }
+                });
             }
         }
         session.incrementCompletedBatches();
@@ -1440,5 +1477,10 @@ public class SyncManager {
                 clearPendingSync();
             }
         }
+    }
+
+    private String getToken() {
+        return context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("token", null);
     }
 } 
