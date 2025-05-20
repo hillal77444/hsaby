@@ -24,4 +24,15 @@
     <!-- Transaction Colors -->
     <color name="transaction_to">#4CAF50</color>
     <color name="transaction_from">#F44336</color>
+    
+    <color name="colorPrimary">#2196F3</color>
+    <color name="colorPrimaryDark">#1976D2</color>
+    <color name="colorAccent">#FF4081</color>
+    
+    <color name="colorYemeni">#F44336</color>
+    <color name="colorSaudi">#4CAF50</color>
+    <color name="colorDollar">#2196F3</color>
+    
+    <color name="gray">#757575</color>
+    <color name="lightGray">#EEEEEE</color>
 </resources> 
