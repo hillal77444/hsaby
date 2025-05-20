@@ -1,39 +1,79 @@
 package com.hsaby.accounting.data.repository
 
 import com.hsaby.accounting.data.local.dao.TransactionDao
+import com.hsaby.accounting.data.local.entity.TransactionEntity
 import com.hsaby.accounting.data.model.Transaction
+import com.hsaby.accounting.data.remote.ApiService
+import com.hsaby.accounting.data.remote.Result
+import com.hsaby.accounting.util.PreferencesManager
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class TransactionRepository @Inject constructor(
-    private val transactionDao: TransactionDao
+    private val transactionDao: TransactionDao,
+    private val apiService: ApiService,
+    private val preferencesManager: PreferencesManager
 ) {
-    fun getAllTransactions(): Flow<List<Transaction>> = transactionDao.getAllTransactions()
+    fun getAllTransactions(): Flow<List<Transaction>> {
+        return transactionDao.getAllTransactions().map { entities ->
+            entities.map { it.toModel() }
+        }
+    }
 
-    fun getTransactionsByAccountId(accountId: String): Flow<List<Transaction>> =
-        transactionDao.getTransactionsByAccountId(accountId)
+    suspend fun getTransactionById(id: Long): Transaction? {
+        return transactionDao.getTransactionById(id)?.toModel()
+    }
 
-    fun getTransactionById(id: String): Flow<Transaction?> = transactionDao.getTransactionById(id)
+    suspend fun getTransactionByServerId(serverId: String): Transaction? {
+        return transactionDao.getTransactionByServerId(serverId)?.toModel()
+    }
 
-    fun getTransactionByServerId(serverId: Long?): Transaction? =
-        transactionDao.getTransactionByServerId(serverId)
+    suspend fun getUnsyncedTransactions(userId: String): List<Transaction> {
+        return transactionDao.getUnsyncedTransactions().map { it.toModel() }
+    }
 
-    fun getUnsyncedTransactions(): List<Transaction> = transactionDao.getUnsyncedTransactions()
+    suspend fun insertTransaction(transaction: Transaction) {
+        transactionDao.insertTransaction(transaction.toEntity())
+    }
 
-    suspend fun insertTransaction(transaction: Transaction) =
-        transactionDao.insertTransaction(transaction)
+    suspend fun updateTransaction(transaction: Transaction) {
+        transactionDao.updateTransaction(transaction.toEntity())
+    }
 
-    suspend fun updateTransaction(transaction: Transaction) =
-        transactionDao.updateTransaction(transaction)
+    suspend fun deleteTransaction(transaction: Transaction) {
+        transactionDao.deleteTransaction(transaction.toEntity())
+    }
 
-    suspend fun deleteTransaction(transaction: Transaction) =
-        transactionDao.deleteTransaction(transaction)
+    suspend fun updateServerId(id: Long, serverId: String) {
+        transactionDao.updateServerId(id, serverId)
+    }
 
-    suspend fun updateServerId(transactionId: String, serverId: Long?) =
-        transactionDao.updateServerId(transactionId, serverId)
+    private fun TransactionEntity.toModel(): Transaction {
+        return Transaction(
+            id = id,
+            serverId = serverId,
+            accountId = accountId,
+            amount = amount,
+            type = type,
+            description = description,
+            date = date,
+            lastModified = lastModified
+        )
+    }
 
-    suspend fun deleteOldTransactions(beforeTime: Long) =
-        transactionDao.deleteOldTransactions(beforeTime)
+    private fun Transaction.toEntity(): TransactionEntity {
+        return TransactionEntity(
+            id = id,
+            serverId = serverId,
+            accountId = accountId,
+            amount = amount,
+            type = type,
+            description = description,
+            date = date,
+            lastModified = lastModified
+        )
+    }
 } 
