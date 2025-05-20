@@ -16,8 +16,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import java.util.*
 
-class NotificationManager(private val context: Context) {
+class NotificationManager private constructor(private val context: Context) {
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     private val database = AppDatabase.getInstance(context)
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -42,9 +43,12 @@ class NotificationManager(private val context: Context) {
     // إشعارات المزامنة
     fun notifySyncSuccess(syncedItems: Int) {
         val notification = NotificationEntity(
+            id = UUID.randomUUID().mostSignificantBits,
             title = "تمت المزامنة بنجاح",
             message = "تم مزامنة $syncedItems عنصر بنجاح",
-            type = NotificationType.SYNC_SUCCESS
+            type = NotificationType.SYNC_SUCCESS,
+            date = System.currentTimeMillis(),
+            isRead = false
         )
         showNotification(notification)
         saveNotification(notification)
@@ -52,9 +56,12 @@ class NotificationManager(private val context: Context) {
 
     fun notifySyncError(error: String) {
         val notification = NotificationEntity(
+            id = UUID.randomUUID().mostSignificantBits,
             title = "فشل المزامنة",
             message = "حدث خطأ أثناء المزامنة: $error",
-            type = NotificationType.SYNC_ERROR
+            type = NotificationType.SYNC_ERROR,
+            date = System.currentTimeMillis(),
+            isRead = false
         )
         showNotification(notification)
         saveNotification(notification)
@@ -63,10 +70,13 @@ class NotificationManager(private val context: Context) {
     // إشعارات المعاملات
     fun notifyTransactionAdded(transactionId: String, amount: Double, currency: String) {
         val notification = NotificationEntity(
+            id = UUID.randomUUID().mostSignificantBits,
             title = "معاملة جديدة",
             message = "تمت إضافة معاملة جديدة بقيمة $amount $currency",
             type = NotificationType.TRANSACTION_ADDED,
-            data = mapOf("transactionId" to transactionId)
+            data = mapOf("transactionId" to transactionId),
+            date = System.currentTimeMillis(),
+            isRead = false
         )
         showNotification(notification)
         saveNotification(notification)
@@ -74,10 +84,13 @@ class NotificationManager(private val context: Context) {
 
     fun notifyTransactionUpdated(transactionId: String, amount: Double, currency: String) {
         val notification = NotificationEntity(
+            id = UUID.randomUUID().mostSignificantBits,
             title = "تم تحديث المعاملة",
             message = "تم تحديث المعاملة بقيمة $amount $currency",
             type = NotificationType.TRANSACTION_UPDATED,
-            data = mapOf("transactionId" to transactionId)
+            data = mapOf("transactionId" to transactionId),
+            date = System.currentTimeMillis(),
+            isRead = false
         )
         showNotification(notification)
         saveNotification(notification)
@@ -86,10 +99,13 @@ class NotificationManager(private val context: Context) {
     // إشعارات الحسابات
     fun notifyAccountUpdated(accountId: String, accountName: String, newBalance: Double) {
         val notification = NotificationEntity(
+            id = UUID.randomUUID().mostSignificantBits,
             title = "تم تحديث الحساب",
             message = "تم تحديث حساب $accountName. الرصيد الجديد: $newBalance",
             type = NotificationType.ACCOUNT_UPDATED,
-            data = mapOf("accountId" to accountId)
+            data = mapOf("accountId" to accountId),
+            date = System.currentTimeMillis(),
+            isRead = false
         )
         showNotification(notification)
         saveNotification(notification)
@@ -97,10 +113,13 @@ class NotificationManager(private val context: Context) {
 
     fun notifyBalanceAlert(accountId: String, accountName: String, balance: Double, threshold: Double) {
         val notification = NotificationEntity(
+            id = UUID.randomUUID().mostSignificantBits,
             title = "تنبيه الرصيد",
             message = "رصيد حساب $accountName ($balance) أقل من الحد الأدنى ($threshold)",
             type = NotificationType.BALANCE_ALERT,
-            data = mapOf("accountId" to accountId)
+            data = mapOf("accountId" to accountId),
+            date = System.currentTimeMillis(),
+            isRead = false
         )
         showNotification(notification)
         saveNotification(notification)
@@ -112,8 +131,8 @@ class NotificationManager(private val context: Context) {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra("notificationId", notification.id)
             putExtra("notificationType", notification.type.name)
-            notification.data.forEach { (key, value) ->
-                putExtra(key, value)
+            notification.data?.forEach { (key, value) ->
+                putExtra(key, value.toString())
             }
         }
 
@@ -166,5 +185,14 @@ class NotificationManager(private val context: Context) {
 
     companion object {
         private const val CHANNEL_ID = "accounting_notifications"
+        
+        @Volatile
+        private var instance: NotificationManager? = null
+        
+        fun getInstance(context: Context): NotificationManager {
+            return instance ?: synchronized(this) {
+                instance ?: NotificationManager(context.applicationContext).also { instance = it }
+            }
+        }
     }
 } 
