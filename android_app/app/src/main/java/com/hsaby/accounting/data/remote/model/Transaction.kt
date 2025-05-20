@@ -13,7 +13,7 @@ data class Transaction(
     val amount: Double,
 
     @SerializedName("type")
-    val type: String, // "income" or "expense"
+    val type: String, // "credit" (له) or "debit" (عليه)
 
     @SerializedName("description")
     val description: String,
