@@ -5,8 +5,13 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.work.*
 import com.hsaby.accounting.data.local.AppDatabase
+import com.hsaby.accounting.data.model.*
 import com.hsaby.accounting.data.remote.ApiService
+import com.hsaby.accounting.data.remote.Result
+import com.hsaby.accounting.data.repository.AccountRepository
+import com.hsaby.accounting.data.repository.TransactionRepository
 import com.hsaby.accounting.util.PreferencesManager
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,12 +19,17 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class SyncManager(
-    private val context: Context,
+@Singleton
+class SyncManager @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val apiService: ApiService,
     private val database: AppDatabase,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    private val accountRepository: AccountRepository,
+    private val transactionRepository: TransactionRepository
 ) {
     companion object {
         private const val SYNC_WORK_NAME = "sync_work"
@@ -41,6 +51,8 @@ class SyncManager(
     // إحصائيات المزامنة
     private val _syncStats = MutableStateFlow(SyncStats())
     val syncStats: StateFlow<SyncStats> = _syncStats
+
+    private val workManager = WorkManager.getInstance(context)
 
     // توليد معرف محلي مؤقت
     private fun generateLocalId(): Long {
@@ -360,6 +372,90 @@ class SyncManager(
             false
         } finally {
             isSyncing.set(false)
+        }
+    }
+
+    fun startPeriodicSync() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val syncRequest = PeriodicWorkRequestBuilder<SyncWorker>(
+            15, TimeUnit.MINUTES,
+            5, TimeUnit.MINUTES
+        )
+            .setConstraints(constraints)
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            "periodic_sync",
+            ExistingPeriodicWorkPolicy.KEEP,
+            syncRequest
+        )
+    }
+
+    fun stopPeriodicSync() {
+        workManager.cancelUniqueWork("periodic_sync")
+    }
+
+    suspend fun syncNow() = withContext(Dispatchers.IO) {
+        try {
+            val userId = accountRepository.getUserId() ?: return@withContext Result.Error("لم يتم تسجيل الدخول")
+            val lastSyncTime = accountRepository.getLastSyncTime()
+
+            // Sync from server
+            val syncResponse = apiService.sync(SyncRequest(lastSyncTime))
+            if (!syncResponse.isSuccessful) {
+                return@withContext Result.Error("فشل المزامنة: ${syncResponse.errorBody()?.string()}")
+            }
+
+            val response = syncResponse.body() ?: return@withContext Result.Error("لا توجد بيانات للمزامنة")
+
+            // Update accounts
+            response.accounts.forEach { account ->
+                val existingAccount = accountRepository.getAccountByServerId(account.serverId)
+                if (existingAccount != null) {
+                    accountRepository.updateAccount(account)
+                } else {
+                    accountRepository.insertAccount(account)
+                }
+            }
+
+            // Update transactions
+            response.transactions.forEach { transaction ->
+                val existingTransaction = transactionRepository.getTransactionByServerId(transaction.serverId)
+                if (existingTransaction != null) {
+                    transactionRepository.updateTransaction(transaction)
+                } else {
+                    transactionRepository.insertTransaction(transaction)
+                }
+            }
+
+            // Sync local changes to server
+            val unsyncedAccounts = accountRepository.getUnsyncedAccounts()
+            val unsyncedTransactions = transactionRepository.getUnsyncedTransactions()
+
+            if (unsyncedAccounts.isNotEmpty() || unsyncedTransactions.isNotEmpty()) {
+                val changesResponse = apiService.syncChanges(
+                    SyncChangesRequest(unsyncedAccounts, unsyncedTransactions)
+                )
+
+                if (changesResponse.isSuccessful) {
+                    // Update server IDs for synced items
+                    unsyncedAccounts.forEach { account ->
+                        accountRepository.updateServerId(account.id, account.serverId)
+                    }
+                    unsyncedTransactions.forEach { transaction ->
+                        transactionRepository.updateServerId(transaction.id, transaction.serverId)
+                    }
+                }
+            }
+
+            // Update last sync time
+            accountRepository.setLastSyncTime(System.currentTimeMillis())
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "حدث خطأ أثناء المزامنة")
         }
     }
 }
