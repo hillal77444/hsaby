@@ -50,6 +50,7 @@ import com.google.gson.reflect.TypeToken;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class SyncManager {
     private static final String TAG = "SyncManager";
@@ -117,8 +118,12 @@ public class SyncManager {
     private static final long MIN_RETRY_INTERVAL = 60000; // دقيقة واحدة
     private static final long MAX_RETRY_INTERVAL = 3600000; // ساعة واحدة
 
+    // إضافة المتغيرات المفقودة
+    private final AtomicLong lastRetryTime = new AtomicLong(0);
+    private final AtomicInteger retryCount = new AtomicInteger(0);
+
     // تعديل تعريف offlineQueue
-    private final BlockingQueue<SyncRequest> offlineQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<SyncRequest> offlineQueue = new ConcurrentLinkedQueue<>();
 
     // إضافة كلاس جديد للتعامل مع التعارضات
     private static class ConflictResolver {
@@ -665,7 +670,7 @@ public class SyncManager {
         }
 
         long currentTime = System.currentTimeMillis();
-        if (currentTime - lastRetryTime < getRetryInterval()) {
+        if (currentTime - lastRetryTime.get() < getRetryInterval()) {
             return;
         }
 
@@ -693,8 +698,8 @@ public class SyncManager {
                     Log.d(TAG, "تمت مزامنة البيانات المخزنة بنجاح");
                     offlineQueue.poll();
                     saveOfflineQueue();
-                    lastRetryTime = currentTime;
-                    retryCount = 0;
+                    lastRetryTime.set(currentTime);
+                    retryCount.set(0);
                     
                     // معالجة الطلب التالي
                     handler.postDelayed(() -> processOfflineQueue(), 1000);
@@ -712,8 +717,8 @@ public class SyncManager {
 
     private void handleSyncFailure(SyncRequest request) {
         request.retryCount++;
-        lastRetryTime = System.currentTimeMillis();
-        retryCount++;
+        lastRetryTime.set(System.currentTimeMillis());
+        retryCount.incrementAndGet();
         
         if (request.retryCount >= MAX_SYNC_RETRY_COUNT) {
             Log.d(TAG, "فشلت المزامنة بعد " + MAX_SYNC_RETRY_COUNT + " محاولات");
@@ -727,7 +732,7 @@ public class SyncManager {
 
     private long getRetryInterval() {
         // زيادة الفاصل الزمني مع كل محاولة فاشلة
-        return Math.min(MIN_RETRY_INTERVAL * (1 << retryCount), MAX_RETRY_INTERVAL);
+        return Math.min(MIN_RETRY_INTERVAL * (1 << retryCount.get()), MAX_RETRY_INTERVAL);
     }
 
     private <T> List<T> filterSyncingItems(List<T> items) {
