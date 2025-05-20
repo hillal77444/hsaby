@@ -14,9 +14,10 @@ class SyncWorker @Inject constructor(
 ) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result = try {
-        when (syncManager.syncNow()) {
+        when (val result = syncManager.syncNow()) {
             is Result.Success -> Result.success()
             is Result.Error -> Result.retry()
+            else -> Result.retry()
         }
     } catch (e: Exception) {
         Result.retry()
