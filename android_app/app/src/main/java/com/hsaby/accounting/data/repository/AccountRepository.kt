@@ -1,35 +1,87 @@
 package com.hsaby.accounting.data.repository
 
 import com.hsaby.accounting.data.local.dao.AccountDao
+import com.hsaby.accounting.data.local.entity.AccountEntity
 import com.hsaby.accounting.data.model.Account
+import com.hsaby.accounting.data.remote.ApiService
+import com.hsaby.accounting.data.remote.Result
+import com.hsaby.accounting.util.PreferencesManager
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class AccountRepository @Inject constructor(
-    private val accountDao: AccountDao
+    private val accountDao: AccountDao,
+    private val apiService: ApiService,
+    private val preferencesManager: PreferencesManager
 ) {
-    fun getAllAccounts(): Flow<List<Account>> = accountDao.getAllAccounts()
+    fun getAllAccounts(): Flow<List<Account>> {
+        return accountDao.getAllAccounts().map { entities ->
+            entities.map { it.toModel() }
+        }
+    }
 
-    fun getAccountById(id: String): Flow<Account?> = accountDao.getAccountById(id)
+    suspend fun getAccountById(id: Long): Account? {
+        return accountDao.getAccountById(id)?.toModel()
+    }
 
-    fun getAccountByServerId(serverId: Long?): Account? = accountDao.getAccountByServerId(serverId)
+    suspend fun getAccountByServerId(serverId: String): Account? {
+        return accountDao.getAccountByServerId(serverId)?.toModel()
+    }
 
-    fun getUnsyncedAccounts(): List<Account> = accountDao.getUnsyncedAccounts()
+    suspend fun getUnsyncedAccounts(): List<Account> {
+        return accountDao.getUnsyncedAccounts().map { it.toModel() }
+    }
 
-    suspend fun insertAccount(account: Account) = accountDao.insertAccount(account)
+    suspend fun insertAccount(account: Account) {
+        accountDao.insertAccount(account.toEntity())
+    }
 
-    suspend fun updateAccount(account: Account) = accountDao.updateAccount(account)
+    suspend fun updateAccount(account: Account) {
+        accountDao.updateAccount(account.toEntity())
+    }
 
-    suspend fun deleteAccount(account: Account) = accountDao.deleteAccount(account)
+    suspend fun deleteAccount(account: Account) {
+        accountDao.deleteAccount(account.toEntity())
+    }
 
-    suspend fun updateServerId(accountId: String, serverId: Long?) = 
-        accountDao.updateServerId(accountId, serverId)
+    suspend fun updateServerId(id: Long, serverId: String) {
+        accountDao.updateServerId(id, serverId)
+    }
 
-    fun getUserId(): String? = accountDao.getUserId()
+    fun getUserId(): String? {
+        return preferencesManager.getUserId()
+    }
 
-    fun getLastSyncTime(): Long = accountDao.getLastSyncTime()
+    fun getLastSyncTime(): Long {
+        return preferencesManager.getLastSyncTime()
+    }
 
-    suspend fun setLastSyncTime(time: Long) = accountDao.setLastSyncTime(time)
+    fun setLastSyncTime(time: Long) {
+        preferencesManager.setLastSyncTime(time)
+    }
+
+    private fun AccountEntity.toModel(): Account {
+        return Account(
+            id = id,
+            serverId = serverId,
+            name = name,
+            balance = balance,
+            isActive = isActive,
+            lastModified = lastModified
+        )
+    }
+
+    private fun Account.toEntity(): AccountEntity {
+        return AccountEntity(
+            id = id,
+            serverId = serverId,
+            name = name,
+            balance = balance,
+            isActive = isActive,
+            lastModified = lastModified
+        )
+    }
 } 
