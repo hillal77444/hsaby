@@ -20,11 +20,11 @@ class AccountRepository @Inject constructor(
         return accountDao.getAllAccounts()
     }
 
-    fun getAccountById(id: String): Flow<AccountEntity?> {
+    suspend fun getAccountById(id: String): AccountEntity? {
         return accountDao.getAccountById(id.toLongOrNull() ?: 0L)
     }
 
-    fun getAccountByServerId(serverId: String): Flow<AccountEntity?> {
+    suspend fun getAccountByServerId(serverId: String): AccountEntity? {
         return accountDao.getAccountByServerId(serverId)
     }
 
