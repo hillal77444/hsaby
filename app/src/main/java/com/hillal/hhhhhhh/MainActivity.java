@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Layout inflated successfully");
 
             // Setup toolbar
-            setSupportActionBar(binding.appBarMain.toolbar);
+            setSupportActionBar(binding.toolbar);
             Log.d(TAG, "Toolbar set successfully");
 
             // Initialize App instance first
