@@ -399,7 +399,14 @@ class SyncManager @Inject constructor(
     }
 
     suspend fun syncNow() = withContext(Dispatchers.IO) {
+        if (!isNetworkAvailable()) {
+            return@withContext Result.Error("لا يوجد اتصال بالإنترنت")
+        }
+
         try {
+            _syncState.value = SyncState.Syncing
+            _syncStats.value = SyncStats()
+
             val userId = accountRepository.getUserId() ?: return@withContext Result.Error("لم يتم تسجيل الدخول")
             val lastSyncTime = accountRepository.getLastSyncTime()
 
@@ -419,6 +426,9 @@ class SyncManager @Inject constructor(
                 } else {
                     accountRepository.insertAccount(account)
                 }
+                _syncStats.value = _syncStats.value.copy(
+                    accountsSynced = _syncStats.value.accountsSynced + 1
+                )
             }
 
             // Update transactions
@@ -429,11 +439,14 @@ class SyncManager @Inject constructor(
                 } else {
                     transactionRepository.insertTransaction(transaction)
                 }
+                _syncStats.value = _syncStats.value.copy(
+                    transactionsSynced = _syncStats.value.transactionsSynced + 1
+                )
             }
 
             // Sync local changes to server
             val unsyncedAccounts = accountRepository.getUnsyncedAccounts()
-            val unsyncedTransactions = transactionRepository.getUnsyncedTransactions()
+            val unsyncedTransactions = transactionRepository.getUnsyncedTransactions(userId)
 
             if (unsyncedAccounts.isNotEmpty() || unsyncedTransactions.isNotEmpty()) {
                 val changesResponse = apiService.syncChanges(
@@ -444,17 +457,25 @@ class SyncManager @Inject constructor(
                     // Update server IDs for synced items
                     unsyncedAccounts.forEach { account ->
                         accountRepository.updateServerId(account.id, account.serverId)
+                        _syncStats.value = _syncStats.value.copy(
+                            accountsUploaded = _syncStats.value.accountsUploaded + 1
+                        )
                     }
                     unsyncedTransactions.forEach { transaction ->
                         transactionRepository.updateServerId(transaction.id, transaction.serverId)
+                        _syncStats.value = _syncStats.value.copy(
+                            transactionsUploaded = _syncStats.value.transactionsUploaded + 1
+                        )
                     }
                 }
             }
 
             // Update last sync time
             accountRepository.setLastSyncTime(System.currentTimeMillis())
+            _syncState.value = SyncState.Success(_syncStats.value)
             Result.Success(Unit)
         } catch (e: Exception) {
+            _syncState.value = SyncState.Error(e.message ?: "حدث خطأ أثناء المزامنة")
             Result.Error(e.message ?: "حدث خطأ أثناء المزامنة")
         }
     }
