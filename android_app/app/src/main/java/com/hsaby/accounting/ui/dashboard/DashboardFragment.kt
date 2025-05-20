@@ -5,17 +5,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.hsaby.accounting.AccountingApp
 import com.hsaby.accounting.databinding.FragmentDashboardBinding
-import com.hsaby.accounting.util.PreferencesManager
+import com.hsaby.accounting.ui.transaction.AddTransactionBottomSheet
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class DashboardFragment : Fragment() {
     
     private var _binding: FragmentDashboardBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: DashboardViewModel by viewModels()
     
     private lateinit var preferencesManager: PreferencesManager
     
@@ -34,65 +39,53 @@ class DashboardFragment : Fragment() {
         preferencesManager = PreferencesManager(requireContext())
         
         setupViews()
-        observeData()
+        observeViewModel()
     }
     
     private fun setupViews() {
         binding.swipeRefresh.setOnRefreshListener {
-            refreshData()
+            viewModel.refreshData()
+        }
+
+        binding.addTransactionFab.setOnClickListener {
+            showAddTransactionDialog()
         }
     }
     
-    private fun observeData() {
+    private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val userId = preferencesManager.userId.first()
-            if (userId != null) {
-                // Observe accounts
-                (requireActivity().application as AccountingApp)
-                    .accountRepository.getAccountsByUserId(userId)
-                    .collect { accounts ->
-                        // Update accounts UI
-                        updateAccountsUI(accounts)
+            viewModel.uiState.collect { state ->
+                when (state) {
+                    is DashboardUiState.Loading -> {
+                        binding.swipeRefresh.isRefreshing = true
                     }
-                
-                // Observe transactions
-                (requireActivity().application as AccountingApp)
-                    .transactionRepository.getTransactionsByUserId(userId)
-                    .collect { transactions ->
-                        // Update transactions UI
-                        updateTransactionsUI(transactions)
+                    is DashboardUiState.Success -> {
+                        binding.swipeRefresh.isRefreshing = false
+                        updateUI(state)
                     }
-            }
-        }
-    }
-    
-    private fun updateAccountsUI(accounts: List<com.hsaby.accounting.data.local.entity.AccountEntity>) {
-        // TODO: Update accounts UI
-    }
-    
-    private fun updateTransactionsUI(transactions: List<com.hsaby.accounting.data.local.entity.TransactionEntity>) {
-        // TODO: Update transactions UI
-    }
-    
-    private fun refreshData() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val userId = preferencesManager.userId.first()
-                if (userId != null) {
-                    // Sync accounts
-                    (requireActivity().application as AccountingApp)
-                        .accountRepository.syncAccounts(userId)
-                    
-                    // Sync transactions
-                    (requireActivity().application as AccountingApp)
-                        .transactionRepository.syncTransactions(userId)
+                    is DashboardUiState.Error -> {
+                        binding.swipeRefresh.isRefreshing = false
+                        // عرض رسالة الخطأ
+                    }
                 }
-            } catch (e: Exception) {
-                // Handle sync error
-            } finally {
-                binding.swipeRefresh.isRefreshing = false
             }
         }
+    }
+    
+    private fun updateUI(state: DashboardUiState.Success) {
+        binding.totalBalanceText.text = state.totalBalance.toString()
+        binding.totalDebtorsText.text = state.totalDebtors.toString()
+        binding.activeAccountsText.text = state.activeAccounts.toString()
+        
+        // تحديث قائمة المعاملات الأخيرة
+        // تحديث قائمة الحسابات النشطة
+    }
+    
+    private fun showAddTransactionDialog() {
+        AddTransactionBottomSheet().show(
+            childFragmentManager,
+            "add_transaction"
+        )
     }
     
     override fun onDestroyView() {
