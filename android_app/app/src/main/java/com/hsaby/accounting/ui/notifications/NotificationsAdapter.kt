@@ -5,61 +5,58 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.hsaby.accounting.R
-import com.hsaby.accounting.data.model.Notification
+import com.hsaby.accounting.data.local.entity.NotificationEntity
 import com.hsaby.accounting.databinding.ItemNotificationBinding
 import java.text.SimpleDateFormat
 import java.util.*
 
 class NotificationsAdapter(
-    private val onNotificationClick: (Notification) -> Unit
-) : ListAdapter<Notification, NotificationsAdapter.NotificationViewHolder>(NotificationDiffCallback()) {
+    private val onItemClick: (NotificationEntity) -> Unit
+) : ListAdapter<NotificationEntity, NotificationsAdapter.ViewHolder>(NotificationDiffCallback()) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NotificationViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemNotificationBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
-        return NotificationViewHolder(binding)
+        return ViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: NotificationViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    inner class NotificationViewHolder(
+    inner class ViewHolder(
         private val binding: ItemNotificationBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
         init {
             binding.root.setOnClickListener {
-                val position = adapterPosition
+                val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    onNotificationClick(getItem(position))
+                    onItemClick(getItem(position))
                 }
             }
         }
 
-        fun bind(notification: Notification) {
-            binding.titleText.text = notification.title
-            binding.messageText.text = notification.message
-            binding.dateText.text = formatDate(notification.date)
-            binding.isReadIndicator.visibility = if (notification.isRead) View.GONE else View.VISIBLE
-        }
-
-        private fun formatDate(date: Date): String {
-            val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-            return formatter.format(date)
+        fun bind(notification: NotificationEntity) {
+            binding.apply {
+                tvTitle.text = notification.title
+                tvMessage.text = notification.message
+                tvDate.text = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                    .format(Date(notification.date))
+                viewUnread.visibility = if (notification.isRead) ViewGroup.GONE else ViewGroup.VISIBLE
+            }
         }
     }
 
-    private class NotificationDiffCallback : DiffUtil.ItemCallback<Notification>() {
-        override fun areItemsTheSame(oldItem: Notification, newItem: Notification): Boolean {
+    private class NotificationDiffCallback : DiffUtil.ItemCallback<NotificationEntity>() {
+        override fun areItemsTheSame(oldItem: NotificationEntity, newItem: NotificationEntity): Boolean {
             return oldItem.id == newItem.id
         }
 
-        override fun areContentsTheSame(oldItem: Notification, newItem: Notification): Boolean {
+        override fun areContentsTheSame(oldItem: NotificationEntity, newItem: NotificationEntity): Boolean {
             return oldItem == newItem
         }
     }
