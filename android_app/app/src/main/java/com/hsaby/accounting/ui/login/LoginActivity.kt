@@ -6,13 +6,11 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import com.hsaby.accounting.R
 import com.hsaby.accounting.databinding.ActivityLoginBinding
 import com.hsaby.accounting.ui.main.MainActivity
 import com.hsaby.accounting.util.PreferencesManager
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -111,64 +109,5 @@ class LoginActivity : AppCompatActivity() {
     private fun isValidPhoneNumber(phone: String): Boolean {
         val phonePattern = "^[0-9]{10}$"
         return phone.matches(phonePattern.toRegex())
-    }
-    
-    private fun login(phone: String, password: String) {
-        binding.progressBar.visibility = View.VISIBLE
-        binding.loginButton.isEnabled = false
-        
-        lifecycleScope.launch {
-            try {
-                val result = (application as AccountingApp).userRepository.login(phone, password)
-                result.fold(
-                    onSuccess = { response ->
-                        // حفظ بيانات المستخدم
-                        preferencesManager.saveLoginCredentials(
-                            phone = phone,
-                            password = password,
-                            userId = response.userId,
-                            token = response.token
-                        )
-                        
-                        // مزامنة البيانات
-                        syncData(response.userId)
-                        
-                        // الانتقال إلى الشاشة الرئيسية
-                        startActivity(Intent(this@LoginActivity, MainActivity::class.java))
-                        finish()
-                    },
-                    onFailure = { error ->
-                        Toast.makeText(
-                            this@LoginActivity,
-                            error.message ?: "حدث خطأ أثناء تسجيل الدخول",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                )
-            } catch (e: Exception) {
-                Toast.makeText(
-                    this@LoginActivity,
-                    "حدث خطأ غير متوقع",
-                    Toast.LENGTH_LONG
-                ).show()
-            } finally {
-                binding.progressBar.visibility = View.GONE
-                binding.loginButton.isEnabled = true
-            }
-        }
-    }
-    
-    private fun syncData(userId: String) {
-        lifecycleScope.launch {
-            try {
-                // مزامنة الحسابات
-                (application as AccountingApp).accountRepository.syncAccounts(userId)
-                
-                // مزامنة المعاملات
-                (application as AccountingApp).transactionRepository.syncTransactions(userId)
-            } catch (e: Exception) {
-                // معالجة خطأ المزامنة
-            }
-        }
     }
 } 
