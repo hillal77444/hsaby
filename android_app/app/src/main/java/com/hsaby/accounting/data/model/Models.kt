@@ -52,6 +52,13 @@ data class RefreshTokenResponse(
     @SerializedName("token") val token: String
 )
 
+data class PaginatedResponse<T>(
+    @SerializedName("data") val data: List<T>,
+    @SerializedName("total_pages") val totalPages: Int,
+    @SerializedName("current_page") val currentPage: Int,
+    @SerializedName("total_items") val totalItems: Int
+)
+
 // Data Models
 data class Account(
     @SerializedName("id") val id: String,
