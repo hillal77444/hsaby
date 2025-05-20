@@ -29,49 +29,24 @@ class AccountingApp : Application() {
     @Inject
     lateinit var preferencesManager: PreferencesManager
 
+    @Inject
     lateinit var database: AppDatabase
+    
+    @Inject
     lateinit var apiService: ApiService
     
+    @Inject
     lateinit var userRepository: UserRepository
+    
+    @Inject
     lateinit var accountRepository: AccountRepository
+    
+    @Inject
     lateinit var transactionRepository: TransactionRepository
     
     override fun onCreate() {
         super.onCreate()
         instance = this
-        
-        // Initialize Room Database
-        database = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java,
-            "accounting_db"
-        ).build()
-        
-        // Initialize Retrofit
-        val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
-        
-        val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .build()
-        
-        val retrofit = Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-        
-        apiService = retrofit.create(ApiService::class.java)
-        
-        // Initialize Repositories with PreferencesManager
-        userRepository = UserRepository(database.userDao(), apiService, preferencesManager)
-        accountRepository = AccountRepository(database.accountDao(), apiService, preferencesManager)
-        transactionRepository = TransactionRepository(database.transactionDao(), apiService, preferencesManager)
-
         setupPeriodicSync()
     }
     
