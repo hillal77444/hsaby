@@ -49,6 +49,7 @@ import java.lang.reflect.Type;
 import com.google.gson.reflect.TypeToken;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
+import java.util.concurrent.BlockingQueue;
 
 public class SyncManager {
     private static final String TAG = "SyncManager";
@@ -116,10 +117,8 @@ public class SyncManager {
     private static final long MIN_RETRY_INTERVAL = 60000; // دقيقة واحدة
     private static final long MAX_RETRY_INTERVAL = 3600000; // ساعة واحدة
 
-    // إضافة متغيرات جديدة
-    private final ConcurrentLinkedQueue<SyncRequest> offlineQueue = new ConcurrentLinkedQueue<>();
-    private long lastRetryTime = 0;
-    private int retryCount = 0;
+    // تعديل تعريف offlineQueue
+    private final BlockingQueue<SyncRequest> offlineQueue = new ConcurrentLinkedQueue<>();
 
     // إضافة كلاس جديد للتعامل مع التعارضات
     private static class ConflictResolver {
@@ -152,7 +151,7 @@ public class SyncManager {
         }
     }
 
-    // إضافة كلاس SyncRequest
+    // تعديل SyncRequest
     private static class SyncRequest {
         private final String id;
         private final Map<String, Object> data;
@@ -549,6 +548,7 @@ public class SyncManager {
         });
     }
 
+    // تعديل handleOfflineSync
     private void handleOfflineSync(SyncCallback callback) {
         Log.d(TAG, "لا يوجد اتصال بالإنترنت، جاري حفظ التغييرات للتحميل لاحقاً");
         
@@ -589,7 +589,7 @@ public class SyncManager {
 
                 // بدء مراقبة الاتصال
                 startNetworkMonitoring();
-                
+
                 callback.onSuccess();
             } else {
                 callback.onError("قائمة انتظار المزامنة ممتلئة");
@@ -600,6 +600,7 @@ public class SyncManager {
         }
     }
 
+    // تعديل saveOfflineQueue
     private void saveOfflineQueue() {
         try {
             List<Map<String, Object>> queueData = new ArrayList<>();
@@ -622,6 +623,7 @@ public class SyncManager {
         }
     }
 
+    // تعديل loadOfflineQueue
     private void loadOfflineQueue() {
         try {
             String queueJson = context.getSharedPreferences(OFFLINE_QUEUE_PREFS, Context.MODE_PRIVATE)
