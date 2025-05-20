@@ -276,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
 
                     if (selectedFragment != null) {
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fragment_container, selectedFragment)
+                                .replace(R.id.nav_host_fragment_content_main, selectedFragment)
                                 .commit();
                         return true;
                     }
