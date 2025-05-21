@@ -25,8 +25,8 @@ class RegisterViewModel @Inject constructor(
             return
         }
 
-        if (!isValidPhone(phone)) {
-            _registerResult.value = AuthResult.Error("رقم الهاتف غير صالح")
+        if (!phone.matches(Regex("^[0-9]{10}$"))) {
+            _registerResult.value = AuthResult.Error("يرجى إدخال رقم هاتف صحيح")
             return
         }
 
@@ -37,16 +37,17 @@ class RegisterViewModel @Inject constructor(
 
         viewModelScope.launch {
             _registerResult.value = AuthResult.Loading
-            val result = authRepository.register(RegisterRequest(name, phone, password))
-            _registerResult.value = when (result) {
-                is AuthResult.Success -> AuthResult.Success(Unit)
-                is AuthResult.Error -> AuthResult.Error(result.message)
-                is AuthResult.Loading -> AuthResult.Loading
+            when (val result = authRepository.register(RegisterRequest(name, phone, password))) {
+                is AuthResult.Success -> {
+                    _registerResult.value = AuthResult.Success(Unit)
+                }
+                is AuthResult.Error -> {
+                    _registerResult.value = AuthResult.Error(result.message)
+                }
+                is AuthResult.Loading -> {
+                    _registerResult.value = AuthResult.Loading
+                }
             }
         }
-    }
-
-    private fun isValidPhone(phone: String): Boolean {
-        return phone.matches(Regex("^[0-9]{10}$"))
     }
 } 
