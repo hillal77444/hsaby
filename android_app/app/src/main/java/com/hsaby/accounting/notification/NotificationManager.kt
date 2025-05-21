@@ -193,7 +193,7 @@ class NotificationManager @Inject constructor(
         title: String,
         message: String,
         transactionId: String,
-        date: Date
+        date: Long
     ) {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -202,86 +202,26 @@ class NotificationManager @Inject constructor(
 
         val pendingIntent = PendingIntent.getActivity(
             context,
-            0,
+            transactionId.hashCode(),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentIntent(pendingIntent)
             .setAutoCancel(true)
-            .build()
-
-        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
-    }
-
-    fun showAccountNotification(
-        title: String,
-        message: String,
-        accountId: String,
-        date: Date
-    ) {
-        val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            putExtra(EXTRA_ACCOUNT_ID, accountId)
-        }
-
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(title)
-            .setContentText(message)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-            .build()
 
-        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
-    }
-
-    fun showSyncNotification(
-        title: String,
-        message: String,
-        date: Date
-    ) {
-        val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(title)
-            .setContentText(message)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-            .build()
-
-        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
+        notificationManager.notify(transactionId.hashCode(), builder.build())
     }
 
     companion object {
-        private const val CHANNEL_ID = "hsaby_notifications"
-        private const val CHANNEL_NAME = "Hsaby Notifications"
-        private const val CHANNEL_DESCRIPTION = "Notifications for Hsaby Accounting App"
-        const val EXTRA_TRANSACTION_ID = "extra_transaction_id"
-        const val EXTRA_ACCOUNT_ID = "extra_account_id"
+        private const val CHANNEL_ID = "accounting_notifications"
+        private const val CHANNEL_NAME = "إشعارات المحاسبة"
+        private const val CHANNEL_DESCRIPTION = "إشعارات تطبيق المحاسبة"
+        private const val EXTRA_TRANSACTION_ID = "transaction_id"
     }
 } 
