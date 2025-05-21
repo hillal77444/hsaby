@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,96 +19,83 @@ class PreferencesManager @Inject constructor(
 
     private val sharedPreferences = EncryptedSharedPreferences.create(
         context,
-        "secure_prefs",
+        PREF_NAME,
         masterKey,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
-    var isFirstLaunch: Boolean
-        get() = sharedPreferences.getBoolean(KEY_FIRST_LAUNCH, true)
-        set(value) = sharedPreferences.edit().putBoolean(KEY_FIRST_LAUNCH, value).apply()
+    val isLoggedIn: Flow<Boolean>
+        get() = getToken().map { it != null }
 
-    var isLoggedIn: Boolean
-        get() = sharedPreferences.getBoolean(KEY_IS_LOGGED_IN, false)
-        set(value) = sharedPreferences.edit().putBoolean(KEY_IS_LOGGED_IN, value).apply()
+    fun getToken(): Flow<String?> {
+        return getString(KEY_TOKEN)
+    }
 
-    var userId: String?
-        get() = sharedPreferences.getString(KEY_USER_ID, null)
-        set(value) = sharedPreferences.edit().putString(KEY_USER_ID, value).apply()
+    fun getRefreshToken(): Flow<String?> {
+        return getString(KEY_REFRESH_TOKEN)
+    }
 
-    var userToken: String?
-        get() = sharedPreferences.getString(KEY_USER_TOKEN, null)
-        set(value) = sharedPreferences.edit().putString(KEY_USER_TOKEN, value).apply()
+    fun getUserId(): Flow<String?> {
+        return getString(KEY_USER_ID)
+    }
 
-    var userPhone: String?
-        get() = sharedPreferences.getString(KEY_USER_PHONE, null)
-        set(value) = sharedPreferences.edit().putString(KEY_USER_PHONE, value).apply()
+    fun getUsername(): Flow<String?> {
+        return getString(KEY_USERNAME)
+    }
 
-    var userPassword: String?
-        get() = sharedPreferences.getString(KEY_USER_PASSWORD, null)
-        set(value) = sharedPreferences.edit().putString(KEY_USER_PASSWORD, value).apply()
+    private fun getString(key: String): Flow<String?> {
+        return kotlinx.coroutines.flow.Flow { emit(sharedPreferences.getString(key, null)) }
+    }
 
-    fun saveLoginCredentials(phone: String, password: String, userId: String, token: String) {
+    suspend fun saveLoginCredentials(
+        phone: String,
+        password: String,
+        userId: String,
+        token: String
+    ) {
         sharedPreferences.edit().apply {
-            putString(KEY_USER_PHONE, phone)
-            putString(KEY_USER_PASSWORD, password)
+            putString(KEY_PHONE, phone)
+            putString(KEY_PASSWORD, password)
             putString(KEY_USER_ID, userId)
-            putString(KEY_USER_TOKEN, token)
+            putString(KEY_TOKEN, token)
             putBoolean(KEY_IS_LOGGED_IN, true)
-            putBoolean(KEY_FIRST_LAUNCH, false)
             apply()
         }
     }
 
-    fun clearLoginCredentials() {
+    suspend fun saveToken(token: String) {
+        sharedPreferences.edit().putString(KEY_TOKEN, token).apply()
+    }
+
+    suspend fun saveRefreshToken(refreshToken: String) {
+        sharedPreferences.edit().putString(KEY_REFRESH_TOKEN, refreshToken).apply()
+    }
+
+    suspend fun saveUserId(userId: String) {
+        sharedPreferences.edit().putString(KEY_USER_ID, userId).apply()
+    }
+
+    suspend fun clearLoginCredentials() {
         sharedPreferences.edit().apply {
-            remove(KEY_USER_PHONE)
-            remove(KEY_USER_PASSWORD)
+            remove(KEY_PHONE)
+            remove(KEY_PASSWORD)
             remove(KEY_USER_ID)
-            remove(KEY_USER_TOKEN)
+            remove(KEY_TOKEN)
+            remove(KEY_REFRESH_TOKEN)
             putBoolean(KEY_IS_LOGGED_IN, false)
             apply()
         }
     }
 
-    fun saveToken(token: String) {
-        sharedPreferences.edit().putString(KEY_TOKEN, token).apply()
-    }
-
-    fun getToken(): String? {
-        return sharedPreferences.getString(KEY_TOKEN, null)
-    }
-
-    fun saveRefreshToken(token: String) {
-        sharedPreferences.edit().putString(KEY_REFRESH_TOKEN, token).apply()
-    }
-
-    fun getRefreshToken(): String? {
-        return sharedPreferences.getString(KEY_REFRESH_TOKEN, null)
-    }
-
-    fun saveUsername(username: String) {
-        sharedPreferences.edit().putString(KEY_USERNAME, username).apply()
-    }
-
-    fun getUsername(): String? {
-        return sharedPreferences.getString(KEY_USERNAME, null)
-    }
-
-    fun clearAuthData() {
-        sharedPreferences.edit().clear().apply()
-    }
-
     companion object {
-        private const val KEY_FIRST_LAUNCH = "first_launch"
-        private const val KEY_IS_LOGGED_IN = "is_logged_in"
-        private const val KEY_USER_ID = "user_id"
-        private const val KEY_USER_TOKEN = "user_token"
-        private const val KEY_USER_PHONE = "user_phone"
-        private const val KEY_USER_PASSWORD = "user_password"
+        private const val PREF_NAME = "accounting_prefs"
         private const val KEY_TOKEN = "token"
         private const val KEY_REFRESH_TOKEN = "refresh_token"
+        private const val KEY_USER_ID = "user_id"
         private const val KEY_USERNAME = "username"
+        private const val KEY_PHONE = "phone"
+        private const val KEY_PASSWORD = "password"
+        private const val KEY_IS_LOGGED_IN = "is_logged_in"
     }
 } 
