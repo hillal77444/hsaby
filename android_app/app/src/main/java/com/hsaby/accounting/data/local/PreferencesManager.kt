@@ -5,7 +5,7 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,20 +28,20 @@ class PreferencesManager @Inject constructor(
     val isLoggedIn: Flow<Boolean>
         get() = getToken().map { it != null }
 
-    fun getToken(): Flow<String?> {
-        return getString(KEY_TOKEN)
+    fun getToken(): Flow<String?> = flow {
+        emit(sharedPreferences.getString(KEY_TOKEN, null))
     }
 
-    fun getRefreshToken(): Flow<String?> {
-        return getString(KEY_REFRESH_TOKEN)
+    fun getRefreshToken(): Flow<String?> = flow {
+        emit(sharedPreferences.getString(KEY_REFRESH_TOKEN, null))
     }
 
-    fun getUserId(): Flow<String?> {
-        return getString(KEY_USER_ID)
+    fun getUserId(): Flow<String?> = flow {
+        emit(sharedPreferences.getString(KEY_USER_ID, null))
     }
 
-    fun getUsername(): Flow<String?> {
-        return getString(KEY_USERNAME)
+    fun getUsername(): Flow<String?> = flow {
+        emit(sharedPreferences.getString(KEY_USERNAME, null))
     }
 
     private fun getString(key: String): Flow<String?> {
