@@ -193,6 +193,56 @@ public class SyncManager {
             return;
         }
 
+        // التحقق من تكامل البيانات
+        validateSyncData(accounts, transactions);
+
+        // محاولة الحصول على التوكن
+        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("token", null);
+
+        // إذا لم يكن هناك توكن، نحاول تجديده
+        if (token == null) {
+            String username = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                    .getString("username", null);
+            String password = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                    .getString("password", null);
+
+            if (username != null && password != null) {
+                // محاولة تسجيل الدخول تلقائياً
+                apiService.login(username, password).enqueue(new Callback<Map<String, Object>>() {
+                    @Override
+                    public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Map<String, Object> loginResponse = response.body();
+                            String newToken = (String) loginResponse.get("token");
+                            if (newToken != null) {
+                                // حفظ التوكن الجديد
+                                context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                                        .edit()
+                                        .putString("token", newToken)
+                                        .apply();
+                                
+                                // متابعة المزامنة مع التوكن الجديد
+                                syncBatch(accounts, transactions, callback, batchIndex, totalBatches);
+                                return;
+                            }
+                        }
+                        // إذا فشل تجديد التوكن
+                        handler.post(() -> callback.onError("فشل تجديد جلسة الدخول، يرجى تسجيل الدخول مرة أخرى"));
+                    }
+
+                    @Override
+                    public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                        handler.post(() -> callback.onError("فشل الاتصال بالسيرفر، يرجى المحاولة مرة أخرى"));
+                    }
+                });
+                return;
+            } else {
+                handler.post(() -> callback.onError("يرجى تسجيل الدخول أولاً"));
+                return;
+            }
+        }
+
         // إنشاء معرف جلسة فريد
         String sessionId = UUID.randomUUID().toString();
         SyncSession session = new SyncSession();
@@ -225,20 +275,12 @@ public class SyncManager {
             return;
         }
 
-        // التحقق من تكامل البيانات
-        validateSyncData(unlockedAccounts, unlockedTransactions);
-
-        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                .getString("token", null);
-
-        if (token == null) {
-            handler.post(() -> callback.onError("يرجى تسجيل الدخول أولاً"));
-            return;
-        }
-
+        // إنشاء طلب المزامنة للدفعة الحالية
+        ApiService.SyncRequest syncRequest = new ApiService.SyncRequest(unlockedAccounts, unlockedTransactions);
+        
         executor.execute(() -> {
             try {
-                Response<ApiService.SyncResponse> response = apiService.syncData("Bearer " + token, new ApiService.SyncRequest(unlockedAccounts, unlockedTransactions)).execute();
+                Response<ApiService.SyncResponse> response = apiService.syncData("Bearer " + token, syncRequest).execute();
                 
                 if (response.isSuccessful()) {
                     ApiService.SyncResponse syncResponse = response.body();
@@ -249,34 +291,34 @@ public class SyncManager {
                             if (!session.isItemProcessed(itemKey)) {
                                 Long serverId = syncResponse.getAccountServerId(account.getId());
                                 if (serverId != null) {
-                                    // التحقق من حالة المزامنة
-                                    if (isItemLocked(itemKey)) {
-                                        Log.d(TAG, "Item is currently being synced: " + itemKey);
-                                        continue;
-                                    }
+                                    // تحديث معرف السيرفر في قاعدة البيانات المحلية
+                                    try {
+                                        // تحديث في قاعدة البيانات المحلية
+                                        account.setServerId(serverId);
+                                        account.setLastSyncTime(System.currentTimeMillis());
+                                        account.setSyncStatus(SYNC_STATUS_SYNCED);
+                                        accountDao.update(account);
 
-                                    // التحقق من التعارضات
-                                    Account existingAccount = accountDao.getAccountByServerIdSync(serverId);
-                                    if (existingAccount != null) {
-                                        // التحقق من وقت آخر تحديث
-                                        if (account.getLastSyncTime() > existingAccount.getLastSyncTime()) {
-                                            // البيانات المحلية أحدث، نحتفظ بها
-                                            Log.d(TAG, "Local data is newer for account: " + account.getId());
+                                        // التحقق من نجاح التحديث
+                                        Account updatedAccount = accountDao.getAccountById(account.getId());
+                                        if (updatedAccount != null && updatedAccount.getServerId() == serverId) {
+                                            Log.d(TAG, "Successfully updated account server_id: " + serverId);
+                                            releaseLock(itemKey);
+                                            session.addProcessedItem(itemKey);
                                         } else {
-                                            // تحديث البيانات المحلية بالبيانات من السيرفر
-                                            account.setBalance(existingAccount.getBalance());
-                                            account.setLastSyncTime(existingAccount.getLastSyncTime());
-                                            Log.d(TAG, "Updated account with server data: " + account.getId());
+                                            Log.e(TAG, "Failed to update account server_id in local database");
+                                            // إعادة المحاولة
+                                            account.setServerId(-1);
+                                            account.setSyncStatus(SYNC_STATUS_FAILED);
+                                            accountDao.update(account);
                                         }
+                                    } catch (Exception e) {
+                                        Log.e(TAG, "Error updating account server_id: " + e.getMessage());
+                                        // إعادة المحاولة
+                                        account.setServerId(-1);
+                                        account.setSyncStatus(SYNC_STATUS_FAILED);
+                                        accountDao.update(account);
                                     }
-
-                                    // تحديث معرف السيرفر وحالة المزامنة
-                                    account.setServerId(serverId);
-                                    account.setLastSyncTime(System.currentTimeMillis());
-                                    account.setSyncStatus(SYNC_STATUS_SYNCED);
-                                    accountDao.update(account);
-                                    releaseLock(itemKey);
-                                    session.addProcessedItem(itemKey);
                                 }
                             }
                         }
@@ -287,36 +329,34 @@ public class SyncManager {
                             if (!session.isItemProcessed(itemKey)) {
                                 Long serverId = syncResponse.getTransactionServerId(transaction.getId());
                                 if (serverId != null) {
-                                    // التحقق من حالة المزامنة
-                                    if (isItemLocked(itemKey)) {
-                                        Log.d(TAG, "Item is currently being synced: " + itemKey);
-                                        continue;
-                                    }
+                                    // تحديث معرف السيرفر في قاعدة البيانات المحلية
+                                    try {
+                                        // تحديث في قاعدة البيانات المحلية
+                                        transaction.setServerId(serverId);
+                                        transaction.setLastSyncTime(System.currentTimeMillis());
+                                        transaction.setSyncStatus(SYNC_STATUS_SYNCED);
+                                        transactionDao.update(transaction);
 
-                                    // التحقق من التعارضات
-                                    Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(serverId);
-                                    if (existingTransaction != null) {
-                                        // التحقق من وقت آخر تحديث
-                                        if (transaction.getLastSyncTime() > existingTransaction.getLastSyncTime()) {
-                                            // البيانات المحلية أحدث، نحتفظ بها
-                                            Log.d(TAG, "Local data is newer for transaction: " + transaction.getId());
+                                        // التحقق من نجاح التحديث
+                                        Transaction updatedTransaction = transactionDao.getTransactionById(transaction.getId());
+                                        if (updatedTransaction != null && updatedTransaction.getServerId() == serverId) {
+                                            Log.d(TAG, "Successfully updated transaction server_id: " + serverId);
+                                            releaseLock(itemKey);
+                                            session.addProcessedItem(itemKey);
                                         } else {
-                                            // تحديث البيانات المحلية بالبيانات من السيرفر
-                                            transaction.setAmount(existingTransaction.getAmount());
-                                            transaction.setType(existingTransaction.getType());
-                                            transaction.setDescription(existingTransaction.getDescription());
-                                            transaction.setLastSyncTime(existingTransaction.getLastSyncTime());
-                                            Log.d(TAG, "Updated transaction with server data: " + transaction.getId());
+                                            Log.e(TAG, "Failed to update transaction server_id in local database");
+                                            // إعادة المحاولة
+                                            transaction.setServerId(-1);
+                                            transaction.setSyncStatus(SYNC_STATUS_FAILED);
+                                            transactionDao.update(transaction);
                                         }
+                                    } catch (Exception e) {
+                                        Log.e(TAG, "Error updating transaction server_id: " + e.getMessage());
+                                        // إعادة المحاولة
+                                        transaction.setServerId(-1);
+                                        transaction.setSyncStatus(SYNC_STATUS_FAILED);
+                                        transactionDao.update(transaction);
                                     }
-
-                                    // تحديث معرف السيرفر وحالة المزامنة
-                                    transaction.setServerId(serverId);
-                                    transaction.setLastSyncTime(System.currentTimeMillis());
-                                    transaction.setSyncStatus(SYNC_STATUS_SYNCED);
-                                    transactionDao.update(transaction);
-                                    releaseLock(itemKey);
-                                    session.addProcessedItem(itemKey);
                                 }
                             }
                         }
