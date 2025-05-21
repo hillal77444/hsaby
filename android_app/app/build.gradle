@@ -17,6 +17,9 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
 
         // Room schema export
         javaCompileOptions {
@@ -55,7 +58,7 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            minifyEnabled true
+            minifyEnabled false
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
@@ -185,6 +188,10 @@ dependencies {
     implementation 'com.google.accompanist:accompanist-systemuicontroller:0.32.0'
     implementation 'com.google.accompanist:accompanist-permissions:0.32.0'
     implementation 'com.google.accompanist:accompanist-navigation-animation:0.32.0'
+    
+    // Security
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+    implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha06'
     
     // Testing
     testImplementation 'junit:junit:4.13.2'
