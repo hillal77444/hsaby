@@ -108,6 +108,14 @@
                 android:text="@string/register_button"
                 android:textSize="16sp" />
 
+            <TextView
+                android:id="@+id/tvLogin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/register_login"
+                android:textColor="@color/primary" />
+
             <ProgressBar
                 android:id="@+id/progressBar"
                 android:layout_width="wrap_content"

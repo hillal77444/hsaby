@@ -20,8 +20,7 @@ class AuthRepository @Inject constructor(
             val response = apiService.login(request)
             if (response.isSuccessful && response.body() != null) {
                 val loginResponse = response.body()!!
-                preferencesManager.saveToken(loginResponse.token)
-                preferencesManager.saveRefreshToken(loginResponse.refreshToken)
+                preferencesManager.saveToken(loginResponse.accessToken)
                 preferencesManager.saveUserId(loginResponse.user.id)
                 Result.Success(loginResponse)
             } else {
@@ -36,16 +35,12 @@ class AuthRepository @Inject constructor(
         return try {
             val response = apiService.register(request)
             if (response.isSuccessful && response.body() != null) {
-                val registerResponse = response.body()!!
-                preferencesManager.saveToken(registerResponse.token)
-                preferencesManager.saveRefreshToken(registerResponse.refreshToken)
-                preferencesManager.saveUserId(registerResponse.user.id)
-                Result.Success(registerResponse)
+                Result.Success(response.body()!!)
             } else {
-                Result.Error("فشل التسجيل: ${response.errorBody()?.string() ?: "خطأ غير معروف"}")
+                Result.Error("فشل إنشاء الحساب: ${response.errorBody()?.string() ?: "خطأ غير معروف"}")
             }
         } catch (e: Exception) {
-            Result.Error(e.message ?: "حدث خطأ أثناء التسجيل")
+            Result.Error(e.message ?: "حدث خطأ أثناء إنشاء الحساب")
         }
     }
 
@@ -69,5 +64,7 @@ class AuthRepository @Inject constructor(
     fun getToken(): String? = preferencesManager.getToken()
     fun getRefreshToken(): String? = preferencesManager.getRefreshToken()
     fun getUserId(): String? = preferencesManager.getUserId()
-    fun clearAuthData() = preferencesManager.clearAuthData()
+    fun clearAuthData() {
+        preferencesManager.clearAuthData()
+    }
 } 

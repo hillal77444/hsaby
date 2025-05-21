@@ -46,13 +46,7 @@ class LoginActivity : AppCompatActivity() {
         }
         
         binding.tvRegister.setOnClickListener {
-            if (validateInput()) {
-                viewModel.register(
-                    binding.etName.text.toString(),
-                    binding.etPhone.text.toString(),
-                    binding.etPassword.text.toString()
-                )
-            }
+            startActivity(Intent(this, RegisterActivity::class.java))
         }
     }
     
@@ -67,9 +61,8 @@ class LoginActivity : AppCompatActivity() {
                 is LoginResult.Success -> {
                     binding.progressBar.visibility = View.GONE
                     lifecycleScope.launch {
-                        preferencesManager.saveToken(result.response.token)
-                        preferencesManager.saveRefreshToken(result.response.refreshToken)
-                        preferencesManager.saveUserId(result.response.userId)
+                        preferencesManager.saveToken(result.response.accessToken)
+                        preferencesManager.saveUserId(result.response.user.id)
                         startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                         finish()
                     }
@@ -77,6 +70,11 @@ class LoginActivity : AppCompatActivity() {
                 is LoginResult.Error -> {
                     binding.progressBar.visibility = View.GONE
                     Toast.makeText(this, result.message, Toast.LENGTH_SHORT).show()
+                    binding.btnLogin.isEnabled = true
+                    binding.tvRegister.isEnabled = true
+                }
+                else -> {
+                    binding.progressBar.visibility = View.GONE
                     binding.btnLogin.isEnabled = true
                     binding.tvRegister.isEnabled = true
                 }
@@ -98,13 +96,6 @@ class LoginActivity : AppCompatActivity() {
         if (binding.etPassword.text.isNullOrBlank()) {
             binding.etPassword.error = getString(R.string.error_password_required)
             isValid = false
-        }
-        
-        if (binding.tvRegister.visibility == View.VISIBLE) {
-            if (binding.etName.text.isNullOrBlank()) {
-                binding.etName.error = getString(R.string.error_name_required)
-                isValid = false
-            }
         }
         
         return isValid

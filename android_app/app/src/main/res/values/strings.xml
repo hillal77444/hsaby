@@ -14,16 +14,26 @@
     <string name="login_phone_hint">رقم الهاتف</string>
     <string name="login_password_hint">كلمة المرور</string>
     <string name="login_button">دخول</string>
-    <string name="login_register">تسجيل جديد</string>
+    <string name="login_register">إنشاء حساب جديد</string>
     <string name="login_remember_me">تذكرني</string>
     
     <!-- Register Screen -->
-    <string name="register_title">تسجيل جديد</string>
+    <string name="register_title">إنشاء حساب جديد</string>
     <string name="register_username_hint">اسم المستخدم</string>
     <string name="register_phone_hint">رقم الهاتف</string>
     <string name="register_password_hint">كلمة المرور</string>
     <string name="register_confirm_password_hint">تأكيد كلمة المرور</string>
-    <string name="register_button">تسجيل</string>
+    <string name="register_button">إنشاء حساب</string>
+    <string name="register_login">لديك حساب؟ تسجيل الدخول</string>
+    <string name="register_success">تم إنشاء الحساب بنجاح</string>
+    
+    <!-- Validation Messages -->
+    <string name="error_name_required">يرجى إدخال اسم المستخدم</string>
+    <string name="error_phone_required">يرجى إدخال رقم الهاتف</string>
+    <string name="error_invalid_phone">يرجى إدخال رقم هاتف صحيح</string>
+    <string name="error_password_required">يرجى إدخال كلمة المرور</string>
+    <string name="error_password_too_short">كلمة المرور يجب أن تكون 6 أحرف على الأقل</string>
+    <string name="error_passwords_dont_match">كلمات المرور غير متطابقة</string>
     
     <!-- Main Screen -->
     <string name="main_dashboard">الرئيسية</string>
