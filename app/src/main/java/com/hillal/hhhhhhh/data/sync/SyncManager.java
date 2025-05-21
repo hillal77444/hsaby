@@ -107,56 +107,10 @@ public class SyncManager {
     private final Queue<SyncRequest> syncQueue = new ConcurrentLinkedQueue<>();
     private int currentConcurrentSync = 0;
 
-    private static class SyncSession {
-        private final long startTime;
-        private final List<String> processedItems;
-        private final Map<String, Integer> retryCount;
-        private int totalItems;
-        private int completedItems;
-
-        public SyncSession() {
-            this.startTime = System.currentTimeMillis();
-            this.processedItems = new ArrayList<>();
-            this.retryCount = new HashMap<>();
-            this.totalItems = 0;
-            this.completedItems = 0;
-        }
-
-        public boolean isExpired() {
-            return System.currentTimeMillis() - startTime > MAX_SYNC_DURATION;
-        }
-
-        public void addProcessedItem(String itemKey) {
-            processedItems.add(itemKey);
-            completedItems++;
-        }
-
-        public boolean isItemProcessed(String itemKey) {
-            return processedItems.contains(itemKey);
-        }
-
-        public int getRetryCount(String itemKey) {
-            return retryCount.getOrDefault(itemKey, 0);
-        }
-
-        public void incrementRetryCount(String itemKey) {
-            retryCount.put(itemKey, getRetryCount(itemKey) + 1);
-        }
-    }
-
-    private static class SyncRequest {
-        private final List<Account> accounts;
-        private final List<Transaction> transactions;
-        private final long timestamp;
-        private int retryCount;
-
-        public SyncRequest(List<Account> accounts, List<Transaction> transactions) {
-            this.accounts = accounts;
-            this.transactions = transactions;
-            this.timestamp = System.currentTimeMillis();
-            this.retryCount = 0;
-        }
-    }
+    // إضافة ثوابت حالة المزامنة
+    private static final int SYNC_STATUS_SYNCED = 1;
+    private static final int SYNC_STATUS_PENDING = 0;
+    private static final int SYNC_STATUS_FAILED = -1;
 
     private int calculateOptimalBatchSize(int totalItems) {
         // حساب حجم الدفعة الأمثل بناءً على عدد العناصر
@@ -217,14 +171,14 @@ public class SyncManager {
     }
 
     private void handleSyncConflict(Account localAccount, Account serverAccount) {
-        // حل تعارضات البيانات
-        if (localAccount.getLastModifiedTime() > serverAccount.getLastModifiedTime()) {
+        // تعديل طريقة التحقق من التعارضات باستخدام lastSyncTime
+        if (localAccount.getLastSyncTime() > serverAccount.getLastSyncTime()) {
             // البيانات المحلية أحدث
             return;
         }
         // تحديث البيانات المحلية بالبيانات من السيرفر
         localAccount.setBalance(serverAccount.getBalance());
-        localAccount.setLastModifiedTime(serverAccount.getLastModifiedTime());
+        localAccount.setLastSyncTime(serverAccount.getLastSyncTime());
         accountDao.update(localAccount);
     }
 
@@ -272,13 +226,28 @@ public class SyncManager {
                                     // التحقق من التعارضات
                                     Account serverAccount = syncResponse.getAccount(serverId);
                                     if (serverAccount != null) {
-                                        handleSyncConflict(account, serverAccount);
-                                    }
+                                        // التحقق من حالة المزامنة
+                                        if (isItemLocked(itemKey)) {
+                                            Log.d(TAG, "Item is currently being synced: " + itemKey);
+                                            continue;
+                                        }
 
-                                    account.setServerId(serverId);
-                                    accountDao.update(account);
-                                    releaseLock(itemKey);
-                                    session.addProcessedItem(itemKey);
+                                        // التحقق من التعارضات
+                                        if (account.getLastSyncTime() > serverAccount.getLastSyncTime()) {
+                                            // البيانات المحلية أحدث، نحتفظ بها
+                                            Log.d(TAG, "Local data is newer for account: " + account.getId());
+                                        } else {
+                                            // تحديث البيانات المحلية بالبيانات من السيرفر
+                                            account.setBalance(serverAccount.getBalance());
+                                            account.setLastSyncTime(serverAccount.getLastSyncTime());
+                                        }
+
+                                        // تحديث معرف السيرفر
+                                        account.setServerId(serverId);
+                                        accountDao.update(account);
+                                        releaseLock(itemKey);
+                                        session.addProcessedItem(itemKey);
+                                    }
                                 }
                             }
                         }
@@ -289,6 +258,28 @@ public class SyncManager {
                             if (!session.isItemProcessed(itemKey)) {
                                 Long serverId = syncResponse.getTransactionServerId(transaction.getId());
                                 if (serverId != null) {
+                                    // التحقق من حالة المزامنة
+                                    if (isItemLocked(itemKey)) {
+                                        Log.d(TAG, "Item is currently being synced: " + itemKey);
+                                        continue;
+                                    }
+
+                                    // التحقق من التعارضات
+                                    Transaction serverTransaction = syncResponse.getTransaction(serverId);
+                                    if (serverTransaction != null) {
+                                        if (transaction.getLastSyncTime() > serverTransaction.getLastSyncTime()) {
+                                            // البيانات المحلية أحدث، نحتفظ بها
+                                            Log.d(TAG, "Local data is newer for transaction: " + transaction.getId());
+                                        } else {
+                                            // تحديث البيانات المحلية بالبيانات من السيرفر
+                                            transaction.setAmount(serverTransaction.getAmount());
+                                            transaction.setType(serverTransaction.getType());
+                                            transaction.setDescription(serverTransaction.getDescription());
+                                            transaction.setLastSyncTime(serverTransaction.getLastSyncTime());
+                                        }
+                                    }
+
+                                    // تحديث معرف السيرفر
                                     transaction.setServerId(serverId);
                                     transactionDao.update(transaction);
                                     releaseLock(itemKey);
@@ -302,12 +293,9 @@ public class SyncManager {
                     if (batchIndex < totalBatches - 1) {
                         handler.postDelayed(() -> {
                             List<Account> nextAccounts = getNextBatch(accountDao.getNewAccounts(), batchIndex + 1);
-                            List<Account> nextModifiedAccounts = getNextBatch(accountDao.getModifiedAccounts(lastSyncTime), batchIndex + 1);
                             List<Transaction> nextTransactions = getNextBatch(transactionDao.getNewTransactions(), batchIndex + 1);
-                            List<Transaction> nextModifiedTransactions = getNextBatch(transactionDao.getModifiedTransactions(lastSyncTime), batchIndex + 1);
                             
-                            syncBatch(nextAccounts, nextModifiedAccounts, nextTransactions, nextModifiedTransactions, 
-                                    callback, batchIndex + 1, totalBatches);
+                            syncBatch(nextAccounts, nextTransactions, callback, batchIndex + 1, totalBatches);
                         }, BATCH_DELAY);
                     } else {
                         // انتهت جميع الدفعات بنجاح
@@ -329,12 +317,9 @@ public class SyncManager {
                     if (batchIndex < totalBatches - 1) {
                         handler.postDelayed(() -> {
                             List<Account> nextAccounts = getNextBatch(accountDao.getNewAccounts(), batchIndex + 1);
-                            List<Account> nextModifiedAccounts = getNextBatch(accountDao.getModifiedAccounts(lastSyncTime), batchIndex + 1);
                             List<Transaction> nextTransactions = getNextBatch(transactionDao.getNewTransactions(), batchIndex + 1);
-                            List<Transaction> nextModifiedTransactions = getNextBatch(transactionDao.getModifiedTransactions(lastSyncTime), batchIndex + 1);
                             
-                            syncBatch(nextAccounts, nextModifiedAccounts, nextTransactions, nextModifiedTransactions, 
-                                    callback, batchIndex + 1, totalBatches);
+                            syncBatch(nextAccounts, nextTransactions, callback, batchIndex + 1, totalBatches);
                         }, BATCH_DELAY);
                     } else {
                         activeSyncSessions.remove(sessionId);
@@ -354,12 +339,9 @@ public class SyncManager {
                 if (batchIndex < totalBatches - 1) {
                     handler.postDelayed(() -> {
                         List<Account> nextAccounts = getNextBatch(accountDao.getNewAccounts(), batchIndex + 1);
-                        List<Account> nextModifiedAccounts = getNextBatch(accountDao.getModifiedAccounts(lastSyncTime), batchIndex + 1);
                         List<Transaction> nextTransactions = getNextBatch(transactionDao.getNewTransactions(), batchIndex + 1);
-                        List<Transaction> nextModifiedTransactions = getNextBatch(transactionDao.getModifiedTransactions(lastSyncTime), batchIndex + 1);
                         
-                        syncBatch(nextAccounts, nextModifiedAccounts, nextTransactions, nextModifiedTransactions, 
-                                callback, batchIndex + 1, totalBatches);
+                        syncBatch(nextAccounts, nextTransactions, callback, batchIndex + 1, totalBatches);
                     }, BATCH_DELAY);
                 } else {
                     activeSyncSessions.remove(sessionId);
@@ -549,13 +531,10 @@ public class SyncManager {
             try {
                 // الحصول على جميع العناصر غير المتزامنة
                 List<Account> allNewAccounts = accountDao.getNewAccounts();
-                List<Account> allModifiedAccounts = accountDao.getModifiedAccounts(lastSyncTime);
                 List<Transaction> allNewTransactions = transactionDao.getNewTransactions();
-                List<Transaction> allModifiedTransactions = transactionDao.getModifiedTransactions(lastSyncTime);
 
                 // حساب عدد الدفعات المطلوبة
-                int totalItems = allNewAccounts.size() + allModifiedAccounts.size() + 
-                               allNewTransactions.size() + allModifiedTransactions.size();
+                int totalItems = allNewAccounts.size() + allNewTransactions.size();
                 int totalBatches = (int) Math.ceil((double) totalItems / BATCH_SIZE);
 
                 if (totalItems == 0) {
@@ -567,13 +546,9 @@ public class SyncManager {
 
                 // بدء المزامنة مع الدفعة الأولى
                 List<Account> firstBatchAccounts = getNextBatch(allNewAccounts, 0);
-                List<Account> firstBatchModifiedAccounts = getNextBatch(allModifiedAccounts, 0);
                 List<Transaction> firstBatchTransactions = getNextBatch(allNewTransactions, 0);
-                List<Transaction> firstBatchModifiedTransactions = getNextBatch(allModifiedTransactions, 0);
 
-                syncBatch(firstBatchAccounts, firstBatchModifiedAccounts, 
-                         firstBatchTransactions, firstBatchModifiedTransactions,
-                         callback, 0, totalBatches);
+                syncBatch(firstBatchAccounts, firstBatchTransactions, callback, 0, totalBatches);
 
             } catch (Exception e) {
                 Log.e(TAG, "خطأ في بدء المزامنة: " + e.getMessage());
