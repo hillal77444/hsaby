@@ -1,160 +1,366 @@
-# هيكل تطبيق المحاسبة
+# هيكل بناء تطبيق حساباتي
 
-```
-📱 تطبيق المحاسبة
-├── 📂 UI Layer (طبقة واجهة المستخدم)
-│   ├── Activities
-│   │   ├── SplashActivity (شاشة البداية)
-│   │   ├── LoginActivity (تسجيل الدخول)
-│   │   └── MainActivity (الشاشة الرئيسية)
-│   └── Fragments
-│       └── NotificationsFragment (الإشعارات)
-│
-├── 📂 Data Layer (طبقة البيانات)
-│   ├── Remote
-│   │   ├── ApiService (خدمة API)
-│   │   └── Models
-│   │       ├── User (نموذج المستخدم)
-│   │       ├── Account (نموذج الحساب)
-│   │       └── Transaction (نموذج المعاملة)
-│   └── Local
-│       ├── PreferencesManager (إدارة التفضيلات)
-│       └── Database
-│           └── NotificationDao (إدارة الإشعارات)
-│
-└── 📂 Sync Layer (طبقة المزامنة)
-    └── SyncManager (مدير المزامنة)
-```
+## المرحلة الأولى: البنية الأساسية والمصادقة
+### 1. إعداد المشروع والتبعيات الأساسية
+#### الملفات المطلوبة:
+- `build.gradle` (app level)
+  - إضافة التبعيات الأساسية:
+    ```gradle
+    // Hilt
+    implementation "com.google.dagger:hilt-android:2.44"
+    kapt "com.google.dagger:hilt-compiler:2.44"
+    
+    // Retrofit
+    implementation "com.squareup.retrofit2:retrofit:2.9.0"
+    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+    
+    // Coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
+    
+    // ViewModel
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
+    ```
+- `NetworkModule.kt`
+  - تكوين Retrofit مع الخادم
+  - إعداد OkHttpClient مع interceptors
+  - تكوين ApiService
 
-## المكونات الجاهزة
+#### آلية العمل:
+- استخدام Hilt للـ Dependency Injection
+- تكوين Retrofit للاتصال بالخادم
+- إعداد PreferencesManager لتخزين بيانات المستخدم
 
-### 1. واجهة المستخدم (UI)
-#### 1.1 شاشة تسجيل الدخول (`LoginActivity`)
-- **الموقع**: `android_app/app/src/main/java/com/hsaby/accounting/ui/login/LoginActivity.kt`
-- **الوظائف**:
-  - عرض نموذج تسجيل الدخول
-  - التحقق من صحة رقم الهاتف وكلمة المرور
-  - إرسال طلب تسجيل الدخول للخادم
-  - حفظ بيانات تسجيل الدخول
-  - الانتقال للشاشة الرئيسية بعد نجاح تسجيل الدخول
+### 2. تنفيذ المصادقة
+#### الملفات المطلوبة:
+- `AuthModels.kt`
+  ```kotlin
+  data class LoginRequest(
+      val email: String,
+      val password: String
+  )
+  
+  data class LoginResponse(
+      val accessToken: String,
+      val userId: String
+  )
+  ```
 
-#### 1.2 شاشة الإشعارات (`NotificationsFragment`)
-- **الموقع**: `android_app/app/src/main/java/com/hsaby/accounting/ui/notifications/NotificationsFragment.kt`
-- **الوظائف**:
-  - عرض قائمة الإشعارات في RecyclerView
-  - تمييز الإشعارات المقروءة وغير المقروءة
-  - تحديث تلقائي للإشعارات الجديدة
-  - معالجة النقر على الإشعارات
+- `ApiService.kt`
+  ```kotlin
+  interface ApiService {
+      @POST("auth/login")
+      suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
+      
+      @POST("auth/register")
+      suspend fun register(@Body request: RegisterRequest): Response<RegisterResponse>
+  }
+  ```
 
-### 2. إدارة البيانات (Data Management)
-#### 2.1 إدارة التفضيلات (`PreferencesManager`)
-- **الموقع**: `android_app/app/src/main/java/com/hsaby/accounting/data/local/PreferencesManager.kt`
-- **الوظائف**:
-  - حفظ بيانات تسجيل الدخول (رقم الهاتف، التوكن)
-  - إدارة حالة تسجيل الدخول
-  - حفظ معرف المستخدم
-  - التحقق من حالة تسجيل الدخول
-  - حذف بيانات تسجيل الدخول
+- `AuthRepository.kt`
+  ```kotlin
+  @Singleton
+  class AuthRepository @Inject constructor(
+      private val apiService: ApiService,
+      private val preferencesManager: PreferencesManager
+  ) {
+      suspend fun login(request: LoginRequest): Result<LoginResponse>
+      suspend fun register(request: RegisterRequest): Result<RegisterResponse>
+      fun saveAuthData(token: String, userId: String)
+      fun clearAuthData()
+  }
+  ```
 
-#### 2.2 إدارة الإشعارات (`NotificationManager`)
-- **الموقع**: `android_app/app/src/main/java/com/hsaby/accounting/notifications/NotificationManager.kt`
-- **الوظائف**:
-  - إنشاء قنوات الإشعارات
-  - إرسال إشعارات المزامنة
-  - إرسال إشعارات المعاملات
-  - إرسال إشعارات الحسابات
-  - إدارة قاعدة بيانات الإشعارات المحلية
+#### الشاشات المطلوبة:
+1. `SplashActivity`
+   - التحقق من حالة تسجيل الدخول
+   - التوجيه إلى الشاشة المناسبة
 
-### 3. نماذج البيانات (Data Models)
-#### 3.1 نموذج المستخدم (`User`)
-- **الموقع**: `android_app/app/src/main/java/com/hsaby/accounting/data/remote/model/User.kt`
-- **الحقول**:
-  - `id`: معرف المستخدم
-  - `phone`: رقم الهاتف
-  - `name`: اسم المستخدم
-  - `createdAt`: تاريخ الإنشاء
-  - `updatedAt`: تاريخ التحديث
+2. `LoginActivity`
+   - نموذج تسجيل الدخول
+   - التحقق من صحة المدخلات
+   - معالجة الأخطاء
 
-#### 3.2 نموذج الحساب (`Account`)
-- **الموقع**: `android_app/app/src/main/java/com/hsaby/accounting/data/remote/model/Account.kt`
-- **الحقول**:
-  - `id`: معرف الحساب المحلي
-  - `serverId`: معرف الحساب على الخادم
-  - `accountName`: اسم الحساب
-  - `balance`: الرصيد
-  - `phoneNumber`: رقم الهاتف
-  - `notes`: الملاحظات
-  - `isDebtor`: حالة المدين
-  - `whatsappEnabled`: تفعيل واتساب
-  - `userId`: معرف المستخدم
-  - `createdAt`: تاريخ الإنشاء
-  - `updatedAt`: تاريخ التحديث
+3. `RegisterActivity`
+   - نموذج التسجيل
+   - التحقق من صحة المدخلات
+   - معالجة الأخطاء
 
-#### 3.3 نموذج المعاملة (`Transaction`)
-- **الموقع**: `android_app/app/src/main/java/com/hsaby/accounting/data/remote/model/Transaction.kt`
-- **الحقول**:
-  - `id`: معرف المعاملة المحلي
-  - `serverId`: معرف المعاملة على الخادم
-  - `amount`: المبلغ
-  - `type`: نوع المعاملة (دخل/مصروف)
-  - `description`: الوصف
-  - `notes`: الملاحظات
-  - `date`: التاريخ
-  - `currency`: العملة
-  - `whatsappEnabled`: تفعيل واتساب
-  - `accountId`: معرف الحساب
-  - `userId`: معرف المستخدم
-  - `createdAt`: تاريخ الإنشاء
-  - `updatedAt`: تاريخ التحديث
+#### آلية العمل:
+- تخزين token و userId في PreferencesManager
+- التحقق من حالة الاتصال قبل محاولة تسجيل الدخول
+- معالجة الأخطاء وعرض رسائل مناسبة للمستخدم
 
-### 4. واجهة برمجة التطبيقات (API)
-#### 4.1 خدمة API (`ApiService`)
-- **الموقع**: `android_app/app/src/main/java/com/hsaby/accounting/data/remote/ApiService.kt`
-- **الوظائف**:
-  - `login`: تسجيل الدخول
-  - `register`: التسجيل
-  - `getAccounts`: جلب الحسابات
-  - `getTransactions`: جلب المعاملات
-  - `syncData`: مزامنة البيانات
-  - `syncChanges`: تحديث البيانات
-  - `refreshToken`: تحديث التوكن
-  - `deleteTransaction`: حذف المعاملات
+## المرحلة الثانية: إدارة الحسابات
+### 1. نماذج البيانات
+#### الملفات المطلوبة:
+- `AccountModels.kt`
+  ```kotlin
+  data class Account(
+      val id: String,
+      val name: String,
+      val type: AccountType,
+      val balance: Double,
+      val currency: String,
+      val userId: String,
+      val lastSyncTime: Long
+  )
+  
+  enum class AccountType {
+      CASH, BANK, CREDIT_CARD
+  }
+  ```
 
-### 5. قاعدة البيانات المحلية (Local Database)
-#### 5.1 كائنات الوصول للبيانات (DAO)
-##### 5.1.1 NotificationDao
-- **الموقع**: `android_app/app/src/main/java/com/hsaby/accounting/data/local/dao/NotificationDao.kt`
-- **الوظائف**:
-  - `getAllNotifications`: جلب جميع الإشعارات
-  - `getUnreadNotifications`: جلب الإشعارات غير المقروءة
-  - `getUnreadCount`: عدد الإشعارات غير المقروءة
-  - `insertNotification`: إدخال إشعار جديد
-  - `insertNotifications`: إدخال عدة إشعارات
-  - `updateNotification`: تحديث إشعار
-  - `markAsRead`: تمييز إشعار كمقروء
-  - `markAllAsRead`: تمييز جميع الإشعارات كمقروءة
-  - `deleteNotification`: حذف إشعار
-  - `deleteOldNotifications`: حذف الإشعارات القديمة
+### 2. واجهات API
+#### الملفات المطلوبة:
+- `ApiService.kt` (تحديث)
+  ```kotlin
+  interface ApiService {
+      @GET("accounts")
+      suspend fun getAccounts(
+          @Query("user_id") userId: String,
+          @Query("last_sync_time") lastSyncTime: Long?
+      ): Response<List<Account>>
+      
+      @POST("accounts")
+      suspend fun createAccount(@Body account: Account): Response<Account>
+  }
+  ```
 
-### 6. المزامنة (Sync)
-#### 6.1 مدير المزامنة (`SyncManager`)
-- **الموقع**: `android_app/app/src/main/java/com/hsaby/accounting/sync/SyncManager.kt`
-- **الوظائف**:
-  - `syncAccounts`: مزامنة الحسابات
-  - `syncTransactions`: مزامنة المعاملات
-  - `isNetworkAvailable`: التحقق من توفر الإنترنت
-  - `manualSync`: مزامنة يدوية
-  - `syncNewData`: مزامنة البيانات الجديدة
-  - معالجة الأخطاء وإعادة المحاولة
+- `AccountRepository.kt`
+  ```kotlin
+  @Singleton
+  class AccountRepository @Inject constructor(
+      private val apiService: ApiService,
+      private val preferencesManager: PreferencesManager,
+      private val accountDao: AccountDao
+  ) {
+      suspend fun getAccounts(): Flow<List<Account>>
+      suspend fun createAccount(account: Account): Result<Account>
+      suspend fun syncAccounts()
+  }
+  ```
 
-## المكونات المتبقية للتطوير
-1. شاشة الحسابات
-2. شاشة المعاملات
-3. شاشة إضافة/تعديل الحساب
-4. شاشة إضافة/تعديل المعاملة
-5. شاشة التقارير
-6. شاشة الإعدادات
-7. شاشة الملف الشخصي
-8. نظام النسخ الاحتياطي
-9. نظام استعادة البيانات
-10. نظام التصدير والاستيراد 
+### 3. واجهة المستخدم
+#### الشاشات المطلوبة:
+1. `AccountsFragment`
+   - عرض قائمة الحسابات
+   - إمكانية التصفية والبحث
+   - عرض الرصيد الإجمالي
+
+2. `AddAccountFragment`
+   - نموذج إضافة حساب جديد
+   - التحقق من صحة المدخلات
+
+3. `AccountDetailsFragment`
+   - عرض تفاصيل الحساب
+   - عرض المعاملات المرتبطة
+   - إمكانية التعديل والحذف
+
+#### آلية العمل:
+- تخزين البيانات محلياً باستخدام Room
+- مزامنة البيانات مع الخادم عند توفر الاتصال
+- معالجة حالات عدم الاتصال
+- تحديث واجهة المستخدم بشكل تلقائي
+
+## المرحلة الثالثة: إدارة المعاملات
+### 1. نماذج البيانات
+#### الملفات المطلوبة:
+- `TransactionModels.kt`
+  ```kotlin
+  data class Transaction(
+      val id: String,
+      val amount: Double,
+      val type: TransactionType,
+      val category: String,
+      val accountId: String,
+      val date: Long,
+      val description: String,
+      val userId: String,
+      val lastSyncTime: Long
+  )
+  
+  enum class TransactionType {
+      INCOME, EXPENSE, TRANSFER
+  }
+  ```
+
+### 2. واجهات API
+#### الملفات المطلوبة:
+- `ApiService.kt` (تحديث)
+  ```kotlin
+  interface ApiService {
+      @GET("transactions")
+      suspend fun getTransactions(
+          @Query("user_id") userId: String,
+          @Query("last_sync_time") lastSyncTime: Long?
+      ): Response<List<Transaction>>
+      
+      @POST("transactions")
+      suspend fun createTransaction(@Body transaction: Transaction): Response<Transaction>
+  }
+  ```
+
+- `TransactionRepository.kt`
+  ```kotlin
+  @Singleton
+  class TransactionRepository @Inject constructor(
+      private val apiService: ApiService,
+      private val preferencesManager: PreferencesManager,
+      private val transactionDao: TransactionDao
+  ) {
+      suspend fun getTransactions(): Flow<List<Transaction>>
+      suspend fun createTransaction(transaction: Transaction): Result<Transaction>
+      suspend fun syncTransactions()
+  }
+  ```
+
+### 3. واجهة المستخدم
+#### الشاشات المطلوبة:
+1. `TransactionsFragment`
+   - عرض قائمة المعاملات
+   - إمكانية التصفية والبحث
+   - عرض الإجماليات
+
+2. `AddTransactionFragment`
+   - نموذج إضافة معاملة جديدة
+   - اختيار الحساب والفئة
+   - التحقق من صحة المدخلات
+
+3. `TransactionDetailsFragment`
+   - عرض تفاصيل المعاملة
+   - إمكانية التعديل والحذف
+
+#### آلية العمل:
+- تخزين البيانات محلياً
+- مزامنة البيانات مع الخادم
+- معالجة حالات عدم الاتصال
+- تحديث الأرصدة تلقائياً
+
+## المرحلة الرابعة: المزامنة والنسخ الاحتياطي
+### 1. نظام المزامنة
+#### الملفات المطلوبة:
+- `SyncManager.kt`
+  ```kotlin
+  @Singleton
+  class SyncManager @Inject constructor(
+      private val accountRepository: AccountRepository,
+      private val transactionRepository: TransactionRepository,
+      private val workManager: WorkManager
+  ) {
+      fun setupPeriodicSync()
+      suspend fun syncAll()
+      suspend fun syncChanges()
+  }
+  ```
+
+- `SyncWorker.kt`
+  ```kotlin
+  class SyncWorker @AssistedInject constructor(
+      @Assisted context: Context,
+      @Assisted workerParams: WorkerParameters,
+      private val syncManager: SyncManager
+  ) : CoroutineWorker(context, workerParams) {
+      override suspend fun doWork(): Result
+  }
+  ```
+
+#### آلية العمل:
+- استخدام WorkManager للمزامنة الدورية
+- مزامنة البيانات عند توفر الاتصال
+- معالجة حالات عدم الاتصال
+- تحسين استهلاك البطارية والبيانات
+
+### 2. النسخ الاحتياطي
+#### الملفات المطلوبة:
+- `BackupManager.kt`
+  ```kotlin
+  @Singleton
+  class BackupManager @Inject constructor(
+      private val accountRepository: AccountRepository,
+      private val transactionRepository: TransactionRepository
+  ) {
+      suspend fun createBackup(): Result<String>
+      suspend fun restoreBackup(backupId: String): Result<Unit>
+  }
+  ```
+
+#### آلية العمل:
+- إنشاء نسخ احتياطية دورية
+- تخزين النسخ في التخزين السحابي
+- إمكانية استعادة البيانات
+
+## المرحلة الخامسة: التقارير والإحصائيات
+1. إنشاء نماذج البيانات للتقارير
+   - نموذج Report
+   - نموذج Statistics
+
+2. تنفيذ واجهات API للتقارير
+   - إنشاء عمليات جلب التقارير
+   - تنفيذ ReportRepository
+
+3. إنشاء واجهة المستخدم للتقارير
+   - عرض التقارير المالية
+   - رسوم بيانية وإحصائيات
+   - تصدير التقارير
+
+## المرحلة السادسة: الإشعارات والتنبيهات
+1. تنفيذ نظام الإشعارات
+   - إشعارات المعاملات
+   - تنبيهات الميزانية
+   - إشعارات التقارير
+
+2. تنفيذ واجهة المستخدم للإشعارات
+   - قائمة الإشعارات
+   - إعدادات الإشعارات
+   - إدارة التنبيهات
+
+## المرحلة السابعة: الأمان والخصوصية
+1. تحسين أمان التطبيق
+   - تشفير البيانات المحلية
+   - حماية البيانات الحساسة
+   - إدارة الجلسات
+
+2. تنفيذ ميزات الخصوصية
+   - إعدادات الخصوصية
+   - حماية البيانات
+   - التحكم في الوصول
+
+## المرحلة الثامنة: تحسينات الأداء
+1. تحسين أداء التطبيق
+   - تحسين استهلاك الذاكرة
+   - تحسين سرعة التطبيق
+   - تحسين استهلاك البطارية
+
+2. تحسين تجربة المستخدم
+   - تحسين واجهة المستخدم
+   - إضافة رسوم متحركة
+   - تحسين التفاعل
+
+## المرحلة التاسعة: الاختبار والتحقق
+1. تنفيذ الاختبارات
+   - اختبارات الوحدة
+   - اختبارات التكامل
+   - اختبارات واجهة المستخدم
+
+2. التحقق من الجودة
+   - مراجعة الكود
+   - تحليل الأداء
+   - تحسين الأخطاء
+
+## المرحلة العاشرة: النشر والصيانة
+1. إعداد النشر
+   - إعداد متجر Google Play
+   - إعداد التحديثات التلقائية
+   - إعداد التحليلات
+
+2. الصيانة المستمرة
+   - مراقبة الأخطاء
+   - تحسينات الأداء
+   - تحديثات الأمان
+
+## ملاحظات هامة:
+- كل مرحلة يجب أن تكون قابلة للبناء والاختبار بشكل مستقل
+- يجب كتابة اختبارات لكل مرحلة قبل الانتقال للمرحلة التالية
+- يجب توثيق كل مرحلة بشكل جيد
+- يمكن تعديل ترتيب المراحل حسب الأولوية
+- يجب مراعاة التوافق مع الإصدارات المختلفة من Android 
