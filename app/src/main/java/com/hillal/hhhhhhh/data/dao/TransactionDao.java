@@ -98,4 +98,10 @@ public interface TransactionDao {
 
     @Query("DELETE FROM transactions WHERE id = :transactionId")
     void deleteTransaction(long transactionId);
+
+    @Query("SELECT * FROM transactions WHERE sync_status = :syncStatus")
+    List<Transaction> getPendingSyncTransactions();
+
+    @Query("SELECT * FROM transactions WHERE sync_status != :syncStatus")
+    List<Transaction> getTransactionsForSync();
 } 
