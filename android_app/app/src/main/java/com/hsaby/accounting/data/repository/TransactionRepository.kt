@@ -55,7 +55,7 @@ class TransactionRepository @Inject constructor(
             val serverTransactions = apiService.getTransactions(userId, lastSyncTime)
 
             // Update local database
-            serverTransactions.forEach { serverTransaction ->
+            for (serverTransaction in serverTransactions) {
                 val localTransaction = getTransactionById(serverTransaction.id)
                 if (localTransaction == null) {
                     // Insert new transaction
