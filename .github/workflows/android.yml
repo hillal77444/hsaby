@@ -57,13 +57,17 @@ jobs:
             cmake;3.22.1
           accept-android-sdk-licenses: true
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x android_app/gradlew
-          
+      - name: Setup Gradle
+        run: |
+          cd android_app
+          ls -la
+          chmod +x ./gradlew
+          ls -la
+          ./gradlew --version
+
       - name: Build with Gradle
         run: |
           cd android_app
-          chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon --parallel --max-workers=2 --build-cache
           
       - name: Upload APK
