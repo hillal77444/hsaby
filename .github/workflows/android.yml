@@ -63,6 +63,7 @@ jobs:
       - name: Build with Gradle
         run: |
           cd android_app
+          chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon --parallel --max-workers=2 --build-cache
           
       - name: Upload APK
