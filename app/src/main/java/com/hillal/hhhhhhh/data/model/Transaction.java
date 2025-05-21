@@ -100,7 +100,6 @@ public class Transaction {
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
         this.syncStatus = 0; // PENDING
-        this.serverId = -1; // تعيين serverId إلى -1 افتراضياً
     }
 
     // Helper method to convert server date to timestamp

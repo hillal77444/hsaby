@@ -11,8 +11,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.content.SharedPreferences;
-import android.net.Network;
-import android.net.NetworkRequest;
 
 import com.hillal.hhhhhhh.data.remote.ApiService;
 import com.hillal.hhhhhhh.data.remote.RetrofitClient;
@@ -24,13 +22,6 @@ import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.model.User;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -40,18 +31,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import com.google.gson.Gson;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.HashMap;
 import java.io.IOException;
 import androidx.lifecycle.LifecycleOwner;
 import java.util.Date;
-import java.util.UUID;
-import java.util.concurrent.TimeoutException;
-import java.lang.reflect.Type;
-import com.google.gson.reflect.TypeToken;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class SyncManager {
     private static final String TAG = "SyncManager";
@@ -102,76 +88,6 @@ public class SyncManager {
     private static final String PENDING_SYNC_DATA = "pending_sync_data";
     private static final String PENDING_SYNC_TIME = "pending_sync_time";
 
-    // إضافة ثوابت جديدة
-    private static final int MAX_SYNC_RETRY_COUNT = 3;
-    private static final long SYNC_RETRY_DELAY = 5000; // 5 ثواني
-    private static final long SYNC_TIMEOUT = 30000; // 30 ثانية
-
-    // إضافة متغيرات جديدة
-    private final Map<String, SyncSession> activeSyncSessions = new ConcurrentHashMap<>();
-    private final Map<Long, Long> lastTransactionSync = new ConcurrentHashMap<>();
-    private final Map<Long, Long> lastAccountSync = new ConcurrentHashMap<>();
-
-    // إضافة ثوابت جديدة للمزامنة في وضع عدم الاتصال
-    private static final String OFFLINE_QUEUE_PREFS = "offline_sync_queue";
-    private static final String OFFLINE_QUEUE_DATA = "offline_queue_data";
-    private static final int MAX_QUEUE_SIZE = 1000;
-    private static final long MIN_RETRY_INTERVAL = 60000; // دقيقة واحدة
-    private static final long MAX_RETRY_INTERVAL = 3600000; // ساعة واحدة
-
-    // إضافة المتغيرات المفقودة
-    private final AtomicLong lastRetryTime = new AtomicLong(0);
-    private final AtomicInteger retryCount = new AtomicInteger(0);
-
-    // تعديل تعريف offlineQueue
-    private final Queue<SyncRequest> offlineQueue = new ConcurrentLinkedQueue<>();
-
-    // إضافة كلاس جديد للتعامل مع التعارضات
-    private static class ConflictResolver {
-        private final TransactionDao transactionDao;
-        private final AccountDao accountDao;
-
-        public ConflictResolver(TransactionDao transactionDao, AccountDao accountDao) {
-            this.transactionDao = transactionDao;
-            this.accountDao = accountDao;
-        }
-
-        public Transaction resolveTransactionConflict(Transaction local, Transaction server) {
-            if (local.getLastSyncTime() > server.getLastSyncTime()) {
-                return local;
-            } else if (server.getLastSyncTime() > local.getLastSyncTime()) {
-                return server;
-            } else {
-                return local;
-            }
-        }
-
-        public Account resolveAccountConflict(Account local, Account server) {
-            if (local.getLastSyncTime() > server.getLastSyncTime()) {
-                return local;
-            } else if (server.getLastSyncTime() > local.getLastSyncTime()) {
-                return server;
-            } else {
-                return local;
-            }
-        }
-    }
-
-    // تعديل SyncRequest
-    private static class SyncRequest {
-        private final String id;
-        private final Map<String, Object> data;
-        private final long timestamp;
-        private int retryCount;
-
-        public SyncRequest(Map<String, Object> data) {
-            this.id = UUID.randomUUID().toString();
-            this.data = data;
-            this.timestamp = System.currentTimeMillis();
-            this.retryCount = 0;
-        }
-    }
-
     public SyncManager(Context context, AccountDao accountDao, TransactionDao transactionDao) {
         this.context = context;
         this.apiService = RetrofitClient.getInstance().getApiService();
@@ -179,12 +95,6 @@ public class SyncManager {
         this.transactionDao = transactionDao;
         this.handler = new Handler(Looper.getMainLooper());
         this.lastSyncTime = getLastSyncTime();
-        
-        // تحميل قائمة انتظار المزامنة
-        loadOfflineQueue();
-        
-        // بدء مراقبة الاتصال
-        startNetworkMonitoring();
         
         // تعطيل المزامنة التلقائية بشكل افتراضي
         this.isAutoSyncEnabled = false;
@@ -313,22 +223,19 @@ public class SyncManager {
     }
 
     private static class SyncSession {
-        private final String id;
         private final List<Account> newAccounts;
         private final List<Account> modifiedAccounts;
         private final List<Transaction> newTransactions;
         private final List<Transaction> modifiedTransactions;
-        private final AtomicInteger completedBatches = new AtomicInteger(0);
-        private final AtomicInteger failedBatches = new AtomicInteger(0);
-        private final AtomicInteger totalBatches = new AtomicInteger(0);
+        private final long startTime;
 
-        public SyncSession(String id, List<Account> newAccounts, List<Account> modifiedAccounts,
-                          List<Transaction> newTransactions, List<Transaction> modifiedTransactions) {
-            this.id = id;
+        public SyncSession(List<Account> newAccounts, List<Account> modifiedAccounts,
+                         List<Transaction> newTransactions, List<Transaction> modifiedTransactions) {
             this.newAccounts = newAccounts;
             this.modifiedAccounts = modifiedAccounts;
             this.newTransactions = newTransactions;
             this.modifiedTransactions = modifiedTransactions;
+            this.startTime = System.currentTimeMillis();
         }
 
         public List<Account> getNewAccounts() {
@@ -347,36 +254,15 @@ public class SyncManager {
             return modifiedTransactions;
         }
 
-        public void incrementCompletedBatches() {
-            completedBatches.incrementAndGet();
-        }
-
-        public void incrementFailedBatches() {
-            failedBatches.incrementAndGet();
-        }
-
-        public void setTotalBatches(int total) {
-            totalBatches.set(total);
-        }
-
-        public boolean waitForCompletion(long timeout) {
-            long startTime = System.currentTimeMillis();
-            while (completedBatches.get() + failedBatches.get() < totalBatches.get()) {
-                if (System.currentTimeMillis() - startTime > timeout) {
-                    return false;
-                }
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    return false;
-                }
-            }
-            return failedBatches.get() == 0;
+        public long getStartTime() {
+            return startTime;
         }
     }
 
     public void syncData(SyncCallback callback) {
-        String token = getToken();
+        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("token", null);
+
         if (token == null) {
             callback.onError("يرجى تسجيل الدخول أولاً");
             return;
@@ -387,6 +273,7 @@ public class SyncManager {
             return;
         }
 
+        // التحقق من حالة المزامنة
         synchronized (syncLock) {
             if (isSyncing) {
                 callback.onError("جاري تنفيذ عملية مزامنة أخرى، يرجى الانتظار");
@@ -397,9 +284,8 @@ public class SyncManager {
 
         executor.execute(() -> {
             try {
-                String syncId = UUID.randomUUID().toString();
+                // إنشاء جلسة مزامنة جديدة
                 SyncSession session = new SyncSession(
-                    syncId,
                     accountDao.getNewAccounts(),
                     accountDao.getModifiedAccounts(lastSyncTime),
                     transactionDao.getNewTransactions(),
@@ -554,36 +440,37 @@ public class SyncManager {
         });
     }
 
-    // تعديل handleOfflineSync
     private void handleOfflineSync(SyncCallback callback) {
-        Log.d(TAG, "لا يوجد اتصال بالإنترنت، جاري حفظ التغييرات للتحميل لاحقاً");
+        long currentTime = System.currentTimeMillis();
         
-        try {
-            // الحصول على التغييرات الحالية
-            List<Transaction> newTransactions = transactionDao.getNewTransactions();
-            List<Transaction> modifiedTransactions = transactionDao.getModifiedTransactions(lastSyncTime);
-
-            if (newTransactions.isEmpty() && modifiedTransactions.isEmpty()) {
-                callback.onSuccess();
+        // التحقق من عدد محاولات إعادة المحاولة
+        if (offlineRetryCount >= MAX_OFFLINE_RETRY_COUNT) {
+            // إعادة تعيين العداد بعد فترة
+            if (currentTime - lastOfflineRetryTime > OFFLINE_RETRY_INTERVAL) {
+                offlineRetryCount = 0;
+            } else {
+                callback.onError("لا يوجد اتصال بالإنترنت. سيتم إعادة المحاولة تلقائياً عند توفر الاتصال.");
                 return;
             }
+        }
 
-            // إنشاء طلب مزامنة
-            Map<String, Object> syncData = new HashMap<>();
-            if (!newTransactions.isEmpty()) {
-                syncData.put("new_transactions", newTransactions);
-            }
-            if (!modifiedTransactions.isEmpty()) {
-                syncData.put("modified_transactions", modifiedTransactions);
-            }
+        // تحديث حالة العناصر إلى PENDING
+        executor.execute(() -> {
+            try {
+                List<Account> newAccounts = accountDao.getNewAccounts();
+                List<Account> modifiedAccounts = accountDao.getModifiedAccounts(lastSyncTime);
+                List<Transaction> newTransactions = transactionDao.getNewTransactions();
+                List<Transaction> modifiedTransactions = transactionDao.getModifiedTransactions(lastSyncTime);
 
-            // إضافة الطلب إلى قائمة الانتظار
-            SyncRequest request = new SyncRequest(syncData);
-            if (offlineQueue.size() < MAX_QUEUE_SIZE) {
-                offlineQueue.offer(request);
-                saveOfflineQueue();
-                
-                // تحديث حالة المعاملات
+                // تحديث حالة العناصر إلى PENDING
+                for (Account account : newAccounts) {
+                    account.setSyncStatus(SYNC_STATUS_PENDING);
+                    accountDao.update(account);
+                }
+                for (Account account : modifiedAccounts) {
+                    account.setSyncStatus(SYNC_STATUS_PENDING);
+                    accountDao.update(account);
+                }
                 for (Transaction transaction : newTransactions) {
                     transaction.setSyncStatus(SYNC_STATUS_PENDING);
                     transactionDao.update(transaction);
@@ -593,147 +480,24 @@ public class SyncManager {
                     transactionDao.update(transaction);
                 }
 
-                // بدء مراقبة الاتصال
-                startNetworkMonitoring();
+                // تخزين وقت آخر محاولة
+                lastOfflineRetryTime = currentTime;
+                offlineRetryCount++;
 
-                callback.onSuccess();
-            } else {
-                callback.onError("قائمة انتظار المزامنة ممتلئة");
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "خطأ في حفظ المزامنة في وضع عدم الاتصال: " + e.getMessage());
-            callback.onError("خطأ في حفظ المزامنة في وضع عدم الاتصال");
-        }
-    }
+                // إعادة جدولة المزامنة
+                handler.postDelayed(() -> {
+                    if (isNetworkAvailable()) {
+                        syncData(callback);
+                    } else {
+                        callback.onError("لا يوجد اتصال بالإنترنت. سيتم إعادة المحاولة تلقائياً عند توفر الاتصال.");
+                    }
+                }, OFFLINE_RETRY_INTERVAL);
 
-    // تعديل saveOfflineQueue
-    private void saveOfflineQueue() {
-        try {
-            List<Map<String, Object>> queueData = new ArrayList<>();
-            for (SyncRequest request : offlineQueue) {
-                Map<String, Object> requestData = new HashMap<>();
-                requestData.put("id", request.id);
-                requestData.put("data", request.data);
-                requestData.put("timestamp", request.timestamp);
-                requestData.put("retryCount", request.retryCount);
-                queueData.add(requestData);
-            }
-
-            String queueJson = new Gson().toJson(queueData);
-            context.getSharedPreferences(OFFLINE_QUEUE_PREFS, Context.MODE_PRIVATE)
-                    .edit()
-                    .putString(OFFLINE_QUEUE_DATA, queueJson)
-                    .apply();
-        } catch (Exception e) {
-            Log.e(TAG, "خطأ في حفظ قائمة انتظار المزامنة: " + e.getMessage());
-        }
-    }
-
-    // تعديل loadOfflineQueue
-    private void loadOfflineQueue() {
-        try {
-            String queueJson = context.getSharedPreferences(OFFLINE_QUEUE_PREFS, Context.MODE_PRIVATE)
-                    .getString(OFFLINE_QUEUE_DATA, null);
-            
-            if (queueJson != null) {
-                Type type = new TypeToken<List<Map<String, Object>>>(){}.getType();
-                List<Map<String, Object>> queueData = new Gson().fromJson(queueJson, type);
-                
-                offlineQueue.clear();
-                for (Map<String, Object> requestData : queueData) {
-                    SyncRequest request = new SyncRequest((Map<String, Object>) requestData.get("data"));
-                    request.retryCount = ((Number) requestData.get("retryCount")).intValue();
-                    offlineQueue.offer(request);
-                }
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "خطأ في تحميل قائمة انتظار المزامنة: " + e.getMessage());
-        }
-    }
-
-    private void startNetworkMonitoring() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager != null) {
-            NetworkRequest.Builder builder = new NetworkRequest.Builder();
-            connectivityManager.registerNetworkCallback(builder.build(), new ConnectivityManager.NetworkCallback() {
-                @Override
-                public void onAvailable(Network network) {
-                    Log.d(TAG, "تم اكتشاف اتصال بالإنترنت، جاري محاولة المزامنة");
-                    processOfflineQueue();
-                }
-            });
-        }
-    }
-
-    private void processOfflineQueue() {
-        if (!isNetworkAvailable() || offlineQueue.isEmpty()) {
-            return;
-        }
-
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastRetryTime.get() < getRetryInterval()) {
-            return;
-        }
-
-        SyncRequest request = offlineQueue.peek();
-        if (request == null) {
-            return;
-        }
-
-        if (request.retryCount >= MAX_SYNC_RETRY_COUNT) {
-            Log.d(TAG, "تم تجاوز الحد الأقصى لمحاولات المزامنة، جاري إزالة الطلب");
-            offlineQueue.poll();
-            saveOfflineQueue();
-            return;
-        }
-
-        String token = getToken();
-        if (token == null) {
-            return;
-        }
-
-        apiService.syncChanges(token, request.data).enqueue(new Callback<Map<String, Object>>() {
-            @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Log.d(TAG, "تمت مزامنة البيانات المخزنة بنجاح");
-                    offlineQueue.poll();
-                    saveOfflineQueue();
-                    lastRetryTime.set(currentTime);
-                    retryCount.set(0);
-                    
-                    // معالجة الطلب التالي
-                    handler.postDelayed(() -> processOfflineQueue(), 1000);
-                } else {
-                    handleSyncFailure(request);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                handleSyncFailure(request);
+            } catch (Exception e) {
+                Log.e(TAG, "خطأ في المزامنة في وضع عدم الاتصال: " + e.getMessage());
+                handler.post(() -> callback.onError("خطأ في المزامنة في وضع عدم الاتصال: " + e.getMessage()));
             }
         });
-    }
-
-    private void handleSyncFailure(SyncRequest request) {
-        request.retryCount++;
-        lastRetryTime.set(System.currentTimeMillis());
-        retryCount.incrementAndGet();
-        
-        if (request.retryCount >= MAX_SYNC_RETRY_COUNT) {
-            Log.d(TAG, "فشلت المزامنة بعد " + MAX_SYNC_RETRY_COUNT + " محاولات");
-            offlineQueue.poll();
-            saveOfflineQueue();
-        }
-        
-        // إعادة المحاولة بعد فترة
-        handler.postDelayed(() -> processOfflineQueue(), getRetryInterval());
-    }
-
-    private long getRetryInterval() {
-        // زيادة الفاصل الزمني مع كل محاولة فاشلة
-        return Math.min(MIN_RETRY_INTERVAL * (1 << retryCount.get()), MAX_RETRY_INTERVAL);
     }
 
     private <T> List<T> filterSyncingItems(List<T> items) {
@@ -861,6 +625,16 @@ public class SyncManager {
         });
     }
 
+    private static class SyncRequest {
+        private List<Account> accounts;
+        private List<Transaction> transactions;
+        
+        public SyncRequest(List<Account> accounts, List<Transaction> transactions) {
+            this.accounts = accounts;
+            this.transactions = transactions;
+        }
+    }
+
     private Runnable syncRunnable = new Runnable() {
         @Override
         public void run() {
@@ -907,147 +681,212 @@ public class SyncManager {
 
     public void syncChanges(SyncCallback callback) {
         if (!isNetworkAvailable()) {
-            handleOfflineSync(callback);
+            callback.onError("لا يوجد اتصال بالإنترنت");
             return;
         }
 
-        String syncId = UUID.randomUUID().toString();
-        SyncSession session = new SyncSession(
-            syncId,
-            accountDao.getNewAccounts(),
-            accountDao.getModifiedAccounts(lastSyncTime),
-            transactionDao.getNewTransactions(),
-            transactionDao.getModifiedTransactions(lastSyncTime)
-        );
-        
-        synchronized (syncLock) {
-            if (isSyncing) {
-                Log.d(TAG, "جاري تنفيذ مزامنة أخرى، سيتم إضافة هذه المزامنة إلى قائمة الانتظار");
-                callback.onError("جاري تنفيذ مزامنة أخرى");
-                return;
-            }
-            isSyncing = true;
-            activeSyncSessions.put(syncId, session);
+        if (isSyncing) {
+            callback.onError("جاري تنفيذ عملية مزامنة أخرى، يرجى الانتظار");
+            return;
         }
 
-        try {
-            String token = getToken();
-            if (token == null) {
-                callback.onError("لم يتم العثور على رمز المصادقة");
-                return;
-            }
+        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("token", null);
 
-            // الحصول على المعاملات الجديدة والمعدلة
-            List<Transaction> newTransactions = transactionDao.getNewTransactions();
-            List<Transaction> modifiedTransactions = transactionDao.getModifiedTransactions(lastSyncTime);
+        if (token == null) {
+            callback.onError("يرجى تسجيل الدخول أولاً");
+            return;
+        }
 
-            // تصفية المعاملات المكررة والمزامنة مؤخراً
-            newTransactions = filterTransactions(newTransactions);
-            modifiedTransactions = filterTransactions(modifiedTransactions);
+        isSyncing = true;
+        executor.execute(() -> {
+            try {
+                Log.d(TAG, "بدء مزامنة التغييرات...");
+                
+                // 1. إرسال التغييرات المحلية إلى السيرفر
+                List<Account> modifiedAccounts = accountDao.getModifiedAccounts(getLastSyncTime());
+                List<Transaction> newTransactions = transactionDao.getNewTransactions();
+                List<Transaction> modifiedTransactions = transactionDao.getModifiedTransactions(getLastSyncTime());
 
-            // تجميع المعاملات في دفعات
-            List<List<Transaction>> newTransactionBatches = splitIntoBatches(newTransactions, BATCH_SIZE);
-            List<List<Transaction>> modifiedTransactionBatches = splitIntoBatches(modifiedTransactions, BATCH_SIZE);
+                // التحقق من وجود تغييرات
+                if (!modifiedAccounts.isEmpty() || !newTransactions.isEmpty() || !modifiedTransactions.isEmpty()) {
+                    Log.d(TAG, String.format("إرسال %d حساب معدل، %d معاملة جديدة، %d معاملة معدلة",
+                        modifiedAccounts.size(), newTransactions.size(), modifiedTransactions.size()));
 
-            // إرسال كل دفعة على حدة
-            for (List<Transaction> batch : newTransactionBatches) {
-                sendTransactionBatch(batch, true, token, session);
-            }
+                    Map<String, Object> changes = new HashMap<>();
+                    changes.put("accounts", modifiedAccounts);
+                    changes.put("new_transactions", newTransactions);
+                    changes.put("modified_transactions", modifiedTransactions);
 
-            for (List<Transaction> batch : modifiedTransactionBatches) {
-                sendTransactionBatch(batch, false, token, session);
-            }
+                    // إرسال التغييرات إلى السيرفر
+                    apiService.syncChanges("Bearer " + token, changes).enqueue(new Callback<Map<String, Object>>() {
+                        @Override
+                        public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                Map<String, Object> responseData = response.body();
+                                
+                                // التحقق من نجاح المزامنة
+                                boolean syncSuccess = true;
+                                
+                                // تحديث معرفات السيرفر للمعاملات الجديدة
+                                if (responseData.containsKey("new_transaction_ids")) {
+                                    Map<Long, Long> newTransactionIds = (Map<Long, Long>) responseData.get("new_transaction_ids");
+                                    for (Transaction transaction : newTransactions) {
+                                        Long serverId = newTransactionIds.get(transaction.getId());
+                                        if (serverId != null) {
+                                            transaction.setServerId(serverId);
+                                            transaction.setLastSyncTime(System.currentTimeMillis());
+                                            transactionDao.update(transaction);
+                                            Log.d(TAG, "تم تحديث معرف السيرفر للمعاملة: " + transaction.getId() + " -> " + serverId);
+                                        } else {
+                                            syncSuccess = false;
+                                            Log.e(TAG, "لم يتم استلام معرف سيرفر للمعاملة: " + transaction.getId());
+                                        }
+                                    }
+                                }
 
-            // انتظار اكتمال جميع الدفعات
-            if (session.waitForCompletion(SYNC_TIMEOUT)) {
-                updateLastSyncTime();
+                                if (syncSuccess) {
+                                    // 2. جلب التغييرات من السيرفر
+                                    fetchServerChanges(token, callback);
+                                } else {
+                                    // حفظ المزامنة الفاشلة للتحميل لاحقاً
+                                    savePendingSync(changes);
+                                    String error = "فشلت مزامنة بعض التغييرات، سيتم إعادة المحاولة عند توفر الاتصال";
+                                    Log.e(TAG, error);
+                                    isSyncing = false;
+                                    handler.post(() -> callback.onError(error));
+                                }
+                            } else {
+                                // حفظ المزامنة الفاشلة للتحميل لاحقاً
+                                savePendingSync(changes);
+                                String error = "فشلت مزامنة التغييرات المحلية، سيتم إعادة المحاولة عند توفر الاتصال";
+                                Log.e(TAG, error);
+                                isSyncing = false;
+                                handler.post(() -> callback.onError(error));
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                            // حفظ المزامنة الفاشلة للتحميل لاحقاً
+                            savePendingSync(changes);
+                            String error = "خطأ في الاتصال: " + t.getMessage() + "، سيتم إعادة المحاولة عند توفر الاتصال";
+                            Log.e(TAG, error);
+                            isSyncing = false;
+                            handler.post(() -> callback.onError(error));
+                        }
+                    });
+                } else {
+                    // إذا لم تكن هناك تغييرات محلية، جلب التغييرات من السيرفر مباشرة
+                    fetchServerChanges(token, callback);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "خطأ في مزامنة التغييرات: " + e.getMessage());
                 isSyncing = false;
-                activeSyncSessions.remove(syncId);
-                callback.onSuccess();
-            } else {
-                throw new TimeoutException("انتهت مهلة المزامنة");
+                handler.post(() -> callback.onError("خطأ في مزامنة التغييرات: " + e.getMessage()));
             }
-
-        } catch (Exception e) {
-            Log.e(TAG, "خطأ في المزامنة: " + e.getMessage());
-            isSyncing = false;
-            activeSyncSessions.remove(syncId);
-            callback.onError("خطأ في المزامنة: " + e.getMessage());
-        }
+        });
     }
 
-    private List<Transaction> filterTransactions(List<Transaction> transactions) {
-        return transactions.stream()
-            .filter(t -> {
-                Long lastSync = lastTransactionSync.get(t.getId());
-                return lastSync == null || 
-                       (System.currentTimeMillis() - lastSync) > SYNC_RETRY_DELAY;
-            })
-            .collect(Collectors.toList());
-    }
+    private void fetchServerChanges(String token, SyncCallback callback) {
+        long lastSyncTime = getLastSyncTime();
+        Log.d(TAG, "جلب التغييرات من السيرفر منذ: " + lastSyncTime);
 
-    private List<List<Transaction>> splitIntoBatches(List<Transaction> items, int batchSize) {
-        List<List<Transaction>> batches = new ArrayList<>();
-        for (int i = 0; i < items.size(); i += batchSize) {
-            batches.add(items.subList(i, Math.min(i + batchSize, items.size())));
-        }
-        return batches;
-    }
-
-    private void sendTransactionBatch(List<Transaction> batch, boolean isNew, String token, SyncSession session) {
-        Map<String, Object> requestData = new HashMap<>();
-        requestData.put(isNew ? "new_transactions" : "modified_transactions", batch);
-
-        apiService.syncChanges(token, requestData).enqueue(new Callback<Map<String, Object>>() {
+        apiService.getChanges("Bearer " + token, lastSyncTime).enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Map<String, Object> responseData = response.body();
-                    handleSyncResponse(responseData, batch, session);
+                    Map<String, Object> changes = response.body();
+                    executor.execute(() -> {
+                        try {
+                            // تحديث الحسابات
+                            List<Map<String, Object>> accounts = (List<Map<String, Object>>) changes.get("accounts");
+                            if (accounts != null && !accounts.isEmpty()) {
+                                Log.d(TAG, "تم استلام " + accounts.size() + " حساب معدل من السيرفر");
+                                for (Map<String, Object> accountData : accounts) {
+                                    String accountNumber = (String) accountData.get("account_number");
+                                    if (accountNumber == null) continue;
+
+                                    Account existingAccount = accountDao.getAccountByNumberSync(accountNumber);
+                                    if (existingAccount != null) {
+                                        // تحديث الحساب الموجود
+                                        existingAccount.setName((String) accountData.get("account_name"));
+                                        existingAccount.setPhoneNumber((String) accountData.get("phone_number"));
+                                        existingAccount.setBalance(((Number) accountData.get("balance")).doubleValue());
+                                        existingAccount.setCurrency((String) accountData.get("currency"));
+                                        existingAccount.setNotes((String) accountData.get("notes"));
+                                        existingAccount.setWhatsappEnabled((Boolean) accountData.get("whatsapp_enabled"));
+                                        existingAccount.setIsDebtor((Boolean) accountData.get("is_debtor"));
+                                        existingAccount.setLastSyncTime(System.currentTimeMillis());
+                                        accountDao.update(existingAccount);
+                                    }
+                                }
+                            }
+
+                            // تحديث المعاملات
+                            List<Map<String, Object>> transactions = (List<Map<String, Object>>) changes.get("transactions");
+                            if (transactions != null && !transactions.isEmpty()) {
+                                Log.d(TAG, "تم استلام " + transactions.size() + " معاملة من السيرفر");
+                                for (Map<String, Object> transactionData : transactions) {
+                                    long serverId = ((Number) transactionData.get("id")).longValue();
+                                    
+                                    Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(serverId);
+                                    if (existingTransaction != null) {
+                                        // تحديث المعاملة الموجودة
+                                        existingTransaction.setAmount(((Number) transactionData.get("amount")).doubleValue());
+                                        existingTransaction.setType((String) transactionData.get("type"));
+                                        existingTransaction.setDescription((String) transactionData.get("description"));
+                                        existingTransaction.setNotes((String) transactionData.get("notes"));
+                                        existingTransaction.setTransactionDate(((Number) transactionData.get("date")).longValue());
+                                        existingTransaction.setCurrency((String) transactionData.get("currency"));
+                                        existingTransaction.setWhatsappEnabled((Boolean) transactionData.get("whatsapp_enabled"));
+                                        existingTransaction.setLastSyncTime(System.currentTimeMillis());
+                                        transactionDao.update(existingTransaction);
+                                    } else {
+                                        // إضافة معاملة جديدة
+                                        Transaction transaction = new Transaction();
+                                        transaction.setServerId(serverId);
+                                        transaction.setAmount(((Number) transactionData.get("amount")).doubleValue());
+                                        transaction.setType((String) transactionData.get("type"));
+                                        transaction.setDescription((String) transactionData.get("description"));
+                                        transaction.setNotes((String) transactionData.get("notes"));
+                                        transaction.setTransactionDate(((Number) transactionData.get("date")).longValue());
+                                        transaction.setCurrency((String) transactionData.get("currency"));
+                                        transaction.setWhatsappEnabled((Boolean) transactionData.get("whatsapp_enabled"));
+                                        transaction.setAccountId(((Number) transactionData.get("account_id")).longValue());
+                                        transaction.setUserId(((Number) transactionData.get("user_id")).longValue());
+                                        transaction.setLastSyncTime(System.currentTimeMillis());
+                                        transactionDao.insert(transaction);
+                                    }
+                                }
+                            }
+
+                            updateLastSyncTime();
+                            Log.d(TAG, "تم تحديث البيانات المحلية بنجاح");
+                            isSyncing = false;
+                            handler.post(() -> callback.onSuccess());
+                        } catch (Exception e) {
+                            Log.e(TAG, "خطأ في تحديث البيانات المحلية: " + e.getMessage());
+                            isSyncing = false;
+                            handler.post(() -> callback.onError("خطأ في تحديث البيانات المحلية: " + e.getMessage()));
+                        }
+                    });
                 } else {
-                    handleSyncError(batch, session);
+                    String error = "فشل جلب التغييرات من السيرفر";
+                    Log.e(TAG, error);
+                    isSyncing = false;
+                    handler.post(() -> callback.onError(error));
                 }
             }
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                handleSyncError(batch, session);
+                String error = "خطأ في الاتصال: " + t.getMessage();
+                Log.e(TAG, error);
+                isSyncing = false;
+                handler.post(() -> callback.onError(error));
             }
         });
-    }
-
-    private void handleSyncResponse(Map<String, Object> responseData, List<Transaction> batch, SyncSession session) {
-        if (responseData.containsKey("transactionIdMap")) {
-            List<Map<String, Object>> idMap = (List<Map<String, Object>>) responseData.get("transactionIdMap");
-            for (Map<String, Object> mapping : idMap) {
-                long localId = ((Number) mapping.get("localId")).longValue();
-                long serverId = ((Number) mapping.get("serverId")).longValue();
-                
-                LiveData<Transaction> transactionLiveData = transactionDao.getTransactionById(localId);
-                transactionLiveData.observeForever(new Observer<Transaction>() {
-                    @Override
-                    public void onChanged(Transaction transaction) {
-                        if (transaction != null) {
-                            transaction.setServerId(serverId);
-                            transaction.setSyncStatus(SYNC_STATUS_SYNCED);
-                            transaction.setLastSyncTime(System.currentTimeMillis());
-                            transactionDao.update(transaction);
-                            lastTransactionSync.put(localId, System.currentTimeMillis());
-                        }
-                        transactionLiveData.removeObserver(this);
-                    }
-                });
-            }
-        }
-        session.incrementCompletedBatches();
-    }
-
-    private void handleSyncError(List<Transaction> batch, SyncSession session) {
-        for (Transaction transaction : batch) {
-            transaction.setSyncStatus(SYNC_STATUS_FAILED);
-            transactionDao.update(transaction);
-        }
-        session.incrementFailedBatches();
     }
 
     public void receiveChanges(SyncCallback callback) {
@@ -1073,7 +912,7 @@ public class SyncManager {
         }
 
         long lastSyncTime = getLastSyncTime();
-        Log.d(TAG, "جلب التغييرات من السيرفر منذ: " + lastSyncTime + " للمستخدم: " + currentUserId);
+        Log.d(TAG, "Fetching changes since: " + lastSyncTime + " for user: " + currentUserId);
 
         apiService.getChanges("Bearer " + token, lastSyncTime).enqueue(new Callback<Map<String, Object>>() {
             @Override
@@ -1085,18 +924,18 @@ public class SyncManager {
                             // تحديث الحسابات
                             List<Map<String, Object>> accounts = (List<Map<String, Object>>) changes.get("accounts");
                             if (accounts != null && !accounts.isEmpty()) {
-                                Log.d(TAG, "تم استلام " + accounts.size() + " حساب معدل من السيرفر");
+                                Log.d(TAG, "Received " + accounts.size() + " account changes");
                                 for (Map<String, Object> accountData : accounts) {
                                     // التحقق من أن الحساب ينتمي للمستخدم الحالي
                                     Long accountUserId = ((Number) accountData.get("user_id")).longValue();
                                     if (accountUserId != currentUserId) {
-                                        Log.d(TAG, "تخطي حساب لا ينتمي للمستخدم الحالي");
+                                        Log.d(TAG, "Skipping account not belonging to current user");
                                         continue;
                                     }
 
                                     String accountNumber = (String) accountData.get("account_number");
                                     if (accountNumber == null) {
-                                        Log.e(TAG, "رقم الحساب فارغ، تم تخطي الحساب");
+                                        Log.e(TAG, "Account number is null, skipping account");
                                         continue;
                                     }
 
@@ -1111,10 +950,11 @@ public class SyncManager {
                                         existingAccount.setNotes((String) accountData.get("notes"));
                                         existingAccount.setWhatsappEnabled((Boolean) accountData.get("whatsapp_enabled"));
                                         existingAccount.setIsDebtor((Boolean) accountData.get("is_debtor"));
+                                        existingAccount.setServerId(((Number) accountData.get("id")).longValue());
                                         existingAccount.setLastSyncTime(System.currentTimeMillis());
                                         existingAccount.setSyncStatus(SYNC_STATUS_SYNCED);
                                         accountDao.update(existingAccount);
-                                        Log.d(TAG, "تم تحديث الحساب: " + accountNumber);
+                                        Log.d(TAG, "Updated account: " + accountNumber);
                                     } else {
                                         // إضافة حساب جديد
                                         Account account = new Account();
@@ -1131,7 +971,7 @@ public class SyncManager {
                                         account.setLastSyncTime(System.currentTimeMillis());
                                         account.setSyncStatus(SYNC_STATUS_SYNCED);
                                         accountDao.insert(account);
-                                        Log.d(TAG, "تم إضافة حساب جديد: " + accountNumber);
+                                        Log.d(TAG, "Added new account: " + accountNumber);
                                     }
                                 }
                             }
@@ -1139,12 +979,12 @@ public class SyncManager {
                             // تحديث المعاملات
                             List<Map<String, Object>> transactions = (List<Map<String, Object>>) changes.get("transactions");
                             if (transactions != null && !transactions.isEmpty()) {
-                                Log.d(TAG, "تم استلام " + transactions.size() + " معاملة من السيرفر");
+                                Log.d(TAG, "Received " + transactions.size() + " transaction changes");
                                 for (Map<String, Object> transactionData : transactions) {
                                     // التحقق من أن المعاملة تنتمي للمستخدم الحالي
                                     Long transactionUserId = ((Number) transactionData.get("user_id")).longValue();
                                     if (transactionUserId != currentUserId) {
-                                        Log.d(TAG, "تخطي معاملة لا تنتمي للمستخدم الحالي");
+                                        Log.d(TAG, "Skipping transaction not belonging to current user");
                                         continue;
                                     }
 
@@ -1165,7 +1005,7 @@ public class SyncManager {
                                         existingTransaction.setLastSyncTime(System.currentTimeMillis());
                                         existingTransaction.setSyncStatus(SYNC_STATUS_SYNCED);
                                         transactionDao.update(existingTransaction);
-                                        Log.d(TAG, "تم تحديث المعاملة: " + serverId);
+                                        Log.d(TAG, "Updated transaction: " + serverId);
                                     } else {
                                         // إضافة معاملة جديدة
                                         Transaction transaction = new Transaction();
@@ -1182,7 +1022,7 @@ public class SyncManager {
                                         transaction.setLastSyncTime(System.currentTimeMillis());
                                         transaction.setSyncStatus(SYNC_STATUS_SYNCED);
                                         transactionDao.insert(transaction);
-                                        Log.d(TAG, "تم إضافة معاملة جديدة: " + serverId);
+                                        Log.d(TAG, "Added new transaction: " + serverId);
                                     }
                                 }
                             }
@@ -1190,43 +1030,43 @@ public class SyncManager {
                             // التعامل مع المعاملات المحذوفة
                             List<Long> deletedTransactionIds = (List<Long>) changes.get("deleted_transactions");
                             if (deletedTransactionIds != null && !deletedTransactionIds.isEmpty()) {
-                                Log.d(TAG, "تم استلام " + deletedTransactionIds.size() + " معاملة محذوفة");
+                                Log.d(TAG, "Received " + deletedTransactionIds.size() + " deleted transactions");
                                 for (Long serverId : deletedTransactionIds) {
                                     Transaction transaction = transactionDao.getTransactionByServerIdSync(serverId);
                                     if (transaction != null && transaction.getUserId() == currentUserId) {
                                         transactionDao.delete(transaction);
-                                        Log.d(TAG, "تم حذف المعاملة: " + serverId);
+                                        Log.d(TAG, "Deleted transaction with server ID: " + serverId);
                                     }
                                 }
                             }
 
                             saveLastSyncTime(System.currentTimeMillis());
-                            Log.d(TAG, "تم تحديث البيانات المحلية بنجاح");
+                            Log.d(TAG, "Successfully updated local data");
                             handler.post(() -> callback.onSuccess());
                         } catch (Exception e) {
-                            Log.e(TAG, "خطأ في تحديث البيانات المحلية: " + e.getMessage());
-                            handler.post(() -> callback.onError("خطأ في تحديث البيانات المحلية: " + e.getMessage()));
+                            Log.e(TAG, "Error updating local data: " + e.getMessage());
+                            handler.post(() -> callback.onError("Error updating local data: " + e.getMessage()));
                         }
                     });
                 } else {
                     String errorBody;
                     try {
                         errorBody = response.errorBody() != null ? 
-                            response.errorBody().string() : "خطأ غير معروف";
+                            response.errorBody().string() : "Unknown error";
                     } catch (IOException e) {
-                        Log.e(TAG, "خطأ في قراءة رسالة الخطأ: " + e.getMessage());
-                        errorBody = "خطأ في قراءة الرد";
+                        Log.e(TAG, "Error reading error body: " + e.getMessage());
+                        errorBody = "Error reading response";
                     }
                     final String finalErrorBody = errorBody;
-                    Log.e(TAG, "فشل في جلب التغييرات: " + finalErrorBody);
-                    callback.onError("فشل في جلب التغييرات: " + finalErrorBody);
+                    Log.e(TAG, "Failed to receive changes: " + finalErrorBody);
+                    callback.onError("Failed to receive changes: " + finalErrorBody);
                 }
             }
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 final String errorBody = t.getMessage();
-                handler.post(() -> callback.onError("فشل في جلب التغييرات: " + errorBody));
+                handler.post(() -> callback.onError("Failed to receive changes: " + errorBody));
             }
         });
     }
@@ -1485,10 +1325,5 @@ public class SyncManager {
                 clearPendingSync();
             }
         }
-    }
-
-    private String getToken() {
-        return context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                .getString("token", null);
     }
 } 

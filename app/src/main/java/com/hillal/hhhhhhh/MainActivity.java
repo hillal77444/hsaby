@@ -23,7 +23,6 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.data.sync.SyncManager;
@@ -32,10 +31,6 @@ import com.hillal.hhhhhhh.data.room.TransactionDao;
 import com.hillal.hhhhhhh.data.room.PendingOperationDao;
 import com.hillal.hhhhhhh.databinding.ActivityMainBinding;
 import com.hillal.hhhhhhh.viewmodel.AuthViewModel;
-import com.hillal.hhhhhhh.viewmodel.MainViewModel;
-import com.hillal.hhhhhhh.adapter.TransactionAdapter;
-import androidx.recyclerview.widget.RecyclerView;
-import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -58,10 +53,6 @@ public class MainActivity extends AppCompatActivity {
     private AuthViewModel authViewModel;
     private SyncManager syncManager;
     private App app;
-    private MainViewModel viewModel;
-    private TransactionAdapter adapter;
-    private TextView syncStatusText;
-    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Layout inflated successfully");
 
             // Setup toolbar
-            setSupportActionBar(binding.toolbar);
+            setSupportActionBar(binding.appBarMain.toolbar);
             Log.d(TAG, "Toolbar set successfully");
 
             // Initialize App instance first
@@ -142,18 +133,9 @@ public class MainActivity extends AppCompatActivity {
             // Set default fragment
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.nav_host_fragment_content_main, new DashboardFragment())
+                        .replace(R.id.fragment_container, new DashboardFragment())
                         .commit();
             }
-
-            // تهيئة ViewModel
-            viewModel = new ViewModelProvider(this).get(MainViewModel.class);
-
-            // تهيئة واجهة المستخدم
-            initUI();
-
-            // مراقبة البيانات
-            observeData();
 
         } catch (IllegalStateException e) {
             String errorMessage = "=== خطأ في تهيئة التطبيق ===\n\n" +
@@ -228,8 +210,6 @@ public class MainActivity extends AppCompatActivity {
         if (syncManager != null) {
             syncManager.onDashboardEntered();
         }
-        // بدء المزامنة عند استئناف النشاط
-        viewModel.startSync();
     }
 
     @Override
@@ -237,8 +217,6 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         Log.d(TAG, "onPause called");
         // لا نقوم بإيقاف المزامنة التلقائية هنا لأنها قد تكون قيد التنفيذ
-        // إيقاف المزامنة عند إيقاف النشاط
-        viewModel.stopSync();
     }
 
     @Override
@@ -276,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
 
                     if (selectedFragment != null) {
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.nav_host_fragment_content_main, selectedFragment)
+                                .replace(R.id.fragment_container, selectedFragment)
                                 .commit();
                         return true;
                     }
@@ -299,48 +277,5 @@ public class MainActivity extends AppCompatActivity {
 
     public PendingOperationDao getPendingOperationDao() {
         return ((App) getApplication()).getDatabase().pendingOperationDao();
-    }
-
-    private void initUI() {
-        syncStatusText = findViewById(R.id.sync_status_text);
-        recyclerView = findViewById(R.id.recycler_view);
-        adapter = new TransactionAdapter();
-        recyclerView.setAdapter(adapter);
-    }
-
-    private void observeData() {
-        // مراقبة جميع المعاملات
-        viewModel.getAllTransactions().observe(this, transactions -> {
-            adapter.setTransactions(transactions);
-        });
-
-        // مراقبة حالة المزامنة
-        viewModel.getIsSyncing().observe(this, isSyncing -> {
-            if (isSyncing) {
-                syncStatusText.setText("جاري المزامنة...");
-            }
-        });
-
-        // مراقبة أخطاء المزامنة
-        viewModel.getSyncError().observe(this, error -> {
-            if (error != null) {
-                Toast.makeText(this, "خطأ في المزامنة: " + error, Toast.LENGTH_SHORT).show();
-                syncStatusText.setText("فشلت المزامنة");
-            }
-        });
-
-        // مراقبة المعاملات المزامنة
-        viewModel.getSyncedTransactions().observe(this, transactions -> {
-            if (!transactions.isEmpty()) {
-                syncStatusText.setText("تمت مزامنة " + transactions.size() + " معاملة");
-            }
-        });
-
-        // مراقبة المعاملات في انتظار المزامنة
-        viewModel.getPendingTransactions().observe(this, transactions -> {
-            if (!transactions.isEmpty()) {
-                syncStatusText.setText("في انتظار مزامنة " + transactions.size() + " معاملة");
-            }
-        });
     }
 }

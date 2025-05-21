@@ -40,11 +40,11 @@
     <color name="green">#4CAF50</color>
     
     <!-- ألوان قديمة للتوافق مع الكود القديم فقط (يمكن حذفها لاحقاً إذا لم تعد مستخدمة) -->
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <color name="purple_200">#BB86FC</color>
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
+    <color name="teal_200">#03DAC5</color>
+    <color name="teal_700">#018786</color>
     <color name="primary_blue">#2563EB</color>
     <color name="primary_blue_dark">#1D4ED8</color>
     <color name="red_100">#FFCDD2</color>
@@ -54,8 +54,4 @@
     <color name="red_700">#D32F2F</color>
     <color name="green_700">#388E3C</color>
     <color name="colorPrimary">#1976D2</color>
-    
-    <!-- ألوان حالات المزامنة -->
-    <color name="synced">#4CAF50</color>
-    <color name="pending">#FFC107</color>
 </resources>
