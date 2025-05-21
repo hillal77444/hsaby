@@ -286,6 +286,7 @@ public class SyncManager {
                 if (response.isSuccessful()) {
                     ApiService.SyncResponse syncResponse = response.body();
                     if (syncResponse != null) {
+                        long serverTime = syncResponse.getServerTime();
                         // تحديث معرفات السيرفر للحسابات
                         for (Account account : unlockedAccounts) {
                             String itemKey = getItemKey(account);
@@ -296,7 +297,7 @@ public class SyncManager {
                                     try {
                                         // تحديث في قاعدة البيانات المحلية
                                         account.setServerId(serverId);
-                                        account.setLastSyncTime(System.currentTimeMillis());
+                                        account.setLastSyncTime(serverTime);
                                         account.setSyncStatus(SYNC_STATUS_SYNCED);
                                         accountDao.update(account);
 
@@ -335,7 +336,7 @@ public class SyncManager {
                                     try {
                                         // تحديث في قاعدة البيانات المحلية
                                         transaction.setServerId(serverId);
-                                        transaction.setLastSyncTime(System.currentTimeMillis());
+                                        transaction.setLastSyncTime(serverTime);
                                         transaction.setSyncStatus(SYNC_STATUS_SYNCED);
                                         transactionDao.update(transaction);
 
