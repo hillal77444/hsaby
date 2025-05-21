@@ -42,7 +42,6 @@ fun RegisterScreen(
     viewModel: RegisterViewModel = hiltViewModel()
 ) {
     var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -96,16 +95,6 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("البريد الإلكتروني") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
             value = phone,
             onValueChange = { phone = it },
             label = { Text("رقم الهاتف") },
@@ -152,7 +141,7 @@ fun RegisterScreen(
                     errorMessage = "كلمات المرور غير متطابقة"
                     return@Button
                 }
-                viewModel.register(name, email, phone, password)
+                viewModel.register(name, phone, password)
             },
             modifier = Modifier
                 .fillMaxWidth()
