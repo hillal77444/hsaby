@@ -33,21 +33,25 @@ class AccountRepository @Inject constructor(
         return accountDao.getActiveAccounts()
     }
 
-    fun getDebtorAccounts(): Flow<List<AccountEntity>> {
-        return accountDao.getDebtorAccounts()
+    fun getDebtorAccounts(userId: String): Flow<List<AccountEntity>> {
+        return accountDao.getDebtorAccounts(userId)
     }
 
     // Suspend functions
-    suspend fun getAccountById(id: String): AccountEntity? {
-        return accountDao.getAccountById(id)
+    suspend fun getAccountById(accountId: String): AccountEntity? {
+        return accountDao.getAccountById(accountId)
     }
 
-    suspend fun getAccountByServerId(serverId: String): AccountEntity? {
+    suspend fun getAccountByServerId(serverId: Long): AccountEntity? {
         return accountDao.getAccountByServerId(serverId)
     }
 
     suspend fun insertAccount(account: AccountEntity) {
         accountDao.insertAccount(account)
+    }
+
+    suspend fun insertAccounts(accounts: List<AccountEntity>) {
+        accountDao.insertAccounts(accounts)
     }
 
     suspend fun updateAccount(account: AccountEntity) {
@@ -75,17 +79,16 @@ class AccountRepository @Inject constructor(
     }
 
     // Sync functions
-    suspend fun syncAccounts(userId: String? = null) {
-        val currentUserId = userId ?: preferencesManager.getUserId() ?: return
+    suspend fun syncAccounts(userId: String) {
         val lastSyncTime = preferencesManager.getLastSyncTime() ?: 0L
 
         try {
             // Get accounts from server
-            val serverAccounts = apiService.getAccounts(currentUserId, lastSyncTime)
+            val serverAccounts = apiService.getAccounts(userId, lastSyncTime)
 
             // Update local database
             serverAccounts.forEach { serverAccount ->
-                val localAccount = accountDao.getAccountById(serverAccount.id)
+                val localAccount = accountDao.getAccountByServerId(serverAccount.serverId)
                 if (localAccount == null) {
                     // Insert new account
                     accountDao.insertAccount(AccountEntity(
@@ -98,7 +101,7 @@ class AccountRepository @Inject constructor(
                         notes = serverAccount.notes,
                         isDebtor = serverAccount.isDebtor,
                         whatsappEnabled = serverAccount.whatsappEnabled,
-                        userId = currentUserId,
+                        userId = userId,
                         lastSync = System.currentTimeMillis()
                     ))
                 } else {
@@ -126,20 +129,20 @@ class AccountRepository @Inject constructor(
     }
 
     // Search functions
-    fun searchAccounts(query: String): Flow<List<AccountEntity>> {
-        return accountDao.searchAccounts("%$query%")
+    fun searchAccounts(query: String, userId: String): Flow<List<AccountEntity>> {
+        return accountDao.searchAccounts(query, userId)
     }
 
     // Statistics functions
-    suspend fun getTotalBalance(): Double {
-        return accountDao.getTotalBalance() ?: 0.0
+    suspend fun getTotalBalance(userId: String): Double {
+        return accountDao.getTotalBalance(userId) ?: 0.0
     }
 
-    suspend fun getTotalDebtors(): Double {
-        return accountDao.getTotalDebtors() ?: 0.0
+    suspend fun getTotalDebtors(userId: String): Double {
+        return accountDao.getTotalDebtors(userId) ?: 0.0
     }
 
-    suspend fun getActiveAccountsCount(): Int {
-        return accountDao.getActiveAccountsCount()
+    suspend fun getAccountsCount(userId: String): Int {
+        return accountDao.getAccountsCount(userId)
     }
 } 
