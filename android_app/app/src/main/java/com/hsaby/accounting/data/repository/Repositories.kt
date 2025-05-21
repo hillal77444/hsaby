@@ -21,8 +21,8 @@ class UserRepository @Inject constructor(
                 response.body()?.let {
                     userDao.insertUser(
                         UserEntity(
-                            id = it.userId,
-                            username = it.username,
+                            id = it.user.id,
+                            username = it.user.name,
                             phone = phone,
                             passwordHash = password,
                             lastSync = System.currentTimeMillis()
@@ -30,7 +30,7 @@ class UserRepository @Inject constructor(
                     )
                     preferencesManager.saveToken(it.token)
                     preferencesManager.saveRefreshToken(it.refreshToken)
-                    preferencesManager.saveUserId(it.userId)
+                    preferencesManager.saveUserId(it.user.id)
                     Result.success(it)
                 } ?: Result.failure(Exception("Empty response body"))
             } else {
@@ -48,8 +48,8 @@ class UserRepository @Inject constructor(
                 response.body()?.let {
                     userDao.insertUser(
                         UserEntity(
-                            id = it.userId,
-                            username = it.username,
+                            id = it.user.id,
+                            username = it.user.name,
                             phone = phone,
                             passwordHash = password,
                             lastSync = System.currentTimeMillis()
@@ -57,7 +57,7 @@ class UserRepository @Inject constructor(
                     )
                     preferencesManager.saveToken(it.token)
                     preferencesManager.saveRefreshToken(it.refreshToken)
-                    preferencesManager.saveUserId(it.userId)
+                    preferencesManager.saveUserId(it.user.id)
                     Result.success(it)
                 } ?: Result.failure(Exception("Empty response body"))
             } else {
