@@ -1,123 +1,172 @@
 package com.hsaby.accounting.ui.register
 
-import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.hsaby.accounting.R
-import com.hsaby.accounting.databinding.ActivityRegisterBinding
-import com.hsaby.accounting.ui.login.LoginActivity
-import com.hsaby.accounting.util.PreferencesManager
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.hsaby.accounting.ui.theme.AccountingAppTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
-class RegisterActivity : AppCompatActivity() {
-    
-    private lateinit var binding: ActivityRegisterBinding
-    private val viewModel: RegisterViewModel by viewModels()
-    
-    @Inject
-    lateinit var preferencesManager: PreferencesManager
-    
+class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityRegisterBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        
-        setupViews()
-        observeViewModel()
+        setContent {
+            AccountingAppTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    RegisterScreen(
+                        onRegisterSuccess = {
+                            finish()
+                        }
+                    )
+                }
+            }
+        }
     }
-    
-    private fun setupViews() {
-        binding.toolbar.title = getString(R.string.register_title)
-        
-        binding.btnRegister.setOnClickListener {
-            if (validateInput()) {
-                viewModel.register(
-                    binding.etUsername.text.toString(),
-                    binding.etPhone.text.toString(),
-                    binding.etPassword.text.toString()
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RegisterScreen(
+    onRegisterSuccess: () -> Unit,
+    viewModel: RegisterViewModel = hiltViewModel()
+) {
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(viewModel.registerResult) {
+        when (val result = viewModel.registerResult) {
+            is AuthResult.Success -> {
+                isLoading = false
+                onRegisterSuccess()
+            }
+            is AuthResult.Error -> {
+                isLoading = false
+                errorMessage = result.message
+            }
+            is AuthResult.Loading -> {
+                isLoading = true
+                errorMessage = null
+            }
+            null -> {
+                isLoading = false
+                errorMessage = null
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "إنشاء حساب جديد",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("الاسم") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("البريد الإلكتروني") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = phone,
+            onValueChange = { phone = it },
+            label = { Text("رقم الهاتف") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("كلمة المرور") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            visualTransformation = PasswordVisualTransformation()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = { Text("تأكيد كلمة المرور") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            visualTransformation = PasswordVisualTransformation()
+        )
+
+        errorMessage?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = {
+                if (password != confirmPassword) {
+                    errorMessage = "كلمات المرور غير متطابقة"
+                    return@Button
+                }
+                viewModel.register(name, email, phone, password)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            enabled = !isLoading
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
+            } else {
+                Text("إنشاء حساب")
             }
         }
-        
-        binding.tvLogin.setOnClickListener {
-            finish()
-        }
-    }
-    
-    private fun observeViewModel() {
-        viewModel.registerResult.observe(this) { result ->
-            when (result) {
-                is RegisterResult.Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
-                    binding.btnRegister.isEnabled = false
-                    binding.tvLogin.isEnabled = false
-                }
-                is RegisterResult.Success -> {
-                    binding.progressBar.visibility = View.GONE
-                    Toast.makeText(
-                        this,
-                        getString(R.string.register_success),
-                        Toast.LENGTH_LONG
-                    ).show()
-                    startActivity(Intent(this, LoginActivity::class.java))
-                    finish()
-                }
-                is RegisterResult.Error -> {
-                    binding.progressBar.visibility = View.GONE
-                    Toast.makeText(this, result.message, Toast.LENGTH_SHORT).show()
-                    binding.btnRegister.isEnabled = true
-                    binding.tvLogin.isEnabled = true
-                }
-                else -> {
-                    binding.progressBar.visibility = View.GONE
-                    binding.btnRegister.isEnabled = true
-                    binding.tvLogin.isEnabled = true
-                }
-            }
-        }
-    }
-    
-    private fun validateInput(): Boolean {
-        var isValid = true
-        
-        if (binding.etUsername.text.isNullOrBlank()) {
-            binding.etUsername.error = getString(R.string.error_name_required)
-            isValid = false
-        }
-        
-        if (binding.etPhone.text.isNullOrBlank()) {
-            binding.etPhone.error = getString(R.string.error_phone_required)
-            isValid = false
-        } else if (!isValidPhoneNumber(binding.etPhone.text.toString())) {
-            binding.etPhone.error = getString(R.string.error_invalid_phone)
-            isValid = false
-        }
-        
-        if (binding.etPassword.text.isNullOrBlank()) {
-            binding.etPassword.error = getString(R.string.error_password_required)
-            isValid = false
-        } else if (binding.etPassword.text.toString().length < 6) {
-            binding.etPassword.error = getString(R.string.error_password_too_short)
-            isValid = false
-        }
-        
-        if (binding.etConfirmPassword.text.toString() != binding.etPassword.text.toString()) {
-            binding.etConfirmPassword.error = getString(R.string.error_passwords_dont_match)
-            isValid = false
-        }
-        
-        return isValid
-    }
-    
-    private fun isValidPhoneNumber(phone: String): Boolean {
-        val phonePattern = "^[0-9]{10}$"
-        return phone.matches(phonePattern.toRegex())
     }
 } 
