@@ -18,8 +18,8 @@ class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    private val _loginResult = MutableStateFlow<AuthResult<LoginResponse>?>(null)
-    val loginResult: StateFlow<AuthResult<LoginResponse>?> = _loginResult
+    private val _loginResult = MutableStateFlow<AuthResult<Unit>>(AuthResult.Loading)
+    val loginResult: StateFlow<AuthResult<Unit>> = _loginResult
 
     fun login(phone: String, password: String) {
         if (phone.isBlank() || password.isBlank()) {
@@ -34,13 +34,17 @@ class LoginViewModel @Inject constructor(
 
         viewModelScope.launch {
             _loginResult.value = AuthResult.Loading
-            _loginResult.value = authRepository.login(LoginRequest(phone, password))
+            val result = authRepository.login(LoginRequest(phone, password))
+            _loginResult.value = when (result) {
+                is AuthResult.Success -> AuthResult.Success(Unit)
+                is AuthResult.Error -> AuthResult.Error(result.message)
+                is AuthResult.Loading -> AuthResult.Loading
+            }
         }
     }
 
     private fun isValidPhone(phone: String): Boolean {
-        val phonePattern = "^[0-9]{10}$"
-        return phone.matches(phonePattern.toRegex())
+        return phone.matches(Regex("^[0-9]{10}$"))
     }
 
     fun register(name: String, phone: String, password: String) {
@@ -50,7 +54,7 @@ class LoginViewModel @Inject constructor(
                 val result = authRepository.register(RegisterRequest(name, phone, password))
                 when (result) {
                     is Result.Success -> {
-                        _loginResult.value = AuthResult.Success(result.data)
+                        _loginResult.value = AuthResult.Success(Unit)
                     }
                     is Result.Error -> {
                         _loginResult.value = AuthResult.Error(result.message)
