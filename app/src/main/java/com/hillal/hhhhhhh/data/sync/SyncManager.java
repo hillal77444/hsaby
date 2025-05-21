@@ -210,12 +210,12 @@ public class SyncManager {
             if (username != null && password != null) {
                 // محاولة تسجيل الدخول تلقائياً
                 ApiService.LoginRequest loginRequest = new ApiService.LoginRequest(username, password);
-                apiService.login(loginRequest).enqueue(new Callback<Map<String, Object>>() {
+                apiService.login(loginRequest).enqueue(new Callback<User>() {
                     @Override
-                    public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                    public void onResponse(Call<User> call, Response<User> response) {
                         if (response.isSuccessful() && response.body() != null) {
-                            Map<String, Object> loginResponse = response.body();
-                            String newToken = (String) loginResponse.get("token");
+                            User user = response.body();
+                            String newToken = user.getToken();
                             if (newToken != null) {
                                 // حفظ التوكن الجديد
                                 context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
@@ -233,7 +233,7 @@ public class SyncManager {
                     }
 
                     @Override
-                    public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                    public void onFailure(Call<User> call, Throwable t) {
                         handler.post(() -> callback.onError("فشل الاتصال بالسيرفر، يرجى المحاولة مرة أخرى"));
                     }
                 });
