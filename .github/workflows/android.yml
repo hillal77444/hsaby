@@ -44,7 +44,7 @@ jobs:
       - name: Build Debug APK
         run: |
           cd android_app
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug --stacktrace --parallel --max-workers=2 --build-cache --configure-on-demand --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
