@@ -25,16 +25,13 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _loginResult.value = LoginResult.Loading
             try {
-                val result = authRepository.login(phone, password)
+                val result = authRepository.login(LoginRequest(phone, password))
                 when (result) {
                     is Result.Success -> {
                         _loginResult.value = LoginResult.Success(result.data)
                     }
                     is Result.Error -> {
                         _loginResult.value = LoginResult.Error(result.message)
-                    }
-                    is Result.Loading -> {
-                        _loginResult.value = LoginResult.Loading
                     }
                 }
             } catch (e: Exception) {
@@ -47,16 +44,13 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _loginResult.value = LoginResult.Loading
             try {
-                val result = authRepository.register(name, phone, password)
+                val result = authRepository.register(RegisterRequest(name, phone, password))
                 when (result) {
                     is Result.Success -> {
                         _loginResult.value = LoginResult.Success(result.data)
                     }
                     is Result.Error -> {
                         _loginResult.value = LoginResult.Error(result.message)
-                    }
-                    is Result.Loading -> {
-                        _loginResult.value = LoginResult.Loading
                     }
                 }
             } catch (e: Exception) {
