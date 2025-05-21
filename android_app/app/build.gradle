@@ -115,6 +115,14 @@ android {
         }
     }
 
+    kapt {
+        correctErrorTypes true
+        useBuildCache true
+        arguments {
+            arg("room.schemaLocation", "$projectDir/schemas")
+        }
+    }
+
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
