@@ -1,9 +1,6 @@
 package com.hsaby.accounting.data.remote
 
-import com.hsaby.accounting.data.model.LoginRequest
-import com.hsaby.accounting.data.model.LoginResponse
-import com.hsaby.accounting.data.model.RegisterRequest
-import com.hsaby.accounting.data.model.RegisterResponse
+import com.hsaby.accounting.data.model.*
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -19,7 +16,7 @@ interface ApiService {
     suspend fun register(@Body request: RegisterRequest): Response<RegisterResponse>
 
     @POST("auth/refresh")
-    suspend fun refreshToken(@Body request: Map<String, String>): Response<LoginResponse>
+    suspend fun refreshToken(@Body request: RefreshTokenRequest): Response<LoginResponse>
 
     @GET("accounts")
     suspend fun getAccounts(
