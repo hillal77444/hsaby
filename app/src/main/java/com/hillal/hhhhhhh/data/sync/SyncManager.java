@@ -114,6 +114,9 @@ public class SyncManager {
     private static final int SYNC_STATUS_PENDING = 0;
     private static final int SYNC_STATUS_FAILED = -1;
 
+    private boolean isAutoSyncInProgress = false;
+    private boolean isManualSyncInProgress = false;
+
     private int calculateOptimalBatchSize(int totalItems) {
         // حساب حجم الدفعة الأمثل بناءً على عدد العناصر
         if (totalItems <= MIN_BATCH_SIZE) {
@@ -188,6 +191,7 @@ public class SyncManager {
                          SyncCallback callback, int batchIndex, int totalBatches) {
         if (accounts.isEmpty() && transactions.isEmpty()) {
             if (batchIndex >= totalBatches - 1) {
+                isSyncInProgress = false;  // Reset sync state
                 handler.post(() -> callback.onSuccess());
             }
             return;
@@ -229,16 +233,19 @@ public class SyncManager {
                             }
                         }
                         // إذا فشل تجديد التوكن
+                        isSyncInProgress = false;  // Reset sync state
                         handler.post(() -> callback.onError("فشل تجديد جلسة الدخول، يرجى تسجيل الدخول مرة أخرى"));
                     }
 
                     @Override
                     public void onFailure(Call<User> call, Throwable t) {
+                        isSyncInProgress = false;  // Reset sync state
                         handler.post(() -> callback.onError("فشل الاتصال بالسيرفر، يرجى المحاولة مرة أخرى"));
                     }
                 });
                 return;
             } else {
+                isSyncInProgress = false;  // Reset sync state
                 handler.post(() -> callback.onError("يرجى تسجيل الدخول أولاً"));
                 return;
             }
@@ -378,6 +385,7 @@ public class SyncManager {
                         // انتهت جميع الدفعات بنجاح
                         updateLastSyncTime();
                         activeSyncSessions.remove(sessionId);
+                        isSyncInProgress = false;  // Reset sync state
                         handler.post(() -> callback.onSuccess());
                     }
                 } else {
@@ -400,6 +408,7 @@ public class SyncManager {
                         }, BATCH_DELAY);
                     } else {
                         activeSyncSessions.remove(sessionId);
+                        isSyncInProgress = false;  // Reset sync state
                         handler.post(() -> callback.onError("فشلت مزامنة بعض الدفعات، سيتم إعادة المحاولة لاحقاً"));
                     }
                 }
@@ -422,6 +431,7 @@ public class SyncManager {
                     }, BATCH_DELAY);
                 } else {
                     activeSyncSessions.remove(sessionId);
+                    isSyncInProgress = false;  // Reset sync state
                     handler.post(() -> callback.onError("فشلت مزامنة بعض الدفعات، سيتم إعادة المحاولة لاحقاً"));
                 }
             }
@@ -464,7 +474,7 @@ public class SyncManager {
     }
 
     public void startAutoSync() {
-        if (!isAutoSyncEnabled || isSyncInProgress) {
+        if (!isAutoSyncEnabled || isAutoSyncInProgress || isManualSyncInProgress) {
             Log.d(TAG, "Auto sync is disabled or already in progress");
             return;
         }
@@ -475,7 +485,7 @@ public class SyncManager {
             return;
         }
 
-        isSyncInProgress = true;
+        isAutoSyncInProgress = true;
         Log.d(TAG, "Starting auto sync...");
 
         // إزالة المهام السابقة فقط إذا كانت هناك مزامنة جديدة
@@ -510,6 +520,7 @@ public class SyncManager {
                                 Log.d(TAG, "Auto sync successful");
                                 updateLastSyncTime();
                                 currentRetryCount = 0;
+                                isAutoSyncInProgress = false;
                                 // جدولة المزامنة التالية
                                 handler.postDelayed(currentSyncTask, SYNC_INTERVAL);
                             }
@@ -517,6 +528,7 @@ public class SyncManager {
                             @Override
                             public void onError(String error) {
                                 Log.e(TAG, "Auto sync failed: " + error);
+                                isAutoSyncInProgress = false;
                                 handleSyncFailure();
                             }
                         });
@@ -525,6 +537,7 @@ public class SyncManager {
                     @Override
                     public void onError(String error) {
                         Log.e(TAG, "Error fetching data: " + error);
+                        isAutoSyncInProgress = false;
                         handleSyncFailure();
                     }
                 });
@@ -589,7 +602,7 @@ public class SyncManager {
     }
 
     public void syncData(SyncCallback callback) {
-        if (isSyncInProgress) {
+        if (isAutoSyncInProgress || isManualSyncInProgress) {
             Log.d(TAG, "Sync already in progress, skipping");
             if (callback != null) {
                 callback.onError("Sync already in progress");
@@ -597,9 +610,10 @@ public class SyncManager {
             return;
         }
 
-        isSyncInProgress = true;
+        isManualSyncInProgress = true;
 
         if (!isNetworkAvailable()) {
+            isManualSyncInProgress = false;
             handleOfflineSync(callback);
             return;
         }
@@ -625,11 +639,27 @@ public class SyncManager {
                 List<Account> firstBatchAccounts = getNextBatch(allNewAccounts, 0);
                 List<Transaction> firstBatchTransactions = getNextBatch(allNewTransactions, 0);
 
-                syncBatch(firstBatchAccounts, firstBatchTransactions, callback, 0, totalBatches);
+                syncBatch(firstBatchAccounts, firstBatchTransactions, new SyncCallback() {
+                    @Override
+                    public void onSuccess() {
+                        isManualSyncInProgress = false;
+                        if (callback != null) {
+                            callback.onSuccess();
+                        }
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        isManualSyncInProgress = false;
+                        if (callback != null) {
+                            callback.onError(error);
+                        }
+                    }
+                }, 0, totalBatches);
 
             } catch (Exception e) {
                 Log.e(TAG, "خطأ في بدء المزامنة: " + e.getMessage());
-                isSyncInProgress = false;
+                isManualSyncInProgress = false;
                 handler.post(() -> callback.onError("خطأ في بدء المزامنة: " + e.getMessage()));
             }
         });
