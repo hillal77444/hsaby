@@ -49,7 +49,7 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
-    var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -91,9 +91,9 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("البريد الإلكتروني") },
+            value = phone,
+            onValueChange = { phone = it },
+            label = { Text("رقم الهاتف") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -122,7 +122,7 @@ fun LoginScreen(
 
         Button(
             onClick = {
-                viewModel.login(email, password)
+                viewModel.login(phone, password)
             },
             modifier = Modifier
                 .fillMaxWidth()
