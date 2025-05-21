@@ -20,27 +20,27 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
       
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
           java-version: '17'
-          cache: 'gradle'
+          distribution: 'temurin'
+          cache: gradle
           
       - name: Set up Android SDK
         uses: android-actions/setup-android@v2
         with:
           cmdline-tools-version: '9477386'
           packages: |
-            build-tools;33.0.0
-            platforms;android-33
-            ndk;25.1.8937393
             platform-tools
+            platforms;android-34
+            build-tools;34.0.0
+            cmake;3.22.1
+            ndk;25.1.8937393
             tools
-            emulator
-            system-images;android-33;google_apis;x86_64
+            system-images;android-34;google_apis;x86_64
           accept-android-sdk-licenses: true
           
       - name: Set up Android SDK Environment
@@ -48,78 +48,36 @@ jobs:
           echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
-          echo "$ANDROID_HOME/tools" >> $GITHUB_PATH
-          echo "$ANDROID_HOME/tools/bin" >> $GITHUB_PATH
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "$ANDROID_HOME/ndk/25.1.8937393" >> $GITHUB_PATH
+          echo "$ANDROID_HOME/cmake/3.22.1/bin" >> $GITHUB_PATH
           
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
+      - name: Set up CMake
+        uses: jwlawson/actions-setup-cmake@v1.13
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+          cmake-version: '3.22.1'
           
-      - name: Create Debug Keystore
+      - name: Set up Ninja
         run: |
-          cd android_app/app
-          keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          sudo apt-get update
+          sudo apt-get install -y ninja-build
           
-      - name: List Installed Packages
-        run: |
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list
+      - name: Grant execute permission for gradlew
+        run: chmod +x android_app/gradlew
           
-      - name: Decode Keystore
-        if: github.event.inputs.build_type == 'release'
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
-          
-      - name: Build APK
+      - name: Build with Gradle
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/25.1.8937393
+          ANDROID_CMAKE_HOME: ${{ env.ANDROID_HOME }}/cmake/3.22.1
         run: |
           cd android_app
-          chmod +x ./gradlew
-          ./gradlew clean
-          if [ "${{ github.event.inputs.build_type }}" == "release" ]; then
-            ./gradlew assembleRelease --quiet --no-daemon --build-cache
-          else
-            ./gradlew assembleDebug --quiet --no-daemon --build-cache
-          fi
-          
-      - name: Check APK
-        run: |
-          cd android_app/app/build/outputs/apk
-          if [ "${{ github.event.inputs.build_type }}" == "release" ]; then
-            if [ ! -f "release/app-release-unsigned.apk" ]; then
-              echo "APK not found!"
-              exit 1
-            fi
-          else
-            if [ ! -f "debug/app-debug.apk" ]; then
-              echo "APK not found!"
-              exit 1
-            fi
-          fi
-          
-      - name: Sign APK
-        if: github.event.inputs.build_type == 'release'
-        uses: r0adkll/sign-android-release@v1
-        with:
-          releaseDirectory: android_app/app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
-          alias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
+          ./gradlew clean build
           
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: app-${{ github.event.inputs.build_type }}
-          path: |
-            android_app/app/build/outputs/apk/${{ github.event.inputs.build_type }}/*.apk
-            android_app/app/build/outputs/logs
-            android_app/app/build/reports
-          if-no-files-found: error
+          name: app-debug
+          path: android_app/app/build/outputs/apk/debug/app-debug.apk
           
   download:
     needs: build
