@@ -17,20 +17,8 @@ class AccountRepository @Inject constructor(
     private val preferencesManager: PreferencesManager
 ) {
     // Flow functions
-    fun getAllAccounts(): Flow<List<AccountEntity>> {
-        return accountDao.getAllAccounts()
-    }
-
     fun getAccountsByUserId(userId: String): Flow<List<AccountEntity>> {
         return accountDao.getAccountsByUserId(userId)
-    }
-
-    fun getUnsyncedAccounts(): Flow<List<AccountEntity>> {
-        return accountDao.getUnsyncedAccounts()
-    }
-
-    fun getActiveAccounts(): Flow<List<AccountEntity>> {
-        return accountDao.getActiveAccounts()
     }
 
     fun getDebtorAccounts(userId: String): Flow<List<AccountEntity>> {
@@ -66,16 +54,22 @@ class AccountRepository @Inject constructor(
         accountDao.deleteAllAccounts(userId)
     }
 
-    suspend fun updateServerId(localId: Long, serverId: String) {
-        accountDao.updateServerId(localId, serverId)
+    // Search functions
+    fun searchAccounts(query: String, userId: String): Flow<List<AccountEntity>> {
+        return accountDao.searchAccounts(query, userId)
     }
 
-    suspend fun updateAccountBalance(accountId: Long, newBalance: Double) {
-        accountDao.updateAccountBalance(accountId, newBalance)
+    // Statistics functions
+    suspend fun getTotalBalance(userId: String): Double {
+        return accountDao.getTotalBalance(userId) ?: 0.0
     }
 
-    suspend fun updateAccountStatus(accountId: Long, isActive: Boolean) {
-        accountDao.updateAccountStatus(accountId, isActive)
+    suspend fun getTotalDebtors(userId: String): Double {
+        return accountDao.getTotalDebtors(userId) ?: 0.0
+    }
+
+    suspend fun getAccountsCount(userId: String): Int {
+        return accountDao.getAccountsCount(userId)
     }
 
     // Sync functions
@@ -126,23 +120,5 @@ class AccountRepository @Inject constructor(
             e.printStackTrace()
             throw e
         }
-    }
-
-    // Search functions
-    fun searchAccounts(query: String, userId: String): Flow<List<AccountEntity>> {
-        return accountDao.searchAccounts(query, userId)
-    }
-
-    // Statistics functions
-    suspend fun getTotalBalance(userId: String): Double {
-        return accountDao.getTotalBalance(userId) ?: 0.0
-    }
-
-    suspend fun getTotalDebtors(userId: String): Double {
-        return accountDao.getTotalDebtors(userId) ?: 0.0
-    }
-
-    suspend fun getAccountsCount(userId: String): Int {
-        return accountDao.getAccountsCount(userId)
     }
 } 
