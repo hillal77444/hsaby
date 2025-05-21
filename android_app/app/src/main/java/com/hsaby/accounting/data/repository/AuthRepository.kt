@@ -22,6 +22,7 @@ class AuthRepository @Inject constructor(
                 userId = response.user.id,
                 token = response.token
             )
+            preferencesManager.saveRefreshToken(response.refreshToken)
             AuthResult.Success(response)
         } catch (e: Exception) {
             AuthResult.Error(e.message ?: "حدث خطأ في تسجيل الدخول")
@@ -37,6 +38,7 @@ class AuthRepository @Inject constructor(
                 userId = response.user.id,
                 token = response.token
             )
+            preferencesManager.saveRefreshToken(response.refreshToken)
             AuthResult.Success(response)
         } catch (e: Exception) {
             AuthResult.Error(e.message ?: "حدث خطأ في التسجيل")
@@ -45,7 +47,7 @@ class AuthRepository @Inject constructor(
 
     suspend fun refreshToken(): AuthResult<RefreshTokenResponse> {
         return try {
-            val refreshToken = preferencesManager.getRefreshToken()
+            val refreshToken = preferencesManager.getRefreshToken().first()
                 ?: return AuthResult.Error("لم يتم العثور على رمز التحديث")
             
             val response = apiService.refreshToken(RefreshTokenRequest(refreshToken))
