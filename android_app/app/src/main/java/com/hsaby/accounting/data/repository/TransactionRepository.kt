@@ -15,24 +15,24 @@ class TransactionRepository @Inject constructor(
     private val apiService: ApiService,
     private val preferencesManager: PreferencesManager
 ) {
-    fun getAllTransactions(): Flow<List<TransactionEntity>> {
-        return transactionDao.getAllTransactions()
-    }
-
-    fun getTransactionById(id: String): Flow<TransactionEntity?> {
-        return transactionDao.getTransactionById(id.toLongOrNull() ?: 0L)
-    }
-
-    fun getTransactionByServerId(serverId: String): Flow<TransactionEntity?> {
-        return transactionDao.getTransactionByServerId(serverId)
+    fun getTransactionsByUserId(userId: String): Flow<List<TransactionEntity>> {
+        return transactionDao.getTransactionsByUserId(userId)
     }
 
     fun getTransactionsByAccountId(accountId: String): Flow<List<TransactionEntity>> {
-        return transactionDao.getTransactionsByAccountId(accountId.toLongOrNull() ?: 0L)
+        return transactionDao.getTransactionsByAccountId(accountId)
+    }
+
+    suspend fun getTransactionById(transactionId: String): TransactionEntity? {
+        return transactionDao.getTransactionById(transactionId)
     }
 
     suspend fun insertTransaction(transaction: TransactionEntity) {
         transactionDao.insertTransaction(transaction)
+    }
+
+    suspend fun insertTransactions(transactions: List<TransactionEntity>) {
+        transactionDao.insertTransactions(transactions)
     }
 
     suspend fun updateTransaction(transaction: TransactionEntity) {
@@ -43,12 +43,11 @@ class TransactionRepository @Inject constructor(
         transactionDao.deleteTransaction(transaction)
     }
 
-    suspend fun updateServerId(localId: Long, serverId: String) {
-        transactionDao.updateServerId(localId, serverId)
+    suspend fun deleteAllTransactions(userId: String) {
+        transactionDao.deleteAllTransactions(userId)
     }
 
-    suspend fun syncTransactions() {
-        val userId = preferencesManager.getUserId() ?: return
+    suspend fun syncTransactions(userId: String) {
         val lastSyncTime = preferencesManager.getLastSyncTime() ?: 0L
 
         try {
@@ -57,19 +56,23 @@ class TransactionRepository @Inject constructor(
 
             // Update local database
             serverTransactions.forEach { serverTransaction ->
-                val localTransaction = transactionDao.getTransactionByServerIdSync(serverTransaction.id)
+                val localTransaction = transactionDao.getTransactionById(serverTransaction.id)
                 if (localTransaction == null) {
                     // Insert new transaction
                     transactionDao.insertTransaction(TransactionEntity(
-                        id = 0,
-                        serverId = serverTransaction.id,
+                        id = serverTransaction.id,
+                        serverId = serverTransaction.serverId,
                         accountId = serverTransaction.accountId,
                         amount = serverTransaction.amount,
                         type = serverTransaction.type,
                         description = serverTransaction.description,
                         date = serverTransaction.date,
-                        lastModified = serverTransaction.lastModified,
-                        userId = userId
+                        currency = serverTransaction.currency,
+                        notes = serverTransaction.notes,
+                        whatsappEnabled = serverTransaction.whatsappEnabled,
+                        userId = userId,
+                        isSynced = true,
+                        lastSync = System.currentTimeMillis()
                     ))
                 } else {
                     // Update existing transaction
@@ -78,7 +81,11 @@ class TransactionRepository @Inject constructor(
                         type = serverTransaction.type,
                         description = serverTransaction.description,
                         date = serverTransaction.date,
-                        lastModified = serverTransaction.lastModified
+                        currency = serverTransaction.currency,
+                        notes = serverTransaction.notes,
+                        whatsappEnabled = serverTransaction.whatsappEnabled,
+                        isSynced = true,
+                        lastSync = System.currentTimeMillis()
                     ))
                 }
             }
@@ -88,6 +95,7 @@ class TransactionRepository @Inject constructor(
         } catch (e: Exception) {
             // Handle error appropriately
             e.printStackTrace()
+            throw e
         }
     }
 } 
