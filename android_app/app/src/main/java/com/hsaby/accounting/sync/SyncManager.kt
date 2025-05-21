@@ -87,7 +87,7 @@ class SyncManager @Inject constructor(
             val response = syncResponse.body() ?: return@withContext Result.Error("لا توجد بيانات للمزامنة")
 
             // Update accounts
-            response.accounts.forEach { account ->
+            for (account in response.accounts) {
                 val existingAccount = accountRepository.getAccountByServerId(account.serverId ?: 0L)
                 if (existingAccount != null) {
                     accountRepository.updateAccount(existingAccount.copy(
@@ -121,7 +121,7 @@ class SyncManager @Inject constructor(
             }
 
             // Update transactions
-            response.transactions.forEach { transaction ->
+            for (transaction in response.transactions) {
                 val existingTransaction = transactionRepository.getTransactionById(transaction.id)
                 if (existingTransaction != null) {
                     transactionRepository.updateTransaction(existingTransaction.copy(
@@ -158,8 +158,10 @@ class SyncManager @Inject constructor(
             }
 
             // Sync local changes to server
-            val unsyncedAccounts = accountRepository.getUnsyncedAccounts().first()
-            val unsyncedTransactions = transactionRepository.getUnsyncedTransactions(userId).first()
+            val unsyncedAccounts = accountRepository.getAccountsByUserId(userId).first()
+                .filter { !it.isSynced }
+            val unsyncedTransactions = transactionRepository.getTransactionsByUserId(userId).first()
+                .filter { !it.isSynced }
 
             if (unsyncedAccounts.isNotEmpty() || unsyncedTransactions.isNotEmpty()) {
                 val changesResponse = apiService.syncChanges(
@@ -168,7 +170,7 @@ class SyncManager @Inject constructor(
 
                 if (changesResponse.isSuccessful) {
                     // Update server IDs for synced items
-                    unsyncedAccounts.forEach { account ->
+                    for (account in unsyncedAccounts) {
                         accountRepository.updateAccount(account.copy(
                             serverId = account.serverId,
                             isSynced = true,
@@ -178,7 +180,7 @@ class SyncManager @Inject constructor(
                             accountsUploaded = _syncStats.value.accountsUploaded + 1
                         )
                     }
-                    unsyncedTransactions.forEach { transaction ->
+                    for (transaction in unsyncedTransactions) {
                         transactionRepository.updateTransaction(transaction.copy(
                             serverId = transaction.serverId,
                             isSynced = true,
