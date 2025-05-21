@@ -1,15 +1,14 @@
 buildscript {
     ext {
-        hilt_version = '2.48'
         kotlin_version = '1.9.0'
-        gradle_version = '8.2.0'
+        hilt_version = '2.48'
     }
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:$gradle_version"
+        classpath 'com.android.tools.build:gradle:8.2.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
     }
@@ -23,4 +22,12 @@ plugins {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
 } 
