@@ -10,13 +10,13 @@ interface ApiService {
     }
 
     @POST("auth/login")
-    suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
+    suspend fun login(@Body request: LoginRequest): LoginResponse
 
     @POST("auth/register")
-    suspend fun register(@Body request: RegisterRequest): Response<RegisterResponse>
+    suspend fun register(@Body request: RegisterRequest): RegisterResponse
 
     @POST("auth/refresh")
-    suspend fun refreshToken(@Body request: RefreshTokenRequest): Response<LoginResponse>
+    suspend fun refreshToken(@Body request: RefreshTokenRequest): RefreshTokenResponse
 
     @GET("accounts")
     suspend fun getAccounts(
@@ -59,4 +59,13 @@ interface ApiService {
 
     @POST("sync/changes")
     suspend fun syncChanges(@Body request: SyncChangesRequest): Response<SyncChangesResponse>
-} 
+}
+
+data class RefreshTokenRequest(
+    val refreshToken: String
+)
+
+data class RefreshTokenResponse(
+    val token: String,
+    val refreshToken: String
+) 
