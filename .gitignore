@@ -1,0 +1,79 @@
+# Build outputs
+*.apk
+*.aab
+*.aar
+*.ap_
+build/
+.gradle/
+app/build/
+android_app/build/
+
+# IDE files
+.idea/
+*.iml
+.navigation/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services
+google-services.json
+
+# Version control
+vcs.xml
+
+# Logs
+*.log
+logs/
+lint/
+
+# System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Generated files
+bin/
+gen/
+out/
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Local configuration file
+local.properties
+
+# Android Studio
+*.iml
+.navigation/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Android Profiling
+*.hprof 
