@@ -1,74 +1,79 @@
 package com.hsaby.accounting.util
 
 import android.content.Context
-import android.content.SharedPreferences
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
+
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 @Singleton
 class PreferencesManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-
-    fun saveToken(token: String) {
-        prefs.edit().putString(KEY_TOKEN, token).apply()
+    companion object {
+        private val ACCESS_TOKEN = stringPreferencesKey("access_token")
+        private val REFRESH_TOKEN = stringPreferencesKey("refresh_token")
+        private val USER_ID = stringPreferencesKey("user_id")
+        private val USER_NAME = stringPreferencesKey("user_name")
+        private val USER_EMAIL = stringPreferencesKey("user_email")
     }
 
-    fun getToken(): String? {
-        return prefs.getString(KEY_TOKEN, null)
-    }
+    val accessToken: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[ACCESS_TOKEN]
+        }
 
-    fun saveRefreshToken(token: String) {
-        prefs.edit().putString(KEY_REFRESH_TOKEN, token).apply()
-    }
+    val refreshToken: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[REFRESH_TOKEN]
+        }
 
-    fun getRefreshToken(): String? {
-        return prefs.getString(KEY_REFRESH_TOKEN, null)
-    }
+    val userId: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[USER_ID]
+        }
 
-    fun saveUserId(userId: String) {
-        prefs.edit().putString(KEY_USER_ID, userId).apply()
-    }
+    val userName: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[USER_NAME]
+        }
 
-    fun getUserId(): String? {
-        return prefs.getString(KEY_USER_ID, null)
-    }
+    val userEmail: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[USER_EMAIL]
+        }
 
-    fun saveUsername(username: String) {
-        prefs.edit().putString(KEY_USERNAME, username).apply()
-    }
-
-    fun getUsername(): String? {
-        return prefs.getString(KEY_USERNAME, null)
-    }
-
-    fun setLastSyncTime(time: Long) {
-        prefs.edit().putLong(KEY_LAST_SYNC_TIME, time).apply()
-    }
-
-    fun getLastSyncTime(): Long? {
-        val time = prefs.getLong(KEY_LAST_SYNC_TIME, -1)
-        return if (time != -1L) time else null
-    }
-
-    fun clearAuthData() {
-        prefs.edit().apply {
-            remove(KEY_TOKEN)
-            remove(KEY_REFRESH_TOKEN)
-            remove(KEY_USER_ID)
-            remove(KEY_USERNAME)
-            apply()
+    suspend fun saveAuthData(
+        accessToken: String,
+        refreshToken: String,
+        userId: String,
+        userName: String,
+        userEmail: String
+    ) {
+        context.dataStore.edit { preferences ->
+            preferences[ACCESS_TOKEN] = accessToken
+            preferences[REFRESH_TOKEN] = refreshToken
+            preferences[USER_ID] = userId
+            preferences[USER_NAME] = userName
+            preferences[USER_EMAIL] = userEmail
         }
     }
 
-    companion object {
-        private const val PREFS_NAME = "hsaby_prefs"
-        private const val KEY_TOKEN = "token"
-        private const val KEY_REFRESH_TOKEN = "refresh_token"
-        private const val KEY_USER_ID = "user_id"
-        private const val KEY_USERNAME = "username"
-        private const val KEY_LAST_SYNC_TIME = "last_sync_time"
+    suspend fun clearAuthData() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(ACCESS_TOKEN)
+            preferences.remove(REFRESH_TOKEN)
+            preferences.remove(USER_ID)
+            preferences.remove(USER_NAME)
+            preferences.remove(USER_EMAIL)
+        }
     }
 } 
