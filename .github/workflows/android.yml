@@ -35,13 +35,7 @@ jobs:
         uses: android-actions/setup-android@v3
         with:
           cmdline-tools-version: '10406996'
-          packages: |
-            "build-tools;34.0.0"
-            "platform-tools"
-            "platforms;android-34"
-            "ndk;25.1.8937393"
-            "cmake;3.22.1"
-            "tools"
+          packages: build-tools;34.0.0 platform-tools platforms;android-34 ndk;25.1.8937393 cmake;3.22.1 tools
           accept-android-sdk-licenses: true
 
       - name: Grant execute permission for gradlew
