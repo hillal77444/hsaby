@@ -3,7 +3,7 @@ package com.hsaby.accounting.sync
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.hsaby.accounting.data.remote.Result
+import com.hsaby.accounting.data.remote.Result as ApiResult
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -15,8 +15,8 @@ class SyncWorker @Inject constructor(
 
     override suspend fun doWork(): Result = try {
         when (val result = syncManager.syncNow()) {
-            is Result.Success -> Result.success()
-            is Result.Error -> Result.retry()
+            is ApiResult.Success -> Result.success()
+            is ApiResult.Error -> Result.retry()
             else -> Result.retry()
         }
     } catch (e: Exception) {
