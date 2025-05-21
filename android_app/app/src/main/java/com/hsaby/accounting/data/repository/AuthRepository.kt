@@ -1,8 +1,8 @@
 package com.hsaby.accounting.data.repository
 
+import com.hsaby.accounting.data.local.PreferencesManager
 import com.hsaby.accounting.data.model.*
 import com.hsaby.accounting.data.remote.ApiService
-import com.hsaby.accounting.util.PreferencesManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -13,71 +13,55 @@ class AuthRepository @Inject constructor(
     private val apiService: ApiService,
     private val preferencesManager: PreferencesManager
 ) {
-    val isLoggedIn: Flow<Boolean>
-        get() = preferencesManager.accessToken.map { it != null }
-
     suspend fun login(request: LoginRequest): AuthResult<LoginResponse> {
         return try {
             val response = apiService.login(request)
-            if (response.isSuccessful) {
-                response.body()?.let { loginResponse ->
-                    preferencesManager.saveAuthData(
-                        accessToken = loginResponse.accessToken,
-                        refreshToken = loginResponse.refreshToken,
-                        userId = loginResponse.userId,
-                        userName = "", // سيتم تحديثه لاحقاً
-                        userEmail = request.email
-                    )
-                    AuthResult.Success(loginResponse)
-                } ?: AuthResult.Error("Empty response body")
-            } else {
-                AuthResult.Error("Login failed: ${response.message()}")
-            }
+            preferencesManager.saveLoginCredentials(
+                phone = request.phone,
+                password = request.password,
+                userId = response.user.id,
+                token = response.token
+            )
+            AuthResult.Success(response)
         } catch (e: Exception) {
-            AuthResult.Error("Network error: ${e.message}")
+            AuthResult.Error(e.message ?: "حدث خطأ في تسجيل الدخول")
         }
     }
 
     suspend fun register(request: RegisterRequest): AuthResult<RegisterResponse> {
         return try {
             val response = apiService.register(request)
-            if (response.isSuccessful) {
-                response.body()?.let { registerResponse ->
-                    AuthResult.Success(registerResponse)
-                } ?: AuthResult.Error("Empty response body")
-            } else {
-                AuthResult.Error("Registration failed: ${response.message()}")
-            }
+            preferencesManager.saveLoginCredentials(
+                phone = request.phone,
+                password = request.password,
+                userId = response.user.id,
+                token = response.token
+            )
+            AuthResult.Success(response)
         } catch (e: Exception) {
-            AuthResult.Error("Network error: ${e.message}")
+            AuthResult.Error(e.message ?: "حدث خطأ في التسجيل")
         }
     }
 
-    suspend fun refreshToken(): AuthResult<LoginResponse> {
-        val refreshToken = preferencesManager.refreshToken.first() ?: return AuthResult.Error("No refresh token")
-        
+    suspend fun refreshToken(): AuthResult<RefreshTokenResponse> {
         return try {
+            val refreshToken = preferencesManager.getRefreshToken()
+                ?: return AuthResult.Error("لم يتم العثور على رمز التحديث")
+            
             val response = apiService.refreshToken(RefreshTokenRequest(refreshToken))
-            if (response.isSuccessful) {
-                response.body()?.let { loginResponse ->
-                    preferencesManager.saveAuthData(
-                        accessToken = loginResponse.accessToken,
-                        refreshToken = loginResponse.refreshToken,
-                        userId = loginResponse.userId,
-                        userName = preferencesManager.userName.first() ?: "",
-                        userEmail = preferencesManager.userEmail.first() ?: ""
-                    )
-                    AuthResult.Success(loginResponse)
-                } ?: AuthResult.Error("Empty response body")
-            } else {
-                AuthResult.Error("Token refresh failed: ${response.message()}")
-            }
+            preferencesManager.saveToken(response.token)
+            preferencesManager.saveRefreshToken(response.refreshToken)
+            AuthResult.Success(response)
         } catch (e: Exception) {
-            AuthResult.Error("Network error: ${e.message}")
+            AuthResult.Error(e.message ?: "حدث خطأ في تحديث الرمز")
         }
+    }
+
+    fun isLoggedIn(): Flow<Boolean> {
+        return preferencesManager.isLoggedIn
     }
 
     suspend fun logout() {
-        preferencesManager.clearAuthData()
+        preferencesManager.clearLoginCredentials()
     }
 } 
