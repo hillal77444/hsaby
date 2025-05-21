@@ -101,7 +101,7 @@ class SyncManager @Inject constructor(
                         lastSync = System.currentTimeMillis()
                     ))
                 } else {
-                    accountRepository.insertAccount(com.hsaby.accounting.data.local.entity.AccountEntity(
+                    accountRepository.insertAccount(AccountEntity(
                         id = account.id,
                         serverId = account.serverId,
                         accountName = account.name,
@@ -136,7 +136,7 @@ class SyncManager @Inject constructor(
                         lastSync = System.currentTimeMillis()
                     ))
                 } else {
-                    transactionRepository.insertTransaction(com.hsaby.accounting.data.local.entity.TransactionEntity(
+                    transactionRepository.insertTransaction(TransactionEntity(
                         id = transaction.id,
                         serverId = transaction.serverId,
                         accountId = transaction.accountId,
@@ -169,13 +169,21 @@ class SyncManager @Inject constructor(
                 if (changesResponse.isSuccessful) {
                     // Update server IDs for synced items
                     unsyncedAccounts.forEach { account ->
-                        accountRepository.updateServerId(account.id, account.serverId)
+                        accountRepository.updateAccount(account.copy(
+                            serverId = account.serverId,
+                            isSynced = true,
+                            lastSync = System.currentTimeMillis()
+                        ))
                         _syncStats.value = _syncStats.value.copy(
                             accountsUploaded = _syncStats.value.accountsUploaded + 1
                         )
                     }
                     unsyncedTransactions.forEach { transaction ->
-                        transactionRepository.updateServerId(transaction.id, transaction.serverId)
+                        transactionRepository.updateTransaction(transaction.copy(
+                            serverId = transaction.serverId,
+                            isSynced = true,
+                            lastSync = System.currentTimeMillis()
+                        ))
                         _syncStats.value = _syncStats.value.copy(
                             transactionsUploaded = _syncStats.value.transactionsUploaded + 1
                         )
