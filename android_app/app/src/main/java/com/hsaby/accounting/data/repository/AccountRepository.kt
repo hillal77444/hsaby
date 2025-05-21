@@ -81,7 +81,7 @@ class AccountRepository @Inject constructor(
             val serverAccounts = apiService.getAccounts(userId, lastSyncTime)
 
             // Update local database
-            serverAccounts.forEach { serverAccount ->
+            for (serverAccount in serverAccounts) {
                 val localAccount = getAccountByServerId(serverAccount.serverId ?: 0L)
                 if (localAccount == null) {
                     // Insert new account
