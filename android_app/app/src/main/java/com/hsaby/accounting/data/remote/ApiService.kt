@@ -1,6 +1,9 @@
 package com.hsaby.accounting.data.remote
 
-import com.hsaby.accounting.data.model.*
+import com.hsaby.accounting.data.model.LoginRequest
+import com.hsaby.accounting.data.model.LoginResponse
+import com.hsaby.accounting.data.model.RegisterRequest
+import com.hsaby.accounting.data.model.RegisterResponse
 import retrofit2.Response
 import retrofit2.http.*
 
