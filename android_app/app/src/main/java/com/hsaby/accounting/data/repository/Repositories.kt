@@ -8,12 +8,16 @@ import com.hsaby.accounting.data.local.entity.TransactionEntity
 import com.hsaby.accounting.data.local.entity.UserEntity
 import com.hsaby.accounting.data.model.*
 import com.hsaby.accounting.data.remote.ApiService
+import com.hsaby.accounting.util.PreferencesManager
 import kotlinx.coroutines.flow.Flow
-import java.util.*
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class UserRepository(
+@Singleton
+class UserRepository @Inject constructor(
     private val userDao: UserDao,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val preferencesManager: PreferencesManager
 ) {
     suspend fun register(username: String, phone: String, password: String): Result<RegisterResponse> {
         return try {
@@ -29,6 +33,9 @@ class UserRepository(
                             lastSync = System.currentTimeMillis()
                         )
                     )
+                    preferencesManager.saveToken(it.token)
+                    preferencesManager.saveRefreshToken(it.refreshToken)
+                    preferencesManager.saveUserId(it.userId)
                     Result.success(it)
                 } ?: Result.failure(Exception("Empty response body"))
             } else {
@@ -53,6 +60,9 @@ class UserRepository(
                             lastSync = System.currentTimeMillis()
                         )
                     )
+                    preferencesManager.saveToken(it.token)
+                    preferencesManager.saveRefreshToken(it.refreshToken)
+                    preferencesManager.saveUserId(it.userId)
                     Result.success(it)
                 } ?: Result.failure(Exception("Empty response body"))
             } else {
@@ -65,6 +75,18 @@ class UserRepository(
     
     suspend fun getUserById(userId: String): UserEntity? {
         return userDao.getUserById(userId)
+    }
+
+    fun getCurrentUserId(): String? {
+        return preferencesManager.getUserId()
+    }
+
+    fun getCurrentUsername(): String? {
+        return preferencesManager.getUsername()
+    }
+
+    fun clearUserData() {
+        preferencesManager.clearAuthData()
     }
 }
 
