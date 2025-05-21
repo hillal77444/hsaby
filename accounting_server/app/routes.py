@@ -87,7 +87,7 @@ def login():
     except Exception as e:
         logger.error(f"Login error: {str(e)}")
         return jsonify({'error': 'حدث خطأ أثناء تسجيل الدخول'}), 500
-
+    
 @main.route('/api/sync', methods=['POST'])
 @jwt_required()
 def sync_data():
@@ -96,7 +96,6 @@ def sync_data():
         current_user_id = get_jwt_identity()
         
         logger.info(f"Received sync request from user {current_user_id}")
-        logger.debug(f"Sync data: {data}")
         
         if not data:
             logger.warning("Empty sync data received")
@@ -121,14 +120,31 @@ def sync_data():
                 
                 # البحث عن الحساب باستخدام server_id إذا كان موجوداً
                 account = None
-                if acc_data.get('server_id') and acc_data['server_id'] > 0:  # تجاهل أي server_id سالب
-                    account = Account.query.filter_by(server_id=acc_data['server_id']).first()
+                if acc_data.get('server_id') and acc_data['server_id'] > 0:
+                    account = Account.query.filter_by(
+                        server_id=acc_data['server_id'],
+                        user_id=current_user_id
+                    ).first()
                 
-                # إذا لم يتم العثور على الحساب، ابحث باستخدام المعرف المحلي
-                if not account and acc_data.get('id'):
-                    account = Account.query.filter_by(id=acc_data['id']).first()
+                # التحقق من تكرار الحساب
+                if not account:
+                    existing_account = Account.query.filter_by(
+                        account_name=acc_data.get('account_name'),
+                        phone_number=acc_data.get('phone_number'),
+                        user_id=current_user_id
+                    ).first()
+                    
+                    if existing_account:
+                        account = existing_account
+                        logger.info(f"Found existing account: {account.account_name}")
                 
                 if account:
+                    # التحقق من وقت آخر مزامنة
+                    if account.last_sync_time and acc_data.get('last_sync_time'):
+                        if account.last_sync_time > acc_data['last_sync_time']:
+                            logger.info(f"Local data is newer for account: {account.account_name}")
+                            continue
+                    
                     # تحديث الحساب الموجود
                     account.account_name = acc_data.get('account_name', account.account_name)
                     account.balance = acc_data.get('balance', account.balance)
@@ -137,6 +153,7 @@ def sync_data():
                     account.is_debtor = acc_data.get('is_debtor', account.is_debtor)
                     account.whatsapp_enabled = acc_data.get('whatsapp_enabled', account.whatsapp_enabled)
                     account.user_id = current_user_id
+                    account.last_sync_time = datetime.now()
                     logger.info(f"Updated account: {account.account_name}")
                 else:
                     # إنشاء حساب جديد
@@ -147,15 +164,16 @@ def sync_data():
                         notes=acc_data.get('notes'),
                         is_debtor=acc_data.get('is_debtor', False),
                         whatsapp_enabled=acc_data.get('whatsapp_enabled', False),
-                        user_id=current_user_id
+                        user_id=current_user_id,
+                        last_sync_time=datetime.now()
                     )
                     db.session.add(account)
-                    db.session.flush()  # للحصول على server_id الجديد
+                    db.session.flush()
                     logger.info(f"Added new account: {account.account_name}")
                 
                 account_mappings.append({
                     'local_id': acc_data.get('id'),
-                    'server_id': account.server_id  # استخدام server_id الفعلي
+                    'server_id': account.server_id
                 })
             except Exception as e:
                 logger.error(f"Error processing account: {str(e)}")
@@ -182,13 +200,49 @@ def sync_data():
                 except (ValueError, TypeError) as e:
                     return json_response({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}, 400)
                 
+                # التحقق من صحة التاريخ
+                if date > datetime.now():
+                    return json_response({'error': 'التاريخ غير صحيح'}, 400)
+                
+                # التحقق من صحة الحساب
+                account = Account.query.filter_by(
+                    id=trans_data.get('account_id'),
+                    user_id=current_user_id
+                ).first()
+                
+                if not account:
+                    return json_response({'error': 'الحساب غير موجود'}, 400)
+                
                 # البحث عن المعاملة باستخدام server_id إذا كان موجوداً
                 transaction = None
-                if trans_data.get('server_id') and trans_data['server_id'] > 0:  # تجاهل أي server_id سالب
-                    transaction = Transaction.query.filter_by(server_id=trans_data['server_id']).first()
+                if trans_data.get('server_id') and trans_data['server_id'] > 0:
+                    transaction = Transaction.query.filter_by(
+                        server_id=trans_data['server_id'],
+                        user_id=current_user_id
+                    ).first()
                 
-
+                # التحقق من تكرار المعاملة
+                if not transaction:
+                    existing_transaction = Transaction.query.filter_by(
+                        amount=trans_data.get('amount'),
+                        type=trans_data.get('type'),
+                        description=trans_data.get('description'),
+                        date=date,
+                        account_id=trans_data.get('account_id'),
+                        user_id=current_user_id
+                    ).first()
+                    
+                    if existing_transaction:
+                        transaction = existing_transaction
+                        logger.info(f"Found existing transaction: {transaction.id}")
+                
                 if transaction:
+                    # التحقق من وقت آخر مزامنة
+                    if transaction.last_sync_time and trans_data.get('last_sync_time'):
+                        if transaction.last_sync_time > trans_data['last_sync_time']:
+                            logger.info(f"Local data is newer for transaction: {transaction.id}")
+                            continue
+                    
                     # تحديث المعاملة الموجودة
                     transaction.amount = trans_data.get('amount', transaction.amount)
                     transaction.type = trans_data.get('type', transaction.type)
@@ -199,6 +253,7 @@ def sync_data():
                     transaction.whatsapp_enabled = trans_data.get('whatsapp_enabled', transaction.whatsapp_enabled)
                     transaction.account_id = trans_data.get('account_id', transaction.account_id)
                     transaction.user_id = current_user_id
+                    transaction.last_sync_time = datetime.now()
                     logger.info(f"Updated transaction: {transaction.id}")
                 else:
                     # إنشاء معاملة جديدة
@@ -216,15 +271,16 @@ def sync_data():
                         whatsapp_enabled=trans_data.get('whatsapp_enabled', False),
                         account_id=trans_data.get('account_id'),
                         user_id=current_user_id,
-                        server_id=new_server_id  # تعيين server_id الجديد
+                        server_id=new_server_id,
+                        last_sync_time=datetime.now()
                     )
                     db.session.add(transaction)
-                    db.session.flush()  # للحصول على معرف المعاملة
+                    db.session.flush()
                     logger.info(f"Added new transaction: {transaction.id}")
                 
                 transaction_mappings.append({
                     'local_id': trans_data.get('id'),
-                    'server_id': transaction.server_id  # استخدام server_id الفعلي
+                    'server_id': transaction.server_id
                 })
             except Exception as e:
                 logger.error(f"Error processing transaction: {str(e)}")
@@ -247,7 +303,7 @@ def sync_data():
         logger.error(f"Unexpected sync error: {str(e)}")
         db.session.rollback()
         return json_response({'error': f'حدث خطأ غير متوقع أثناء المزامنة: {str(e)}'}, 500)
-
+    
 @main.route('/api/accounts', methods=['GET'])
 @jwt_required()
 def get_accounts():
