@@ -40,7 +40,6 @@ jobs:
             cmake;3.22.1
             ndk;25.1.8937393
             tools
-            system-images;android-34;google_apis;x86_64
           accept-android-sdk-licenses: true
           
       - name: Set up Android SDK Environment
@@ -71,7 +70,7 @@ jobs:
           ANDROID_CMAKE_HOME: ${{ env.ANDROID_HOME }}/cmake/3.22.1
         run: |
           cd android_app
-          ./gradlew clean build
+          ./gradlew clean build --no-daemon
           
       - name: Upload APK
         uses: actions/upload-artifact@v3
