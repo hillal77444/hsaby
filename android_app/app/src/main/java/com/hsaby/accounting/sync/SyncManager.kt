@@ -76,7 +76,7 @@ class SyncManager @Inject constructor(
             _syncStats.value = SyncStats()
 
             val userId = preferencesManager.getUserId() ?: return@withContext Result.Error("لم يتم تسجيل الدخول")
-            val lastSyncTime = preferencesManager.getLastSyncTime()
+            val lastSyncTime = preferencesManager.getLastSyncTime() ?: 0L
 
             // Sync from server
             val syncResponse = apiService.sync(SyncRequest(lastSyncTime))
@@ -88,11 +88,32 @@ class SyncManager @Inject constructor(
 
             // Update accounts
             response.accounts.forEach { account ->
-                val existingAccount = accountRepository.getAccountByServerId(account.serverId)
+                val existingAccount = accountRepository.getAccountByServerId(account.serverId ?: 0L)
                 if (existingAccount != null) {
-                    accountRepository.updateAccount(account)
+                    accountRepository.updateAccount(existingAccount.copy(
+                        accountName = account.name,
+                        balance = account.balance,
+                        currency = account.currency,
+                        phoneNumber = account.phoneNumber,
+                        notes = account.notes,
+                        isDebtor = account.isDebtor,
+                        whatsappEnabled = account.whatsappEnabled,
+                        lastSync = System.currentTimeMillis()
+                    ))
                 } else {
-                    accountRepository.insertAccount(account)
+                    accountRepository.insertAccount(com.hsaby.accounting.data.local.entity.AccountEntity(
+                        id = account.id,
+                        serverId = account.serverId,
+                        accountName = account.name,
+                        balance = account.balance,
+                        currency = account.currency,
+                        phoneNumber = account.phoneNumber,
+                        notes = account.notes,
+                        isDebtor = account.isDebtor,
+                        whatsappEnabled = account.whatsappEnabled,
+                        userId = userId,
+                        lastSync = System.currentTimeMillis()
+                    ))
                 }
                 _syncStats.value = _syncStats.value.copy(
                     accountsSynced = _syncStats.value.accountsSynced + 1
@@ -101,11 +122,35 @@ class SyncManager @Inject constructor(
 
             // Update transactions
             response.transactions.forEach { transaction ->
-                val existingTransaction = transactionRepository.getTransactionByServerId(transaction.serverId)
+                val existingTransaction = transactionRepository.getTransactionById(transaction.id)
                 if (existingTransaction != null) {
-                    transactionRepository.updateTransaction(transaction)
+                    transactionRepository.updateTransaction(existingTransaction.copy(
+                        amount = transaction.amount,
+                        type = transaction.type,
+                        description = transaction.description,
+                        date = transaction.date,
+                        currency = transaction.currency,
+                        notes = transaction.notes,
+                        whatsappEnabled = transaction.whatsappEnabled,
+                        isSynced = true,
+                        lastSync = System.currentTimeMillis()
+                    ))
                 } else {
-                    transactionRepository.insertTransaction(transaction)
+                    transactionRepository.insertTransaction(com.hsaby.accounting.data.local.entity.TransactionEntity(
+                        id = transaction.id,
+                        serverId = transaction.serverId,
+                        accountId = transaction.accountId,
+                        amount = transaction.amount,
+                        type = transaction.type,
+                        description = transaction.description,
+                        date = transaction.date,
+                        currency = transaction.currency,
+                        notes = transaction.notes,
+                        whatsappEnabled = transaction.whatsappEnabled,
+                        userId = userId,
+                        isSynced = true,
+                        lastSync = System.currentTimeMillis()
+                    ))
                 }
                 _syncStats.value = _syncStats.value.copy(
                     transactionsSynced = _syncStats.value.transactionsSynced + 1
