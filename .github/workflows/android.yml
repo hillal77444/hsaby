@@ -58,17 +58,21 @@ jobs:
           accept-android-sdk-licenses: true
 
       - name: Setup Gradle
+        shell: bash
         run: |
           cd android_app
+          pwd
           ls -la
-          chmod +x ./gradlew
+          sudo chmod +x ./gradlew
           ls -la
-          ./gradlew --version
+          file ./gradlew
+          bash ./gradlew --version
 
       - name: Build with Gradle
+        shell: bash
         run: |
           cd android_app
-          ./gradlew assembleDebug --no-daemon --parallel --max-workers=2 --build-cache
+          bash ./gradlew assembleDebug --no-daemon --parallel --max-workers=2 --build-cache
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
