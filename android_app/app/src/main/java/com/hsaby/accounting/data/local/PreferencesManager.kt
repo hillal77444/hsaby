@@ -6,6 +6,7 @@ import androidx.security.crypto.MasterKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,8 +26,7 @@ class PreferencesManager @Inject constructor(
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
-    val isLoggedIn: Flow<Boolean>
-        get() = getToken().map { it != null }
+    val isLoggedIn: Flow<Boolean> = getToken().map { it != null }
 
     fun getToken(): Flow<String?> = flow {
         emit(sharedPreferences.getString(KEY_TOKEN, null))
