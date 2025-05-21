@@ -28,13 +28,12 @@ class PreferencesManager @Inject constructor(
         return prefs.getString(KEY_REFRESH_TOKEN, null)
     }
 
-    fun saveUserId(userId: Long) {
-        prefs.edit().putLong(KEY_USER_ID, userId).apply()
+    fun saveUserId(userId: String) {
+        prefs.edit().putString(KEY_USER_ID, userId).apply()
     }
 
-    fun getUserId(): Long? {
-        val userId = prefs.getLong(KEY_USER_ID, -1)
-        return if (userId != -1L) userId else null
+    fun getUserId(): String? {
+        return prefs.getString(KEY_USER_ID, null)
     }
 
     fun saveUsername(username: String) {
