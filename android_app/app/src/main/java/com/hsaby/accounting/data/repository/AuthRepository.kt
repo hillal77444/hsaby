@@ -1,12 +1,10 @@
 package com.hsaby.accounting.data.repository
 
-import com.hsaby.accounting.data.model.LoginRequest
-import com.hsaby.accounting.data.model.LoginResponse
-import com.hsaby.accounting.data.model.RegisterRequest
-import com.hsaby.accounting.data.model.RegisterResponse
+import com.hsaby.accounting.data.model.*
 import com.hsaby.accounting.data.remote.ApiService
-import com.hsaby.accounting.data.remote.Result
 import com.hsaby.accounting.util.PreferencesManager
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,56 +13,71 @@ class AuthRepository @Inject constructor(
     private val apiService: ApiService,
     private val preferencesManager: PreferencesManager
 ) {
-    suspend fun login(request: LoginRequest): Result<LoginResponse> {
+    val isLoggedIn: Flow<Boolean>
+        get() = preferencesManager.accessToken.map { it != null }
+
+    suspend fun login(request: LoginRequest): AuthResult<LoginResponse> {
         return try {
             val response = apiService.login(request)
-            if (response.isSuccessful && response.body() != null) {
-                val loginResponse = response.body()!!
-                preferencesManager.saveToken(loginResponse.accessToken)
-                preferencesManager.saveUserId(loginResponse.user.id)
-                Result.Success(loginResponse)
+            if (response.isSuccessful) {
+                response.body()?.let { loginResponse ->
+                    preferencesManager.saveAuthData(
+                        accessToken = loginResponse.accessToken,
+                        refreshToken = loginResponse.refreshToken,
+                        userId = loginResponse.userId,
+                        userName = "", // سيتم تحديثه لاحقاً
+                        userEmail = request.email
+                    )
+                    AuthResult.Success(loginResponse)
+                } ?: AuthResult.Error("Empty response body")
             } else {
-                Result.Error("فشل تسجيل الدخول: ${response.errorBody()?.string() ?: "خطأ غير معروف"}")
+                AuthResult.Error("Login failed: ${response.message()}")
             }
         } catch (e: Exception) {
-            Result.Error(e.message ?: "حدث خطأ أثناء تسجيل الدخول")
+            AuthResult.Error("Network error: ${e.message}")
         }
     }
 
-    suspend fun register(request: RegisterRequest): Result<RegisterResponse> {
+    suspend fun register(request: RegisterRequest): AuthResult<RegisterResponse> {
         return try {
             val response = apiService.register(request)
-            if (response.isSuccessful && response.body() != null) {
-                Result.Success(response.body()!!)
+            if (response.isSuccessful) {
+                response.body()?.let { registerResponse ->
+                    AuthResult.Success(registerResponse)
+                } ?: AuthResult.Error("Empty response body")
             } else {
-                Result.Error("فشل إنشاء الحساب: ${response.errorBody()?.string() ?: "خطأ غير معروف"}")
+                AuthResult.Error("Registration failed: ${response.message()}")
             }
         } catch (e: Exception) {
-            Result.Error(e.message ?: "حدث خطأ أثناء إنشاء الحساب")
+            AuthResult.Error("Network error: ${e.message}")
         }
     }
 
-    suspend fun refreshToken(refreshToken: String): Result<LoginResponse> {
+    suspend fun refreshToken(): AuthResult<LoginResponse> {
+        val refreshToken = preferencesManager.refreshToken.first() ?: return AuthResult.Error("No refresh token")
+        
         return try {
-            val response = apiService.refreshToken(mapOf("refresh_token" to refreshToken))
-            if (response.isSuccessful && response.body() != null) {
-                val loginResponse = response.body()!!
-                preferencesManager.saveToken(loginResponse.token)
-                preferencesManager.saveRefreshToken(loginResponse.refreshToken)
-                preferencesManager.saveUserId(loginResponse.user.id)
-                Result.Success(loginResponse)
+            val response = apiService.refreshToken(RefreshTokenRequest(refreshToken))
+            if (response.isSuccessful) {
+                response.body()?.let { loginResponse ->
+                    preferencesManager.saveAuthData(
+                        accessToken = loginResponse.accessToken,
+                        refreshToken = loginResponse.refreshToken,
+                        userId = loginResponse.userId,
+                        userName = preferencesManager.userName.first() ?: "",
+                        userEmail = preferencesManager.userEmail.first() ?: ""
+                    )
+                    AuthResult.Success(loginResponse)
+                } ?: AuthResult.Error("Empty response body")
             } else {
-                Result.Error("فشل تحديث التوكن: ${response.errorBody()?.string() ?: "خطأ غير معروف"}")
+                AuthResult.Error("Token refresh failed: ${response.message()}")
             }
         } catch (e: Exception) {
-            Result.Error(e.message ?: "حدث خطأ أثناء تحديث التوكن")
+            AuthResult.Error("Network error: ${e.message}")
         }
     }
 
-    fun getToken(): String? = preferencesManager.getToken()
-    fun getRefreshToken(): String? = preferencesManager.getRefreshToken()
-    fun getUserId(): String? = preferencesManager.getUserId()
-    fun clearAuthData() {
+    suspend fun logout() {
         preferencesManager.clearAuthData()
     }
 } 
