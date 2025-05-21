@@ -96,8 +96,8 @@ public class SyncManager {
     private boolean isSyncInProgress = false;
     private long lastSuccessfulSync = 0;
 
-    // إضافة قفل لكل معاملة
-    private final Map<String, Long> syncLocks = new ConcurrentHashMap<>();
+    // تحسين آلية القفل
+    private final Map<String, SyncLock> syncLocks = new ConcurrentHashMap<>();
     private static final long LOCK_TIMEOUT = 5 * 60 * 1000; // 5 دقائق
 
     // تحسينات جديدة
@@ -193,8 +193,40 @@ public class SyncManager {
             return;
         }
 
+        // إنشاء معرف جلسة فريد
+        String sessionId = UUID.randomUUID().toString();
+        SyncSession session = new SyncSession();
+        activeSyncSessions.put(sessionId, session);
+
+        // التحقق من القفل لكل عنصر
+        List<Account> unlockedAccounts = new ArrayList<>();
+        List<Transaction> unlockedTransactions = new ArrayList<>();
+
+        for (Account account : accounts) {
+            String itemKey = getItemKey(account);
+            if (acquireLock(itemKey, sessionId)) {
+                unlockedAccounts.add(account);
+            } else {
+                Log.d(TAG, "Account is locked: " + account.getId());
+            }
+        }
+
+        for (Transaction transaction : transactions) {
+            String itemKey = getItemKey(transaction);
+            if (acquireLock(itemKey, sessionId)) {
+                unlockedTransactions.add(transaction);
+            } else {
+                Log.d(TAG, "Transaction is locked: " + transaction.getId());
+            }
+        }
+
+        if (unlockedAccounts.isEmpty() && unlockedTransactions.isEmpty()) {
+            handler.post(() -> callback.onError("جميع العناصر قيد المزامنة حالياً"));
+            return;
+        }
+
         // التحقق من تكامل البيانات
-        validateSyncData(accounts, transactions);
+        validateSyncData(unlockedAccounts, unlockedTransactions);
 
         String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
                 .getString("token", null);
@@ -204,23 +236,15 @@ public class SyncManager {
             return;
         }
 
-        // إنشاء جلسة مزامنة جديدة
-        String sessionId = UUID.randomUUID().toString();
-        SyncSession session = new SyncSession();
-        activeSyncSessions.put(sessionId, session);
-
-        // إنشاء طلب المزامنة للدفعة الحالية
-        ApiService.SyncRequest syncRequest = new ApiService.SyncRequest(accounts, transactions);
-        
         executor.execute(() -> {
             try {
-                Response<ApiService.SyncResponse> response = apiService.syncData("Bearer " + token, syncRequest).execute();
+                Response<ApiService.SyncResponse> response = apiService.syncData("Bearer " + token, new ApiService.SyncRequest(unlockedAccounts, unlockedTransactions)).execute();
                 
                 if (response.isSuccessful()) {
                     ApiService.SyncResponse syncResponse = response.body();
                     if (syncResponse != null) {
                         // تحديث معرفات السيرفر للحسابات
-                        for (Account account : accounts) {
+                        for (Account account : unlockedAccounts) {
                             String itemKey = getItemKey(account);
                             if (!session.isItemProcessed(itemKey)) {
                                 Long serverId = syncResponse.getAccountServerId(account.getId());
@@ -258,7 +282,7 @@ public class SyncManager {
                         }
                         
                         // تحديث معرفات السيرفر للمعاملات
-                        for (Transaction transaction : transactions) {
+                        for (Transaction transaction : unlockedTransactions) {
                             String itemKey = getItemKey(transaction);
                             if (!session.isItemProcessed(itemKey)) {
                                 Long serverId = syncResponse.getTransactionServerId(transaction.getId());
@@ -315,8 +339,8 @@ public class SyncManager {
                 } else {
                     // في حالة الفشل، نحفظ الدفعة للتحميل لاحقاً
                     Map<String, Object> batchData = new HashMap<>();
-                    batchData.put("accounts", accounts);
-                    batchData.put("transactions", transactions);
+                    batchData.put("accounts", unlockedAccounts);
+                    batchData.put("transactions", unlockedTransactions);
                     savePendingSync(batchData);
                     
                     String errorBody = response.errorBody() != null ? response.errorBody().string() : "خطأ غير معروف";
@@ -340,8 +364,8 @@ public class SyncManager {
                 
                 // نحفظ الدفعة للتحميل لاحقاً
                 Map<String, Object> batchData = new HashMap<>();
-                batchData.put("accounts", accounts);
-                batchData.put("transactions", transactions);
+                batchData.put("accounts", unlockedAccounts);
+                batchData.put("transactions", unlockedTransactions);
                 savePendingSync(batchData);
                 
                 // نتابع مع الدفعة التالية
@@ -636,28 +660,27 @@ public class SyncManager {
         return "";
     }
 
-    private boolean acquireLock(String itemKey) {
-        long currentTime = System.currentTimeMillis();
-        Long lockTime = syncLocks.get(itemKey);
-        
-        if (lockTime == null || currentTime - lockTime > LOCK_TIMEOUT) {
-            syncLocks.put(itemKey, currentTime);
-            return true;
+    private boolean acquireLock(String itemKey, String sessionId) {
+        SyncLock existingLock = syncLocks.get(itemKey);
+        if (existingLock != null) {
+            if (existingLock.isExpired()) {
+                syncLocks.remove(itemKey);
+            } else {
+                return false; // العنصر مقفل حالياً
+            }
         }
-        return false;
+        syncLocks.put(itemKey, new SyncLock(sessionId));
+        return true;
     }
 
     private void releaseLock(String itemKey) {
         syncLocks.remove(itemKey);
     }
 
-    private <T> boolean isItemLocked(T item) {
-        String itemKey = getItemKey(item);
-        Long lockTime = syncLocks.get(itemKey);
-        if (lockTime == null) return false;
-        
-        // إزالة القفل إذا انتهت صلاحيته
-        if (System.currentTimeMillis() - lockTime > LOCK_TIMEOUT) {
+    private boolean isItemLocked(String itemKey) {
+        SyncLock lock = syncLocks.get(itemKey);
+        if (lock == null) return false;
+        if (lock.isExpired()) {
             syncLocks.remove(itemKey);
             return false;
         }
@@ -666,7 +689,7 @@ public class SyncManager {
 
     private <T> List<T> filterLockedItems(List<T> items) {
         return items.stream()
-                .filter(item -> !isItemLocked(item))
+                .filter(item -> !isItemLocked(getItemKey(item)))
                 .collect(Collectors.toList());
     }
 
@@ -1461,6 +1484,22 @@ public class SyncManager {
         public SyncRequest(List<Account> accounts, List<Transaction> transactions) {
             this.accounts = accounts;
             this.transactions = transactions;
+        }
+    }
+
+    private static class SyncLock {
+        private final long lockTime;
+        private final String sessionId;
+        private int retryCount;
+
+        public SyncLock(String sessionId) {
+            this.lockTime = System.currentTimeMillis();
+            this.sessionId = sessionId;
+            this.retryCount = 0;
+        }
+
+        public boolean isExpired() {
+            return System.currentTimeMillis() - lockTime > LOCK_TIMEOUT;
         }
     }
 } 
