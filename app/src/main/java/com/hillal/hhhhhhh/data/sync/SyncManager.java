@@ -225,31 +225,34 @@ public class SyncManager {
                             if (!session.isItemProcessed(itemKey)) {
                                 Long serverId = syncResponse.getAccountServerId(account.getId());
                                 if (serverId != null) {
-                                    // التحقق من التعارضات
-                                    Account serverAccount = syncResponse.getAccount(serverId);
-                                    if (serverAccount != null) {
-                                        // التحقق من حالة المزامنة
-                                        if (isItemLocked(itemKey)) {
-                                            Log.d(TAG, "Item is currently being synced: " + itemKey);
-                                            continue;
-                                        }
+                                    // التحقق من حالة المزامنة
+                                    if (isItemLocked(itemKey)) {
+                                        Log.d(TAG, "Item is currently being synced: " + itemKey);
+                                        continue;
+                                    }
 
-                                        // التحقق من التعارضات
-                                        if (account.getLastSyncTime() > serverAccount.getLastSyncTime()) {
+                                    // التحقق من التعارضات
+                                    Account existingAccount = accountDao.getAccountByServerIdSync(serverId);
+                                    if (existingAccount != null) {
+                                        // التحقق من وقت آخر تحديث
+                                        if (account.getLastSyncTime() > existingAccount.getLastSyncTime()) {
                                             // البيانات المحلية أحدث، نحتفظ بها
                                             Log.d(TAG, "Local data is newer for account: " + account.getId());
                                         } else {
                                             // تحديث البيانات المحلية بالبيانات من السيرفر
-                                            account.setBalance(serverAccount.getBalance());
-                                            account.setLastSyncTime(serverAccount.getLastSyncTime());
+                                            account.setBalance(existingAccount.getBalance());
+                                            account.setLastSyncTime(existingAccount.getLastSyncTime());
+                                            Log.d(TAG, "Updated account with server data: " + account.getId());
                                         }
-
-                                        // تحديث معرف السيرفر
-                                        account.setServerId(serverId);
-                                        accountDao.update(account);
-                                        releaseLock(itemKey);
-                                        session.addProcessedItem(itemKey);
                                     }
+
+                                    // تحديث معرف السيرفر وحالة المزامنة
+                                    account.setServerId(serverId);
+                                    account.setLastSyncTime(System.currentTimeMillis());
+                                    account.setSyncStatus(SYNC_STATUS_SYNCED);
+                                    accountDao.update(account);
+                                    releaseLock(itemKey);
+                                    session.addProcessedItem(itemKey);
                                 }
                             }
                         }
@@ -267,22 +270,26 @@ public class SyncManager {
                                     }
 
                                     // التحقق من التعارضات
-                                    Transaction serverTransaction = syncResponse.getTransaction(serverId);
-                                    if (serverTransaction != null) {
-                                        if (transaction.getLastSyncTime() > serverTransaction.getLastSyncTime()) {
+                                    Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(serverId);
+                                    if (existingTransaction != null) {
+                                        // التحقق من وقت آخر تحديث
+                                        if (transaction.getLastSyncTime() > existingTransaction.getLastSyncTime()) {
                                             // البيانات المحلية أحدث، نحتفظ بها
                                             Log.d(TAG, "Local data is newer for transaction: " + transaction.getId());
                                         } else {
                                             // تحديث البيانات المحلية بالبيانات من السيرفر
-                                            transaction.setAmount(serverTransaction.getAmount());
-                                            transaction.setType(serverTransaction.getType());
-                                            transaction.setDescription(serverTransaction.getDescription());
-                                            transaction.setLastSyncTime(serverTransaction.getLastSyncTime());
+                                            transaction.setAmount(existingTransaction.getAmount());
+                                            transaction.setType(existingTransaction.getType());
+                                            transaction.setDescription(existingTransaction.getDescription());
+                                            transaction.setLastSyncTime(existingTransaction.getLastSyncTime());
+                                            Log.d(TAG, "Updated transaction with server data: " + transaction.getId());
                                         }
                                     }
 
-                                    // تحديث معرف السيرفر
+                                    // تحديث معرف السيرفر وحالة المزامنة
                                     transaction.setServerId(serverId);
+                                    transaction.setLastSyncTime(System.currentTimeMillis());
+                                    transaction.setSyncStatus(SYNC_STATUS_SYNCED);
                                     transactionDao.update(transaction);
                                     releaseLock(itemKey);
                                     session.addProcessedItem(itemKey);
