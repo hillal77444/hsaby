@@ -52,8 +52,8 @@ class NotificationManager @Inject constructor(
             id = UUID.randomUUID().mostSignificantBits,
             title = "تمت المزامنة بنجاح",
             message = "تم مزامنة $syncedItems عنصر بنجاح",
-            type = NotificationType.SYNC_SUCCESS,
-            date = System.currentTimeMillis(),
+            notificationType = NotificationType.SYNC_SUCCESS,
+            timestamp = System.currentTimeMillis(),
             isRead = false
         )
         showNotification(notification)
@@ -65,8 +65,8 @@ class NotificationManager @Inject constructor(
             id = UUID.randomUUID().mostSignificantBits,
             title = "فشل المزامنة",
             message = "حدث خطأ أثناء المزامنة: $error",
-            type = NotificationType.SYNC_ERROR,
-            date = System.currentTimeMillis(),
+            notificationType = NotificationType.SYNC_ERROR,
+            timestamp = System.currentTimeMillis(),
             isRead = false
         )
         showNotification(notification)
@@ -79,9 +79,9 @@ class NotificationManager @Inject constructor(
             id = UUID.randomUUID().mostSignificantBits,
             title = "معاملة جديدة",
             message = "تمت إضافة معاملة جديدة بقيمة $amount $currency",
-            type = NotificationType.TRANSACTION_ADDED,
+            notificationType = NotificationType.TRANSACTION_ADDED,
             data = mapOf("transactionId" to transactionId),
-            date = System.currentTimeMillis(),
+            timestamp = System.currentTimeMillis(),
             isRead = false
         )
         showNotification(notification)
@@ -93,9 +93,9 @@ class NotificationManager @Inject constructor(
             id = UUID.randomUUID().mostSignificantBits,
             title = "تم تحديث المعاملة",
             message = "تم تحديث المعاملة بقيمة $amount $currency",
-            type = NotificationType.TRANSACTION_UPDATED,
+            notificationType = NotificationType.TRANSACTION_UPDATED,
             data = mapOf("transactionId" to transactionId),
-            date = System.currentTimeMillis(),
+            timestamp = System.currentTimeMillis(),
             isRead = false
         )
         showNotification(notification)
@@ -108,9 +108,9 @@ class NotificationManager @Inject constructor(
             id = UUID.randomUUID().mostSignificantBits,
             title = "تم تحديث الحساب",
             message = "تم تحديث حساب $accountName. الرصيد الجديد: $newBalance",
-            type = NotificationType.ACCOUNT_UPDATED,
+            notificationType = NotificationType.ACCOUNT_UPDATED,
             data = mapOf("accountId" to accountId),
-            date = System.currentTimeMillis(),
+            timestamp = System.currentTimeMillis(),
             isRead = false
         )
         showNotification(notification)
@@ -122,9 +122,9 @@ class NotificationManager @Inject constructor(
             id = UUID.randomUUID().mostSignificantBits,
             title = "تنبيه الرصيد",
             message = "رصيد حساب $accountName ($balance) أقل من الحد الأدنى ($threshold)",
-            type = NotificationType.BALANCE_ALERT,
+            notificationType = NotificationType.BALANCE_ALERT,
             data = mapOf("accountId" to accountId),
-            date = System.currentTimeMillis(),
+            timestamp = System.currentTimeMillis(),
             isRead = false
         )
         showNotification(notification)
@@ -136,7 +136,7 @@ class NotificationManager @Inject constructor(
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra("notificationId", notification.id)
-            putExtra("notificationType", notification.type.name)
+            putExtra("notificationType", notification.notificationType.name)
             notification.data?.forEach { (key, value) ->
                 putExtra(key, value.toString())
             }
