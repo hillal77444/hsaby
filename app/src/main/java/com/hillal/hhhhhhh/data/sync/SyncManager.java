@@ -170,7 +170,6 @@ public class SyncManager {
                 Log.w(TAG, "Invalid transaction amount for transaction: " + transaction.getId());
             }
         }
-        return true;
     }
 
     private void handleSyncConflict(Account localAccount, Account serverAccount) {
@@ -590,206 +589,50 @@ public class SyncManager {
     }
 
     public void syncData(SyncCallback callback) {
-        // التحقق من وجود مزامنات معلقة
         if (isSyncInProgress) {
-            Log.d(TAG, "Found pending sync, executing pending sync first");
-            executePendingSync(callback);
+            Log.d(TAG, "Sync already in progress, skipping");
+            if (callback != null) {
+                callback.onError("Sync already in progress");
+            }
             return;
         }
 
-        try {
-            isSyncInProgress = true;
-            Log.d(TAG, "Starting new sync process");
-            
-            // الحصول على البيانات المحلية
-            List<Account> accounts = accountDao.getAccountsForSync();
-            List<Transaction> transactions = transactionDao.getTransactionsForSync();
-            
-            if (accounts.isEmpty() && transactions.isEmpty()) {
-                Log.d(TAG, "No data to sync");
-                isSyncInProgress = false;
-                if (callback != null) {
-                    callback.onSyncCompleted();
-                }
-                return;
-            }
+        isSyncInProgress = true;
 
-            // التحقق من صحة البيانات
-            if (!validateSyncData(accounts, transactions)) {
-                isSyncInProgress = false;
-                if (callback != null) {
-                    callback.onError("بيانات المزامنة غير صالحة");
-                }
-                return;
-            }
-
-            // الحصول على التوكن
-            String token = getAuthToken();
-            if (token == null) {
-                isSyncInProgress = false;
-                if (callback != null) {
-                    callback.onError("يرجى تسجيل الدخول أولاً");
-                }
-                return;
-            }
-
-            // بدء المزامنة
-            handler.post(() -> callback.onSyncStarted());
-            
-            // تقسيم البيانات إلى دفعات
-            int batchSize = 50;
-            int totalBatches = (int) Math.ceil((double) (accounts.size() + transactions.size()) / batchSize);
-            
-            // بدء المزامنة مع الدفعة الأولى
-            syncBatch(accounts, transactions, callback, 0, totalBatches);
-            
-        } catch (Exception e) {
-            Log.e(TAG, "Error in syncData: " + e.getMessage());
-            isSyncInProgress = false;
-            if (callback != null) {
-                callback.onError("حدث خطأ أثناء المزامنة: " + e.getMessage());
-            }
+        if (!isNetworkAvailable()) {
+            handleOfflineSync(callback);
+            return;
         }
-    }
 
-    private void executePendingSync(SyncCallback callback) {
-        try {
-            Log.d(TAG, "Executing pending sync");
-            
-            // الحصول على البيانات المعلقة
-            List<Account> pendingAccounts = accountDao.getPendingSyncAccounts();
-            List<Transaction> pendingTransactions = transactionDao.getPendingSyncTransactions();
-            
-            if (pendingAccounts.isEmpty() && pendingTransactions.isEmpty()) {
-                Log.d(TAG, "No pending data to sync");
-                isSyncInProgress = false;
-                if (callback != null) {
-                    callback.onSyncCompleted();
-                }
-                return;
-            }
+        executor.execute(() -> {
+            try {
+                // الحصول على جميع العناصر غير المتزامنة
+                List<Account> allNewAccounts = accountDao.getNewAccounts();
+                List<Transaction> allNewTransactions = transactionDao.getNewTransactions();
 
-            // التحقق من صحة البيانات المعلقة
-            if (!validateSyncData(pendingAccounts, pendingTransactions)) {
-                isSyncInProgress = false;
-                if (callback != null) {
-                    callback.onError("بيانات المزامنة المعلقة غير صالحة");
-                }
-                return;
-            }
+                // حساب عدد الدفعات المطلوبة
+                int totalItems = allNewAccounts.size() + allNewTransactions.size();
+                int totalBatches = (int) Math.ceil((double) totalItems / BATCH_SIZE);
 
-            // الحصول على التوكن
-            String token = getAuthToken();
-            if (token == null) {
-                isSyncInProgress = false;
-                if (callback != null) {
-                    callback.onError("يرجى تسجيل الدخول أولاً");
-                }
-                return;
-            }
-
-            // بدء مزامنة البيانات المعلقة
-            handler.post(() -> callback.onSyncStarted());
-            
-            // تقسيم البيانات المعلقة إلى دفعات
-            int batchSize = 50;
-            int totalBatches = (int) Math.ceil((double) (pendingAccounts.size() + pendingTransactions.size()) / batchSize);
-            
-            // بدء المزامنة مع الدفعة الأولى
-            syncBatch(pendingAccounts, pendingTransactions, callback, 0, totalBatches);
-            
-        } catch (Exception e) {
-            Log.e(TAG, "Error in executePendingSync: " + e.getMessage());
-            isSyncInProgress = false;
-            if (callback != null) {
-                callback.onError("حدث خطأ أثناء مزامنة البيانات المعلقة: " + e.getMessage());
-            }
-        }
-    }
-
-    private void syncBatch(List<Account> accounts, List<Transaction> transactions, 
-                          SyncCallback callback, int batchIndex, int totalBatches) {
-        try {
-            // حساب حدود الدفعة الحالية
-            int startIndex = batchIndex * batchSize;
-            int endIndex = Math.min(startIndex + batchSize, accounts.size() + transactions.size());
-            
-            // تجهيز بيانات الدفعة
-            List<Account> batchAccounts = accounts.subList(startIndex, Math.min(endIndex, accounts.size()));
-            List<Transaction> batchTransactions = transactions.subList(
-                Math.max(0, startIndex - accounts.size()),
-                Math.min(endIndex - accounts.size(), transactions.size())
-            );
-
-            // إرسال الدفعة للخادم
-            Call<ApiService.SyncResponse> call = apiService.sync(token, new SyncRequest(batchAccounts, batchTransactions));
-            call.enqueue(new Callback<ApiService.SyncResponse>() {
-                @Override
-                public void onResponse(Call<ApiService.SyncResponse> call, Response<ApiService.SyncResponse> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        ApiService.SyncResponse syncResponse = response.body();
-                        
-                        // تحديث المعرفات المحلية
-                        updateLocalIds(syncResponse.getAccountMappings(), syncResponse.getTransactionMappings());
-                        
-                        // التحقق من وجود دفعات إضافية
-                        if (batchIndex < totalBatches - 1) {
-                            syncBatch(accounts, transactions, callback, batchIndex + 1, totalBatches);
-                        } else {
-                            // اكتملت جميع الدفعات
-                            isSyncInProgress = false;
-                            handler.post(() -> callback.onSyncCompleted());
-                        }
-                    } else {
-                        isSyncInProgress = false;
-                        handler.post(() -> callback.onError("فشلت المزامنة: " + response.message()));
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ApiService.SyncResponse> call, Throwable t) {
+                if (totalItems == 0) {
+                    Log.d(TAG, "لا توجد بيانات جديدة للمزامنة");
                     isSyncInProgress = false;
-                    handler.post(() -> callback.onError("فشلت المزامنة: " + t.getMessage()));
+                    handler.post(() -> callback.onSuccess());
+                    return;
                 }
-            });
-        } catch (Exception e) {
-            Log.e(TAG, "Error in syncBatch: " + e.getMessage());
-            isSyncInProgress = false;
-            handler.post(() -> callback.onError("حدث خطأ أثناء المزامنة: " + e.getMessage()));
-        }
-    }
 
-    private void updateLocalIds(List<AccountMapping> accountMappings, List<TransactionMapping> transactionMappings) {
-        try {
-            // تحديث معرفات الحسابات
-            for (AccountMapping mapping : accountMappings) {
-                Account account = accountDao.getAccountById(mapping.getLocalId());
-                if (account != null) {
-                    account.setServerId(mapping.getServerId());
-                    account.setLastSyncTime(System.currentTimeMillis());
-                    account.setSyncStatus(SYNC_STATUS_SYNCED);
-                    accountDao.update(account);
-                }
+                // بدء المزامنة مع الدفعة الأولى
+                List<Account> firstBatchAccounts = getNextBatch(allNewAccounts, 0);
+                List<Transaction> firstBatchTransactions = getNextBatch(allNewTransactions, 0);
+
+                syncBatch(firstBatchAccounts, firstBatchTransactions, callback, 0, totalBatches);
+
+            } catch (Exception e) {
+                Log.e(TAG, "خطأ في بدء المزامنة: " + e.getMessage());
+                isSyncInProgress = false;
+                handler.post(() -> callback.onError("خطأ في بدء المزامنة: " + e.getMessage()));
             }
-
-            // تحديث معرفات المعاملات
-            for (TransactionMapping mapping : transactionMappings) {
-                Transaction transaction = transactionDao.getTransactionById(mapping.getLocalId());
-                if (transaction != null) {
-                    transaction.setServerId(mapping.getServerId());
-                    transaction.setLastSyncTime(System.currentTimeMillis());
-                    transaction.setSyncStatus(SYNC_STATUS_SYNCED);
-                    transactionDao.update(transaction);
-                }
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error updating local IDs: " + e.getMessage());
-        }
-    }
-
-    private String getAuthToken() {
-        return context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                .getString("token", null);
+        });
     }
 
     private void handleOfflineSync(SyncCallback callback) {
