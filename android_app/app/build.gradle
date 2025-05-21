@@ -28,6 +28,15 @@ android {
                 ]
             }
         }
+
+        externalNativeBuild {
+            cmake {
+                cppFlags ""
+                version "3.22.1"
+            }
+        }
+        
+        ndkVersion "25.1.8937393"
     }
 
     signingConfigs {
@@ -103,6 +112,13 @@ android {
         unitTests {
             includeAndroidResources = true
             returnDefaultValues = true
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.22.1"
         }
     }
 }
