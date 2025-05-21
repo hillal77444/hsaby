@@ -22,7 +22,7 @@ class AuthRepository @Inject constructor(
                 val loginResponse = response.body()!!
                 preferencesManager.saveToken(loginResponse.token)
                 preferencesManager.saveRefreshToken(loginResponse.refreshToken)
-                preferencesManager.saveUserId(loginResponse.userId)
+                preferencesManager.saveUserId(loginResponse.user.id)
                 Result.Success(loginResponse)
             } else {
                 Result.Error("فشل تسجيل الدخول: ${response.errorBody()?.string() ?: "خطأ غير معروف"}")
@@ -39,7 +39,7 @@ class AuthRepository @Inject constructor(
                 val registerResponse = response.body()!!
                 preferencesManager.saveToken(registerResponse.token)
                 preferencesManager.saveRefreshToken(registerResponse.refreshToken)
-                preferencesManager.saveUserId(registerResponse.userId)
+                preferencesManager.saveUserId(registerResponse.user.id)
                 Result.Success(registerResponse)
             } else {
                 Result.Error("فشل التسجيل: ${response.errorBody()?.string() ?: "خطأ غير معروف"}")
@@ -56,7 +56,7 @@ class AuthRepository @Inject constructor(
                 val loginResponse = response.body()!!
                 preferencesManager.saveToken(loginResponse.token)
                 preferencesManager.saveRefreshToken(loginResponse.refreshToken)
-                preferencesManager.saveUserId(loginResponse.userId)
+                preferencesManager.saveUserId(loginResponse.user.id)
                 Result.Success(loginResponse)
             } else {
                 Result.Error("فشل تحديث التوكن: ${response.errorBody()?.string() ?: "خطأ غير معروف"}")
