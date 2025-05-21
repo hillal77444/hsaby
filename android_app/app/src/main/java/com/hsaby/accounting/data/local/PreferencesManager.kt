@@ -1,18 +1,23 @@
 package com.hsaby.accounting.data.local
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class PreferencesManager(context: Context) {
+@Singleton
+class PreferencesManager @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
     private val masterKey = MasterKey.Builder(context)
         .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
         .build()
 
-    private val sharedPreferences: SharedPreferences = EncryptedSharedPreferences.create(
+    private val sharedPreferences = EncryptedSharedPreferences.create(
         context,
-        PREF_NAME,
+        "secure_prefs",
         masterKey,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
@@ -65,13 +70,43 @@ class PreferencesManager(context: Context) {
         }
     }
 
+    fun saveToken(token: String) {
+        sharedPreferences.edit().putString(KEY_TOKEN, token).apply()
+    }
+
+    fun getToken(): String? {
+        return sharedPreferences.getString(KEY_TOKEN, null)
+    }
+
+    fun saveRefreshToken(token: String) {
+        sharedPreferences.edit().putString(KEY_REFRESH_TOKEN, token).apply()
+    }
+
+    fun getRefreshToken(): String? {
+        return sharedPreferences.getString(KEY_REFRESH_TOKEN, null)
+    }
+
+    fun saveUsername(username: String) {
+        sharedPreferences.edit().putString(KEY_USERNAME, username).apply()
+    }
+
+    fun getUsername(): String? {
+        return sharedPreferences.getString(KEY_USERNAME, null)
+    }
+
+    fun clearAuthData() {
+        sharedPreferences.edit().clear().apply()
+    }
+
     companion object {
-        private const val PREF_NAME = "accounting_prefs"
         private const val KEY_FIRST_LAUNCH = "first_launch"
         private const val KEY_IS_LOGGED_IN = "is_logged_in"
         private const val KEY_USER_ID = "user_id"
         private const val KEY_USER_TOKEN = "user_token"
         private const val KEY_USER_PHONE = "user_phone"
         private const val KEY_USER_PASSWORD = "user_password"
+        private const val KEY_TOKEN = "token"
+        private const val KEY_REFRESH_TOKEN = "refresh_token"
+        private const val KEY_USERNAME = "username"
     }
 } 
