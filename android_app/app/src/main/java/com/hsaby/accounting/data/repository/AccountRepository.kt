@@ -82,7 +82,7 @@ class AccountRepository @Inject constructor(
 
             // Update local database
             serverAccounts.forEach { serverAccount ->
-                val localAccount = getAccountByServerId(serverAccount.serverId)
+                val localAccount = getAccountByServerId(serverAccount.serverId ?: 0L)
                 if (localAccount == null) {
                     // Insert new account
                     insertAccount(AccountEntity(
@@ -96,6 +96,7 @@ class AccountRepository @Inject constructor(
                         isDebtor = serverAccount.isDebtor,
                         whatsappEnabled = serverAccount.whatsappEnabled,
                         userId = userId,
+                        isSynced = true,
                         lastSync = System.currentTimeMillis()
                     ))
                 } else {
@@ -108,6 +109,7 @@ class AccountRepository @Inject constructor(
                         notes = serverAccount.notes,
                         isDebtor = serverAccount.isDebtor,
                         whatsappEnabled = serverAccount.whatsappEnabled,
+                        isSynced = true,
                         lastSync = System.currentTimeMillis()
                     ))
                 }
