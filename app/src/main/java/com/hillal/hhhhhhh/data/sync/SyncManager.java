@@ -41,6 +41,8 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SyncManager {
     private static final String TAG = "SyncManager";
@@ -1427,6 +1429,31 @@ public class SyncManager {
             Log.d(TAG, "تم مسح بيانات المزامنة الفاشلة");
         } catch (Exception e) {
             Log.e(TAG, "Error clearing pending sync: " + e.getMessage());
+        }
+    }
+
+    // إضافة تعريفات الفئات المفقودة
+    private static class SyncSession {
+        private final Set<String> processedItems = new HashSet<>();
+        private int retryCount = 0;
+
+        public void addProcessedItem(String itemKey) {
+            processedItems.add(itemKey);
+        }
+
+        public boolean isItemProcessed(String itemKey) {
+            return processedItems.contains(itemKey);
+        }
+    }
+
+    private static class SyncRequest {
+        private final List<Account> accounts;
+        private final List<Transaction> transactions;
+        private int retryCount = 0;
+
+        public SyncRequest(List<Account> accounts, List<Transaction> transactions) {
+            this.accounts = accounts;
+            this.transactions = transactions;
         }
     }
 } 
