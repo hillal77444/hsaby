@@ -50,6 +50,11 @@ jobs:
           echo "$ANDROID_HOME/tools" >> $GITHUB_PATH
           echo "$ANDROID_HOME/tools/bin" >> $GITHUB_PATH
           
+      - name: Create Debug Keystore
+        run: |
+          cd android_app/app
+          keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          
       - name: List Installed Packages
         run: |
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list
