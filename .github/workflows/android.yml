@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       build_type:
-        description: 'نوع البناء'
+        description: 'Build type (debug/release)'
         required: true
         default: 'debug'
         type: choice
@@ -19,29 +19,44 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=2 -Dorg.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError"
+
     steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up JDK 17
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
           distribution: 'temurin'
+          java-version: '17'
           cache: gradle
-          
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v2
+        uses: android-actions/setup-android@v1
         with:
           cmdline-tools-version: '9477386'
           packages: |
+            build-tools;34.0.0
             platform-tools
             platforms;android-34
-            build-tools;34.0.0
-            cmake;3.22.1
             ndk;25.1.8937393
-            tools
+            cmake;3.22.1
           accept-android-sdk-licenses: true
-          
+
       - name: Set up Android SDK Environment
         run: |
           echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
@@ -65,18 +80,22 @@ jobs:
         run: chmod +x android_app/gradlew
           
       - name: Build with Gradle
-        env:
-          ANDROID_NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/25.1.8937393
-          ANDROID_CMAKE_HOME: ${{ env.ANDROID_HOME }}/cmake/3.22.1
         run: |
           cd android_app
-          ./gradlew clean build --no-daemon
+          ./gradlew assembleDebug --no-daemon --parallel --max-workers=2 --build-cache
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: android_app/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          
+      - name: Clean Gradle cache
+        if: always()
+        run: |
+          cd android_app
+          ./gradlew cleanBuildCache
           
   download:
     needs: build
