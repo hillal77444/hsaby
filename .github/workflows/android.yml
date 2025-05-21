@@ -27,6 +27,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+          cache: 'gradle'
           
       - name: Set up Android SDK
         uses: android-actions/setup-android@v2
@@ -50,6 +51,16 @@ jobs:
           echo "$ANDROID_HOME/tools" >> $GITHUB_PATH
           echo "$ANDROID_HOME/tools/bin" >> $GITHUB_PATH
           
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+          
       - name: Create Debug Keystore
         run: |
           cd android_app/app
@@ -70,9 +81,9 @@ jobs:
           chmod +x ./gradlew
           ./gradlew clean
           if [ "${{ github.event.inputs.build_type }}" == "release" ]; then
-            ./gradlew assembleRelease --quiet --no-daemon
+            ./gradlew assembleRelease --quiet --no-daemon --build-cache
           else
-            ./gradlew assembleDebug --quiet --no-daemon
+            ./gradlew assembleDebug --quiet --no-daemon --build-cache
           fi
           
       - name: Check APK
