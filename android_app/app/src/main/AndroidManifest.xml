@@ -37,10 +37,5 @@
             android:exported="false"
             android:theme="@style/Theme.AccountingApp.NoActionBar" />
 
-        <activity
-            android:name=".ui.main.MainActivity"
-            android:exported="false"
-            android:theme="@style/Theme.AccountingApp.NoActionBar" />
-
     </application>
 </manifest> 
