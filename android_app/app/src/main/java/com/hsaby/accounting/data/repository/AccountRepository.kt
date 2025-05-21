@@ -82,10 +82,10 @@ class AccountRepository @Inject constructor(
 
             // Update local database
             serverAccounts.forEach { serverAccount ->
-                val localAccount = accountDao.getAccountByServerId(serverAccount.serverId)
+                val localAccount = getAccountByServerId(serverAccount.serverId)
                 if (localAccount == null) {
                     // Insert new account
-                    accountDao.insertAccount(AccountEntity(
+                    insertAccount(AccountEntity(
                         id = serverAccount.id,
                         serverId = serverAccount.serverId,
                         accountName = serverAccount.name,
@@ -100,7 +100,7 @@ class AccountRepository @Inject constructor(
                     ))
                 } else {
                     // Update existing account
-                    accountDao.updateAccount(localAccount.copy(
+                    updateAccount(localAccount.copy(
                         accountName = serverAccount.name,
                         balance = serverAccount.balance,
                         currency = serverAccount.currency,
