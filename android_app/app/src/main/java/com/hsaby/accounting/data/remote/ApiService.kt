@@ -6,7 +6,7 @@ import retrofit2.http.*
 
 interface ApiService {
     companion object {
-        const val BASE_URL = "http://212.224.88.122:5007/api/"
+        const val BASE_URL = "https://api.hsaby.com/"
     }
 
     @POST("auth/login")
