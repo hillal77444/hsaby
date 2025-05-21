@@ -209,7 +209,8 @@ public class SyncManager {
 
             if (username != null && password != null) {
                 // محاولة تسجيل الدخول تلقائياً
-                apiService.login(username, password).enqueue(new Callback<Map<String, Object>>() {
+                ApiService.LoginRequest loginRequest = new ApiService.LoginRequest(username, password);
+                apiService.login(loginRequest).enqueue(new Callback<Map<String, Object>>() {
                     @Override
                     public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                         if (response.isSuccessful() && response.body() != null) {
@@ -300,18 +301,19 @@ public class SyncManager {
                                         accountDao.update(account);
 
                                         // التحقق من نجاح التحديث
-                                        Account updatedAccount = accountDao.getAccountById(account.getId());
-                                        if (updatedAccount != null && updatedAccount.getServerId() == serverId) {
-                                            Log.d(TAG, "Successfully updated account server_id: " + serverId);
-                                            releaseLock(itemKey);
-                                            session.addProcessedItem(itemKey);
-                                        } else {
-                                            Log.e(TAG, "Failed to update account server_id in local database");
-                                            // إعادة المحاولة
-                                            account.setServerId(-1);
-                                            account.setSyncStatus(SYNC_STATUS_FAILED);
-                                            accountDao.update(account);
-                                        }
+                                        accountDao.getAccountById(account.getId()).observe((LifecycleOwner) context, updatedAccount -> {
+                                            if (updatedAccount != null && updatedAccount.getServerId() == serverId) {
+                                                Log.d(TAG, "Successfully updated account server_id: " + serverId);
+                                                releaseLock(itemKey);
+                                                session.addProcessedItem(itemKey);
+                                            } else {
+                                                Log.e(TAG, "Failed to update account server_id in local database");
+                                                // إعادة المحاولة
+                                                account.setServerId(-1);
+                                                account.setSyncStatus(SYNC_STATUS_FAILED);
+                                                accountDao.update(account);
+                                            }
+                                        });
                                     } catch (Exception e) {
                                         Log.e(TAG, "Error updating account server_id: " + e.getMessage());
                                         // إعادة المحاولة
@@ -338,18 +340,19 @@ public class SyncManager {
                                         transactionDao.update(transaction);
 
                                         // التحقق من نجاح التحديث
-                                        Transaction updatedTransaction = transactionDao.getTransactionById(transaction.getId());
-                                        if (updatedTransaction != null && updatedTransaction.getServerId() == serverId) {
-                                            Log.d(TAG, "Successfully updated transaction server_id: " + serverId);
-                                            releaseLock(itemKey);
-                                            session.addProcessedItem(itemKey);
-                                        } else {
-                                            Log.e(TAG, "Failed to update transaction server_id in local database");
-                                            // إعادة المحاولة
-                                            transaction.setServerId(-1);
-                                            transaction.setSyncStatus(SYNC_STATUS_FAILED);
-                                            transactionDao.update(transaction);
-                                        }
+                                        transactionDao.getTransactionById(transaction.getId()).observe((LifecycleOwner) context, updatedTransaction -> {
+                                            if (updatedTransaction != null && updatedTransaction.getServerId() == serverId) {
+                                                Log.d(TAG, "Successfully updated transaction server_id: " + serverId);
+                                                releaseLock(itemKey);
+                                                session.addProcessedItem(itemKey);
+                                            } else {
+                                                Log.e(TAG, "Failed to update transaction server_id in local database");
+                                                // إعادة المحاولة
+                                                transaction.setServerId(-1);
+                                                transaction.setSyncStatus(SYNC_STATUS_FAILED);
+                                                transactionDao.update(transaction);
+                                            }
+                                        });
                                     } catch (Exception e) {
                                         Log.e(TAG, "Error updating transaction server_id: " + e.getMessage());
                                         // إعادة المحاولة
