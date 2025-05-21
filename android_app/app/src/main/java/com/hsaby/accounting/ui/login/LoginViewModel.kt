@@ -21,16 +21,26 @@ class LoginViewModel @Inject constructor(
     private val _loginResult = MutableStateFlow<AuthResult<LoginResponse>?>(null)
     val loginResult: StateFlow<AuthResult<LoginResponse>?> = _loginResult
 
-    fun login(email: String, password: String) {
-        if (email.isBlank() || password.isBlank()) {
+    fun login(phone: String, password: String) {
+        if (phone.isBlank() || password.isBlank()) {
             _loginResult.value = AuthResult.Error("يرجى ملء جميع الحقول")
+            return
+        }
+
+        if (!isValidPhone(phone)) {
+            _loginResult.value = AuthResult.Error("رقم الهاتف غير صالح")
             return
         }
 
         viewModelScope.launch {
             _loginResult.value = AuthResult.Loading
-            _loginResult.value = authRepository.login(LoginRequest(email, password))
+            _loginResult.value = authRepository.login(LoginRequest(phone, password))
         }
+    }
+
+    private fun isValidPhone(phone: String): Boolean {
+        val phonePattern = "^[0-9]{10}$"
+        return phone.matches(phonePattern.toRegex())
     }
 
     fun register(name: String, phone: String, password: String) {
