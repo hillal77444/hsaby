@@ -56,10 +56,10 @@ class TransactionRepository @Inject constructor(
 
             // Update local database
             serverTransactions.forEach { serverTransaction ->
-                val localTransaction = transactionDao.getTransactionById(serverTransaction.id)
+                val localTransaction = getTransactionById(serverTransaction.id)
                 if (localTransaction == null) {
                     // Insert new transaction
-                    transactionDao.insertTransaction(TransactionEntity(
+                    insertTransaction(TransactionEntity(
                         id = serverTransaction.id,
                         serverId = serverTransaction.serverId,
                         accountId = serverTransaction.accountId,
@@ -76,7 +76,7 @@ class TransactionRepository @Inject constructor(
                     ))
                 } else {
                     // Update existing transaction
-                    transactionDao.updateTransaction(localTransaction.copy(
+                    updateTransaction(localTransaction.copy(
                         amount = serverTransaction.amount,
                         type = serverTransaction.type,
                         description = serverTransaction.description,
