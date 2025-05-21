@@ -55,4 +55,10 @@ public interface AccountDao {
 
     @Query("SELECT * FROM accounts WHERE server_id = :serverId")
     Account getAccountByServerIdSync(long serverId);
+
+    @Query("SELECT * FROM accounts WHERE sync_status = :syncStatus")
+    List<Account> getPendingSyncAccounts();
+
+    @Query("SELECT * FROM accounts WHERE sync_status != :syncStatus")
+    List<Account> getAccountsForSync();
 } 
