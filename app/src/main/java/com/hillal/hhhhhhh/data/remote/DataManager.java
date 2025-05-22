@@ -703,35 +703,34 @@ public class DataManager {
 
     public void updateTransaction(Transaction transaction, DataCallback callback) {
         if (!isNetworkAvailable()) {
+<<<<<<< HEAD
             // حفظ العملية كعملية معلقة
             insertPendingOperation(transaction, "UPDATE");
+=======
+>>>>>>> parent of 150017bc (Update DataManager.java)
             callback.onError("No internet connection");
             return;
         }
-    
+
         // التحقق من إمكانية المزامنة
         if (!canSyncTransaction(transaction)) {
             callback.onError("Transaction cannot be synced at this time");
             return;
         }
-    
+
         String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
                 .getString("token", null);
-    
+
         if (token == null) {
             callback.onError("User not authenticated");
             return;
         }
-    
-        // تحديث وقت التعديل
-        transaction.setUpdatedAt(System.currentTimeMillis());
-        transaction.setModified(true);
-    
+
         // زيادة عدد محاولات المزامنة
         Long serverId = transaction.getServerId();
         int attempts = syncAttempts.getOrDefault(serverId, 0) + 1;
         syncAttempts.put(serverId, attempts);
-    
+
         apiService.updateTransaction("Bearer " + token, transaction.getServerId(), transaction).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
@@ -740,21 +739,24 @@ public class DataManager {
                     lastSyncTimes.put(serverId, System.currentTimeMillis());
                     // إزالة من محاولات المزامنة
                     syncAttempts.remove(serverId);
-                    // تحديث حالة المزامنة
-                    transaction.setModified(false);
-                    transactionDao.update(transaction);
                     callback.onSuccess();
                 } else {
+<<<<<<< HEAD
                     // حفظ العملية كعملية معلقة
                     insertPendingOperation(transaction, "UPDATE");
+=======
+>>>>>>> parent of 150017bc (Update DataManager.java)
                     callback.onError("Failed to update transaction: " + response.code());
                 }
             }
-    
+
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
+<<<<<<< HEAD
                 // حفظ العملية كعملية معلقة
                 insertPendingOperation(transaction, "UPDATE");
+=======
+>>>>>>> parent of 150017bc (Update DataManager.java)
                 callback.onError("Network error: " + t.getMessage());
             }
         });
