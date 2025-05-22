@@ -25,7 +25,6 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.hillal.hhhhhhh.data.repository.AccountRepository;
-import com.hillal.hhhhhhh.data.sync.SyncManager;
 import com.hillal.hhhhhhh.data.room.AccountDao;
 import com.hillal.hhhhhhh.data.room.TransactionDao;
 import com.hillal.hhhhhhh.data.room.PendingOperationDao;
@@ -52,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
     private AccountRepository accountRepository;
     private AppBarConfiguration appBarConfiguration;
     private AuthViewModel authViewModel;
-    private SyncManager syncManager;
     private App app;
     private AppDatabase db;
 
@@ -84,12 +82,6 @@ public class MainActivity extends AppCompatActivity {
                 throw new IllegalStateException("AccountRepository is null");
             }
             Log.d(TAG, "AccountRepository initialized successfully");
-
-            // Initialize SyncManager
-            AccountDao accountDao = app.getDatabase().accountDao();
-            TransactionDao transactionDao = app.getDatabase().transactionDao();
-            syncManager = new SyncManager(this, accountDao, transactionDao);
-            Log.d(TAG, "SyncManager initialized successfully");
 
             // Setup navigation
             NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
@@ -211,26 +203,6 @@ public class MainActivity extends AppCompatActivity {
 
     public AccountRepository getAccountRepository() {
         return accountRepository;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume called");
-        // إعادة تشغيل المزامنة التلقائية عند عودة التطبيق للواجهة
-        if (syncManager != null && syncManager.isAutoSyncEnabled()) {
-            syncManager.startAutoSync();
-        }
-        if (syncManager != null) {
-            syncManager.onDashboardEntered();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d(TAG, "onPause called");
-        // لا نقوم بإيقاف المزامنة التلقائية هنا لأنها قد تكون قيد التنفيذ
     }
 
     @Override
