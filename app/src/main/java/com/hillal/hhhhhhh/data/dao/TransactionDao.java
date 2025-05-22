@@ -104,4 +104,7 @@ public interface TransactionDao {
 
     @Query("SELECT * FROM transactions WHERE sync_status != :syncStatus")
     List<Transaction> getTransactionsForSync();
+
+    @Query("SELECT * FROM transactions WHERE server_id = -1")
+    List<Transaction> getTransactionsToMigrate();
 } 
