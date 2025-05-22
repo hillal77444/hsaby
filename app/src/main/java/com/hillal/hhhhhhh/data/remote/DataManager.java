@@ -26,7 +26,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import java.util.ArrayList;
 import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class DataManager {
     private static final String TAG = "DataManager";
@@ -40,12 +39,6 @@ public class DataManager {
     private final Gson gson;
     private static final long TOKEN_REFRESH_THRESHOLD = 3600000; // ساعة واحدة قبل انتهاء الصلاحية
     private static final String TOKEN_EXPIRY_KEY = "token_expiry_time";
-    private static final long INVALID_SERVER_ID = 0;
-    private static final long NEW_TRANSACTION_SERVER_ID = -System.currentTimeMillis();
-    private static final int MAX_SYNC_ATTEMPTS = 3;
-    private static final long SYNC_TIMEOUT = 5 * 60 * 1000; // 5 دقائق
-    private final Map<Long, Integer> syncAttempts = new ConcurrentHashMap<>();
-    private final Map<Long, Long> lastSyncTimes = new ConcurrentHashMap<>();
 
     public DataManager(Context context, AccountDao accountDao, TransactionDao transactionDao, PendingOperationDao pendingOperationDao) {
         this.context = context;
