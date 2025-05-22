@@ -645,115 +645,123 @@ public class SyncManager {
     }
 
     private void performSync(SyncCallback callback) {
-        // الحصول على البيانات المحلية
-        List<Account> localAccounts = accountDao.getAllAccountsSync();
-        List<Transaction> localTransactions = transactionDao.getAllTransactionsSync();
+        executor.execute(() -> {
+            try {
+                // الحصول على البيانات المحلية
+                List<Account> localAccounts = accountDao.getAllAccountsSync();
+                List<Transaction> localTransactions = transactionDao.getAllTransactionsSync();
 
-        // تحضير البيانات للإرسال
-        Map<String, Object> syncData = new HashMap<>();
-        List<Map<String, Object>> accountsData = new ArrayList<>();
-        List<Map<String, Object>> transactionsData = new ArrayList<>();
+                // تحضير البيانات للإرسال
+                Map<String, Object> syncData = new HashMap<>();
+                List<Map<String, Object>> accountsData = new ArrayList<>();
+                List<Map<String, Object>> transactionsData = new ArrayList<>();
 
-        // تحضير بيانات الحسابات
-        for (Account account : localAccounts) {
-            Map<String, Object> accountData = new HashMap<>();
-            accountData.put("id", account.getId());
-            if (account.getServerId() > 0) {
-                accountData.put("server_id", account.getServerId());
-            }
-            accountData.put("account_name", account.getName());
-            accountData.put("balance", account.getBalance());
-            accountData.put("phone_number", account.getPhoneNumber());
-            accountData.put("notes", account.getNotes());
-            accountData.put("is_debtor", account.isDebtor());
-            accountData.put("whatsapp_enabled", account.isWhatsappEnabled());
-            accountData.put("last_sync_time", account.getLastSyncTime());
-            accountsData.add(accountData);
-        }
-
-        // تحضير بيانات المعاملات
-        for (Transaction transaction : localTransactions) {
-            Map<String, Object> transactionData = new HashMap<>();
-            transactionData.put("id", transaction.getId());
-            if (transaction.getServerId() > 0) {
-                transactionData.put("server_id", transaction.getServerId());
-            }
-            transactionData.put("amount", transaction.getAmount());
-            transactionData.put("type", transaction.getType());
-            transactionData.put("description", transaction.getDescription());
-            transactionData.put("notes", transaction.getNotes());
-            transactionData.put("date", transaction.getTransactionDate());
-            transactionData.put("currency", transaction.getCurrency());
-            transactionData.put("whatsapp_enabled", transaction.isWhatsappEnabled());
-            transactionData.put("account_id", transaction.getAccountId());
-            transactionData.put("last_sync_time", transaction.getLastSyncTime());
-            transactionsData.add(transactionData);
-        }
-
-        syncData.put("accounts", accountsData);
-        syncData.put("transactions", transactionsData);
-
-        // إرسال البيانات للخادم
-        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                .getString("token", null);
-        
-        if (token == null) {
-            callback.onError("يرجى تسجيل الدخول أولاً");
-            return;
-        }
-
-        // تحويل البيانات إلى التنسيق المطلوب للخادم
-        ApiService.SyncRequest syncRequest = new ApiService.SyncRequest(
-            localAccounts.stream()
-                .map(account -> {
-                    Account syncAccount = new Account();
-                    syncAccount.setId(account.getId());
-                    syncAccount.setServerId(account.getServerId());
-                    syncAccount.setName(account.getName());
-                    syncAccount.setBalance(account.getBalance());
-                    syncAccount.setPhoneNumber(account.getPhoneNumber());
-                    syncAccount.setNotes(account.getNotes());
-                    syncAccount.setIsDebtor(account.isDebtor());
-                    syncAccount.setWhatsappEnabled(account.isWhatsappEnabled());
-                    syncAccount.setLastSyncTime(account.getLastSyncTime());
-                    return syncAccount;
-                })
-                .collect(Collectors.toList()),
-            localTransactions.stream()
-                .map(transaction -> {
-                    Transaction syncTransaction = new Transaction();
-                    syncTransaction.setId(transaction.getId());
-                    syncTransaction.setServerId(transaction.getServerId());
-                    syncTransaction.setAmount(transaction.getAmount());
-                    syncTransaction.setType(transaction.getType());
-                    syncTransaction.setDescription(transaction.getDescription());
-                    syncTransaction.setNotes(transaction.getNotes());
-                    syncTransaction.setTransactionDate(transaction.getTransactionDate());
-                    syncTransaction.setCurrency(transaction.getCurrency());
-                    syncTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
-                    syncTransaction.setAccountId(transaction.getAccountId());
-                    syncTransaction.setLastSyncTime(transaction.getLastSyncTime());
-                    return syncTransaction;
-                })
-                .collect(Collectors.toList())
-        );
-
-        apiService.syncData("Bearer " + token, syncRequest).enqueue(new Callback<ApiService.SyncResponse>() {
-            @Override
-            public void onResponse(Call<ApiService.SyncResponse> call, Response<ApiService.SyncResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiService.SyncResponse syncResponse = response.body();
-                    handleSyncResponse(syncResponse, callback);
-                } else {
-                    isSyncing = false;
-                    callback.onError("فشلت مزامنة البيانات");
+                // تحضير بيانات الحسابات
+                for (Account account : localAccounts) {
+                    Map<String, Object> accountData = new HashMap<>();
+                    accountData.put("id", account.getId());
+                    if (account.getServerId() > 0) {
+                        accountData.put("server_id", account.getServerId());
+                    }
+                    accountData.put("account_name", account.getName());
+                    accountData.put("balance", account.getBalance());
+                    accountData.put("phone_number", account.getPhoneNumber());
+                    accountData.put("notes", account.getNotes());
+                    accountData.put("is_debtor", account.isDebtor());
+                    accountData.put("whatsapp_enabled", account.isWhatsappEnabled());
+                    accountData.put("last_sync_time", account.getLastSyncTime());
+                    accountsData.add(accountData);
                 }
-            }
 
-            @Override
-            public void onFailure(Call<ApiService.SyncResponse> call, Throwable t) {
+                // تحضير بيانات المعاملات
+                for (Transaction transaction : localTransactions) {
+                    Map<String, Object> transactionData = new HashMap<>();
+                    transactionData.put("id", transaction.getId());
+                    if (transaction.getServerId() > 0) {
+                        transactionData.put("server_id", transaction.getServerId());
+                    }
+                    transactionData.put("amount", transaction.getAmount());
+                    transactionData.put("type", transaction.getType());
+                    transactionData.put("description", transaction.getDescription());
+                    transactionData.put("notes", transaction.getNotes());
+                    transactionData.put("date", transaction.getTransactionDate());
+                    transactionData.put("currency", transaction.getCurrency());
+                    transactionData.put("whatsapp_enabled", transaction.isWhatsappEnabled());
+                    transactionData.put("account_id", transaction.getAccountId());
+                    transactionData.put("last_sync_time", transaction.getLastSyncTime());
+                    transactionsData.add(transactionData);
+                }
+
+                syncData.put("accounts", accountsData);
+                syncData.put("transactions", transactionsData);
+
+                // إرسال البيانات للخادم
+                String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                        .getString("token", null);
+                
+                if (token == null) {
+                    handler.post(() -> callback.onError("يرجى تسجيل الدخول أولاً"));
+                    return;
+                }
+
+                // تحويل البيانات إلى التنسيق المطلوب للخادم
+                ApiService.SyncRequest syncRequest = new ApiService.SyncRequest(
+                    localAccounts.stream()
+                        .map(account -> {
+                            Account syncAccount = new Account();
+                            syncAccount.setId(account.getId());
+                            syncAccount.setServerId(account.getServerId());
+                            syncAccount.setName(account.getName());
+                            syncAccount.setBalance(account.getBalance());
+                            syncAccount.setPhoneNumber(account.getPhoneNumber());
+                            syncAccount.setNotes(account.getNotes());
+                            syncAccount.setIsDebtor(account.isDebtor());
+                            syncAccount.setWhatsappEnabled(account.isWhatsappEnabled());
+                            syncAccount.setLastSyncTime(account.getLastSyncTime());
+                            return syncAccount;
+                        })
+                        .collect(Collectors.toList()),
+                    localTransactions.stream()
+                        .map(transaction -> {
+                            Transaction syncTransaction = new Transaction();
+                            syncTransaction.setId(transaction.getId());
+                            syncTransaction.setServerId(transaction.getServerId());
+                            syncTransaction.setAmount(transaction.getAmount());
+                            syncTransaction.setType(transaction.getType());
+                            syncTransaction.setDescription(transaction.getDescription());
+                            syncTransaction.setNotes(transaction.getNotes());
+                            syncTransaction.setTransactionDate(transaction.getTransactionDate());
+                            syncTransaction.setCurrency(transaction.getCurrency());
+                            syncTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
+                            syncTransaction.setAccountId(transaction.getAccountId());
+                            syncTransaction.setLastSyncTime(transaction.getLastSyncTime());
+                            return syncTransaction;
+                        })
+                        .collect(Collectors.toList())
+                );
+
+                apiService.syncData("Bearer " + token, syncRequest).enqueue(new Callback<ApiService.SyncResponse>() {
+                    @Override
+                    public void onResponse(Call<ApiService.SyncResponse> call, Response<ApiService.SyncResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            ApiService.SyncResponse syncResponse = response.body();
+                            handleSyncResponse(syncResponse, callback);
+                        } else {
+                            isSyncing = false;
+                            handler.post(() -> callback.onError("فشلت مزامنة البيانات"));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ApiService.SyncResponse> call, Throwable t) {
+                        isSyncing = false;
+                        handler.post(() -> callback.onError("خطأ في الاتصال: " + t.getMessage()));
+                    }
+                });
+            } catch (Exception e) {
+                Log.e(TAG, "Error in performSync: " + e.getMessage());
                 isSyncing = false;
-                callback.onError("خطأ في الاتصال: " + t.getMessage());
+                handler.post(() -> callback.onError("خطأ في المزامنة: " + e.getMessage()));
             }
         });
     }
