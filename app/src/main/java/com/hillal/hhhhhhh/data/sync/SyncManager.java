@@ -702,7 +702,42 @@ public class SyncManager {
             return;
         }
 
-        ApiService.SyncRequest syncRequest = new ApiService.SyncRequest(accountsData, transactionsData);
+        // تحويل البيانات إلى التنسيق المطلوب للخادم
+        ApiService.SyncRequest syncRequest = new ApiService.SyncRequest(
+            localAccounts.stream()
+                .map(account -> {
+                    Account syncAccount = new Account();
+                    syncAccount.setId(account.getId());
+                    syncAccount.setServerId(account.getServerId());
+                    syncAccount.setName(account.getName());
+                    syncAccount.setBalance(account.getBalance());
+                    syncAccount.setPhoneNumber(account.getPhoneNumber());
+                    syncAccount.setNotes(account.getNotes());
+                    syncAccount.setIsDebtor(account.isDebtor());
+                    syncAccount.setWhatsappEnabled(account.isWhatsappEnabled());
+                    syncAccount.setLastSyncTime(account.getLastSyncTime());
+                    return syncAccount;
+                })
+                .collect(Collectors.toList()),
+            localTransactions.stream()
+                .map(transaction -> {
+                    Transaction syncTransaction = new Transaction();
+                    syncTransaction.setId(transaction.getId());
+                    syncTransaction.setServerId(transaction.getServerId());
+                    syncTransaction.setAmount(transaction.getAmount());
+                    syncTransaction.setType(transaction.getType());
+                    syncTransaction.setDescription(transaction.getDescription());
+                    syncTransaction.setNotes(transaction.getNotes());
+                    syncTransaction.setTransactionDate(transaction.getTransactionDate());
+                    syncTransaction.setCurrency(transaction.getCurrency());
+                    syncTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
+                    syncTransaction.setAccountId(transaction.getAccountId());
+                    syncTransaction.setLastSyncTime(transaction.getLastSyncTime());
+                    return syncTransaction;
+                })
+                .collect(Collectors.toList())
+        );
+
         apiService.syncData("Bearer " + token, syncRequest).enqueue(new Callback<ApiService.SyncResponse>() {
             @Override
             public void onResponse(Call<ApiService.SyncResponse> call, Response<ApiService.SyncResponse> response) {
