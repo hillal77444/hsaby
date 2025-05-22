@@ -105,7 +105,4 @@ public interface TransactionDao {
 
     @Query("DELETE FROM transactions")
     void deleteAllTransactions();
-
-    @Query("SELECT * FROM transactions WHERE server_id = :serverId")
-    List<Transaction> getTransactionsByServerId(long serverId);
 } 
