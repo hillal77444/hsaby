@@ -65,7 +65,7 @@ public class Transaction {
     private long updatedAt;
 
     @ColumnInfo(name = "last_sync_time")
-    @SerializedName("lastSyncTime")
+    @SerializedName("last_sync_time")
     private long lastSyncTime;
 
     @ColumnInfo(name = "is_modified")
