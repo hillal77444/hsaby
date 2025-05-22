@@ -738,8 +738,8 @@ def refresh_token():
         
     except Exception as e:
         logger.error(f"Token refresh error: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء تجديد التوكن'}), 500
-
+        return jsonify({'error': 'حدث خطأ أثناء تجديد التوكن'}), 500 
+    
 @main.route('/api/server/time', methods=['GET'])
 def get_server_time():
     try:
