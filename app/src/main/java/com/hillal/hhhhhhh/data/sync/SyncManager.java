@@ -121,6 +121,11 @@ public class SyncManager {
     private static final String SERVER_TIME_KEY = "server_time";
     private static final String TIME_DIFFERENCE_KEY = "time_difference";
     private long serverTimeDifference = 0;
+    
+    // إضافة المتغيرات المفقودة
+    private static final long MIN_SYNC_INTERVAL = 60 * 1000; // دقيقة واحدة
+    private long syncStartTime = 0;
+    private DataManager dataManager;
 
     private int calculateOptimalBatchSize(int totalItems) {
         // حساب حجم الدفعة الأمثل بناءً على عدد العناصر
@@ -641,8 +646,8 @@ public class SyncManager {
 
     private void performSync(SyncCallback callback) {
         // الحصول على البيانات المحلية
-        List<Account> localAccounts = dataManager.getAllAccounts();
-        List<Transaction> localTransactions = dataManager.getAllTransactions();
+        List<Account> localAccounts = accountDao.getAllAccountsSync();
+        List<Transaction> localTransactions = transactionDao.getAllTransactionsSync();
 
         // تحضير البيانات للإرسال
         Map<String, Object> syncData = new HashMap<>();
@@ -653,10 +658,10 @@ public class SyncManager {
         for (Account account : localAccounts) {
             Map<String, Object> accountData = new HashMap<>();
             accountData.put("id", account.getId());
-            if (account.getServerId() != null && account.getServerId() > 0) {
+            if (account.getServerId() > 0) {
                 accountData.put("server_id", account.getServerId());
             }
-            accountData.put("account_name", account.getAccountName());
+            accountData.put("account_name", account.getName());
             accountData.put("balance", account.getBalance());
             accountData.put("phone_number", account.getPhoneNumber());
             accountData.put("notes", account.getNotes());
@@ -670,14 +675,14 @@ public class SyncManager {
         for (Transaction transaction : localTransactions) {
             Map<String, Object> transactionData = new HashMap<>();
             transactionData.put("id", transaction.getId());
-            if (transaction.getServerId() != null && transaction.getServerId() > 0) {
+            if (transaction.getServerId() > 0) {
                 transactionData.put("server_id", transaction.getServerId());
             }
             transactionData.put("amount", transaction.getAmount());
             transactionData.put("type", transaction.getType());
             transactionData.put("description", transaction.getDescription());
             transactionData.put("notes", transaction.getNotes());
-            transactionData.put("date", transaction.getDate());
+            transactionData.put("date", transaction.getTransactionDate());
             transactionData.put("currency", transaction.getCurrency());
             transactionData.put("whatsapp_enabled", transaction.isWhatsappEnabled());
             transactionData.put("account_id", transaction.getAccountId());
@@ -689,27 +694,36 @@ public class SyncManager {
         syncData.put("transactions", transactionsData);
 
         // إرسال البيانات للخادم
-        apiService.syncData(syncData).enqueue(new Callback<Map<String, Object>>() {
+        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("token", null);
+        
+        if (token == null) {
+            callback.onError("يرجى تسجيل الدخول أولاً");
+            return;
+        }
+
+        ApiService.SyncRequest syncRequest = new ApiService.SyncRequest(accountsData, transactionsData);
+        apiService.syncData("Bearer " + token, syncRequest).enqueue(new Callback<ApiService.SyncResponse>() {
             @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+            public void onResponse(Call<ApiService.SyncResponse> call, Response<ApiService.SyncResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Map<String, Object> responseData = response.body();
-                    handleSyncResponse(responseData, callback);
+                    ApiService.SyncResponse syncResponse = response.body();
+                    handleSyncResponse(syncResponse, callback);
                 } else {
                     isSyncing = false;
-                    callback.onError("Failed to sync data");
+                    callback.onError("فشلت مزامنة البيانات");
                 }
             }
 
             @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+            public void onFailure(Call<ApiService.SyncResponse> call, Throwable t) {
                 isSyncing = false;
-                callback.onError("Network error: " + t.getMessage());
+                callback.onError("خطأ في الاتصال: " + t.getMessage());
             }
         });
     }
 
-    private void handleSyncResponse(Map<String, Object> responseData, SyncCallback callback) {
+    private void handleSyncResponse(ApiService.SyncResponse syncResponse, SyncCallback callback) {
         // Handle the response from the server
         // This method should be implemented to handle the response from the server
         // and call the appropriate methods to update the local data
