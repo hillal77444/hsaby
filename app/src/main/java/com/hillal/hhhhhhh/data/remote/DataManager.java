@@ -26,6 +26,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import java.util.ArrayList;
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DataManager {
     private static final String TAG = "DataManager";
@@ -39,6 +40,12 @@ public class DataManager {
     private final Gson gson;
     private static final long TOKEN_REFRESH_THRESHOLD = 3600000; // ساعة واحدة قبل انتهاء الصلاحية
     private static final String TOKEN_EXPIRY_KEY = "token_expiry_time";
+    private static final long INVALID_SERVER_ID = 0;
+    private static final long NEW_TRANSACTION_SERVER_ID = -System.currentTimeMillis();
+    private static final int MAX_SYNC_ATTEMPTS = 3;
+    private static final long SYNC_TIMEOUT = 5 * 60 * 1000; // 5 دقائق
+    private final Map<Long, Integer> syncAttempts = new ConcurrentHashMap<>();
+    private final Map<Long, Long> lastSyncTimes = new ConcurrentHashMap<>();
 
     public DataManager(Context context, AccountDao accountDao, TransactionDao transactionDao, PendingOperationDao pendingOperationDao) {
         this.context = context;
@@ -263,9 +270,40 @@ public class DataManager {
         });
     }
 
+    private boolean isValidServerId(Long serverId) {
+        return serverId != null && serverId != INVALID_SERVER_ID;
+    }
+
+    private boolean canSyncTransaction(Transaction transaction) {
+        if (transaction == null) return false;
+        
+        Long serverId = transaction.getServerId();
+        if (!isValidServerId(serverId)) {
+            // تعيين server_id سالب للمعاملة الجديدة
+            transaction.setServerId(NEW_TRANSACTION_SERVER_ID);
+            transactionDao.update(transaction);
+            return true;
+        }
+
+        // التحقق من عدد محاولات المزامنة
+        int attempts = syncAttempts.getOrDefault(serverId, 0);
+        if (attempts >= MAX_SYNC_ATTEMPTS) {
+            Log.w(TAG, "تم تجاوز الحد الأقصى لمحاولات المزامنة للمعاملة: " + serverId);
+            return false;
+        }
+
+        // التحقق من وقت آخر مزامنة
+        long lastSync = lastSyncTimes.getOrDefault(serverId, 0L);
+        if (System.currentTimeMillis() - lastSync < SYNC_TIMEOUT) {
+            Log.w(TAG, "المعاملة قيد المزامنة حالياً: " + serverId);
+            return false;
+        }
+
+        return true;
+    }
+
     private void fetchTransactions(String token, DataCallback callback) {
         Log.d(TAG, "Fetching transactions from server...");
-        
         apiService.getTransactions("Bearer " + token).enqueue(new Callback<List<Transaction>>() {
             @Override
             public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
@@ -275,82 +313,45 @@ public class DataManager {
                     
                     executor.execute(() -> {
                         try {
-                            // إضافة جميع المعاملات
+                            // تحديث وقت المزامنة وحالة المزامنة لجميع المعاملات
                             for (Transaction transaction : transactions) {
                                 try {
-                                    // التحقق من وجود الحساب المرتبط بالمعاملة
-                                    Account account = accountDao.getAccountByServerIdSync(transaction.getAccountId());
-                                    if (account == null) {
-                                        Log.e(TAG, "Account not found for transaction: " + transaction.getServerId() + 
-                                              ", Account ID: " + transaction.getAccountId());
-                                        continue; // تخطي هذه المعاملة
+                                    // التحقق من صحة server_id
+                                    if (!isValidServerId(transaction.getServerId())) {
+                                        Log.w(TAG, "Invalid server_id for transaction: " + transaction.getId());
+                                        continue;
                                     }
 
-                                    // تحديث معرف الحساب المحلي
-                                    transaction.setAccountId(account.getId());
-
+                                    transaction.setLastSyncTime(System.currentTimeMillis());
+                                    transaction.setSyncStatus(2); // SYNCED
+                                    
                                     // التحقق من وجود معاملة بنفس server_id
                                     Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
                                     if (existingTransaction != null) {
                                         // تحديث المعاملة الموجودة
                                         transaction.setId(existingTransaction.getId());
                                         transactionDao.update(transaction);
-                                        Log.d(TAG, "تم تحديث معاملة موجودة: server_id=" + transaction.getServerId() + 
-                                              ", amount=" + transaction.getAmount() + 
-                                              ", date=" + transaction.getTransactionDate());
+                                        Log.d(TAG, "Updated existing transaction: " + transaction.getServerId());
                                     } else {
                                         // إضافة معاملة جديدة
                                         transactionDao.insert(transaction);
-                                        Log.d(TAG, "تم إضافة معاملة جديدة: server_id=" + transaction.getServerId() + 
-                                              ", amount=" + transaction.getAmount() + 
-                                              ", date=" + transaction.getTransactionDate());
+                                        Log.d(TAG, "Added new transaction: " + transaction.getServerId());
                                     }
                                 } catch (Exception e) {
-                                    StringBuilder errorBuilder = new StringBuilder("خطأ في معالجة المعاملة: server_id=")
-                                            .append(transaction.getServerId())
-                                            .append(", amount=")
-                                            .append(transaction.getAmount())
-                                            .append(", date=")
-                                            .append(transaction.getTransactionDate())
-                                            .append("\nالخطأ: ")
-                                            .append(e.getMessage())
-                                            .append("\nStack trace: ")
-                                            .append(Log.getStackTraceString(e));
-                                    final String errorMessage = errorBuilder.toString();
-                                    Log.e(TAG, errorMessage);
-                                    throw e;
+                                    Log.e(TAG, "Error processing transaction: " + transaction.getServerId() + 
+                                          "\nError: " + e.getMessage());
                                 }
                             }
-                            
-                            // تحديث وقت آخر مزامنة
-                            context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
-                                    .edit()
-                                    .putLong("last_sync_time", System.currentTimeMillis())
-                                    .apply();
-
-                            Log.d(TAG, "Full sync completed successfully");
+                            Log.d(TAG, "All transactions processed successfully");
                             handler.post(() -> callback.onSuccess());
                         } catch (Exception e) {
-                            StringBuilder errorBuilder = new StringBuilder("خطأ في حفظ المعاملات: ")
-                                    .append(e.getMessage())
-                                    .append("\nStack trace: ")
-                                    .append(Log.getStackTraceString(e));
-                            final String errorMessage = errorBuilder.toString();
+                            final String errorMessage = "Error saving transactions: " + e.getMessage();
                             Log.e(TAG, errorMessage);
                             handler.post(() -> callback.onError(errorMessage));
                         }
                     });
                 } else {
-                    StringBuilder errorBuilder = new StringBuilder("فشل في جلب المعاملات: ")
-                            .append(response.code());
-                    try {
-                        if (response.errorBody() != null) {
-                            errorBuilder.append("\n").append(response.errorBody().string());
-                        }
-                    } catch (IOException e) {
-                        errorBuilder.append("\nخطأ في قراءة رسالة الخطأ: ").append(e.getMessage());
-                    }
-                    final String errorMessage = errorBuilder.toString();
+                    final String errorMessage = "Failed to fetch transactions: " + response.code();
                     Log.e(TAG, errorMessage);
                     handler.post(() -> callback.onError(errorMessage));
                 }
@@ -358,11 +359,7 @@ public class DataManager {
 
             @Override
             public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                StringBuilder errorBuilder = new StringBuilder("خطأ في الاتصال: ")
-                        .append(t.getMessage())
-                        .append("\nStack trace: ")
-                        .append(Log.getStackTraceString(t));
-                final String errorMessage = errorBuilder.toString();
+                final String errorMessage = "Network error while fetching transactions: " + t.getMessage();
                 Log.e(TAG, errorMessage);
                 handler.post(() -> callback.onError(errorMessage));
             }
@@ -684,20 +681,13 @@ public class DataManager {
 
     public void updateTransaction(Transaction transaction, DataCallback callback) {
         if (!isNetworkAvailable()) {
-            // حفظ العملية في قائمة العمليات المعلقة
-            executor.execute(() -> {
-                try {
-                    String transactionJson = gson.toJson(transaction);
-                    PendingOperation operation = new PendingOperation("UPDATE", transaction.getId(), transactionJson);
-                    pendingOperationDao.insert(operation);
-                    transactionDao.update(transaction);
-                    Log.d(TAG, "تم حفظ عملية التحديث في قائمة العمليات المعلقة");
-                    handler.post(() -> callback.onSuccess());
-                } catch (Exception e) {
-                    Log.e(TAG, "خطأ في حفظ العملية المعلقة: " + e.getMessage());
-                    handler.post(() -> callback.onError("خطأ في حفظ العملية المعلقة: " + e.getMessage()));
-                }
-            });
+            callback.onError("No internet connection");
+            return;
+        }
+
+        // التحقق من إمكانية المزامنة
+        if (!canSyncTransaction(transaction)) {
+            callback.onError("Transaction cannot be synced at this time");
             return;
         }
 
@@ -705,36 +695,34 @@ public class DataManager {
                 .getString("token", null);
 
         if (token == null) {
-            handler.post(() -> callback.onError("يرجى تسجيل الدخول أولاً"));
+            callback.onError("User not authenticated");
             return;
         }
 
-        apiService.updateTransaction("Bearer " + token, transaction.getId(), transaction)
-                .enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (response.isSuccessful()) {
-                            // تحديث القيد في قاعدة البيانات المحلية
-                            executor.execute(() -> {
-                                try {
-                                    transactionDao.update(transaction);
-                                    Log.d(TAG, "تم تحديث القيد بنجاح");
-                                    handler.post(() -> callback.onSuccess());
-                                } catch (Exception e) {
-                                    Log.e(TAG, "خطأ في تحديث القيد: " + e.getMessage());
-                                    handler.post(() -> callback.onError("خطأ في تحديث القيد: " + e.getMessage()));
-                                }
-                            });
-                        } else {
-                            handler.post(() -> callback.onError("فشل في تحديث القيد"));
-                        }
-                    }
+        // زيادة عدد محاولات المزامنة
+        Long serverId = transaction.getServerId();
+        int attempts = syncAttempts.getOrDefault(serverId, 0) + 1;
+        syncAttempts.put(serverId, attempts);
 
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        handler.post(() -> callback.onError("خطأ في الاتصال: " + t.getMessage()));
-                    }
-                });
+        apiService.updateTransaction("Bearer " + token, transaction).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    // تحديث وقت المزامنة
+                    lastSyncTimes.put(serverId, System.currentTimeMillis());
+                    // إزالة من محاولات المزامنة
+                    syncAttempts.remove(serverId);
+                    callback.onSuccess();
+                } else {
+                    callback.onError("Failed to update transaction: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
     }
 
     public void deleteTransaction(long transactionId, DataCallback callback) {
