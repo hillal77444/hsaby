@@ -6,11 +6,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
-import android.content.SharedPreferences;
 
 import com.hillal.hhhhhhh.data.remote.ApiService;
 import com.hillal.hhhhhhh.data.remote.RetrofitClient;
-import com.hillal.hhhhhhh.data.remote.DataManager;
 import com.hillal.hhhhhhh.data.room.AccountDao;
 import com.hillal.hhhhhhh.data.room.TransactionDao;
 import com.hillal.hhhhhhh.data.model.Account;
@@ -23,15 +21,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import com.google.gson.Gson;
-import java.util.concurrent.TimeUnit;
 
 public class SyncManager {
     private static final String TAG = "SyncManager";
-    private static final int BATCH_SIZE = 10; // عدد العمليات في كل دفعة
-    private static final int MAX_RETRIES = 3; // عدد المحاولات القصوى
-    private static final long RETRY_DELAY_MS = 5000; // وقت الانتظار بين المحاولات
-
     private final Context context;
     private final ApiService apiService;
     private final AccountDao accountDao;
@@ -39,12 +31,6 @@ public class SyncManager {
     private final Handler handler;
     private final ExecutorService executor;
     private boolean isSyncing = false;
-    private int currentRetryCount = 0;
-
-    private boolean autoSyncEnabled = false;
-    private static final long AUTO_SYNC_INTERVAL = 15 * 60 * 1000; // 15 minutes
-    private Handler autoSyncHandler = new Handler(Looper.getMainLooper());
-    private Runnable autoSyncRunnable;
 
     public SyncManager(Context context, AccountDao accountDao, TransactionDao transactionDao) {
         this.context = context;
@@ -222,116 +208,5 @@ public class SyncManager {
 
     public void shutdown() {
         executor.shutdown();
-    }
-
-    public void enableAutoSync(boolean enable) {
-        autoSyncEnabled = enable;
-        if (enable) {
-            startAutoSync();
-        } else {
-            stopAutoSync();
-        }
-    }
-
-    public boolean isAutoSyncEnabled() {
-        return autoSyncEnabled;
-    }
-
-    public void startAutoSync() {
-        if (autoSyncRunnable != null) {
-            autoSyncHandler.removeCallbacks(autoSyncRunnable);
-        }
-
-        autoSyncRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (autoSyncEnabled) {
-                    performFullSync(new SyncCallback() {
-                        @Override
-                        public void onSuccess() {
-                            // Schedule next sync
-                            autoSyncHandler.postDelayed(this, AUTO_SYNC_INTERVAL);
-                        }
-
-                        @Override
-                        public void onError(String error) {
-                            // Retry after error
-                            autoSyncHandler.postDelayed(this, AUTO_SYNC_INTERVAL);
-                        }
-
-                        @Override
-                        public void onProgress(int current, int total) {
-                            // Progress updates
-                        }
-                    });
-                }
-            }
-        };
-
-        autoSyncHandler.post(autoSyncRunnable);
-    }
-
-    private void stopAutoSync() {
-        if (autoSyncRunnable != null) {
-            autoSyncHandler.removeCallbacks(autoSyncRunnable);
-            autoSyncRunnable = null;
-        }
-    }
-
-    public void performFullSync(SyncCallback callback) {
-        if (!isNetworkAvailable()) {
-            callback.onError("لا يوجد اتصال بالإنترنت");
-            return;
-        }
-
-        if (isSyncing) {
-            callback.onError("جاري تنفيذ عملية مزامنة أخرى، يرجى الانتظار");
-            return;
-        }
-
-        String token = getAuthToken();
-        if (token == null) {
-            callback.onError("يرجى تسجيل الدخول أولاً");
-            return;
-        }
-
-        isSyncing = true;
-        executor.execute(() -> {
-            try {
-                Log.d(TAG, "بدء المزامنة الكاملة...");
-                
-                // حذف البيانات المحلية
-                accountDao.deleteAllAccounts();
-                transactionDao.deleteAllTransactions();
-                Log.d(TAG, "تم حذف البيانات المحلية");
-
-                // جلب البيانات من السيرفر
-                DataManager dataManager = new DataManager(
-                    context,
-                    accountDao,
-                    transactionDao,
-                    null
-                );
-
-                dataManager.fetchDataFromServer(new DataManager.DataCallback() {
-                    @Override
-                    public void onSuccess() {
-                        isSyncing = false;
-                        handler.post(() -> callback.onSuccess());
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        Log.e(TAG, "فشلت المزامنة الكاملة: " + error);
-                        isSyncing = false;
-                        handler.post(() -> callback.onError(error));
-                    }
-                });
-            } catch (Exception e) {
-                Log.e(TAG, "خطأ في المزامنة الكاملة: " + e.getMessage());
-                isSyncing = false;
-                handler.post(() -> callback.onError("خطأ في المزامنة الكاملة: " + e.getMessage()));
-            }
-        });
     }
 } 
