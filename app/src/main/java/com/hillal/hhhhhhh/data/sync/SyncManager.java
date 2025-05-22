@@ -701,29 +701,77 @@ public class SyncManager {
     private void handleSyncResponse(ApiService.SyncResponse syncResponse, SyncCallback callback) {
         try {
             if (syncResponse != null) {
+                // قائمة لتخزين المعاملات التي تمت مزامنتها بنجاح
+                List<Transaction> syncedTransactions = new ArrayList<>();
+                
                 for (Transaction transaction : currentNewTransactions) {
-                    if (transaction.getServerId() < 0) {  // فقط المعاملات الجديدة
+                    // تحقق من أن المعاملة جديدة ولم تتم مزامنتها من قبل
+                    if (transaction.getServerId() < 0 && !isTransactionSynced(transaction.getId())) {
                         Long serverId = syncResponse.getTransactionServerId(transaction.getId());
-                        // تأكد من أن المعرف موجود وإيجابي
                         if (serverId != null && serverId > 0) {
+                            // تحديث معرف السيرفر
                             transaction.setServerId(serverId);
                             transaction.setLastSyncTime(System.currentTimeMillis());
+                            
+                            // تحديث في قاعدة البيانات
                             transactionDao.update(transaction);
+                            
+                            // إضافة المعاملة إلى قائمة المزامنة
+                            syncedTransactions.add(transaction);
                             
                             // تحديث سجلات المزامنة
                             syncAttempts.remove(transaction.getServerId());
                             lastSyncTimes.put(transaction.getServerId(), System.currentTimeMillis());
-                        } else {
-                            // تسجيل الخطأ إذا لم نحصل على معرف صالح
-                            Log.e(TAG, "لم يتم الحصول على معرف سيرفر صالح للمعاملة: " + transaction.getId());
+                            
+                            // تسجيل نجاح المزامنة
+                            Log.d(TAG, "تمت مزامنة المعاملة بنجاح: " + transaction.getId() + " -> " + serverId);
                         }
                     }
                 }
+                
+                // إزالة المعاملات المزامنة من القائمة الحالية
+                currentNewTransactions.removeAll(syncedTransactions);
+                
+                // حفظ حالة المزامنة
+                saveSyncState();
+                
+                callback.onSuccess();
             }
         } catch (Exception e) {
             Log.e(TAG, "Error handling sync response: " + e.getMessage());
             callback.onError("Error handling sync response: " + e.getMessage());
         }
+    }
+    
+    // دالة للتحقق من حالة مزامنة المعاملة
+    private boolean isTransactionSynced(long transactionId) {
+        // التحقق من سجلات المزامنة
+        if (lastSyncTimes.containsKey(transactionId)) {
+            long lastSync = lastSyncTimes.get(transactionId);
+            // إذا تمت المزامنة خلال آخر 5 دقائق، نعتبرها مزامنة
+            return (System.currentTimeMillis() - lastSync) < 300000;
+        }
+        return false;
+    }
+    
+    // دالة لحفظ حالة المزامنة
+    private void saveSyncState() {
+        SharedPreferences prefs = context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        
+        // حفظ وقت آخر مزامنة
+        editor.putLong("last_sync_time", System.currentTimeMillis());
+        
+        // حفظ معرفات المعاملات المزامنة
+        Set<String> syncedIds = new HashSet<>();
+        for (Transaction transaction : currentNewTransactions) {
+            if (transaction.getServerId() > 0) {
+                syncedIds.add(String.valueOf(transaction.getId()));
+            }
+        }
+        editor.putStringSet("synced_transactions", syncedIds);
+        
+        editor.apply();
     }
 
     private void getServerTime(SyncCallback callback) {
