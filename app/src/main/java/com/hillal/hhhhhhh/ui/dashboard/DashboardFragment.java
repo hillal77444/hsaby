@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,7 +19,6 @@ import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.data.repository.TransactionRepository;
 import com.hillal.hhhhhhh.databinding.FragmentDashboardBinding;
 import com.hillal.hhhhhhh.App;
-import com.hillal.hhhhhhh.data.sync.SyncManager;
 import com.hillal.hhhhhhh.data.preferences.UserPreferences;
 import com.hillal.hhhhhhh.data.room.AppDatabase;
 
@@ -29,7 +27,6 @@ public class DashboardFragment extends Fragment {
     private FragmentDashboardBinding binding;
     private DashboardViewModel dashboardViewModel;
     private UserPreferences userPreferences;
-    private SyncManager syncManager;
     private ProgressDialog progressDialog;
     private AppDatabase db;
 
@@ -47,11 +44,6 @@ public class DashboardFragment extends Fragment {
             dashboardViewModel = new ViewModelProvider(this, new DashboardViewModelFactory(accountRepository, transactionRepository))
                     .get(DashboardViewModel.class);
             userPreferences = new UserPreferences(requireContext());
-            syncManager = new SyncManager(
-                requireContext(),
-                db.accountDao(),
-                db.transactionDao()
-            );
             Log.d(TAG, "DashboardViewModel initialized successfully");
         } catch (Exception e) {
             Log.e(TAG, "Error initializing DashboardFragment: " + e.getMessage(), e);
@@ -70,28 +62,6 @@ public class DashboardFragment extends Fragment {
     private void setupUI() {
         // إعدادات أخرى
         setupOtherSettings();
-
-        // إضافة زر المزامنة الكاملة
-        Button fullSyncButton = binding.getRoot().findViewById(R.id.full_sync_button);
-        fullSyncButton.setOnClickListener(v -> {
-            showLoadingDialog("جاري المزامنة الكاملة...");
-            syncManager.performFullSync(new SyncManager.SyncCallback() {
-                @Override
-                public void onSuccess() {
-                    hideLoadingDialog();
-                    showSuccessDialog("تمت المزامنة الكاملة بنجاح");
-                    // تحديث البيانات في الواجهة
-                    loadAccounts();
-                    loadTransactions();
-                }
-
-                @Override
-                public void onError(String error) {
-                    hideLoadingDialog();
-                    showErrorDialog("فشلت المزامنة الكاملة: " + error);
-                }
-            });
-        });
     }
 
     private void setupOtherSettings() {
@@ -104,9 +74,6 @@ public class DashboardFragment extends Fragment {
         Log.d(TAG, "DashboardFragment onViewCreated started");
 
         try {
-            // إضافة المزامنة عند دخول لوحة التحكم
-            syncManager.onDashboardEntered();
-
             setupClickListeners();
             observeData();
             updateUserName();
@@ -122,7 +89,6 @@ public class DashboardFragment extends Fragment {
 
         // زر عرض القيود المحاسبية
         binding.viewTransactionsButton.setOnClickListener(v -> 
-         
             Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment));
 
         // زر عرض الحسابات
