@@ -28,128 +28,104 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MigrationManager {
-    private final AppDatabase database;
+    private final Context context;
     private final AccountDao accountDao;
     private final TransactionDao transactionDao;
     private final ApiService apiService;
-    private final Context context;
     private final UserPreferences userPreferences;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutorService executor;
     private int migratedAccountsCount = 0;
     private int migratedTransactionsCount = 0;
 
     public MigrationManager(Context context) {
         this.context = context;
-        this.database = AppDatabase.getInstance(context);
+        AppDatabase database = AppDatabase.getInstance(context);
         this.accountDao = database.accountDao();
         this.transactionDao = database.transactionDao();
         this.apiService = RetrofitClient.getApiService();
         this.userPreferences = new UserPreferences(context);
+        this.executor = Executors.newSingleThreadExecutor();
     }
 
-    public void migrateLocalData() {
-        executor.execute(() -> {
-            if (!isNetworkAvailable()) {
-                new Handler(Looper.getMainLooper()).post(() -> 
-                    Toast.makeText(context, "لا يوجد اتصال بالإنترنت", Toast.LENGTH_SHORT).show());
-                return;
-            }
+    public void startMigration() {
+        if (!isNetworkAvailable()) {
+            showError("لا يوجد اتصال بالإنترنت");
+            return;
+        }
 
-            String token = getAuthToken();
-            if (token == null) {
-                return;
-            }
+        String token = userPreferences.getToken();
+        if (token == null) {
+            showError("المستخدم غير مسجل الدخول");
+            return;
+        }
 
-            migratedAccountsCount = 0;
-            migratedTransactionsCount = 0;
+        // جلب الحسابات والمعاملات التي لم تتم مزامنتها بعد
+        List<Account> accountsToMigrate = accountDao.getNewAccounts();
+        List<Transaction> transactionsToMigrate = transactionDao.getNewTransactions();
 
-            List<Account> accountsToMigrate = accountDao.getNewAccounts();
-            List<Transaction> transactionsToMigrate = transactionDao.getNewTransactions();
+        if (accountsToMigrate.isEmpty() && transactionsToMigrate.isEmpty()) {
+            showError("لا توجد بيانات للمزامنة");
+            return;
+        }
 
-            if (accountsToMigrate.isEmpty() && transactionsToMigrate.isEmpty()) {
-                new Handler(Looper.getMainLooper()).post(() -> 
-                    Toast.makeText(context, "لا توجد حسابات أو معاملات تحتاج إلى ترحيل", Toast.LENGTH_LONG).show());
-                return;
-            }
-
-            SyncRequest request = new SyncRequest(accountsToMigrate, transactionsToMigrate);
-            apiService.syncData("Bearer " + token, request).enqueue(new Callback<SyncResponse>() {
-                @Override
-                public void onResponse(Call<SyncResponse> call, Response<SyncResponse> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        SyncResponse syncResponse = response.body();
-                        
-                        executor.execute(() -> {
-                            for (Account account : accountsToMigrate) {
-                                Long serverId = syncResponse.getAccountServerId(account.getId());
-                                if (serverId != null) {
-                                    account.setServerId(serverId);
-                                    accountDao.update(account);
-                                    migratedAccountsCount++;
-                                }
+        // إرسال البيانات إلى الخادم
+        SyncRequest request = new SyncRequest(accountsToMigrate, transactionsToMigrate);
+        apiService.syncData("Bearer " + token, request).enqueue(new Callback<SyncResponse>() {
+            @Override
+            public void onResponse(Call<SyncResponse> call, Response<SyncResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    SyncResponse syncResponse = response.body();
+                    
+                    executor.execute(() -> {
+                        for (Account account : accountsToMigrate) {
+                            Long serverId = syncResponse.getAccountServerId(account.getId());
+                            if (serverId != null) {
+                                account.setServerId(serverId);
+                                accountDao.update(account);
+                                migratedAccountsCount++;
                             }
+                        }
 
-                            for (Transaction transaction : transactionsToMigrate) {
-                                Long serverId = syncResponse.getTransactionServerId(transaction.getId());
-                                if (serverId != null) {
-                                    transaction.setServerId(serverId);
-                                    transactionDao.update(transaction);
-                                    migratedTransactionsCount++;
-                                }
+                        for (Transaction transaction : transactionsToMigrate) {
+                            Long serverId = syncResponse.getTransactionServerId(transaction.getId());
+                            if (serverId != null) {
+                                transaction.setServerId(serverId);
+                                transactionDao.update(transaction);
+                                migratedTransactionsCount++;
                             }
+                        }
 
-                            new Handler(Looper.getMainLooper()).post(() -> showMigrationSummary());
-                        });
-                    } else {
-                        new Handler(Looper.getMainLooper()).post(() -> {
-                            String errorMessage = "فشل في ترحيل البيانات";
-                            if (response.errorBody() != null) {
-                                try {
-                                    errorMessage += "\n\nالسبب: " + response.errorBody().string();
-                                } catch (Exception e) {
-                                    errorMessage += "\n\nالسبب: " + response.message();
-                                }
-                            }
-                            new AlertDialog.Builder(context)
-                                .setTitle("خطأ في الترحيل")
-                                .setMessage(errorMessage)
-                                .setPositiveButton("حسناً", null)
-                                .show();
-                        });
-                    }
+                        new Handler(Looper.getMainLooper()).post(() -> showMigrationSummary());
+                    });
+                } else {
+                    showError("فشلت المزامنة: " + (response.errorBody() != null ? response.errorBody().string() : "خطأ غير معروف"));
                 }
+            }
 
-                @Override
-                public void onFailure(Call<SyncResponse> call, Throwable t) {
-                    new Handler(Looper.getMainLooper()).post(() -> 
-                        Toast.makeText(context, "فشل في الاتصال بالخادم: " + t.getMessage(), Toast.LENGTH_SHORT).show());
-                }
-            });
+            @Override
+            public void onFailure(Call<SyncResponse> call, Throwable t) {
+                showError("فشلت المزامنة: " + t.getMessage());
+            }
         });
-    }
-
-    private void showMigrationSummary() {
-        String summary = String.format("تم ترحيل %d حساب و %d معاملة بنجاح", 
-            migratedAccountsCount, migratedTransactionsCount);
-        Toast.makeText(context, summary, Toast.LENGTH_LONG).show();
     }
 
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager != null) {
-            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-        }
-        return false;
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    private String getAuthToken() {
-        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                .getString("token", null);
-        if (token == null || token.isEmpty()) {
-            Toast.makeText(context, "يرجى تسجيل الدخول أولاً", Toast.LENGTH_SHORT).show();
-            return null;
-        }
-        return token;
+    private void showError(String message) {
+        new Handler(Looper.getMainLooper()).post(() -> {
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+        });
+    }
+
+    private void showMigrationSummary() {
+        new AlertDialog.Builder(context)
+                .setTitle("نتيجة المزامنة")
+                .setMessage(String.format("تمت مزامنة %d حساب و %d معاملة بنجاح", migratedAccountsCount, migratedTransactionsCount))
+                .setPositiveButton("موافق", null)
+                .show();
     }
 } 
