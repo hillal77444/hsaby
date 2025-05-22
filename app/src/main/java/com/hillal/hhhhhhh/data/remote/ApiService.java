@@ -53,6 +53,15 @@ public interface ApiService {
     @GET("api/server/time")
     Call<Long> getServerTime();
 
+    @PUT("accounts/{id}")
+    Call<Account> updateAccount(@Header("Authorization") String token, @Path("id") long id, @Body Account account);
+
+    @PUT("transactions/{id}")
+    Call<Transaction> updateTransaction(@Header("Authorization") String token, @Path("id") long id, @Body Transaction transaction);
+
+    @DELETE("accounts/{id}")
+    Call<Void> deleteAccount(@Header("Authorization") String token, @Path("id") long id);
+
     class LoginRequest {
         private String phone;
         private String password;
