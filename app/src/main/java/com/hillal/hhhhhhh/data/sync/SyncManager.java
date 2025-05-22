@@ -700,21 +700,26 @@ public class SyncManager {
 
     private void handleSyncResponse(ApiService.SyncResponse syncResponse, SyncCallback callback) {
         try {
-            if (syncResponse != null && syncResponse.getServerId() != null) {
-                // تحديث server_id ووقت المزامنة
+            if (syncResponse != null) {
                 for (Transaction transaction : currentNewTransactions) {
-                    if (transaction.getServerId() < 0) {
-                        transaction.setServerId(syncResponse.getServerId());
-                        transaction.setLastSyncTime(System.currentTimeMillis());
-                        transactionDao.update(transaction);
-                        
-                        // تحديث سجلات المزامنة
-                        syncAttempts.remove(transaction.getServerId());
-                        lastSyncTimes.put(transaction.getServerId(), System.currentTimeMillis());
+                    if (transaction.getServerId() < 0) {  // فقط المعاملات الجديدة
+                        Long serverId = syncResponse.getTransactionServerId(transaction.getId());
+                        // تأكد من أن المعرف موجود وإيجابي
+                        if (serverId != null && serverId > 0) {
+                            transaction.setServerId(serverId);
+                            transaction.setLastSyncTime(System.currentTimeMillis());
+                            transactionDao.update(transaction);
+                            
+                            // تحديث سجلات المزامنة
+                            syncAttempts.remove(transaction.getServerId());
+                            lastSyncTimes.put(transaction.getServerId(), System.currentTimeMillis());
+                        } else {
+                            // تسجيل الخطأ إذا لم نحصل على معرف صالح
+                            Log.e(TAG, "لم يتم الحصول على معرف سيرفر صالح للمعاملة: " + transaction.getId());
+                        }
                     }
                 }
             }
-            // ... باقي الكود الموجود ...
         } catch (Exception e) {
             Log.e(TAG, "Error handling sync response: " + e.getMessage());
             callback.onError("Error handling sync response: " + e.getMessage());
