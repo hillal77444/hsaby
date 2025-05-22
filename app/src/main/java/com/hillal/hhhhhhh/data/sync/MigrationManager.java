@@ -58,7 +58,7 @@ public class MigrationManager {
 
         // جلب الحسابات والمعاملات التي تحتاج إلى ترحيل
         List<Account> accountsToMigrate = accountDao.getNewAccounts();
-        List<Transaction> transactionsToMigrate = transactionDao.getTransactionsToMigrate();
+        List<Transaction> transactionsToMigrate = transactionDao.getNewTransactions();
 
         if (accountsToMigrate.isEmpty() && transactionsToMigrate.isEmpty()) {
             Toast.makeText(context, "لا توجد حسابات أو معاملات تحتاج إلى ترحيل", Toast.LENGTH_LONG).show();
