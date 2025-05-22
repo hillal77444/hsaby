@@ -1,6 +1,8 @@
 package com.hillal.hhhhhhh.data.sync;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -54,11 +56,15 @@ public class SyncManager {
     }
 
     private boolean isNetworkAvailable() {
-        return dataManager.isNetworkAvailable();
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     private boolean isUserAuthenticated() {
-        return dataManager.isUserAuthenticated();
+        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("token", null);
+        return token != null;
     }
 
     public interface SyncCallback {
