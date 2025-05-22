@@ -53,7 +53,7 @@ public class SyncManager {
     public interface SyncCallback {
         void onSuccess();
         void onError(String error);
-        void onProgress(int progress, int total);
+        void onProgress(int current, int total);
     }
 
     private boolean isNetworkAvailable() {
