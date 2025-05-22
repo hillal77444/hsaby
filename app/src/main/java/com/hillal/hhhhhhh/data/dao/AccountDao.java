@@ -38,6 +38,9 @@ public interface AccountDao {
     @Query("SELECT * FROM accounts WHERE server_id = -1")
     List<Account> getNewAccounts();
 
+    @Query("SELECT * FROM accounts WHERE server_id = -1")
+    List<Account> getAccountsToMigrate();
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(Account account);
 
