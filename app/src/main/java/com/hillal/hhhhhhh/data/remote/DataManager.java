@@ -255,7 +255,6 @@ public class DataManager {
 
     public void updateAccount(Account account, DataCallback callback) {
         if (!isNetworkAvailable()) {
-            // حفظ التغييرات محلياً فقط
             executor.execute(() -> {
                 accountDao.update(account);
                 handler.post(() -> callback.onSuccess());
@@ -269,7 +268,7 @@ public class DataManager {
             return;
         }
 
-        apiService.updateAccount("Bearer " + token, account).enqueue(new Callback<Account>() {
+        apiService.updateAccount("Bearer " + token, account.getId(), account).enqueue(new Callback<Account>() {
             @Override
             public void onResponse(Call<Account> call, Response<Account> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -279,7 +278,6 @@ public class DataManager {
                         handler.post(() -> callback.onSuccess());
                     });
                 } else {
-                    // حفظ التغييرات محلياً فقط
                     executor.execute(() -> {
                         accountDao.update(account);
                         handler.post(() -> callback.onSuccess());
@@ -289,7 +287,6 @@ public class DataManager {
 
             @Override
             public void onFailure(Call<Account> call, Throwable t) {
-                // حفظ التغييرات محلياً فقط
                 executor.execute(() -> {
                     accountDao.update(account);
                     handler.post(() -> callback.onSuccess());
@@ -300,7 +297,6 @@ public class DataManager {
 
     public void updateTransaction(Transaction transaction, DataCallback callback) {
         if (!isNetworkAvailable()) {
-            // حفظ التغييرات محلياً فقط
             executor.execute(() -> {
                 transactionDao.update(transaction);
                 handler.post(() -> callback.onSuccess());
@@ -314,7 +310,7 @@ public class DataManager {
             return;
         }
 
-        apiService.updateTransaction("Bearer " + token, transaction).enqueue(new Callback<Transaction>() {
+        apiService.updateTransaction("Bearer " + token, transaction.getId(), transaction).enqueue(new Callback<Transaction>() {
             @Override
             public void onResponse(Call<Transaction> call, Response<Transaction> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -324,7 +320,6 @@ public class DataManager {
                         handler.post(() -> callback.onSuccess());
                     });
                 } else {
-                    // حفظ التغييرات محلياً فقط
                     executor.execute(() -> {
                         transactionDao.update(transaction);
                         handler.post(() -> callback.onSuccess());
@@ -334,7 +329,6 @@ public class DataManager {
 
             @Override
             public void onFailure(Call<Transaction> call, Throwable t) {
-                // حفظ التغييرات محلياً فقط
                 executor.execute(() -> {
                     transactionDao.update(transaction);
                     handler.post(() -> callback.onSuccess());
@@ -345,7 +339,6 @@ public class DataManager {
 
     public void deleteAccount(Account account, DataCallback callback) {
         if (!isNetworkAvailable()) {
-            // حفظ التغييرات محلياً فقط
             executor.execute(() -> {
                 accountDao.delete(account);
                 handler.post(() -> callback.onSuccess());
@@ -368,7 +361,6 @@ public class DataManager {
                         handler.post(() -> callback.onSuccess());
                     });
                 } else {
-                    // حفظ التغييرات محلياً فقط
                     executor.execute(() -> {
                         accountDao.delete(account);
                         handler.post(() -> callback.onSuccess());
@@ -378,7 +370,6 @@ public class DataManager {
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                // حفظ التغييرات محلياً فقط
                 executor.execute(() -> {
                     accountDao.delete(account);
                     handler.post(() -> callback.onSuccess());
