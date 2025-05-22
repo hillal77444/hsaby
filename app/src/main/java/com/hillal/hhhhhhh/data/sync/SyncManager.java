@@ -41,6 +41,11 @@ public class SyncManager {
     private boolean isSyncing = false;
     private int currentRetryCount = 0;
 
+    private boolean autoSyncEnabled = false;
+    private static final long AUTO_SYNC_INTERVAL = 15 * 60 * 1000; // 15 minutes
+    private Handler autoSyncHandler = new Handler(Looper.getMainLooper());
+    private Runnable autoSyncRunnable;
+
     public SyncManager(Context context, AccountDao accountDao, TransactionDao transactionDao) {
         this.context = context;
         this.apiService = RetrofitClient.getInstance().getApiService();
@@ -358,5 +363,80 @@ public class SyncManager {
 
     public void shutdown() {
         executor.shutdown();
+    }
+
+    public void enableAutoSync(boolean enable) {
+        autoSyncEnabled = enable;
+        if (enable) {
+            startAutoSync();
+        } else {
+            stopAutoSync();
+        }
+    }
+
+    public boolean isAutoSyncEnabled() {
+        return autoSyncEnabled;
+    }
+
+    public void startAutoSync() {
+        if (autoSyncRunnable != null) {
+            autoSyncHandler.removeCallbacks(autoSyncRunnable);
+        }
+
+        autoSyncRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (autoSyncEnabled) {
+                    performFullSync(new SyncCallback() {
+                        @Override
+                        public void onSuccess() {
+                            // Schedule next sync
+                            autoSyncHandler.postDelayed(this, AUTO_SYNC_INTERVAL);
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            // Retry after error
+                            autoSyncHandler.postDelayed(this, AUTO_SYNC_INTERVAL);
+                        }
+
+                        @Override
+                        public void onProgress(int current, int total) {
+                            // Progress updates
+                        }
+                    });
+                }
+            }
+        };
+
+        autoSyncHandler.post(autoSyncRunnable);
+    }
+
+    private void stopAutoSync() {
+        if (autoSyncRunnable != null) {
+            autoSyncHandler.removeCallbacks(autoSyncRunnable);
+            autoSyncRunnable = null;
+        }
+    }
+
+    public void onDashboardEntered() {
+        if (isNetworkAvailable()) {
+            syncPendingItems(new SyncCallback() {
+                @Override
+                public void onSuccess() {
+                    Log.d(TAG, "Dashboard sync completed successfully");
+                }
+
+                @Override
+                public void onError(String error) {
+                    Log.e(TAG, "Dashboard sync failed: " + error);
+                }
+
+                @Override
+                public void onProgress(int current, int total) {
+                    // Progress updates
+                }
+            });
+        }
     }
 } 
