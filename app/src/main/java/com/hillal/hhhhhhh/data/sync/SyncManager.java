@@ -701,17 +701,17 @@ public class SyncManager {
     private void handleSyncResponse(ApiService.SyncResponse syncResponse, SyncCallback callback) {
         try {
             if (syncResponse != null) {
-                // قائمة لتخزين المعاملات التي تمت مزامنتها بنجاح
                 List<Transaction> syncedTransactions = new ArrayList<>();
                 
                 for (Transaction transaction : currentNewTransactions) {
-                    // تحقق من أن المعاملة جديدة ولم تتم مزامنتها من قبل
-                    if (transaction.getServerId() < 0 && !isTransactionSynced(transaction.getId())) {
+                    // نتحقق من أن المعاملة جديدة أو معدلة
+                    if (transaction.getServerId() < 0 || transaction.isModified()) {
                         Long serverId = syncResponse.getTransactionServerId(transaction.getId());
                         if (serverId != null && serverId > 0) {
                             // تحديث معرف السيرفر
                             transaction.setServerId(serverId);
                             transaction.setLastSyncTime(System.currentTimeMillis());
+                            transaction.setModified(false); // إعادة تعيين حالة التعديل
                             
                             // تحديث في قاعدة البيانات
                             transactionDao.update(transaction);
@@ -723,7 +723,6 @@ public class SyncManager {
                             syncAttempts.remove(transaction.getServerId());
                             lastSyncTimes.put(transaction.getServerId(), System.currentTimeMillis());
                             
-                            // تسجيل نجاح المزامنة
                             Log.d(TAG, "تمت مزامنة المعاملة بنجاح: " + transaction.getId() + " -> " + serverId);
                         }
                     }
@@ -742,17 +741,8 @@ public class SyncManager {
             callback.onError("Error handling sync response: " + e.getMessage());
         }
     }
-    
     // دالة للتحقق من حالة مزامنة المعاملة
-    private boolean isTransactionSynced(long transactionId) {
-        // التحقق من سجلات المزامنة
-        if (lastSyncTimes.containsKey(transactionId)) {
-            long lastSync = lastSyncTimes.get(transactionId);
-            // إذا تمت المزامنة خلال آخر 5 دقائق، نعتبرها مزامنة
-            return (System.currentTimeMillis() - lastSync) < 300000;
-        }
-        return false;
-    }
+   
     
     // دالة لحفظ حالة المزامنة
     private void saveSyncState() {
