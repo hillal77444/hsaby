@@ -83,7 +83,7 @@ public class SyncManager {
                 .getString("token", null);
     }
 
-    public void syncPendingItems(SyncCallback callback) {
+    public void onDashboardEntered(SyncCallback callback) {
         if (!isNetworkAvailable()) {
             callback.onError("لا يوجد اتصال بالإنترنت");
             return;
@@ -101,264 +101,123 @@ public class SyncManager {
         }
 
         isSyncing = true;
-        currentRetryCount = 0;
         executor.execute(() -> {
             try {
+                // جلب الحسابات التي تحتاج مزامنة
                 List<Account> pendingAccounts = accountDao.getAccountsByServerId(-1);
-                List<Transaction> pendingTransactions = transactionDao.getTransactionsByServerId(-1);
+                if (!pendingAccounts.isEmpty()) {
+                    syncAccountsSequentially(pendingAccounts, token, new SyncCallback() {
+                        @Override
+                        public void onSuccess() {
+                            // بعد اكتمال مزامنة الحسابات، نبدأ بمزامنة المعاملات
+                            syncTransactions(token, callback);
+                        }
 
-                if (pendingAccounts.isEmpty() && pendingTransactions.isEmpty()) {
-                    isSyncing = false;
-                    handler.post(() -> callback.onSuccess());
-                    return;
+                        @Override
+                        public void onError(String error) {
+                            isSyncing = false;
+                            handler.post(() -> callback.onError(error));
+                        }
+
+                        @Override
+                        public void onProgress(int current, int total) {
+                            handler.post(() -> callback.onProgress(current, total));
+                        }
+                    });
+                } else {
+                    // إذا لم تكن هناك حسابات للمزامنة، نبدأ مباشرة بمزامنة المعاملات
+                    syncTransactions(token, callback);
                 }
-
-                List<List<Account>> accountBatches = splitIntoBatches(pendingAccounts, BATCH_SIZE);
-                List<List<Transaction>> transactionBatches = splitIntoBatches(pendingTransactions, BATCH_SIZE);
-
-                int totalBatches = accountBatches.size() + transactionBatches.size();
-                int completedBatches = 0;
-
-                // مزامنة الحسابات أولاً
-                syncAccountBatchesSequentially(accountBatches, token, new SyncCallback() {
-                    @Override
-                    public void onSuccess() {
-                        // بعد اكتمال مزامنة الحسابات، نبدأ بمزامنة المعاملات
-                        syncTransactionBatchesSequentially(transactionBatches, token, new SyncCallback() {
-                            @Override
-                            public void onSuccess() {
-                                isSyncing = false;
-                                handler.post(() -> callback.onSuccess());
-                            }
-
-                            @Override
-                            public void onError(String error) {
-                                handleSyncError(error, callback);
-                            }
-
-                            @Override
-                            public void onProgress(int progress, int total) {
-                                completedBatches = accountBatches.size() + progress;
-                                handler.post(() -> callback.onProgress(completedBatches, totalBatches));
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        handleSyncError(error, callback);
-                    }
-
-                    @Override
-                    public void onProgress(int progress, int total) {
-                        handler.post(() -> callback.onProgress(progress, totalBatches));
-                    }
-                });
             } catch (Exception e) {
-                Log.e(TAG, "Error in syncPendingItems: " + e.getMessage());
+                Log.e(TAG, "Error in onDashboardEntered: " + e.getMessage());
                 isSyncing = false;
                 handler.post(() -> callback.onError("خطأ في المزامنة: " + e.getMessage()));
             }
         });
     }
 
-    private void syncAccountBatchesSequentially(List<List<Account>> batches, String token, SyncCallback callback) {
-        if (batches.isEmpty()) {
+    private void syncAccountsSequentially(List<Account> accounts, String token, SyncCallback callback) {
+        if (accounts.isEmpty()) {
             callback.onSuccess();
             return;
         }
 
-        List<Account> currentBatch = batches.get(0);
-        List<List<Account>> remainingBatches = batches.subList(1, batches.size());
+        Account currentAccount = accounts.get(0);
+        List<Account> remainingAccounts = accounts.subList(1, accounts.size());
 
-        syncAccountBatch(currentBatch, token, new SyncCallback() {
-            @Override
-            public void onSuccess() {
-                // بعد نجاح المزامنة، ننتقل للدفعة التالية
-                syncAccountBatchesSequentially(remainingBatches, token, callback);
-            }
-
-            @Override
-            public void onError(String error) {
-                callback.onError(error);
-            }
-
-            @Override
-            public void onProgress(int progress, int total) {
-                callback.onProgress(progress, total);
-            }
-        });
-    }
-
-    private void syncTransactionBatchesSequentially(List<List<Transaction>> batches, String token, SyncCallback callback) {
-        if (batches.isEmpty()) {
-            callback.onSuccess();
-            return;
-        }
-
-        List<Transaction> currentBatch = batches.get(0);
-        List<List<Transaction>> remainingBatches = batches.subList(1, batches.size());
-
-        syncTransactionBatch(currentBatch, token, new SyncCallback() {
-            @Override
-            public void onSuccess() {
-                // بعد نجاح المزامنة، ننتقل للدفعة التالية
-                syncTransactionBatchesSequentially(remainingBatches, token, callback);
-            }
-
-            @Override
-            public void onError(String error) {
-                callback.onError(error);
-            }
-
-            @Override
-            public void onProgress(int progress, int total) {
-                callback.onProgress(progress, total);
-            }
-        });
-    }
-
-    private <T> List<List<T>> splitIntoBatches(List<T> items, int batchSize) {
-        List<List<T>> batches = new ArrayList<>();
-        for (int i = 0; i < items.size(); i += batchSize) {
-            batches.add(items.subList(i, Math.min(i + batchSize, items.size())));
-        }
-        return batches;
-    }
-
-    private void syncAccountBatch(List<Account> accounts, String token, SyncCallback callback) {
-        ApiService.SyncRequest syncRequest = new ApiService.SyncRequest(accounts, new ArrayList<>());
-        apiService.syncData("Bearer " + token, syncRequest).enqueue(new Callback<ApiService.SyncResponse>() {
-            @Override
-            public void onResponse(Call<ApiService.SyncResponse> call, Response<ApiService.SyncResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiService.SyncResponse syncResponse = response.body();
-                    handleSyncResponse(syncResponse, callback);
-                } else {
-                    callback.onError("فشلت مزامنة الحسابات");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ApiService.SyncResponse> call, Throwable t) {
-                callback.onError("خطأ في الاتصال: " + t.getMessage());
-            }
-        });
-    }
-
-    private void syncTransactionBatch(List<Transaction> transactions, String token, SyncCallback callback) {
-        ApiService.SyncRequest syncRequest = new ApiService.SyncRequest(new ArrayList<>(), transactions);
-        apiService.syncData("Bearer " + token, syncRequest).enqueue(new Callback<ApiService.SyncResponse>() {
-            @Override
-            public void onResponse(Call<ApiService.SyncResponse> call, Response<ApiService.SyncResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiService.SyncResponse syncResponse = response.body();
-                    handleSyncResponse(syncResponse, callback);
-                } else {
-                    callback.onError("فشلت مزامنة المعاملات");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ApiService.SyncResponse> call, Throwable t) {
-                callback.onError("خطأ في الاتصال: " + t.getMessage());
-            }
-        });
-    }
-
-    private void handleSyncError(String error, SyncCallback callback) {
-        if (currentRetryCount < MAX_RETRIES) {
-            currentRetryCount++;
-            handler.postDelayed(() -> {
-                Log.d(TAG, "Retrying sync operation. Attempt " + currentRetryCount + " of " + MAX_RETRIES);
-                syncPendingItems(callback);
-            }, RETRY_DELAY_MS);
-        } else {
-            isSyncing = false;
-            handler.post(() -> callback.onError("فشلت المزامنة بعد " + MAX_RETRIES + " محاولات: " + error));
-        }
-    }
-
-    private void handleSyncResponse(ApiService.SyncResponse syncResponse, SyncCallback callback) {
-        try {
-            if (syncResponse != null) {
-                // تحديث معرفات السيرفر للحسابات
-                for (Account account : syncResponse.getAccounts()) {
-                    if (account.getServerId() > 0) {
-                        accountDao.update(account);
-                    }
-                }
-
-                // تحديث معرفات السيرفر للمعاملات
-                for (Transaction transaction : syncResponse.getTransactions()) {
-                    if (transaction.getServerId() > 0) {
-                        transactionDao.update(transaction);
-                    }
-                }
-                callback.onSuccess();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error handling sync response: " + e.getMessage());
-            callback.onError("خطأ في معالجة استجابة المزامنة: " + e.getMessage());
-        }
-    }
-
-    // الحفاظ على performFullSync كما هي بدون تغيير
-    public void performFullSync(SyncCallback callback) {
-        if (!isNetworkAvailable()) {
-            callback.onError("لا يوجد اتصال بالإنترنت");
-            return;
-        }
-
-        if (isSyncing) {
-            callback.onError("جاري تنفيذ عملية مزامنة أخرى، يرجى الانتظار");
-            return;
-        }
-
-        String token = getAuthToken();
-        if (token == null) {
-            callback.onError("يرجى تسجيل الدخول أولاً");
-            return;
-        }
-
-        isSyncing = true;
-        executor.execute(() -> {
-            try {
-                Log.d(TAG, "بدء المزامنة الكاملة...");
-                
-                // حذف البيانات المحلية
-                accountDao.deleteAllAccounts();
-                transactionDao.deleteAllTransactions();
-                Log.d(TAG, "تم حذف البيانات المحلية");
-
-                // جلب البيانات من السيرفر
-                DataManager dataManager = new DataManager(
-                    context,
-                    accountDao,
-                    transactionDao,
-                    null
-                );
-
-                dataManager.fetchDataFromServer(new DataManager.DataCallback() {
+        apiService.syncData("Bearer " + token, new ApiService.SyncRequest(List.of(currentAccount), new ArrayList<>()))
+                .enqueue(new Callback<ApiService.SyncResponse>() {
                     @Override
-                    public void onSuccess() {
-                        isSyncing = false;
-                        handler.post(() -> callback.onSuccess());
+                    public void onResponse(Call<ApiService.SyncResponse> call, Response<ApiService.SyncResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            ApiService.SyncResponse syncResponse = response.body();
+                            Long serverId = syncResponse.getAccountServerId(currentAccount.getId());
+                            if (serverId != null) {
+                                currentAccount.setServerId(serverId);
+                                accountDao.update(currentAccount);
+                            }
+                            // المتابعة مع الحساب التالي
+                            syncAccountsSequentially(remainingAccounts, token, callback);
+                        } else {
+                            isSyncing = false;
+                            handler.post(() -> callback.onError("فشلت مزامنة الحساب"));
+                        }
                     }
 
                     @Override
-                    public void onError(String error) {
-                        Log.e(TAG, "فشلت المزامنة الكاملة: " + error);
+                    public void onFailure(Call<ApiService.SyncResponse> call, Throwable t) {
                         isSyncing = false;
-                        handler.post(() -> callback.onError(error));
+                        handler.post(() -> callback.onError("خطأ في الاتصال: " + t.getMessage()));
                     }
                 });
-            } catch (Exception e) {
-                Log.e(TAG, "خطأ في المزامنة الكاملة: " + e.getMessage());
-                isSyncing = false;
-                handler.post(() -> callback.onError("خطأ في المزامنة الكاملة: " + e.getMessage()));
-            }
-        });
+    }
+
+    private void syncTransactions(String token, SyncCallback callback) {
+        List<Transaction> pendingTransactions = transactionDao.getTransactionsByServerId(-1);
+        if (pendingTransactions.isEmpty()) {
+            isSyncing = false;
+            handler.post(() -> callback.onSuccess());
+            return;
+        }
+
+        syncTransactionsSequentially(pendingTransactions, token, callback);
+    }
+
+    private void syncTransactionsSequentially(List<Transaction> transactions, String token, SyncCallback callback) {
+        if (transactions.isEmpty()) {
+            isSyncing = false;
+            handler.post(() -> callback.onSuccess());
+            return;
+        }
+
+        Transaction currentTransaction = transactions.get(0);
+        List<Transaction> remainingTransactions = transactions.subList(1, transactions.size());
+
+        apiService.syncData("Bearer " + token, new ApiService.SyncRequest(new ArrayList<>(), List.of(currentTransaction)))
+                .enqueue(new Callback<ApiService.SyncResponse>() {
+                    @Override
+                    public void onResponse(Call<ApiService.SyncResponse> call, Response<ApiService.SyncResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            ApiService.SyncResponse syncResponse = response.body();
+                            Long serverId = syncResponse.getTransactionServerId(currentTransaction.getId());
+                            if (serverId != null) {
+                                currentTransaction.setServerId(serverId);
+                                transactionDao.update(currentTransaction);
+                            }
+                            // المتابعة مع المعاملة التالية
+                            syncTransactionsSequentially(remainingTransactions, token, callback);
+                        } else {
+                            isSyncing = false;
+                            handler.post(() -> callback.onError("فشلت مزامنة المعاملة"));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ApiService.SyncResponse> call, Throwable t) {
+                        isSyncing = false;
+                        handler.post(() -> callback.onError("خطأ في الاتصال: " + t.getMessage()));
+                    }
+                });
     }
 
     public void shutdown() {
@@ -419,24 +278,60 @@ public class SyncManager {
         }
     }
 
-    public void onDashboardEntered() {
-        if (isNetworkAvailable()) {
-            syncPendingItems(new SyncCallback() {
-                @Override
-                public void onSuccess() {
-                    Log.d(TAG, "Dashboard sync completed successfully");
-                }
-
-                @Override
-                public void onError(String error) {
-                    Log.e(TAG, "Dashboard sync failed: " + error);
-                }
-
-                @Override
-                public void onProgress(int current, int total) {
-                    // Progress updates
-                }
-            });
+    public void performFullSync(SyncCallback callback) {
+        if (!isNetworkAvailable()) {
+            callback.onError("لا يوجد اتصال بالإنترنت");
+            return;
         }
+
+        if (isSyncing) {
+            callback.onError("جاري تنفيذ عملية مزامنة أخرى، يرجى الانتظار");
+            return;
+        }
+
+        String token = getAuthToken();
+        if (token == null) {
+            callback.onError("يرجى تسجيل الدخول أولاً");
+            return;
+        }
+
+        isSyncing = true;
+        executor.execute(() -> {
+            try {
+                Log.d(TAG, "بدء المزامنة الكاملة...");
+                
+                // حذف البيانات المحلية
+                accountDao.deleteAllAccounts();
+                transactionDao.deleteAllTransactions();
+                Log.d(TAG, "تم حذف البيانات المحلية");
+
+                // جلب البيانات من السيرفر
+                DataManager dataManager = new DataManager(
+                    context,
+                    accountDao,
+                    transactionDao,
+                    null
+                );
+
+                dataManager.fetchDataFromServer(new DataManager.DataCallback() {
+                    @Override
+                    public void onSuccess() {
+                        isSyncing = false;
+                        handler.post(() -> callback.onSuccess());
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Log.e(TAG, "فشلت المزامنة الكاملة: " + error);
+                        isSyncing = false;
+                        handler.post(() -> callback.onError(error));
+                    }
+                });
+            } catch (Exception e) {
+                Log.e(TAG, "خطأ في المزامنة الكاملة: " + e.getMessage());
+                isSyncing = false;
+                handler.post(() -> callback.onError("خطأ في المزامنة الكاملة: " + e.getMessage()));
+            }
+        });
     }
 } 
