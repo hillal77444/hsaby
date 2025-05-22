@@ -3,6 +3,8 @@ package com.hillal.hhhhhhh.data.sync;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Toast;
 
 import com.hillal.hhhhhhh.data.room.AppDatabase;
@@ -17,6 +19,8 @@ import com.hillal.hhhhhhh.data.remote.ApiService.SyncResponse;
 import com.hillal.hhhhhhh.data.preferences.UserPreferences;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,6 +33,7 @@ public class MigrationManager {
     private final ApiService apiService;
     private final Context context;
     private final UserPreferences userPreferences;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private int migratedAccountsCount = 0;
     private int migratedTransactionsCount = 0;
 
@@ -42,68 +47,70 @@ public class MigrationManager {
     }
 
     public void migrateLocalData() {
-        if (!isNetworkAvailable()) {
-            Toast.makeText(context, "لا يوجد اتصال بالإنترنت", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        executor.execute(() -> {
+            if (!isNetworkAvailable()) {
+                new Handler(Looper.getMainLooper()).post(() -> 
+                    Toast.makeText(context, "لا يوجد اتصال بالإنترنت", Toast.LENGTH_SHORT).show());
+                return;
+            }
 
-        String token = getAuthToken();
-        if (token == null) {
-            return;
-        }
+            String token = getAuthToken();
+            if (token == null) {
+                return;
+            }
 
-        // إعادة تعيين العدادات
-        migratedAccountsCount = 0;
-        migratedTransactionsCount = 0;
+            migratedAccountsCount = 0;
+            migratedTransactionsCount = 0;
 
-        // جلب الحسابات والمعاملات التي تحتاج إلى ترحيل
-        List<Account> accountsToMigrate = accountDao.getNewAccounts();
-        List<Transaction> transactionsToMigrate = transactionDao.getNewTransactions();
+            List<Account> accountsToMigrate = accountDao.getNewAccounts();
+            List<Transaction> transactionsToMigrate = transactionDao.getNewTransactions();
 
-        if (accountsToMigrate.isEmpty() && transactionsToMigrate.isEmpty()) {
-            Toast.makeText(context, "لا توجد حسابات أو معاملات تحتاج إلى ترحيل", Toast.LENGTH_LONG).show();
-            return;
-        }
+            if (accountsToMigrate.isEmpty() && transactionsToMigrate.isEmpty()) {
+                new Handler(Looper.getMainLooper()).post(() -> 
+                    Toast.makeText(context, "لا توجد حسابات أو معاملات تحتاج إلى ترحيل", Toast.LENGTH_LONG).show());
+                return;
+            }
 
-        // إرسال البيانات إلى الخادم
-        SyncRequest request = new SyncRequest(accountsToMigrate, transactionsToMigrate);
-        apiService.syncData("Bearer " + token, request).enqueue(new Callback<SyncResponse>() {
-            @Override
-            public void onResponse(Call<SyncResponse> call, Response<SyncResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    SyncResponse syncResponse = response.body();
-                    
-                    // تحديث server_id للحسابات
-                    for (Account account : accountsToMigrate) {
-                        Long serverId = syncResponse.getAccountServerId(account.getId());
-                        if (serverId != null) {
-                            account.setServerId(serverId);
-                            accountDao.update(account);
-                            migratedAccountsCount++;
-                        }
+            SyncRequest request = new SyncRequest(accountsToMigrate, transactionsToMigrate);
+            apiService.syncData("Bearer " + token, request).enqueue(new Callback<SyncResponse>() {
+                @Override
+                public void onResponse(Call<SyncResponse> call, Response<SyncResponse> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        SyncResponse syncResponse = response.body();
+                        
+                        executor.execute(() -> {
+                            for (Account account : accountsToMigrate) {
+                                Long serverId = syncResponse.getAccountServerId(account.getId());
+                                if (serverId != null) {
+                                    account.setServerId(serverId);
+                                    accountDao.update(account);
+                                    migratedAccountsCount++;
+                                }
+                            }
+
+                            for (Transaction transaction : transactionsToMigrate) {
+                                Long serverId = syncResponse.getTransactionServerId(transaction.getId());
+                                if (serverId != null) {
+                                    transaction.setServerId(serverId);
+                                    transactionDao.update(transaction);
+                                    migratedTransactionsCount++;
+                                }
+                            }
+
+                            new Handler(Looper.getMainLooper()).post(() -> showMigrationSummary());
+                        });
+                    } else {
+                        new Handler(Looper.getMainLooper()).post(() -> 
+                            Toast.makeText(context, "فشل في ترحيل البيانات", Toast.LENGTH_SHORT).show());
                     }
-
-                    // تحديث server_id للمعاملات
-                    for (Transaction transaction : transactionsToMigrate) {
-                        Long serverId = syncResponse.getTransactionServerId(transaction.getId());
-                        if (serverId != null) {
-                            transaction.setServerId(serverId);
-                            transactionDao.update(transaction);
-                            migratedTransactionsCount++;
-                        }
-                    }
-
-                    // عرض ملخص الترحيل
-                    showMigrationSummary();
-                } else {
-                    Toast.makeText(context, "فشل في ترحيل البيانات", Toast.LENGTH_SHORT).show();
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SyncResponse> call, Throwable t) {
-                Toast.makeText(context, "فشل في الاتصال بالخادم: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+                @Override
+                public void onFailure(Call<SyncResponse> call, Throwable t) {
+                    new Handler(Looper.getMainLooper()).post(() -> 
+                        Toast.makeText(context, "فشل في الاتصال بالخادم: " + t.getMessage(), Toast.LENGTH_SHORT).show());
+                }
+            });
         });
     }
 
