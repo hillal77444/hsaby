@@ -23,6 +23,7 @@ import com.hillal.hhhhhhh.data.preferences.UserPreferences;
 import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.data.sync.SyncManager;
 import com.hillal.hhhhhhh.data.remote.DataManager;
+import com.hillal.hhhhhhh.data.migration.MigrationManager;
 
 public class DashboardFragment extends Fragment {
     private static final String TAG = "DashboardFragment";
@@ -32,6 +33,7 @@ public class DashboardFragment extends Fragment {
     private ProgressDialog progressDialog;
     private AppDatabase db;
     private SyncManager syncManager;
+    private MigrationManager migrationManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -117,6 +119,12 @@ public class DashboardFragment extends Fragment {
             setupClickListeners();
             observeData();
             updateUserName();
+            migrationManager = new MigrationManager(requireContext());
+
+            // إضافة مستمع النقر لزر الترحيل
+            view.findViewById(R.id.migrate_button).setOnClickListener(v -> {
+                migrationManager.migrateLocalData();
+            });
         } catch (Exception e) {
             Log.e(TAG, "Error in onViewCreated: " + e.getMessage(), e);
         }
