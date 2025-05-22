@@ -77,15 +77,32 @@ public interface TransactionDao {
     @Query("SELECT SUM(amount) FROM transactions WHERE account_id = :accountId AND type = 'credit'")
     LiveData<Double> getTotalCredit(long accountId);
 
+    @Query("SELECT * FROM transactions WHERE updated_at > :timestamp")
+    List<Transaction> getModifiedTransactions(long timestamp);
+
     @Query("SELECT * FROM transactions WHERE server_id < 0")
     List<Transaction> getNewTransactions();
+
+    @Query("SELECT * FROM transactions WHERE updated_at > :timestamp")
+    List<Transaction> getTransactionsModifiedAfter(long timestamp);
+
+    @Query("SELECT SUM(amount) FROM transactions WHERE type = 'debit' AND currency = 'ريال يمني'")
+    LiveData<Double> getTotalDebtors();
+
+    @Query("SELECT SUM(amount) FROM transactions WHERE type = 'credit' AND currency = 'ريال يمني'")
+    LiveData<Double> getTotalCreditors();
+
+    @Query("SELECT SUM(CASE WHEN type = 'debit' THEN -amount ELSE amount END) " +
+           "FROM transactions " +
+           "WHERE account_id = :accountId " +
+           "AND currency = :currency " +
+           "AND transaction_date <= :transactionDate " +
+           "ORDER BY transaction_date")
+    LiveData<Double> getBalanceUntilDate(long accountId, long transactionDate, String currency);
 
     @Query("SELECT * FROM transactions WHERE server_id = :serverId")
     Transaction getTransactionByServerIdSync(long serverId);
 
     @Query("DELETE FROM transactions")
     void deleteAllTransactions();
-
-    @Query("SELECT * FROM transactions WHERE account_id = :accountId")
-    List<Transaction> getTransactionsByAccountId(long accountId);
 } 
