@@ -6,6 +6,7 @@ import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
+import android.app.AlertDialog;
 
 import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.data.room.AccountDao;
@@ -100,8 +101,21 @@ public class MigrationManager {
                             new Handler(Looper.getMainLooper()).post(() -> showMigrationSummary());
                         });
                     } else {
-                        new Handler(Looper.getMainLooper()).post(() -> 
-                            Toast.makeText(context, "فشل في ترحيل البيانات", Toast.LENGTH_SHORT).show());
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            String errorMessage = "فشل في ترحيل البيانات";
+                            if (response.errorBody() != null) {
+                                try {
+                                    errorMessage += "\n\nالسبب: " + response.errorBody().string();
+                                } catch (Exception e) {
+                                    errorMessage += "\n\nالسبب: " + response.message();
+                                }
+                            }
+                            new AlertDialog.Builder(context)
+                                .setTitle("خطأ في الترحيل")
+                                .setMessage(errorMessage)
+                                .setPositiveButton("حسناً", null)
+                                .show();
+                        });
                     }
                 }
 
