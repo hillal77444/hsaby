@@ -679,10 +679,33 @@ public class DataManager {
         });
     }
 
+    private void insertPendingOperation(Transaction transaction, String operationType) {
+        try {
+            PendingOperation operation = new PendingOperation();
+            operation.setOperationType(operationType);
+            operation.setEntityType("TRANSACTION");
+            operation.setEntityData(gson.toJson(transaction));
+            operation.setTimestamp(System.currentTimeMillis());
+            operation.setStatus(0); // pending
+            operation.setRetryCount(0);
+            
+            executor.execute(() -> {
+                try {
+                    pendingOperationDao.insert(operation);
+                    Log.d(TAG, "تم حفظ العملية المعلقة بنجاح: " + operationType);
+                } catch (Exception e) {
+                    Log.e(TAG, "خطأ في حفظ العملية المعلقة: " + e.getMessage());
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "خطأ في إنشاء العملية المعلقة: " + e.getMessage());
+        }
+    }
+
     public void updateTransaction(Transaction transaction, DataCallback callback) {
         if (!isNetworkAvailable()) {
             // حفظ العملية كعملية معلقة
-            savePendingOperation(transaction, "UPDATE");
+            insertPendingOperation(transaction, "UPDATE");
             callback.onError("No internet connection");
             return;
         }
@@ -724,7 +747,7 @@ public class DataManager {
                     callback.onSuccess();
                 } else {
                     // حفظ العملية كعملية معلقة
-                    savePendingOperation(transaction, "UPDATE");
+                    insertPendingOperation(transaction, "UPDATE");
                     callback.onError("Failed to update transaction: " + response.code());
                 }
             }
@@ -732,7 +755,7 @@ public class DataManager {
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 // حفظ العملية كعملية معلقة
-                savePendingOperation(transaction, "UPDATE");
+                insertPendingOperation(transaction, "UPDATE");
                 callback.onError("Network error: " + t.getMessage());
             }
         });
