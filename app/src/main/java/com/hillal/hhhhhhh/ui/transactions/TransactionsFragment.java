@@ -416,8 +416,10 @@ public class TransactionsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        loadTransactions();
-        loadAccounts();
+        // تحديث القائمة فقط إذا كانت فارغة
+        if (adapter.getItemCount() == 0) {
+            loadTransactions();
+        }
     }
 
     @Override
@@ -426,7 +428,23 @@ public class TransactionsFragment extends Fragment {
     }
 
     private void loadTransactions() {
-        // ... existing code ...
+        // عرض مؤشر التحميل
+        binding.progressBar.setVisibility(View.VISIBLE);
+        
+        // تحميل البيانات من قاعدة البيانات المحلية
+        viewModel.getTransactions().observe(getViewLifecycleOwner(), transactions -> {
+            // إخفاء مؤشر التحميل
+            binding.progressBar.setVisibility(View.GONE);
+            
+            if (transactions != null && !transactions.isEmpty()) {
+                // تحديث القائمة
+                allTransactions = transactions;
+                applyAllFilters();
+            } else {
+                // عرض رسالة عدم وجود بيانات
+                binding.emptyView.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     private void loadAccounts() {
