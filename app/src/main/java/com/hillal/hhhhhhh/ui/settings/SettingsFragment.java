@@ -49,6 +49,8 @@ public class SettingsFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentSettingsBinding.inflate(inflater, container, false);
+        db = AppDatabase.getInstance(requireContext());
+        setupUI();
         return binding.getRoot();
     }
 
@@ -56,6 +58,11 @@ public class SettingsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setupViews();
+    }
+
+    private void setupUI() {
+        // إعدادات أخرى
+        setupOtherSettings();
     }
 
     private void setupViews() {
@@ -136,6 +143,10 @@ public class SettingsFragment extends Fragment {
                 isChecked ? R.string.msg_encryption_enabled : R.string.msg_encryption_disabled, 
                 Toast.LENGTH_SHORT).show();
         });
+    }
+
+    private void setupOtherSettings() {
+        // هنا يمكن إضافة إعدادات أخرى
     }
 
     private void showMessage(String message) {
