@@ -9,15 +9,16 @@ public class PendingOperation {
     private long id;
     
     private String operationType; // "UPDATE" or "DELETE"
-    private long transactionId;
-    private String transactionData; // JSON string of transaction data for updates
+    private String entityType; // "TRANSACTION" or "ACCOUNT"
+    private String entityData; // JSON string of entity data
     private long timestamp;
+    private int retryCount;
+    private int status; // 0: pending, 1: in progress, 2: completed, 3: failed
 
-    public PendingOperation(String operationType, long transactionId, String transactionData) {
-        this.operationType = operationType;
-        this.transactionId = transactionId;
-        this.transactionData = transactionData;
+    public PendingOperation() {
         this.timestamp = System.currentTimeMillis();
+        this.retryCount = 0;
+        this.status = 0;
     }
 
     // Getters and Setters
@@ -27,12 +28,18 @@ public class PendingOperation {
     public String getOperationType() { return operationType; }
     public void setOperationType(String operationType) { this.operationType = operationType; }
     
-    public long getTransactionId() { return transactionId; }
-    public void setTransactionId(long transactionId) { this.transactionId = transactionId; }
+    public String getEntityType() { return entityType; }
+    public void setEntityType(String entityType) { this.entityType = entityType; }
     
-    public String getTransactionData() { return transactionData; }
-    public void setTransactionData(String transactionData) { this.transactionData = transactionData; }
+    public String getEntityData() { return entityData; }
+    public void setEntityData(String entityData) { this.entityData = entityData; }
     
     public long getTimestamp() { return timestamp; }
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+    
+    public int getRetryCount() { return retryCount; }
+    public void setRetryCount(int retryCount) { this.retryCount = retryCount; }
+    
+    public int getStatus() { return status; }
+    public void setStatus(int status) { this.status = status; }
 } 
