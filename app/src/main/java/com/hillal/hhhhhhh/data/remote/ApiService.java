@@ -50,6 +50,9 @@ public interface ApiService {
     @POST("api/refresh-token")
     Call<Map<String, String>> refreshToken(@Header("Authorization") String token);
 
+    @GET("api/server/time")
+    Call<Long> getServerTime();
+
     class LoginRequest {
         private String phone;
         private String password;
