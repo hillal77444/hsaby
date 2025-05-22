@@ -90,6 +90,10 @@ public interface ApiService {
         }
 
         public List<Transaction> getTransactions() {
+            // استبعاد last_sync_time من المعاملات
+            for (Transaction transaction : transactions) {
+                transaction.setLastSyncTime(0);
+            }
             return transactions;
         }
     }
