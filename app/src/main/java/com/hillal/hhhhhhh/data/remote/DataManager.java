@@ -704,7 +704,7 @@ public class DataManager {
         int attempts = syncAttempts.getOrDefault(serverId, 0) + 1;
         syncAttempts.put(serverId, attempts);
 
-        apiService.updateTransaction("Bearer " + token, transaction).enqueue(new Callback<Void>() {
+        apiService.updateTransaction("Bearer " + token, transaction.getServerId(), transaction).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
