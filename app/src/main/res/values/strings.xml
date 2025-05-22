@@ -103,7 +103,7 @@
     <string name="currency_yer">يمني</string>
     <string name="currency_sar">سعودي</string>
     <string name="currency_usd">دولار</string>
-    <string name="no_transactions">لا توجد قيود محاسبية</string>
+    <string name="no_transactions">لا توجد معاملات</string>
     <string name="confirm_delete">هل أنت متأكد من حذف هذا القيد؟</string>
     <string name="transaction_updated">تم تحديث القيد بنجاح</string>
 
