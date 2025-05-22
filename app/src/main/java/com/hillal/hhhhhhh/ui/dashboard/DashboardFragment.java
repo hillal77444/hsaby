@@ -21,6 +21,8 @@ import com.hillal.hhhhhhh.databinding.FragmentDashboardBinding;
 import com.hillal.hhhhhhh.App;
 import com.hillal.hhhhhhh.data.preferences.UserPreferences;
 import com.hillal.hhhhhhh.data.room.AppDatabase;
+import com.hillal.hhhhhhh.data.sync.SyncManager;
+import com.hillal.hhhhhhh.data.remote.DataManager;
 
 public class DashboardFragment extends Fragment {
     private static final String TAG = "DashboardFragment";
@@ -29,6 +31,7 @@ public class DashboardFragment extends Fragment {
     private UserPreferences userPreferences;
     private ProgressDialog progressDialog;
     private AppDatabase db;
+    private SyncManager syncManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,6 +47,22 @@ public class DashboardFragment extends Fragment {
             dashboardViewModel = new ViewModelProvider(this, new DashboardViewModelFactory(accountRepository, transactionRepository))
                     .get(DashboardViewModel.class);
             userPreferences = new UserPreferences(requireContext());
+            
+            // Initialize SyncManager
+            DataManager dataManager = new DataManager(
+                requireContext(),
+                db.accountDao(),
+                db.transactionDao(),
+                db.pendingOperationDao()
+            );
+            syncManager = new SyncManager(
+                requireContext(),
+                dataManager,
+                db.accountDao(),
+                db.transactionDao(),
+                db.pendingOperationDao()
+            );
+            
             Log.d(TAG, "DashboardViewModel initialized successfully");
         } catch (Exception e) {
             Log.e(TAG, "Error initializing DashboardFragment: " + e.getMessage(), e);
@@ -62,6 +81,27 @@ public class DashboardFragment extends Fragment {
     private void setupUI() {
         // إعدادات أخرى
         setupOtherSettings();
+
+        // إضافة زر المزامنة الكاملة
+        binding.fullSyncButton.setOnClickListener(v -> {
+            showLoadingDialog("جاري المزامنة الكاملة...");
+            syncManager.performFullSync(new SyncManager.SyncCallback() {
+                @Override
+                public void onSuccess() {
+                    hideLoadingDialog();
+                    showSuccessDialog("تمت المزامنة الكاملة بنجاح");
+                    // تحديث البيانات في الواجهة
+                    loadAccounts();
+                    loadTransactions();
+                }
+
+                @Override
+                public void onError(String error) {
+                    hideLoadingDialog();
+                    showErrorDialog("فشلت المزامنة الكاملة: " + error);
+                }
+            });
+        });
     }
 
     private void setupOtherSettings() {
