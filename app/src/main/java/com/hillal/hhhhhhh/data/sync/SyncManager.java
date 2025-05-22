@@ -54,7 +54,7 @@ public class SyncManager {
     private boolean isAutoSyncEnabled = false;
     private long lastSyncTime = 0;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private static final long SYNC_INTERVAL = 15 * 60 * 1000; // 15 دقيقة
+    private static final long SYNC_INTERVAL = 1 * 60 * 1000; // 15 دقيقة
     private static final int MAX_RETRY_COUNT = 2;
     private int currentRetryCount = 0;
     private static final String SYNC_TAG = "sync_task";
