@@ -72,6 +72,16 @@ public class MigrationManager {
                 return;
             }
 
+            // تعيين last_sync_time للحسابات الجديدة
+            for (Account account : accountsToMigrate) {
+                account.setLastSyncTime(System.currentTimeMillis());
+            }
+
+            // تعيين last_sync_time لكل المعاملات الجديدة
+            for (Transaction transaction : transactionsToMigrate) {
+                transaction.setLastSyncTime(System.currentTimeMillis());
+            }
+
             SyncRequest request = new SyncRequest(accountsToMigrate, transactionsToMigrate);
             apiService.syncData("Bearer " + token, request).enqueue(new Callback<SyncResponse>() {
                 @Override
