@@ -76,4 +76,7 @@ public interface AccountDao {
 
     @Query("DELETE FROM accounts")
     void deleteAllAccounts();
+
+    @Query("SELECT * FROM accounts WHERE server_id = :serverId")
+    List<Account> getAccountsByServerId(long serverId);
 } 
