@@ -33,9 +33,9 @@ public interface ApiService {
     Call<List<Transaction>> getTransactions(@Header("Authorization") String token);
 
     @PUT("api/transactions/{id}")
-    Call<Transaction> updateTransaction(@Header("Authorization") String token, 
-                                     @Path("id") long transactionId, 
-                                     @Body Transaction transaction);
+    Call<Void> updateTransaction(@Header("Authorization") String token, 
+                               @Path("id") long transactionId, 
+                               @Body Transaction transaction);
 
     @DELETE("api/transactions/{id}")
     Call<Void> deleteTransaction(@Header("Authorization") String token, 
@@ -52,12 +52,6 @@ public interface ApiService {
 
     @GET("api/server/time")
     Call<Long> getServerTime();
-
-    @PUT("accounts/{id}")
-    Call<Account> updateAccount(@Header("Authorization") String token, @Path("id") long id, @Body Account account);
-
-    @DELETE("accounts/{id}")
-    Call<Void> deleteAccount(@Header("Authorization") String token, @Path("id") long id);
 
     class LoginRequest {
         private String phone;
@@ -101,18 +95,8 @@ public interface ApiService {
     }
 
     public static class SyncResponse {
-        private List<Account> accounts;
-        private List<Transaction> transactions;
         private Map<Long, Long> accountIdMap;
         private Map<Long, Long> transactionIdMap;
-
-        public List<Account> getAccounts() {
-            return accounts;
-        }
-
-        public List<Transaction> getTransactions() {
-            return transactions;
-        }
 
         public Long getAccountServerId(Long localId) {
             return accountIdMap != null ? accountIdMap.get(localId) : null;
