@@ -31,6 +31,7 @@ import com.hillal.hhhhhhh.data.room.TransactionDao;
 import com.hillal.hhhhhhh.data.room.PendingOperationDao;
 import com.hillal.hhhhhhh.databinding.ActivityMainBinding;
 import com.hillal.hhhhhhh.viewmodel.AuthViewModel;
+import com.hillal.hhhhhhh.data.room.AppDatabase;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private AuthViewModel authViewModel;
     private SyncManager syncManager;
     private App app;
+    private AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,6 +139,9 @@ public class MainActivity extends AppCompatActivity {
                         .commit();
             }
 
+            db = AppDatabase.getInstance(this);
+            setupUI();
+
         } catch (IllegalStateException e) {
             String errorMessage = "=== خطأ في تهيئة التطبيق ===\n\n" +
                                 "نوع الخطأ: " + e.getClass().getSimpleName() + "\n" +
@@ -150,6 +155,15 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, errorMessage, e);
             showErrorAndExit(errorMessage);
         }
+    }
+
+    private void setupUI() {
+        // إعدادات أخرى
+        setupOtherSettings();
+    }
+
+    private void setupOtherSettings() {
+        // هنا يمكن إضافة إعدادات أخرى
     }
 
     @Override
@@ -277,5 +291,13 @@ public class MainActivity extends AppCompatActivity {
 
     public PendingOperationDao getPendingOperationDao() {
         return ((App) getApplication()).getDatabase().pendingOperationDao();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (db != null) {
+            db.close();
+        }
     }
 }
