@@ -110,27 +110,9 @@ public class DashboardFragment extends Fragment {
             Navigation.findNavController(requireView()).navigate(R.id.editProfileFragment));
 
         // زر عرض القيود المحاسبية
-        binding.viewTransactionsButton.setOnClickListener(v -> {
-            // تنفيذ المزامنة
-            syncManager.syncData(new SyncManager.SyncCallback() {
-                @Override
-                public void onSuccess() {
-                    // بعد نجاح المزامنة، الانتقال إلى صفحة القيود
-                    if (isAdded() && getView() != null) {
-                        Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment);
-                    }
-                }
-
-                @Override
-                public void onError(String error) {
-                    // في حالة حدوث خطأ، نعرض رسالة الخطأ ثم ننتقل إلى صفحة القيود
-                    if (isAdded() && getView() != null) {
-                        android.widget.Toast.makeText(requireContext(), error, android.widget.Toast.LENGTH_SHORT).show();
-                        Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment);
-                    }
-                }
-            });
-        });
+        binding.viewTransactionsButton.setOnClickListener(v -> 
+         
+            Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment));
 
         // زر عرض الحسابات
         binding.viewAccountsButton.setOnClickListener(v -> 
