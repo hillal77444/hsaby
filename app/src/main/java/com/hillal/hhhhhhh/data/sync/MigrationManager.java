@@ -5,13 +5,13 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.widget.Toast;
 
-import com.hillal.hhhhhhh.data.AppDatabase;
+import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.data.dao.AccountDao;
 import com.hillal.hhhhhhh.data.dao.TransactionDao;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
-import com.hillal.hhhhhhh.network.ApiService;
-import com.hillal.hhhhhhh.network.RetrofitClient;
+import com.hillal.hhhhhhh.data.remote.ApiService;
+import com.hillal.hhhhhhh.data.remote.RetrofitClient;
 import com.hillal.hhhhhhh.data.remote.ApiService.SyncRequest;
 import com.hillal.hhhhhhh.data.remote.ApiService.SyncResponse;
 import com.hillal.hhhhhhh.data.preferences.UserPreferences;
