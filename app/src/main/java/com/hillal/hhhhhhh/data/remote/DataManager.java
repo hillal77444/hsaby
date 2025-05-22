@@ -865,6 +865,29 @@ public class DataManager {
         });
     }
 
+    private void savePendingOperation(Transaction transaction, String operationType) {
+        try {
+            PendingOperation operation = new PendingOperation();
+            operation.setOperationType(operationType);
+            operation.setEntityType("TRANSACTION");
+            operation.setEntityData(gson.toJson(transaction));
+            operation.setTimestamp(System.currentTimeMillis());
+            operation.setStatus(0); // pending
+            operation.setRetryCount(0);
+            
+            executor.execute(() -> {
+                try {
+                    pendingOperationDao.insert(operation);
+                    Log.d(TAG, "تم حفظ العملية المعلقة بنجاح: " + operationType);
+                } catch (Exception e) {
+                    Log.e(TAG, "خطأ في حفظ العملية المعلقة: " + e.getMessage());
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "خطأ في إنشاء العملية المعلقة: " + e.getMessage());
+        }
+    }
+
     public void shutdown() {
         executor.shutdown();
     }
