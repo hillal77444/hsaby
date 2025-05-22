@@ -6,7 +6,7 @@ import android.net.NetworkInfo;
 import android.widget.Toast;
 
 import com.hillal.hhhhhhh.data.room.AppDatabase;
-import com.hillal.hhhhhhh.data.dao.AccountDao;
+import com.hillal.hhhhhhh.data.room.AccountDao;
 import com.hillal.hhhhhhh.data.room.TransactionDao;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
@@ -57,7 +57,7 @@ public class MigrationManager {
         migratedTransactionsCount = 0;
 
         // جلب الحسابات والمعاملات التي تحتاج إلى ترحيل
-        List<Account> accountsToMigrate = accountDao.getAccountsToMigrate();
+        List<Account> accountsToMigrate = accountDao.getNewAccounts();
         List<Transaction> transactionsToMigrate = transactionDao.getTransactionsToMigrate();
 
         if (accountsToMigrate.isEmpty() && transactionsToMigrate.isEmpty()) {
