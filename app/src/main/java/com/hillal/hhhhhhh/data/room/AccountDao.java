@@ -56,14 +56,8 @@ public interface AccountDao {
     @Query("DELETE FROM accounts WHERE id = :accountId")
     void deleteAccount(long accountId);
 
-    @Query("SELECT * FROM accounts WHERE updated_at > :timestamp")
-    List<Account> getAccountsModifiedAfter(long timestamp);
-
     @Query("SELECT * FROM accounts WHERE server_id < 0")
     List<Account> getNewAccounts();
-
-    @Query("SELECT * FROM accounts WHERE updated_at > :timestamp AND server_id > 0")
-    List<Account> getModifiedAccounts(long timestamp);
 
     @Query("SELECT * FROM accounts WHERE account_number = :accountNumber")
     Account getAccountByNumberSync(String accountNumber);
@@ -76,4 +70,7 @@ public interface AccountDao {
 
     @Query("DELETE FROM accounts")
     void deleteAllAccounts();
+
+    @Query("SELECT * FROM accounts WHERE server_id = :serverId")
+    Account getAccountByServerId(long serverId);
 } 
