@@ -31,6 +31,7 @@ public class DashboardFragment extends Fragment {
     private UserPreferences userPreferences;
     private SyncManager syncManager;
     private ProgressDialog progressDialog;
+    private AppDatabase db;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -40,7 +41,7 @@ public class DashboardFragment extends Fragment {
         try {
             // Initialize ViewModel
             App app = (App) requireActivity().getApplication();
-            AppDatabase db = app.getDatabase();
+            db = app.getDatabase();
             AccountRepository accountRepository = new AccountRepository(db.accountDao(), db);
             TransactionRepository transactionRepository = new TransactionRepository(((App) requireActivity().getApplication()).getDatabase());
             dashboardViewModel = new ViewModelProvider(this, new DashboardViewModelFactory(accountRepository, transactionRepository))
@@ -61,7 +62,15 @@ public class DashboardFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentDashboardBinding.inflate(inflater, container, false);
-        
+        db = AppDatabase.getInstance(requireContext());
+        setupUI();
+        return binding.getRoot();
+    }
+
+    private void setupUI() {
+        // إعدادات أخرى
+        setupOtherSettings();
+
         // إضافة زر المزامنة الكاملة
         Button fullSyncButton = binding.getRoot().findViewById(R.id.full_sync_button);
         fullSyncButton.setOnClickListener(v -> {
@@ -83,8 +92,10 @@ public class DashboardFragment extends Fragment {
                 }
             });
         });
+    }
 
-        return binding.getRoot();
+    private void setupOtherSettings() {
+        // هنا يمكن إضافة إعدادات أخرى
     }
 
     @Override
