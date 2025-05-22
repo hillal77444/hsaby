@@ -86,6 +86,7 @@ public class AddAccountFragment extends Fragment {
             );
             account.setNotes(notes);
             account.setWhatsappEnabled(whatsappEnabled);
+            account.setServerId(-1);
             accountViewModel.insertAccount(account);
             Toast.makeText(getContext(), R.string.account_saved, Toast.LENGTH_SHORT).show();
             Navigation.findNavController(requireView()).navigateUp();
