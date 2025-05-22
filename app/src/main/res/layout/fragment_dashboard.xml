@@ -350,19 +350,6 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <Button
-                android:id="@+id/full_sync_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:text="مزامنة كاملة"
-                android:drawableStart="@drawable/ic_sync"
-                android:drawablePadding="8dp"
-                android:background="@drawable/button_background"
-                android:textColor="@color/white"
-                android:gravity="center"
-                android:padding="12dp" />
-
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
