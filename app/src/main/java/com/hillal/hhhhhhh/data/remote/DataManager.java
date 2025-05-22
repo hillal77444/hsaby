@@ -681,13 +681,12 @@ public class DataManager {
 
     private void insertPendingOperation(Transaction transaction, String operationType) {
         try {
-            PendingOperation operation = new PendingOperation();
-            operation.setOperationType(operationType);
-            operation.setEntityType("TRANSACTION");
-            operation.setEntityData(gson.toJson(transaction));
-            operation.setTimestamp(System.currentTimeMillis());
-            operation.setStatus(0); // pending
-            operation.setRetryCount(0);
+            // إنشاء كائن PendingOperation باستخدام البناء المطلوب
+            PendingOperation operation = new PendingOperation(
+                operationType,                    // نوع العملية
+                transaction.getId(),              // معرف المعاملة
+                gson.toJson(transaction)          // بيانات المعاملة كـ JSON
+            );
             
             executor.execute(() -> {
                 try {
