@@ -117,6 +117,11 @@ public class SyncManager {
     private boolean isAutoSyncInProgress = false;
     private boolean isManualSyncInProgress = false;
 
+    // إضافة متغيرات لتوقيت الخادم
+    private static final String SERVER_TIME_KEY = "server_time";
+    private static final String TIME_DIFFERENCE_KEY = "time_difference";
+    private long serverTimeDifference = 0;
+
     private int calculateOptimalBatchSize(int totalItems) {
         // حساب حجم الدفعة الأمثل بناءً على عدد العناصر
         if (totalItems <= MIN_BATCH_SIZE) {
@@ -460,7 +465,7 @@ public class SyncManager {
     }
 
     private void updateLastSyncTime() {
-        long currentTime = System.currentTimeMillis();
+        long currentTime = getAdjustedTime();
         context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
                 .edit()
                 .putLong("last_sync_time", currentTime)
@@ -618,49 +623,63 @@ public class SyncManager {
             return;
         }
 
-        executor.execute(() -> {
-            try {
-                // الحصول على جميع العناصر غير المتزامنة
-                List<Account> allNewAccounts = accountDao.getNewAccounts();
-                List<Transaction> allNewTransactions = transactionDao.getNewTransactions();
+        // أولاً: الحصول على توقيت الخادم
+        getServerTime(new SyncCallback() {
+            @Override
+            public void onSuccess() {
+                executor.execute(() -> {
+                    try {
+                        // الحصول على جميع العناصر غير المتزامنة
+                        List<Account> allNewAccounts = accountDao.getNewAccounts();
+                        List<Transaction> allNewTransactions = transactionDao.getNewTransactions();
 
-                // حساب عدد الدفعات المطلوبة
-                int totalItems = allNewAccounts.size() + allNewTransactions.size();
-                int totalBatches = (int) Math.ceil((double) totalItems / BATCH_SIZE);
+                        // حساب عدد الدفعات المطلوبة
+                        int totalItems = allNewAccounts.size() + allNewTransactions.size();
+                        int totalBatches = (int) Math.ceil((double) totalItems / BATCH_SIZE);
 
-                if (totalItems == 0) {
-                    Log.d(TAG, "لا توجد بيانات جديدة للمزامنة");
-                    isSyncInProgress = false;
-                    handler.post(() -> callback.onSuccess());
-                    return;
-                }
-
-                // بدء المزامنة مع الدفعة الأولى
-                List<Account> firstBatchAccounts = getNextBatch(allNewAccounts, 0);
-                List<Transaction> firstBatchTransactions = getNextBatch(allNewTransactions, 0);
-
-                syncBatch(firstBatchAccounts, firstBatchTransactions, new SyncCallback() {
-                    @Override
-                    public void onSuccess() {
-                        isManualSyncInProgress = false;
-                        if (callback != null) {
-                            callback.onSuccess();
+                        if (totalItems == 0) {
+                            Log.d(TAG, "لا توجد بيانات جديدة للمزامنة");
+                            isSyncInProgress = false;
+                            handler.post(() -> callback.onSuccess());
+                            return;
                         }
-                    }
 
-                    @Override
-                    public void onError(String error) {
+                        // بدء المزامنة مع الدفعة الأولى
+                        List<Account> firstBatchAccounts = getNextBatch(allNewAccounts, 0);
+                        List<Transaction> firstBatchTransactions = getNextBatch(allNewTransactions, 0);
+
+                        syncBatch(firstBatchAccounts, firstBatchTransactions, new SyncCallback() {
+                            @Override
+                            public void onSuccess() {
+                                isManualSyncInProgress = false;
+                                if (callback != null) {
+                                    callback.onSuccess();
+                                }
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                isManualSyncInProgress = false;
+                                if (callback != null) {
+                                    callback.onError(error);
+                                }
+                            }
+                        }, 0, totalBatches);
+
+                    } catch (Exception e) {
+                        Log.e(TAG, "خطأ في بدء المزامنة: " + e.getMessage());
                         isManualSyncInProgress = false;
-                        if (callback != null) {
-                            callback.onError(error);
-                        }
+                        handler.post(() -> callback.onError("خطأ في بدء المزامنة: " + e.getMessage()));
                     }
-                }, 0, totalBatches);
+                });
+            }
 
-            } catch (Exception e) {
-                Log.e(TAG, "خطأ في بدء المزامنة: " + e.getMessage());
+            @Override
+            public void onError(String error) {
                 isManualSyncInProgress = false;
-                handler.post(() -> callback.onError("خطأ في بدء المزامنة: " + e.getMessage()));
+                if (callback != null) {
+                    callback.onError(error);
+                }
             }
         });
     }
@@ -1015,7 +1034,7 @@ public class SyncManager {
                                         existingAccount.setNotes((String) accountData.get("notes"));
                                         existingAccount.setWhatsappEnabled((Boolean) accountData.get("whatsapp_enabled"));
                                         existingAccount.setIsDebtor((Boolean) accountData.get("is_debtor"));
-                                        existingAccount.setLastSyncTime(System.currentTimeMillis());
+                                        existingAccount.setLastSyncTime(getAdjustedTime());
                                         accountDao.update(existingAccount);
                                     }
                                 }
@@ -1038,7 +1057,7 @@ public class SyncManager {
                                         existingTransaction.setTransactionDate(((Number) transactionData.get("date")).longValue());
                                         existingTransaction.setCurrency((String) transactionData.get("currency"));
                                         existingTransaction.setWhatsappEnabled((Boolean) transactionData.get("whatsapp_enabled"));
-                                        existingTransaction.setLastSyncTime(System.currentTimeMillis());
+                                        existingTransaction.setLastSyncTime(getAdjustedTime());
                                         transactionDao.update(existingTransaction);
                                     } else {
                                         // إضافة معاملة جديدة
@@ -1053,7 +1072,7 @@ public class SyncManager {
                                         transaction.setWhatsappEnabled((Boolean) transactionData.get("whatsapp_enabled"));
                                         transaction.setAccountId(((Number) transactionData.get("account_id")).longValue());
                                         transaction.setUserId(((Number) transactionData.get("user_id")).longValue());
-                                        transaction.setLastSyncTime(System.currentTimeMillis());
+                                        transaction.setLastSyncTime(getAdjustedTime());
                                         transactionDao.insert(transaction);
                                     }
                                 }
@@ -1149,7 +1168,7 @@ public class SyncManager {
                                         existingAccount.setWhatsappEnabled((Boolean) accountData.get("whatsapp_enabled"));
                                         existingAccount.setIsDebtor((Boolean) accountData.get("is_debtor"));
                                         existingAccount.setServerId(((Number) accountData.get("id")).longValue());
-                                        existingAccount.setLastSyncTime(System.currentTimeMillis());
+                                        existingAccount.setLastSyncTime(getAdjustedTime());
                                         existingAccount.setSyncStatus(SYNC_STATUS_SYNCED);
                                         accountDao.update(existingAccount);
                                         Log.d(TAG, "Updated account: " + accountNumber);
@@ -1166,7 +1185,7 @@ public class SyncManager {
                                         account.setIsDebtor((Boolean) accountData.get("is_debtor"));
                                         account.setServerId(((Number) accountData.get("id")).longValue());
                                         account.setUserId(currentUserId);
-                                        account.setLastSyncTime(System.currentTimeMillis());
+                                        account.setLastSyncTime(getAdjustedTime());
                                         account.setSyncStatus(SYNC_STATUS_SYNCED);
                                         accountDao.insert(account);
                                         Log.d(TAG, "Added new account: " + accountNumber);
@@ -1200,7 +1219,7 @@ public class SyncManager {
                                         existingTransaction.setCurrency((String) transactionData.get("currency"));
                                         existingTransaction.setWhatsappEnabled((Boolean) transactionData.get("whatsapp_enabled"));
                                         existingTransaction.setAccountId(((Number) transactionData.get("account_id")).longValue());
-                                        existingTransaction.setLastSyncTime(System.currentTimeMillis());
+                                        existingTransaction.setLastSyncTime(getAdjustedTime());
                                         existingTransaction.setSyncStatus(SYNC_STATUS_SYNCED);
                                         transactionDao.update(existingTransaction);
                                         Log.d(TAG, "Updated transaction: " + serverId);
@@ -1217,7 +1236,7 @@ public class SyncManager {
                                         transaction.setWhatsappEnabled((Boolean) transactionData.get("whatsapp_enabled"));
                                         transaction.setAccountId(((Number) transactionData.get("account_id")).longValue());
                                         transaction.setUserId(currentUserId);
-                                        transaction.setLastSyncTime(System.currentTimeMillis());
+                                        transaction.setLastSyncTime(getAdjustedTime());
                                         transaction.setSyncStatus(SYNC_STATUS_SYNCED);
                                         transactionDao.insert(transaction);
                                         Log.d(TAG, "Added new transaction: " + serverId);
@@ -1575,5 +1594,37 @@ public class SyncManager {
         public boolean isExpired() {
             return System.currentTimeMillis() - lockTime > LOCK_TIMEOUT;
         }
+    }
+
+    private void getServerTime(SyncCallback callback) {
+        apiService.getServerTime().enqueue(new Callback<Long>() {
+            @Override
+            public void onResponse(Call<Long> call, Response<Long> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    long serverTime = response.body();
+                    long localTime = System.currentTimeMillis();
+                    serverTimeDifference = serverTime - localTime;
+                    
+                    // حفظ الفرق بين توقيت الخادم والمستخدم
+                    context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
+                            .edit()
+                            .putLong(TIME_DIFFERENCE_KEY, serverTimeDifference)
+                            .apply();
+                    
+                    callback.onSuccess();
+                } else {
+                    callback.onError("فشل في الحصول على توقيت الخادم");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Long> call, Throwable t) {
+                callback.onError("خطأ في الاتصال بالخادم");
+            }
+        });
+    }
+
+    private long getAdjustedTime() {
+        return System.currentTimeMillis() + serverTimeDifference;
     }
 } 
