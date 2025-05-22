@@ -23,7 +23,7 @@ import com.hillal.hhhhhhh.data.preferences.UserPreferences;
 import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.data.sync.SyncManager;
 import com.hillal.hhhhhhh.data.remote.DataManager;
-import com.hillal.hhhhhhh.data.migration.MigrationManager;
+import com.hillal.hhhhhhh.data.sync.MigrationManager;
 
 public class DashboardFragment extends Fragment {
     private static final String TAG = "DashboardFragment";
