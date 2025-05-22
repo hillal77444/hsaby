@@ -607,81 +607,149 @@ public class SyncManager {
     }
 
     public void syncData(SyncCallback callback) {
-        if (isAutoSyncInProgress || isManualSyncInProgress) {
-            Log.d(TAG, "Sync already in progress, skipping");
-            if (callback != null) {
-                callback.onError("Sync already in progress");
-            }
+        if (isSyncing) {
+            callback.onError("Sync already in progress");
             return;
         }
 
-        isManualSyncInProgress = true;
-
-        if (!isNetworkAvailable()) {
-            isManualSyncInProgress = false;
-            handleOfflineSync(callback);
+        // التحقق من وقت آخر مزامنة
+        long lastSyncTime = getLastSyncTime();
+        long currentTime = getAdjustedTime();
+        if (currentTime - lastSyncTime < MIN_SYNC_INTERVAL) {
+            callback.onError("Please wait before syncing again");
             return;
         }
 
-        // أولاً: الحصول على توقيت الخادم
+        isSyncing = true;
+        syncStartTime = currentTime;
+
+        // الحصول على توقيت الخادم أولاً
         getServerTime(new SyncCallback() {
             @Override
             public void onSuccess() {
-                executor.execute(() -> {
-                    try {
-                        // الحصول على جميع العناصر غير المتزامنة
-                        List<Account> allNewAccounts = accountDao.getNewAccounts();
-                        List<Transaction> allNewTransactions = transactionDao.getNewTransactions();
-
-                        // حساب عدد الدفعات المطلوبة
-                        int totalItems = allNewAccounts.size() + allNewTransactions.size();
-                        int totalBatches = (int) Math.ceil((double) totalItems / BATCH_SIZE);
-
-                        if (totalItems == 0) {
-                            Log.d(TAG, "لا توجد بيانات جديدة للمزامنة");
-                            isSyncInProgress = false;
-                            handler.post(() -> callback.onSuccess());
-                            return;
-                        }
-
-                        // بدء المزامنة مع الدفعة الأولى
-                        List<Account> firstBatchAccounts = getNextBatch(allNewAccounts, 0);
-                        List<Transaction> firstBatchTransactions = getNextBatch(allNewTransactions, 0);
-
-                        syncBatch(firstBatchAccounts, firstBatchTransactions, new SyncCallback() {
-                            @Override
-                            public void onSuccess() {
-                                isManualSyncInProgress = false;
-                                if (callback != null) {
-                                    callback.onSuccess();
-                                }
-                            }
-
-                            @Override
-                            public void onError(String error) {
-                                isManualSyncInProgress = false;
-                                if (callback != null) {
-                                    callback.onError(error);
-                                }
-                            }
-                        }, 0, totalBatches);
-
-                    } catch (Exception e) {
-                        Log.e(TAG, "خطأ في بدء المزامنة: " + e.getMessage());
-                        isManualSyncInProgress = false;
-                        handler.post(() -> callback.onError("خطأ في بدء المزامنة: " + e.getMessage()));
-                    }
-                });
+                // بعد الحصول على توقيت الخادم، نبدأ المزامنة
+                performSync(callback);
             }
 
             @Override
             public void onError(String error) {
-                isManualSyncInProgress = false;
-                if (callback != null) {
-                    callback.onError(error);
-                }
+                isSyncing = false;
+                callback.onError(error);
             }
         });
+    }
+
+    private void performSync(SyncCallback callback) {
+        // الحصول على البيانات المحلية
+        List<Account> localAccounts = dataManager.getAllAccounts();
+        List<Transaction> localTransactions = dataManager.getAllTransactions();
+
+        // تحضير البيانات للإرسال
+        Map<String, Object> syncData = new HashMap<>();
+        List<Map<String, Object>> accountsData = new ArrayList<>();
+        List<Map<String, Object>> transactionsData = new ArrayList<>();
+
+        // تحضير بيانات الحسابات
+        for (Account account : localAccounts) {
+            Map<String, Object> accountData = new HashMap<>();
+            accountData.put("id", account.getId());
+            if (account.getServerId() != null && account.getServerId() > 0) {
+                accountData.put("server_id", account.getServerId());
+            }
+            accountData.put("account_name", account.getAccountName());
+            accountData.put("balance", account.getBalance());
+            accountData.put("phone_number", account.getPhoneNumber());
+            accountData.put("notes", account.getNotes());
+            accountData.put("is_debtor", account.isDebtor());
+            accountData.put("whatsapp_enabled", account.isWhatsappEnabled());
+            accountData.put("last_sync_time", account.getLastSyncTime());
+            accountsData.add(accountData);
+        }
+
+        // تحضير بيانات المعاملات
+        for (Transaction transaction : localTransactions) {
+            Map<String, Object> transactionData = new HashMap<>();
+            transactionData.put("id", transaction.getId());
+            if (transaction.getServerId() != null && transaction.getServerId() > 0) {
+                transactionData.put("server_id", transaction.getServerId());
+            }
+            transactionData.put("amount", transaction.getAmount());
+            transactionData.put("type", transaction.getType());
+            transactionData.put("description", transaction.getDescription());
+            transactionData.put("notes", transaction.getNotes());
+            transactionData.put("date", transaction.getDate());
+            transactionData.put("currency", transaction.getCurrency());
+            transactionData.put("whatsapp_enabled", transaction.isWhatsappEnabled());
+            transactionData.put("account_id", transaction.getAccountId());
+            transactionData.put("last_sync_time", transaction.getLastSyncTime());
+            transactionsData.add(transactionData);
+        }
+
+        syncData.put("accounts", accountsData);
+        syncData.put("transactions", transactionsData);
+
+        // إرسال البيانات للخادم
+        apiService.syncData(syncData).enqueue(new Callback<Map<String, Object>>() {
+            @Override
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Map<String, Object> responseData = response.body();
+                    handleSyncResponse(responseData, callback);
+                } else {
+                    isSyncing = false;
+                    callback.onError("Failed to sync data");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                isSyncing = false;
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    private void handleSyncResponse(Map<String, Object> responseData, SyncCallback callback) {
+        // Handle the response from the server
+        // This method should be implemented to handle the response from the server
+        // and call the appropriate methods to update the local data
+        // based on the response data.
+        // For example, you might want to update the accounts and transactions in the database
+        // based on the response data.
+        // This method should call callback.onSuccess() or callback.onError(String error)
+        // depending on the result of the sync operation.
+    }
+
+    private void getServerTime(SyncCallback callback) {
+        apiService.getServerTime().enqueue(new Callback<Long>() {
+            @Override
+            public void onResponse(Call<Long> call, Response<Long> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    long serverTime = response.body();
+                    long localTime = System.currentTimeMillis();
+                    serverTimeDifference = serverTime - localTime;
+                    
+                    // حفظ الفرق بين توقيت الخادم والمستخدم
+                    context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
+                            .edit()
+                            .putLong(TIME_DIFFERENCE_KEY, serverTimeDifference)
+                            .apply();
+                    
+                    callback.onSuccess();
+                } else {
+                    callback.onError("فشل في الحصول على توقيت الخادم");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Long> call, Throwable t) {
+                callback.onError("خطأ في الاتصال بالخادم");
+            }
+        });
+    }
+
+    private long getAdjustedTime() {
+        return System.currentTimeMillis() + serverTimeDifference;
     }
 
     private void handleOfflineSync(SyncCallback callback) {
@@ -1594,37 +1662,5 @@ public class SyncManager {
         public boolean isExpired() {
             return System.currentTimeMillis() - lockTime > LOCK_TIMEOUT;
         }
-    }
-
-    private void getServerTime(SyncCallback callback) {
-        apiService.getServerTime().enqueue(new Callback<Long>() {
-            @Override
-            public void onResponse(Call<Long> call, Response<Long> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    long serverTime = response.body();
-                    long localTime = System.currentTimeMillis();
-                    serverTimeDifference = serverTime - localTime;
-                    
-                    // حفظ الفرق بين توقيت الخادم والمستخدم
-                    context.getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
-                            .edit()
-                            .putLong(TIME_DIFFERENCE_KEY, serverTimeDifference)
-                            .apply();
-                    
-                    callback.onSuccess();
-                } else {
-                    callback.onError("فشل في الحصول على توقيت الخادم");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Long> call, Throwable t) {
-                callback.onError("خطأ في الاتصال بالخادم");
-            }
-        });
-    }
-
-    private long getAdjustedTime() {
-        return System.currentTimeMillis() + serverTimeDifference;
     }
 } 
