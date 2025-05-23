@@ -207,6 +207,7 @@ public class EditTransactionFragment extends Fragment {
             transaction.setCurrency(currency);
             transaction.setTransactionDate(calendar.getTimeInMillis());
             transaction.setUpdatedAt(System.currentTimeMillis());
+            transaction.setServerId(oldTransaction.getServerId());
 
             transactionsViewModel.updateTransaction(transaction);
             Toast.makeText(requireContext(), R.string.transaction_updated, Toast.LENGTH_SHORT).show();
