@@ -129,7 +129,7 @@ def sync_data():
                 # التحقق من تكرار الحساب
                 if not account:
                     existing_account = Account.query.filter_by(
-                        account_name=acc_data.get('account_name'),
+                        account_name=acc_data.get('account_number'),
                         phone_number=acc_data.get('phone_number'),
                         user_id=current_user_id
                     ).first()
@@ -149,15 +149,20 @@ def sync_data():
                     account.user_id = current_user_id
                     logger.info(f"Updated account: {account.account_name}")
                 else:
+                    last_account = Account.query.order_by(Account.server_id.desc()).first()
+                    new_server_id = (last_account.server_id + 1) if last_account and last_account.server_id else 1
+
                     # إنشاء حساب جديد
                     account = Account(
+                        account_number=acc_data.get('account_number'),
                         account_name=acc_data.get('account_name'),
                         balance=acc_data.get('balance', 0),
                         phone_number=acc_data.get('phone_number'),
                         notes=acc_data.get('notes'),
                         is_debtor=acc_data.get('is_debtor', False),
                         whatsapp_enabled=acc_data.get('whatsapp_enabled', False),
-                        user_id=current_user_id
+                        user_id=current_user_id,
+                        server_id=new_server_id
                     )
                     db.session.add(account)
                     db.session.flush()
