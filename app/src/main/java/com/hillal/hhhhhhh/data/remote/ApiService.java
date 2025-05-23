@@ -111,7 +111,6 @@ public interface ApiService {
                 newTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
                 newTransaction.setSyncStatus(transaction.getSyncStatus());
                 // تعيين last_sync_time إلى الوقت الحالي
-                newTransaction.setLastSyncTime(System.currentTimeMillis());
                 transactionsToSend.add(newTransaction);
             }
             return transactionsToSend;
