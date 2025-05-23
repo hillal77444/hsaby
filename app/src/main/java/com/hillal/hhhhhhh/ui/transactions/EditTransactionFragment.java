@@ -35,6 +35,7 @@ public class EditTransactionFragment extends Fragment {
     private long transactionId;
     private long selectedAccountId = -1;
     private final Calendar calendar = Calendar.getInstance();
+    private Transaction oldTransaction;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", new Locale("ar"));
 
     @Override
