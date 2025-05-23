@@ -66,8 +66,8 @@ public class MigrationManager {
             migratedAccountsCount = 0;
             migratedTransactionsCount = 0;
 
-            List<Account> accountsToMigrate = accountDao.getNewAccounts();
-            List<Transaction> transactionsToMigrate = transactionDao.getNewTransactions();
+            List<Account> accountsToMigrate = accountDao.getNewOrModifiedAccounts();
+            List<Transaction> transactionsToMigrate = transactionDao.getNewOrModifiedTransactions();
 
             if (accountsToMigrate.isEmpty() && transactionsToMigrate.isEmpty()) {
                 new Handler(Looper.getMainLooper()).post(() -> 
@@ -97,6 +97,7 @@ public class MigrationManager {
                                         
                                         if (serverId != null && serverId > 0) {
                                             account.setServerId(serverId);
+                                            account.setSyncStatus(2); 
                                             accountDao.update(account);
                                             migratedAccountsCount++;
                                             Log.d("MigrationManager", "Account migrated: localId=" + account.getId() + 
@@ -115,6 +116,7 @@ public class MigrationManager {
                                         
                                         if (serverId != null && serverId > 0) {
                                             transaction.setServerId(serverId);
+                                            transaction.setSyncStatus(2);
                                             transactionDao.update(transaction);
                                             migratedTransactionsCount++;
                                             Log.d("MigrationManager", "Transaction migrated: localId=" + transaction.getId() + 
