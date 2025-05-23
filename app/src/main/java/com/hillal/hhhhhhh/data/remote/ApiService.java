@@ -95,9 +95,9 @@ public interface ApiService {
                 newAccount.setId(account.getId());
                 newAccount.setServerId(account.getServerId());
                 newAccount.setAccountNumber(account.getAccountNumber());
-                newAccount.setAccountName(account.getAccountName());
+                newAccount.setName(account.getName());
                 newAccount.setBalance(account.getBalance());
-                newAccount.setIsDebtor(account.getIsDebtor());
+                newAccount.setIsDebtor(account.isDebtor());
                 newAccount.setPhoneNumber(account.getPhoneNumber());
                 newAccount.setNotes(account.getNotes());
                 newAccount.setWhatsappEnabled(account.isWhatsappEnabled());
