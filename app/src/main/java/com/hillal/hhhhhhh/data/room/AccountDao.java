@@ -59,8 +59,8 @@ public interface AccountDao {
     @Query("SELECT * FROM accounts WHERE updated_at > :timestamp")
     List<Account> getAccountsModifiedAfter(long timestamp);
 
-    @Query("SELECT * FROM accounts WHERE server_id < 0")
-    List<Account> getNewAccounts();
+    @Query("SELECT * FROM accounts WHERE server_id < 0 OR sync_status = 0")
+    List<Account> getNewOrModifiedAccounts();
 
     @Query("SELECT * FROM accounts WHERE updated_at > :timestamp AND server_id > 0")
     List<Account> getModifiedAccounts(long timestamp);
