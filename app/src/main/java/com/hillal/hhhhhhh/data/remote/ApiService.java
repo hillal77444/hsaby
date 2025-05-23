@@ -6,6 +6,7 @@ import com.hillal.hhhhhhh.data.model.Transaction;
 
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
@@ -90,14 +91,30 @@ public interface ApiService {
         }
 
         public List<Transaction> getTransactions() {
-            // استبعاد last_sync_time من المعاملات
+            // نسخ المعاملات مع last_sync_time
+            List<Transaction> transactionsToSend = new ArrayList<>();
             for (Transaction transaction : transactions) {
-                // تعيين الحقول المطلوبة فقط
-                transaction.setCreatedAt(System.currentTimeMillis());
-                transaction.setUpdatedAt(System.currentTimeMillis());
-                transaction.setTransactionDate(System.currentTimeMillis());
+                Transaction newTransaction = new Transaction();
+                newTransaction.setId(transaction.getId());
+                newTransaction.setServerId(transaction.getServerId());
+                newTransaction.setUserId(transaction.getUserId());
+                newTransaction.setAccountId(transaction.getAccountId());
+                newTransaction.setAmount(transaction.getAmount());
+                newTransaction.setType(transaction.getType());
+                newTransaction.setDescription(transaction.getDescription());
+                newTransaction.setNotes(transaction.getNotes());
+                newTransaction.setCurrency(transaction.getCurrency());
+                newTransaction.setTransactionDate(transaction.getTransactionDate());
+                newTransaction.setCreatedAt(transaction.getCreatedAt());
+                newTransaction.setUpdatedAt(transaction.getUpdatedAt());
+                newTransaction.setModified(transaction.isModified());
+                newTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
+                newTransaction.setSyncStatus(transaction.getSyncStatus());
+                // تعيين last_sync_time إلى الوقت الحالي
+                newTransaction.setLastSyncTime(System.currentTimeMillis());
+                transactionsToSend.add(newTransaction);
             }
-            return transactions;
+            return transactionsToSend;
         }
     }
 
