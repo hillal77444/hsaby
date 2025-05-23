@@ -123,11 +123,6 @@ public class DashboardFragment extends Fragment {
 
             // تشغيل الترحيل تلقائياً عند فتح الصفحة
             migrationManager.migrateLocalData();
-
-            // إضافة مستمع النقر لزر الترحيل (نحتفظ به للترحيل اليدوي إذا احتجنا له)
-            view.findViewById(R.id.migrate_button).setOnClickListener(v -> {
-                migrationManager.migrateLocalData();
-            });
         } catch (Exception e) {
             Log.e(TAG, "Error in onViewCreated: " + e.getMessage(), e);
         }
