@@ -81,7 +81,7 @@ public interface TransactionDao {
     List<Transaction> getModifiedTransactions(long timestamp);
 
     @Query("SELECT * FROM transactions WHERE server_id < 0 OR sync_status = 0")
-    List<Transaction> getNewOrModifiedAccounts();
+    List<Transaction> getNewOrModifiedTransactions();
 
     @Query("SELECT * FROM transactions WHERE updated_at > :timestamp")
     List<Transaction> getTransactionsModifiedAfter(long timestamp);
