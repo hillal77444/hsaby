@@ -16,6 +16,7 @@ import retrofit2.http.DELETE;
 import retrofit2.http.Path;
 import retrofit2.http.Header;
 import retrofit2.http.Query;
+import com.google.gson.annotations.SerializedName;
 
 public interface ApiService {
     @POST("api/login")
@@ -118,7 +119,10 @@ public interface ApiService {
     }
 
     public static class SyncResponse {
+        @SerializedName("account_mappings")
         private Map<Long, Long> accountIdMap;
+        
+        @SerializedName("transaction_mappings")
         private Map<Long, Long> transactionIdMap;
 
         public Long getAccountServerId(Long localId) {
