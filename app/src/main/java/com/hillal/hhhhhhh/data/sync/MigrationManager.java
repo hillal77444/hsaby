@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.io.IOException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -143,20 +144,19 @@ public class MigrationManager {
                                 }
                             });
                         } else {
-                            String errorBody = "";
+                            String errorBody = "خطأ غير معروف";
                             try {
                                 if (response.errorBody() != null) {
                                     errorBody = response.errorBody().string();
                                 }
-                            } catch (Exception e) {
-                                errorBody = "Error reading error body: " + e.getMessage();
+                            } catch (IOException e) {
+                                Log.e("MigrationManager", "Error reading error body", e);
                             }
-                            
-                            Log.e("MigrationManager", "Server error: " + response.code() + " - " + errorBody);
+                            final String finalErrorBody = errorBody;
                             new Handler(Looper.getMainLooper()).post(() -> {
                                 new AlertDialog.Builder(context)
-                                    .setTitle("خطأ في الترحيل")
-                                    .setMessage("فشل في الاتصال بالخادم: " + response.code() + "\n" + errorBody)
+                                    .setTitle("خطأ في المزامنة")
+                                    .setMessage("فشل في الاتصال بالخادم: " + response.code() + "\n" + finalErrorBody)
                                     .setPositiveButton("حسناً", null)
                                     .show();
                             });
