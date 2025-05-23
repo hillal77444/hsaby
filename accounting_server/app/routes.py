@@ -139,12 +139,6 @@ def sync_data():
                         logger.info(f"Found existing account: {account.account_name}")
                 
                 if account:
-                    # التحقق من وقت آخر مزامنة
-                    if account.last_sync_time and acc_data.get('last_sync_time'):
-                        if account.last_sync_time > acc_data['last_sync_time']:
-                            logger.info(f"Local data is newer for account: {account.account_name}")
-                            continue
-                    
                     # تحديث الحساب الموجود
                     account.account_name = acc_data.get('account_name', account.account_name)
                     account.balance = acc_data.get('balance', account.balance)
@@ -153,7 +147,6 @@ def sync_data():
                     account.is_debtor = acc_data.get('is_debtor', account.is_debtor)
                     account.whatsapp_enabled = acc_data.get('whatsapp_enabled', account.whatsapp_enabled)
                     account.user_id = current_user_id
-                    account.last_sync_time = datetime.now()
                     logger.info(f"Updated account: {account.account_name}")
                 else:
                     # إنشاء حساب جديد
@@ -164,8 +157,7 @@ def sync_data():
                         notes=acc_data.get('notes'),
                         is_debtor=acc_data.get('is_debtor', False),
                         whatsapp_enabled=acc_data.get('whatsapp_enabled', False),
-                        user_id=current_user_id,
-                        last_sync_time=datetime.now()
+                        user_id=current_user_id
                     )
                     db.session.add(account)
                     db.session.flush()
@@ -237,12 +229,6 @@ def sync_data():
                         logger.info(f"Found existing transaction: {transaction.id}")
                 
                 if transaction:
-                    # التحقق من وقت آخر مزامنة
-                    if transaction.last_sync_time and trans_data.get('last_sync_time'):
-                        if transaction.last_sync_time > trans_data['last_sync_time']:
-                            logger.info(f"Local data is newer for transaction: {transaction.id}")
-                            continue
-                    
                     # تحديث المعاملة الموجودة
                     transaction.amount = trans_data.get('amount', transaction.amount)
                     transaction.type = trans_data.get('type', transaction.type)
@@ -253,7 +239,6 @@ def sync_data():
                     transaction.whatsapp_enabled = trans_data.get('whatsapp_enabled', transaction.whatsapp_enabled)
                     transaction.account_id = trans_data.get('account_id', transaction.account_id)
                     transaction.user_id = current_user_id
-                    transaction.last_sync_time = datetime.now()
                     logger.info(f"Updated transaction: {transaction.id}")
                 else:
                     # إنشاء معاملة جديدة
@@ -271,8 +256,7 @@ def sync_data():
                         whatsapp_enabled=trans_data.get('whatsapp_enabled', False),
                         account_id=trans_data.get('account_id'),
                         user_id=current_user_id,
-                        server_id=new_server_id,
-                        last_sync_time=datetime.now()
+                        server_id=new_server_id
                     )
                     db.session.add(transaction)
                     db.session.flush()
