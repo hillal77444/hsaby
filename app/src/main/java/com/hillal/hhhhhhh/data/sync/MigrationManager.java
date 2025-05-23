@@ -22,6 +22,7 @@ import com.hillal.hhhhhhh.data.preferences.UserPreferences;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -78,7 +79,7 @@ public class MigrationManager {
                 public void onResponse(Call<SyncResponse> call, Response<SyncResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         SyncResponse syncResponse = response.body();
-                        boolean hasUpdates = false;
+                        final AtomicBoolean hasUpdates = new AtomicBoolean(false);
                         
                         executor.execute(() -> {
                             for (Account account : accountsToMigrate) {
@@ -87,7 +88,7 @@ public class MigrationManager {
                                     account.setServerId(serverId);
                                     accountDao.update(account);
                                     migratedAccountsCount++;
-                                    hasUpdates = true;
+                                    hasUpdates.set(true);
                                 }
                             }
 
@@ -97,12 +98,12 @@ public class MigrationManager {
                                     transaction.setServerId(serverId);
                                     transactionDao.update(transaction);
                                     migratedTransactionsCount++;
-                                    hasUpdates = true;
+                                    hasUpdates.set(true);
                                 }
                             }
 
                             new Handler(Looper.getMainLooper()).post(() -> {
-                                if (hasUpdates) {
+                                if (hasUpdates.get()) {
                                     String summary = String.format("تم ترحيل %d حساب و %d معاملة بنجاح", 
                                         migratedAccountsCount, migratedTransactionsCount);
                                     Toast.makeText(context, summary, Toast.LENGTH_LONG).show();
