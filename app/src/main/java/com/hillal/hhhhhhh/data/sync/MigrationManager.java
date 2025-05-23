@@ -78,6 +78,7 @@ public class MigrationManager {
                 public void onResponse(Call<SyncResponse> call, Response<SyncResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         SyncResponse syncResponse = response.body();
+                        boolean hasUpdates = false;
                         
                         executor.execute(() -> {
                             for (Account account : accountsToMigrate) {
@@ -86,6 +87,7 @@ public class MigrationManager {
                                     account.setServerId(serverId);
                                     accountDao.update(account);
                                     migratedAccountsCount++;
+                                    hasUpdates = true;
                                 }
                             }
 
@@ -95,10 +97,19 @@ public class MigrationManager {
                                     transaction.setServerId(serverId);
                                     transactionDao.update(transaction);
                                     migratedTransactionsCount++;
+                                    hasUpdates = true;
                                 }
                             }
 
-                            new Handler(Looper.getMainLooper()).post(() -> showMigrationSummary());
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                if (hasUpdates) {
+                                    String summary = String.format("تم ترحيل %d حساب و %d معاملة بنجاح", 
+                                        migratedAccountsCount, migratedTransactionsCount);
+                                    Toast.makeText(context, summary, Toast.LENGTH_LONG).show();
+                                } else {
+                                    Toast.makeText(context, "لم يتم تحديث أي بيانات", Toast.LENGTH_LONG).show();
+                                }
+                            });
                         });
                     } else {
                         new Handler(Looper.getMainLooper()).post(() -> {
@@ -126,12 +137,6 @@ public class MigrationManager {
                 }
             });
         });
-    }
-
-    private void showMigrationSummary() {
-        String summary = String.format("تم ترحيل %d حساب و %d معاملة بنجاح", 
-            migratedAccountsCount, migratedTransactionsCount);
-        Toast.makeText(context, summary, Toast.LENGTH_LONG).show();
     }
 
     private boolean isNetworkAvailable() {
