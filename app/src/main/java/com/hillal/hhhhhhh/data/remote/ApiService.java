@@ -120,17 +120,39 @@ public interface ApiService {
 
     public static class SyncResponse {
         @SerializedName("account_mappings")
-        private Map<Long, Long> accountIdMap;
+        private List<Mapping> accountMappings;
         
         @SerializedName("transaction_mappings")
-        private Map<Long, Long> transactionIdMap;
+        private List<Mapping> transactionMappings;
 
         public Long getAccountServerId(Long localId) {
-            return accountIdMap != null ? accountIdMap.get(localId) : null;
+            if (accountMappings != null) {
+                for (Mapping mapping : accountMappings) {
+                    if (mapping.localId.equals(localId)) {
+                        return mapping.serverId;
+                    }
+                }
+            }
+            return null;
         }
 
         public Long getTransactionServerId(Long localId) {
-            return transactionIdMap != null ? transactionIdMap.get(localId) : null;
+            if (transactionMappings != null) {
+                for (Mapping mapping : transactionMappings) {
+                    if (mapping.localId.equals(localId)) {
+                        return mapping.serverId;
+                    }
+                }
+            }
+            return null;
+        }
+
+        private static class Mapping {
+            @SerializedName("local_id")
+            private Long localId;
+            
+            @SerializedName("server_id")
+            private Long serverId;
         }
     }
 } 
