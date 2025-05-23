@@ -86,6 +86,9 @@ public class EditTransactionFragment extends Fragment {
         });
     }
 
+
+    
+
     private void setupAccountDropdown(List<Account> accounts) {
         String[] accountNames = new String[accounts.size()];
         for (int i = 0; i < accounts.size(); i++) {
@@ -108,6 +111,7 @@ public class EditTransactionFragment extends Fragment {
         if (transactionId != -1) {
             transactionsViewModel.getTransactionById(transactionId).observe(getViewLifecycleOwner(), transaction -> {
                 if (transaction != null) {
+                    oldTransaction = transaction;
                     populateTransactionData(transaction);
                 }
             });
@@ -196,6 +200,11 @@ public class EditTransactionFragment extends Fragment {
 
         try {
             double amount = Double.parseDouble(amountStr);
+
+            if (oldTransaction == null) {
+                Toast.makeText(requireContext(), "حدث خطأ في تحميل بيانات المعاملة الأصلية", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             Transaction transaction = new Transaction();
             transaction.setId(transactionId);
