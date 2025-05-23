@@ -88,7 +88,25 @@ public interface ApiService {
 
         // Getters for JSON serialization
         public List<Account> getAccounts() {
-            return accounts;
+            // نسخ الحسابات مع جميع البيانات المطلوبة
+            List<Account> accountsToSend = new ArrayList<>();
+            for (Account account : accounts) {
+                Account newAccount = new Account();
+                newAccount.setId(account.getId());
+                newAccount.setServerId(account.getServerId());
+                newAccount.setAccountNumber(account.getAccountNumber());
+                newAccount.setAccountName(account.getAccountName());
+                newAccount.setBalance(account.getBalance());
+                newAccount.setIsDebtor(account.getIsDebtor());
+                newAccount.setPhoneNumber(account.getPhoneNumber());
+                newAccount.setNotes(account.getNotes());
+                newAccount.setWhatsappEnabled(account.isWhatsappEnabled());
+                newAccount.setUserId(account.getUserId());
+                newAccount.setCreatedAt(account.getCreatedAt());
+                newAccount.setUpdatedAt(account.getUpdatedAt());
+                accountsToSend.add(newAccount);
+            }
+            return accountsToSend;
         }
 
         public List<Transaction> getTransactions() {
