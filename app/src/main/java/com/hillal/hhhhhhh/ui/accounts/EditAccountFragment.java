@@ -22,6 +22,7 @@ public class EditAccountFragment extends Fragment {
     private FragmentAddAccountBinding binding;
     private AccountViewModel accountViewModel;
     private long accountId;
+    private Account oldAccount;
     private SwitchCompat whatsappSwitch;
 
     @Override
@@ -60,6 +61,7 @@ public class EditAccountFragment extends Fragment {
         if (accountId != -1) {
             accountViewModel.getAccountById(accountId).observe(getViewLifecycleOwner(), account -> {
                 if (account != null) {
+                    oldAccount = account;
                     binding.nameEditText.setText(account.getName());
                     binding.phoneEditText.setText(account.getPhoneNumber());
                     binding.openingBalanceEditText.setText(String.valueOf(account.getBalance()));
@@ -86,12 +88,18 @@ public class EditAccountFragment extends Fragment {
             double balance = Double.parseDouble(balanceStr);
             accountViewModel.getAccountById(accountId).observe(getViewLifecycleOwner(), account -> {
                 if (account != null) {
+                    if (oldAccount == null) {
+                        Toast.makeText(getContext(), "حدث خطأ في تحميل بيانات الحساب الأصلية", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     account.setName(name);
                     account.setPhoneNumber(phone);
                     account.setBalance(balance);
                     account.setNotes(notes);
                     account.setWhatsappEnabled(whatsappEnabled);
                     account.setUpdatedAt(System.currentTimeMillis());
+                    account.setServerId(oldAccount.getServerId()); 
+                    account.setSyncStatus(0);
                     accountViewModel.updateAccount(account);
                     Toast.makeText(getContext(), R.string.account_saved, Toast.LENGTH_SHORT).show();
                     Navigation.findNavController(requireView()).navigateUp();
