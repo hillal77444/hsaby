@@ -133,14 +133,15 @@ public class MigrationManager {
                             });
                         });
                     } else {
-                        String errorMessage = "فشل في ترحيل البيانات";
+                        StringBuilder errorBuilder = new StringBuilder("فشل في ترحيل البيانات");
                         if (response.errorBody() != null) {
                             try {
-                                errorMessage += "\n\nالسبب: " + response.errorBody().string();
+                                errorBuilder.append("\n\nالسبب: ").append(response.errorBody().string());
                             } catch (Exception e) {
-                                errorMessage += "\n\nالسبب: " + response.message();
+                                errorBuilder.append("\n\nالسبب: ").append(response.message());
                             }
                         }
+                        final String errorMessage = errorBuilder.toString();
                         Log.e("MigrationManager", "Sync failed: " + errorMessage);
                         new Handler(Looper.getMainLooper()).post(() -> {
                             new AlertDialog.Builder(context)
