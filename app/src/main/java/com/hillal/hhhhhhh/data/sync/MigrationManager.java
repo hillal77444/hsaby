@@ -97,7 +97,7 @@ public class MigrationManager {
                                     accountDao.update(account);
                                     migratedAccountsCount++;
                                     Log.d("MigrationManager", "Account migrated: localId=" + account.getId() + 
-                                        ", serverId=" + serverId);
+                                        ", serverId=" + serverId + ", total migrated: " + migratedAccountsCount);
                                 } else {
                                     Log.e("MigrationManager", "Failed to get server ID for account: localId=" + 
                                         account.getId());
@@ -115,12 +115,15 @@ public class MigrationManager {
                                     transactionDao.update(transaction);
                                     migratedTransactionsCount++;
                                     Log.d("MigrationManager", "Transaction migrated: localId=" + transaction.getId() + 
-                                        ", serverId=" + serverId);
+                                        ", serverId=" + serverId + ", total migrated: " + migratedTransactionsCount);
                                 } else {
                                     Log.e("MigrationManager", "Failed to get server ID for transaction: localId=" + 
                                         transaction.getId());
                                 }
                             }
+
+                            Log.d("MigrationManager", "Final counts - Accounts: " + migratedAccountsCount + 
+                                ", Transactions: " + migratedTransactionsCount);
 
                             new Handler(Looper.getMainLooper()).post(() -> {
                                 if (migratedAccountsCount > 0 || migratedTransactionsCount > 0) {
