@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 import android.app.AlertDialog;
+import android.util.Log;
 
 import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.data.room.AccountDao;
@@ -73,37 +74,56 @@ public class MigrationManager {
                 return;
             }
 
+            Log.d("MigrationManager", "Starting migration with " + accountsToMigrate.size() + " accounts and " + 
+                transactionsToMigrate.size() + " transactions");
+
             SyncRequest request = new SyncRequest(accountsToMigrate, transactionsToMigrate);
             apiService.syncData("Bearer " + token, request).enqueue(new Callback<SyncResponse>() {
                 @Override
                 public void onResponse(Call<SyncResponse> call, Response<SyncResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         SyncResponse syncResponse = response.body();
-                        final AtomicBoolean hasUpdates = new AtomicBoolean(false);
+                        Log.d("MigrationManager", "Received response from server");
                         
                         executor.execute(() -> {
+                            // تحديث الحسابات
                             for (Account account : accountsToMigrate) {
                                 Long serverId = syncResponse.getAccountServerId(account.getId());
-                                if (serverId != null) {
+                                Log.d("MigrationManager", "Account mapping: localId=" + account.getId() + 
+                                    ", serverId=" + serverId);
+                                
+                                if (serverId != null && serverId > 0) {
                                     account.setServerId(serverId);
                                     accountDao.update(account);
                                     migratedAccountsCount++;
-                                    hasUpdates.set(true);
+                                    Log.d("MigrationManager", "Account migrated: localId=" + account.getId() + 
+                                        ", serverId=" + serverId);
+                                } else {
+                                    Log.e("MigrationManager", "Failed to get server ID for account: localId=" + 
+                                        account.getId());
                                 }
                             }
 
+                            // تحديث المعاملات
                             for (Transaction transaction : transactionsToMigrate) {
                                 Long serverId = syncResponse.getTransactionServerId(transaction.getId());
-                                if (serverId != null) {
+                                Log.d("MigrationManager", "Transaction mapping: localId=" + transaction.getId() + 
+                                    ", serverId=" + serverId);
+                                
+                                if (serverId != null && serverId > 0) {
                                     transaction.setServerId(serverId);
                                     transactionDao.update(transaction);
                                     migratedTransactionsCount++;
-                                    hasUpdates.set(true);
+                                    Log.d("MigrationManager", "Transaction migrated: localId=" + transaction.getId() + 
+                                        ", serverId=" + serverId);
+                                } else {
+                                    Log.e("MigrationManager", "Failed to get server ID for transaction: localId=" + 
+                                        transaction.getId());
                                 }
                             }
 
                             new Handler(Looper.getMainLooper()).post(() -> {
-                                if (hasUpdates.get()) {
+                                if (migratedAccountsCount > 0 || migratedTransactionsCount > 0) {
                                     String summary = String.format("تم ترحيل %d حساب و %d معاملة بنجاح", 
                                         migratedAccountsCount, migratedTransactionsCount);
                                     Toast.makeText(context, summary, Toast.LENGTH_LONG).show();
@@ -113,15 +133,16 @@ public class MigrationManager {
                             });
                         });
                     } else {
-                        new Handler(Looper.getMainLooper()).post(() -> {
-                            String errorMessage = "فشل في ترحيل البيانات";
-                            if (response.errorBody() != null) {
-                                try {
-                                    errorMessage += "\n\nالسبب: " + response.errorBody().string();
-                                } catch (Exception e) {
-                                    errorMessage += "\n\nالسبب: " + response.message();
-                                }
+                        String errorMessage = "فشل في ترحيل البيانات";
+                        if (response.errorBody() != null) {
+                            try {
+                                errorMessage += "\n\nالسبب: " + response.errorBody().string();
+                            } catch (Exception e) {
+                                errorMessage += "\n\nالسبب: " + response.message();
                             }
+                        }
+                        Log.e("MigrationManager", "Sync failed: " + errorMessage);
+                        new Handler(Looper.getMainLooper()).post(() -> {
                             new AlertDialog.Builder(context)
                                 .setTitle("خطأ في الترحيل")
                                 .setMessage(errorMessage)
@@ -133,6 +154,7 @@ public class MigrationManager {
 
                 @Override
                 public void onFailure(Call<SyncResponse> call, Throwable t) {
+                    Log.e("MigrationManager", "Network error: " + t.getMessage());
                     new Handler(Looper.getMainLooper()).post(() -> 
                         Toast.makeText(context, "فشل في الاتصال بالخادم: " + t.getMessage(), Toast.LENGTH_SHORT).show());
                 }
