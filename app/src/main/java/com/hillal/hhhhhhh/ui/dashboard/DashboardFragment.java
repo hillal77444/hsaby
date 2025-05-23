@@ -121,7 +121,10 @@ public class DashboardFragment extends Fragment {
             updateUserName();
             migrationManager = new MigrationManager(requireContext());
 
-            // إضافة مستمع النقر لزر الترحيل
+            // تشغيل الترحيل تلقائياً عند فتح الصفحة
+            migrationManager.migrateLocalData();
+
+            // إضافة مستمع النقر لزر الترحيل (نحتفظ به للترحيل اليدوي إذا احتجنا له)
             view.findViewById(R.id.migrate_button).setOnClickListener(v -> {
                 migrationManager.migrateLocalData();
             });
@@ -151,13 +154,13 @@ public class DashboardFragment extends Fragment {
     private void observeData() {
         dashboardViewModel.getTotalDebtors().observe(getViewLifecycleOwner(), total -> {
             if (total != null) {
-                binding.totalDebtors.setText(String.format("%.2f ريال يمني", total));
+                binding.totalDebtors.setText(String.format("%.2f يمني", total));
             }
         });
 
         dashboardViewModel.getTotalCreditors().observe(getViewLifecycleOwner(), total -> {
             if (total != null) {
-                binding.totalCreditors.setText(String.format("%.2f ريال يمني", total));
+                binding.totalCreditors.setText(String.format("%.2f يمني", total));
             }
         });
     }
