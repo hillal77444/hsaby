@@ -81,84 +81,96 @@ public class MigrationManager {
             apiService.syncData("Bearer " + token, request).enqueue(new Callback<SyncResponse>() {
                 @Override
                 public void onResponse(Call<SyncResponse> call, Response<SyncResponse> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        SyncResponse syncResponse = response.body();
-                        Log.d("MigrationManager", "Received response from server");
-                        
-                        executor.execute(() -> {
-                            // تحديث الحسابات
-                            for (Account account : accountsToMigrate) {
-                                Long serverId = syncResponse.getAccountServerId(account.getId());
-                                Log.d("MigrationManager", "Account mapping: localId=" + account.getId() + 
-                                    ", serverId=" + serverId);
-                                
-                                if (serverId != null && serverId > 0) {
-                                    account.setServerId(serverId);
-                                    accountDao.update(account);
-                                    migratedAccountsCount++;
-                                    Log.d("MigrationManager", "Account migrated: localId=" + account.getId() + 
-                                        ", serverId=" + serverId + ", total migrated: " + migratedAccountsCount);
-                                } else {
-                                    Log.e("MigrationManager", "Failed to get server ID for account: localId=" + 
-                                        account.getId());
-                                }
-                            }
+                    try {
+                        if (response.isSuccessful() && response.body() != null) {
+                            SyncResponse syncResponse = response.body();
+                            Log.d("MigrationManager", "Received response from server: " + response.body());
+                            
+                            executor.execute(() -> {
+                                try {
+                                    // تحديث الحسابات
+                                    for (Account account : accountsToMigrate) {
+                                        Long serverId = syncResponse.getAccountServerId(account.getId());
+                                        Log.d("MigrationManager", "Account mapping: localId=" + account.getId() + 
+                                            ", serverId=" + serverId);
+                                        
+                                        if (serverId != null && serverId > 0) {
+                                            account.setServerId(serverId);
+                                            accountDao.update(account);
+                                            migratedAccountsCount++;
+                                            Log.d("MigrationManager", "Account migrated: localId=" + account.getId() + 
+                                                ", serverId=" + serverId + ", total migrated: " + migratedAccountsCount);
+                                        } else {
+                                            Log.e("MigrationManager", "Failed to get server ID for account: localId=" + 
+                                                account.getId());
+                                        }
+                                    }
 
-                            // تحديث المعاملات
-                            for (Transaction transaction : transactionsToMigrate) {
-                                Long serverId = syncResponse.getTransactionServerId(transaction.getId());
-                                Log.d("MigrationManager", "Transaction mapping: localId=" + transaction.getId() + 
-                                    ", serverId=" + serverId);
-                                
-                                if (serverId != null && serverId > 0) {
-                                    transaction.setServerId(serverId);
-                                    transactionDao.update(transaction);
-                                    migratedTransactionsCount++;
-                                    Log.d("MigrationManager", "Transaction migrated: localId=" + transaction.getId() + 
-                                        ", serverId=" + serverId + ", total migrated: " + migratedTransactionsCount);
-                                } else {
-                                    Log.e("MigrationManager", "Failed to get server ID for transaction: localId=" + 
-                                        transaction.getId());
-                                }
-                            }
+                                    // تحديث المعاملات
+                                    for (Transaction transaction : transactionsToMigrate) {
+                                        Long serverId = syncResponse.getTransactionServerId(transaction.getId());
+                                        Log.d("MigrationManager", "Transaction mapping: localId=" + transaction.getId() + 
+                                            ", serverId=" + serverId);
+                                        
+                                        if (serverId != null && serverId > 0) {
+                                            transaction.setServerId(serverId);
+                                            transactionDao.update(transaction);
+                                            migratedTransactionsCount++;
+                                            Log.d("MigrationManager", "Transaction migrated: localId=" + transaction.getId() + 
+                                                ", serverId=" + serverId + ", total migrated: " + migratedTransactionsCount);
+                                        } else {
+                                            Log.e("MigrationManager", "Failed to get server ID for transaction: localId=" + 
+                                                transaction.getId());
+                                        }
+                                    }
 
-                            Log.d("MigrationManager", "Final counts - Accounts: " + migratedAccountsCount + 
-                                ", Transactions: " + migratedTransactionsCount);
+                                    Log.d("MigrationManager", "Final counts - Accounts: " + migratedAccountsCount + 
+                                        ", Transactions: " + migratedTransactionsCount);
 
-                            new Handler(Looper.getMainLooper()).post(() -> {
-                                if (migratedAccountsCount > 0 || migratedTransactionsCount > 0) {
-                                    String summary = String.format("تم ترحيل %d حساب و %d معاملة بنجاح", 
-                                        migratedAccountsCount, migratedTransactionsCount);
-                                    Toast.makeText(context, summary, Toast.LENGTH_LONG).show();
-                                } else {
-                                    Toast.makeText(context, "لم يتم تحديث أي بيانات", Toast.LENGTH_LONG).show();
+                                    new Handler(Looper.getMainLooper()).post(() -> {
+                                        if (migratedAccountsCount > 0 || migratedTransactionsCount > 0) {
+                                            String summary = String.format("تم ترحيل %d حساب و %d معاملة بنجاح", 
+                                                migratedAccountsCount, migratedTransactionsCount);
+                                            Toast.makeText(context, summary, Toast.LENGTH_LONG).show();
+                                        } else {
+                                            Toast.makeText(context, "لم يتم تحديث أي بيانات", Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                } catch (Exception e) {
+                                    Log.e("MigrationManager", "Error processing server response: " + e.getMessage(), e);
+                                    new Handler(Looper.getMainLooper()).post(() -> 
+                                        Toast.makeText(context, "خطأ في معالجة البيانات: " + e.getMessage(), Toast.LENGTH_LONG).show());
                                 }
                             });
-                        });
-                    } else {
-                        StringBuilder errorBuilder = new StringBuilder("فشل في ترحيل البيانات");
-                        if (response.errorBody() != null) {
+                        } else {
+                            String errorBody = "";
                             try {
-                                errorBuilder.append("\n\nالسبب: ").append(response.errorBody().string());
+                                if (response.errorBody() != null) {
+                                    errorBody = response.errorBody().string();
+                                }
                             } catch (Exception e) {
-                                errorBuilder.append("\n\nالسبب: ").append(response.message());
+                                errorBody = "Error reading error body: " + e.getMessage();
                             }
+                            
+                            Log.e("MigrationManager", "Server error: " + response.code() + " - " + errorBody);
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                new AlertDialog.Builder(context)
+                                    .setTitle("خطأ في الترحيل")
+                                    .setMessage("فشل في الاتصال بالخادم: " + response.code() + "\n" + errorBody)
+                                    .setPositiveButton("حسناً", null)
+                                    .show();
+                            });
                         }
-                        final String errorMessage = errorBuilder.toString();
-                        Log.e("MigrationManager", "Sync failed: " + errorMessage);
-                        new Handler(Looper.getMainLooper()).post(() -> {
-                            new AlertDialog.Builder(context)
-                                .setTitle("خطأ في الترحيل")
-                                .setMessage(errorMessage)
-                                .setPositiveButton("حسناً", null)
-                                .show();
-                        });
+                    } catch (Exception e) {
+                        Log.e("MigrationManager", "Unexpected error: " + e.getMessage(), e);
+                        new Handler(Looper.getMainLooper()).post(() -> 
+                            Toast.makeText(context, "خطأ غير متوقع: " + e.getMessage(), Toast.LENGTH_LONG).show());
                     }
                 }
 
                 @Override
                 public void onFailure(Call<SyncResponse> call, Throwable t) {
-                    Log.e("MigrationManager", "Network error: " + t.getMessage());
+                    Log.e("MigrationManager", "Network error: " + t.getMessage(), t);
                     new Handler(Looper.getMainLooper()).post(() -> 
                         Toast.makeText(context, "فشل في الاتصال بالخادم: " + t.getMessage(), Toast.LENGTH_SHORT).show());
                 }
