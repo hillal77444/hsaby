@@ -93,6 +93,9 @@ public interface ApiService {
             // استبعاد last_sync_time من المعاملات
             for (Transaction transaction : transactions) {
                 transaction.setLastSyncTime(0);
+                // تعيين الحقول الأخرى المطلوبة
+                transaction.setCreatedAt(System.currentTimeMillis());
+                transaction.setUpdatedAt(System.currentTimeMillis());
             }
             return transactions;
         }
