@@ -170,7 +170,8 @@ public class TransactionsFragment extends Fragment {
                     transactionRepository.getBalanceUntilDate(transaction.getAccountId(), transaction.getTransactionDate(), transaction.getCurrency())
                         .observe(getViewLifecycleOwner(), balance -> {
                             if (balance != null) {
-                                String message = buildWhatsAppMessage(account.getName(), transaction, balance);
+                                String type = transaction.isCredit() ? "credit" : "debit"; // أو حسب منطقك لمعرفة النوع
+                                String message = buildWhatsAppMessage(account.getName(), transaction, balance, type);
                                 sendWhatsAppMessage(requireContext(), phoneNumber, message);
                             }
                         });
@@ -457,24 +458,44 @@ public class TransactionsFragment extends Fragment {
         binding = null;
     }
 
-    private String buildWhatsAppMessage(String accountName, Transaction transaction, double balance) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+    private String buildWhatsAppMessage(String accountName, Transaction transaction, double balance, String type) {
+        // تنسيق التاريخ بالإنجليزي
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
         String date = dateFormat.format(new Date(transaction.getTransactionDate()));
-        
-        return String.format(Locale.getDefault(),
+    
+        // تحديد الجملة حسب النوع
+        String typeMessage;
+        if ("credit".equalsIgnoreCase(type)) {
+            typeMessage = "قيدنا إلى حسابكم";
+        } else if ("debit".equalsIgnoreCase(type)) {
+            typeMessage = "قيد على حسابكم";
+        } else {
+            typeMessage = "تفاصيل القيد المحاسبي";
+        }
+    
+        // تحديد جملة الرصيد حسب القيمة
+        String balanceMessage;
+        if (balance >= 0) {
+            balanceMessage = String.format(Locale.ENGLISH, "الرصيد لكم حتى تاريخ: %.2f %s", balance, transaction.getCurrency());
+        } else {
+            balanceMessage = String.format(Locale.ENGLISH, "الرصيد عليكم حتى تاريخ: %.2f %s", Math.abs(balance), transaction.getCurrency());
+        }
+    
+        // بناء الرسالة مع جميع الأرقام بالإنجليزي
+        return String.format(Locale.ENGLISH,
             "مرحباً %s\n\n" +
-            "تفاصيل القيد المحاسبي:\n" +
+            "%s:\n" +
             "التاريخ: %s\n" +
             "المبلغ: %.2f %s\n" +
             "البيان: %s\n" +
-            "الرصيد حتى التاريخ: %.2f %s",
+            "%s",
             accountName,
+            typeMessage,
             date,
             transaction.getAmount(),
             transaction.getCurrency(),
             transaction.getDescription(),
-            balance,
-            transaction.getCurrency()
+            balanceMessage
         );
     }
 
