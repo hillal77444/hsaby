@@ -36,6 +36,7 @@ import com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePick
 import com.hillal.hhhhhhh.data.repository.TransactionRepository;
 import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.App;
+import com.hillal.hhhhhhh.ui.common.AccountPickerDialog;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -56,8 +57,9 @@ public class AccountStatementActivity extends AppCompatActivity {
     private WebView webView;
     private Calendar calendar;
     private SimpleDateFormat dateFormat;
-    // قائمة الحسابات للاستخدام الداخلي
     private List<Account> allAccounts = new ArrayList<>();
+    private List<Transaction> allTransactions = new ArrayList<>();
+    private Map<Long, Map<String, Double>> accountBalancesMap = new HashMap<>();
     private TransactionRepository transactionRepository;
 
     @Override
@@ -100,6 +102,10 @@ public class AccountStatementActivity extends AppCompatActivity {
 
         btnShowReport.setOnClickListener(v -> showReport());
         btnPrint.setOnClickListener(v -> printReport());
+
+        // إعداد مستمع النقر على حقل اختيار الحساب
+        accountDropdown.setFocusable(false);
+        accountDropdown.setOnClickListener(v -> showAccountPicker());
     }
 
     private void setupDatePickers() {
@@ -197,37 +203,39 @@ public class AccountStatementActivity extends AppCompatActivity {
         viewModel.getAllAccounts().observe(this, accounts -> {
             if (accounts == null) return;
             allAccounts = accounts;
-            List<String> accountNames = new ArrayList<>();
-            for (Account acc : accounts) {
-                accountNames.add(acc.getName());
-            }
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                accountNames
-            );
-            accountDropdown.setAdapter(adapter);
-            
-            // تفعيل البحث الفوري
-            accountDropdown.setOnItemClickListener((parent, view, position, id) -> {
-                String selectedAccountName = (String) parent.getItemAtPosition(position);
-                // يمكنك إضافة أي إجراء إضافي هنا عند اختيار الحساب
-            });
-            
-            // تفعيل البحث أثناء الكتابة
-            accountDropdown.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    adapter.getFilter().filter(s);
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {}
-            });
         });
+
+        // مراقبة المعاملات
+        viewModel.getTransactions().observe(this, transactions -> {
+            if (transactions != null) {
+                allTransactions = transactions;
+            }
+        });
+
+        // مراقبة أرصدة الحسابات
+        viewModel.getAccountBalancesMap().observe(this, balancesMap -> {
+            if (balancesMap != null) {
+                accountBalancesMap = balancesMap;
+            }
+        });
+    }
+
+    private void showAccountPicker() {
+        if (allAccounts == null || allAccounts.isEmpty()) {
+            Toast.makeText(this, "جاري تحميل الحسابات...", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        AccountPickerDialog dialog = new AccountPickerDialog(
+            this,
+            allAccounts,
+            allTransactions,
+            accountBalancesMap,
+            account -> {
+                accountDropdown.setText(account.getName());
+            }
+        );
+        dialog.show();
     }
 
     private void setupWebView() {
