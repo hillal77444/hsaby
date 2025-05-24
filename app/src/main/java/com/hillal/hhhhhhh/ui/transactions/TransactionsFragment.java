@@ -94,7 +94,7 @@ public class TransactionsFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         
         // إنشاء المحول مع تمرير السياق
-        adapter = new TransactionAdapter(new TransactionAdapter.TransactionDiffCallback(), requireContext());
+        adapter = new TransactionAdapter(new TransactionAdapter.TransactionDiffCallback(), requireContext(), getViewLifecycleOwner());
         recyclerView.setAdapter(adapter);
 
         setupAccountFilter();
