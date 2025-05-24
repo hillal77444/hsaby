@@ -40,6 +40,7 @@ import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.ui.transactions.TransactionViewModelFactory;
 import com.hillal.hhhhhhh.data.remote.RetrofitClient;
 import com.hillal.hhhhhhh.data.remote.ApiService;
+import com.hillal.hhhhhhh.ui.dialogs.AccountPickerDialog;
 
 public class TransactionsFragment extends Fragment {
     private FragmentTransactionsBinding binding;
@@ -53,7 +54,9 @@ public class TransactionsFragment extends Fragment {
     private String selectedAccount = null;
     private String selectedCurrency = null;
     private List<Transaction> allTransactions = new ArrayList<>();
-    private boolean isStartDate = true; // متغير لتتبع أي تاريخ يتم تعديله
+    private List<Account> allAccounts = new ArrayList<>();
+    private Map<Long, Map<String, Double>> accountBalancesMap = new HashMap<>();
+    private boolean isStartDate = true;
     private boolean isFirstLoad = true;
     private long lastSyncTime = 0;
     private Map<Long, Account> accountMap = new HashMap<>();
@@ -191,22 +194,41 @@ public class TransactionsFragment extends Fragment {
     }
 
     private void setupAccountFilter() {
+        // تحميل الحسابات
         accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
-            List<String> accountNames = new ArrayList<>();
-            for (Account account : accounts) {
-                accountNames.add(account.getName());
+            if (accounts != null) {
+                allAccounts = accounts;
+                // تحديث خريطة الحسابات
+                accountMap.clear();
+                for (Account account : accounts) {
+                    accountMap.put(account.getId(), account);
+                }
             }
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                requireContext(),
-                android.R.layout.simple_dropdown_item_1line,
-                accountNames
-            );
-            binding.accountFilterDropdown.setAdapter(adapter);
-            binding.accountFilterDropdown.setOnItemClickListener((parent, view, position, id) -> {
-                selectedAccount = accountNames.get(position);
-                applyAllFilters();
-            });
         });
+
+        // إعداد مستمع النقر على حقل اختيار الحساب
+        binding.accountFilterDropdown.setFocusable(false);
+        binding.accountFilterDropdown.setOnClickListener(v -> showAccountPicker());
+    }
+
+    private void showAccountPicker() {
+        if (allAccounts == null || allAccounts.isEmpty()) {
+            Toast.makeText(requireContext(), "جاري تحميل الحسابات...", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        AccountPickerDialog dialog = new AccountPickerDialog(
+            requireContext(),
+            allAccounts,
+            allTransactions,
+            accountBalancesMap,
+            account -> {
+                selectedAccount = account.getName();
+                binding.accountFilterDropdown.setText(account.getName());
+                applyAllFilters();
+            }
+        );
+        dialog.show();
     }
 
     private void setupCurrencyFilter() {
@@ -358,6 +380,7 @@ public class TransactionsFragment extends Fragment {
         // مراقبة الحسابات
         accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
             if (accounts != null) {
+                allAccounts = accounts;
                 // تحديث خريطة الحسابات
                 accountMap.clear();
                 for (Account account : accounts) {
@@ -383,6 +406,13 @@ public class TransactionsFragment extends Fragment {
             } else {
                 allTransactions = new ArrayList<>();
                 applyAllFilters();
+            }
+        });
+
+        // مراقبة أرصدة الحسابات
+        viewModel.getAccountBalancesMap().observe(getViewLifecycleOwner(), balancesMap -> {
+            if (balancesMap != null) {
+                accountBalancesMap = balancesMap;
             }
         });
     }
