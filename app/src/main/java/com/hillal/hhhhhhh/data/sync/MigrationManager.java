@@ -193,7 +193,8 @@ public class MigrationManager {
         String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
                 .getString("token", null);
         if (token == null || token.isEmpty()) {
-            Toast.makeText(context, "يرجى تسجيل الدخول أولاً", Toast.LENGTH_SHORT).show();
+            new Handler(Looper.getMainLooper()).post(() -> 
+                Toast.makeText(context, "يرجى تسجيل الدخول أولاً", Toast.LENGTH_SHORT).show());
             return null;
         }
         return token;
