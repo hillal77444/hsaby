@@ -37,6 +37,7 @@ import com.hillal.hhhhhhh.data.repository.TransactionRepository;
 import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.App;
 import com.hillal.hhhhhhh.ui.common.AccountPickerDialog;
+import com.hillal.hhhhhhh.ui.transactions.TransactionsViewModel;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -51,6 +52,7 @@ import java.util.Collections;
 
 public class AccountStatementActivity extends AppCompatActivity {
     private AccountStatementViewModel viewModel;
+    private TransactionsViewModel transactionsViewModel;
     private AutoCompleteTextView accountDropdown;
     private TextInputEditText startDateInput, endDateInput;
     private MaterialButton btnShowReport, btnPrint;
@@ -77,8 +79,9 @@ public class AccountStatementActivity extends AppCompatActivity {
         calendar = Calendar.getInstance();
         dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
 
-        // تهيئة ViewModel
+        // تهيئة ViewModels
         viewModel = new ViewModelProvider(this).get(AccountStatementViewModel.class);
+        transactionsViewModel = new ViewModelProvider(this).get(TransactionsViewModel.class);
 
         // تهيئة واجهة المستخدم
         initializeViews();
@@ -200,20 +203,21 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private void loadAccounts() {
+        // تحميل الحسابات
         viewModel.getAllAccounts().observe(this, accounts -> {
             if (accounts == null) return;
             allAccounts = accounts;
         });
 
-        // مراقبة المعاملات
-        viewModel.getTransactions().observe(this, transactions -> {
+        // تحميل المعاملات
+        transactionsViewModel.getTransactions().observe(this, transactions -> {
             if (transactions != null) {
                 allTransactions = transactions;
             }
         });
 
-        // مراقبة أرصدة الحسابات
-        viewModel.getAccountBalancesMap().observe(this, balancesMap -> {
+        // تحميل أرصدة الحسابات
+        transactionsViewModel.getAccountBalancesMap().observe(this, balancesMap -> {
             if (balancesMap != null) {
                 accountBalancesMap = balancesMap;
             }
