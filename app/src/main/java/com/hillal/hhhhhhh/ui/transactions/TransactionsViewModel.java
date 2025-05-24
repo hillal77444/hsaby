@@ -17,6 +17,8 @@ import java.util.Map;
 public class TransactionsViewModel extends AndroidViewModel {
     private final TransactionRepository repository;
     private final MutableLiveData<List<Transaction>> transactions = new MutableLiveData<>();
+    private long startDate = 0;
+    private long endDate = 0;
 
     public TransactionsViewModel(Application application) {
         super(application);
@@ -47,6 +49,8 @@ public class TransactionsViewModel extends AndroidViewModel {
     }
 
     public void loadTransactionsByDateRange(long startDate, long endDate) {
+        this.startDate = startDate;
+        this.endDate = endDate;
         repository.getTransactionsByDateRange(startDate, endDate).observeForever(transactions::setValue);
     }
 
@@ -66,6 +70,7 @@ public class TransactionsViewModel extends AndroidViewModel {
 
     public void deleteTransaction(Transaction transaction) {
         repository.delete(transaction);
+        loadTransactionsByDateRange(startDate, endDate);
     }
 
     public void updateTransaction(Transaction transaction) {
@@ -74,6 +79,7 @@ public class TransactionsViewModel extends AndroidViewModel {
 
     public void insertTransaction(Transaction transaction) {
         repository.insert(transaction);
+        loadTransactionsByDateRange(startDate, endDate);
     }
 
     public LiveData<Transaction> getTransactionById(long id) {
