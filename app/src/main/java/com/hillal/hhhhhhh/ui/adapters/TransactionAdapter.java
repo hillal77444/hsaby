@@ -199,22 +199,6 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             }
         }
 
-        private String buildWhatsAppMessage(String accountName, Transaction transaction, double balanceAfter) {
-            // جميع الأرقام بالإنجليزي
-            String amount = String.format(Locale.US, "%.2f %s", transaction.getAmount(), transaction.getCurrency());
-            String type = transaction.getType(); // استخدام نوع القيد مباشرة
-            String actionText = type.equals("عليه") ? "على حسابكم" : "إلى حسابكم";
-            String balanceText = balanceAfter < 0 ? "عليكم: " : "لكم: ";
-            String balanceAmount = String.format(Locale.US, "%.2f %s", Math.abs(balanceAfter), transaction.getCurrency());
-            String description = transaction.getDescription();
-
-            return "السيد/ " + accountName + "\n"
-                 + "نود اشعاركم أنه تم قيد مبلغ: \n"
-                 + amount + " " + actionText + "\n"
-                 + "البيان/ " + description + "\n"
-                 + "رصيدكم/ " + balanceText + balanceAmount;
-        }
-
         private void sendWhatsAppMessage(Context context, String phoneNumber, String message) {
             if (phoneNumber == null || phoneNumber.isEmpty()) {
                 Toast.makeText(context, "رقم الهاتف غير متوفر لهذا الحساب", Toast.LENGTH_SHORT).show();
