@@ -110,21 +110,29 @@ public class TransactionsFragment extends Fragment {
                         Toast.makeText(requireContext(), "يرجى الاتصال بالإنترنت لحذف القيد", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    
+        
+                    // عرض مؤشر تحميل
+                    ProgressDialog progressDialog = new ProgressDialog(requireContext());
+                    progressDialog.setMessage("جاري حذف القيد...");
+                    progressDialog.setCancelable(false);
+                    progressDialog.show();
+        
                     // الحصول على token المستخدم
                     String token = requireContext().getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
                             .getString("token", null);
-                    
+        
                     if (token == null) {
+                        progressDialog.dismiss();
                         Toast.makeText(requireContext(), "يرجى تسجيل الدخول أولاً", Toast.LENGTH_SHORT).show();
                         return;
                     }
-
+        
                     // إرسال طلب الحذف إلى السيرفر
                     RetrofitClient.getApiService().deleteTransaction("Bearer " + token, transaction.getServerId())
                         .enqueue(new retrofit2.Callback<Void>() {
                             @Override
                             public void onResponse(retrofit2.Call<Void> call, retrofit2.Response<Void> response) {
+                                progressDialog.dismiss();
                                 if (response.isSuccessful()) {
                                     // إذا نجح الحذف من السيرفر، نقوم بحذفه من قاعدة البيانات المحلية
                                     transactionViewModel.deleteTransaction(transaction);
@@ -137,9 +145,10 @@ public class TransactionsFragment extends Fragment {
                                     });
                                 }
                             }
-
+        
                             @Override
                             public void onFailure(retrofit2.Call<Void> call, Throwable t) {
+                                progressDialog.dismiss();
                                 requireActivity().runOnUiThread(() -> {
                                     Toast.makeText(requireContext(), "خطأ في الاتصال بالسيرفر", Toast.LENGTH_SHORT).show();
                                 });
