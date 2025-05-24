@@ -229,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
                     navController.navigate(R.id.navigation_dashboard);
                     return true;
                 } else if (itemId == R.id.nav_add_account) {
-                    navController.navigate(R.id.addAccountFragment);
+                    navController.navigate(R.id.navigation_accounts);
                     return true;
                 } else if (itemId == R.id.nav_transactions) {
                     navController.navigate(R.id.transactionsFragment);
