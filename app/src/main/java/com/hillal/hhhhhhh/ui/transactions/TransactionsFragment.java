@@ -170,7 +170,7 @@ public class TransactionsFragment extends Fragment {
                     transactionRepository.getBalanceUntilDate(transaction.getAccountId(), transaction.getTransactionDate(), transaction.getCurrency())
                         .observe(getViewLifecycleOwner(), balance -> {
                             if (balance != null) {
-                                String type = transaction.isCredit() ? "credit" : "debit"; // أو حسب منطقك لمعرفة النوع
+                                String type = transaction.getType();
                                 String message = buildWhatsAppMessage(account.getName(), transaction, balance, type);
                                 sendWhatsAppMessage(requireContext(), phoneNumber, message);
                             }
