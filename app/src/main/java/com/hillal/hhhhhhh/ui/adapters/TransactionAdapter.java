@@ -34,10 +34,12 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
     private OnWhatsAppClickListener onWhatsAppClickListener;
     private Map<Long, Account> accountMap;
     private final TransactionRepository transactionRepository;
+    private final LifecycleOwner lifecycleOwner;
 
-    public TransactionAdapter(@NonNull DiffUtil.ItemCallback<Transaction> diffCallback, Context context) {
+    public TransactionAdapter(@NonNull DiffUtil.ItemCallback<Transaction> diffCallback, Context context, LifecycleOwner lifecycleOwner) {
         super(diffCallback);
         this.transactionRepository = new TransactionRepository(((App) context.getApplicationContext()).getDatabase());
+        this.lifecycleOwner = lifecycleOwner;
     }
 
     public interface OnDeleteClickListener {
@@ -156,11 +158,19 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             final String phoneNumber;
             if (accountMap != null && accountMap.containsKey(transaction.getAccountId())) {
                 Account account = accountMap.get(transaction.getAccountId());
-                accountName = account.getName();
-                phoneNumber = account.getPhoneNumber();
+                accountName = account != null && account.getName() != null ? account.getName() : "حساب غير معروف";
+                phoneNumber = account != null ? account.getPhoneNumber() : "";
             } else {
-                accountName = "";
+                accountName = "جاري التحميل...";
                 phoneNumber = "";
+                // محاولة تحميل بيانات الحساب إذا لم تكن موجودة
+                if (transactionRepository != null) {
+                    transactionRepository.getAccountById(transaction.getAccountId()).observe(lifecycleOwner, account -> {
+                        if (account != null) {
+                            binding.accountNameTextView.setText(account.getName());
+                        }
+                    });
+                }
             }
             binding.accountNameTextView.setText(accountName);
 
