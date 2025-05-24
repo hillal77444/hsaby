@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,6 +18,7 @@ import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.databinding.ItemTransactionBinding;
 import com.hillal.hhhhhhh.data.repository.TransactionRepository;
+import com.hillal.hhhhhhh.data.viewmodel.AccountViewModel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -35,11 +38,13 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
     private Map<Long, Account> accountMap;
     private final TransactionRepository transactionRepository;
     private final LifecycleOwner lifecycleOwner;
+    private final AccountViewModel accountViewModel;
 
     public TransactionAdapter(@NonNull DiffUtil.ItemCallback<Transaction> diffCallback, Context context, LifecycleOwner lifecycleOwner) {
         super(diffCallback);
         this.transactionRepository = new TransactionRepository(((App) context.getApplicationContext()).getDatabase());
         this.lifecycleOwner = lifecycleOwner;
+        this.accountViewModel = new ViewModelProvider((ViewModelStoreOwner) context).get(AccountViewModel.class);
     }
 
     public interface OnDeleteClickListener {
@@ -137,12 +142,14 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
         private final ItemTransactionBinding binding;
         private final SimpleDateFormat dateFormat;
         private final TransactionRepository transactionRepository;
+        private final AccountViewModel accountViewModel;
 
         TransactionViewHolder(ItemTransactionBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
             this.dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
             this.transactionRepository = new TransactionRepository(((App) binding.getRoot().getContext().getApplicationContext()).getDatabase());
+            this.accountViewModel = new ViewModelProvider((ViewModelStoreOwner) binding.getRoot().getContext()).get(AccountViewModel.class);
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
@@ -164,8 +171,8 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                 accountName = "جاري التحميل...";
                 phoneNumber = "";
                 // محاولة تحميل بيانات الحساب إذا لم تكن موجودة
-                if (transactionRepository != null) {
-                    transactionRepository.getAccountById(transaction.getAccountId()).observe(lifecycleOwner, account -> {
+                if (accountViewModel != null) {
+                    accountViewModel.getAccountById(transaction.getAccountId()).observe(lifecycleOwner, account -> {
                         if (account != null) {
                             binding.accountNameTextView.setText(account.getName());
                         }
