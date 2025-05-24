@@ -352,18 +352,38 @@ public class TransactionsFragment extends Fragment {
     }
 
     private void observeAccountsAndTransactions() {
+        // عرض مؤشر التحميل
+        binding.progressBar.setVisibility(View.VISIBLE);
+        
+        // مراقبة الحسابات
         accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
-            accountMap.clear();
-            for (Account account : accounts) {
-                accountMap.put(account.getId(), account);
+            if (accounts != null) {
+                // تحديث خريطة الحسابات
+                accountMap.clear();
+                for (Account account : accounts) {
+                    accountMap.put(account.getId(), account);
+                }
+                
+                // تحديث المحول بالحسابات
+                adapter.setAccountMap(accountMap);
+                
+                // تحميل المعاملات مع التصفية الافتراضية
+                viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
             }
-            adapter.setAccountMap(accountMap);
-            // تحميل المعاملات مع التصفية الافتراضية
-            viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
-            viewModel.getTransactions().observe(getViewLifecycleOwner(), transactions -> {
-                allTransactions = transactions != null ? transactions : new ArrayList<>();
+        });
+    
+        // مراقبة المعاملات
+        viewModel.getTransactions().observe(getViewLifecycleOwner(), transactions -> {
+            // إخفاء مؤشر التحميل
+            binding.progressBar.setVisibility(View.GONE);
+            
+            if (transactions != null) {
+                allTransactions = transactions;
                 applyAllFilters();
-            });
+            } else {
+                allTransactions = new ArrayList<>();
+                applyAllFilters();
+            }
         });
     }
 
