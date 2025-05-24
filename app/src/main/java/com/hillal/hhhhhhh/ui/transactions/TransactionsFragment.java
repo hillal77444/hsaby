@@ -40,7 +40,7 @@ import com.hillal.hhhhhhh.data.repository.AccountRepository;
 import com.hillal.hhhhhhh.ui.transactions.TransactionViewModelFactory;
 import com.hillal.hhhhhhh.data.remote.RetrofitClient;
 import com.hillal.hhhhhhh.data.remote.ApiService;
-import com.hillal.hhhhhhh.ui.dialogs.AccountPickerDialog;
+import com.hillal.hhhhhhh.ui.common.AccountPickerDialog;
 
 public class TransactionsFragment extends Fragment {
     private FragmentTransactionsBinding binding;
