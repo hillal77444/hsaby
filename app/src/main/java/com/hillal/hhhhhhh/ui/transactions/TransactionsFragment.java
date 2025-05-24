@@ -504,7 +504,8 @@ public class TransactionsFragment extends Fragment {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             String url = "https://api.whatsapp.com/send?phone=" + phoneNumber + "&text=" + Uri.encode(message);
             intent.setData(Uri.parse(url));
-            startActivity(intent);
+            Intent chooser = Intent.createChooser(intent, "اختر تطبيق واتساب");
+            startActivity(chooser);
         } catch (Exception e) {
             Toast.makeText(context, "حدث خطأ أثناء فتح واتساب", Toast.LENGTH_SHORT).show();
         }
