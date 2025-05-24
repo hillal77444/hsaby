@@ -104,7 +104,12 @@ public class TransactionsFragment extends Fragment {
         
         observeAccountsAndTransactions();
 
-        // إعداد المستمعين للأزرار
+        // إعداد المستمعين للأزرار بشكل منفصل
+        setupAdapterListeners();
+    }
+
+    private void setupAdapterListeners() {
+        // مستمع الحذف
         adapter.setOnDeleteClickListener(transaction -> {
             new AlertDialog.Builder(requireContext())
                 .setTitle("تأكيد الحذف")
@@ -163,13 +168,14 @@ public class TransactionsFragment extends Fragment {
                 .show();
         });
 
+        // مستمع التعديل
         adapter.setOnEditClickListener(transaction -> {
-            // التنقل إلى صفحة تعديل القيد
             Bundle args = new Bundle();
             args.putLong("transactionId", transaction.getId());
-            Navigation.findNavController(view).navigate(R.id.action_transactions_to_editTransaction, args);
+            Navigation.findNavController(requireView()).navigate(R.id.action_transactions_to_editTransaction, args);
         });
 
+        // مستمع واتساب
         adapter.setOnWhatsAppClickListener((transaction, phoneNumber) -> {
             if (phoneNumber == null || phoneNumber.isEmpty()) {
                 Toast.makeText(requireContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show();
