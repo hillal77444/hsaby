@@ -127,14 +127,6 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                     onWhatsAppClickListener.onWhatsAppClick(transaction, phoneNumber);
                 }
             });
-
-            // إضافة مستمع النقر لزر الإرسال
-            holder.binding.btnSendWhatsApp.setOnClickListener(v -> {
-                if (onWhatsAppClickListener != null && accountMap != null && accountMap.containsKey(transaction.getAccountId())) {
-                    String phoneNumber = accountMap.get(transaction.getAccountId()).getPhoneNumber();
-                    onWhatsAppClickListener.onWhatsAppClick(transaction, phoneNumber);
-                }
-            });
         }
     }
 
@@ -203,36 +195,6 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                 binding.transactionAmount.setText("");
                 binding.transactionAmount.setTextColor(itemView.getContext().getResources().getColor(R.color.text_primary));
                 binding.getRoot().setBackgroundColor(itemView.getContext().getResources().getColor(R.color.white));
-            }
-        }
-
-        private void sendWhatsAppMessage(Context context, String phoneNumber, String message) {
-            if (phoneNumber == null || phoneNumber.isEmpty()) {
-                Toast.makeText(context, "رقم الهاتف غير متوفر لهذا الحساب", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            // إضافة مفتاح الدولة تلقائياً إذا لم يكن موجوداً
-            String normalizedPhone = phoneNumber.trim();
-            if (normalizedPhone.startsWith("0")) {
-                normalizedPhone = "967" + normalizedPhone.substring(1);
-            } else if (!normalizedPhone.startsWith("967") && !normalizedPhone.startsWith("00")) {
-                normalizedPhone = "967" + normalizedPhone;
-            }
-            String url = "https://wa.me/" + normalizedPhone + "?text=" + Uri.encode(message);
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse(url));
-            intent.setPackage("com.whatsapp");
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            try {
-                context.startActivity(intent);
-            } catch (Exception e) {
-                // إذا لم يكن واتساب العادي مثبت، جرب واتساب الأعمال
-                intent.setPackage("com.whatsapp.w4b");
-                try {
-                    context.startActivity(intent);
-                } catch (Exception ex) {
-                    Toast.makeText(context, "واتساب غير مثبت على الجهاز", Toast.LENGTH_SHORT).show();
-                }
             }
         }
     }
