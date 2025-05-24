@@ -121,9 +121,7 @@ public class MainActivity extends AppCompatActivity {
             NavigationUI.setupWithNavController(binding.navView, navController);
             Log.d(TAG, "Navigation setup completed successfully");
 
-            BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-            bottomNav.setOnNavigationItemSelectedListener(navListener);
-
+            binding.bottomNavigation.setOnNavigationItemSelectedListener(navListener);
             // Set default fragment
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
@@ -222,31 +220,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
-            new BottomNavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                    Fragment selectedFragment = null;
-
-                    int itemId = item.getItemId();
-                    if (itemId == R.id.nav_dashboard) {
-                        selectedFragment = new DashboardFragment();
-                    } else if (itemId == R.id.nav_add_account) {
-                        selectedFragment = new AddAccountFragment();
-                    } else if (itemId == R.id.nav_transactions) {
-                        selectedFragment = new TransactionsFragment();
-                    } else if (itemId == R.id.nav_reports) {
-                        selectedFragment = new AccountStatementFragment();
-                    }
-
-                    if (selectedFragment != null) {
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fragment_container, selectedFragment)
-                                .commit();
-                        return true;
-                    }
-                    return false;
+        new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
+                
+                if (itemId == R.id.nav_dashboard) {
+                    Navigation.findNavController(requireView()).navigate(R.id.navigation_dashboard);
+                    return true;
+                } else if (itemId == R.id.nav_add_account) {
+                    Navigation.findNavController(requireView()).navigate(R.id.addAccountFragment);
+                    return true;
+                } else if (itemId == R.id.nav_transactions) {
+                    Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment);
+                    return true;
+                } else if (itemId == R.id.nav_reports) {
+                    Navigation.findNavController(requireView()).navigate(R.id.navigation_reports);
+                    return true;
                 }
-            };
+                return false;
+            }
+        };
 
     // دالة للتحكم في ظهور/إخفاء شريط التنقل السفلي
     public void setBottomNavigationVisibility(boolean isVisible) {
