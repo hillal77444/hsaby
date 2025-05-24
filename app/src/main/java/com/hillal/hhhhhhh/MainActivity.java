@@ -226,16 +226,16 @@ public class MainActivity extends AppCompatActivity {
                 int itemId = item.getItemId();
                 
                 if (itemId == R.id.nav_dashboard) {
-                    Navigation.findNavController(requireView()).navigate(R.id.navigation_dashboard);
+                    navController.navigate(R.id.navigation_dashboard);
                     return true;
                 } else if (itemId == R.id.nav_add_account) {
-                    Navigation.findNavController(requireView()).navigate(R.id.addAccountFragment);
+                    navController.navigate(R.id.addAccountFragment);
                     return true;
                 } else if (itemId == R.id.nav_transactions) {
-                    Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment);
+                    navController.navigate(R.id.transactionsFragment);
                     return true;
                 } else if (itemId == R.id.nav_reports) {
-                    Navigation.findNavController(requireView()).navigate(R.id.navigation_reports);
+                    navController.navigate(R.id.navigation_reports);
                     return true;
                 }
                 return false;
