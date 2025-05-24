@@ -183,18 +183,25 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             double amount = transaction.getAmount();
             String type = transaction.getType() != null ? transaction.getType().trim() : "";
 
+            // تحديد نوع المعاملة وتغيير لون البطاقة والمبلغ
             if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
+                // معاملة مدين
+                binding.getRoot().setActivated(true);
+                binding.getRoot().setSelected(false);
                 binding.transactionAmount.setText(String.format(Locale.US, "%.2f %s", amount, transaction.getCurrency()));
                 binding.transactionAmount.setTextColor(itemView.getContext().getResources().getColor(R.color.debit_color));
-                binding.getRoot().setBackgroundColor(itemView.getContext().getResources().getColor(R.color.red_100));
             } else if ((type.equals("له") || type.equalsIgnoreCase("credit")) && amount != 0) {
+                // معاملة دائن
+                binding.getRoot().setActivated(false);
+                binding.getRoot().setSelected(true);
                 binding.transactionAmount.setText(String.format(Locale.US, "%.2f %s", amount, transaction.getCurrency()));
                 binding.transactionAmount.setTextColor(itemView.getContext().getResources().getColor(R.color.credit_color));
-                binding.getRoot().setBackgroundColor(itemView.getContext().getResources().getColor(R.color.green_100));
             } else {
+                // حالة افتراضية
+                binding.getRoot().setActivated(false);
+                binding.getRoot().setSelected(false);
                 binding.transactionAmount.setText("");
                 binding.transactionAmount.setTextColor(itemView.getContext().getResources().getColor(R.color.text_primary));
-                binding.getRoot().setBackgroundColor(itemView.getContext().getResources().getColor(R.color.white));
             }
         }
     }
