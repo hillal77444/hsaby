@@ -5,6 +5,9 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -38,6 +41,7 @@ public class DashboardFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         Log.d(TAG, "DashboardFragment onCreate started");
 
         try {
@@ -83,27 +87,6 @@ public class DashboardFragment extends Fragment {
     private void setupUI() {
         // إعدادات أخرى
         setupOtherSettings();
-
-        // إضافة زر المزامنة الكاملة
-        binding.fullSyncButton.setOnClickListener(v -> {
-            showLoadingDialog("جاري المزامنة الكاملة...");
-            syncManager.performFullSync(new SyncManager.SyncCallback() {
-                @Override
-                public void onSuccess() {
-                    hideLoadingDialog();
-                    showSuccessDialog("تمت المزامنة الكاملة بنجاح");
-                    // تحديث البيانات في الواجهة
-                    loadAccounts();
-                    loadTransactions();
-                }
-
-                @Override
-                public void onError(String error) {
-                    hideLoadingDialog();
-                    showErrorDialog("فشلت المزامنة الكاملة: " + error);
-                }
-            });
-        });
     }
 
     private void setupOtherSettings() {
@@ -220,5 +203,34 @@ public class DashboardFragment extends Fragment {
             progressDialog = null;
         }
         binding = null;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_dashboard, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_full_sync) {
+            showLoadingDialog("جاري المزامنة الكاملة...");
+            syncManager.performFullSync(new SyncManager.SyncCallback() {
+                @Override
+                public void onSuccess() {
+                    hideLoadingDialog();
+                    showSuccessDialog("تمت المزامنة الكاملة بنجاح");
+                    loadAccounts();
+                    loadTransactions();
+                }
+                @Override
+                public void onError(String error) {
+                    hideLoadingDialog();
+                    showErrorDialog("فشلت المزامنة الكاملة: " + error);
+                }
+            });
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 } 
