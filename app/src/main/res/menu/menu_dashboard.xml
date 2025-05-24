@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_full_sync"
+        android:icon="@drawable/ic_sync"
+        android:title="مزامنة كاملة"
+        app:showAsAction="ifRoom"/>
+</menu>
