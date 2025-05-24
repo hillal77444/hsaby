@@ -126,21 +126,6 @@
                     android:contentDescription="إرسال عبر واتساب"
                     app:tint="@color/accent_green" />
 
-                <!-- زر إرسال -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSendWhatsApp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:text="إرسال"
-                    android:textSize="12sp"
-                    android:textColor="@color/white"
-                    android:backgroundTint="@color/success"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="0dp"
-                    app:cornerRadius="18dp" />
-
                 <!-- زر حذف -->
                 <ImageButton
                     android:id="@+id/deleteButton"
