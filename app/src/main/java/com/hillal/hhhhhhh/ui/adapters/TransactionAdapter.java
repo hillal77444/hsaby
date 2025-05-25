@@ -194,22 +194,17 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             }
             binding.transactionAmount.setText(amountStr + " " + transaction.getCurrency());
 
-            // تحديد نوع المعاملة وتغيير لون البطاقة والمبلغ
-            MaterialCardView cardView = (MaterialCardView) binding.getRoot();
-            cardView.setStateListAnimator(null); // تعطيل الـ state animator الافتراضي
-            
+            // تغيير خلفية الـ LinearLayout الداخلي ولون النص حسب نوع المعاملة
+            Context context = binding.getRoot().getContext();
             if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
-                cardView.setCardBackgroundColor(binding.getRoot().getContext().getResources().getColor(R.color.debit_background));
-                binding.transactionAmount.setTextColor(binding.getRoot().getContext().getResources().getColor(R.color.debit_color));
-                cardView.setRadius(16f);
+                binding.innerLayout.setBackgroundResource(R.drawable.rounded_inner_background_debit);
+                binding.transactionAmount.setTextColor(context.getResources().getColor(R.color.debit_color));
             } else if ((type.equals("له") || type.equalsIgnoreCase("credit")) && amount != 0) {
-                cardView.setCardBackgroundColor(binding.getRoot().getContext().getResources().getColor(R.color.credit_background));
-                binding.transactionAmount.setTextColor(binding.getRoot().getContext().getResources().getColor(R.color.credit_color));
-                cardView.setRadius(16f);
+                binding.innerLayout.setBackgroundResource(R.drawable.rounded_inner_background_credit);
+                binding.transactionAmount.setTextColor(context.getResources().getColor(R.color.credit_color));
             } else {
-                cardView.setCardBackgroundColor(binding.getRoot().getContext().getResources().getColor(R.color.surface));
-                binding.transactionAmount.setTextColor(binding.getRoot().getContext().getResources().getColor(R.color.text_primary));
-                cardView.setRadius(16f);
+                binding.innerLayout.setBackgroundResource(R.drawable.rounded_inner_background_default);
+                binding.transactionAmount.setTextColor(context.getResources().getColor(R.color.text_primary));
             }
         }
     }
