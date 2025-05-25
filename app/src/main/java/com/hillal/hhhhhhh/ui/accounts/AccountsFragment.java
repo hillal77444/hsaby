@@ -18,10 +18,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.Account;
+import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class AccountsFragment extends Fragment {
     private AccountViewModel accountViewModel;
@@ -76,14 +78,35 @@ public class AccountsFragment extends Fragment {
 
     private static class AccountsAdapter extends RecyclerView.Adapter<AccountsAdapter.ViewHolder> {
         private List<Account> accounts;
+        private Map<Long, List<Transaction>> accountTransactions;
 
         public AccountsAdapter(List<Account> accounts) {
             this.accounts = accounts;
         }
 
+        public void setAccountTransactions(Map<Long, List<Transaction>> accountTransactions) {
+            this.accountTransactions = accountTransactions;
+            notifyDataSetChanged();
+        }
+
         public void updateAccounts(List<Account> newAccounts) {
             this.accounts = newAccounts;
             notifyDataSetChanged();
+        }
+
+        private long calculateBalance(long accountId) {
+            List<Transaction> transactions = accountTransactions != null ? accountTransactions.get(accountId) : null;
+            if (transactions == null) return 0;
+            long totalCredit = 0;
+            long totalDebit = 0;
+            for (Transaction t : transactions) {
+                if (t.getType().equalsIgnoreCase("credit") || t.getType().equals("له")) {
+                    totalCredit += t.getAmount();
+                } else if (t.getType().equalsIgnoreCase("debit") || t.getType().equals("عليه")) {
+                    totalDebit += t.getAmount();
+                }
+            }
+            return totalCredit - totalDebit;
         }
 
         @NonNull
@@ -99,10 +122,19 @@ public class AccountsFragment extends Fragment {
             Account account = accounts.get(position);
             holder.accountName.setText(account.getName());
             holder.phone.setText(account.getPhoneNumber());
-            holder.balance.setText(String.format("%,.2f", account.getBalance()));
-            holder.balance.setTextColor(account.isDebtor() ? 
-                holder.itemView.getContext().getColor(R.color.red) : 
-                holder.itemView.getContext().getColor(R.color.green));
+            
+            // حساب الرصيد من جميع المعاملات
+            long balance = calculateBalance(account.getId());
+            String currency = account.getCurrency() != null ? account.getCurrency() : "يمني";
+            String balanceText;
+            if (balance < 0) {
+                balanceText = String.format("عليه %,d %s", Math.abs(balance), currency);
+                holder.balance.setTextColor(holder.itemView.getContext().getColor(R.color.red));
+            } else {
+                balanceText = String.format("له %,d %s", balance, currency);
+                holder.balance.setTextColor(holder.itemView.getContext().getColor(R.color.green));
+            }
+            holder.balance.setText(balanceText);
 
             holder.itemView.setOnClickListener(v -> {
                 Bundle args = new Bundle();
