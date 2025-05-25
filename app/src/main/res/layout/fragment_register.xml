@@ -9,6 +9,8 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
+        <!-- تم حذف حقل الاسم الرباعي للحفاظ على البساطة -->
+        <!--
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textInputLayoutFullName"
             style="@style/TextInputLayoutStyle"
@@ -26,6 +28,7 @@
                 android:inputType="textPersonName" />
 
         </com.google.android.material.textfield.TextInputLayout>
+        -->
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textInputLayoutDisplayName"
