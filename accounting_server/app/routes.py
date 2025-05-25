@@ -738,3 +738,25 @@ def get_server_time():
     except Exception as e:
         logger.error(f"Error getting server time: {str(e)}")
         return jsonify({'error': 'حدث خطأ أثناء الحصول على توقيت الخادم'}), 500 
+    
+@main.route('/api/update_username', methods=['POST'])
+@jwt_required()
+def update_username():
+    try:
+        data = request.get_json()
+        new_username = data.get('username')
+        if not new_username:
+            return jsonify({'error': 'يرجى إدخال اسم المستخدم الجديد'}), 400
+
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'المستخدم غير موجود'}), 404
+
+        # تحديث الاسم مباشرة بدون التحقق من التكرار
+        user.username = new_username
+        db.session.commit()
+        return jsonify({'message': 'تم تحديث اسم المستخدم بنجاح', 'username': user.username}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'حدث خطأ أثناء تحديث اسم المستخدم'}), 500
