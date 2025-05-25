@@ -15,6 +15,8 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.databinding.FragmentEditProfileBinding;
 import com.hillal.hhhhhhh.data.preferences.UserPreferences;
+import com.hillal.hhhhhhh.data.repository.AuthRepository;
+import com.hillal.hhhhhhh.data.model.User;
 
 public class EditProfileFragment extends Fragment {
     private FragmentEditProfileBinding binding;
@@ -52,13 +54,22 @@ public class EditProfileFragment extends Fragment {
             return;
         }
 
-        // حفظ الاسم الجديد
-        userPreferences.saveUserName(newName);
-        
-        Toast.makeText(requireContext(), "تم حفظ الاسم بنجاح", Toast.LENGTH_SHORT).show();
-        
-        // العودة إلى الشاشة السابقة
-        Navigation.findNavController(requireView()).navigateUp();
+        // إرسال الاسم الجديد للسيرفر
+        AuthRepository authRepository = new AuthRepository(requireActivity().getApplication());
+        authRepository.updateUserNameOnServer(newName, new AuthRepository.AuthCallback() {
+            @Override
+            public void onSuccess(User user) {
+                // حفظ الاسم الجديد محليًا فقط إذا نجح في السيرفر
+                userPreferences.saveUserName(newName);
+                Toast.makeText(requireContext(), "تم حفظ الاسم بنجاح", Toast.LENGTH_SHORT).show();
+                Navigation.findNavController(requireView()).navigateUp();
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(requireContext(), "فشل تحديث الاسم: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
