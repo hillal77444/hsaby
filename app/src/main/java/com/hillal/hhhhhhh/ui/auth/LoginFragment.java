@@ -80,6 +80,12 @@ public class LoginFragment extends Fragment {
                     Log.d(TAG, "Login successful");
                     binding.progressBar.setVisibility(View.GONE);
                     Toast.makeText(getContext(), "تم تسجيل الدخول بنجاح", Toast.LENGTH_SHORT).show();
+
+                    // حفظ اسم المستخدم في UserPreferences
+                    com.hillal.hhhhhhh.data.repository.AuthRepository authRepository = new com.hillal.hhhhhhh.data.repository.AuthRepository(requireActivity().getApplication());
+                    String userName = authRepository.getCurrentUser() != null ? authRepository.getCurrentUser().getUsername() : "";
+                    com.hillal.hhhhhhh.data.preferences.UserPreferences userPreferences = new com.hillal.hhhhhhh.data.preferences.UserPreferences(requireContext());
+                    userPreferences.saveUserName(userName);
                     
                     // جلب البيانات من السيرفر بعد تسجيل الدخول
                     MainActivity mainActivity = (MainActivity) requireActivity();
