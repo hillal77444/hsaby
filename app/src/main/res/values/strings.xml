@@ -223,4 +223,10 @@
     <string name="label_credit">له</string>
     <string name="label_debit">عليه</string>
     <string name="label_zero_balance">لا يوجد رصيد</string>
+
+    <string-array name="sort_options">
+        <item>تلقائي</item>
+        <item>من الأكبر إلى الأصغر</item>
+        <item>من الأصغر إلى الأكبر</item>
+    </string-array>
 </resources>
