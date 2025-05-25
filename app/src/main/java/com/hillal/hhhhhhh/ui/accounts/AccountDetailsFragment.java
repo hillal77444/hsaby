@@ -45,8 +45,6 @@ public class AccountDetailsFragment extends Fragment {
     private TextView accountBalance;
     private TextView accountPhone;
     private TextView accountNotes;
-    private RecyclerView transactionsRecyclerView;
-    private TransactionsAdapter transactionsAdapter;
     private long accountId;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
 
@@ -97,10 +95,6 @@ public class AccountDetailsFragment extends Fragment {
         accountBalance = binding.accountBalance;
         accountPhone = binding.accountPhone;
         accountNotes = binding.accountNotes;
-        transactionsRecyclerView = binding.transactionsRecyclerView;
-        transactionsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        transactionsAdapter = new TransactionsAdapter();
-        transactionsRecyclerView.setAdapter(transactionsAdapter);
 
         // إضافة زر تعديل الحساب
         binding.editAccountButton.setOnClickListener(v -> {
@@ -121,12 +115,6 @@ public class AccountDetailsFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.nav_add_transaction, bundle);
         });
 
-        binding.viewTransactionsButton.setOnClickListener(v -> {
-            Bundle args = new Bundle();
-            args.putLong("accountId", accountId);
-            Navigation.findNavController(v).navigate(R.id.nav_transactions, args);
-        });
-
         // إضافة زر كشف الحساب التفصيلي
         binding.viewAccountStatementButton.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), AccountStatementActivity.class);
@@ -140,21 +128,6 @@ public class AccountDetailsFragment extends Fragment {
             if (account != null) {
                 updateAccountDetails(account);
             }
-        });
-
-        loadTransactions();
-    }
-
-    private void loadTransactions() {
-        transactionViewModel.getTransactionsByAccount(accountId).observe(getViewLifecycleOwner(), transactions -> {
-            transactionsAdapter.submitList(transactions);
-        });
-
-        transactionViewModel.getTotalDebit(accountId).observe(getViewLifecycleOwner(), debit -> {
-            transactionViewModel.getTotalCredit(accountId).observe(getViewLifecycleOwner(), credit -> {
-                double balance = (credit != null ? credit : 0) - (debit != null ? debit : 0);
-                accountBalance.setText(String.format("%.2f", balance));
-            });
         });
     }
 
@@ -185,79 +158,5 @@ public class AccountDetailsFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
-    }
-
-    private static class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapter.ViewHolder> {
-        private List<Transaction> transactions;
-
-        public TransactionsAdapter() {
-            this.transactions = new ArrayList<>();
-        }
-
-        public void submitList(List<Transaction> newTransactions) {
-            this.transactions = newTransactions;
-            notifyDataSetChanged();
-        }
-
-        @NonNull
-        @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_transaction, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            Transaction transaction = transactions.get(position);
-            holder.bind(transaction);
-        }
-
-        @Override
-        public int getItemCount() {
-            return transactions.size();
-        }
-
-        static class ViewHolder extends RecyclerView.ViewHolder {
-            private final TextView amountTextView;
-            private final TextView descriptionTextView;
-            private final TextView dateTextView;
-
-            ViewHolder(@NonNull View itemView) {
-                super(itemView);
-                amountTextView = itemView.findViewById(R.id.transactionAmount);
-                descriptionTextView = itemView.findViewById(R.id.transactionDescription);
-                dateTextView = itemView.findViewById(R.id.transactionDate);
-            }
-
-            void bind(Transaction transaction) {
-                dateTextView.setText(DATE_FORMAT.format(new Date(transaction.getTransactionDate())));
-                descriptionTextView.setText(transaction.getDescription());
-                
-                double amount = transaction.getAmount();
-                String type = transaction.getType() != null ? transaction.getType().trim() : "";
-
-                String amountStr;
-                if (Math.abs(amount - Math.round(amount)) < 0.00001) {
-                    amountStr = String.format("%.0f", amount);
-                } else {
-                    amountStr = String.format("%.2f", amount);
-                }
-
-                if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
-                    amountTextView.setText(amountStr + " " + transaction.getCurrency());
-                    amountTextView.setTextColor(itemView.getContext().getResources().getColor(R.color.debit_color));
-                    itemView.setBackgroundColor(itemView.getContext().getResources().getColor(R.color.red_100));
-                } else if ((type.equals("له") || type.equalsIgnoreCase("credit")) && amount != 0) {
-                    amountTextView.setText(amountStr + " " + transaction.getCurrency());
-                    amountTextView.setTextColor(itemView.getContext().getResources().getColor(R.color.credit_color));
-                    itemView.setBackgroundColor(itemView.getContext().getResources().getColor(R.color.green_100));
-                } else {
-                    amountTextView.setText("");
-                    amountTextView.setTextColor(itemView.getContext().getResources().getColor(R.color.text_primary));
-                    itemView.setBackgroundColor(itemView.getContext().getResources().getColor(R.color.white));
-                }
-            }
-        }
     }
 } 
