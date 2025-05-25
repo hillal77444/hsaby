@@ -41,6 +41,7 @@ import com.hillal.hhhhhhh.ui.transactions.TransactionViewModelFactory;
 import com.hillal.hhhhhhh.data.remote.RetrofitClient;
 import com.hillal.hhhhhhh.data.remote.ApiService;
 import com.hillal.hhhhhhh.ui.common.AccountPickerDialog;
+import com.hillal.hhhhhhh.data.preferences.UserPreferences;
 
 public class TransactionsFragment extends Fragment {
     private FragmentTransactionsBinding binding;
@@ -542,26 +543,34 @@ public class TransactionsFragment extends Fragment {
         // تحديد جملة الرصيد حسب القيمة
         String balanceMessage;
         if (balance >= 0) {
-            balanceMessage = String.format(Locale.ENGLISH, "الرصيد لكم حتى تاريخ: %.2f %s", balance, transaction.getCurrency());
+            balanceMessage = String.format(Locale.ENGLISH, "الرصيد لكم: %.2f %s", balance, transaction.getCurrency());
         } else {
-            balanceMessage = String.format(Locale.ENGLISH, "الرصيد عليكم حتى تاريخ: %.2f %s", Math.abs(balance), transaction.getCurrency());
+            balanceMessage = String.format(Locale.ENGLISH, "الرصيد عليكم: %.2f %s", Math.abs(balance), transaction.getCurrency());
         }
-    
-        // بناء الرسالة مع جميع الأرقام بالإنجليزي
+
+        // جلب اسم المستخدم من التفضيلات
+        String userName = new UserPreferences(requireContext()).getUserName();
+
+        // بناء الرسالة مع جميع الأرقام بالإنجليزي واسم المرسل في النهاية
         return String.format(Locale.ENGLISH,
-            "مرحباً %s\n\n" +
-            "%s:\n" +
+            "السيد %s\n" +
+            "──────────────\n" +
+            "%s\n" +
+            "──────────────\n" +
             "التاريخ: %s\n" +
             "المبلغ: %.2f %s\n" +
             "البيان: %s\n" +
-            "%s",
+            "%s\n" +
+            "──────────────\n" +
+            "تم الإرسال بواسطة:\n%s",
             accountName,
             typeMessage,
             date,
             transaction.getAmount(),
             transaction.getCurrency(),
             transaction.getDescription(),
-            balanceMessage
+            balanceMessage,
+            userName
         );
     }
 
