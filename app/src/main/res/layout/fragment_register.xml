@@ -38,7 +38,7 @@
             android:layout_marginTop="16dp"
             android:hint="@string/display_name"
             app:startIconDrawable="@drawable/ic_person"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayoutFullName">
+            app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editTextDisplayName"
