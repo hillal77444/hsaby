@@ -191,7 +191,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             } else {
                 amountStr = String.format(Locale.US, "%.2f", amount);
             }
-            binding.amountTextView.setText(amountStr + " " + transaction.getCurrency());
+            binding.transactionAmount.setText(amountStr + " " + transaction.getCurrency());
 
             if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
                 binding.getRoot().setActivated(true);
