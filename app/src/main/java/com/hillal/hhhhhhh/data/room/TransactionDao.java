@@ -105,4 +105,7 @@ public interface TransactionDao {
 
     @Query("DELETE FROM transactions")
     void deleteAllTransactions();
+
+    @Query("SELECT SUM(CASE WHEN type = 'credit' OR type = 'له' THEN amount ELSE -amount END) FROM transactions WHERE account_id = :accountId AND currency = 'يمني'")
+    LiveData<Double> getAccountBalanceYemeni(long accountId);
 } 
