@@ -553,7 +553,7 @@ public class TransactionsFragment extends Fragment {
 
         // بناء الرسالة مع جميع الأرقام بالإنجليزي واسم المرسل في النهاية
         return String.format(Locale.ENGLISH,
-            "السيد %s\n" +
+            "السيد / *%s*\n" +
             "──────────────\n" +
             "%s\n" +
             "──────────────\n" +
@@ -562,7 +562,7 @@ public class TransactionsFragment extends Fragment {
             "البيان: %s\n" +
             "%s\n" +
             "──────────────\n" +
-            "تم الإرسال بواسطة:\n%s",
+            "تم الإرسال بواسطة:\n*%s*",
             accountName,
             typeMessage,
             date,
