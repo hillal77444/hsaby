@@ -196,12 +196,18 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
                 binding.getRoot().setActivated(true);
                 binding.getRoot().setSelected(false);
+                binding.transactionAmount.setActivated(true);
+                binding.transactionAmount.setSelected(false);
             } else if ((type.equals("له") || type.equalsIgnoreCase("credit")) && amount != 0) {
                 binding.getRoot().setActivated(false);
                 binding.getRoot().setSelected(true);
+                binding.transactionAmount.setActivated(false);
+                binding.transactionAmount.setSelected(true);
             } else {
                 binding.getRoot().setActivated(false);
                 binding.getRoot().setSelected(false);
+                binding.transactionAmount.setActivated(false);
+                binding.transactionAmount.setSelected(false);
             }
         }
     }
