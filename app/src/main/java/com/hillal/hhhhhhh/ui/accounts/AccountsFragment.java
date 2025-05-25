@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import android.widget.TextView;
+import android.widget.Spinner;
+import android.widget.AdapterView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -25,6 +27,8 @@ import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class AccountsFragment extends Fragment {
     private AccountViewModel accountViewModel;
@@ -39,6 +43,7 @@ public class AccountsFragment extends Fragment {
         // Initialize views
         accountsRecyclerView = root.findViewById(R.id.accounts_list);
         searchEditText = root.findViewById(R.id.search_edit_text);
+        Spinner sortSpinner = root.findViewById(R.id.sort_spinner);
         FloatingActionButton addAccountButton = root.findViewById(R.id.fab_add_account);
 
         // Initialize ViewModel
@@ -49,8 +54,12 @@ public class AccountsFragment extends Fragment {
         accountsAdapter = new AccountsAdapter(new ArrayList<>(), accountViewModel, getViewLifecycleOwner());
         accountsRecyclerView.setAdapter(accountsAdapter);
 
+        // قائمة الحسابات الحالية
+        final List<Account>[] currentAccounts = new List[]{new ArrayList<>()};
+
         // Observe accounts data
         accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
+            currentAccounts[0] = new ArrayList<>(accounts);
             accountsAdapter.updateAccounts(accounts);
         });
 
@@ -59,14 +68,32 @@ public class AccountsFragment extends Fragment {
             String query = v.getText().toString();
             if (!query.isEmpty()) {
                 accountViewModel.searchAccounts(query).observe(getViewLifecycleOwner(), accounts -> {
+                    currentAccounts[0] = new ArrayList<>(accounts);
                     accountsAdapter.updateAccounts(accounts);
                 });
             } else {
                 accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
+                    currentAccounts[0] = new ArrayList<>(accounts);
                     accountsAdapter.updateAccounts(accounts);
                 });
             }
             return true;
+        });
+
+        // Spinner: ترتيب القائمة
+        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                List<Account> sorted = new ArrayList<>(currentAccounts[0]);
+                if (position == 1) { // من الكبير إلى الصغير
+                    Collections.sort(sorted, (a, b) -> Double.compare(b.getBalance(), a.getBalance()));
+                } else if (position == 2) { // من الصغير إلى الكبير
+                    Collections.sort(sorted, (a, b) -> Double.compare(a.getBalance(), b.getBalance()));
+                }
+                accountsAdapter.updateAccounts(sorted);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
 
         // Setup add account button
