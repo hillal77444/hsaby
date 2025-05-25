@@ -28,6 +28,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
 import com.hillal.hhhhhhh.App;
+import com.google.android.material.card.MaterialCardView;
 
 public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdapter.TransactionViewHolder> {
     private OnItemClickListener onItemClickListener;
@@ -193,21 +194,23 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             }
             binding.transactionAmount.setText(amountStr + " " + transaction.getCurrency());
 
+            // تحديد نوع المعاملة وتغيير لون البطاقة والمبلغ
+            MaterialCardView cardView = (MaterialCardView) binding.getRoot();
+            cardView.setStateListAnimator(null); // تعطيل الـ state animator الافتراضي
+            
+            // الحفاظ على الحواف
+            cardView.setRadius(16f);
+            cardView.setCardCornerRadius(16f);
+            
             if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
-                binding.getRoot().setActivated(true);
-                binding.getRoot().setSelected(false);
-                binding.transactionAmount.setActivated(true);
-                binding.transactionAmount.setSelected(false);
+                cardView.setCardBackgroundColor(binding.getRoot().getContext().getResources().getColor(R.color.debit_background));
+                binding.transactionAmount.setTextColor(binding.getRoot().getContext().getResources().getColor(R.color.debit_color));
             } else if ((type.equals("له") || type.equalsIgnoreCase("credit")) && amount != 0) {
-                binding.getRoot().setActivated(false);
-                binding.getRoot().setSelected(true);
-                binding.transactionAmount.setActivated(false);
-                binding.transactionAmount.setSelected(true);
+                cardView.setCardBackgroundColor(binding.getRoot().getContext().getResources().getColor(R.color.credit_background));
+                binding.transactionAmount.setTextColor(binding.getRoot().getContext().getResources().getColor(R.color.credit_color));
             } else {
-                binding.getRoot().setActivated(false);
-                binding.getRoot().setSelected(false);
-                binding.transactionAmount.setActivated(false);
-                binding.transactionAmount.setSelected(false);
+                cardView.setCardBackgroundColor(binding.getRoot().getContext().getResources().getColor(R.color.surface));
+                binding.transactionAmount.setTextColor(binding.getRoot().getContext().getResources().getColor(R.color.text_primary));
             }
         }
     }
