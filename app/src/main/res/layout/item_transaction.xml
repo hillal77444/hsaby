@@ -12,16 +12,18 @@
     android:clickable="true"
     android:focusable="true"
     app:rippleColor="@color/ripple_light"
-    app:cardBackgroundColor="@drawable/transaction_card_background"
+    app:cardBackgroundColor="@android:color/transparent"
     app:cardPreventCornerOverlap="true"
     app:cardUseCompatPadding="true"
     android:stateListAnimator="@animator/card_state_list_anim"
     android:tag="transaction_card">
 
     <LinearLayout
+        android:id="@+id/innerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="@drawable/rounded_inner_background_default">
 
         <!-- صف العنوان والمبلغ -->
         <LinearLayout
