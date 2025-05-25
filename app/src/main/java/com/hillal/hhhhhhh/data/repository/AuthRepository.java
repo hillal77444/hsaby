@@ -157,4 +157,26 @@ public class AuthRepository {
                 preferences.getString(KEY_TOKEN, "")
         );
     }
+
+    public void updateUserNameOnServer(String newName, AuthCallback callback) {
+        String token = getToken();
+        java.util.Map<String, String> body = new java.util.HashMap<>();
+        body.put("username", newName);
+
+        apiService.updateUserName("Bearer " + token, body).enqueue(new retrofit2.Callback<User>() {
+            @Override
+            public void onResponse(retrofit2.Call<User> call, retrofit2.Response<User> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    saveUserData(response.body());
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("فشل تحديث الاسم في السيرفر");
+                }
+            }
+            @Override
+            public void onFailure(retrofit2.Call<User> call, Throwable t) {
+                callback.onError("خطأ في الاتصال بالسيرفر");
+            }
+        });
+    }
 } 
