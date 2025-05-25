@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,7 +43,7 @@ public class AccountsFragment extends Fragment {
 
         // Setup RecyclerView
         accountsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        accountsAdapter = new AccountsAdapter(new ArrayList<>());
+        accountsAdapter = new AccountsAdapter(new ArrayList<>(), accountViewModel, getViewLifecycleOwner());
         accountsRecyclerView.setAdapter(accountsAdapter);
 
         // Initialize ViewModel
@@ -78,35 +79,18 @@ public class AccountsFragment extends Fragment {
 
     private static class AccountsAdapter extends RecyclerView.Adapter<AccountsAdapter.ViewHolder> {
         private List<Account> accounts;
-        private Map<Long, List<Transaction>> accountTransactions;
+        private AccountViewModel accountViewModel;
+        private LifecycleOwner lifecycleOwner;
 
-        public AccountsAdapter(List<Account> accounts) {
+        public AccountsAdapter(List<Account> accounts, AccountViewModel viewModel, LifecycleOwner owner) {
             this.accounts = accounts;
-        }
-
-        public void setAccountTransactions(Map<Long, List<Transaction>> accountTransactions) {
-            this.accountTransactions = accountTransactions;
-            notifyDataSetChanged();
+            this.accountViewModel = viewModel;
+            this.lifecycleOwner = owner;
         }
 
         public void updateAccounts(List<Account> newAccounts) {
             this.accounts = newAccounts;
             notifyDataSetChanged();
-        }
-
-        private long calculateBalance(long accountId) {
-            List<Transaction> transactions = accountTransactions != null ? accountTransactions.get(accountId) : null;
-            if (transactions == null) return 0;
-            long totalCredit = 0;
-            long totalDebit = 0;
-            for (Transaction t : transactions) {
-                if (t.getType().equalsIgnoreCase("credit") || t.getType().equals("له")) {
-                    totalCredit += t.getAmount();
-                } else if (t.getType().equalsIgnoreCase("debit") || t.getType().equals("عليه")) {
-                    totalDebit += t.getAmount();
-                }
-            }
-            return totalCredit - totalDebit;
         }
 
         @NonNull
@@ -122,19 +106,20 @@ public class AccountsFragment extends Fragment {
             Account account = accounts.get(position);
             holder.accountName.setText(account.getName());
             holder.phone.setText(account.getPhoneNumber());
-            
-            // حساب الرصيد من جميع المعاملات
-            long balance = calculateBalance(account.getId());
-            String currency = account.getCurrency() != null ? account.getCurrency() : "يمني";
-            String balanceText;
-            if (balance < 0) {
-                balanceText = String.format("عليه %,d %s", Math.abs(balance), currency);
-                holder.balance.setTextColor(holder.itemView.getContext().getColor(R.color.red));
-            } else {
-                balanceText = String.format("له %,d %s", balance, currency);
-                holder.balance.setTextColor(holder.itemView.getContext().getColor(R.color.green));
-            }
-            holder.balance.setText(balanceText);
+
+            // راقب الرصيد اليمني فقط
+            accountViewModel.getAccountBalanceYemeni(account.getId()).observe(lifecycleOwner, balance -> {
+                double value = balance != null ? balance : 0;
+                String balanceText;
+                if (value < 0) {
+                    balanceText = String.format("عليه %,d يمني", Math.abs((long)value));
+                    holder.balance.setTextColor(holder.itemView.getContext().getColor(R.color.red));
+                } else {
+                    balanceText = String.format("له %,d يمني", (long)value);
+                    holder.balance.setTextColor(holder.itemView.getContext().getColor(R.color.green));
+                }
+                holder.balance.setText(balanceText);
+            });
 
             holder.itemView.setOnClickListener(v -> {
                 Bundle args = new Bundle();
