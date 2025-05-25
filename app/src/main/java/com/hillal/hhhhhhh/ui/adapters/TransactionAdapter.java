@@ -198,18 +198,18 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             MaterialCardView cardView = (MaterialCardView) binding.getRoot();
             cardView.setStateListAnimator(null); // تعطيل الـ state animator الافتراضي
             
-            // الحفاظ على الحواف
-            cardView.setRadius(16f);
-            
             if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
                 cardView.setCardBackgroundColor(binding.getRoot().getContext().getResources().getColor(R.color.debit_background));
                 binding.transactionAmount.setTextColor(binding.getRoot().getContext().getResources().getColor(R.color.debit_color));
+                cardView.setRadius(16f);
             } else if ((type.equals("له") || type.equalsIgnoreCase("credit")) && amount != 0) {
                 cardView.setCardBackgroundColor(binding.getRoot().getContext().getResources().getColor(R.color.credit_background));
                 binding.transactionAmount.setTextColor(binding.getRoot().getContext().getResources().getColor(R.color.credit_color));
+                cardView.setRadius(16f);
             } else {
                 cardView.setCardBackgroundColor(binding.getRoot().getContext().getResources().getColor(R.color.surface));
                 binding.transactionAmount.setTextColor(binding.getRoot().getContext().getResources().getColor(R.color.text_primary));
+                cardView.setRadius(16f);
             }
         }
     }
