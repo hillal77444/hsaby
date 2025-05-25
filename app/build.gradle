@@ -128,6 +128,7 @@ dependencies {
 
     implementation 'com.github.florent37:singledateandtimepicker:2.2.7'
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
+       implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     
     // Optional - RxJava2 support for Room
     implementation "androidx.room:room-rxjava2:$room_version"
@@ -137,6 +138,7 @@ dependencies {
     
     // Optional - Guava support for Room, including Optional and ListenableFuture
     implementation "androidx.room:room-guava:$room_version"
+    
     
     // Test helpers
     testImplementation "androidx.room:room-testing:$room_version"
