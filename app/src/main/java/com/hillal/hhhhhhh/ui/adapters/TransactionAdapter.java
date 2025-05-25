@@ -191,17 +191,17 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             } else {
                 amountStr = String.format(Locale.US, "%.2f", amount);
             }
-            amountTextView.setText(amountStr + " " + transaction.getCurrency());
+            binding.amountTextView.setText(amountStr + " " + transaction.getCurrency());
 
             if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
-                itemView.setActivated(true);
-                itemView.setSelected(false);
+                binding.getRoot().setActivated(true);
+                binding.getRoot().setSelected(false);
             } else if ((type.equals("له") || type.equalsIgnoreCase("credit")) && amount != 0) {
-                itemView.setActivated(false);
-                itemView.setSelected(true);
+                binding.getRoot().setActivated(false);
+                binding.getRoot().setSelected(true);
             } else {
-                itemView.setActivated(false);
-                itemView.setSelected(false);
+                binding.getRoot().setActivated(false);
+                binding.getRoot().setSelected(false);
             }
         }
     }
