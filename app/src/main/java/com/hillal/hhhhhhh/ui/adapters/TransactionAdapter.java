@@ -188,21 +188,18 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                 // معاملة مدين
                 binding.getRoot().setActivated(true);
                 binding.getRoot().setSelected(false);
-                binding.getRoot().setBackgroundColor(itemView.getContext().getResources().getColor(R.color.debit_background));
                 binding.transactionAmount.setText(String.format(Locale.US, "%.2f %s", amount, transaction.getCurrency()));
                 binding.transactionAmount.setTextColor(itemView.getContext().getResources().getColor(R.color.debit_color));
             } else if ((type.equals("له") || type.equalsIgnoreCase("credit")) && amount != 0) {
                 // معاملة دائن
                 binding.getRoot().setActivated(false);
                 binding.getRoot().setSelected(true);
-                binding.getRoot().setBackgroundColor(itemView.getContext().getResources().getColor(R.color.credit_background));
                 binding.transactionAmount.setText(String.format(Locale.US, "%.2f %s", amount, transaction.getCurrency()));
                 binding.transactionAmount.setTextColor(itemView.getContext().getResources().getColor(R.color.credit_color));
             } else {
                 // حالة افتراضية
                 binding.getRoot().setActivated(false);
                 binding.getRoot().setSelected(false);
-                binding.getRoot().setBackgroundColor(itemView.getContext().getResources().getColor(R.color.surface));
                 binding.transactionAmount.setText("");
                 binding.transactionAmount.setTextColor(itemView.getContext().getResources().getColor(R.color.text_primary));
             }
