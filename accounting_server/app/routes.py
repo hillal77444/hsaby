@@ -753,10 +753,18 @@ def update_username():
         if not user:
             return jsonify({'error': 'المستخدم غير موجود'}), 404
 
-        # تحديث الاسم مباشرة بدون التحقق من التكرار
         user.username = new_username
         db.session.commit()
-        return jsonify({'message': 'تم تحديث اسم المستخدم بنجاح', 'username': user.username}), 200
+
+        # إعادة نفس التوكن المرسل في الهيدر
+        auth_header = request.headers.get('Authorization', '')
+        token = auth_header.replace('Bearer ', '') if auth_header.startswith('Bearer ') else auth_header
+
+        return jsonify({
+            'message': 'تم تحديث اسم المستخدم بنجاح',
+            'username': user.username,
+            'token': token
+        }), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'حدث خطأ أثناء تحديث اسم المستخدم'}), 500
