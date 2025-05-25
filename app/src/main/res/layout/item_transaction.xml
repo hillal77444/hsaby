@@ -45,7 +45,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/text_primar"
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:fontFamily="sans-serif-medium"
