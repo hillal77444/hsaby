@@ -71,6 +71,10 @@ public class AccountRepository {
         return database.transactionDao().getAccountBalance(accountId);
     }
 
+    public LiveData<Double> getAccountBalanceYemeni(long accountId) {
+        return database.transactionDao().getAccountBalanceYemeni(accountId);
+    }
+
     public void insertTransaction(Transaction transaction) {
         executorService.execute(() -> database.transactionDao().insert(transaction));
     }
