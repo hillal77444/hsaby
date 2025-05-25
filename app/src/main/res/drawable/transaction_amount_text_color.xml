@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- لون المبلغ للمعاملة المدين -->
+    <item android:state_activated="true" android:color="@color/debit_color" />
+    <!-- لون المبلغ للمعاملة الدائن -->
+    <item android:state_selected="true" android:color="@color/credit_color" />
+    <!-- اللون الافتراضي -->
+    <item android:color="@color/text_primary" />
+</selector> 
