@@ -55,6 +55,12 @@ public interface ApiService {
     @GET("api/server/time")
     Call<Long> getServerTime();
 
+    @POST("/api/update_username")
+    Call<User> updateUserName(
+        @Header("Authorization") String token,
+        @Body Map<String, String> body
+    );
+
     class LoginRequest {
         private String phone;
         private String password;
