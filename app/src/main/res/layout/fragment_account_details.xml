@@ -99,43 +99,85 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Transactions Section -->
-            <LinearLayout
+            <!-- إحصائيات الحساب -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp">
 
-                <TextView
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/transactions"
-                    android:textAppearance="?attr/textAppearanceSubtitle1" />
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/view_transactions_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/view_all"
-                    style="@style/Widget.MaterialComponents.Button.TextButton" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="إحصائيات الحساب"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:layout_marginBottom="8dp" />
 
-            </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/transactionsRecyclerView"
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+                            <TextView
+                                android:id="@+id/total_credit"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="له: 0"
+                                android:textColor="@color/green"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/total_debit"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="عليه: 0"
+                                android:textColor="@color/red"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+                            <TextView
+                                android:id="@+id/transaction_count"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="عدد المعاملات: 0"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/average_transaction"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="متوسط المعاملة: 0"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- رسم بياني دائري -->
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/pie_chart"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:scrollbars="vertical" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/viewTransactionsButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/view_transactions"
-                app:icon="@drawable/ic_transactions" />
+                android:layout_height="200dp"
+                android:layout_marginBottom="16dp" />
 
             <Button
                 android:id="@+id/viewAccountStatementButton"
