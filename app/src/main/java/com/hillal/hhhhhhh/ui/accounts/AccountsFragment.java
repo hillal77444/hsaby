@@ -41,13 +41,13 @@ public class AccountsFragment extends Fragment {
         searchEditText = root.findViewById(R.id.search_edit_text);
         FloatingActionButton addAccountButton = root.findViewById(R.id.fab_add_account);
 
+        // Initialize ViewModel
+        accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
+
         // Setup RecyclerView
         accountsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         accountsAdapter = new AccountsAdapter(new ArrayList<>(), accountViewModel, getViewLifecycleOwner());
         accountsRecyclerView.setAdapter(accountsAdapter);
-
-        // Initialize ViewModel
-        accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
 
         // Observe accounts data
         accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
@@ -112,10 +112,10 @@ public class AccountsFragment extends Fragment {
                 double value = balance != null ? balance : 0;
                 String balanceText;
                 if (value < 0) {
-                    balanceText = String.format("عليه %,d يمني", Math.abs((long)value));
+                    balanceText = String.format(java.util.Locale.US, "عليه %,d يمني", Math.abs((long)value));
                     holder.balance.setTextColor(holder.itemView.getContext().getColor(R.color.red));
                 } else {
-                    balanceText = String.format("له %,d يمني", (long)value);
+                    balanceText = String.format(java.util.Locale.US, "له %,d يمني", (long)value);
                     holder.balance.setTextColor(holder.itemView.getContext().getColor(R.color.green));
                 }
                 holder.balance.setText(balanceText);
