@@ -200,7 +200,6 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             
             // الحفاظ على الحواف
             cardView.setRadius(16f);
-            cardView.setCardCornerRadius(16f);
             
             if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
                 cardView.setCardBackgroundColor(binding.getRoot().getContext().getResources().getColor(R.color.debit_background));
