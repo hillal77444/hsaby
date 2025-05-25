@@ -70,19 +70,17 @@ public class TransactionsAdapter extends ListAdapter<Transaction, TransactionsAd
             } else {
                 amountStr = String.format(Locale.US, "%.2f", amount);
             }
+            amountTextView.setText(amountStr + " " + transaction.getCurrency());
 
             if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
-                amountTextView.setText(amountStr + " " + transaction.getCurrency());
-                amountTextView.setTextColor(itemView.getContext().getResources().getColor(R.color.debit_color));
-                itemView.setBackgroundColor(itemView.getContext().getResources().getColor(R.color.red_100));
+                itemView.setActivated(true);
+                itemView.setSelected(false);
             } else if ((type.equals("له") || type.equalsIgnoreCase("credit")) && amount != 0) {
-                amountTextView.setText(amountStr + " " + transaction.getCurrency());
-                amountTextView.setTextColor(itemView.getContext().getResources().getColor(R.color.credit_color));
-                itemView.setBackgroundColor(itemView.getContext().getResources().getColor(R.color.green_100));
+                itemView.setActivated(false);
+                itemView.setSelected(true);
             } else {
-                amountTextView.setText("");
-                amountTextView.setTextColor(itemView.getContext().getResources().getColor(R.color.text_primary));
-                itemView.setBackgroundColor(itemView.getContext().getResources().getColor(R.color.white));
+                itemView.setActivated(false);
+                itemView.setSelected(false);
             }
         }
     }
