@@ -182,26 +182,26 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
 
             double amount = transaction.getAmount();
             String type = transaction.getType() != null ? transaction.getType().trim() : "";
+            
 
             // تحديد نوع المعاملة وتغيير لون البطاقة والمبلغ
-            if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
-                // معاملة مدين
-                binding.getRoot().setActivated(true);
-                binding.getRoot().setSelected(false);
-                binding.transactionAmount.setText(String.format(Locale.US, "%.2f %s", amount, transaction.getCurrency()));
-                binding.transactionAmount.setTextColor(itemView.getContext().getResources().getColor(R.color.debit_color));
-            } else if ((type.equals("له") || type.equalsIgnoreCase("credit")) && amount != 0) {
-                // معاملة دائن
-                binding.getRoot().setActivated(false);
-                binding.getRoot().setSelected(true);
-                binding.transactionAmount.setText(String.format(Locale.US, "%.2f %s", amount, transaction.getCurrency()));
-                binding.transactionAmount.setTextColor(itemView.getContext().getResources().getColor(R.color.credit_color));
+            String amountStr;
+            if (Math.abs(amount - Math.round(amount)) < 0.00001) {
+                amountStr = String.format(Locale.US, "%.0f", amount);
             } else {
-                // حالة افتراضية
-                binding.getRoot().setActivated(false);
-                binding.getRoot().setSelected(false);
-                binding.transactionAmount.setText("");
-                binding.transactionAmount.setTextColor(itemView.getContext().getResources().getColor(R.color.text_primary));
+                amountStr = String.format(Locale.US, "%.2f", amount);
+            }
+            amountTextView.setText(amountStr + " " + transaction.getCurrency());
+
+            if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
+                itemView.setActivated(true);
+                itemView.setSelected(false);
+            } else if ((type.equals("له") || type.equalsIgnoreCase("credit")) && amount != 0) {
+                itemView.setActivated(false);
+                itemView.setSelected(true);
+            } else {
+                itemView.setActivated(false);
+                itemView.setSelected(false);
             }
         }
     }
