@@ -9,14 +9,15 @@
     <color name="accent_green_dark">#059669</color>
 
     <!-- ألوان النصوص -->
-    <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#64748B</color>
+    <color name="text_primary">#0B0B0B</color>
+    <color name="text_secondary">#FFFFFF</color>
     <color name="text_hint">#94A3B8</color>
 
     <!-- ألوان الخلفيات -->
     <color name="background_light">#F8FAFC</color>
     <color name="background_dark">#0F172A</color>
     <color name="background">#F5F5F5</color>
+    <color name="text_primar">#FFFFFF</color>
     <color name="surface">#FFFFFF</color>
     <color name="divider">#E2E8F0</color>
 
