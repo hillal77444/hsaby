@@ -29,12 +29,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 
 public class AccountsFragment extends Fragment {
     private AccountViewModel accountViewModel;
     private RecyclerView accountsRecyclerView;
     private AccountsAdapter accountsAdapter;
     private TextInputEditText searchEditText;
+    private Map<Long, Double> accountBalances = new HashMap<>();
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -60,6 +62,11 @@ public class AccountsFragment extends Fragment {
         // Observe accounts data
         accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
             currentAccounts[0] = new ArrayList<>(accounts);
+            for (Account account : accounts) {
+                accountViewModel.getAccountBalanceYemeni(account.getId()).observe(getViewLifecycleOwner(), balance -> {
+                    accountBalances.put(account.getId(), balance != null ? balance : 0.0);
+                });
+            }
             accountsAdapter.updateAccounts(accounts);
         });
 
@@ -85,10 +92,16 @@ public class AccountsFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 List<Account> sorted = new ArrayList<>(currentAccounts[0]);
-                if (position == 1) { // من الكبير إلى الصغير
-                    Collections.sort(sorted, (a, b) -> Double.compare(b.getBalance(), a.getBalance()));
-                } else if (position == 2) { // من الصغير إلى الكبير
-                    Collections.sort(sorted, (a, b) -> Double.compare(a.getBalance(), b.getBalance()));
+                if (position == 1) { // من الأكبر إلى الأصغر
+                    Collections.sort(sorted, (a, b) -> Double.compare(
+                        accountBalances.getOrDefault(b.getId(), 0.0),
+                        accountBalances.getOrDefault(a.getId(), 0.0)
+                    ));
+                } else if (position == 2) { // من الأصغر إلى الأكبر
+                    Collections.sort(sorted, (a, b) -> Double.compare(
+                        accountBalances.getOrDefault(a.getId(), 0.0),
+                        accountBalances.getOrDefault(b.getId(), 0.0)
+                    ));
                 }
                 accountsAdapter.updateAccounts(sorted);
             }
