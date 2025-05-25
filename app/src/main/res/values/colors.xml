@@ -1,45 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Modern color palette -->
+    <!-- الألوان الأساسية -->
     <color name="primary">#2563EB</color>
     <color name="primary_dark">#1D4ED8</color>
     <color name="primary_light">#BBDEFB</color>
     <color name="accent">#10B981</color>
     <color name="accent_green">#10B981</color>
     <color name="accent_green_dark">#059669</color>
-    
-    <!-- Text colors -->
+
+    <!-- ألوان النصوص -->
     <color name="text_primary">#1E293B</color>
-    <color name="text_secondary">#757575</color>
-    
-    <!-- Background colors -->
+    <color name="text_secondary">#64748B</color>
+    <color name="text_hint">#94A3B8</color>
+
+    <!-- ألوان الخلفيات -->
     <color name="background_light">#F8FAFC</color>
     <color name="background_dark">#0F172A</color>
     <color name="background">#F5F5F5</color>
     <color name="surface">#FFFFFF</color>
-    
-    <!-- Utility colors -->
-    <color name="white">#FFFFFF</color>
-    <color name="black">#000000</color>
-    <color name="ripple_light">#1A000000</color>
-    <color name="divider">#BDBDBD</color>
-    
-    <!-- ألوان القيود المحاسبية -->
-    <color name="debit_color">#E53935</color>  <!-- أحمر للقيد المدين -->
-    <color name="credit_color">#43A047</color> <!-- أخضر للقيد الدائن -->
+    <color name="divider">#E2E8F0</color>
+
+    <!-- ألوان المعاملات -->
+    <color name="debit_color">#DC2626</color>
+    <color name="credit_color">#059669</color>
+    <color name="debit_background">#FEF2F2</color>
+    <color name="credit_background">#F0FDF4</color>
     <color name="debit">#D32F2F</color>
     <color name="credit">#388E3C</color>
-    
-    <!-- حالة النظام -->
-    <color name="error">#F44336</color>
-    <color name="success">#4CAF50</color>
-    <color name="warning">#FFC107</color>
-    <color name="info">#2196F3</color>
+
+    <!-- ألوان الحالات -->
+    <color name="error">#DC2626</color>
+    <color name="success">#059669</color>
+    <color name="warning">#D97706</color>
+    <color name="info">#2563EB</color>
     <color name="error_red">#B00020</color>
     <color name="red">#FF0000</color>
     <color name="green">#4CAF50</color>
-    
-    <!-- ألوان قديمة للتوافق مع الكود القديم فقط (يمكن حذفها لاحقاً إذا لم تعد مستخدمة) -->
+
+    <!-- ألوان إضافية -->
+    <color name="ripple_light">#1A000000</color>
+    <color name="ripple_dark">#1AFFFFFF</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- ألوان قديمة للتوافق -->
     <color name="purple_200">#BB86FC</color>
     <color name="purple_500">#6200EE</color>
     <color name="purple_700">#3700B3</color>
