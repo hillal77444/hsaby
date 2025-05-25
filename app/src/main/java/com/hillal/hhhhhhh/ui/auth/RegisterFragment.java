@@ -41,17 +41,12 @@ public class RegisterFragment extends Fragment {
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
         binding.buttonRegister.setOnClickListener(v -> {
-            String fullName = binding.editTextFullName.getText().toString().trim();
             String displayName = binding.editTextDisplayName.getText().toString().trim();
             String phone = binding.editTextPhone.getText().toString().trim();
             String password = binding.editTextPassword.getText().toString();
             String confirmPassword = binding.editTextConfirmPassword.getText().toString();
 
             // التحقق من صحة المدخلات
-            if (fullName.isEmpty()) {
-                binding.editTextFullName.setError("الرجاء إدخال الاسم الرباعي");
-                return;
-            }
             if (displayName.isEmpty()) {
                 binding.editTextDisplayName.setError("الرجاء إدخال الاسم المستخدم في الإشعارات");
                 return;
@@ -78,10 +73,9 @@ public class RegisterFragment extends Fragment {
             binding.progressBar.setVisibility(View.VISIBLE);
 
             Log.d(TAG, "Attempting to register with phone: " + phone);
-            
-            // دمج الاسم الرباعي واسم العرض في اسم مستخدم واحد
-            String username = fullName + " (" + displayName + ")";
-            
+
+            String username = displayName;
+
             authViewModel.register(username, phone, password, new AuthViewModel.AuthCallback() {
                 @Override
                 public void onSuccess() {
