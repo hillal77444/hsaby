@@ -68,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@color/text_primary"
+                android:textColor="@drawable/transaction_amount_text_color"
                 android:fontFamily="sans-serif-medium"
                 tools:text="1,000,000 ريال" />
 
