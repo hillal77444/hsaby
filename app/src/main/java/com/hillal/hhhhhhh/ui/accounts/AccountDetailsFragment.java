@@ -26,6 +26,11 @@ import com.hillal.hhhhhhh.viewmodel.AccountViewModel;
 import com.hillal.hhhhhhh.viewmodel.TransactionViewModel;
 import com.hillal.hhhhhhh.databinding.FragmentAccountDetailsBinding;
 import androidx.navigation.fragment.NavHostFragment;
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.utils.ColorTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +69,27 @@ public class AccountDetailsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         setupViews();
         loadAccountDetails();
+
+        // PieChart: عرض الدائن والمدين
+        PieChart pieChart = view.findViewById(R.id.pie_chart);
+        transactionViewModel.getTotalCredit(accountId).observe(getViewLifecycleOwner(), credit -> {
+            transactionViewModel.getTotalDebit(accountId).observe(getViewLifecycleOwner(), debit -> {
+                float totalCredit = credit != null ? credit.floatValue() : 0f;
+                float totalDebit = debit != null ? debit.floatValue() : 0f;
+                ArrayList<PieEntry> entries = new ArrayList<>();
+                if (totalCredit > 0) entries.add(new PieEntry(totalCredit, "له"));
+                if (totalDebit > 0) entries.add(new PieEntry(totalDebit, "عليه"));
+                PieDataSet dataSet = new PieDataSet(entries, "");
+                dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+                PieData data = new PieData(dataSet);
+                data.setValueTextSize(14f);
+                pieChart.setData(data);
+                pieChart.setUsePercentValues(true);
+                pieChart.getDescription().setEnabled(false);
+                pieChart.getLegend().setEnabled(true);
+                pieChart.invalidate();
+            });
+        });
     }
 
     private void setupViews() {
