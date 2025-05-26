@@ -33,6 +33,14 @@ public class DirectStatementFragment extends Fragment {
     private String phoneNumber;
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            phoneNumber = getArguments().getString("phoneNumber");
+        }
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentDirectStatementBinding.inflate(inflater, container, false);
         return binding.getRoot();
@@ -41,6 +49,11 @@ public class DirectStatementFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        
+        if (phoneNumber == null) {
+            Toast.makeText(requireContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_LONG).show();
+            return;
+        }
         
         apiService = RetrofitClient.getApiService();
         progressDialog = new ProgressDialog(requireContext());
