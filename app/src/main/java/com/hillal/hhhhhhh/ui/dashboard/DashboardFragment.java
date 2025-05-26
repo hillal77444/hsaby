@@ -27,7 +27,6 @@ import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.data.sync.SyncManager;
 import com.hillal.hhhhhhh.data.remote.DataManager;
 import com.hillal.hhhhhhh.data.sync.MigrationManager;
-import com.hillal.hhhhhhh.ui.direct_statement.DirectStatementFragment;
 
 public class DashboardFragment extends Fragment {
     private static final String TAG = "DashboardFragment";
@@ -91,10 +90,7 @@ public class DashboardFragment extends Fragment {
     }
 
     private void setupOtherSettings() {
-        // زر عرض الكشف المباشر
-        binding.viewDirectStatementButton.setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.action_navigation_dashboard_to_directStatementFragment);
-        });
+        // هنا يمكن إضافة إعدادات أخرى
     }
 
     @Override
@@ -131,15 +127,6 @@ public class DashboardFragment extends Fragment {
         // زر عرض التقارير
         binding.viewReportsButton.setOnClickListener(v -> 
             Navigation.findNavController(requireView()).navigate(R.id.navigation_reports));
-
-        // زر عرض الكشف المباشر
-        binding.viewDirectStatementButton.setOnClickListener(v -> {
-            DirectStatementFragment fragment = new DirectStatementFragment();
-            getParentFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit();
-        });
     }
 
     private void observeData() {
