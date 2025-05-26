@@ -5,6 +5,7 @@ import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.model.AccountSummaryResponse;
 import com.hillal.hhhhhhh.data.model.DetailedTransactionsResponse;
+import com.hillal.hhhhhhh.data.model.TransactionResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -64,12 +65,10 @@ public interface ApiService {
     );
 
     @GET("api/accounts/summary/{phone}")
-    Call<AccountSummaryResponse> getAccountSummary(
-        @Path("phone") String phone
-    );
+    Call<AccountSummaryResponse> getAccountsSummary(@Path("phone") String phone);
 
     @GET("api/transactions/detailed/{phone}/{userId}")
-    Call<DetailedTransactionsResponse> getDetailedTransactions(
+    Call<TransactionResponse> getDetailedTransactions(
         @Path("phone") String phone,
         @Path("userId") long userId,
         @Query("fromDate") String fromDate,
