@@ -232,4 +232,5 @@
     </string-array>
 
     <string name="view_direct_statement">عرض الكشف المباشر</string>
+    <string name="direct_statement_description">عرض كشف حساب مفصل لجميع الحسابات مع إمكانية تصفية حسب التاريخ</string>
 </resources>
