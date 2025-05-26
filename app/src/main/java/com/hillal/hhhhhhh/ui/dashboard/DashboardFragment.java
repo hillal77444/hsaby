@@ -127,6 +127,14 @@ public class DashboardFragment extends Fragment {
         // زر عرض التقارير
         binding.viewReportsButton.setOnClickListener(v -> 
             Navigation.findNavController(requireView()).navigate(R.id.navigation_reports));
+
+        view.findViewById(R.id.viewDirectStatementButton).setOnClickListener(v -> {
+            DirectStatementFragment fragment = new DirectStatementFragment();
+            getParentFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit();
+        });
     }
 
     private void observeData() {
