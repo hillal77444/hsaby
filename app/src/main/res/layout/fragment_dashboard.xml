@@ -181,18 +181,6 @@
                             android:maxLines="1"
                             android:ellipsize="end" />
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/viewAccountsButton"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
-                            android:text="@string/view_accounts"
-                            android:textSize="14sp"
-                            android:minHeight="48dp"
-                            android:textColor="@android:color/white"
-                            app:cornerRadius="16dp"
-                            app:backgroundTint="@color/accent_green" />
-
                     </LinearLayout>
 
                 </com.google.android.material.card.MaterialCardView>
@@ -359,14 +347,6 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/account_statement"
                 app:icon="@drawable/ic_statement" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/viewDirectStatementButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/direct_statement"
-                app:icon="@drawable/ic_direct_statement" />
 
         </LinearLayout>
 
