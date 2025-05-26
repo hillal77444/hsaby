@@ -26,7 +26,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     @Override
     public TransactionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.direct.item_direct_transaction, parent, false);
+                .inflate(R.layout.item_direct_transaction, parent, false);
         return new TransactionViewHolder(view);
     }
 
@@ -49,10 +49,10 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
         public TransactionViewHolder(@NonNull View itemView) {
             super(itemView);
-            dateText = itemView.findViewById(R.id.dateText);
-            amountText = itemView.findViewById(R.id.amountText);
-            typeText = itemView.findViewById(R.id.typeText);
-            descriptionText = itemView.findViewById(R.id.descriptionText);
+            dateText = itemView.findViewById(R.id.transaction_date);
+            amountText = itemView.findViewById(R.id.transaction_amount);
+            typeText = itemView.findViewById(R.id.transaction_type);
+            descriptionText = itemView.findViewById(R.id.transaction_description);
         }
 
         public void bind(Transaction transaction) {
