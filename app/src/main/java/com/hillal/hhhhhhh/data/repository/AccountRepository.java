@@ -89,25 +89,23 @@ public class AccountRepository {
     }
 
     public String generateUniqueAccountNumber() {
-        String accountNumber;
-        do {
+        while (true) {
             try {
                 // توليد رقم حساب جديد بتنسيق: ACC-YYYYMMDD-XXXX
                 // YYYYMMDD: التاريخ
                 // XXXX: رقم تسلسلي من 0001 إلى 9999
                 String date = new java.text.SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
                 int random = (int)(Math.random() * 9000) + 1000; // رقم بين 1000 و 9999
-                accountNumber = "ACC-" + date + "-" + random;
-                if (executorService.submit(() -> accountDao.getAccountByNumberSync(accountNumber)).get() != null) {
-                    continue;
+                final String accountNumber = "ACC-" + date + "-" + random;
+                
+                if (executorService.submit(() -> accountDao.getAccountByNumberSync(accountNumber)).get() == null) {
+                    return accountNumber;
                 }
-                break;
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }
-        } while (true);
-        return accountNumber;
+        }
     }
 
     public void insertTransaction(Transaction transaction) {
