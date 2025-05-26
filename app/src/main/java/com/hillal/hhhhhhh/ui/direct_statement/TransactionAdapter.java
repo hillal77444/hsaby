@@ -8,30 +8,26 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.TransactionResponse.Transaction;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.ViewHolder> {
     private List<Transaction> transactions = new ArrayList<>();
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_transaction, parent, false);
+                .inflate(R.layout.item_direct_transaction, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Transaction transaction = transactions.get(position);
-        holder.date.setText(dateFormat.format(transaction.getDate()));
-        holder.amount.setText(String.valueOf(transaction.getAmount()));
-        holder.type.setText(transaction.getType());
+        holder.date.setText(transaction.getDate());
+        holder.amount.setText(String.format("%.2f", transaction.getAmount()));
+        holder.type.setText(transaction.getType().equals("debit") ? "دفعة" : "دين");
         holder.description.setText(transaction.getDescription());
     }
 
