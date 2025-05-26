@@ -7,33 +7,32 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.hillal.hhhhhhh.R;
+import com.hillal.hhhhhhh.data.model.TransactionResponse.Transaction;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder> {
+public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.ViewHolder> {
     private List<Transaction> transactions = new ArrayList<>();
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
-    public void setTransactions(List<Transaction> transactions) {
-        this.transactions = transactions;
-        notifyDataSetChanged();
-    }
-
     @NonNull
     @Override
-    public TransactionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_direct_transaction, parent, false);
-        return new TransactionViewHolder(view);
+                .inflate(R.layout.item_transaction, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Transaction transaction = transactions.get(position);
-        holder.bind(transaction);
+        holder.date.setText(dateFormat.format(transaction.getDate()));
+        holder.amount.setText(String.valueOf(transaction.getAmount()));
+        holder.type.setText(transaction.getType());
+        holder.description.setText(transaction.getDescription());
     }
 
     @Override
@@ -41,48 +40,23 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         return transactions.size();
     }
 
-    static class TransactionViewHolder extends RecyclerView.ViewHolder {
-        private TextView dateText;
-        private TextView amountText;
-        private TextView typeText;
-        private TextView descriptionText;
-
-        public TransactionViewHolder(@NonNull View itemView) {
-            super(itemView);
-            dateText = itemView.findViewById(R.id.transaction_date);
-            amountText = itemView.findViewById(R.id.transaction_amount);
-            typeText = itemView.findViewById(R.id.transaction_type);
-            descriptionText = itemView.findViewById(R.id.transaction_description);
-        }
-
-        public void bind(Transaction transaction) {
-            dateText.setText(dateFormat.format(transaction.getDate()));
-            amountText.setText(String.format("%.2f", transaction.getAmount()));
-            typeText.setText(transaction.getType().equals("debit") ? "دفعة" : "دين");
-            descriptionText.setText(transaction.getDescription());
-        }
+    public void setTransactions(List<Transaction> transactions) {
+        this.transactions = transactions;
+        notifyDataSetChanged();
     }
 
-    public static class Transaction {
-        private Date date;
-        private double amount;
-        private String type;
-        private String description;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView date;
+        TextView amount;
+        TextView type;
+        TextView description;
 
-        public Date getDate() {
-            return date;
-        }
-
-        public double getAmount() {
-            return amount;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public String getDescription() {
-            return description;
+        ViewHolder(View view) {
+            super(view);
+            date = view.findViewById(R.id.date);
+            amount = view.findViewById(R.id.amount);
+            type = view.findViewById(R.id.type);
+            description = view.findViewById(R.id.description);
         }
     }
 } 
