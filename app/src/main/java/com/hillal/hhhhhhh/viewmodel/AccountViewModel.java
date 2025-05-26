@@ -55,6 +55,10 @@ public class AccountViewModel extends AndroidViewModel {
         return repository.getAccountByPhoneNumber(phoneNumber);
     }
 
+    public Account getAccountByPhoneNumber(String phoneNumber) {
+        return repository.getAccountByPhoneNumber(phoneNumber);
+    }
+
     public String generateUniqueAccountNumber() {
         return repository.generateUniqueAccountNumber();
     }
