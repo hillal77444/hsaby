@@ -177,6 +177,7 @@
     <string name="generate_statement">إنشاء كشف الحساب</string>
     <string name="export_to_pdf">تصدير كملف PDF</string>
     <string name="account_statement">كشف الحساب</string>
+    <string name="direct_statement">كشف الحساب المباشر</string>
     <string name="account_statement_for">كشف حساب: %1$s</string>
     <string name="period">الفترة: %1$s - %2$s</string>
     <string name="closing_balance">الرصيد الختامي: %1$s</string>
