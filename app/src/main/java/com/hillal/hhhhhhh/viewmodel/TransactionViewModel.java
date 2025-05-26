@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.room.AppDatabase;
 import com.hillal.hhhhhhh.repository.TransactionRepository;
+import java.util.Date;
 import java.util.List;
 
 public class TransactionViewModel extends AndroidViewModel {
@@ -50,6 +51,18 @@ public class TransactionViewModel extends AndroidViewModel {
     }
 
     public LiveData<Double> getTotalCredit(long accountId) {
+        return repository.getTotalCredit(accountId);
+    }
+
+    public LiveData<Double> getTotalCreditForDateRange(long accountId, Date startDate, Date endDate) {
+        return repository.getTotalCreditsInDateRange(accountId, startDate.getTime(), endDate.getTime());
+    }
+
+    public LiveData<Double> getTotalDebitForDateRange(long accountId, Date startDate, Date endDate) {
+        return repository.getTotalDebitsInDateRange(accountId, startDate.getTime(), endDate.getTime());
+    }
+
+    public LiveData<Double> getAccountBalance(long accountId) {
         return repository.getTotalCredit(accountId);
     }
 } 
