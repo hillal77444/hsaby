@@ -91,7 +91,10 @@ public class DashboardFragment extends Fragment {
     }
 
     private void setupOtherSettings() {
-        // هنا يمكن إضافة إعدادات أخرى
+        // زر عرض الكشف المباشر
+        binding.viewDirectStatementButton.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.action_navigation_dashboard_to_directStatementFragment);
+        });
     }
 
     @Override
