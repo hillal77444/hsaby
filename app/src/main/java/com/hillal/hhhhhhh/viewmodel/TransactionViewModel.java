@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import com.hillal.hhhhhhh.data.model.Transaction;
 import com.hillal.hhhhhhh.data.room.AppDatabase;
-import com.hillal.hhhhhhh.repository.TransactionRepository;
+import com.hillal.hhhhhhh.data.repository.TransactionRepository;
 import java.util.Date;
 import java.util.List;
 
@@ -15,7 +15,7 @@ public class TransactionViewModel extends AndroidViewModel {
     public TransactionViewModel(Application application) {
         super(application);
         AppDatabase database = AppDatabase.getInstance(application);
-        repository = new TransactionRepository(database.transactionDao());
+        repository = new TransactionRepository(database);
     }
 
     public void insert(Transaction transaction) {
@@ -63,6 +63,6 @@ public class TransactionViewModel extends AndroidViewModel {
     }
 
     public LiveData<Double> getAccountBalance(long accountId) {
-        return repository.getTotalCredit(accountId);
+        return repository.getAccountBalance(accountId);
     }
 } 
