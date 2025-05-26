@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -75,7 +76,8 @@ public class DirectStatementFragment extends Fragment {
 
     private void setupRecyclerViews() {
         // إعداد قائمة الحسابات
-        accountsAdapter = new DirectStatementAdapter(new ArrayList<>(), account -> {
+        accountsAdapter = new DirectStatementAdapter();
+        accountsAdapter.setOnAccountClickListener(account -> {
             // عند النقر على حساب، نعرض حقول التاريخ وزر إنشاء الكشف
             binding.dateRangeLayout.setVisibility(View.VISIBLE);
             binding.generateButton.setVisibility(View.VISIBLE);
@@ -86,7 +88,7 @@ public class DirectStatementFragment extends Fragment {
         accountsRecyclerView.setAdapter(accountsAdapter);
 
         // إعداد قائمة المعاملات
-        transactionsAdapter = new TransactionAdapter(new ArrayList<>());
+        transactionsAdapter = new TransactionAdapter();
         transactionsRecyclerView = binding.transactionsRecyclerView;
         transactionsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         transactionsRecyclerView.setAdapter(transactionsAdapter);
@@ -104,26 +106,31 @@ public class DirectStatementFragment extends Fragment {
 
         showLoadingDialog("جاري تحميل البيانات...");
         
-        apiService.getAccounts().enqueue(new Callback<List<DirectStatementAdapter.AccountSummary>>() {
-            @Override
-            public void onResponse(@NonNull Call<List<DirectStatementAdapter.AccountSummary>> call, 
-                                 @NonNull Response<List<DirectStatementAdapter.AccountSummary>> response) {
-                hideLoadingDialog();
-                
-                if (response.isSuccessful() && response.body() != null) {
-                    accountsAdapter.setAccounts(response.body());
-                } else {
+        if (phoneNumber != null) {
+            apiService.getAccounts(phoneNumber).enqueue(new Callback<List<DirectStatementAdapter.AccountSummary>>() {
+                @Override
+                public void onResponse(@NonNull Call<List<DirectStatementAdapter.AccountSummary>> call, 
+                                     @NonNull Response<List<DirectStatementAdapter.AccountSummary>> response) {
+                    hideLoadingDialog();
+                    
+                    if (response.isSuccessful() && response.body() != null) {
+                        accountsAdapter.setAccounts(response.body());
+                    } else {
+                        Toast.makeText(requireContext(), "فشل في جلب البيانات", Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<List<DirectStatementAdapter.AccountSummary>> call, 
+                                    @NonNull Throwable t) {
+                    hideLoadingDialog();
                     Toast.makeText(requireContext(), "فشل في جلب البيانات", Toast.LENGTH_LONG).show();
                 }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<List<DirectStatementAdapter.AccountSummary>> call, 
-                                @NonNull Throwable t) {
-                hideLoadingDialog();
-                Toast.makeText(requireContext(), "فشل في جلب البيانات", Toast.LENGTH_LONG).show();
-            }
-        });
+            });
+        } else {
+            hideLoadingDialog();
+            Toast.makeText(requireContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_LONG).show();
+        }
     }
 
     private boolean isNetworkAvailable() {
