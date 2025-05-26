@@ -52,7 +52,7 @@ public class AccountViewModel extends AndroidViewModel {
     }
 
     public Account getAccountByPhoneNumberSync(String phoneNumber) {
-        return repository.getAccountByPhoneNumberSync(phoneNumber);
+        return repository.getAccountByPhoneNumber(phoneNumber);
     }
 
     public String generateUniqueAccountNumber() {
