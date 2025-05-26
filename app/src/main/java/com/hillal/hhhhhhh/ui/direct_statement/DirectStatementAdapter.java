@@ -31,7 +31,7 @@ public class DirectStatementAdapter extends RecyclerView.Adapter<DirectStatement
     @Override
     public AccountViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.direct.item_direct_account, parent, false);
+                .inflate(R.layout.item_direct_account, parent, false);
         return new AccountViewHolder(view);
     }
 
