@@ -80,10 +80,14 @@ public class AccountRepository {
     }
 
     public Account getAccountByPhoneNumberSync(String phoneNumber) {
-        return accountDao.getAccountByPhoneNumberSync(phoneNumber);
+        return accountDao.getAccountByPhoneNumber(phoneNumber);
     }
 
-    private String generateUniqueAccountNumber() {
+    public Account getAccountByPhoneNumber(String phoneNumber) {
+        return accountDao.getAccountByPhoneNumber(phoneNumber);
+    }
+
+    public String generateUniqueAccountNumber() {
         String accountNumber;
         do {
             // توليد رقم حساب جديد بتنسيق: ACC-YYYYMMDD-XXXX
