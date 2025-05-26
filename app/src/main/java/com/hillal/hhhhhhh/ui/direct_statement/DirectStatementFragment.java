@@ -1,10 +1,13 @@
 package com.hillal.hhhhhhh.ui.direct_statement;
 
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,6 +18,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.remote.ApiService;
 import com.hillal.hhhhhhh.data.remote.RetrofitClient;
+import com.hillal.hhhhhhh.databinding.FragmentDirectStatementBinding;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,6 +29,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class DirectStatementFragment extends Fragment {
+    private FragmentDirectStatementBinding binding;
     private ApiService apiService;
     private TextInputEditText fromDateInput;
     private TextInputEditText toDateInput;
@@ -37,6 +42,7 @@ public class DirectStatementFragment extends Fragment {
     private TextView totalCreditText;
     private String phoneNumber;
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+    private ProgressDialog progressDialog;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,53 +56,108 @@ public class DirectStatementFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_direct_statement, container, false);
+        binding = FragmentDirectStatementBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         
-        // تهيئة عناصر واجهة المستخدم
-        initializeViews(view);
+        // إخفاء حقول التاريخ من الشاشة الرئيسية
+        binding.dateRangeLayout.setVisibility(View.GONE);
+        binding.generateButton.setVisibility(View.GONE);
         
-        // تهيئة Adapters
-        setupAdapters();
-        
-        // إضافة مستمعي الأحداث
-        setupListeners(view);
-        
-        // جلب البيانات
+        setupRecyclerViews();
+        initializeApiService();
         loadData();
-        
-        return view;
     }
 
-    private void initializeViews(View view) {
-        fromDateInput = view.findViewById(R.id.fromDateInput);
-        toDateInput = view.findViewById(R.id.toDateInput);
-        accountsRecyclerView = view.findViewById(R.id.accountsRecyclerView);
-        transactionsRecyclerView = view.findViewById(R.id.transactionsRecyclerView);
-        totalBalanceText = view.findViewById(R.id.totalBalanceText);
-        totalDebitText = view.findViewById(R.id.totalDebitText);
-        totalCreditText = view.findViewById(R.id.totalCreditText);
-    }
-
-    private void setupAdapters() {
-        accountsAdapter = new DirectStatementAdapter();
-        transactionsAdapter = new TransactionAdapter();
-        
-        accountsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+    private void setupRecyclerViews() {
+        // إعداد قائمة الحسابات
+        accountsAdapter = new DirectStatementAdapter(new ArrayList<>(), account -> {
+            // عند النقر على حساب، نعرض حقول التاريخ وزر إنشاء الكشف
+            binding.dateRangeLayout.setVisibility(View.VISIBLE);
+            binding.generateButton.setVisibility(View.VISIBLE);
+            // يمكن إضافة المزيد من المنطق هنا
+        });
+        accountsRecyclerView = binding.accountsRecyclerView;
+        accountsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         accountsRecyclerView.setAdapter(accountsAdapter);
-        
-        transactionsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // إعداد قائمة المعاملات
+        transactionsAdapter = new TransactionAdapter(new ArrayList<>());
+        transactionsRecyclerView = binding.transactionsRecyclerView;
+        transactionsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         transactionsRecyclerView.setAdapter(transactionsAdapter);
     }
 
-    private void setupListeners(View view) {
-        view.findViewById(R.id.generateStatementButton).setOnClickListener(v -> generateStatement());
+    private void initializeApiService() {
+        apiService = RetrofitClient.getApiService();
     }
 
     private void loadData() {
-        // سيتم تنفيذ جلب البيانات من الخادم هنا
+        if (!isNetworkAvailable()) {
+            Toast.makeText(requireContext(), "لا يوجد اتصال بالإنترنت", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        showLoadingDialog("جاري تحميل البيانات...");
+        
+        apiService.getAccounts().enqueue(new Callback<List<DirectStatementAdapter.AccountSummary>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<DirectStatementAdapter.AccountSummary>> call, 
+                                 @NonNull Response<List<DirectStatementAdapter.AccountSummary>> response) {
+                hideLoadingDialog();
+                
+                if (response.isSuccessful() && response.body() != null) {
+                    accountsAdapter.setAccounts(response.body());
+                } else {
+                    Toast.makeText(requireContext(), "فشل في جلب البيانات", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<DirectStatementAdapter.AccountSummary>> call, 
+                                @NonNull Throwable t) {
+                hideLoadingDialog();
+                Toast.makeText(requireContext(), "فشل في جلب البيانات", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
-    private void generateStatement() {
-        // سيتم تنفيذ إنشاء الكشف هنا
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) requireContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        }
+        return false;
+    }
+
+    private void showLoadingDialog(String message) {
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(requireContext());
+            progressDialog.setCancelable(false);
+        }
+        progressDialog.setMessage(message);
+        progressDialog.show();
+    }
+
+    private void hideLoadingDialog() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
+        binding = null;
     }
 } 
