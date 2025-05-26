@@ -7,6 +7,7 @@ from datetime import datetime
 import logging
 import json
 from sqlalchemy import func
+from sqlalchemy import case
 
 main = Blueprint('main', __name__)
 logger = logging.getLogger(__name__)
@@ -770,84 +771,96 @@ def update_username():
         db.session.rollback()
         return jsonify({'error': 'حدث خطأ أثناء تحديث اسم المستخدم'}), 500
 
-@main.route('/api/accounts/summary/<phone>')
-@jwt_required()
-def get_accounts_summary(phone):
+@main.route('/api/accounts/summary/<phone>', methods=['GET'])
+def get_account_summary(phone):
     try:
+        # جلب جميع الحسابات المرتبطة برقم الهاتف
         accounts = Account.query.filter_by(phone_number=phone).all()
-        if not accounts:
-            return jsonify({'error': 'لم يتم العثور على حسابات لهذا الرقم'}), 404
-
-        summary = []
+        
+        total_balance = 0
+        total_debits = 0
+        total_credits = 0
+        accounts_list = []
+        
         for account in accounts:
-            # حساب إجمالي الديون والمدفوعات
-            total_credits = db.session.query(func.sum(Transaction.amount)).filter(
-                Transaction.account_id == account.id,
-                Transaction.type == 'credit'
-            ).scalar() or 0
-
-            total_debits = db.session.query(func.sum(Transaction.amount)).filter(
-                Transaction.account_id == account.id,
-                Transaction.type == 'debit'
-            ).scalar() or 0
-
-            # حساب الرصيد
-            balance = total_credits - total_debits
-
-            summary.append({
-                'user_id': account.user_id,
-                'user_name': account.user.username,
-                'balance': balance,
-                'total_credits': total_credits,
-                'total_debits': total_debits
-            })
-
-        return jsonify({
-            'summary': summary
-        })
-
-    except Exception as e:
-        logger.error(f"Error getting accounts summary: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء جلب البيانات'}), 500
-
-@main.route('/api/transactions/detailed/<phone>/<int:user_id>')
-@jwt_required()
-def get_detailed_transactions(phone, user_id):
-    try:
-        account = Account.query.filter_by(phone_number=phone, user_id=user_id).first()
-        if not account:
-            return jsonify({'error': 'لم يتم العثور على الحساب'}), 404
-
-        # جلب المعاملات مرتبة حسب التاريخ
-        transactions = Transaction.query.filter_by(account_id=account.id).order_by(Transaction.date).all()
-        
-        # حساب الرصيد المتراكم
-        running_balance = 0
-        detailed_transactions = []
-        
-        for transaction in transactions:
-            if transaction.type == 'credit':
-                running_balance += transaction.amount
-            else:
-                running_balance -= transaction.amount
+            # حساب إجمالي المدفوعات والديون
+            debits = db.session.query(func.sum(Transaction.amount))\
+                .filter(Transaction.account_id == account.id,
+                       Transaction.type == 'debit')\
+                .scalar() or 0
                 
-            detailed_transactions.append({
-                'date': transaction.date.isoformat(),
+            credits = db.session.query(func.sum(Transaction.amount))\
+                .filter(Transaction.account_id == account.id,
+                       Transaction.type == 'credit')\
+                .scalar() or 0
+            
+            balance = credits - debits
+            
+            accounts_list.append({
+                'userId': account.id,
+                'userName': account.user.username,
+                'balance': balance,
+                'totalDebits': debits,
+                'totalCredits': credits
+            })
+            
+            total_balance += balance
+            total_debits += debits
+            total_credits += credits
+        
+        return jsonify({
+            'accounts': accounts_list,
+            'totalBalance': total_balance,
+            'totalDebits': total_debits,
+            'totalCredits': total_credits
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@main.route('/api/transactions/detailed/<phone>/<int:userId>', methods=['GET'])
+def get_detailed_transactions(phone, userId):
+    try:
+        # التحقق من وجود الحساب
+        account = Account.query.filter_by(id=userId, phone_number=phone).first()
+        if not account:
+            return jsonify({'error': 'Account not found'}), 404
+        
+        # جلب معاملات الحساب
+        from_date = request.args.get('fromDate')
+        to_date = request.args.get('toDate')
+        
+        query = Transaction.query.filter_by(account_id=userId)
+        
+        if from_date:
+            query = query.filter(Transaction.date >= datetime.strptime(from_date, '%Y-%m-%d'))
+        if to_date:
+            query = query.filter(Transaction.date <= datetime.strptime(to_date, '%Y-%m-%d'))
+            
+        transactions = query.order_by(Transaction.date.desc()).all()
+        
+        # حساب الرصيد الحالي
+        current_balance = db.session.query(
+            func.sum(case([(Transaction.type == 'credit', Transaction.amount)], else_=0)) -
+            func.sum(case([(Transaction.type == 'debit', Transaction.amount)], else_=0))
+        ).filter(Transaction.account_id == userId).scalar() or 0
+        
+        transactions_list = []
+        for transaction in transactions:
+            transactions_list.append({
+                'date': transaction.date.strftime('%Y-%m-%d'),
                 'amount': transaction.amount,
                 'type': transaction.type,
-                'description': transaction.description,
-                'running_balance': running_balance
+                'description': transaction.description
             })
-
+        
         return jsonify({
-            'account_name': account.user.username,
-            'transactions': detailed_transactions,
-            'current_balance': running_balance
+            'transactions': transactions_list,
+            'currentBalance': current_balance
         })
-
+        
     except Exception as e:
-        logger.error(f"Error getting detailed transactions: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء جلب البيانات'}), 500
+        return jsonify({'error': str(e)}), 500
 
 @main.route('/api/report/<phone>/<int:user_id>')
 @jwt_required()
