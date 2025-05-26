@@ -28,6 +28,7 @@ import com.hillal.hhhhhhh.data.sync.SyncManager;
 import com.hillal.hhhhhhh.data.remote.DataManager;
 import com.hillal.hhhhhhh.data.sync.MigrationManager;
 import com.hillal.hhhhhhh.ui.direct_statement.DirectStatementFragment;
+import com.google.android.material.button.MaterialButton;
 
 public class DashboardFragment extends Fragment {
     private static final String TAG = "DashboardFragment";
@@ -79,19 +80,30 @@ public class DashboardFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        binding = FragmentDashboardBinding.inflate(inflater, container, false);
-        db = AppDatabase.getInstance(requireContext());
-        setupUI();
-        return binding.getRoot();
-    }
+        View root = inflater.inflate(R.layout.fragment_dashboard, container, false);
 
-    private void setupUI() {
-        // إعدادات أخرى
-        setupOtherSettings();
-    }
+        // تهيئة الأزرار
+        MaterialButton addAccountButton = root.findViewById(R.id.addAccountCard);
+        MaterialButton addTransactionButton = root.findViewById(R.id.addTransactionCard);
+        MaterialButton viewDirectStatementButton = root.findViewById(R.id.viewDirectStatementButton);
 
-    private void setupOtherSettings() {
-        // هنا يمكن إضافة إعدادات أخرى
+        // إضافة المستمعين
+        addAccountButton.setOnClickListener(v -> {
+            // الانتقال إلى شاشة إضافة حساب جديد
+            Navigation.findNavController(v).navigate(R.id.action_navigation_dashboard_to_addAccountFragment);
+        });
+
+        addTransactionButton.setOnClickListener(v -> {
+            // الانتقال إلى شاشة إضافة معاملة جديدة
+            Navigation.findNavController(v).navigate(R.id.action_navigation_dashboard_to_addTransactionFragment);
+        });
+
+        viewDirectStatementButton.setOnClickListener(v -> {
+            // الانتقال إلى شاشة كشف الحساب المباشر
+            Navigation.findNavController(v).navigate(R.id.action_navigation_dashboard_to_directStatementFragment);
+        });
+
+        return root;
     }
 
     @Override
@@ -128,15 +140,6 @@ public class DashboardFragment extends Fragment {
         // زر عرض التقارير
         binding.viewReportsButton.setOnClickListener(v -> 
             Navigation.findNavController(requireView()).navigate(R.id.navigation_reports));
-
-        // زر عرض الكشف المباشر
-        binding.viewDirectStatementButton.setOnClickListener(v -> {
-            DirectStatementFragment fragment = new DirectStatementFragment();
-            getParentFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit();
-        });
     }
 
     private void observeData() {
