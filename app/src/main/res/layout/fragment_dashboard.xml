@@ -352,6 +352,22 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/viewAccountStatementButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/account_statement"
+                app:icon="@drawable/ic_statement" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/viewDirectStatementButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/direct_statement"
+                app:icon="@drawable/ic_direct_statement" />
+
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
