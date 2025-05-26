@@ -247,137 +247,106 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:baselineAligned="false">
 
-                        <LinearLayout
+                        <!-- إجمالي المدينين -->
+                        <com.google.android.material.card.MaterialCardView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/card_spacing"
                             android:layout_weight="1"
-                            android:orientation="vertical">
+                            app:cardCornerRadius="20dp"
+                            app:cardElevation="0dp"
+                            app:strokeColor="#E2E8F0"
+                            app:strokeWidth="1dp">
 
-                            <TextView
-                                android:layout_width="wrap_content"
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@string/total_debtors"
-                                android:textAppearance="?attr/textAppearanceBody2"
-                                android:textColor="@color/text_secondary" />
+                                android:orientation="vertical"
+                                android:padding="20dp">
 
-                            <TextView
-                                android:id="@+id/totalDebtors"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:textAppearance="?attr/textAppearanceSubtitle1"
-                                android:textColor="@color/debit_color"
-                                tools:text="0.00 يمني" />
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="إجمالي المدينين"
+                                    android:textAppearance="?attr/textAppearanceBody2"
+                                    android:textColor="@color/text_secondary"
+                                    android:maxLines="1"
+                                    android:ellipsize="end" />
 
-                        </LinearLayout>
+                                <TextView
+                                    android:id="@+id/totalDebtors"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="8dp"
+                                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                                    android:textColor="@color/debit_color"
+                                    android:maxLines="1"
+                                    android:ellipsize="end"
+                                    tools:text="1000 ريال يمني" />
 
-                        <LinearLayout
+                            </LinearLayout>
+
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- إجمالي الدائنين -->
+                        <com.google.android.material.card.MaterialCardView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/card_spacing"
                             android:layout_weight="1"
-                            android:orientation="vertical">
+                            app:cardCornerRadius="20dp"
+                            app:cardElevation="0dp"
+                            app:strokeColor="#E2E8F0"
+                            app:strokeWidth="1dp">
 
-                            <TextView
-                                android:layout_width="wrap_content"
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@string/total_creditors"
-                                android:textAppearance="?attr/textAppearanceBody2"
-                                android:textColor="@color/text_secondary" />
+                                android:orientation="vertical"
+                                android:padding="20dp">
 
-                            <TextView
-                                android:id="@+id/totalCreditors"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:textAppearance="?attr/textAppearanceSubtitle1"
-                                android:textColor="@color/credit_color"
-                                tools:text="0.00 يمني" />
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="إجمالي الدائنين"
+                                    android:textAppearance="?attr/textAppearanceBody2"
+                                    android:textColor="@color/text_secondary"
+                                    android:maxLines="1"
+                                    android:ellipsize="end" />
 
-                        </LinearLayout>
+                                <TextView
+                                    android:id="@+id/totalCreditors"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="8dp"
+                                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                                    android:textColor="@color/credit_color"
+                                    android:maxLines="1"
+                                    android:ellipsize="end"
+                                    tools:text="500 ريال يمني" />
+
+                            </LinearLayout>
+
+                        </com.google.android.material.card.MaterialCardView>
 
                     </LinearLayout>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/viewReportsButton"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="24dp"
                         android:text="@string/view_reports"
                         android:textSize="14sp"
                         android:minHeight="48dp"
-                        android:textColor="@android:color/white"
-                        app:cornerRadius="16dp"
+                        app:cornerRadius="20dp"
+                        app:icon="@drawable/ic_reports"
+                        app:iconGravity="textStart"
+                        app:iconPadding="10dp"
                         app:backgroundTint="#FF9800" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- بطاقة كشف الحساب المباشر -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/directStatementCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/card_margin"
-                app:cardCornerRadius="@dimen/card_corner_radius"
-                app:cardElevation="0dp"
-                app:strokeColor="#E2E8F0"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/card_padding">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="@dimen/icon_size"
-                            android:layout_height="@dimen/icon_size"
-                            android:background="@drawable/circle_background"
-                            android:padding="16dp"
-                            android:src="@drawable/ic_direct_statement"
-                            app:tint="#2196F3" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_weight="1"
-                            android:text="@string/view_direct_statement"
-                            android:textAppearance="?attr/textAppearanceHeadline6"
-                            android:textColor="#2196F3"
-                            android:maxLines="1"
-                            android:ellipsize="end" />
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/direct_statement_description"
-                        android:textAppearance="?attr/textAppearanceBody2"
-                        android:textColor="@color/text_secondary" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/viewDirectStatementButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/view_direct_statement"
-                        android:textSize="14sp"
-                        android:minHeight="48dp"
-                        android:textColor="@android:color/white"
-                        app:cornerRadius="16dp"
-                        app:backgroundTint="#2196F3" />
 
                 </LinearLayout>
 

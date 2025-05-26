@@ -47,11 +47,7 @@
         android:id="@+id/navigation_dashboard"
         android:name="com.hillal.hhhhhhh.ui.dashboard.DashboardFragment"
         android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard">
-        <action
-            android:id="@+id/action_navigation_dashboard_to_directStatementFragment"
-            app:destination="@id/directStatementFragment" />
-    </fragment>
+        tools:layout="@layout/fragment_dashboard" />
 
     <!-- إضافة حساب جديد -->
     <fragment
@@ -163,11 +159,5 @@
         android:name="com.hillal.hhhhhhh.ui.profile.EditProfileFragment"
         android:label="تعديل الملف الشخصي"
         tools:layout="@layout/fragment_edit_profile" />
-
-    <fragment
-        android:id="@+id/directStatementFragment"
-        android:name="com.hillal.hhhhhhh.ui.direct_statement.DirectStatementFragment"
-        android:label="@string/view_direct_statement"
-        tools:layout="@layout/fragment_direct_statement" />
 
 </navigation>

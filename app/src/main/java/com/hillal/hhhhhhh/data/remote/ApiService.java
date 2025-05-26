@@ -3,9 +3,6 @@ package com.hillal.hhhhhhh.data.remote;
 import com.hillal.hhhhhhh.data.model.User;
 import com.hillal.hhhhhhh.data.model.Account;
 import com.hillal.hhhhhhh.data.model.Transaction;
-import com.hillal.hhhhhhh.data.model.AccountSummaryResponse;
-import com.hillal.hhhhhhh.data.model.DetailedTransactionsResponse;
-import com.hillal.hhhhhhh.data.model.TransactionResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -62,17 +59,6 @@ public interface ApiService {
     Call<User> updateUserName(
         @Header("Authorization") String token,
         @Body Map<String, String> body
-    );
-
-    @GET("api/accounts/summary/{phone}")
-    Call<AccountSummaryResponse> getAccountsSummary(@Path("phone") String phone);
-
-    @GET("api/transactions/detailed/{phone}/{userId}")
-    Call<TransactionResponse> getDetailedTransactions(
-        @Path("phone") String phone,
-        @Path("userId") long userId,
-        @Query("fromDate") String fromDate,
-        @Query("toDate") String toDate
     );
 
     class LoginRequest {

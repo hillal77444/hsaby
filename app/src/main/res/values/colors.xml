@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- الألوان الأساسية -->
-    <color name="primary">#2196F3</color>
-    <color name="primary_dark">#1976D2</color>
+    <color name="primary">#2563EB</color>
+    <color name="primary_dark">#1D4ED8</color>
     <color name="primary_light">#BBDEFB</color>
-    <color name="accent">#FF4081</color>
+    <color name="accent">#10B981</color>
     <color name="accent_green">#10B981</color>
     <color name="accent_green_dark">#059669</color>
 
     <!-- ألوان النصوص -->
-    <color name="text_primary">#212121</color>
-    <color name="text_secondary">#757575</color>
+    <color name="text_primary">#0B0B0B</color>
+    <color name="text_secondary">#FFFFFF</color>
     <color name="text_hint">#94A3B8</color>
 
     <!-- ألوان الخلفيات -->
@@ -56,12 +56,8 @@
     <color name="red_100">#FFCDD2</color>
     <color name="green_100">#C8E6C9</color>
     <color name="background_gradient">#F5F6FA</color>
-    <color name="gray">#9E9E9E</color>
+    <color name="gray">#888888</color>
     <color name="red_700">#D32F2F</color>
     <color name="green_700">#388E3C</color>
     <color name="colorPrimary">#1976D2</color>
-
-    <!-- جديدة من التعديل -->
-    <color name="credit_green">#4CAF50</color>
-    <color name="debit_red">#F44336</color>
 </resources>

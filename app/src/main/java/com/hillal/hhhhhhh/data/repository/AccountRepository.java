@@ -75,39 +75,6 @@ public class AccountRepository {
         return database.transactionDao().getAccountBalanceYemeni(accountId);
     }
 
-    public Account getAccountByNumberSync(String accountNumber) {
-        return accountDao.getAccountByNumberSync(accountNumber);
-    }
-
-    public Account getAccountByPhoneNumber(String phoneNumber) {
-        try {
-            return executorService.submit(() -> accountDao.getAccountByPhoneNumber(phoneNumber)).get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public String generateUniqueAccountNumber() {
-        while (true) {
-            try {
-                // توليد رقم حساب جديد بتنسيق: ACC-YYYYMMDD-XXXX
-                // YYYYMMDD: التاريخ
-                // XXXX: رقم تسلسلي من 0001 إلى 9999
-                String date = new java.text.SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
-                int random = (int)(Math.random() * 9000) + 1000; // رقم بين 1000 و 9999
-                final String accountNumber = "ACC-" + date + "-" + random;
-                
-                if (executorService.submit(() -> accountDao.getAccountByNumberSync(accountNumber)).get() == null) {
-                    return accountNumber;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-    }
-
     public void insertTransaction(Transaction transaction) {
         executorService.execute(() -> database.transactionDao().insert(transaction));
     }

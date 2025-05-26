@@ -75,24 +75,10 @@ public class AddAccountFragment extends Fragment {
             return;
         }
 
-        if (phone.isEmpty()) {
-            binding.phoneEditText.setError("الرجاء إدخال رقم الهاتف");
-            return;
-        }
-
         try {
             double balance = Double.parseDouble(balanceStr);
-            
-            // التحقق من وجود حساب بنفس رقم الهاتف
-            Account existingAccountByPhone = accountViewModel.getAccountByPhoneNumber(phone);
-            if (existingAccountByPhone != null) {
-                binding.phoneEditText.setError("رقم الهاتف موجود مسبقاً");
-                return;
-            }
-
-            // إنشاء حساب جديد برقم فريد
             Account account = new Account(
-                accountViewModel.generateUniqueAccountNumber(),
+                String.valueOf(System.currentTimeMillis()), // account number
                 name,
                 balance,
                 phone,
