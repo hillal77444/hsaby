@@ -15,13 +15,29 @@
         android:padding="12dp">
 
         <!-- اسم الحساب -->
-        <TextView
-            android:id="@+id/account_name"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/black"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/account_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"/>
+
+            <Switch
+                android:id="@+id/whatsapp_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="واتساب"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
 
         <!-- رقم الهاتف مع أيقونة -->
         <LinearLayout
