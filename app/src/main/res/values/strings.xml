@@ -230,4 +230,6 @@
         <item>من الأكبر إلى الأصغر</item>
         <item>من الأصغر إلى الأكبر</item>
     </string-array>
+
+    <string name="view_direct_statement">عرض الكشف المباشر</string>
 </resources>
