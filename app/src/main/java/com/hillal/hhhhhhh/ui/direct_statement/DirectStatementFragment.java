@@ -8,101 +8,72 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.hhhhhhh.R;
+import com.hillal.hhhhhhh.data.model.AccountSummary;
+import com.hillal.hhhhhhh.data.model.AccountSummaryResponse;
+import com.hillal.hhhhhhh.data.model.TransactionResponse;
+import com.hillal.hhhhhhh.data.remote.ApiClient;
 import com.hillal.hhhhhhh.data.remote.ApiService;
-import com.hillal.hhhhhhh.data.remote.RetrofitClient;
 import com.hillal.hhhhhhh.databinding.FragmentDirectStatementBinding;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import java.util.List;
 
 public class DirectStatementFragment extends Fragment {
     private FragmentDirectStatementBinding binding;
-    private ApiService apiService;
-    private TextInputEditText fromDateInput;
-    private TextInputEditText toDateInput;
-    private RecyclerView accountsRecyclerView;
-    private RecyclerView transactionsRecyclerView;
     private DirectStatementAdapter accountsAdapter;
     private TransactionAdapter transactionsAdapter;
-    private TextView totalBalanceText;
-    private TextView totalDebitText;
-    private TextView totalCreditText;
-    private String phoneNumber;
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+    private ApiService apiService;
     private ProgressDialog progressDialog;
+    private String phoneNumber;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        apiService = RetrofitClient.getApiService();
-        if (getArguments() != null) {
-            phoneNumber = getArguments().getString("phoneNumber");
-        }
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentDirectStatementBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         
-        // إخفاء حقول التاريخ من الشاشة الرئيسية
-        binding.dateRangeLayout.setVisibility(View.GONE);
-        binding.generateButton.setVisibility(View.GONE);
+        apiService = ApiClient.getClient().create(ApiService.class);
+        progressDialog = new ProgressDialog(requireContext());
+        progressDialog.setMessage("جاري تحميل البيانات...");
         
         setupRecyclerViews();
-        initializeApiService();
+        hideDateFields();
         loadData();
     }
 
     private void setupRecyclerViews() {
-        // إعداد قائمة الحسابات
-        accountsAdapter = new DirectStatementAdapter();
-        accountsAdapter.setOnAccountClickListener(account -> {
-            // عند النقر على حساب، نعرض حقول التاريخ وزر إنشاء الكشف
-            binding.dateRangeLayout.setVisibility(View.VISIBLE);
-            binding.generateButton.setVisibility(View.VISIBLE);
+        accountsAdapter = new DirectStatementAdapter(account -> {
+            showDateFields();
             loadAccountTransactions(account.getUserId());
         });
-        accountsRecyclerView = binding.accountsRecyclerView;
-        accountsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        accountsRecyclerView.setAdapter(accountsAdapter);
-
-        // إعداد قائمة المعاملات
+        
         transactionsAdapter = new TransactionAdapter();
-        transactionsRecyclerView = binding.transactionsRecyclerView;
-        transactionsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        transactionsRecyclerView.setAdapter(transactionsAdapter);
-
-        // إعداد مستمع لزر إنشاء الكشف
-        binding.generateButton.setOnClickListener(v -> {
-            String fromDate = fromDateInput.getText().toString();
-            String toDate = toDateInput.getText().toString();
-            loadAccountTransactions(accountsAdapter.getSelectedAccountId(), fromDate, toDate);
-        });
+        
+        binding.accountsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.accountsRecyclerView.setAdapter(accountsAdapter);
+        
+        binding.transactionsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.transactionsRecyclerView.setAdapter(transactionsAdapter);
     }
 
-    private void initializeApiService() {
-        apiService = RetrofitClient.getApiService();
+    private void hideDateFields() {
+        binding.dateRangeLayout.setVisibility(View.GONE);
+        binding.generateButton.setVisibility(View.GONE);
+    }
+
+    private void showDateFields() {
+        binding.dateRangeLayout.setVisibility(View.VISIBLE);
+        binding.generateButton.setVisibility(View.VISIBLE);
     }
 
     private void loadData() {
@@ -111,108 +82,79 @@ public class DirectStatementFragment extends Fragment {
             return;
         }
 
-        showLoadingDialog("جاري تحميل البيانات...");
-        
-        if (phoneNumber != null) {
-            apiService.getAccountsSummary(phoneNumber).enqueue(new Callback<AccountSummaryResponse>() {
-                @Override
-                public void onResponse(@NonNull Call<AccountSummaryResponse> call, 
-                                     @NonNull Response<AccountSummaryResponse> response) {
-                    hideLoadingDialog();
-                    
-                    if (response.isSuccessful() && response.body() != null) {
-                        AccountSummaryResponse summary = response.body();
-                        accountsAdapter.setAccounts(summary.getAccounts());
-                        
-                        // تحديث الإجماليات
-                        binding.totalBalanceText.setText(String.format("الرصيد الإجمالي: %.2f يمني", summary.getTotalBalance()));
-                        binding.totalDebitText.setText(String.format("إجمالي الديون: %.2f يمني", summary.getTotalDebits()));
-                        binding.totalCreditText.setText(String.format("إجمالي المدفوعات: %.2f يمني", summary.getTotalCredits()));
-                    } else {
-                        Toast.makeText(requireContext(), "فشل في جلب البيانات", Toast.LENGTH_LONG).show();
-                    }
+        progressDialog.show();
+        apiService.getAccountsSummary(phoneNumber).enqueue(new Callback<AccountSummaryResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<AccountSummaryResponse> call, @NonNull Response<AccountSummaryResponse> response) {
+                progressDialog.dismiss();
+                if (response.isSuccessful() && response.body() != null) {
+                    AccountSummaryResponse summary = response.body();
+                    accountsAdapter.setAccounts(summary.getAccounts());
+                    updateSummaryTotals(summary);
+                } else {
+                    Toast.makeText(requireContext(), "فشل في تحميل البيانات", Toast.LENGTH_LONG).show();
                 }
+            }
 
-                @Override
-                public void onFailure(@NonNull Call<AccountSummaryResponse> call, 
-                                    @NonNull Throwable t) {
-                    hideLoadingDialog();
-                    Toast.makeText(requireContext(), "فشل في جلب البيانات", Toast.LENGTH_LONG).show();
-                }
-            });
-        } else {
-            hideLoadingDialog();
-            Toast.makeText(requireContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_LONG).show();
-        }
+            @Override
+            public void onFailure(@NonNull Call<AccountSummaryResponse> call, @NonNull Throwable t) {
+                progressDialog.dismiss();
+                Toast.makeText(requireContext(), "حدث خطأ في الاتصال", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
-    private void loadAccountTransactions(int userId) {
-        loadAccountTransactions(userId, null, null);
-    }
-
-    private void loadAccountTransactions(int userId, String fromDate, String toDate) {
+    private void loadAccountTransactions(long userId) {
         if (!isNetworkAvailable()) {
             Toast.makeText(requireContext(), "لا يوجد اتصال بالإنترنت", Toast.LENGTH_LONG).show();
             return;
         }
 
-        showLoadingDialog("جاري تحميل المعاملات...");
-        
-        apiService.getDetailedTransactions(phoneNumber, userId, fromDate, toDate)
-            .enqueue(new Callback<TransactionResponse>() {
-                @Override
-                public void onResponse(@NonNull Call<TransactionResponse> call, 
-                                     @NonNull Response<TransactionResponse> response) {
-                    hideLoadingDialog();
-                    
-                    if (response.isSuccessful() && response.body() != null) {
-                        transactionsAdapter.setTransactions(response.body().getTransactions());
-                    } else {
-                        Toast.makeText(requireContext(), "فشل في جلب المعاملات", Toast.LENGTH_LONG).show();
-                    }
-                }
+        progressDialog.show();
+        String fromDate = binding.fromDateInput.getText().toString();
+        String toDate = binding.toDateInput.getText().toString();
 
-                @Override
-                public void onFailure(@NonNull Call<TransactionResponse> call, 
-                                    @NonNull Throwable t) {
-                    hideLoadingDialog();
-                    Toast.makeText(requireContext(), "فشل في جلب المعاملات", Toast.LENGTH_LONG).show();
-                }
-            });
+        apiService.getDetailedTransactions(phoneNumber, userId, fromDate, toDate)
+                .enqueue(new Callback<TransactionResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<TransactionResponse> call, @NonNull Response<TransactionResponse> response) {
+                        progressDialog.dismiss();
+                        if (response.isSuccessful() && response.body() != null) {
+                            TransactionResponse transactionResponse = response.body();
+                            transactionsAdapter.setTransactions(transactionResponse.getTransactions());
+                            updateCurrentBalance(transactionResponse.getCurrentBalance());
+                        } else {
+                            Toast.makeText(requireContext(), "فشل في تحميل المعاملات", Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<TransactionResponse> call, @NonNull Throwable t) {
+                        progressDialog.dismiss();
+                        Toast.makeText(requireContext(), "حدث خطأ في الاتصال", Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    private void updateSummaryTotals(AccountSummaryResponse summary) {
+        binding.totalBalanceText.setText(String.format("إجمالي الرصيد: %.2f", summary.getTotalBalance()));
+        binding.totalDebitsText.setText(String.format("إجمالي المدفوعات: %.2f", summary.getTotalDebits()));
+        binding.totalCreditsText.setText(String.format("إجمالي الديون: %.2f", summary.getTotalCredits()));
+    }
+
+    private void updateCurrentBalance(double currentBalance) {
+        binding.currentBalanceText.setText(String.format("الرصيد الحالي: %.2f", currentBalance));
     }
 
     private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) requireContext()
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager != null) {
-            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-        }
-        return false;
-    }
-
-    private void showLoadingDialog(String message) {
-        if (progressDialog == null) {
-            progressDialog = new ProgressDialog(requireContext());
-            progressDialog.setCancelable(false);
-        }
-        progressDialog.setMessage(message);
-        progressDialog.show();
-    }
-
-    private void hideLoadingDialog() {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
-        }
+        ConnectivityManager connectivityManager = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (progressDialog != null) {
-            progressDialog.dismiss();
-            progressDialog = null;
-        }
         binding = null;
     }
 } 
