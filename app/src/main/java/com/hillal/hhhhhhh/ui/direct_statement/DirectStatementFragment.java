@@ -81,7 +81,7 @@ public class DirectStatementFragment extends Fragment {
             // عند النقر على حساب، نعرض حقول التاريخ وزر إنشاء الكشف
             binding.dateRangeLayout.setVisibility(View.VISIBLE);
             binding.generateButton.setVisibility(View.VISIBLE);
-            // يمكن إضافة المزيد من المنطق هنا
+            loadAccountTransactions(account.getUserId());
         });
         accountsRecyclerView = binding.accountsRecyclerView;
         accountsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -92,6 +92,13 @@ public class DirectStatementFragment extends Fragment {
         transactionsRecyclerView = binding.transactionsRecyclerView;
         transactionsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         transactionsRecyclerView.setAdapter(transactionsAdapter);
+
+        // إعداد مستمع لزر إنشاء الكشف
+        binding.generateButton.setOnClickListener(v -> {
+            String fromDate = fromDateInput.getText().toString();
+            String toDate = toDateInput.getText().toString();
+            loadAccountTransactions(accountsAdapter.getSelectedAccountId(), fromDate, toDate);
+        });
     }
 
     private void initializeApiService() {
@@ -107,21 +114,27 @@ public class DirectStatementFragment extends Fragment {
         showLoadingDialog("جاري تحميل البيانات...");
         
         if (phoneNumber != null) {
-            apiService.getAccounts(phoneNumber).enqueue(new Callback<List<DirectStatementAdapter.AccountSummary>>() {
+            apiService.getAccountsSummary(phoneNumber).enqueue(new Callback<AccountSummaryResponse>() {
                 @Override
-                public void onResponse(@NonNull Call<List<DirectStatementAdapter.AccountSummary>> call, 
-                                     @NonNull Response<List<DirectStatementAdapter.AccountSummary>> response) {
+                public void onResponse(@NonNull Call<AccountSummaryResponse> call, 
+                                     @NonNull Response<AccountSummaryResponse> response) {
                     hideLoadingDialog();
                     
                     if (response.isSuccessful() && response.body() != null) {
-                        accountsAdapter.setAccounts(response.body());
+                        AccountSummaryResponse summary = response.body();
+                        accountsAdapter.setAccounts(summary.getAccounts());
+                        
+                        // تحديث الإجماليات
+                        binding.totalBalanceText.setText(String.format("الرصيد الإجمالي: %.2f يمني", summary.getTotalBalance()));
+                        binding.totalDebitText.setText(String.format("إجمالي الديون: %.2f يمني", summary.getTotalDebits()));
+                        binding.totalCreditText.setText(String.format("إجمالي المدفوعات: %.2f يمني", summary.getTotalCredits()));
                     } else {
                         Toast.makeText(requireContext(), "فشل في جلب البيانات", Toast.LENGTH_LONG).show();
                     }
                 }
 
                 @Override
-                public void onFailure(@NonNull Call<List<DirectStatementAdapter.AccountSummary>> call, 
+                public void onFailure(@NonNull Call<AccountSummaryResponse> call, 
                                     @NonNull Throwable t) {
                     hideLoadingDialog();
                     Toast.makeText(requireContext(), "فشل في جلب البيانات", Toast.LENGTH_LONG).show();
@@ -131,6 +144,41 @@ public class DirectStatementFragment extends Fragment {
             hideLoadingDialog();
             Toast.makeText(requireContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void loadAccountTransactions(int userId) {
+        loadAccountTransactions(userId, null, null);
+    }
+
+    private void loadAccountTransactions(int userId, String fromDate, String toDate) {
+        if (!isNetworkAvailable()) {
+            Toast.makeText(requireContext(), "لا يوجد اتصال بالإنترنت", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        showLoadingDialog("جاري تحميل المعاملات...");
+        
+        apiService.getDetailedTransactions(phoneNumber, userId, fromDate, toDate)
+            .enqueue(new Callback<TransactionResponse>() {
+                @Override
+                public void onResponse(@NonNull Call<TransactionResponse> call, 
+                                     @NonNull Response<TransactionResponse> response) {
+                    hideLoadingDialog();
+                    
+                    if (response.isSuccessful() && response.body() != null) {
+                        transactionsAdapter.setTransactions(response.body().getTransactions());
+                    } else {
+                        Toast.makeText(requireContext(), "فشل في جلب المعاملات", Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<TransactionResponse> call, 
+                                    @NonNull Throwable t) {
+                    hideLoadingDialog();
+                    Toast.makeText(requireContext(), "فشل في جلب المعاملات", Toast.LENGTH_LONG).show();
+                }
+            });
     }
 
     private boolean isNetworkAvailable() {
