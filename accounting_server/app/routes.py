@@ -818,92 +818,50 @@ def get_account_summary(phone):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@main.route('/api/transactions/detailed/<phone>/<int:userId>', methods=['GET'])
-def get_detailed_transactions(phone, userId):
+    
+@main.route('/api/accounts/<int:account_id>/details', methods=['GET'])
+def get_account_details(account_id):
     try:
-        # التحقق من وجود الحساب
-        account = Account.query.filter_by(id=userId, phone_number=phone).first()
+        account = Account.query.get(account_id)
         if not account:
             return jsonify({'error': 'Account not found'}), 404
-        
-        # جلب معاملات الحساب
-        from_date = request.args.get('fromDate')
-        to_date = request.args.get('toDate')
-        
-        query = Transaction.query.filter_by(account_id=userId)
-        
-        if from_date:
-            query = query.filter(Transaction.date >= datetime.strptime(from_date, '%Y-%m-%d'))
-        if to_date:
-            query = query.filter(Transaction.date <= datetime.strptime(to_date, '%Y-%m-%d'))
-            
-        transactions = query.order_by(Transaction.date.desc()).all()
-        
-        # حساب الرصيد الحالي
-        current_balance = db.session.query(
-            func.sum(case([(Transaction.type == 'credit', Transaction.amount)], else_=0)) -
-            func.sum(case([(Transaction.type == 'debit', Transaction.amount)], else_=0))
-        ).filter(Transaction.account_id == userId).scalar() or 0
-        
-        transactions_list = []
-        for transaction in transactions:
-            transactions_list.append({
-                'date': transaction.date.strftime('%Y-%m-%d'),
-                'amount': transaction.amount,
-                'type': transaction.type,
-                'description': transaction.description
+
+        # حساب الرصيد
+        debits = db.session.query(func.sum(Transaction.amount))\
+            .filter(Transaction.account_id == account.id,
+                    Transaction.type == 'debit')\
+            .scalar() or 0
+
+        credits = db.session.query(func.sum(Transaction.amount))\
+            .filter(Transaction.account_id == account.id,
+                    Transaction.type == 'credit')\
+            .scalar() or 0
+
+        balance = credits - debits
+
+        # جلب المعاملات
+        transactions = Transaction.query.filter_by(account_id=account.id)\
+            .order_by(Transaction.date.desc()).all()
+
+        transaction_list = []
+        for tx in transactions:
+            transaction_list.append({
+                'transactionId': tx.id,
+                'type': tx.type,
+                'amount': tx.amount,
+                'currency': tx.currency,
+                'date': tx.date.strftime('%Y-%m-%d %H:%M:%S'),
+                'description': tx.description or ''
             })
-        
+
         return jsonify({
-            'transactions': transactions_list,
-            'currentBalance': current_balance
+            'accountId': account.id,
+            'userName': account.user.username,
+            'balance': balance,
+            'totalDebits': debits,
+            'totalCredits': credits,
+            'transactions': transaction_list
         })
-        
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-@main.route('/api/report/<phone>/<int:user_id>')
-@jwt_required()
-def get_account_report(phone, user_id):
-    try:
-        account = Account.query.filter_by(phone_number=phone, user_id=user_id).first()
-        if not account:
-            return jsonify({'error': 'لم يتم العثور على الحساب'}), 404
-
-        # جلب المعاملات مرتبة حسب التاريخ
-        transactions = Transaction.query.filter_by(account_id=account.id).order_by(Transaction.date).all()
-        
-        # حساب الإجماليات
-        total_credits = sum(t.amount for t in transactions if t.type == 'credit')
-        total_debits = sum(t.amount for t in transactions if t.type == 'debit')
-        current_balance = total_credits - total_debits
-
-        # تجهيز المعاملات مع الرصيد المتراكم
-        running_balance = 0
-        detailed_transactions = []
-        
-        for transaction in transactions:
-            if transaction.type == 'credit':
-                running_balance += transaction.amount
-            else:
-                running_balance -= transaction.amount
-                
-            detailed_transactions.append({
-                'date': transaction.date.isoformat(),
-                'amount': transaction.amount,
-                'type': transaction.type,
-                'description': transaction.description,
-                'running_balance': running_balance
-            })
-
-        return jsonify({
-            'account_name': account.user.username,
-            'total_credits': total_credits,
-            'total_debits': total_debits,
-            'current_balance': current_balance,
-            'transactions': detailed_transactions
-        })
-
-    except Exception as e:
-        logger.error(f"Error generating account report: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء إنشاء التقرير'}), 500
