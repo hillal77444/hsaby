@@ -84,7 +84,7 @@ public class AddAccountFragment extends Fragment {
             double balance = Double.parseDouble(balanceStr);
             
             // التحقق من وجود حساب بنفس رقم الهاتف
-            Account existingAccountByPhone = accountViewModel.getAccountByPhoneNumberSync(phone);
+            Account existingAccountByPhone = accountViewModel.getAccountByPhoneNumber(phone);
             if (existingAccountByPhone != null) {
                 binding.phoneEditText.setError("رقم الهاتف موجود مسبقاً");
                 return;
