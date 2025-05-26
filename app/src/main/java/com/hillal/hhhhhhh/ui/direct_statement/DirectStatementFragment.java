@@ -16,7 +16,7 @@ import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.data.model.AccountSummary;
 import com.hillal.hhhhhhh.data.model.AccountSummaryResponse;
 import com.hillal.hhhhhhh.data.model.TransactionResponse;
-import com.hillal.hhhhhhh.data.remote.ApiClient;
+import com.hillal.hhhhhhh.data.remote.RetrofitClient;
 import com.hillal.hhhhhhh.data.remote.ApiService;
 import com.hillal.hhhhhhh.databinding.FragmentDirectStatementBinding;
 import retrofit2.Call;
@@ -42,7 +42,7 @@ public class DirectStatementFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         
-        apiService = ApiClient.getClient().create(ApiService.class);
+        apiService = RetrofitClient.getApiService();
         progressDialog = new ProgressDialog(requireContext());
         progressDialog.setMessage("جاري تحميل البيانات...");
         
