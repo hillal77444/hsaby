@@ -79,12 +79,13 @@ public class AccountRepository {
         return accountDao.getAccountByNumberSync(accountNumber);
     }
 
-    public Account getAccountByPhoneNumberSync(String phoneNumber) {
-        return accountDao.getAccountByPhoneNumber(phoneNumber);
-    }
-
     public Account getAccountByPhoneNumber(String phoneNumber) {
-        return accountDao.getAccountByPhoneNumber(phoneNumber);
+        try {
+            return executorService.submit(() -> accountDao.getAccountByPhoneNumber(phoneNumber)).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public String generateUniqueAccountNumber() {
@@ -96,7 +97,7 @@ public class AccountRepository {
             String date = new java.text.SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
             int random = (int)(Math.random() * 9000) + 1000; // رقم بين 1000 و 9999
             accountNumber = "ACC-" + date + "-" + random;
-        } while (accountDao.getAccountByNumberSync(accountNumber) != null);
+        } while (executorService.submit(() -> accountDao.getAccountByNumberSync(accountNumber)).get() != null);
         return accountNumber;
     }
 
