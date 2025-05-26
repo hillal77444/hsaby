@@ -35,7 +35,7 @@ public class DirectStatementAdapter extends RecyclerView.Adapter<DirectStatement
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         AccountSummary account = accounts.get(position);
-        holder.accountName.setText(account.getAccountName());
+        holder.accountName.setText(account.getUserName());
         holder.balance.setText(String.valueOf(account.getBalance()));
         holder.itemView.setSelected(position == selectedPosition);
         
