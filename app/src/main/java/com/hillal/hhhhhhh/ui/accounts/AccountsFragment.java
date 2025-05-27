@@ -8,6 +8,7 @@ import android.widget.Toast;
 import android.widget.TextView;
 import android.widget.Spinner;
 import android.widget.AdapterView;
+import android.widget.Switch;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -146,6 +147,12 @@ public class AccountsFragment extends Fragment {
             Account account = accounts.get(position);
             holder.accountName.setText(account.getName());
             holder.phone.setText(account.getPhoneNumber());
+            holder.whatsappSwitch.setChecked(account.isWhatsappEnabled());
+
+            holder.whatsappSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                account.setWhatsappEnabled(isChecked);
+                accountViewModel.updateAccount(account);
+            });
 
             // راقب الرصيد اليمني فقط
             accountViewModel.getAccountBalanceYemeni(account.getId()).observe(lifecycleOwner, balance -> {
@@ -177,12 +184,14 @@ public class AccountsFragment extends Fragment {
             TextView accountName;
             TextView phone;
             TextView balance;
+            Switch whatsappSwitch;
 
             ViewHolder(View itemView) {
                 super(itemView);
                 accountName = itemView.findViewById(R.id.account_name);
                 phone = itemView.findViewById(R.id.phone);
                 balance = itemView.findViewById(R.id.balance);
+                whatsappSwitch = itemView.findViewById(R.id.whatsapp_switch);
             }
         }
     }
