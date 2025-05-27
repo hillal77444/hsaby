@@ -9,6 +9,7 @@ import android.widget.Toast;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.app.ProgressDialog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,6 +30,7 @@ public class LoginFragment extends Fragment {
     private static final String TAG = "LoginFragment";
     private FragmentLoginBinding binding;
     private AuthViewModel authViewModel;
+    private ProgressDialog loadingDialog;
 
     // دالة مساعدة لنسخ النص إلى الحافظة
     private void copyToClipboard(String text) {
@@ -87,6 +89,12 @@ public class LoginFragment extends Fragment {
                     com.hillal.hhhhhhh.data.preferences.UserPreferences userPreferences = new com.hillal.hhhhhhh.data.preferences.UserPreferences(requireContext());
                     userPreferences.saveUserName(userName);
                     
+                    // إظهار Dialog التحميل أثناء جلب البيانات من السيرفر
+                    loadingDialog = new ProgressDialog(getContext());
+                    loadingDialog.setMessage("جاري تحميل البيانات...");
+                    loadingDialog.setCancelable(false);
+                    loadingDialog.show();
+                    
                     // جلب البيانات من السيرفر بعد تسجيل الدخول
                     MainActivity mainActivity = (MainActivity) requireActivity();
                     DataManager dataManager = new DataManager(requireContext(), 
@@ -97,6 +105,10 @@ public class LoginFragment extends Fragment {
                     dataManager.fetchDataFromServer(new DataManager.DataCallback() {
                         @Override
                         public void onSuccess() {
+                            // إخفاء Dialog التحميل
+                            if (loadingDialog != null && loadingDialog.isShowing()) {
+                                loadingDialog.dismiss();
+                            }
                             Log.d(TAG, "Data fetched successfully");
                             // التنقل إلى لوحة التحكم بعد جلب البيانات
                             NavHostFragment.findNavController(LoginFragment.this)
@@ -105,6 +117,10 @@ public class LoginFragment extends Fragment {
 
                         @Override
                         public void onError(String error) {
+                            // إخفاء Dialog التحميل
+                            if (loadingDialog != null && loadingDialog.isShowing()) {
+                                loadingDialog.dismiss();
+                            }
                             Log.e(TAG, "Failed to fetch data: " + error);
                             
                             // تحضير رسالة الخطأ
