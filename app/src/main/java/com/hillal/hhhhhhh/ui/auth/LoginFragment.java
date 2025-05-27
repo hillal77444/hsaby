@@ -110,6 +110,7 @@ public class LoginFragment extends Fragment {
                             // التنقل إلى لوحة التحكم بعد جلب البيانات
                             NavHostFragment.findNavController(LoginFragment.this)
                                     .navigate(R.id.navigation_dashboard);
+                            ((MainActivity) requireActivity()).setBottomNavigationVisibility(true);
                         }
 
                         @Override
