@@ -53,7 +53,7 @@ public class AccountSummaryFragment extends Fragment {
     }
 
     private void setupApiService() {
-        apiService = RetrofitClient.getClient().create(ApiService.class);
+        apiService = RetrofitClient.getInstance().getClient().create(ApiService.class);
     }
 
     private void loadAccountSummary() {
@@ -85,17 +85,16 @@ public class AccountSummaryFragment extends Fragment {
         table.removeAllViews();
 
         // إضافة رأس الجدول
-        addTableRow(table, "العملة", "الرصيد", "المدين", "الدائن", true);
+        addTableRow(table, new String[]{"العملة", "الرصيد", "المدين", "الدائن"}, true);
 
         // إضافة البيانات
         for (CurrencySummary summary : summaries) {
-            addTableRow(table,
+            addTableRow(table, new String[]{
                 summary.getCurrency(),
                 numberFormat.format(summary.getTotalBalance()),
                 numberFormat.format(summary.getTotalDebits()),
-                numberFormat.format(summary.getTotalCredits()),
-                false
-            );
+                numberFormat.format(summary.getTotalCredits())
+            }, false);
         }
     }
 
@@ -104,23 +103,22 @@ public class AccountSummaryFragment extends Fragment {
         table.removeAllViews();
 
         // إضافة رأس الجدول
-        addTableRow(table, "ID", "الاسم", "العملة", "الرصيد", "المدين", "الدائن", true);
+        addTableRow(table, new String[]{"ID", "الاسم", "العملة", "الرصيد", "المدين", "الدائن"}, true);
 
         // إضافة البيانات
         for (AccountSummary account : accounts) {
-            addTableRow(table,
+            addTableRow(table, new String[]{
                 String.valueOf(account.getUserId()),
                 account.getUserName(),
                 account.getCurrency(),
                 numberFormat.format(account.getBalance()),
                 numberFormat.format(account.getTotalDebits()),
-                numberFormat.format(account.getTotalCredits()),
-                false
-            );
+                numberFormat.format(account.getTotalCredits())
+            }, false);
         }
     }
 
-    private void addTableRow(TableLayout table, String... values) {
+    private void addTableRow(TableLayout table, String[] values, boolean isHeader) {
         TableRow row = new TableRow(requireContext());
         row.setLayoutParams(new TableLayout.LayoutParams(
             TableLayout.LayoutParams.MATCH_PARENT,
@@ -133,7 +131,7 @@ public class AccountSummaryFragment extends Fragment {
             textView.setPadding(8, 8, 8, 8);
             textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
             
-            if (values[0].equals("العملة") || values[0].equals("ID")) {
+            if (isHeader) {
                 textView.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.light_gray));
                 textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
             }
