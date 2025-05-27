@@ -28,6 +28,8 @@ import com.hillal.hhhhhhh.data.sync.SyncManager;
 import com.hillal.hhhhhhh.data.remote.DataManager;
 import com.hillal.hhhhhhh.data.sync.MigrationManager;
 
+import java.util.Locale;
+
 public class DashboardFragment extends Fragment {
     private static final String TAG = "DashboardFragment";
     private FragmentDashboardBinding binding;
@@ -129,27 +131,25 @@ public class DashboardFragment extends Fragment {
     private void observeData() {
         dashboardViewModel.getTotalDebtors().observe(getViewLifecycleOwner(), total -> {
             if (total != null) {
-                binding.totalDebtors.setText(String.format("%.2f يمني", total));
+                binding.totalDebtors.setText(String.format(Locale.US, "%d يمني", (int) Math.round(total)));
             }
         });
 
         dashboardViewModel.getTotalCreditors().observe(getViewLifecycleOwner(), total -> {
             if (total != null) {
-                binding.totalCreditors.setText(String.format("%.2f يمني", total));
+                binding.totalCreditors.setText(String.format(Locale.US, "%d يمني", (int) Math.round(total)));
             }
         });
 
-        // ربط عدد الحسابات
         dashboardViewModel.getAccounts().observe(getViewLifecycleOwner(), accounts -> {
             if (accounts != null) {
-                binding.totalAccounts.setText(String.valueOf(accounts.size()));
+                binding.totalAccounts.setText(String.format(Locale.US, "%d", accounts.size()));
             }
         });
 
-        // ربط الرصيد
         dashboardViewModel.getNetBalance().observe(getViewLifecycleOwner(), balance -> {
             if (balance != null) {
-                binding.totalBalance.setText(String.format("%.2f يمني", balance));
+                binding.totalBalance.setText(String.format(Locale.US, "%d يمني", (int) Math.round(balance)));
             }
         });
     }
