@@ -46,4 +46,20 @@ public class AccountViewModel extends AndroidViewModel {
     public LiveData<Double> getAccountBalanceYemeni(long accountId) {
         return repository.getAccountBalanceYemeni(accountId);
     }
+
+    public Account getAccountByNumberSync(String accountNumber) {
+        return repository.getAccountByNumberSync(accountNumber);
+    }
+
+    public Account getAccountByPhoneNumberSync(String phoneNumber) {
+        return repository.getAccountByPhoneNumber(phoneNumber);
+    }
+
+    public Account getAccountByPhoneNumber(String phoneNumber) {
+        return repository.getAccountByPhoneNumber(phoneNumber);
+    }
+
+    public String generateUniqueAccountNumber() {
+        return repository.generateUniqueAccountNumber();
+    }
 } 
