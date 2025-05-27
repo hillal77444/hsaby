@@ -258,12 +258,4 @@ public class MainActivity extends AppCompatActivity {
     public PendingOperationDao getPendingOperationDao() {
         return ((App) getApplication()).getDatabase().pendingOperationDao();
     }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (db != null) {
-            db.close();
-        }
-    }
 }
