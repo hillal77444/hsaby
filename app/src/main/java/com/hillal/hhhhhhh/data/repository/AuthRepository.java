@@ -48,8 +48,13 @@ public class AuthRepository {
                     if (response.errorBody() != null) {
                         try {
                             String errorBody = response.errorBody().string();
+                            Log.d(TAG, "Error response from server: " + errorBody);
                             org.json.JSONObject jsonObject = new org.json.JSONObject(errorBody);
-                            errorMessage = jsonObject.getString("error");
+                            if (jsonObject.has("error")) {
+                                errorMessage = jsonObject.getString("error");
+                            } else {
+                                errorMessage = "حدث خطأ أثناء تسجيل الدخول";
+                            }
                         } catch (Exception e) {
                             Log.e(TAG, "Error reading error body", e);
                             errorMessage = "حدث خطأ أثناء تسجيل الدخول";
