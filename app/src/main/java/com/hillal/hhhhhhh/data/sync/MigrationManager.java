@@ -70,8 +70,7 @@ public class MigrationManager {
             List<Transaction> transactionsToMigrate = transactionDao.getNewOrModifiedTransactions();
 
             if (accountsToMigrate.isEmpty() && transactionsToMigrate.isEmpty()) {
-                new Handler(Looper.getMainLooper()).post(() -> 
-                    Toast.makeText(context, "لا توجد حسابات أو معاملات تحتاج إلى ترحيل", Toast.LENGTH_LONG).show());
+                // Toast.makeText(context, "لا توجد حسابات أو معاملات تحتاج إلى ترحيل", Toast.LENGTH_LONG).show());
                 return;
             }
 
