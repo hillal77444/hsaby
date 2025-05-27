@@ -121,10 +121,13 @@ dependencies {
 
     implementation 'com.itextpdf:itextpdf:5.5.13.3'
 
-    // Retrofit for network requests
+    // Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+    
+    // OkHttp
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.3'
 
     implementation 'com.github.florent37:singledateandtimepicker:2.2.7'
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
