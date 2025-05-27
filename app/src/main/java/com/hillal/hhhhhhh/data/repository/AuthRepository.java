@@ -44,13 +44,20 @@ public class AuthRepository {
                     saveUserData(user);
                     callback.onSuccess(user);
                 } else {
-                    String errorMessage = "فشل تسجيل الدخول: " + response.code();
+                    String errorMessage;
                     if (response.errorBody() != null) {
                         try {
-                            errorMessage += " - " + response.errorBody().string();
+                            String errorBody = response.errorBody().string();
+                            org.json.JSONObject jsonObject = new org.json.JSONObject(errorBody);
+                            String encodedError = jsonObject.getString("error");
+                            // تحويل النص من Unicode إلى نص عربي
+                            errorMessage = new String(encodedError.getBytes("ISO-8859-1"), "UTF-8");
                         } catch (Exception e) {
                             Log.e(TAG, "Error reading error body", e);
+                            errorMessage = "حدث خطأ أثناء تسجيل الدخول";
                         }
+                    } else {
+                        errorMessage = "حدث خطأ أثناء تسجيل الدخول";
                     }
                     Log.e(TAG, "Login failed: " + errorMessage);
                     callback.onError(errorMessage);
