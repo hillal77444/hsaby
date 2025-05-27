@@ -15,6 +15,9 @@ import androidx.fragment.app.Fragment;
 
 import com.hillal.hhhhhhh.R;
 import com.hillal.hhhhhhh.databinding.FragmentAccountSummaryBinding;
+import com.hillal.hhhhhhh.models.AccountSummary;
+import com.hillal.hhhhhhh.models.AccountSummaryResponse;
+import com.hillal.hhhhhhh.models.CurrencySummary;
 import com.hillal.hhhhhhh.network.ApiService;
 import com.hillal.hhhhhhh.network.RetrofitClient;
 
