@@ -62,33 +62,39 @@ def register():
         logger.error(f"Registration error: {str(e)}")
         db.session.rollback()
         return jsonify({'error': 'حدث خطأ أثناء إنشاء الحساب'}), 500
+    
 
 @main.route('/api/login', methods=['POST'])
 def login():
     try:
         data = request.get_json()
-        
+
         # التحقق من البيانات المطلوبة
         if 'phone' not in data or 'password' not in data:
             return jsonify({'error': 'يرجى إدخال رقم الهاتف وكلمة المرور'}), 400
-        
+
         # البحث عن المستخدم برقم الهاتف
         user = User.query.filter_by(phone=data['phone']).first()
-        
-        if user and verify_password(user.password_hash, data['password']):
-            access_token = create_access_token(identity=user.id)
-            return jsonify({
-                'message': 'تم تسجيل الدخول بنجاح',
-                'token': access_token,
-                'user_id': user.id,
-                'username': user.username
-            })
-        
-        return jsonify({'error': 'رقم الهاتف أو كلمة المرور غير صحيحة'}), 401
-        
+
+        if not user:
+            return jsonify({'error': 'رقم الهاتف غير مسجل'}), 401
+
+        if not verify_password(user.password_hash, data['password']):
+            return jsonify({'error': 'كلمة المرور غير صحيحة'}), 401
+
+        # إذا كانت البيانات صحيحة
+        access_token = create_access_token(identity=user.id)
+        return jsonify({
+            'message': 'تم تسجيل الدخول بنجاح',
+            'token': access_token,
+            'user_id': user.id,
+            'username': user.username
+        })
+
     except Exception as e:
         logger.error(f"Login error: {str(e)}")
         return jsonify({'error': 'حدث خطأ أثناء تسجيل الدخول'}), 500
+
     
 @main.route('/api/sync', methods=['POST'])
 @jwt_required()
