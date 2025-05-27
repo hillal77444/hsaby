@@ -49,9 +49,7 @@ public class AuthRepository {
                         try {
                             String errorBody = response.errorBody().string();
                             org.json.JSONObject jsonObject = new org.json.JSONObject(errorBody);
-                            String encodedError = jsonObject.getString("error");
-                            // تحويل النص من Unicode إلى نص عربي
-                            errorMessage = new String(encodedError.getBytes("ISO-8859-1"), "UTF-8");
+                            errorMessage = jsonObject.getString("error");
                         } catch (Exception e) {
                             Log.e(TAG, "Error reading error body", e);
                             errorMessage = "حدث خطأ أثناء تسجيل الدخول";
