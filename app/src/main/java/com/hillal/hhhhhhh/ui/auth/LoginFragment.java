@@ -163,7 +163,10 @@ public class LoginFragment extends Fragment {
                         try {
                             String jsonError = error.substring(error.indexOf("{"));
                             org.json.JSONObject jsonObject = new org.json.JSONObject(jsonError);
-                            errorMessage = jsonObject.getString("error");
+                            String encodedError = jsonObject.getString("error");
+                            // تحويل النص من Unicode إلى نص عربي
+                            byte[] bytes = encodedError.getBytes("ISO-8859-1");
+                            errorMessage = new String(bytes, "UTF-8");
                         } catch (Exception e) {
                             errorMessage = "رقم الهاتف أو كلمة المرور غير صحيحة";
                         }
