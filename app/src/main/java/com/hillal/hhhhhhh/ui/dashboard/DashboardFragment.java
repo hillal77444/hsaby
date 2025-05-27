@@ -141,6 +141,20 @@ public class DashboardFragment extends Fragment {
                 binding.totalCreditors.setText(String.format("%.2f يمني", total));
             }
         });
+
+        // ربط عدد الحسابات
+        dashboardViewModel.getAccounts().observe(getViewLifecycleOwner(), accounts -> {
+            if (accounts != null) {
+                binding.totalAccounts.setText(String.valueOf(accounts.size()));
+            }
+        });
+
+        // ربط الرصيد
+        dashboardViewModel.getNetBalance().observe(getViewLifecycleOwner(), balance -> {
+            if (balance != null) {
+                binding.totalBalance.setText(String.format("%.2f يمني", balance));
+            }
+        });
     }
 
     private void updateUserName() {
