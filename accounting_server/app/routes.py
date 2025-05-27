@@ -797,7 +797,6 @@ def update_username():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'حدث خطأ أثناء تحديث اسم المستخدم'}), 500
-
 @main.route('/api/accounts/summary/<phone>', methods=['GET'])
 def get_account_summary(phone):
     try:
@@ -815,7 +814,7 @@ def get_account_summary(phone):
             # تجميع المعاملات حسب العملة
             account_currencies = {}
             for trans in transactions:
-                currency = trans.currency or 'ريال يمني'  # استخدام العملة الافتراضية إذا لم تكن محددة
+                currency = trans.currency or 'يمني'  # استخدام العملة الافتراضية إذا لم تكن محددة
                 if currency not in account_currencies:
                     account_currencies[currency] = {
                         'debits': 0,
@@ -871,6 +870,7 @@ def get_account_summary(phone):
         return jsonify({'error': str(e)}), 500
 
     
+    #جلب تفاصيل الحساب حسب العمله http://212.224.88.122:5007/api/accounts/4/details?currency=يمني
 @main.route('/api/accounts/<int:account_id>/details', methods=['GET'])
 def get_account_details(account_id):
     try:
@@ -878,22 +878,29 @@ def get_account_details(account_id):
         if not account:
             return jsonify({'error': 'Account not found'}), 404
 
-        # حساب الرصيد
+        # الحصول على العملة من query parameter
+        currency = request.args.get('currency', 'يمني')
+
+        # حساب الرصيد للعملة المحددة
         debits = db.session.query(func.sum(Transaction.amount))\
             .filter(Transaction.account_id == account.id,
-                    Transaction.type == 'debit')\
+                    Transaction.type == 'debit',
+                    Transaction.currency == currency)\
             .scalar() or 0
 
         credits = db.session.query(func.sum(Transaction.amount))\
             .filter(Transaction.account_id == account.id,
-                    Transaction.type == 'credit')\
+                    Transaction.type == 'credit',
+                    Transaction.currency == currency)\
             .scalar() or 0
 
         balance = credits - debits
 
-        # جلب المعاملات
-        transactions = Transaction.query.filter_by(account_id=account.id)\
-            .order_by(Transaction.date.desc()).all()
+        # جلب المعاملات للعملة المحددة
+        transactions = Transaction.query.filter_by(
+            account_id=account.id,
+            currency=currency
+        ).order_by(Transaction.date.desc()).all()
 
         transaction_list = []
         for tx in transactions:
@@ -909,14 +916,17 @@ def get_account_details(account_id):
         return jsonify({
             'accountId': account.id,
             'userName': account.user.username,
+            'accountName': account.account_name,
             'balance': balance,
             'totalDebits': debits,
             'totalCredits': credits,
+            'currency': currency,
             'transactions': transaction_list
         })
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
     
 
 #لتحدي كلمه المرور http://212.224.88.122:5007/api/774447251/774447251
