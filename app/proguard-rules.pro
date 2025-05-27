@@ -20,9 +20,13 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# Retrofit
+# Keep attributes
 -keepattributes Signature
 -keepattributes *Annotation*
+-keepattributes SourceFile,LineNumberTable
+-keepattributes Exceptions
+
+# Retrofit
 -keep class retrofit2.** { *; }
 -keepclasseswithmembers class * {
     @retrofit2.http.* <methods>;
@@ -40,8 +44,6 @@
 -keep interface okhttp3.** { *; }
 
 # Gson
--keepattributes Signature
--keepattributes *Annotation*
 -dontwarn sun.misc.**
 -keep class com.google.gson.** { *; }
 -keep class * implements com.google.gson.TypeAdapterFactory
@@ -69,6 +71,7 @@
 -keep class com.hillal.hhhhhhh.data.remote.** { *; }
 -keep class com.hillal.hhhhhhh.ui.** { *; }
 -keep class com.hillal.hhhhhhh.utils.** { *; }
+-keep class com.hillal.hhhhhhh.models.** { *; }
 
 # Keep Room
 -keep class * extends androidx.room.RoomDatabase
@@ -121,14 +124,16 @@
     public <methods>;
 }
 
-# Keep AndroidX
+# Keep AndroidX and Android
 -keep class androidx.** { *; }
 -keep interface androidx.** { *; }
 -keep class android.** { *; }
 -keep interface android.** { *; }
 
-# Keep R8
--keepattributes SourceFile,LineNumberTable
--keepattributes *Annotation*
--keepattributes Signature
--keepattributes Exceptions
+# Keep Security Libraries
+-keep class org.conscrypt.** { *; }
+-keep class com.android.org.conscrypt.** { *; }
+-keep class org.bouncycastle.** { *; }
+-keep class org.bouncycastle.jsse.** { *; }
+-keep class org.bouncycastle.jsse.provider.** { *; }
+-keep class org.openjsse.** { *; }
