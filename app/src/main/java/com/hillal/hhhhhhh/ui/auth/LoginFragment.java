@@ -165,8 +165,7 @@ public class LoginFragment extends Fragment {
                             org.json.JSONObject jsonObject = new org.json.JSONObject(jsonError);
                             String encodedError = jsonObject.getString("error");
                             // تحويل النص من Unicode إلى نص عربي
-                            byte[] bytes = encodedError.getBytes("ISO-8859-1");
-                            errorMessage = new String(bytes, "UTF-8");
+                            errorMessage = java.net.URLDecoder.decode(encodedError, "UTF-8");
                         } catch (Exception e) {
                             errorMessage = "رقم الهاتف أو كلمة المرور غير صحيحة";
                         }
