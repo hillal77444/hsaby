@@ -163,15 +163,19 @@ public class LoginFragment extends Fragment {
                     } else if (error.contains("SocketTimeoutException")) {
                         errorMessage = "انتهت مهلة الاتصال بالخادم. يرجى المحاولة مرة أخرى";
                     } else if (error.contains("401")) {
-                        errorMessage = "رقم الهاتف أو كلمة المرور غير صحيحة";
+                        // استخراج رسالة الخطأ من JSON
+                        try {
+                            String jsonError = error.substring(error.indexOf("{"));
+                            org.json.JSONObject jsonObject = new org.json.JSONObject(jsonError);
+                            errorMessage = jsonObject.getString("error");
+                        } catch (Exception e) {
+                            errorMessage = "رقم الهاتف أو كلمة المرور غير صحيحة";
+                        }
                     } else {
                         errorMessage = "فشل تسجيل الدخول: " + error;
                     }
                     
-                    // نسخ تفاصيل الخطأ الكاملة إلى الحافظة
-                    copyToClipboard("تفاصيل الخطأ:\n" + error);
-                    
-                    Toast.makeText(getContext(), errorMessage + "\nتم نسخ تفاصيل الخطأ إلى الحافظة", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
                 }
             });
         });
