@@ -797,6 +797,8 @@ def update_username():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'حدث خطأ أثناء تحديث اسم المستخدم'}), 500
+    
+
 @main.route('/api/accounts/summary/<phone>', methods=['GET'])
 def get_account_summary(phone):
     try:
@@ -808,7 +810,6 @@ def get_account_summary(phone):
         accounts_list = []
         
         for account in accounts:
-            # حساب إجمالي المدفوعات والديون لكل عملة
             transactions = Transaction.query.filter_by(account_id=account.id).all()
             
             # تجميع المعاملات حسب العملة
