@@ -86,10 +86,10 @@ public interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE updated_at > :timestamp")
     List<Transaction> getTransactionsModifiedAfter(long timestamp);
 
-    @Query("SELECT SUM(amount) FROM transactions WHERE type = 'debit' AND currency = 'ريال يمني'")
+    @Query("SELECT SUM(amount) FROM transactions WHERE type = 'debit' AND currency = 'يمني'")
     LiveData<Double> getTotalDebtors();
 
-    @Query("SELECT SUM(amount) FROM transactions WHERE type = 'credit' AND currency = 'ريال يمني'")
+    @Query("SELECT SUM(amount) FROM transactions WHERE type = 'credit' AND currency = 'يمني'")
     LiveData<Double> getTotalCreditors();
 
     @Query("SELECT SUM(CASE WHEN type = 'debit' THEN -amount ELSE amount END) " +
