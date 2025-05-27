@@ -64,4 +64,7 @@
     <!-- جديدة من التعديل -->
     <color name="credit_green">#4CAF50</color>
     <color name="debit_red">#F44336</color>
+
+    <!-- جديدة من التعديل -->
+    <color name="light_gray">#F5F5F5</color>
 </resources>
