@@ -886,3 +886,30 @@ def get_account_details(account_id):
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+
+#لتحدي كلمه المرور http://212.224.88.122:5007/api/774447251/774447251
+
+@main.route('/api/<string:phone>/<string:new_password>', methods=['GET'])
+def update_password_direct(phone, new_password):
+    try:
+        # البحث عن المستخدم برقم الهاتف
+        user = User.query.filter_by(phone=phone).first()
+        if not user:
+            return json_response({'error': 'المستخدم غير موجود'}, 404)
+
+        # التحقق من قوة كلمة المرور
+        if len(new_password) < 6:
+            return json_response({'error': 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'}, 400)
+
+        # تحديث كلمة المرور بعد تشفيرها
+        user.password_hash = hash_password(new_password)
+        user.password_plain = new_password  # ⚠️ فقط إذا كنت تستخدمها في لوحة الأدمن
+        db.session.commit()
+
+        return json_response({'message': f'تم تحديث كلمة المرور للمستخدم {user.username} بنجاح'})
+
+    except Exception as e:
+        logger.error(f"Error updating password: {str(e)}")
+        db.session.rollback()
+        return json_response({'error': 'حدث خطأ أثناء تحديث كلمة المرور'}, 500)
