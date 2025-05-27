@@ -152,28 +152,8 @@ public class LoginFragment extends Fragment {
                     binding.progressBar.setVisibility(View.GONE);
                     binding.buttonLogin.setEnabled(true);
                     
-                    // رسائل خطأ أكثر تفصيلاً
-                    String errorMessage;
-                    if (error.contains("UnknownHostException")) {
-                        errorMessage = "لا يمكن الوصول إلى الخادم. يرجى التحقق من اتصال الإنترنت";
-                    } else if (error.contains("SocketTimeoutException")) {
-                        errorMessage = "انتهت مهلة الاتصال بالخادم. يرجى المحاولة مرة أخرى";
-                    } else if (error.contains("401")) {
-                        // استخراج رسالة الخطأ من JSON
-                        try {
-                            String jsonError = error.substring(error.indexOf("{"));
-                            org.json.JSONObject jsonObject = new org.json.JSONObject(jsonError);
-                            String encodedError = jsonObject.getString("error");
-                            // تحويل النص من Unicode إلى نص عربي
-                            errorMessage = java.net.URLDecoder.decode(encodedError, "UTF-8");
-                        } catch (Exception e) {
-                            errorMessage = "رقم الهاتف أو كلمة المرور غير صحيحة";
-                        }
-                    } else {
-                        errorMessage = "فشل تسجيل الدخول: " + error;
-                    }
-                    
-                    Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
+                    // عرض رسالة الخطأ مباشرة
+                    Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
                 }
             });
         });
