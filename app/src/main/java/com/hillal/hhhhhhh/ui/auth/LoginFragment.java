@@ -49,11 +49,6 @@ public class LoginFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         
-        // إخفاء شريط التنقل السفلي
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).setBottomNavigationVisibility(false);
-        }
-        
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
         binding.buttonLogin.setOnClickListener(v -> {
@@ -189,10 +184,6 @@ public class LoginFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // إظهار شريط التنقل السفلي عند مغادرة الصفحة
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).setBottomNavigationVisibility(true);
-        }
         binding = null;
     }
 } 
