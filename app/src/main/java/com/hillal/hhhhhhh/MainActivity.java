@@ -102,9 +102,11 @@ public class MainActivity extends AppCompatActivity {
             if (authViewModel.isLoggedIn()) {
                 // User is logged in, navigate to dashboard
                 navController.navigate(R.id.navigation_dashboard);
+                binding.bottomNavigation.setVisibility(View.VISIBLE);
             } else {
                 // User is not logged in, navigate to login
                 navController.navigate(R.id.loginFragment);
+                binding.bottomNavigation.setVisibility(View.GONE);
             }
 
             // Setup navigation drawer
