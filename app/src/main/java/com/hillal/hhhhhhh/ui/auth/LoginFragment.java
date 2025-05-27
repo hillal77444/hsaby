@@ -88,6 +88,8 @@ public class LoginFragment extends Fragment {
                     String userName = authRepository.getCurrentUser() != null ? authRepository.getCurrentUser().getUsername() : "";
                     com.hillal.hhhhhhh.data.preferences.UserPreferences userPreferences = new com.hillal.hhhhhhh.data.preferences.UserPreferences(requireContext());
                     userPreferences.saveUserName(userName);
+                    // حفظ رقم الهاتف من الحقل
+                    userPreferences.savePhoneNumber(phone);
                     
                     // إظهار Dialog التحميل أثناء جلب البيانات من السيرفر
                     loadingDialog = new ProgressDialog(getContext());
