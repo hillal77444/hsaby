@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 public class UserPreferences {
     private static final String PREF_NAME = "user_preferences";
     private static final String KEY_USER_NAME = "user_name";
+    private static final String KEY_PHONE = "user_phone";
     
     private final SharedPreferences preferences;
 
@@ -19,5 +20,13 @@ public class UserPreferences {
 
     public String getUserName() {
         return preferences.getString(KEY_USER_NAME, "");
+    }
+
+    public void savePhoneNumber(String phone) {
+        preferences.edit().putString(KEY_PHONE, phone).apply();
+    }
+
+    public String getPhoneNumber() {
+        return preferences.getString(KEY_PHONE, "");
     }
 } 
