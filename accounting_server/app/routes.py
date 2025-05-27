@@ -804,42 +804,67 @@ def get_account_summary(phone):
         # جلب جميع الحسابات المرتبطة برقم الهاتف
         accounts = Account.query.filter_by(phone_number=phone).all()
         
-        total_balance = 0
-        total_debits = 0
-        total_credits = 0
+        # قاموس لتخزين الأرصدة حسب العملة
+        currency_balances = {}
         accounts_list = []
         
         for account in accounts:
-            # حساب إجمالي المدفوعات والديون
-            debits = db.session.query(func.sum(Transaction.amount))\
-                .filter(Transaction.account_id == account.id,
-                       Transaction.type == 'debit')\
-                .scalar() or 0
+            # حساب إجمالي المدفوعات والديون لكل عملة
+            transactions = Transaction.query.filter_by(account_id=account.id).all()
+            
+            # تجميع المعاملات حسب العملة
+            account_currencies = {}
+            for trans in transactions:
+                currency = trans.currency or 'ريال يمني'  # استخدام العملة الافتراضية إذا لم تكن محددة
+                if currency not in account_currencies:
+                    account_currencies[currency] = {
+                        'debits': 0,
+                        'credits': 0
+                    }
                 
-            credits = db.session.query(func.sum(Transaction.amount))\
-                .filter(Transaction.account_id == account.id,
-                       Transaction.type == 'credit')\
-                .scalar() or 0
+                if trans.type == 'debit':
+                    account_currencies[currency]['debits'] += trans.amount
+                else:
+                    account_currencies[currency]['credits'] += trans.amount
             
-            balance = credits - debits
-            
-            accounts_list.append({
-                'userId': account.id,
-                'userName': account.user.username,
-                'balance': balance,
-                'totalDebits': debits,
-                'totalCredits': credits
-            })
-            
-            total_balance += balance
-            total_debits += debits
-            total_credits += credits
+            # إضافة الأرصدة إلى القائمة الرئيسية
+            for currency, amounts in account_currencies.items():
+                balance = amounts['credits'] - amounts['debits']
+                
+                if currency not in currency_balances:
+                    currency_balances[currency] = {
+                        'totalBalance': 0,
+                        'totalDebits': 0,
+                        'totalCredits': 0
+                    }
+                
+                currency_balances[currency]['totalBalance'] += balance
+                currency_balances[currency]['totalDebits'] += amounts['debits']
+                currency_balances[currency]['totalCredits'] += amounts['credits']
+                
+                accounts_list.append({
+                    'userId': account.id,
+                    'userName': account.user.username,
+                    'balance': balance,
+                    'totalDebits': amounts['debits'],
+                    'totalCredits': amounts['credits'],
+                    'currency': currency
+                })
+        
+        # تحويل قاموس العملات إلى قائمة
+        currency_summary = [
+            {
+                'currency': currency,
+                'totalBalance': data['totalBalance'],
+                'totalDebits': data['totalDebits'],
+                'totalCredits': data['totalCredits']
+            }
+            for currency, data in currency_balances.items()
+        ]
         
         return jsonify({
             'accounts': accounts_list,
-            'totalBalance': total_balance,
-            'totalDebits': total_debits,
-            'totalCredits': total_credits
+            'currencySummary': currency_summary
         })
         
     except Exception as e:
