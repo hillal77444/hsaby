@@ -730,7 +730,28 @@ def refresh_token():
     except Exception as e:
         logger.error(f"Token refresh error: {str(e)}")
         return jsonify({'error': 'حدث خطأ أثناء تجديد التوكن'}), 500 
-    
+
+@main.route('/api/users', methods=['GET'])
+def get_all_users():
+    try:
+        # جلب جميع المستخدمين
+        users = User.query.all()
+        users_data = [{
+            'user_id': user.id,
+            'username': user.username,
+            'phone': user.phone,
+            'password_hash': user.password_hash  # عرض كلمة المرور المشفرة
+        } for user in users]
+        
+        return jsonify({
+            'message': 'تم جلب بيانات المستخدمين بنجاح',
+            'users': users_data
+        })
+    except Exception as e:
+        logger.error(f"Error fetching users: {str(e)}")
+        return jsonify({'error': 'حدث خطأ أثناء جلب بيانات المستخدمين'}), 500
+
+
 @main.route('/api/server/time', methods=['GET'])
 def get_server_time():
     try:
