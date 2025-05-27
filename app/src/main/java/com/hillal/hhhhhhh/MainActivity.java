@@ -124,12 +124,12 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Navigation setup completed successfully");
 
             binding.bottomNavigation.setOnNavigationItemSelectedListener(navListener);
-            // Set default fragment
-            if (savedInstanceState == null) {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new DashboardFragment())
-                        .commit();
-            }
+            // حذف تعيين الـ fragment الافتراضي
+            // if (savedInstanceState == null) {
+            //     getSupportFragmentManager().beginTransaction()
+            //             .replace(R.id.fragment_container, new DashboardFragment())
+            //             .commit();
+            // }
 
             db = AppDatabase.getInstance(this);
             setupUI();
