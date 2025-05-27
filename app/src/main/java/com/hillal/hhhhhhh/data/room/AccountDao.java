@@ -74,6 +74,9 @@ public interface AccountDao {
     @Query("SELECT * FROM accounts WHERE phone_number = :phoneNumber")
     Account getAccountByPhoneNumber(String phoneNumber);
 
+    @Query("SELECT * FROM accounts WHERE phone_number = :phoneNumber")
+    Account getAccountByPhoneNumberSync(String phoneNumber);
+
     @Query("DELETE FROM accounts")
     void deleteAllAccounts();
 } 
