@@ -124,9 +124,6 @@ public class DashboardFragment extends Fragment {
         binding.viewAccountsButton.setOnClickListener(v -> 
             Navigation.findNavController(requireView()).navigate(R.id.navigation_accounts));
 
-        // زر عرض التقارير
-        binding.viewReportsButton.setOnClickListener(v -> 
-            Navigation.findNavController(requireView()).navigate(R.id.navigation_reports));
     }
 
     private void observeData() {
