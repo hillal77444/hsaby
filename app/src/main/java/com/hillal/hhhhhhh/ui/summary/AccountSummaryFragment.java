@@ -60,7 +60,7 @@ public class AccountSummaryFragment extends Fragment {
     }
 
     private void setupApiService() {
-        apiService = RetrofitClient.getInstance().getClient().create(ApiService.class);
+        apiService = RetrofitClient.getInstance().getApiService();
     }
 
     private void loadAccountSummary() {
