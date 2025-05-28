@@ -153,6 +153,19 @@ public class AccountReportFragment extends Fragment {
                                 return;
                             }
 
+                            // التحقق من البيانات الأساسية
+                            if (report.getAccountId() <= 0) {
+                                Log.e("AccountReport", "Invalid account ID in response");
+                                showError("بيانات الحساب غير صحيحة");
+                                return;
+                            }
+
+                            if (report.getCurrency() == null || report.getCurrency().isEmpty()) {
+                                Log.e("AccountReport", "Currency is null or empty");
+                                showError("العملة غير محددة");
+                                return;
+                            }
+
                             // تحديث العرض في الـ UI thread
                             if (getActivity() != null) {
                                 Log.d("AccountReport", "Updating UI with report data");
@@ -220,6 +233,13 @@ public class AccountReportFragment extends Fragment {
 
         try {
             Log.d("AccountReport", "Updating report view with data: " + report.toString());
+
+            // التحقق من البيانات قبل عرضها
+            if (report.getAccountId() <= 0) {
+                Log.e("AccountReport", "Invalid account ID in report");
+                showError("بيانات الحساب غير صحيحة");
+                return;
+            }
 
             StringBuilder html = new StringBuilder();
             html.append("<!DOCTYPE html>");
