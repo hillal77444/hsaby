@@ -184,7 +184,7 @@ public class AccountSummaryFragment extends Fragment {
             table.removeAllViews();
 
             // إضافة رأس الجدول
-            addTableRow(table, new String[]{"الاسم", "العملة", "الدائن", "المدين", "الرصيد", "ID"}, true);
+            addTableRow(table, new String[]{"الاسم", "العملة", "لك", "عليك", "الرصيد", "ID"}, true);
 
             // إضافة البيانات
             if (accounts != null && !accounts.isEmpty()) {
