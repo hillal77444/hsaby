@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -276,7 +277,9 @@ public class AccountSummaryFragment extends Fragment {
                 TextView textView = new TextView(requireContext());
                 textView.setText(values[i] != null ? values[i] : "-");
                 textView.setPadding(4, 4, 4, 4);
-                textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
+                
+                // تعيين المحاذاة في المنتصف
+                textView.setGravity(Gravity.CENTER);
                 
                 // السماح بعرض النص في عدة أسطر
                 textView.setSingleLine(false);
@@ -285,6 +288,7 @@ public class AccountSummaryFragment extends Fragment {
                 // تعيين الوزن النسبي للعمود
                 TableRow.LayoutParams params = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT);
                 params.weight = weights[i];
+                params.gravity = Gravity.CENTER; // محاذاة الخلية في المنتصف
                 textView.setLayoutParams(params);
                 
                 if (isHeader) {
