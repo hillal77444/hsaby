@@ -36,7 +36,9 @@ public class RetrofitClient {
                     
                     // إنشاء استجابة جديدة مع نفس البيانات
                     ResponseBody newResponseBody = ResponseBody.create(responseBody.contentType(), responseBodyString);
-                    return response.newBuilder().body(newResponseBody).build();
+                    return response.newBuilder()
+                            .body(newResponseBody)
+                            .build();
                 }
                 
                 return response;
