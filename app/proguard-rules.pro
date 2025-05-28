@@ -137,3 +137,67 @@
 -keep class org.bouncycastle.jsse.** { *; }
 -keep class org.bouncycastle.jsse.provider.** { *; }
 -keep class org.openjsse.** { *; }
+
+# Keep SSL/TLS related classes
+-keep class org.conscrypt.** { *; }
+-keep class com.android.org.conscrypt.** { *; }
+-keep class org.apache.harmony.xnet.provider.jsse.** { *; }
+-keep class org.bouncycastle.jsse.** { *; }
+-keep class org.bouncycastle.jsse.provider.** { *; }
+-keep class org.openjsse.** { *; }
+-keep class org.openjsse.javax.net.ssl.** { *; }
+-keep class org.openjsse.net.ssl.** { *; }
+
+# Keep OkHttp platform classes
+-keep class okhttp3.internal.platform.** { *; }
+-keep class okhttp3.internal.platform.android.** { *; }
+-keep class okhttp3.internal.platform.AndroidPlatform { *; }
+-keep class okhttp3.internal.platform.ConscryptPlatform { *; }
+-keep class okhttp3.internal.platform.BouncyCastlePlatform { *; }
+-keep class okhttp3.internal.platform.OpenJSSEPlatform { *; }
+
+# Keep SSL/TLS interfaces
+-keep interface javax.net.ssl.** { *; }
+-keep interface org.conscrypt.** { *; }
+-keep interface org.bouncycastle.jsse.** { *; }
+-keep interface org.openjsse.javax.net.ssl.** { *; }
+
+# Keep SSL/TLS implementations
+-keep class * implements javax.net.ssl.SSLSocket { *; }
+-keep class * implements javax.net.ssl.SSLServerSocket { *; }
+-keep class * implements javax.net.ssl.SSLSocketFactory { *; }
+-keep class * implements javax.net.ssl.SSLServerSocketFactory { *; }
+-keep class * implements javax.net.ssl.SSLContext { *; }
+-keep class * implements javax.net.ssl.TrustManager { *; }
+-keep class * implements javax.net.ssl.X509TrustManager { *; }
+
+# تحسينات عامة
+-optimizationpasses 5
+-dontusemixedcaseclassnames
+-dontskipnonpubliclibraryclasses
+-dontpreverify
+-verbose
+-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
+
+# تقليل حجم الكود
+-assumenosideeffects class android.util.Log {
+    public static *** d(...);
+    public static *** v(...);
+    public static *** i(...);
+    public static *** w(...);
+    public static *** e(...);
+}
+
+# تقليل حجم الموارد
+-keepclassmembers class * extends android.app.Activity {
+    public void *(android.view.View);
+    public void *(android.view.Menu);
+}
+
+# تقليل حجم المكتبات
+-dontwarn org.bouncycastle.jsse.BCSSLParameters
+-dontwarn org.bouncycastle.jsse.BCSSLSocket
+-dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider
+-dontwarn org.openjsse.javax.net.ssl.SSLParameters
+-dontwarn org.openjsse.javax.net.ssl.SSLSocket
+-dontwarn org.openjsse.net.ssl.OpenJSSE
