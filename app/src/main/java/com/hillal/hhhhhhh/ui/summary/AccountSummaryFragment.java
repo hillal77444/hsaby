@@ -94,6 +94,9 @@ public class AccountSummaryFragment extends Fragment {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         try {
+                            // طباعة معلومات التصحيح
+                            Log.d("AccountSummary", "Opening report for account: " + accountId + ", currency: " + currency);
+                            
                             AccountReportFragment fragment = AccountReportFragment.newInstance(accountId, currency);
                             getActivity().getSupportFragmentManager()
                                 .beginTransaction()
@@ -101,6 +104,7 @@ public class AccountSummaryFragment extends Fragment {
                                 .addToBackStack(null)
                                 .commit();
                         } catch (Exception e) {
+                            Log.e("AccountSummary", "Error opening report", e);
                             showError("خطأ في فتح التقرير: " + e.getMessage(), "");
                         }
                     });
@@ -269,10 +273,10 @@ public class AccountSummaryFragment extends Fragment {
             
             html.append("<script>");
             html.append("function showReport(accountId, currency) {");
-            html.append("    try {");
+            html.append("    if (window.Android && typeof window.Android.showAccountReport === 'function') {");
             html.append("        window.Android.showAccountReport(accountId, currency);");
-            html.append("    } catch(e) {");
-            html.append("        console.error('Error:', e);");
+            html.append("    } else {");
+            html.append("        alert('خطأ في فتح التقرير');");
             html.append("    }");
             html.append("}");
             html.append("</script>");
