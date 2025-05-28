@@ -102,6 +102,11 @@ public class AccountReportFragment extends Fragment {
                     Log.e("AccountReport", "WebView error: " + description);
                     showError("خطأ في تحميل التقرير: " + description);
                 }
+
+                @Override
+                public void onPageFinished(android.webkit.WebView view, String url) {
+                    Log.d("AccountReport", "WebView page loaded successfully");
+                }
             });
             
             Log.d("AccountReport", "WebView setup completed");
@@ -203,7 +208,12 @@ public class AccountReportFragment extends Fragment {
             Log.d("AccountReport", "Updating report view with data: " + report.toString());
 
             StringBuilder html = new StringBuilder();
-            html.append("<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'><style>");
+            html.append("<!DOCTYPE html>");
+            html.append("<html dir='rtl' lang='ar'>");
+            html.append("<head>");
+            html.append("<meta charset='UTF-8'>");
+            html.append("<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>");
+            html.append("<style>");
             html.append("body { font-family: Arial, sans-serif; margin: 0; padding: 16px; -webkit-touch-callout: none; -webkit-user-select: none; }");
             html.append("h2 { color: #333; text-align: center; margin-bottom: 20px; }");
             html.append("table { width: 100%; border-collapse: collapse; margin-top: 16px; }");
@@ -213,7 +223,9 @@ public class AccountReportFragment extends Fragment {
             html.append(".summary { margin: 16px 0; padding: 16px; background-color: #f5f5f5; border-radius: 4px; }");
             html.append(".summary p { margin: 8px 0; }");
             html.append(".summary strong { color: #333; }");
-            html.append("</style></head><body>");
+            html.append("</style>");
+            html.append("</head>");
+            html.append("<body>");
 
             // معلومات الحساب
             html.append("<h2>تقرير الحساب</h2>");
@@ -256,7 +268,7 @@ public class AccountReportFragment extends Fragment {
             String htmlContent = html.toString();
             Log.d("AccountReport", "Generated HTML content length: " + htmlContent.length());
 
-            binding.reportWebView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
+            binding.reportWebView.loadDataWithBaseURL(null, htmlContent, "text/html; charset=UTF-8", "UTF-8", null);
             Log.d("AccountReport", "HTML content loaded into WebView");
         } catch (Exception e) {
             Log.e("AccountReport", "Error updating report view", e);
