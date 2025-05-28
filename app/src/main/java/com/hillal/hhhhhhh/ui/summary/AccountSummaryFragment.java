@@ -213,10 +213,10 @@ public class AccountSummaryFragment extends Fragment {
             html.append("<table>");
             // إضافة رأس الجدول
             html.append("<tr>");
-            html.append("<th>العملة</th>");
-            html.append("<th>الرصيد</th>");
-            html.append("<th>المدين</th>");
             html.append("<th>الدائن</th>");
+            html.append("<th>المدين</th>");
+            html.append("<th>الرصيد</th>");
+            html.append("<th>العملة</th>");
             html.append("</tr>");
 
             // إضافة البيانات
@@ -224,10 +224,10 @@ public class AccountSummaryFragment extends Fragment {
                 for (CurrencySummary summary : summaries) {
                     if (summary != null) {
                         html.append("<tr>");
-                        html.append("<td>").append(summary.getCurrency() != null ? summary.getCurrency() : "-").append("</td>");
-                        html.append("<td>").append(numberFormat.format(summary.getTotalBalance())).append("</td>");
-                        html.append("<td>").append(numberFormat.format(summary.getTotalDebits())).append("</td>");
                         html.append("<td>").append(numberFormat.format(summary.getTotalCredits())).append("</td>");
+                        html.append("<td>").append(numberFormat.format(summary.getTotalDebits())).append("</td>");
+                        html.append("<td>").append(numberFormat.format(summary.getTotalBalance())).append("</td>");
+                        html.append("<td>").append(summary.getCurrency() != null ? summary.getCurrency() : "-").append("</td>");
                         html.append("</tr>");
                     }
                 }
@@ -257,12 +257,12 @@ public class AccountSummaryFragment extends Fragment {
             html.append("<table>");
             // إضافة رأس الجدول
             html.append("<tr>");
-            html.append("<th>الاسم</th>");
-            html.append("<th>العملة</th>");
-            html.append("<th>لك</th>");
-            html.append("<th>عليك</th>");
-            html.append("<th>الرصيد</th>");
             html.append("<th>ID</th>");
+            html.append("<th>الرصيد</th>");
+            html.append("<th>عليك</th>");
+            html.append("<th>لك</th>");
+            html.append("<th>العملة</th>");
+            html.append("<th>الاسم</th>");
             html.append("</tr>");
 
             // إضافة البيانات
@@ -270,12 +270,12 @@ public class AccountSummaryFragment extends Fragment {
                 for (AccountSummary account : accounts) {
                     if (account != null) {
                         html.append("<tr>");
-                        html.append("<td>").append(account.getUserName() != null ? account.getUserName() : "-").append("</td>");
-                        html.append("<td>").append(account.getCurrency() != null ? account.getCurrency() : "-").append("</td>");
-                        html.append("<td>").append(numberFormat.format(account.getTotalCredits())).append("</td>");
-                        html.append("<td>").append(numberFormat.format(account.getTotalDebits())).append("</td>");
-                        html.append("<td>").append(numberFormat.format(account.getBalance())).append("</td>");
                         html.append("<td>").append(account.getUserId()).append("</td>");
+                        html.append("<td>").append(numberFormat.format(account.getBalance())).append("</td>");
+                        html.append("<td>").append(numberFormat.format(account.getTotalDebits())).append("</td>");
+                        html.append("<td>").append(numberFormat.format(account.getTotalCredits())).append("</td>");
+                        html.append("<td>").append(account.getCurrency() != null ? account.getCurrency() : "-").append("</td>");
+                        html.append("<td>").append(account.getUserName() != null ? account.getUserName() : "-").append("</td>");
                         html.append("</tr>");
                     }
                 }
