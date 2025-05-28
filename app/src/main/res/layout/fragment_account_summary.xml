@@ -38,14 +38,16 @@
                 <HorizontalScrollView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:scrollbars="none"
-                    android:fillViewport="true">
+                    android:scrollbars="horizontal"
+                    android:fillViewport="true"
+                    android:overScrollMode="always">
 
                     <TableLayout
                         android:id="@+id/summaryTable"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:stretchColumns="*"
+                        android:shrinkColumns="*"
                         android:background="@drawable/table_border"/>
 
                 </HorizontalScrollView>
@@ -79,14 +81,16 @@
                 <HorizontalScrollView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:scrollbars="none"
-                    android:fillViewport="true">
+                    android:scrollbars="horizontal"
+                    android:fillViewport="true"
+                    android:overScrollMode="always">
 
                     <TableLayout
                         android:id="@+id/detailsTable"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:stretchColumns="*"
+                        android:shrinkColumns="*"
                         android:background="@drawable/table_border"/>
 
                 </HorizontalScrollView>
