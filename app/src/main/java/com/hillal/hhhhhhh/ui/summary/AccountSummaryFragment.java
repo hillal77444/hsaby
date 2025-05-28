@@ -305,7 +305,7 @@ public class AccountSummaryFragment extends Fragment {
             html.append("<th>عليك</th>");
             html.append("<th>لك</th>");
             html.append("<th>العملة</th>");
-            html.append("<th>الاسم</th>");
+            html.append("<th>التاجر</th>");
             html.append("</tr>");
 
             // إضافة البيانات
