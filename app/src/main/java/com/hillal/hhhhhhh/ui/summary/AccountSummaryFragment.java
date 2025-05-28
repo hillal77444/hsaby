@@ -285,6 +285,18 @@ public class AccountSummaryFragment extends Fragment {
             html.append(".report-btn:hover { background-color: #45a049; }");
             html.append("</style></head><body>");
             
+            // إضافة JavaScript في بداية الصفحة
+            html.append("<script>");
+            html.append("function showReport(accountId, currency) {");
+            html.append("    console.log('Button clicked for account: ' + accountId);");
+            html.append("    try {");
+            html.append("        window.Android.showAccountReport(accountId, currency);");
+            html.append("    } catch(e) {");
+            html.append("        console.error('Error calling Android interface:', e);");
+            html.append("    }");
+            html.append("}");
+            html.append("</script>");
+            
             html.append("<table>");
             // إضافة رأس الجدول
             html.append("<tr>");
@@ -301,7 +313,7 @@ public class AccountSummaryFragment extends Fragment {
                 for (AccountSummary account : accounts) {
                     if (account != null) {
                         html.append("<tr>");
-                        html.append("<td><button class='report-btn' onclick='window.Android.showAccountReport(")
+                        html.append("<td><button class='report-btn' onclick='showReport(")
                             .append(account.getUserId())
                             .append(", \"")
                             .append(account.getCurrency() != null ? account.getCurrency() : "-")
@@ -320,7 +332,25 @@ public class AccountSummaryFragment extends Fragment {
             
             html.append("</table></body></html>");
             
+            // تفعيل WebView debugging
+            binding.detailsWebView.setWebContentsDebuggingEnabled(true);
+            
+            // تحميل المحتوى
             binding.detailsWebView.loadDataWithBaseURL(null, html.toString(), "text/html", "UTF-8", null);
+            
+            // إضافة WebViewClient للتحكم في التحميل
+            binding.detailsWebView.setWebViewClient(new android.webkit.WebViewClient() {
+                @Override
+                public void onPageFinished(android.webkit.WebView view, String url) {
+                    super.onPageFinished(view, url);
+                    // التأكد من تفعيل JavaScript بعد تحميل الصفحة
+                    view.evaluateJavascript(
+                        "console.log('Page loaded successfully');",
+                        null
+                    );
+                }
+            });
+            
         } catch (Exception e) {
             showError("خطأ في عرض تفاصيل الحسابات: " + e.getMessage(), "");
         }
