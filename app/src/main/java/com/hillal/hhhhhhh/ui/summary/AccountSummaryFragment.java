@@ -296,7 +296,10 @@ public class AccountSummaryFragment extends Fragment {
             
             // الحصول على رقم الهاتف
             String phoneNumber = getPhoneNumber();
-            String requestUrl = "http://212.224.88.122:5007/api/accounts/summary/" + (phoneNumber != null ? phoneNumber : "unknown");
+            
+            // الحصول على رابط الطلب من RetrofitClient ومسار الطلب من ApiService
+            String baseUrl = RetrofitClient.getInstance().getBaseUrl();
+            String endpoint = apiService.getAccountSummary(phoneNumber).request().url().toString();
             
             // إضافة معلومات إضافية للرسالة
             String detailedMessage = "تفاصيل الخطأ:\n" +
@@ -306,7 +309,7 @@ public class AccountSummaryFragment extends Fragment {
                     "سبب الخطأ: " + (message.contains("ClassCastException") ? 
                         "خطأ في تحويل نوع البيانات - تأكد من تطابق أنواع البيانات مع الخادم" : 
                         "خطأ غير معروف") + "\n" +
-                    "رابط الطلب: " + requestUrl + "\n" +
+                    "رابط الطلب: " + endpoint + "\n" +
                     "رقم الهاتف: " + (phoneNumber != null ? phoneNumber : "غير متوفر") + "\n" +
                     "البيانات المستلمة من السيرفر:\n" + (responseData != null && !responseData.isEmpty() ? responseData : "لا توجد بيانات متاحة") + "\n" +
                     "تفاصيل إضافية:\n" +
