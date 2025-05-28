@@ -141,24 +141,10 @@ public class AccountReportFragment extends Fragment {
                                 return;
                             }
 
-                            // التحقق من البيانات المستلمة
-                            if (report.getUserName() == null || report.getAccountName() == null) {
-                                Log.e("AccountReport", "Missing required fields: userName or accountName");
-                                showError("بيانات الحساب غير مكتملة");
-                                return;
-                            }
-
                             // تحديث العرض في الـ UI thread
                             if (getActivity() != null) {
                                 Log.d("AccountReport", "Updating UI with report data");
-                                getActivity().runOnUiThread(() -> {
-                                    try {
-                                        updateReportView(report);
-                                    } catch (Exception e) {
-                                        Log.e("AccountReport", "Error updating report view", e);
-                                        showError("خطأ في تحديث التقرير: " + e.getMessage());
-                                    }
-                                });
+                                getActivity().runOnUiThread(() -> updateReportView(report));
                             } else {
                                 Log.e("AccountReport", "Activity is null");
                                 showError("خطأ في تحديث واجهة المستخدم");
@@ -201,13 +187,19 @@ public class AccountReportFragment extends Fragment {
     }
 
     private void updateReportView(AccountReport report) {
-        try {
-            if (report == null) {
-                Log.e("AccountReport", "Report is null in updateReportView");
-                showError("التقرير فارغ");
-                return;
-            }
+        if (report == null) {
+            Log.e("AccountReport", "Report is null in updateReportView");
+            showError("التقرير فارغ");
+            return;
+        }
 
+        if (binding == null || binding.reportWebView == null) {
+            Log.e("AccountReport", "WebView or binding is null");
+            showError("خطأ في تهيئة واجهة المستخدم");
+            return;
+        }
+
+        try {
             Log.d("AccountReport", "Updating report view with data: " + report.toString());
 
             StringBuilder html = new StringBuilder();
@@ -264,13 +256,8 @@ public class AccountReportFragment extends Fragment {
             String htmlContent = html.toString();
             Log.d("AccountReport", "Generated HTML content length: " + htmlContent.length());
 
-            if (binding != null && binding.reportWebView != null) {
-                Log.d("AccountReport", "Loading HTML content into WebView");
-                binding.reportWebView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
-            } else {
-                Log.e("AccountReport", "WebView is null or not initialized");
-                showError("خطأ في تهيئة WebView");
-            }
+            binding.reportWebView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
+            Log.d("AccountReport", "HTML content loaded into WebView");
         } catch (Exception e) {
             Log.e("AccountReport", "Error updating report view", e);
             showError("خطأ في عرض التقرير: " + e.getMessage());
