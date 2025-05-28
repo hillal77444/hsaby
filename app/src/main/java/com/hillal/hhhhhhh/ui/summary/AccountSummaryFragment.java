@@ -127,7 +127,7 @@ public class AccountSummaryFragment extends Fragment {
                             updateSummaryTable(summaryResponse.getCurrencySummary());
                         } catch (Exception e) {
                             Log.e("AccountSummary", "Error updating currency table", e);
-                            showError("خطأ في تحديث جدول العملات: " + e.getMessage());
+                            showError("خطأ في تحديث جدول العملات: " + e.getMessage() + "\n" + e.toString());
                             return;
                         }
 
@@ -135,7 +135,7 @@ public class AccountSummaryFragment extends Fragment {
                             updateDetailsTable(summaryResponse.getAccounts());
                         } catch (Exception e) {
                             Log.e("AccountSummary", "Error updating accounts table", e);
-                            showError("خطأ في تحديث جدول الحسابات: " + e.getMessage());
+                            showError("خطأ في تحديث جدول الحسابات: " + e.getMessage() + "\n" + e.toString());
                             return;
                         }
                     } else {
@@ -160,7 +160,7 @@ public class AccountSummaryFragment extends Fragment {
                     }
                 } catch (Exception e) {
                     Log.e("AccountSummary", "Error processing response", e);
-                    String errorMessage = "حدث خطأ في معالجة البيانات: " + e.getMessage();
+                    String errorMessage = "حدث خطأ في معالجة البيانات: " + e.getMessage() + "\n" + e.toString();
                     showError(errorMessage);
                 }
             }
@@ -169,7 +169,7 @@ public class AccountSummaryFragment extends Fragment {
             public void onFailure(@NonNull Call<AccountSummaryResponse> call, @NonNull Throwable t) {
                 binding.progressBar.setVisibility(View.GONE);
                 Log.e("AccountSummary", "Network error", t);
-                String errorMessage = "حدث خطأ في الاتصال: " + t.getMessage();
+                String errorMessage = "حدث خطأ في الاتصال: " + t.getMessage() + "\n" + t.toString();
                 showError(errorMessage);
             }
         });
@@ -274,7 +274,23 @@ public class AccountSummaryFragment extends Fragment {
     }
 
     private void showError(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+        try {
+            // طباعة رسالة الخطأ في السجل
+            Log.e("AccountSummary", "Error: " + message);
+            
+            // عرض رسالة الخطأ في Toast
+            if (getContext() != null) {
+                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+            }
+            
+            // عرض رسالة الخطأ في TextView إذا كان موجوداً
+            if (binding != null && binding.errorTextView != null) {
+                binding.errorTextView.setVisibility(View.VISIBLE);
+                binding.errorTextView.setText(message);
+            }
+        } catch (Exception e) {
+            Log.e("AccountSummary", "Error showing error message", e);
+        }
     }
 
     private String getPhoneNumber() {
