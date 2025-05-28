@@ -301,32 +301,101 @@ public class AccountSummaryFragment extends Fragment {
             String endpoint = apiService.getAccountSummary(phoneNumber).request().url().toString();
             
             // إضافة معلومات إضافية للرسالة
-            String detailedMessage = "تفاصيل الخطأ:\n" +
-                    "الوقت: " + new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date()) + "\n" +
-                    "الرسالة: " + message + "\n" +
-                    "نوع الخطأ: " + (message.contains("null") ? "خطأ في البيانات" : "خطأ في المعالجة") + "\n" +
-                    "سبب الخطأ: " + (message.contains("ClassCastException") ? 
+            String detailedMessage = "=== تفاصيل الخطأ ===\n\n" +
+                    "1. معلومات الطلب:\n" +
+                    "   - الوقت: " + new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date()) + "\n" +
+                    "   - رابط الطلب: " + endpoint + "\n" +
+                    "   - رقم الهاتف: " + (phoneNumber != null ? phoneNumber : "غير متوفر") + "\n\n" +
+                    
+                    "2. معلومات الخطأ:\n" +
+                    "   - الرسالة: " + message + "\n" +
+                    "   - نوع الخطأ: " + (message.contains("null") ? "خطأ في البيانات" : "خطأ في المعالجة") + "\n" +
+                    "   - سبب الخطأ: " + (message.contains("ClassCastException") ? 
                         "خطأ في تحويل نوع البيانات - تأكد من تطابق أنواع البيانات مع الخادم" : 
-                        "خطأ غير معروف") + "\n" +
-                    "رابط الطلب: " + endpoint + "\n" +
-                    "رقم الهاتف: " + (phoneNumber != null ? phoneNumber : "غير متوفر") + "\n" +
-                    "البيانات المستلمة من السيرفر:\n" + (responseData != null && !responseData.isEmpty() ? responseData : "لا توجد بيانات متاحة") + "\n" +
-                    "تفاصيل إضافية:\n" +
-                    "- تأكد من أن السيرفر يعمل بشكل صحيح\n" +
-                    "- تأكد من صحة رقم الهاتف\n" +
-                    "- تأكد من وجود اتصال بالإنترنت";
+                        "خطأ غير معروف") + "\n\n" +
+                    
+                    "3. معلومات الاستجابة:\n" +
+                    "   - البيانات المستلمة من السيرفر:\n" + 
+                    (responseData != null && !responseData.isEmpty() ? 
+                        "     " + responseData.replace("\n", "\n     ") : 
+                        "     لا توجد بيانات متاحة") + "\n\n" +
+                    
+                    "4. معلومات النظام:\n" +
+                    "   - نظام التشغيل: Android " + android.os.Build.VERSION.RELEASE + "\n" +
+                    "   - نوع الجهاز: " + android.os.Build.MANUFACTURER + " " + android.os.Build.MODEL + "\n" +
+                    "   - إصدار التطبيق: " + getAppVersion() + "\n\n" +
+                    
+                    "5. خطوات التشخيص:\n" +
+                    "   1. تأكد من أن السيرفر يعمل بشكل صحيح\n" +
+                    "   2. تأكد من صحة رقم الهاتف\n" +
+                    "   3. تأكد من وجود اتصال بالإنترنت\n" +
+                    "   4. تأكد من أن البيانات المرسلة صحيحة\n" +
+                    "   5. تأكد من أن الاستجابة تتطابق مع نموذج البيانات\n\n" +
+                    
+                    "6. معلومات إضافية:\n" +
+                    "   - حالة الاتصال: " + (isNetworkAvailable() ? "متصل" : "غير متصل") + "\n" +
+                    "   - نوع الاتصال: " + getNetworkType() + "\n" +
+                    "   - قوة الإشارة: " + getSignalStrength() + "\n";
             
             // نسخ رسالة الخطأ إلى الحافظة
             if (getContext() != null) {
                 android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                android.content.ClipData clip = android.content.ClipData.newPlainText("Error Details", detailedMessage);
+                android.content.ClipData clip = android.content.ClipData.newPlainText("تفاصيل الخطأ", detailedMessage);
                 clipboard.setPrimaryClip(clip);
                 
-                // عرض رسالة الخطأ في Toast مع إشعار بنسخ التفاصيل
+                // عرض رسالة Toast لإعلام المستخدم بنسخ التفاصيل
                 Toast.makeText(getContext(), "تم نسخ تفاصيل الخطأ إلى الحافظة\n" + message, Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
-            Log.e("AccountSummary", "Error showing error message", e);
+            Log.e("AccountSummary", "خطأ في عرض رسالة الخطأ", e);
+        }
+    }
+
+    private String getAppVersion() {
+        try {
+            return getContext().getPackageManager().getPackageInfo(getContext().getPackageName(), 0).versionName;
+        } catch (Exception e) {
+            return "غير معروف";
+        }
+    }
+
+    private boolean isNetworkAvailable() {
+        try {
+            android.net.ConnectivityManager connectivityManager = (android.net.ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            android.net.NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private String getNetworkType() {
+        try {
+            android.net.ConnectivityManager connectivityManager = (android.net.ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            android.net.NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            if (activeNetworkInfo != null) {
+                if (activeNetworkInfo.getType() == android.net.ConnectivityManager.TYPE_WIFI) {
+                    return "WiFi";
+                } else if (activeNetworkInfo.getType() == android.net.ConnectivityManager.TYPE_MOBILE) {
+                    return "بيانات الجوال";
+                }
+            }
+            return "غير معروف";
+        } catch (Exception e) {
+            return "غير معروف";
+        }
+    }
+
+    private String getSignalStrength() {
+        try {
+            android.telephony.TelephonyManager telephonyManager = (android.telephony.TelephonyManager) getContext().getSystemService(Context.TELEPHONY_SERVICE);
+            android.telephony.SignalStrength signalStrength = telephonyManager.getSignalStrength();
+            if (signalStrength != null) {
+                return signalStrength.getLevel() + "/4";
+            }
+            return "غير معروف";
+        } catch (Exception e) {
+            return "غير معروف";
         }
     }
 
