@@ -87,7 +87,17 @@ public class AccountSummaryFragment extends Fragment {
                     Log.d("AccountSummary", "Response code: " + response.code());
                     
                     if (response.isSuccessful()) {
-                        String responseBody = response.body() != null ? response.body().toString() : "null";
+                        String responseBody = "";
+                        try {
+                            if (response.body() != null) {
+                                responseBody = response.body().toString();
+                            } else if (response.raw().body() != null) {
+                                responseBody = response.raw().body().string();
+                            }
+                        } catch (IOException e) {
+                            Log.e("AccountSummary", "Error reading response body", e);
+                        }
+                        
                         Log.d("AccountSummary", "Raw response body: " + responseBody);
                         
                         AccountSummaryResponse summaryResponse = response.body();
@@ -292,7 +302,11 @@ public class AccountSummaryFragment extends Fragment {
                     "سبب الخطأ: " + (message.contains("ClassCastException") ? 
                         "خطأ في تحويل نوع البيانات - تأكد من تطابق أنواع البيانات مع الخادم" : 
                         "خطأ غير معروف") + "\n" +
-                    "البيانات المستلمة من السيرفر:\n" + responseData;
+                    "البيانات المستلمة من السيرفر:\n" + (responseData != null && !responseData.isEmpty() ? responseData : "لا توجد بيانات متاحة") + "\n" +
+                    "تفاصيل إضافية:\n" +
+                    "- تأكد من أن السيرفر يعمل بشكل صحيح\n" +
+                    "- تأكد من صحة رقم الهاتف\n" +
+                    "- تأكد من وجود اتصال بالإنترنت";
             
             // نسخ رسالة الخطأ إلى الحافظة
             if (getContext() != null) {
