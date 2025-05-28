@@ -1,9 +1,13 @@
 package com.hillal.hhhhhhh.models;
 
+import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class AccountSummaryResponse {
+    @SerializedName("accounts")
     private List<AccountSummary> accounts;
+    
+    @SerializedName("currencySummary")
     private List<CurrencySummary> currencySummary;
 
     public List<AccountSummary> getAccounts() {
