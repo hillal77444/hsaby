@@ -132,8 +132,8 @@ public class AccountReportFragment extends Fragment {
             call.enqueue(new Callback<AccountReport>() {
                 @Override
                 public void onResponse(@NonNull Call<AccountReport> call, @NonNull Response<AccountReport> response) {
-                    Log.d("AccountReport", "Received response with code: " + response.code());
                     binding.progressBar.setVisibility(View.GONE);
+                    Log.d("AccountReport", "Received response with code: " + response.code());
 
                     if (response.isSuccessful()) {
                         try {
@@ -146,10 +146,24 @@ public class AccountReportFragment extends Fragment {
                                 return;
                             }
 
+                            // التحقق من البيانات المستلمة
+                            if (report.getTransactions() == null) {
+                                Log.e("AccountReport", "Transactions list is null");
+                                showError("لا توجد بيانات المعاملات");
+                                return;
+                            }
+
                             // تحديث العرض في الـ UI thread
                             if (getActivity() != null) {
                                 Log.d("AccountReport", "Updating UI with report data");
-                                getActivity().runOnUiThread(() -> updateReportView(report));
+                                getActivity().runOnUiThread(() -> {
+                                    try {
+                                        updateReportView(report);
+                                    } catch (Exception e) {
+                                        Log.e("AccountReport", "Error updating report view", e);
+                                        showError("خطأ في تحديث العرض: " + e.getMessage());
+                                    }
+                                });
                             } else {
                                 Log.e("AccountReport", "Activity is null");
                                 showError("خطأ في تحديث واجهة المستخدم");
