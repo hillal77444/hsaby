@@ -57,6 +57,10 @@ public class AccountSummaryFragment extends Fragment {
         setupNumberFormat();
         setupApiService();
         setupScaleGestureDetector();
+        
+        // إضافة واجهة JavaScript
+        binding.detailsWebView.addJavascriptInterface(this, "Android");
+        
         loadAccountSummary();
     }
 
@@ -252,12 +256,14 @@ public class AccountSummaryFragment extends Fragment {
             html.append("th, td { padding: 8px; text-align: center; border: 1px solid #ddd; }");
             html.append("th { background-color: #f5f5f5; font-weight: bold; }");
             html.append("tr:nth-child(even) { background-color: #f9f9f9; }");
+            html.append(".report-btn { background-color: #4CAF50; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }");
+            html.append(".report-btn:hover { background-color: #45a049; }");
             html.append("</style></head><body>");
             
             html.append("<table>");
             // إضافة رأس الجدول
             html.append("<tr>");
-            html.append("<th>ID</th>");
+            html.append("<th>تقرير</th>");
             html.append("<th>الرصيد</th>");
             html.append("<th>عليك</th>");
             html.append("<th>لك</th>");
@@ -270,7 +276,11 @@ public class AccountSummaryFragment extends Fragment {
                 for (AccountSummary account : accounts) {
                     if (account != null) {
                         html.append("<tr>");
-                        html.append("<td>").append(account.getUserId()).append("</td>");
+                        html.append("<td><button class='report-btn' onclick='showReport(")
+                            .append(account.getUserId())
+                            .append(", \"")
+                            .append(account.getCurrency() != null ? account.getCurrency() : "-")
+                            .append("\")'>تقرير</button></td>");
                         html.append("<td>").append(numberFormat.format(account.getBalance())).append("</td>");
                         html.append("<td>").append(numberFormat.format(account.getTotalDebits())).append("</td>");
                         html.append("<td>").append(numberFormat.format(account.getTotalCredits())).append("</td>");
@@ -283,11 +293,39 @@ public class AccountSummaryFragment extends Fragment {
                 html.append("<tr><td colspan='6' style='text-align: center;'>لا توجد بيانات</td></tr>");
             }
             
-            html.append("</table></body></html>");
+            html.append("</table>");
+            
+            // إضافة JavaScript للتعامل مع النقر على زر التقرير
+            html.append("<script>");
+            html.append("function showReport(accountId, currency) {");
+            html.append("    window.Android.showAccountReport(accountId, currency);");
+            html.append("}");
+            html.append("</script>");
+            
+            html.append("</body></html>");
             
             binding.detailsWebView.loadDataWithBaseURL(null, html.toString(), "text/html", "UTF-8", null);
         } catch (Exception e) {
             showError("خطأ في عرض تفاصيل الحسابات: " + e.getMessage(), "");
+        }
+    }
+
+    @JavascriptInterface
+    public void showAccountReport(int accountId, String currency) {
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                try {
+                    // فتح صفحة التقرير
+                    AccountReportFragment fragment = AccountReportFragment.newInstance(accountId, currency);
+                    getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.nav_host_fragment_content_main, fragment)
+                        .addToBackStack(null)
+                        .commit();
+                } catch (Exception e) {
+                    showError("خطأ في فتح التقرير: " + e.getMessage(), "");
+                }
+            });
         }
     }
 
