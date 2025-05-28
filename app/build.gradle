@@ -42,12 +42,18 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            minifyEnabled false
-            shrinkResources false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             ndk {
                 debugSymbolLevel 'FULL'
             }
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            consumerProguardFiles 'proguard-rules.pro'
+            
+            buildConfigField "boolean", "ENABLE_R8_FULL_MODE", "true"
+            buildConfigField "boolean", "ENABLE_RESOURCE_SHRINKING", "true"
+            buildConfigField "boolean", "ENABLE_CODE_SHRINKING", "true"
         }
         debug {
             debuggable true
