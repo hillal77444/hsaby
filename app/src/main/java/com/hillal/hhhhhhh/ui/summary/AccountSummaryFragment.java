@@ -67,82 +67,119 @@ public class AccountSummaryFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<AccountSummaryResponse> call, @NonNull Response<AccountSummaryResponse> response) {
                 binding.progressBar.setVisibility(View.GONE);
-                if (response.isSuccessful() && response.body() != null) {
-                    updateSummaryTable(response.body().getCurrencySummary());
-                    updateDetailsTable(response.body().getAccounts());
-                } else {
-                    showError("فشل في تحميل البيانات");
+                try {
+                    if (response.isSuccessful() && response.body() != null) {
+                        AccountSummaryResponse summaryResponse = response.body();
+                        if (summaryResponse.getCurrencySummary() != null) {
+                            updateSummaryTable(summaryResponse.getCurrencySummary());
+                        }
+                        if (summaryResponse.getAccounts() != null) {
+                            updateDetailsTable(summaryResponse.getAccounts());
+                        }
+                    } else {
+                        showError("فشل في تحميل البيانات: " + response.code());
+                    }
+                } catch (Exception e) {
+                    showError("حدث خطأ في معالجة البيانات: " + e.getMessage());
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<AccountSummaryResponse> call, @NonNull Throwable t) {
                 binding.progressBar.setVisibility(View.GONE);
-                showError("حدث خطأ في الاتصال");
+                showError("حدث خطأ في الاتصال: " + t.getMessage());
             }
         });
     }
 
     private void updateSummaryTable(List<CurrencySummary> summaries) {
-        TableLayout table = binding.summaryTable;
-        table.removeAllViews();
+        try {
+            TableLayout table = binding.summaryTable;
+            table.removeAllViews();
 
-        // إضافة رأس الجدول
-        addTableRow(table, new String[]{"العملة", "الرصيد", "المدين", "الدائن"}, true);
+            // إضافة رأس الجدول
+            addTableRow(table, new String[]{"العملة", "الرصيد", "المدين", "الدائن"}, true);
 
-        // إضافة البيانات
-        for (CurrencySummary summary : summaries) {
-            addTableRow(table, new String[]{
-                summary.getCurrency(),
-                numberFormat.format(summary.getTotalBalance()),
-                numberFormat.format(summary.getTotalDebits()),
-                numberFormat.format(summary.getTotalCredits())
-            }, false);
+            // إضافة البيانات
+            if (summaries != null && !summaries.isEmpty()) {
+                for (CurrencySummary summary : summaries) {
+                    if (summary != null) {
+                        addTableRow(table, new String[]{
+                            summary.getCurrency() != null ? summary.getCurrency() : "-",
+                            numberFormat.format(summary.getTotalBalance()),
+                            numberFormat.format(summary.getTotalDebits()),
+                            numberFormat.format(summary.getTotalCredits())
+                        }, false);
+                    }
+                }
+            } else {
+                addTableRow(table, new String[]{"لا توجد بيانات", "-", "-", "-"}, false);
+            }
+        } catch (Exception e) {
+            showError("خطأ في عرض ملخص العملات: " + e.getMessage());
         }
     }
 
     private void updateDetailsTable(List<AccountSummary> accounts) {
-        TableLayout table = binding.detailsTable;
-        table.removeAllViews();
+        try {
+            TableLayout table = binding.detailsTable;
+            table.removeAllViews();
 
-        // إضافة رأس الجدول
-        addTableRow(table, new String[]{"ID", "الاسم", "العملة", "الرصيد", "المدين", "الدائن"}, true);
+            // إضافة رأس الجدول
+            addTableRow(table, new String[]{"ID", "الاسم", "العملة", "الرصيد", "المدين", "الدائن"}, true);
 
-        // إضافة البيانات
-        for (AccountSummary account : accounts) {
-            addTableRow(table, new String[]{
-                String.valueOf(account.getUserId()),
-                account.getUserName(),
-                account.getCurrency(),
-                numberFormat.format(account.getBalance()),
-                numberFormat.format(account.getTotalDebits()),
-                numberFormat.format(account.getTotalCredits())
-            }, false);
+            // إضافة البيانات
+            if (accounts != null && !accounts.isEmpty()) {
+                for (AccountSummary account : accounts) {
+                    if (account != null) {
+                        addTableRow(table, new String[]{
+                            String.valueOf(account.getUserId()),
+                            account.getUserName() != null ? account.getUserName() : "-",
+                            account.getCurrency() != null ? account.getCurrency() : "-",
+                            numberFormat.format(account.getBalance()),
+                            numberFormat.format(account.getTotalDebits()),
+                            numberFormat.format(account.getTotalCredits())
+                        }, false);
+                    }
+                }
+            } else {
+                addTableRow(table, new String[]{"لا توجد بيانات", "-", "-", "-", "-", "-"}, false);
+            }
+        } catch (Exception e) {
+            showError("خطأ في عرض تفاصيل الحسابات: " + e.getMessage());
         }
     }
 
     private void addTableRow(TableLayout table, String[] values, boolean isHeader) {
-        TableRow row = new TableRow(requireContext());
-        row.setLayoutParams(new TableLayout.LayoutParams(
-            TableLayout.LayoutParams.MATCH_PARENT,
-            TableLayout.LayoutParams.WRAP_CONTENT
-        ));
+        try {
+            TableRow row = new TableRow(requireContext());
+            row.setLayoutParams(new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.MATCH_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT
+            ));
 
-        for (String value : values) {
-            TextView textView = new TextView(requireContext());
-            textView.setText(value);
-            textView.setPadding(8, 8, 8, 8);
-            textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
-            
-            if (isHeader) {
-                textView.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.light_gray));
-                textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
+            for (String value : values) {
+                TextView textView = new TextView(requireContext());
+                textView.setText(value != null ? value : "-");
+                textView.setPadding(16, 12, 16, 12);
+                textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
+                
+                if (isHeader) {
+                    textView.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.light_gray));
+                    textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
+                    textView.setTextSize(16);
+                    textView.setTypeface(null, android.graphics.Typeface.BOLD);
+                } else {
+                    textView.setTextSize(14);
+                }
+                
+                row.addView(textView);
             }
-            
-            row.addView(textView);
-        }
 
-        table.addView(row);
+            table.addView(row);
+        } catch (Exception e) {
+            showError("خطأ في إضافة صف للجدول: " + e.getMessage());
+        }
     }
 
     private void showError(String message) {
