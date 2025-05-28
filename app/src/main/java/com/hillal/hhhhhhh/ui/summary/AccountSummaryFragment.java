@@ -2,6 +2,7 @@ package com.hillal.hhhhhhh.ui.summary;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -215,19 +216,31 @@ public class AccountSummaryFragment extends Fragment {
                 TableLayout.LayoutParams.WRAP_CONTENT
             ));
 
-            for (String value : values) {
+            // تحديد الأوزان النسبية للأعمدة
+            float[] weights = {0.25f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f}; // مجموع الأوزان = 1
+
+            for (int i = 0; i < values.length; i++) {
                 TextView textView = new TextView(requireContext());
-                textView.setText(value != null ? value : "-");
-                textView.setPadding(16, 12, 16, 12);
+                textView.setText(values[i] != null ? values[i] : "-");
+                textView.setPadding(8, 8, 8, 8);
                 textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
+                
+                // السماح بعرض النص في عدة أسطر
+                textView.setSingleLine(false);
+                textView.setMaxLines(Integer.MAX_VALUE);
+                
+                // تعيين الوزن النسبي للعمود
+                TableRow.LayoutParams params = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT);
+                params.weight = weights[i];
+                textView.setLayoutParams(params);
                 
                 if (isHeader) {
                     textView.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.light_gray));
                     textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
-                    textView.setTextSize(16);
+                    textView.setTextSize(14);
                     textView.setTypeface(null, android.graphics.Typeface.BOLD);
                 } else {
-                    textView.setTextSize(14);
+                    textView.setTextSize(12);
                 }
                 
                 row.addView(textView);
