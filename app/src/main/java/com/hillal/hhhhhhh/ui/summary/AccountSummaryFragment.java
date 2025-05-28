@@ -55,7 +55,7 @@ public class AccountSummaryFragment extends Fragment {
 
     private void setupNumberFormat() {
         numberFormat = NumberFormat.getNumberInstance(Locale.US);
-        numberFormat.setMinimumFractionDigits(2);
+        numberFormat.setMinimumFractionDigits(0);
         numberFormat.setMaximumFractionDigits(2);
     }
 
