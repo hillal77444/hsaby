@@ -89,16 +89,13 @@ public class AccountSummaryFragment extends Fragment {
                     if (response.isSuccessful()) {
                         String responseBody = "";
                         try {
-                            if (response.body() != null) {
-                                responseBody = response.body().toString();
-                            } else if (response.raw().body() != null) {
+                            if (response.raw().body() != null) {
                                 responseBody = response.raw().body().string();
+                                Log.d("AccountSummary", "Raw response body: " + responseBody);
                             }
                         } catch (IOException e) {
                             Log.e("AccountSummary", "Error reading response body", e);
                         }
-                        
-                        Log.d("AccountSummary", "Raw response body: " + responseBody);
                         
                         AccountSummaryResponse summaryResponse = response.body();
                         if (summaryResponse == null) {
