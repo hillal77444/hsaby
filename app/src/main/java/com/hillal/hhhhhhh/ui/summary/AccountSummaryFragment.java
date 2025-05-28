@@ -75,7 +75,7 @@ public class AccountSummaryFragment extends Fragment {
 
         // تسجيل رقم الهاتف المستخدم في الطلب
         Log.d("AccountSummary", "Sending request for phone number: " + phoneNumber);
-        Log.d("AccountSummary", "Request URL: " + RetrofitClient.BASE_URL + "api/accounts/summary/" + phoneNumber);
+        Log.d("AccountSummary", "Request URL: http://212.224.88.122:5007/api/accounts/summary/" + phoneNumber);
 
         apiService.getAccountSummary(phoneNumber).enqueue(new Callback<AccountSummaryResponse>() {
             @Override
@@ -281,12 +281,6 @@ public class AccountSummaryFragment extends Fragment {
             // عرض رسالة الخطأ في Toast
             if (getContext() != null) {
                 Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
-            }
-            
-            // عرض رسالة الخطأ في TextView إذا كان موجوداً
-            if (binding != null && binding.errorTextView != null) {
-                binding.errorTextView.setVisibility(View.VISIBLE);
-                binding.errorTextView.setText(message);
             }
         } catch (Exception e) {
             Log.e("AccountSummary", "Error showing error message", e);
