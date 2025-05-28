@@ -82,100 +82,59 @@ public class AccountSummaryFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<AccountSummaryResponse> call, @NonNull Response<AccountSummaryResponse> response) {
                 binding.progressBar.setVisibility(View.GONE);
-                try {
-                    // تسجيل رمز الاستجابة
-                    Log.d("AccountSummary", "Response code: " + response.code());
-                    
-                    if (response.isSuccessful()) {
-                        // قراءة الاستجابة الخام قبل أي تحويل
-                        String rawResponse = "";
-                        try {
-                            if (response.raw().body() != null) {
-                                rawResponse = response.raw().body().string();
-                                Log.d("AccountSummary", "Raw response: " + rawResponse);
-                            }
-                        } catch (IOException e) {
-                            Log.e("AccountSummary", "Error reading raw response", e);
-                        }
+                
+                // تسجيل رمز الاستجابة
+                Log.d("AccountSummary", "Response code: " + response.code());
+                
+                if (response.isSuccessful()) {
+                    AccountSummaryResponse summaryResponse = response.body();
+                    if (summaryResponse == null) {
+                        Log.e("AccountSummary", "Response body is null");
+                        showError("لم يتم استلام أي بيانات من الخادم", "");
+                        return;
+                    }
 
-                        // تحويل الاستجابة إلى كائن
-                        AccountSummaryResponse summaryResponse = response.body();
-                        if (summaryResponse == null) {
-                            Log.e("AccountSummary", "Response body is null");
-                            showError("لم يتم استلام أي بيانات من الخادم", rawResponse);
-                            return;
-                        }
+                    // تسجيل البيانات المستلمة
+                    Log.d("AccountSummary", "Response received: " + summaryResponse.toString());
+                    Log.d("AccountSummary", "Accounts size: " + (summaryResponse.getAccounts() != null ? summaryResponse.getAccounts().size() : 0));
+                    Log.d("AccountSummary", "Currency summary size: " + (summaryResponse.getCurrencySummary() != null ? summaryResponse.getCurrencySummary().size() : 0));
 
-                        // تسجيل البيانات المستلمة
-                        Log.d("AccountSummary", "Response received: " + summaryResponse.toString());
-                        Log.d("AccountSummary", "Accounts size: " + (summaryResponse.getAccounts() != null ? summaryResponse.getAccounts().size() : 0));
-                        Log.d("AccountSummary", "Currency summary size: " + (summaryResponse.getCurrencySummary() != null ? summaryResponse.getCurrencySummary().size() : 0));
+                    // التحقق من البيانات المستلمة
+                    if (summaryResponse.getCurrencySummary() == null || summaryResponse.getCurrencySummary().isEmpty()) {
+                        Log.e("AccountSummary", "Currency summary is null or empty");
+                        showError("لا توجد بيانات ملخص العملات", "");
+                        return;
+                    }
 
-                        // التحقق من البيانات المستلمة
-                        if (summaryResponse.getCurrencySummary() == null) {
-                            Log.e("AccountSummary", "Currency summary is null");
-                            showError("بيانات العملات فارغة", rawResponse);
-                            return;
-                        }
-                        
-                        if (summaryResponse.getCurrencySummary().isEmpty()) {
-                            Log.e("AccountSummary", "Currency summary is empty");
-                            showError("لا توجد بيانات ملخص العملات", rawResponse);
-                            return;
-                        }
+                    if (summaryResponse.getAccounts() == null || summaryResponse.getAccounts().isEmpty()) {
+                        Log.e("AccountSummary", "Accounts list is null or empty");
+                        showError("لا توجد بيانات الحسابات", "");
+                        return;
+                    }
 
-                        if (summaryResponse.getAccounts() == null) {
-                            Log.e("AccountSummary", "Accounts list is null");
-                            showError("بيانات الحسابات فارغة", rawResponse);
-                            return;
-                        }
-                        
-                        if (summaryResponse.getAccounts().isEmpty()) {
-                            Log.e("AccountSummary", "Accounts list is empty");
-                            showError("لا توجد بيانات الحسابات", rawResponse);
-                            return;
-                        }
-
-                        try {
-                            updateSummaryTable(summaryResponse.getCurrencySummary());
-                        } catch (Exception e) {
-                            Log.e("AccountSummary", "Error updating currency table", e);
-                            showError("خطأ في تحديث جدول العملات: " + e.getMessage() + "\n" + e.toString(), rawResponse);
-                            return;
-                        }
-
-                        try {
-                            updateDetailsTable(summaryResponse.getAccounts());
-                        } catch (Exception e) {
-                            Log.e("AccountSummary", "Error updating accounts table", e);
-                            showError("خطأ في تحديث جدول الحسابات: " + e.getMessage() + "\n" + e.toString(), rawResponse);
-                            return;
-                        }
-                    } else {
-                        String errorMessage = "فشل في تحميل البيانات";
-                        String errorBody = "";
-                        try {
-                            if (response.errorBody() != null) {
-                                errorBody = response.errorBody().string();
-                                Log.e("AccountSummary", "Error response body: " + errorBody);
-                                if (errorBody.contains("error")) {
-                                    errorMessage = errorBody;
-                                } else {
-                                    errorMessage += ": " + errorBody;
-                                }
-                            } else {
-                                errorMessage += " (رمز الخطأ: " + response.code() + ")";
-                            }
-                        } catch (IOException e) {
-                            Log.e("AccountSummary", "Error reading error body", e);
+                    try {
+                        updateSummaryTable(summaryResponse.getCurrencySummary());
+                        updateDetailsTable(summaryResponse.getAccounts());
+                    } catch (Exception e) {
+                        Log.e("AccountSummary", "Error updating tables", e);
+                        showError("خطأ في تحديث الجداول: " + e.getMessage(), "");
+                    }
+                } else {
+                    String errorMessage = "فشل في تحميل البيانات";
+                    String errorBody = "";
+                    try {
+                        if (response.errorBody() != null) {
+                            errorBody = response.errorBody().string();
+                            Log.e("AccountSummary", "Error response body: " + errorBody);
+                            errorMessage += ": " + errorBody;
+                        } else {
                             errorMessage += " (رمز الخطأ: " + response.code() + ")";
                         }
-                        showError(errorMessage, errorBody);
+                    } catch (IOException e) {
+                        Log.e("AccountSummary", "Error reading error body", e);
+                        errorMessage += " (رمز الخطأ: " + response.code() + ")";
                     }
-                } catch (Exception e) {
-                    Log.e("AccountSummary", "Error processing response", e);
-                    String errorMessage = "حدث خطأ في معالجة البيانات: " + e.getMessage() + "\n" + e.toString();
-                    showError(errorMessage, "لا توجد بيانات متاحة");
+                    showError(errorMessage, errorBody);
                 }
             }
 
