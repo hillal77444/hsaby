@@ -11,6 +11,7 @@ import okio.Buffer;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import java.io.IOException;
+import android.util.Log;
 
 public class RetrofitClient {
     private static final String BASE_URL = "http://212.224.88.122:5007/";
@@ -28,11 +29,17 @@ public class RetrofitClient {
             public Response intercept(Chain chain) throws IOException {
                 Response response = chain.proceed(chain.request());
                 ResponseBody responseBody = response.body();
-                String responseBodyString = responseBody.string();
                 
-                // إنشاء استجابة جديدة مع نفس البيانات
-                ResponseBody newResponseBody = ResponseBody.create(responseBody.contentType(), responseBodyString);
-                return response.newBuilder().body(newResponseBody).build();
+                if (responseBody != null) {
+                    String responseBodyString = responseBody.string();
+                    Log.d("RetrofitClient", "Response body: " + responseBodyString);
+                    
+                    // إنشاء استجابة جديدة مع نفس البيانات
+                    ResponseBody newResponseBody = ResponseBody.create(responseBody.contentType(), responseBodyString);
+                    return response.newBuilder().body(newResponseBody).build();
+                }
+                
+                return response;
             }
         };
 
