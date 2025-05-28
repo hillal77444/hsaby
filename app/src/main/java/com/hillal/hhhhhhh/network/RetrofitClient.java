@@ -2,12 +2,16 @@ package com.hillal.hhhhhhh.network;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
+import com.hillal.hhhhhhh.models.AccountSummary;
+import com.hillal.hhhhhhh.models.AccountSummaryResponse;
+import com.hillal.hhhhhhh.models.CurrencySummary;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import java.util.concurrent.TimeUnit;
-import java.nio.charset.StandardCharsets;
+import java.lang.reflect.Type;
 
 public class RetrofitClient {
     private static final String BASE_URL = "http://212.224.88.122:5007/";
@@ -25,10 +29,15 @@ public class RetrofitClient {
                 .writeTimeout(30, TimeUnit.SECONDS)
                 .build();
 
-        Gson gson = new GsonBuilder()
+        GsonBuilder gsonBuilder = new GsonBuilder()
                 .setLenient()
-                .disableHtmlEscaping()
-                .create();
+                .disableHtmlEscaping();
+
+        gsonBuilder.registerTypeAdapter(AccountSummaryResponse.class, (InstanceCreator<AccountSummaryResponse>) type -> new AccountSummaryResponse());
+        gsonBuilder.registerTypeAdapter(AccountSummary.class, (InstanceCreator<AccountSummary>) type -> new AccountSummary());
+        gsonBuilder.registerTypeAdapter(CurrencySummary.class, (InstanceCreator<CurrencySummary>) type -> new CurrencySummary());
+
+        Gson gson = gsonBuilder.create();
 
         retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
