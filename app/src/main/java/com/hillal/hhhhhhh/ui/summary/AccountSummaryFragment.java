@@ -282,10 +282,16 @@ public class AccountSummaryFragment extends Fragment {
             // طباعة رسالة الخطأ في السجل
             Log.e("AccountSummary", "Error: " + message);
             
+            // إضافة معلومات إضافية للرسالة
+            String detailedMessage = "تفاصيل الخطأ:\n" +
+                    "الوقت: " + new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date()) + "\n" +
+                    "الرسالة: " + message + "\n" +
+                    "نوع الخطأ: " + (message.contains("null") ? "خطأ في البيانات" : "خطأ في المعالجة");
+            
             // نسخ رسالة الخطأ إلى الحافظة
             if (getContext() != null) {
                 android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                android.content.ClipData clip = android.content.ClipData.newPlainText("Error Details", message);
+                android.content.ClipData clip = android.content.ClipData.newPlainText("Error Details", detailedMessage);
                 clipboard.setPrimaryClip(clip);
                 
                 // عرض رسالة الخطأ في Toast مع إشعار بنسخ التفاصيل
