@@ -75,59 +75,27 @@ public class AccountSummaryFragment extends Fragment {
         binding.progressBar.setVisibility(View.VISIBLE);
         updateTitle(phoneNumber);
 
-        // تسجيل معلومات الطلب بشكل مفصل
-        Log.d("AccountSummary", "=== بداية طلب ملخص الحسابات ===");
-        Log.d("AccountSummary", "رقم الهاتف: " + phoneNumber);
-        Log.d("AccountSummary", "رابط الطلب: http://212.224.88.122:5007/api/accounts/summary/" + phoneNumber);
-        Log.d("AccountSummary", "وقت الطلب: " + new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date()));
-
         try {
             apiService.getAccountSummary(phoneNumber).enqueue(new Callback<AccountSummaryResponse>() {
                 @Override
                 public void onResponse(@NonNull Call<AccountSummaryResponse> call, @NonNull Response<AccountSummaryResponse> response) {
                     binding.progressBar.setVisibility(View.GONE);
                     
-                    // تسجيل معلومات الاستجابة بشكل مفصل
-                    Log.d("AccountSummary", "=== استلام استجابة من الخادم ===");
-                    Log.d("AccountSummary", "رمز الاستجابة: " + response.code());
-                    Log.d("AccountSummary", "نوع الاستجابة: " + response.headers().get("Content-Type"));
-                    Log.d("AccountSummary", "حجم الاستجابة: " + (response.body() != null ? response.body().toString().length() : 0) + " bytes");
-                    
                     if (response.isSuccessful()) {
                         try {
                             AccountSummaryResponse summaryResponse = response.body();
                             if (summaryResponse == null) {
-                                Log.e("AccountSummary", "جسم الاستجابة فارغ");
                                 showError("لم يتم استلام أي بيانات من الخادم", "");
                                 return;
                             }
 
-                            // تسجيل محتوى الاستجابة
-                            Log.d("AccountSummary", "=== محتوى الاستجابة ===");
-                            Log.d("AccountSummary", "عدد الحسابات: " + (summaryResponse.getAccounts() != null ? summaryResponse.getAccounts().size() : 0));
-                            Log.d("AccountSummary", "عدد العملات: " + (summaryResponse.getCurrencySummary() != null ? summaryResponse.getCurrencySummary().size() : 0));
-                            
-                            if (summaryResponse.getAccounts() != null) {
-                                for (AccountSummary account : summaryResponse.getAccounts()) {
-                                    Log.d("AccountSummary", "حساب: " + account.toString());
-                                }
-                            }
-                            
-                            if (summaryResponse.getCurrencySummary() != null) {
-                                for (CurrencySummary currency : summaryResponse.getCurrencySummary()) {
-                                    Log.d("AccountSummary", "عملة: " + currency.toString());
-                                }
-                            }
-
                             // التحقق من البيانات المستلمة
                             if (summaryResponse.getCurrencySummary() == null || summaryResponse.getCurrencySummary().isEmpty()) {
-                                Log.e("AccountSummary", "ملخص العملات فارغ");
                                 showError("لا توجد بيانات ملخص العملات", "");
                                 return;
                             }
 
                             if (summaryResponse.getAccounts() == null || summaryResponse.getAccounts().isEmpty()) {
-                                Log.e("AccountSummary", "قائمة الحسابات فارغة");
                                 showError("لا توجد بيانات الحسابات", "");
                                 return;
                             }
@@ -138,54 +106,37 @@ public class AccountSummaryFragment extends Fragment {
                                     try {
                                         updateSummaryTable(summaryResponse.getCurrencySummary());
                                         updateDetailsTable(summaryResponse.getAccounts());
-                                        Log.d("AccountSummary", "تم تحديث الجداول بنجاح");
                                     } catch (Exception e) {
-                                        Log.e("AccountSummary", "خطأ في تحديث الجداول", e);
                                         showError("خطأ في تحديث الجداول: " + e.getMessage(), "");
                                     }
                                 });
                             }
                         } catch (Exception e) {
-                            Log.e("AccountSummary", "خطأ في معالجة الاستجابة", e);
                             showError("خطأ في معالجة البيانات: " + e.getMessage(), "");
                         }
                     } else {
                         String errorMessage = "فشل في تحميل البيانات";
-                        String errorBody = "";
                         try {
                             if (response.errorBody() != null) {
-                                errorBody = response.errorBody().string();
-                                Log.e("AccountSummary", "جسم الخطأ: " + errorBody);
-                                errorMessage += ": " + errorBody;
+                                errorMessage += ": " + response.errorBody().string();
                             } else {
                                 errorMessage += " (رمز الخطأ: " + response.code() + ")";
                             }
                         } catch (IOException e) {
-                            Log.e("AccountSummary", "خطأ في قراءة جسم الخطأ", e);
                             errorMessage += " (رمز الخطأ: " + response.code() + ")";
                         }
-                        showError(errorMessage, errorBody);
+                        showError(errorMessage, "");
                     }
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<AccountSummaryResponse> call, @NonNull Throwable t) {
                     binding.progressBar.setVisibility(View.GONE);
-                    Log.e("AccountSummary", "=== فشل في الاتصال ===");
-                    Log.e("AccountSummary", "نوع الخطأ: " + t.getClass().getName());
-                    Log.e("AccountSummary", "رسالة الخطأ: " + t.getMessage());
-                    if (t.getCause() != null) {
-                        Log.e("AccountSummary", "سبب الخطأ: " + t.getCause().getMessage());
-                    }
-                    String errorMessage = "حدث خطأ في الاتصال: " + t.getMessage();
-                    showError(errorMessage, "");
+                    showError("حدث خطأ في الاتصال: " + t.getMessage(), "");
                 }
             });
         } catch (Exception e) {
             binding.progressBar.setVisibility(View.GONE);
-            Log.e("AccountSummary", "=== خطأ في إرسال الطلب ===");
-            Log.e("AccountSummary", "نوع الخطأ: " + e.getClass().getName());
-            Log.e("AccountSummary", "رسالة الخطأ: " + e.getMessage());
             showError("خطأ في إرسال الطلب: " + e.getMessage(), "");
         }
     }
@@ -292,59 +243,10 @@ public class AccountSummaryFragment extends Fragment {
         try {
             // طباعة رسالة الخطأ في السجل
             Log.e("AccountSummary", "Error: " + message);
-            Log.e("AccountSummary", "Response Data: " + responseData);
             
-            // الحصول على رقم الهاتف
-            String phoneNumber = getPhoneNumber();
-            
-            // الحصول على رابط الطلب مباشرة من ApiService
-            String endpoint = apiService.getAccountSummary(phoneNumber).request().url().toString();
-            
-            // إضافة معلومات إضافية للرسالة
-            String detailedMessage = "=== تفاصيل الخطأ ===\n\n" +
-                    "1. معلومات الطلب:\n" +
-                    "   - الوقت: " + new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date()) + "\n" +
-                    "   - رابط الطلب: " + endpoint + "\n" +
-                    "   - رقم الهاتف: " + (phoneNumber != null ? phoneNumber : "غير متوفر") + "\n\n" +
-                    
-                    "2. معلومات الخطأ:\n" +
-                    "   - الرسالة: " + message + "\n" +
-                    "   - نوع الخطأ: " + (message.contains("null") ? "خطأ في البيانات" : "خطأ في المعالجة") + "\n" +
-                    "   - سبب الخطأ: " + (message.contains("ClassCastException") ? 
-                        "خطأ في تحويل نوع البيانات - تأكد من تطابق أنواع البيانات مع الخادم" : 
-                        "خطأ غير معروف") + "\n\n" +
-                    
-                    "3. معلومات الاستجابة:\n" +
-                    "   - البيانات المستلمة من السيرفر:\n" + 
-                    (responseData != null && !responseData.isEmpty() ? 
-                        "     " + responseData.replace("\n", "\n     ") : 
-                        "     لا توجد بيانات متاحة") + "\n\n" +
-                    
-                    "4. معلومات النظام:\n" +
-                    "   - نظام التشغيل: Android " + android.os.Build.VERSION.RELEASE + "\n" +
-                    "   - نوع الجهاز: " + android.os.Build.MANUFACTURER + " " + android.os.Build.MODEL + "\n" +
-                    "   - إصدار التطبيق: " + getAppVersion() + "\n\n" +
-                    
-                    "5. خطوات التشخيص:\n" +
-                    "   1. تأكد من أن السيرفر يعمل بشكل صحيح\n" +
-                    "   2. تأكد من صحة رقم الهاتف\n" +
-                    "   3. تأكد من وجود اتصال بالإنترنت\n" +
-                    "   4. تأكد من أن البيانات المرسلة صحيحة\n" +
-                    "   5. تأكد من أن الاستجابة تتطابق مع نموذج البيانات\n\n" +
-                    
-                    "6. معلومات إضافية:\n" +
-                    "   - حالة الاتصال: " + (isNetworkAvailable() ? "متصل" : "غير متصل") + "\n" +
-                    "   - نوع الاتصال: " + getNetworkType() + "\n" +
-                    "   - قوة الإشارة: " + getSignalStrength() + "\n";
-            
-            // نسخ رسالة الخطأ إلى الحافظة
+            // عرض رسالة Toast بسيطة للمستخدم
             if (getContext() != null) {
-                android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                android.content.ClipData clip = android.content.ClipData.newPlainText("تفاصيل الخطأ", detailedMessage);
-                clipboard.setPrimaryClip(clip);
-                
-                // عرض رسالة Toast لإعلام المستخدم بنسخ التفاصيل
-                Toast.makeText(getContext(), "تم نسخ تفاصيل الخطأ إلى الحافظة\n" + message, Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
             Log.e("AccountSummary", "خطأ في عرض رسالة الخطأ", e);
