@@ -195,27 +195,43 @@ public class AccountSummaryFragment extends Fragment {
 
     private void updateSummaryTable(List<CurrencySummary> summaries) {
         try {
-            TableLayout table = binding.summaryTable;
-            table.removeAllViews();
-
+            StringBuilder html = new StringBuilder();
+            html.append("<html><head><style>");
+            html.append("body { font-family: Arial, sans-serif; margin: 0; padding: 0; }");
+            html.append("table { width: 100%; border-collapse: collapse; }");
+            html.append("th, td { padding: 8px; text-align: center; border: 1px solid #ddd; }");
+            html.append("th { background-color: #f5f5f5; font-weight: bold; }");
+            html.append("tr:nth-child(even) { background-color: #f9f9f9; }");
+            html.append("</style></head><body>");
+            
+            html.append("<table>");
             // إضافة رأس الجدول
-            addTableRow(table, new String[]{"العملة", "الرصيد", "المدين", "الدائن"}, true);
+            html.append("<tr>");
+            html.append("<th>العملة</th>");
+            html.append("<th>الرصيد</th>");
+            html.append("<th>المدين</th>");
+            html.append("<th>الدائن</th>");
+            html.append("</tr>");
 
             // إضافة البيانات
             if (summaries != null && !summaries.isEmpty()) {
                 for (CurrencySummary summary : summaries) {
                     if (summary != null) {
-                        addTableRow(table, new String[]{
-                            summary.getCurrency() != null ? summary.getCurrency() : "-",
-                            numberFormat.format(summary.getTotalBalance()),
-                            numberFormat.format(summary.getTotalDebits()),
-                            numberFormat.format(summary.getTotalCredits())
-                        }, false);
+                        html.append("<tr>");
+                        html.append("<td>").append(summary.getCurrency() != null ? summary.getCurrency() : "-").append("</td>");
+                        html.append("<td>").append(numberFormat.format(summary.getTotalBalance())).append("</td>");
+                        html.append("<td>").append(numberFormat.format(summary.getTotalDebits())).append("</td>");
+                        html.append("<td>").append(numberFormat.format(summary.getTotalCredits())).append("</td>");
+                        html.append("</tr>");
                     }
                 }
             } else {
-                addTableRow(table, new String[]{"لا توجد بيانات", "-", "-", "-"}, false);
+                html.append("<tr><td colspan='4' style='text-align: center;'>لا توجد بيانات</td></tr>");
             }
+            
+            html.append("</table></body></html>");
+            
+            binding.summaryWebView.loadDataWithBaseURL(null, html.toString(), "text/html", "UTF-8", null);
         } catch (Exception e) {
             showError("خطأ في عرض ملخص العملات: " + e.getMessage(), "");
         }
@@ -223,79 +239,49 @@ public class AccountSummaryFragment extends Fragment {
 
     private void updateDetailsTable(List<AccountSummary> accounts) {
         try {
-            TableLayout table = binding.detailsTable;
-            table.removeAllViews();
-            // إعادة تعيين مقياس التكبير عند تحديث الجدول
-            scale = 1.0f;
-            table.setScaleX(scale);
-            table.setScaleY(scale);
-
+            StringBuilder html = new StringBuilder();
+            html.append("<html><head><style>");
+            html.append("body { font-family: Arial, sans-serif; margin: 0; padding: 0; }");
+            html.append("table { width: 100%; border-collapse: collapse; }");
+            html.append("th, td { padding: 8px; text-align: center; border: 1px solid #ddd; }");
+            html.append("th { background-color: #f5f5f5; font-weight: bold; }");
+            html.append("tr:nth-child(even) { background-color: #f9f9f9; }");
+            html.append("</style></head><body>");
+            
+            html.append("<table>");
             // إضافة رأس الجدول
-            addTableRow(table, new String[]{"الاسم", "العملة", "لك", "عليك", "الرصيد", "ID"}, true);
+            html.append("<tr>");
+            html.append("<th>الاسم</th>");
+            html.append("<th>العملة</th>");
+            html.append("<th>لك</th>");
+            html.append("<th>عليك</th>");
+            html.append("<th>الرصيد</th>");
+            html.append("<th>ID</th>");
+            html.append("</tr>");
 
             // إضافة البيانات
             if (accounts != null && !accounts.isEmpty()) {
                 for (AccountSummary account : accounts) {
                     if (account != null) {
-                        addTableRow(table, new String[]{
-                            account.getUserName() != null ? account.getUserName() : "-",
-                            account.getCurrency() != null ? account.getCurrency() : "-",
-                            numberFormat.format(account.getTotalCredits()),
-                            numberFormat.format(account.getTotalDebits()),
-                            numberFormat.format(account.getBalance()),
-                            String.valueOf(account.getUserId())
-                        }, false);
+                        html.append("<tr>");
+                        html.append("<td>").append(account.getUserName() != null ? account.getUserName() : "-").append("</td>");
+                        html.append("<td>").append(account.getCurrency() != null ? account.getCurrency() : "-").append("</td>");
+                        html.append("<td>").append(numberFormat.format(account.getTotalCredits())).append("</td>");
+                        html.append("<td>").append(numberFormat.format(account.getTotalDebits())).append("</td>");
+                        html.append("<td>").append(numberFormat.format(account.getBalance())).append("</td>");
+                        html.append("<td>").append(account.getUserId()).append("</td>");
+                        html.append("</tr>");
                     }
                 }
             } else {
-                addTableRow(table, new String[]{"لا توجد بيانات", "-", "-", "-", "-", "-"}, false);
+                html.append("<tr><td colspan='6' style='text-align: center;'>لا توجد بيانات</td></tr>");
             }
+            
+            html.append("</table></body></html>");
+            
+            binding.detailsWebView.loadDataWithBaseURL(null, html.toString(), "text/html", "UTF-8", null);
         } catch (Exception e) {
             showError("خطأ في عرض تفاصيل الحسابات: " + e.getMessage(), "");
-        }
-    }
-
-    private void addTableRow(TableLayout table, String[] values, boolean isHeader) {
-        try {
-            TableRow row = new TableRow(requireContext());
-            row.setLayoutParams(new TableLayout.LayoutParams(
-                TableLayout.LayoutParams.MATCH_PARENT,
-                TableLayout.LayoutParams.WRAP_CONTENT
-            ));
-
-            // تحديد الأوزان النسبية للأعمدة
-            float[] weights = {0.25f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f}; // مجموع الأوزان = 1
-
-            for (int i = 0; i < values.length; i++) {
-                TextView textView = new TextView(requireContext());
-                textView.setText(values[i] != null ? values[i] : "-");
-                textView.setPadding(4, 4, 4, 4);
-                textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
-                
-                // السماح بعرض النص في عدة أسطر
-                textView.setSingleLine(false);
-                textView.setMaxLines(Integer.MAX_VALUE);
-                
-                // تعيين الوزن النسبي للعمود
-                TableRow.LayoutParams params = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT);
-                params.weight = weights[i];
-                textView.setLayoutParams(params);
-                
-                if (isHeader) {
-                    textView.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.light_gray));
-                    textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
-                    textView.setTextSize(14);
-                    textView.setTypeface(null, android.graphics.Typeface.BOLD);
-                } else {
-                    textView.setTextSize(12);
-                }
-                
-                row.addView(textView);
-            }
-
-            table.addView(row);
-        } catch (Exception e) {
-            showError("خطأ في إضافة صف للجدول: " + e.getMessage(), "");
         }
     }
 
