@@ -22,4 +22,7 @@
     <!-- Button dimensions -->
     <dimen name="button_min_height">48dp</dimen>
     <dimen name="button_corner_radius">16dp</dimen>
+
+    <!-- Text sizes -->
+    <dimen name="text_size_large">18sp</dimen>
 </resources>
