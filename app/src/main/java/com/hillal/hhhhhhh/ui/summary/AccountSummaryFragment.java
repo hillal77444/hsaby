@@ -259,10 +259,12 @@ public class AccountSummaryFragment extends Fragment {
     private void addTableRow(TableLayout table, String[] values, boolean isHeader) {
         try {
             TableRow row = new TableRow(requireContext());
-            row.setLayoutParams(new TableLayout.LayoutParams(
+            TableLayout.LayoutParams rowParams = new TableLayout.LayoutParams(
                 TableLayout.LayoutParams.MATCH_PARENT,
                 TableLayout.LayoutParams.WRAP_CONTENT
-            ));
+            );
+            rowParams.setMargins(0, 0, 0, 0); // إزالة الهوامش بين الصفوف
+            row.setLayoutParams(rowParams);
 
             // تحديد الأوزان النسبية للأعمدة بناءً على حجم الشاشة
             float[] weights;
@@ -276,7 +278,7 @@ public class AccountSummaryFragment extends Fragment {
             for (int i = 0; i < values.length; i++) {
                 TextView textView = new TextView(requireContext());
                 textView.setText(values[i] != null ? values[i] : "-");
-                textView.setPadding(4, 4, 4, 4);
+                textView.setPadding(2, 2, 2, 2); // تقليل الهوامش الداخلية للخلايا
                 
                 // تعيين المحاذاة في المنتصف
                 textView.setGravity(Gravity.CENTER);
@@ -288,7 +290,8 @@ public class AccountSummaryFragment extends Fragment {
                 // تعيين الوزن النسبي للعمود
                 TableRow.LayoutParams params = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT);
                 params.weight = weights[i];
-                params.gravity = Gravity.CENTER; // محاذاة الخلية في المنتصف
+                params.gravity = Gravity.CENTER;
+                params.setMargins(0, 0, 0, 0); // إزالة الهوامش بين الأعمدة
                 textView.setLayoutParams(params);
                 
                 if (isHeader) {
