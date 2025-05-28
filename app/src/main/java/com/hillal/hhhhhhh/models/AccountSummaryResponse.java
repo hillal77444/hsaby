@@ -10,6 +10,10 @@ public class AccountSummaryResponse {
     @SerializedName("currencySummary")
     private List<CurrencySummary> currencySummary;
 
+    // Constructor فارغ مطلوب لـ Gson
+    public AccountSummaryResponse() {
+    }
+
     public List<AccountSummary> getAccounts() {
         return accounts;
     }
