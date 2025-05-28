@@ -799,6 +799,8 @@ def update_username():
         return jsonify({'error': 'حدث خطأ أثناء تحديث اسم المستخدم'}), 500
     
 
+# http://212.224.88.122:5007/api/accounts/summary/715175085
+# يتم جلب رقم التلفون من هنا userPreferences.savePhoneNumber(phone);
 @main.route('/api/accounts/summary/<phone>', methods=['GET'])
 def get_account_summary(phone):
     try:
