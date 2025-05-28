@@ -269,7 +269,7 @@ public class AccountSummaryFragment extends Fragment {
             for (int i = 0; i < values.length; i++) {
                 TextView textView = new TextView(requireContext());
                 textView.setText(values[i] != null ? values[i] : "-");
-                textView.setPadding(8, 8, 8, 8);
+                textView.setPadding(4, 4, 4, 4);
                 textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
                 
                 // السماح بعرض النص في عدة أسطر
