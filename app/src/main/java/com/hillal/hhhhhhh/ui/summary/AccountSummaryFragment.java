@@ -87,13 +87,18 @@ public class AccountSummaryFragment extends Fragment {
                     Log.d("AccountSummary", "Response code: " + response.code());
                     
                     if (response.isSuccessful()) {
-                        // قراءة الاستجابة الخام أولاً
+                        // قراءة الاستجابة الخام قبل أي تحويل
                         String rawResponse = "";
-                        if (response.raw().body() != null) {
-                            rawResponse = response.raw().body().string();
-                            Log.d("AccountSummary", "Raw response: " + rawResponse);
+                        try {
+                            if (response.raw().body() != null) {
+                                rawResponse = response.raw().body().string();
+                                Log.d("AccountSummary", "Raw response: " + rawResponse);
+                            }
+                        } catch (IOException e) {
+                            Log.e("AccountSummary", "Error reading raw response", e);
                         }
 
+                        // تحويل الاستجابة إلى كائن
                         AccountSummaryResponse summaryResponse = response.body();
                         if (summaryResponse == null) {
                             Log.e("AccountSummary", "Response body is null");
