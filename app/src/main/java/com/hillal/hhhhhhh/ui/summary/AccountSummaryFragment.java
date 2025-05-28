@@ -6,7 +6,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TableLayout;
@@ -40,10 +39,6 @@ public class AccountSummaryFragment extends Fragment {
     private FragmentAccountSummaryBinding binding;
     private ApiService apiService;
     private NumberFormat numberFormat;
-    private float scale = 1.0f;
-    private ScaleGestureDetector scaleGestureDetector;
-    private static final float MIN_SCALE = 0.5f;
-    private static final float MAX_SCALE = 2.0f;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -57,7 +52,6 @@ public class AccountSummaryFragment extends Fragment {
         
         setupNumberFormat();
         setupApiService();
-        setupScaleGestureDetector();
         loadAccountSummary();
     }
 
@@ -69,43 +63,6 @@ public class AccountSummaryFragment extends Fragment {
 
     private void setupApiService() {
         apiService = RetrofitClient.getInstance().getApiService();
-    }
-
-    private void setupScaleGestureDetector() {
-        scaleGestureDetector = new ScaleGestureDetector(requireContext(), new ScaleListener());
-        
-        // إضافة معالج اللمس للجداول
-        binding.summaryTable.setOnTouchListener((v, event) -> {
-            scaleGestureDetector.onTouchEvent(event);
-            return true;
-        });
-        
-        binding.detailsTable.setOnTouchListener((v, event) -> {
-            scaleGestureDetector.onTouchEvent(event);
-            return true;
-        });
-    }
-
-    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            try {
-                scale *= detector.getScaleFactor();
-                // تحديد حدود التكبير والتصغير
-                scale = Math.max(MIN_SCALE, Math.min(scale, MAX_SCALE));
-                
-                // تطبيق التكبير على الجداول
-                binding.summaryTable.setScaleX(scale);
-                binding.summaryTable.setScaleY(scale);
-                binding.detailsTable.setScaleX(scale);
-                binding.detailsTable.setScaleY(scale);
-                
-                return true;
-            } catch (Exception e) {
-                Log.e("AccountSummary", "خطأ في التكبير والتصغير", e);
-                return false;
-            }
-        }
     }
 
     private void loadAccountSummary() {
@@ -226,10 +183,6 @@ public class AccountSummaryFragment extends Fragment {
         try {
             TableLayout table = binding.detailsTable;
             table.removeAllViews();
-            // إعادة تعيين مقياس التكبير عند تحديث الجدول
-            scale = 1.0f;
-            table.setScaleX(scale);
-            table.setScaleY(scale);
 
             // إضافة رأس الجدول
             addTableRow(table, new String[]{"الاسم", "العملة", "لك", "عليك", "الرصيد", "ID"}, true);
