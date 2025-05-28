@@ -91,78 +91,83 @@ public class AccountReportFragment extends Fragment {
 
         binding.progressBar.setVisibility(View.VISIBLE);
 
-        Call<AccountReport> call = apiService.getAccountDetails(accountId, currency);
-        String requestUrl = call.request().url().toString();
-        Log.d("AccountReport", "Request URL: " + requestUrl);
+        try {
+            Call<AccountReport> call = apiService.getAccountDetails(accountId, currency);
+            String requestUrl = call.request().url().toString();
+            Log.d("AccountReport", "Request URL: " + requestUrl);
 
-        call.enqueue(new Callback<AccountReport>() {
-            @Override
-            public void onResponse(@NonNull Call<AccountReport> call, @NonNull Response<AccountReport> response) {
-                binding.progressBar.setVisibility(View.GONE);
+            call.enqueue(new Callback<AccountReport>() {
+                @Override
+                public void onResponse(@NonNull Call<AccountReport> call, @NonNull Response<AccountReport> response) {
+                    binding.progressBar.setVisibility(View.GONE);
 
-                if (response.isSuccessful()) {
-                    try {
-                        AccountReport report = response.body();
-                        if (report == null) {
-                            showError("لم يتم استلام أي بيانات من الخادم");
-                            return;
+                    if (response.isSuccessful()) {
+                        try {
+                            AccountReport report = response.body();
+                            if (report == null) {
+                                showError("لم يتم استلام أي بيانات من الخادم");
+                                return;
+                            }
+
+                            // التحقق من البيانات المستلمة
+                            if (report.getUserName() == null || report.getAccountName() == null) {
+                                showError("بيانات الحساب غير مكتملة");
+                                return;
+                            }
+
+                            // تحديث العرض في الـ UI thread
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(() -> {
+                                    try {
+                                        updateReportView(report);
+                                    } catch (Exception e) {
+                                        showError("خطأ في تحديث التقرير: " + e.getMessage());
+                                    }
+                                });
+                            }
+                        } catch (Exception e) {
+                            showError("خطأ في معالجة البيانات: " + e.getMessage());
                         }
-
-                        // التحقق من البيانات المستلمة
-                        if (report.getUserName() == null || report.getAccountName() == null) {
-                            showError("بيانات الحساب غير مكتملة");
-                            return;
+                    } else {
+                        StringBuilder errorDetails = new StringBuilder();
+                        errorDetails.append("تفاصيل الخطأ:\n");
+                        errorDetails.append("الرابط: ").append(requestUrl).append("\n");
+                        errorDetails.append("رمز الاستجابة: ").append(response.code()).append("\n");
+                        
+                        try {
+                            if (response.errorBody() != null) {
+                                String errorBody = response.errorBody().string();
+                                errorDetails.append("رد الخادم: ").append(errorBody).append("\n");
+                            }
+                        } catch (IOException e) {
+                            errorDetails.append("خطأ في قراءة رد الخادم: ").append(e.getMessage()).append("\n");
                         }
-
-                        // تحديث العرض في الـ UI thread
-                        if (getActivity() != null) {
-                            getActivity().runOnUiThread(() -> {
-                                try {
-                                    updateReportView(report);
-                                } catch (Exception e) {
-                                    showError("خطأ في تحديث التقرير: " + e.getMessage());
-                                }
-                            });
-                        }
-                    } catch (Exception e) {
-                        showError("خطأ في معالجة البيانات: " + e.getMessage());
+                        
+                        showError(errorDetails.toString());
                     }
-                } else {
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<AccountReport> call, @NonNull Throwable t) {
+                    binding.progressBar.setVisibility(View.GONE);
+                    
                     StringBuilder errorDetails = new StringBuilder();
                     errorDetails.append("تفاصيل الخطأ:\n");
                     errorDetails.append("الرابط: ").append(requestUrl).append("\n");
-                    errorDetails.append("رمز الاستجابة: ").append(response.code()).append("\n");
+                    errorDetails.append("نوع الخطأ: ").append(t.getClass().getName()).append("\n");
+                    errorDetails.append("السبب: ").append(t.getMessage()).append("\n");
                     
-                    try {
-                        if (response.errorBody() != null) {
-                            String errorBody = response.errorBody().string();
-                            errorDetails.append("رد الخادم: ").append(errorBody).append("\n");
-                        }
-                    } catch (IOException e) {
-                        errorDetails.append("خطأ في قراءة رد الخادم: ").append(e.getMessage()).append("\n");
+                    if (t.getCause() != null) {
+                        errorDetails.append("السبب الأساسي: ").append(t.getCause().getMessage()).append("\n");
                     }
                     
                     showError(errorDetails.toString());
                 }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<AccountReport> call, @NonNull Throwable t) {
-                binding.progressBar.setVisibility(View.GONE);
-                
-                StringBuilder errorDetails = new StringBuilder();
-                errorDetails.append("تفاصيل الخطأ:\n");
-                errorDetails.append("الرابط: ").append(requestUrl).append("\n");
-                errorDetails.append("نوع الخطأ: ").append(t.getClass().getName()).append("\n");
-                errorDetails.append("السبب: ").append(t.getMessage()).append("\n");
-                
-                if (t.getCause() != null) {
-                    errorDetails.append("السبب الأساسي: ").append(t.getCause().getMessage()).append("\n");
-                }
-                
-                showError(errorDetails.toString());
-            }
-        });
+            });
+        } catch (Exception e) {
+            binding.progressBar.setVisibility(View.GONE);
+            showError("خطأ في إرسال الطلب: " + e.getMessage());
+        }
     }
 
     private void updateReportView(AccountReport report) {
