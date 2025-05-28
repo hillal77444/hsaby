@@ -73,16 +73,22 @@ public class AccountSummaryFragment extends Fragment {
     private void setupScaleGestureDetector() {
         scaleGestureDetector = new ScaleGestureDetector(requireContext(), new ScaleListener());
         
-        // إضافة معالج اللمس للجداول
-        binding.summaryTable.setOnTouchListener((v, event) -> {
+        // إضافة معالج اللمس للـ WebView
+        binding.summaryWebView.setOnTouchListener((v, event) -> {
             scaleGestureDetector.onTouchEvent(event);
             return true;
         });
         
-        binding.detailsTable.setOnTouchListener((v, event) -> {
+        binding.detailsWebView.setOnTouchListener((v, event) -> {
             scaleGestureDetector.onTouchEvent(event);
             return true;
         });
+
+        // تفعيل التكبير والتصغير في WebView
+        binding.summaryWebView.getSettings().setBuiltInZoomControls(true);
+        binding.summaryWebView.getSettings().setDisplayZoomControls(false);
+        binding.detailsWebView.getSettings().setBuiltInZoomControls(true);
+        binding.detailsWebView.getSettings().setDisplayZoomControls(false);
     }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
@@ -93,11 +99,11 @@ public class AccountSummaryFragment extends Fragment {
                 // تحديد حدود التكبير والتصغير
                 scale = Math.max(MIN_SCALE, Math.min(scale, MAX_SCALE));
                 
-                // تطبيق التكبير على الجداول
-                binding.summaryTable.setScaleX(scale);
-                binding.summaryTable.setScaleY(scale);
-                binding.detailsTable.setScaleX(scale);
-                binding.detailsTable.setScaleY(scale);
+                // تطبيق التكبير على WebView
+                binding.summaryWebView.setScaleX(scale);
+                binding.summaryWebView.setScaleY(scale);
+                binding.detailsWebView.setScaleX(scale);
+                binding.detailsWebView.setScaleY(scale);
                 
                 return true;
             } catch (Exception e) {
