@@ -28,15 +28,18 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="ملخص الحسابات لرقم: +967XXXXXXXX"
-                    android:textSize="18sp"
+                    android:textSize="@dimen/text_size_large"
                     android:textStyle="bold"
                     android:gravity="center"
-                    android:layout_marginBottom="8dp"/>
+                    android:layout_marginBottom="8dp"
+                    android:maxLines="2"
+                    android:ellipsize="end"/>
 
                 <HorizontalScrollView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:scrollbars="none">
+                    android:scrollbars="none"
+                    android:fillViewport="true">
 
                     <TableLayout
                         android:id="@+id/summaryTable"
@@ -66,15 +69,18 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="تفاصيل الحسابات الفردية"
-                    android:textSize="18sp"
+                    android:textSize="@dimen/text_size_large"
                     android:textStyle="bold"
                     android:gravity="center"
-                    android:layout_marginBottom="8dp"/>
+                    android:layout_marginBottom="8dp"
+                    android:maxLines="2"
+                    android:ellipsize="end"/>
 
                 <HorizontalScrollView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:scrollbars="none">
+                    android:scrollbars="none"
+                    android:fillViewport="true">
 
                     <TableLayout
                         android:id="@+id/detailsTable"
