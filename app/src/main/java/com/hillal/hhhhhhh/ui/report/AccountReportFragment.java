@@ -86,6 +86,7 @@ public class AccountReportFragment extends Fragment {
 
     private void setupWebView() {
         if (binding != null && binding.reportWebView != null) {
+            Log.d("AccountReport", "Setting up WebView");
             binding.reportWebView.getSettings().setJavaScriptEnabled(true);
             binding.reportWebView.getSettings().setDomStorageEnabled(true);
             binding.reportWebView.getSettings().setLoadWithOverviewMode(true);
@@ -93,6 +94,19 @@ public class AccountReportFragment extends Fragment {
             binding.reportWebView.getSettings().setBuiltInZoomControls(true);
             binding.reportWebView.getSettings().setDisplayZoomControls(false);
             binding.reportWebView.setInitialScale(1);
+            
+            // إضافة WebViewClient للتعامل مع الأخطاء
+            binding.reportWebView.setWebViewClient(new android.webkit.WebViewClient() {
+                @Override
+                public void onReceivedError(android.webkit.WebView view, int errorCode, String description, String failingUrl) {
+                    Log.e("AccountReport", "WebView error: " + description);
+                    showError("خطأ في تحميل التقرير: " + description);
+                }
+            });
+            
+            Log.d("AccountReport", "WebView setup completed");
+        } else {
+            Log.e("AccountReport", "WebView or binding is null during setup");
         }
     }
 
@@ -174,9 +188,12 @@ public class AccountReportFragment extends Fragment {
     private void updateReportView(AccountReport report) {
         try {
             if (report == null) {
+                Log.e("AccountReport", "Report is null");
                 showError("التقرير فارغ");
                 return;
             }
+
+            Log.d("AccountReport", "Updating report view with data: " + report.toString());
 
             StringBuilder html = new StringBuilder();
             html.append("<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'><style>");
@@ -230,11 +247,13 @@ public class AccountReportFragment extends Fragment {
             html.append("</table></body></html>");
 
             String htmlContent = html.toString();
-            Log.d("AccountReport", "HTML Content: " + htmlContent);
+            Log.d("AccountReport", "Generated HTML content length: " + htmlContent.length());
 
             if (binding != null && binding.reportWebView != null) {
+                Log.d("AccountReport", "Loading HTML content into WebView");
                 binding.reportWebView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
             } else {
+                Log.e("AccountReport", "WebView is null or not initialized");
                 showError("خطأ في تهيئة WebView");
             }
         } catch (Exception e) {
