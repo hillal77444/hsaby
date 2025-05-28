@@ -87,20 +87,10 @@ public class AccountSummaryFragment extends Fragment {
                     Log.d("AccountSummary", "Response code: " + response.code());
                     
                     if (response.isSuccessful()) {
-                        String responseBody = "";
-                        try {
-                            if (response.raw().body() != null) {
-                                responseBody = response.raw().body().string();
-                                Log.d("AccountSummary", "Raw response body: " + responseBody);
-                            }
-                        } catch (IOException e) {
-                            Log.e("AccountSummary", "Error reading response body", e);
-                        }
-                        
                         AccountSummaryResponse summaryResponse = response.body();
                         if (summaryResponse == null) {
                             Log.e("AccountSummary", "Response body is null");
-                            showError("لم يتم استلام أي بيانات من الخادم", responseBody);
+                            showError("لم يتم استلام أي بيانات من الخادم", "لا توجد بيانات متاحة");
                             return;
                         }
 
@@ -112,25 +102,25 @@ public class AccountSummaryFragment extends Fragment {
                         // التحقق من البيانات المستلمة
                         if (summaryResponse.getCurrencySummary() == null) {
                             Log.e("AccountSummary", "Currency summary is null");
-                            showError("بيانات العملات فارغة", responseBody);
+                            showError("بيانات العملات فارغة", "لا توجد بيانات متاحة");
                             return;
                         }
                         
                         if (summaryResponse.getCurrencySummary().isEmpty()) {
                             Log.e("AccountSummary", "Currency summary is empty");
-                            showError("لا توجد بيانات ملخص العملات", responseBody);
+                            showError("لا توجد بيانات ملخص العملات", "لا توجد بيانات متاحة");
                             return;
                         }
 
                         if (summaryResponse.getAccounts() == null) {
                             Log.e("AccountSummary", "Accounts list is null");
-                            showError("بيانات الحسابات فارغة", responseBody);
+                            showError("بيانات الحسابات فارغة", "لا توجد بيانات متاحة");
                             return;
                         }
                         
                         if (summaryResponse.getAccounts().isEmpty()) {
                             Log.e("AccountSummary", "Accounts list is empty");
-                            showError("لا توجد بيانات الحسابات", responseBody);
+                            showError("لا توجد بيانات الحسابات", "لا توجد بيانات متاحة");
                             return;
                         }
 
@@ -138,7 +128,7 @@ public class AccountSummaryFragment extends Fragment {
                             updateSummaryTable(summaryResponse.getCurrencySummary());
                         } catch (Exception e) {
                             Log.e("AccountSummary", "Error updating currency table", e);
-                            showError("خطأ في تحديث جدول العملات: " + e.getMessage() + "\n" + e.toString(), responseBody);
+                            showError("خطأ في تحديث جدول العملات: " + e.getMessage() + "\n" + e.toString(), "لا توجد بيانات متاحة");
                             return;
                         }
 
@@ -146,7 +136,7 @@ public class AccountSummaryFragment extends Fragment {
                             updateDetailsTable(summaryResponse.getAccounts());
                         } catch (Exception e) {
                             Log.e("AccountSummary", "Error updating accounts table", e);
-                            showError("خطأ في تحديث جدول الحسابات: " + e.getMessage() + "\n" + e.toString(), responseBody);
+                            showError("خطأ في تحديث جدول الحسابات: " + e.getMessage() + "\n" + e.toString(), "لا توجد بيانات متاحة");
                             return;
                         }
                     } else {
