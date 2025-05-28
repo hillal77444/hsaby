@@ -87,10 +87,17 @@ public class AccountSummaryFragment extends Fragment {
                     Log.d("AccountSummary", "Response code: " + response.code());
                     
                     if (response.isSuccessful()) {
+                        // قراءة الاستجابة الخام أولاً
+                        String rawResponse = "";
+                        if (response.raw().body() != null) {
+                            rawResponse = response.raw().body().string();
+                            Log.d("AccountSummary", "Raw response: " + rawResponse);
+                        }
+
                         AccountSummaryResponse summaryResponse = response.body();
                         if (summaryResponse == null) {
                             Log.e("AccountSummary", "Response body is null");
-                            showError("لم يتم استلام أي بيانات من الخادم", "لا توجد بيانات متاحة");
+                            showError("لم يتم استلام أي بيانات من الخادم", rawResponse);
                             return;
                         }
 
@@ -102,25 +109,25 @@ public class AccountSummaryFragment extends Fragment {
                         // التحقق من البيانات المستلمة
                         if (summaryResponse.getCurrencySummary() == null) {
                             Log.e("AccountSummary", "Currency summary is null");
-                            showError("بيانات العملات فارغة", "لا توجد بيانات متاحة");
+                            showError("بيانات العملات فارغة", rawResponse);
                             return;
                         }
                         
                         if (summaryResponse.getCurrencySummary().isEmpty()) {
                             Log.e("AccountSummary", "Currency summary is empty");
-                            showError("لا توجد بيانات ملخص العملات", "لا توجد بيانات متاحة");
+                            showError("لا توجد بيانات ملخص العملات", rawResponse);
                             return;
                         }
 
                         if (summaryResponse.getAccounts() == null) {
                             Log.e("AccountSummary", "Accounts list is null");
-                            showError("بيانات الحسابات فارغة", "لا توجد بيانات متاحة");
+                            showError("بيانات الحسابات فارغة", rawResponse);
                             return;
                         }
                         
                         if (summaryResponse.getAccounts().isEmpty()) {
                             Log.e("AccountSummary", "Accounts list is empty");
-                            showError("لا توجد بيانات الحسابات", "لا توجد بيانات متاحة");
+                            showError("لا توجد بيانات الحسابات", rawResponse);
                             return;
                         }
 
@@ -128,7 +135,7 @@ public class AccountSummaryFragment extends Fragment {
                             updateSummaryTable(summaryResponse.getCurrencySummary());
                         } catch (Exception e) {
                             Log.e("AccountSummary", "Error updating currency table", e);
-                            showError("خطأ في تحديث جدول العملات: " + e.getMessage() + "\n" + e.toString(), "لا توجد بيانات متاحة");
+                            showError("خطأ في تحديث جدول العملات: " + e.getMessage() + "\n" + e.toString(), rawResponse);
                             return;
                         }
 
@@ -136,7 +143,7 @@ public class AccountSummaryFragment extends Fragment {
                             updateDetailsTable(summaryResponse.getAccounts());
                         } catch (Exception e) {
                             Log.e("AccountSummary", "Error updating accounts table", e);
-                            showError("خطأ في تحديث جدول الحسابات: " + e.getMessage() + "\n" + e.toString(), "لا توجد بيانات متاحة");
+                            showError("خطأ في تحديث جدول الحسابات: " + e.getMessage() + "\n" + e.toString(), rawResponse);
                             return;
                         }
                     } else {
@@ -281,6 +288,10 @@ public class AccountSummaryFragment extends Fragment {
             Log.e("AccountSummary", "Error: " + message);
             Log.e("AccountSummary", "Response Data: " + responseData);
             
+            // الحصول على رقم الهاتف
+            String phoneNumber = getPhoneNumber();
+            String requestUrl = "http://212.224.88.122:5007/api/accounts/summary/" + (phoneNumber != null ? phoneNumber : "unknown");
+            
             // إضافة معلومات إضافية للرسالة
             String detailedMessage = "تفاصيل الخطأ:\n" +
                     "الوقت: " + new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date()) + "\n" +
@@ -289,6 +300,8 @@ public class AccountSummaryFragment extends Fragment {
                     "سبب الخطأ: " + (message.contains("ClassCastException") ? 
                         "خطأ في تحويل نوع البيانات - تأكد من تطابق أنواع البيانات مع الخادم" : 
                         "خطأ غير معروف") + "\n" +
+                    "رابط الطلب: " + requestUrl + "\n" +
+                    "رقم الهاتف: " + (phoneNumber != null ? phoneNumber : "غير متوفر") + "\n" +
                     "البيانات المستلمة من السيرفر:\n" + (responseData != null && !responseData.isEmpty() ? responseData : "لا توجد بيانات متاحة") + "\n" +
                     "تفاصيل إضافية:\n" +
                     "- تأكد من أن السيرفر يعمل بشكل صحيح\n" +
