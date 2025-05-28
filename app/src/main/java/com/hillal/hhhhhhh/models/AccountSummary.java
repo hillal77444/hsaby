@@ -21,6 +21,10 @@ public class AccountSummary {
     @SerializedName("currency")
     private String currency;
 
+    // Constructor فارغ مطلوب لـ Gson
+    public AccountSummary() {
+    }
+
     public long getUserId() {
         return userId;
     }
