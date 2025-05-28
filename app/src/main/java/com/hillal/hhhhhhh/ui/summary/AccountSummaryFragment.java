@@ -58,34 +58,7 @@ public class AccountSummaryFragment extends Fragment {
         
         setupNumberFormat();
         setupApiService();
-        setupScaleGestureDetector();
-        
-        // تفعيل JavaScript في WebView
-        binding.detailsWebView.getSettings().setJavaScriptEnabled(true);
-        binding.detailsWebView.getSettings().setDomStorageEnabled(true);
-        
-        // إضافة واجهة JavaScript
-        binding.detailsWebView.addJavascriptInterface(new Object() {
-            @JavascriptInterface
-            public void showAccountReport(int accountId, String currency) {
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        try {
-                            // فتح صفحة التقرير
-                            AccountReportFragment fragment = AccountReportFragment.newInstance(accountId, currency);
-                            getActivity().getSupportFragmentManager()
-                                .beginTransaction()
-                                .replace(R.id.nav_host_fragment_content_main, fragment)
-                                .addToBackStack(null)
-                                .commit();
-                        } catch (Exception e) {
-                            showError("خطأ في فتح التقرير: " + e.getMessage(), "");
-                        }
-                    });
-                }
-            }
-        }, "Android");
-        
+        setupWebView();
         loadAccountSummary();
     }
 
@@ -99,47 +72,56 @@ public class AccountSummaryFragment extends Fragment {
         apiService = RetrofitClient.getInstance().getApiService();
     }
 
-    private void setupScaleGestureDetector() {
-        scaleGestureDetector = new ScaleGestureDetector(requireContext(), new ScaleListener());
-        
-        // إضافة معالج اللمس للـ WebView
-        binding.summaryWebView.setOnTouchListener((v, event) -> {
-            scaleGestureDetector.onTouchEvent(event);
-            return true;
-        });
-        
-        binding.detailsWebView.setOnTouchListener((v, event) -> {
-            scaleGestureDetector.onTouchEvent(event);
-            return true;
-        });
-
-        // تفعيل التكبير والتصغير في WebView
-        binding.summaryWebView.getSettings().setBuiltInZoomControls(true);
-        binding.summaryWebView.getSettings().setDisplayZoomControls(false);
+    private void setupWebView() {
+        // إعدادات WebView الأساسية
+        binding.detailsWebView.getSettings().setJavaScriptEnabled(true);
+        binding.detailsWebView.getSettings().setDomStorageEnabled(true);
+        binding.detailsWebView.getSettings().setSupportZoom(true);
         binding.detailsWebView.getSettings().setBuiltInZoomControls(true);
         binding.detailsWebView.getSettings().setDisplayZoomControls(false);
-    }
-
-    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            try {
-                scale *= detector.getScaleFactor();
-                // تحديد حدود التكبير والتصغير
-                scale = Math.max(MIN_SCALE, Math.min(scale, MAX_SCALE));
-                
-                // تطبيق التكبير على WebView
-                binding.summaryWebView.setScaleX(scale);
-                binding.summaryWebView.setScaleY(scale);
-                binding.detailsWebView.setScaleX(scale);
-                binding.detailsWebView.setScaleY(scale);
-                
-                return true;
-            } catch (Exception e) {
-                Log.e("AccountSummary", "خطأ في التكبير والتصغير", e);
-                return false;
+        binding.detailsWebView.getSettings().setLoadWithOverviewMode(true);
+        binding.detailsWebView.getSettings().setUseWideViewPort(true);
+        
+        // تفعيل التفاعل مع المحتوى
+        binding.detailsWebView.setClickable(true);
+        binding.detailsWebView.setFocusable(true);
+        binding.detailsWebView.setFocusableInTouchMode(true);
+        
+        // إضافة واجهة JavaScript
+        binding.detailsWebView.addJavascriptInterface(new Object() {
+            @JavascriptInterface
+            public void showAccountReport(int accountId, String currency) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        try {
+                            AccountReportFragment fragment = AccountReportFragment.newInstance(accountId, currency);
+                            getActivity().getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.nav_host_fragment_content_main, fragment)
+                                .addToBackStack(null)
+                                .commit();
+                        } catch (Exception e) {
+                            showError("خطأ في فتح التقرير: " + e.getMessage(), "");
+                        }
+                    });
+                }
             }
-        }
+        }, "Android");
+
+        // إضافة WebViewClient للتحكم في التفاعل
+        binding.detailsWebView.setWebViewClient(new android.webkit.WebViewClient() {
+            @Override
+            public void onPageFinished(android.webkit.WebView view, String url) {
+                super.onPageFinished(view, url);
+                // تفعيل التفاعل مع المحتوى بعد تحميل الصفحة
+                view.evaluateJavascript(
+                    "document.body.style.webkitTouchCallout = 'none';" +
+                    "document.body.style.webkitUserSelect = 'none';" +
+                    "document.body.style.webkitTapHighlightColor = 'transparent';",
+                    null
+                );
+            }
+        });
     }
 
     private void loadAccountSummary() {
@@ -275,30 +257,27 @@ public class AccountSummaryFragment extends Fragment {
     private void updateDetailsTable(List<AccountSummary> accounts) {
         try {
             StringBuilder html = new StringBuilder();
-            html.append("<html><head><style>");
-            html.append("body { font-family: Arial, sans-serif; margin: 0; padding: 0; }");
+            html.append("<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'><style>");
+            html.append("body { font-family: Arial, sans-serif; margin: 0; padding: 0; -webkit-touch-callout: none; -webkit-user-select: none; }");
             html.append("table { width: 100%; border-collapse: collapse; }");
             html.append("th, td { padding: 8px; text-align: center; border: 1px solid #ddd; }");
             html.append("th { background-color: #f5f5f5; font-weight: bold; }");
             html.append("tr:nth-child(even) { background-color: #f9f9f9; }");
-            html.append(".report-btn { background-color: #4CAF50; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }");
-            html.append(".report-btn:hover { background-color: #45a049; }");
+            html.append(".report-btn { background-color: #4CAF50; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; -webkit-tap-highlight-color: transparent; }");
+            html.append(".report-btn:active { background-color: #45a049; }");
             html.append("</style></head><body>");
             
-            // إضافة JavaScript في بداية الصفحة
             html.append("<script>");
             html.append("function showReport(accountId, currency) {");
-            html.append("    console.log('Button clicked for account: ' + accountId);");
             html.append("    try {");
             html.append("        window.Android.showAccountReport(accountId, currency);");
             html.append("    } catch(e) {");
-            html.append("        console.error('Error calling Android interface:', e);");
+            html.append("        console.error('Error:', e);");
             html.append("    }");
             html.append("}");
             html.append("</script>");
             
             html.append("<table>");
-            // إضافة رأس الجدول
             html.append("<tr>");
             html.append("<th>تقرير</th>");
             html.append("<th>الرصيد</th>");
@@ -308,7 +287,6 @@ public class AccountSummaryFragment extends Fragment {
             html.append("<th>التاجر</th>");
             html.append("</tr>");
 
-            // إضافة البيانات
             if (accounts != null && !accounts.isEmpty()) {
                 for (AccountSummary account : accounts) {
                     if (account != null) {
@@ -332,25 +310,7 @@ public class AccountSummaryFragment extends Fragment {
             
             html.append("</table></body></html>");
             
-            // تفعيل WebView debugging
-            binding.detailsWebView.setWebContentsDebuggingEnabled(true);
-            
-            // تحميل المحتوى
             binding.detailsWebView.loadDataWithBaseURL(null, html.toString(), "text/html", "UTF-8", null);
-            
-            // إضافة WebViewClient للتحكم في التحميل
-            binding.detailsWebView.setWebViewClient(new android.webkit.WebViewClient() {
-                @Override
-                public void onPageFinished(android.webkit.WebView view, String url) {
-                    super.onPageFinished(view, url);
-                    // التأكد من تفعيل JavaScript بعد تحميل الصفحة
-                    view.evaluateJavascript(
-                        "console.log('Page loaded successfully');",
-                        null
-                    );
-                }
-            });
-            
         } catch (Exception e) {
             showError("خطأ في عرض تفاصيل الحسابات: " + e.getMessage(), "");
         }
