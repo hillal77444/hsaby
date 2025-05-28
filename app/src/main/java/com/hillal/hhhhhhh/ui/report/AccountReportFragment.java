@@ -1,5 +1,6 @@
 package com.hillal.hhhhhhh.ui.report;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -90,10 +91,11 @@ public class AccountReportFragment extends Fragment {
 
         binding.progressBar.setVisibility(View.VISIBLE);
 
-        // طباعة معلومات الطلب
-        Log.d("AccountReport", "Loading report for account: " + accountId + ", currency: " + currency);
+        Call<AccountReport> call = apiService.getAccountDetails(accountId, currency);
+        String requestUrl = call.request().url().toString();
+        Log.d("AccountReport", "Request URL: " + requestUrl);
 
-        apiService.getAccountDetails(accountId, currency).enqueue(new Callback<AccountReport>() {
+        call.enqueue(new Callback<AccountReport>() {
             @Override
             public void onResponse(@NonNull Call<AccountReport> call, @NonNull Response<AccountReport> response) {
                 binding.progressBar.setVisibility(View.GONE);
@@ -106,29 +108,39 @@ public class AccountReportFragment extends Fragment {
                         showError("لم يتم استلام أي بيانات من الخادم");
                     }
                 } else {
-                    String errorMessage = "فشل في تحميل التقرير";
+                    StringBuilder errorDetails = new StringBuilder();
+                    errorDetails.append("تفاصيل الخطأ:\n");
+                    errorDetails.append("الرابط: ").append(requestUrl).append("\n");
+                    errorDetails.append("رمز الاستجابة: ").append(response.code()).append("\n");
+                    
                     try {
                         if (response.errorBody() != null) {
-                            errorMessage += "\nالسبب: " + response.errorBody().string();
+                            String errorBody = response.errorBody().string();
+                            errorDetails.append("رد الخادم: ").append(errorBody).append("\n");
                         }
-                        errorMessage += "\nرمز الخطأ: " + response.code();
                     } catch (IOException e) {
-                        errorMessage += "\nخطأ في قراءة رسالة الخطأ: " + e.getMessage();
+                        errorDetails.append("خطأ في قراءة رد الخادم: ").append(e.getMessage()).append("\n");
                     }
-                    showError(errorMessage);
+                    
+                    showError(errorDetails.toString());
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<AccountReport> call, @NonNull Throwable t) {
                 binding.progressBar.setVisibility(View.GONE);
-                String errorMessage = "خطأ في الاتصال بالخادم:\n" +
-                    "السبب: " + t.getMessage() + "\n" +
-                    "النوع: " + t.getClass().getName();
+                
+                StringBuilder errorDetails = new StringBuilder();
+                errorDetails.append("تفاصيل الخطأ:\n");
+                errorDetails.append("الرابط: ").append(requestUrl).append("\n");
+                errorDetails.append("نوع الخطأ: ").append(t.getClass().getName()).append("\n");
+                errorDetails.append("السبب: ").append(t.getMessage()).append("\n");
+                
                 if (t.getCause() != null) {
-                    errorMessage += "\nالسبب الأساسي: " + t.getCause().getMessage();
+                    errorDetails.append("السبب الأساسي: ").append(t.getCause().getMessage()).append("\n");
                 }
-                showError(errorMessage);
+                
+                showError(errorDetails.toString());
             }
         });
     }
@@ -186,17 +198,13 @@ public class AccountReportFragment extends Fragment {
             // طباعة الخطأ في السجل
             Log.e("AccountReport", "Error: " + message);
             
-            // عرض رسالة الخطأ في Toast
+            // عرض رسالة الخطأ في Toast مع إمكانية النسخ
             if (getContext() != null) {
-                // تقسيم الرسالة إذا كانت طويلة
-                if (message.length() > 100) {
-                    String[] parts = message.split("\n");
-                    for (String part : parts) {
-                        Toast.makeText(getContext(), part, Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
-                }
+                android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                android.content.ClipData clip = android.content.ClipData.newPlainText("Error Details", message);
+                clipboard.setPrimaryClip(clip);
+                
+                Toast.makeText(getContext(), "تم نسخ تفاصيل الخطأ إلى الحافظة", Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
             Log.e("AccountReport", "Error showing error message", e);
