@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TableLayout;
@@ -39,6 +39,10 @@ public class AccountSummaryFragment extends Fragment {
     private FragmentAccountSummaryBinding binding;
     private ApiService apiService;
     private NumberFormat numberFormat;
+    private float scale = 1.0f;
+    private ScaleGestureDetector scaleGestureDetector;
+    private static final float MIN_SCALE = 0.5f;
+    private static final float MAX_SCALE = 2.0f;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,6 +56,7 @@ public class AccountSummaryFragment extends Fragment {
         
         setupNumberFormat();
         setupApiService();
+        setupScaleGestureDetector();
         loadAccountSummary();
     }
 
@@ -63,6 +68,43 @@ public class AccountSummaryFragment extends Fragment {
 
     private void setupApiService() {
         apiService = RetrofitClient.getInstance().getApiService();
+    }
+
+    private void setupScaleGestureDetector() {
+        scaleGestureDetector = new ScaleGestureDetector(requireContext(), new ScaleListener());
+        
+        // إضافة معالج اللمس للجداول
+        binding.summaryTable.setOnTouchListener((v, event) -> {
+            scaleGestureDetector.onTouchEvent(event);
+            return true;
+        });
+        
+        binding.detailsTable.setOnTouchListener((v, event) -> {
+            scaleGestureDetector.onTouchEvent(event);
+            return true;
+        });
+    }
+
+    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            try {
+                scale *= detector.getScaleFactor();
+                // تحديد حدود التكبير والتصغير
+                scale = Math.max(MIN_SCALE, Math.min(scale, MAX_SCALE));
+                
+                // تطبيق التكبير على الجداول
+                binding.summaryTable.setScaleX(scale);
+                binding.summaryTable.setScaleY(scale);
+                binding.detailsTable.setScaleX(scale);
+                binding.detailsTable.setScaleY(scale);
+                
+                return true;
+            } catch (Exception e) {
+                Log.e("AccountSummary", "خطأ في التكبير والتصغير", e);
+                return false;
+            }
+        }
     }
 
     private void loadAccountSummary() {
@@ -183,6 +225,10 @@ public class AccountSummaryFragment extends Fragment {
         try {
             TableLayout table = binding.detailsTable;
             table.removeAllViews();
+            // إعادة تعيين مقياس التكبير عند تحديث الجدول
+            scale = 1.0f;
+            table.setScaleX(scale);
+            table.setScaleY(scale);
 
             // إضافة رأس الجدول
             addTableRow(table, new String[]{"الاسم", "العملة", "لك", "عليك", "الرصيد", "ID"}, true);
@@ -212,29 +258,19 @@ public class AccountSummaryFragment extends Fragment {
     private void addTableRow(TableLayout table, String[] values, boolean isHeader) {
         try {
             TableRow row = new TableRow(requireContext());
-            TableLayout.LayoutParams rowParams = new TableLayout.LayoutParams(
+            row.setLayoutParams(new TableLayout.LayoutParams(
                 TableLayout.LayoutParams.MATCH_PARENT,
                 TableLayout.LayoutParams.WRAP_CONTENT
-            );
-            rowParams.setMargins(0, 0, 0, 0); // إزالة الهوامش بين الصفوف
-            row.setLayoutParams(rowParams);
+            ));
 
-            // تحديد الأوزان النسبية للأعمدة بناءً على حجم الشاشة
-            float[] weights;
-            int screenWidth = getResources().getDisplayMetrics().widthPixels;
-            if (screenWidth < 600) { // للشاشات الصغيرة
-                weights = new float[]{0.30f, 0.15f, 0.15f, 0.15f, 0.15f, 0.10f};
-            } else { // للشاشات الكبيرة
-                weights = new float[]{0.25f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f};
-            }
+            // تحديد الأوزان النسبية للأعمدة
+            float[] weights = {0.25f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f}; // مجموع الأوزان = 1
 
             for (int i = 0; i < values.length; i++) {
                 TextView textView = new TextView(requireContext());
                 textView.setText(values[i] != null ? values[i] : "-");
-                textView.setPadding(2, 2, 2, 2); // تقليل الهوامش الداخلية للخلايا
-                
-                // تعيين المحاذاة في المنتصف
-                textView.setGravity(Gravity.CENTER);
+                textView.setPadding(4, 4, 4, 4);
+                textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
                 
                 // السماح بعرض النص في عدة أسطر
                 textView.setSingleLine(false);
@@ -243,17 +279,15 @@ public class AccountSummaryFragment extends Fragment {
                 // تعيين الوزن النسبي للعمود
                 TableRow.LayoutParams params = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT);
                 params.weight = weights[i];
-                params.gravity = Gravity.CENTER;
-                params.setMargins(0, 0, 0, 0); // إزالة الهوامش بين الأعمدة
                 textView.setLayoutParams(params);
                 
                 if (isHeader) {
                     textView.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.light_gray));
                     textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
-                    textView.setTextSize(screenWidth < 600 ? 12 : 14);
+                    textView.setTextSize(14);
                     textView.setTypeface(null, android.graphics.Typeface.BOLD);
                 } else {
-                    textView.setTextSize(screenWidth < 600 ? 10 : 12);
+                    textView.setTextSize(12);
                 }
                 
                 row.addView(textView);
