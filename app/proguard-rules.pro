@@ -139,22 +139,15 @@
 -keep class org.openjsse.** { *; }
 
 # Keep SSL/TLS related classes
--keep class org.conscrypt.** { *; }
 -keep class com.android.org.conscrypt.** { *; }
 -keep class org.apache.harmony.xnet.provider.jsse.** { *; }
--keep class org.bouncycastle.jsse.** { *; }
--keep class org.bouncycastle.jsse.provider.** { *; }
+-keep class org.conscrypt.** { *; }
+-keep class org.bouncycastle.** { *; }
 -keep class org.openjsse.** { *; }
--keep class org.openjsse.javax.net.ssl.** { *; }
--keep class org.openjsse.net.ssl.** { *; }
 
 # Keep OkHttp platform classes
 -keep class okhttp3.internal.platform.** { *; }
--keep class okhttp3.internal.platform.android.** { *; }
--keep class okhttp3.internal.platform.AndroidPlatform { *; }
--keep class okhttp3.internal.platform.ConscryptPlatform { *; }
--keep class okhttp3.internal.platform.BouncyCastlePlatform { *; }
--keep class okhttp3.internal.platform.OpenJSSEPlatform { *; }
+-keep class okhttp3.internal.tls.** { *; }
 
 # Keep SSL/TLS interfaces
 -keep interface javax.net.ssl.** { *; }
@@ -201,3 +194,41 @@
 -dontwarn org.openjsse.javax.net.ssl.SSLParameters
 -dontwarn org.openjsse.javax.net.ssl.SSLSocket
 -dontwarn org.openjsse.net.ssl.OpenJSSE
+
+# Keep Retrofit and OkHttp
+-keepattributes Signature
+-keepattributes *Annotation*
+-keep class retrofit2.** { *; }
+-keepclasseswithmembers class * {
+    @retrofit2.http.* <methods>;
+}
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+-dontwarn okhttp3.**
+-dontwarn okio.**
+
+# Keep Gson
+-keepattributes Signature
+-keepattributes *Annotation*
+-dontwarn sun.misc.**
+-keep class com.google.gson.** { *; }
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
+
+# Keep model classes
+-keep class com.hillal.hhhhhhh.models.** { *; }
+-keep class com.hillal.hhhhhhh.data.room.entities.** { *; }
+
+# Keep Android platform classes
+-keep class android.** { *; }
+-keep interface android.** { *; }
+-dontwarn android.**
+
+# Keep Kotlin Coroutines
+-keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
+-keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
+
+# Keep Room
+-keep class * extends androidx.room.RoomDatabase
+-dontwarn androidx.room.paging.**
