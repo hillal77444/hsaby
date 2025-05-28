@@ -6,6 +6,7 @@ import com.google.gson.InstanceCreator;
 import com.hillal.hhhhhhh.models.AccountSummary;
 import com.hillal.hhhhhhh.models.AccountSummaryResponse;
 import com.hillal.hhhhhhh.models.CurrencySummary;
+import com.hillal.hhhhhhh.models.AccountReport;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -36,6 +37,7 @@ public class RetrofitClient {
         gsonBuilder.registerTypeAdapter(AccountSummaryResponse.class, (InstanceCreator<AccountSummaryResponse>) type -> new AccountSummaryResponse());
         gsonBuilder.registerTypeAdapter(AccountSummary.class, (InstanceCreator<AccountSummary>) type -> new AccountSummary());
         gsonBuilder.registerTypeAdapter(CurrencySummary.class, (InstanceCreator<CurrencySummary>) type -> new CurrencySummary());
+        gsonBuilder.registerTypeAdapter(AccountReport.class, (InstanceCreator<AccountReport>) type -> new AccountReport());
 
         Gson gson = gsonBuilder.create();
 
