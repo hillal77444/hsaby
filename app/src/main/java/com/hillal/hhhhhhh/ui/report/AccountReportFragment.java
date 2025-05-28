@@ -134,51 +134,39 @@ public class AccountReportFragment extends Fragment {
                                     try {
                                         updateReportView(report);
                                     } catch (Exception e) {
+                                        Log.e("AccountReport", "Error updating report view", e);
                                         showError("خطأ في تحديث التقرير: " + e.getMessage());
                                     }
                                 });
                             }
                         } catch (Exception e) {
+                            Log.e("AccountReport", "Error processing response", e);
                             showError("خطأ في معالجة البيانات: " + e.getMessage());
                         }
                     } else {
-                        StringBuilder errorDetails = new StringBuilder();
-                        errorDetails.append("تفاصيل الخطأ:\n");
-                        errorDetails.append("الرابط: ").append(requestUrl).append("\n");
-                        errorDetails.append("رمز الاستجابة: ").append(response.code()).append("\n");
-                        
+                        String errorMessage = "فشل في تحميل البيانات";
                         try {
                             if (response.errorBody() != null) {
-                                String errorBody = response.errorBody().string();
-                                errorDetails.append("رد الخادم: ").append(errorBody).append("\n");
+                                errorMessage += ": " + response.errorBody().string();
+                            } else {
+                                errorMessage += " (رمز الخطأ: " + response.code() + ")";
                             }
                         } catch (IOException e) {
-                            errorDetails.append("خطأ في قراءة رد الخادم: ").append(e.getMessage()).append("\n");
+                            errorMessage += " (رمز الخطأ: " + response.code() + ")";
                         }
-                        
-                        showError(errorDetails.toString());
+                        showError(errorMessage);
                     }
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<AccountReport> call, @NonNull Throwable t) {
                     binding.progressBar.setVisibility(View.GONE);
-                    
-                    StringBuilder errorDetails = new StringBuilder();
-                    errorDetails.append("تفاصيل الخطأ:\n");
-                    errorDetails.append("الرابط: ").append(requestUrl).append("\n");
-                    errorDetails.append("نوع الخطأ: ").append(t.getClass().getName()).append("\n");
-                    errorDetails.append("السبب: ").append(t.getMessage()).append("\n");
-                    
-                    if (t.getCause() != null) {
-                        errorDetails.append("السبب الأساسي: ").append(t.getCause().getMessage()).append("\n");
-                    }
-                    
-                    showError(errorDetails.toString());
+                    showError("حدث خطأ في الاتصال: " + t.getMessage());
                 }
             });
         } catch (Exception e) {
             binding.progressBar.setVisibility(View.GONE);
+            Log.e("AccountReport", "Error making request", e);
             showError("خطأ في إرسال الطلب: " + e.getMessage());
         }
     }
@@ -260,13 +248,9 @@ public class AccountReportFragment extends Fragment {
             // طباعة الخطأ في السجل
             Log.e("AccountReport", "Error: " + message);
             
-            // عرض رسالة الخطأ في Toast مع إمكانية النسخ
+            // عرض رسالة الخطأ في Toast
             if (getContext() != null) {
-                android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                android.content.ClipData clip = android.content.ClipData.newPlainText("Error Details", message);
-                clipboard.setPrimaryClip(clip);
-                
-                Toast.makeText(getContext(), "تم نسخ تفاصيل الخطأ إلى الحافظة", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
             Log.e("AccountReport", "Error showing error message", e);
