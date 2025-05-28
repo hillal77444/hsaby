@@ -1,5 +1,7 @@
 package com.hillal.hhhhhhh.network;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -19,11 +21,17 @@ public class RetrofitClient {
                 .addInterceptor(loggingInterceptor)
                 .build();
 
+        // إنشاء Gson مع إعدادات مخصصة
+        Gson gson = new GsonBuilder()
+                .setLenient() // السماح بتسامح أكبر في تحليل JSON
+                .serializeNulls() // تضمين القيم الفارغة في التسلسل
+                .create();
+
         // إنشاء Retrofit
         retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
     }
 
