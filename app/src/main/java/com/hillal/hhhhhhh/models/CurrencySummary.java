@@ -15,6 +15,10 @@ public class CurrencySummary {
     @SerializedName("totalCredits")
     private double totalCredits;
 
+    // Constructor فارغ مطلوب لـ Gson
+    public CurrencySummary() {
+    }
+
     public String getCurrency() {
         return currency;
     }
