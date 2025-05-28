@@ -297,8 +297,7 @@ public class AccountSummaryFragment extends Fragment {
             // الحصول على رقم الهاتف
             String phoneNumber = getPhoneNumber();
             
-            // الحصول على رابط الطلب من RetrofitClient ومسار الطلب من ApiService
-            String baseUrl = RetrofitClient.getInstance().getBaseUrl();
+            // الحصول على رابط الطلب مباشرة من ApiService
             String endpoint = apiService.getAccountSummary(phoneNumber).request().url().toString();
             
             // إضافة معلومات إضافية للرسالة
