@@ -33,6 +33,10 @@ public class AccountReportFragment extends Fragment {
     private int accountId;
     private String currency;
 
+    public AccountReportFragment() {
+        // Constructor فارغ مطلوب
+    }
+
     public static AccountReportFragment newInstance(int accountId, String currency) {
         AccountReportFragment fragment = new AccountReportFragment();
         Bundle args = new Bundle();
@@ -40,6 +44,15 @@ public class AccountReportFragment extends Fragment {
         args.putString("currency", currency);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            accountId = getArguments().getInt("accountId");
+            currency = getArguments().getString("currency");
+        }
     }
 
     @Override
@@ -51,11 +64,6 @@ public class AccountReportFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        if (getArguments() != null) {
-            accountId = getArguments().getInt("accountId");
-            currency = getArguments().getString("currency");
-        }
 
         setupNumberFormat();
         setupApiService();
@@ -73,6 +81,11 @@ public class AccountReportFragment extends Fragment {
     }
 
     private void loadAccountReport() {
+        if (accountId <= 0 || currency == null) {
+            showError("بيانات الحساب غير صحيحة");
+            return;
+        }
+
         binding.progressBar.setVisibility(View.VISIBLE);
 
         apiService.getAccountDetails(accountId, currency).enqueue(new Callback<AccountReport>() {
