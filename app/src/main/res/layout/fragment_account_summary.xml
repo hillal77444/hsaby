@@ -2,8 +2,7 @@
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -35,9 +34,11 @@
                     android:maxLines="2"
                     android:ellipsize="end"/>
 
-                <HorizontalScrollView
+                <TableLayout
+                    android:id="@+id/summaryTable"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+<<<<<<< HEAD
                     android:scrollbars="horizontal"
                     android:fillViewport="true"
                     android:overScrollMode="always">
@@ -51,6 +52,10 @@
                         android:background="@drawable/table_border"/>
 
                 </HorizontalScrollView>
+=======
+                    android:stretchColumns="*"
+                    android:background="@drawable/table_border"/>
+>>>>>>> parent of 7dcd3a11 (Update fragment_account_summary.xml)
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -78,9 +83,11 @@
                     android:maxLines="2"
                     android:ellipsize="end"/>
 
-                <HorizontalScrollView
+                <TableLayout
+                    android:id="@+id/detailsTable"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+<<<<<<< HEAD
                     android:scrollbars="horizontal"
                     android:fillViewport="true"
                     android:overScrollMode="always">
@@ -94,6 +101,10 @@
                         android:background="@drawable/table_border"/>
 
                 </HorizontalScrollView>
+=======
+                    android:stretchColumns="*"
+                    android:background="@drawable/table_border"/>
+>>>>>>> parent of 7dcd3a11 (Update fragment_account_summary.xml)
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
