@@ -20,6 +20,7 @@ import com.hillal.hhhhhhh.models.AccountSummaryResponse;
 import com.hillal.hhhhhhh.models.CurrencySummary;
 import com.hillal.hhhhhhh.network.ApiService;
 import com.hillal.hhhhhhh.network.RetrofitClient;
+import com.hillal.hhhhhhh.utils.UserPreferences;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -60,8 +61,15 @@ public class AccountSummaryFragment extends Fragment {
     }
 
     private void loadAccountSummary() {
-        binding.progressBar.setVisibility(View.VISIBLE);
         String phoneNumber = getPhoneNumber();
+        
+        // التحقق من وجود رقم الهاتف
+        if (phoneNumber == null) {
+            binding.progressBar.setVisibility(View.GONE);
+            return;
+        }
+        
+        binding.progressBar.setVisibility(View.VISIBLE);
         
         // تحديث عنوان الصفحة
         updateTitle(phoneNumber);
@@ -208,8 +216,30 @@ public class AccountSummaryFragment extends Fragment {
     }
 
     private String getPhoneNumber() {
-        // هنا يجب تنفيذ جلب رقم الهاتف من SharedPreferences أو من أي مصدر آخر
-        return "715175085"; // مثال مؤقت
+        try {
+            UserPreferences userPreferences = new UserPreferences(requireContext());
+            String phoneNumber = userPreferences.getPhoneNumber();
+            
+            // التحقق من صحة الرقم
+            if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+                showError("لم يتم العثور على رقم الهاتف");
+                return null;
+            }
+            
+            // إزالة أي مسافات أو رموز غير ضرورية
+            phoneNumber = phoneNumber.trim();
+            
+            // التحقق من أن الرقم يحتوي على أرقام فقط
+            if (!phoneNumber.matches("\\d+")) {
+                showError("رقم الهاتف غير صالح");
+                return null;
+            }
+            
+            return phoneNumber;
+        } catch (Exception e) {
+            showError("حدث خطأ في جلب رقم الهاتف");
+            return null;
+        }
     }
 
     @Override
