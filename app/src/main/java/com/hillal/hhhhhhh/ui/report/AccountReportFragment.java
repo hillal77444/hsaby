@@ -116,34 +116,41 @@ public class AccountReportFragment extends Fragment {
             return;
         }
 
+        Log.d("AccountReport", "Starting to load account report for ID: " + accountId + ", Currency: " + currency);
         binding.progressBar.setVisibility(View.VISIBLE);
 
         try {
             Call<AccountReport> call = apiService.getAccountDetails(accountId, currency);
             String requestUrl = call.request().url().toString();
-            Log.d("AccountReport", "Request URL: " + requestUrl);
+            Log.d("AccountReport", "Making request to URL: " + requestUrl);
 
             call.enqueue(new Callback<AccountReport>() {
                 @Override
                 public void onResponse(@NonNull Call<AccountReport> call, @NonNull Response<AccountReport> response) {
+                    Log.d("AccountReport", "Received response with code: " + response.code());
                     binding.progressBar.setVisibility(View.GONE);
 
                     if (response.isSuccessful()) {
                         try {
                             AccountReport report = response.body();
+                            Log.d("AccountReport", "Response body: " + (report != null ? report.toString() : "null"));
+
                             if (report == null) {
+                                Log.e("AccountReport", "Response body is null");
                                 showError("لم يتم استلام أي بيانات من الخادم");
                                 return;
                             }
 
                             // التحقق من البيانات المستلمة
                             if (report.getUserName() == null || report.getAccountName() == null) {
+                                Log.e("AccountReport", "Missing required fields: userName or accountName");
                                 showError("بيانات الحساب غير مكتملة");
                                 return;
                             }
 
                             // تحديث العرض في الـ UI thread
                             if (getActivity() != null) {
+                                Log.d("AccountReport", "Updating UI with report data");
                                 getActivity().runOnUiThread(() -> {
                                     try {
                                         updateReportView(report);
@@ -152,6 +159,9 @@ public class AccountReportFragment extends Fragment {
                                         showError("خطأ في تحديث التقرير: " + e.getMessage());
                                     }
                                 });
+                            } else {
+                                Log.e("AccountReport", "Activity is null");
+                                showError("خطأ في تحديث واجهة المستخدم");
                             }
                         } catch (Exception e) {
                             Log.e("AccountReport", "Error processing response", e);
@@ -161,11 +171,15 @@ public class AccountReportFragment extends Fragment {
                         String errorMessage = "فشل في تحميل البيانات";
                         try {
                             if (response.errorBody() != null) {
-                                errorMessage += ": " + response.errorBody().string();
+                                String errorBody = response.errorBody().string();
+                                Log.e("AccountReport", "Error response body: " + errorBody);
+                                errorMessage += ": " + errorBody;
                             } else {
+                                Log.e("AccountReport", "Error response code: " + response.code());
                                 errorMessage += " (رمز الخطأ: " + response.code() + ")";
                             }
                         } catch (IOException e) {
+                            Log.e("AccountReport", "Error reading error body", e);
                             errorMessage += " (رمز الخطأ: " + response.code() + ")";
                         }
                         showError(errorMessage);
@@ -174,13 +188,14 @@ public class AccountReportFragment extends Fragment {
 
                 @Override
                 public void onFailure(@NonNull Call<AccountReport> call, @NonNull Throwable t) {
+                    Log.e("AccountReport", "Network request failed", t);
                     binding.progressBar.setVisibility(View.GONE);
                     showError("حدث خطأ في الاتصال: " + t.getMessage());
                 }
             });
         } catch (Exception e) {
-            binding.progressBar.setVisibility(View.GONE);
             Log.e("AccountReport", "Error making request", e);
+            binding.progressBar.setVisibility(View.GONE);
             showError("خطأ في إرسال الطلب: " + e.getMessage());
         }
     }
@@ -188,7 +203,7 @@ public class AccountReportFragment extends Fragment {
     private void updateReportView(AccountReport report) {
         try {
             if (report == null) {
-                Log.e("AccountReport", "Report is null");
+                Log.e("AccountReport", "Report is null in updateReportView");
                 showError("التقرير فارغ");
                 return;
             }
