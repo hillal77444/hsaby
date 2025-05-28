@@ -60,8 +60,31 @@ public class AccountSummaryFragment extends Fragment {
         setupApiService();
         setupScaleGestureDetector();
         
+        // تفعيل JavaScript في WebView
+        binding.detailsWebView.getSettings().setJavaScriptEnabled(true);
+        binding.detailsWebView.getSettings().setDomStorageEnabled(true);
+        
         // إضافة واجهة JavaScript
-        binding.detailsWebView.addJavascriptInterface(this, "Android");
+        binding.detailsWebView.addJavascriptInterface(new Object() {
+            @JavascriptInterface
+            public void showAccountReport(int accountId, String currency) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        try {
+                            // فتح صفحة التقرير
+                            AccountReportFragment fragment = AccountReportFragment.newInstance(accountId, currency);
+                            getActivity().getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.nav_host_fragment_content_main, fragment)
+                                .addToBackStack(null)
+                                .commit();
+                        } catch (Exception e) {
+                            showError("خطأ في فتح التقرير: " + e.getMessage(), "");
+                        }
+                    });
+                }
+            }
+        }, "Android");
         
         loadAccountSummary();
     }
@@ -278,7 +301,7 @@ public class AccountSummaryFragment extends Fragment {
                 for (AccountSummary account : accounts) {
                     if (account != null) {
                         html.append("<tr>");
-                        html.append("<td><button class='report-btn' onclick='showReport(")
+                        html.append("<td><button class='report-btn' onclick='window.Android.showAccountReport(")
                             .append(account.getUserId())
                             .append(", \"")
                             .append(account.getCurrency() != null ? account.getCurrency() : "-")
@@ -295,39 +318,11 @@ public class AccountSummaryFragment extends Fragment {
                 html.append("<tr><td colspan='6' style='text-align: center;'>لا توجد بيانات</td></tr>");
             }
             
-            html.append("</table>");
-            
-            // إضافة JavaScript للتعامل مع النقر على زر التقرير
-            html.append("<script>");
-            html.append("function showReport(accountId, currency) {");
-            html.append("    window.Android.showAccountReport(accountId, currency);");
-            html.append("}");
-            html.append("</script>");
-            
-            html.append("</body></html>");
+            html.append("</table></body></html>");
             
             binding.detailsWebView.loadDataWithBaseURL(null, html.toString(), "text/html", "UTF-8", null);
         } catch (Exception e) {
             showError("خطأ في عرض تفاصيل الحسابات: " + e.getMessage(), "");
-        }
-    }
-
-    @JavascriptInterface
-    public void showAccountReport(int accountId, String currency) {
-        if (getActivity() != null) {
-            getActivity().runOnUiThread(() -> {
-                try {
-                    // فتح صفحة التقرير
-                    AccountReportFragment fragment = AccountReportFragment.newInstance(accountId, currency);
-                    getActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.nav_host_fragment_content_main, fragment)
-                        .addToBackStack(null)
-                        .commit();
-                } catch (Exception e) {
-                    showError("خطأ في فتح التقرير: " + e.getMessage(), "");
-                }
-            });
         }
     }
 
