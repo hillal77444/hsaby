@@ -1,6 +1,7 @@
 package com.hillal.hhhhhhh.ui.report;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import com.hillal.hhhhhhh.models.AccountReport;
 import com.hillal.hhhhhhh.network.ApiService;
 import com.hillal.hhhhhhh.network.RetrofitClient;
 
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -88,23 +90,45 @@ public class AccountReportFragment extends Fragment {
 
         binding.progressBar.setVisibility(View.VISIBLE);
 
+        // طباعة معلومات الطلب
+        Log.d("AccountReport", "Loading report for account: " + accountId + ", currency: " + currency);
+
         apiService.getAccountDetails(accountId, currency).enqueue(new Callback<AccountReport>() {
             @Override
             public void onResponse(@NonNull Call<AccountReport> call, @NonNull Response<AccountReport> response) {
                 binding.progressBar.setVisibility(View.GONE);
 
-                if (response.isSuccessful() && response.body() != null) {
+                if (response.isSuccessful()) {
                     AccountReport report = response.body();
-                    updateReportView(report);
+                    if (report != null) {
+                        updateReportView(report);
+                    } else {
+                        showError("لم يتم استلام أي بيانات من الخادم");
+                    }
                 } else {
-                    showError("فشل في تحميل التقرير");
+                    String errorMessage = "فشل في تحميل التقرير";
+                    try {
+                        if (response.errorBody() != null) {
+                            errorMessage += "\nالسبب: " + response.errorBody().string();
+                        }
+                        errorMessage += "\nرمز الخطأ: " + response.code();
+                    } catch (IOException e) {
+                        errorMessage += "\nخطأ في قراءة رسالة الخطأ: " + e.getMessage();
+                    }
+                    showError(errorMessage);
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<AccountReport> call, @NonNull Throwable t) {
                 binding.progressBar.setVisibility(View.GONE);
-                showError("خطأ في الاتصال: " + t.getMessage());
+                String errorMessage = "خطأ في الاتصال بالخادم:\n" +
+                    "السبب: " + t.getMessage() + "\n" +
+                    "النوع: " + t.getClass().getName();
+                if (t.getCause() != null) {
+                    errorMessage += "\nالسبب الأساسي: " + t.getCause().getMessage();
+                }
+                showError(errorMessage);
             }
         });
     }
@@ -158,7 +182,25 @@ public class AccountReportFragment extends Fragment {
     }
 
     private void showError(String message) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
+        try {
+            // طباعة الخطأ في السجل
+            Log.e("AccountReport", "Error: " + message);
+            
+            // عرض رسالة الخطأ في Toast
+            if (getContext() != null) {
+                // تقسيم الرسالة إذا كانت طويلة
+                if (message.length() > 100) {
+                    String[] parts = message.split("\n");
+                    for (String part : parts) {
+                        Toast.makeText(getContext(), part, Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                }
+            }
+        } catch (Exception e) {
+            Log.e("AccountReport", "Error showing error message", e);
+        }
     }
 
     @Override
