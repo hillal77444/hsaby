@@ -368,6 +368,15 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- زر عرض ملخص الحسابات -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/viewSummaryButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="ملخص الحسابات"
+                app:icon="@drawable/ic_summary" />
+
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
