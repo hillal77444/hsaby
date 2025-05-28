@@ -64,15 +64,12 @@ public class AccountSummaryFragment extends Fragment {
     private void loadAccountSummary() {
         String phoneNumber = getPhoneNumber();
         
-        // التحقق من وجود رقم الهاتف
         if (phoneNumber == null) {
             binding.progressBar.setVisibility(View.GONE);
             return;
         }
         
         binding.progressBar.setVisibility(View.VISIBLE);
-        
-        // تحديث عنوان الصفحة
         updateTitle(phoneNumber);
 
         apiService.getAccountSummary(phoneNumber).enqueue(new Callback<AccountSummaryResponse>() {
@@ -103,7 +100,13 @@ public class AccountSummaryFragment extends Fragment {
                         String errorMessage = "فشل في تحميل البيانات";
                         try {
                             if (response.errorBody() != null) {
-                                errorMessage += ": " + response.errorBody().string();
+                                String errorBody = response.errorBody().string();
+                                // محاولة تحليل رسالة الخطأ من الخادم
+                                if (errorBody.contains("error")) {
+                                    errorMessage = errorBody;
+                                } else {
+                                    errorMessage += ": " + errorBody;
+                                }
                             } else {
                                 errorMessage += " (رمز الخطأ: " + response.code() + ")";
                             }
@@ -118,7 +121,7 @@ public class AccountSummaryFragment extends Fragment {
                         errorMessage += ": " + e.getMessage();
                     }
                     showError(errorMessage);
-                    e.printStackTrace(); // طباعة تفاصيل الخطأ في السجل
+                    e.printStackTrace();
                 }
             }
 
@@ -130,7 +133,7 @@ public class AccountSummaryFragment extends Fragment {
                     errorMessage += ": " + t.getMessage();
                 }
                 showError(errorMessage);
-                t.printStackTrace(); // طباعة تفاصيل الخطأ في السجل
+                t.printStackTrace();
             }
         });
     }
