@@ -20,7 +20,7 @@ import com.hillal.hhhhhhh.models.AccountSummaryResponse;
 import com.hillal.hhhhhhh.models.CurrencySummary;
 import com.hillal.hhhhhhh.network.ApiService;
 import com.hillal.hhhhhhh.network.RetrofitClient;
-import com.hillal.hhhhhhh.utils.UserPreferences;
+import com.hillal.hhhhhhh.data.preferences.UserPreferences;
 
 import java.text.NumberFormat;
 import java.util.List;
