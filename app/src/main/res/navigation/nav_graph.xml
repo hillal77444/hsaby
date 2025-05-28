@@ -160,4 +160,11 @@
         android:label="تعديل الملف الشخصي"
         tools:layout="@layout/fragment_edit_profile" />
 
+    <!-- ملخص الحسابات -->
+    <fragment
+        android:id="@+id/nav_summary"
+        android:name="com.hillal.hhhhhhh.ui.summary.AccountSummaryFragment"
+        android:label="ملخص الحسابات"
+        tools:layout="@layout/fragment_account_summary" />
+
 </navigation>
