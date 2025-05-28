@@ -101,11 +101,31 @@ public class AccountReportFragment extends Fragment {
                 binding.progressBar.setVisibility(View.GONE);
 
                 if (response.isSuccessful()) {
-                    AccountReport report = response.body();
-                    if (report != null) {
-                        updateReportView(report);
-                    } else {
-                        showError("لم يتم استلام أي بيانات من الخادم");
+                    try {
+                        AccountReport report = response.body();
+                        if (report == null) {
+                            showError("لم يتم استلام أي بيانات من الخادم");
+                            return;
+                        }
+
+                        // التحقق من البيانات المستلمة
+                        if (report.getUserName() == null || report.getAccountName() == null) {
+                            showError("بيانات الحساب غير مكتملة");
+                            return;
+                        }
+
+                        // تحديث العرض في الـ UI thread
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                try {
+                                    updateReportView(report);
+                                } catch (Exception e) {
+                                    showError("خطأ في تحديث التقرير: " + e.getMessage());
+                                }
+                            });
+                        }
+                    } catch (Exception e) {
+                        showError("خطأ في معالجة البيانات: " + e.getMessage());
                     }
                 } else {
                     StringBuilder errorDetails = new StringBuilder();
@@ -146,51 +166,60 @@ public class AccountReportFragment extends Fragment {
     }
 
     private void updateReportView(AccountReport report) {
-        StringBuilder html = new StringBuilder();
-        html.append("<html><head><style>");
-        html.append("body { font-family: Arial, sans-serif; margin: 0; padding: 16px; }");
-        html.append("h2 { color: #333; text-align: center; }");
-        html.append("table { width: 100%; border-collapse: collapse; margin-top: 16px; }");
-        html.append("th, td { padding: 8px; text-align: center; border: 1px solid #ddd; }");
-        html.append("th { background-color: #f5f5f5; font-weight: bold; }");
-        html.append("tr:nth-child(even) { background-color: #f9f9f9; }");
-        html.append(".summary { margin: 16px 0; padding: 16px; background-color: #f5f5f5; border-radius: 4px; }");
-        html.append("</style></head><body>");
+        try {
+            StringBuilder html = new StringBuilder();
+            html.append("<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'><style>");
+            html.append("body { font-family: Arial, sans-serif; margin: 0; padding: 16px; -webkit-touch-callout: none; -webkit-user-select: none; }");
+            html.append("h2 { color: #333; text-align: center; margin-bottom: 20px; }");
+            html.append("table { width: 100%; border-collapse: collapse; margin-top: 16px; }");
+            html.append("th, td { padding: 8px; text-align: center; border: 1px solid #ddd; }");
+            html.append("th { background-color: #f5f5f5; font-weight: bold; }");
+            html.append("tr:nth-child(even) { background-color: #f9f9f9; }");
+            html.append(".summary { margin: 16px 0; padding: 16px; background-color: #f5f5f5; border-radius: 4px; }");
+            html.append(".summary p { margin: 8px 0; }");
+            html.append(".summary strong { color: #333; }");
+            html.append("</style></head><body>");
 
-        // معلومات الحساب
-        html.append("<h2>تقرير الحساب</h2>");
-        html.append("<div class='summary'>");
-        html.append("<p><strong>اسم المستخدم:</strong> ").append(report.getUserName()).append("</p>");
-        html.append("<p><strong>اسم الحساب:</strong> ").append(report.getAccountName()).append("</p>");
-        html.append("<p><strong>العملة:</strong> ").append(report.getCurrency()).append("</p>");
-        html.append("<p><strong>الرصيد الحالي:</strong> ").append(numberFormat.format(report.getBalance())).append("</p>");
-        html.append("<p><strong>إجمالي المدين:</strong> ").append(numberFormat.format(report.getTotalDebits())).append("</p>");
-        html.append("<p><strong>إجمالي الدائن:</strong> ").append(numberFormat.format(report.getTotalCredits())).append("</p>");
-        html.append("</div>");
+            // معلومات الحساب
+            html.append("<h2>تقرير الحساب</h2>");
+            html.append("<div class='summary'>");
+            html.append("<p><strong>اسم المستخدم:</strong> ").append(report.getUserName() != null ? report.getUserName() : "-").append("</p>");
+            html.append("<p><strong>اسم الحساب:</strong> ").append(report.getAccountName() != null ? report.getAccountName() : "-").append("</p>");
+            html.append("<p><strong>العملة:</strong> ").append(report.getCurrency() != null ? report.getCurrency() : "-").append("</p>");
+            html.append("<p><strong>الرصيد الحالي:</strong> ").append(numberFormat.format(report.getBalance())).append("</p>");
+            html.append("<p><strong>إجمالي المدين:</strong> ").append(numberFormat.format(report.getTotalDebits())).append("</p>");
+            html.append("<p><strong>إجمالي الدائن:</strong> ").append(numberFormat.format(report.getTotalCredits())).append("</p>");
+            html.append("</div>");
 
-        // جدول المعاملات
-        html.append("<h3>المعاملات</h3>");
-        html.append("<table>");
-        html.append("<tr>");
-        html.append("<th>التاريخ</th>");
-        html.append("<th>النوع</th>");
-        html.append("<th>المبلغ</th>");
-        html.append("<th>الوصف</th>");
-        html.append("</tr>");
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
-        for (AccountReport.Transaction tx : report.getTransactions()) {
+            // جدول المعاملات
+            html.append("<h3>المعاملات</h3>");
+            html.append("<table>");
             html.append("<tr>");
-            html.append("<td>").append(tx.getDate()).append("</td>");
-            html.append("<td>").append(tx.getType().equals("credit") ? "دائن" : "مدين").append("</td>");
-            html.append("<td>").append(numberFormat.format(tx.getAmount())).append("</td>");
-            html.append("<td>").append(tx.getDescription()).append("</td>");
+            html.append("<th>التاريخ</th>");
+            html.append("<th>النوع</th>");
+            html.append("<th>المبلغ</th>");
+            html.append("<th>الوصف</th>");
             html.append("</tr>");
+
+            if (report.getTransactions() != null && !report.getTransactions().isEmpty()) {
+                for (AccountReport.Transaction tx : report.getTransactions()) {
+                    html.append("<tr>");
+                    html.append("<td>").append(tx.getDate() != null ? tx.getDate() : "-").append("</td>");
+                    html.append("<td>").append(tx.getType() != null ? (tx.getType().equals("credit") ? "دائن" : "مدين") : "-").append("</td>");
+                    html.append("<td>").append(numberFormat.format(tx.getAmount())).append("</td>");
+                    html.append("<td>").append(tx.getDescription() != null ? tx.getDescription() : "-").append("</td>");
+                    html.append("</tr>");
+                }
+            } else {
+                html.append("<tr><td colspan='4' style='text-align: center;'>لا توجد معاملات</td></tr>");
+            }
+
+            html.append("</table></body></html>");
+
+            binding.reportWebView.loadDataWithBaseURL(null, html.toString(), "text/html", "UTF-8", null);
+        } catch (Exception e) {
+            showError("خطأ في عرض التقرير: " + e.getMessage());
         }
-
-        html.append("</table></body></html>");
-
-        binding.reportWebView.loadDataWithBaseURL(null, html.toString(), "text/html", "UTF-8", null);
     }
 
     private void showError(String message) {
