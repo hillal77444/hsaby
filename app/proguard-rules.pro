@@ -20,13 +20,9 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# Keep attributes
+# Retrofit
 -keepattributes Signature
 -keepattributes *Annotation*
--keepattributes SourceFile,LineNumberTable
--keepattributes Exceptions
-
-# Retrofit
 -keep class retrofit2.** { *; }
 -keepclasseswithmembers class * {
     @retrofit2.http.* <methods>;
@@ -44,6 +40,8 @@
 -keep interface okhttp3.** { *; }
 
 # Gson
+-keepattributes Signature
+-keepattributes *Annotation*
 -dontwarn sun.misc.**
 -keep class com.google.gson.** { *; }
 -keep class * implements com.google.gson.TypeAdapterFactory
@@ -71,7 +69,6 @@
 -keep class com.hillal.hhhhhhh.data.remote.** { *; }
 -keep class com.hillal.hhhhhhh.ui.** { *; }
 -keep class com.hillal.hhhhhhh.utils.** { *; }
--keep class com.hillal.hhhhhhh.models.** { *; }
 
 # Keep Room
 -keep class * extends androidx.room.RoomDatabase
@@ -124,111 +121,14 @@
     public <methods>;
 }
 
-# Keep AndroidX and Android
+# Keep AndroidX
 -keep class androidx.** { *; }
 -keep interface androidx.** { *; }
 -keep class android.** { *; }
 -keep interface android.** { *; }
 
-# Keep Security Libraries
--keep class org.conscrypt.** { *; }
--keep class com.android.org.conscrypt.** { *; }
--keep class org.bouncycastle.** { *; }
--keep class org.bouncycastle.jsse.** { *; }
--keep class org.bouncycastle.jsse.provider.** { *; }
--keep class org.openjsse.** { *; }
-
-# Keep SSL/TLS related classes
--keep class com.android.org.conscrypt.** { *; }
--keep class org.apache.harmony.xnet.provider.jsse.** { *; }
--keep class org.conscrypt.** { *; }
--keep class org.bouncycastle.** { *; }
--keep class org.openjsse.** { *; }
-
-# Keep OkHttp platform classes
--keep class okhttp3.internal.platform.** { *; }
--keep class okhttp3.internal.tls.** { *; }
-
-# Keep SSL/TLS interfaces
--keep interface javax.net.ssl.** { *; }
--keep interface org.conscrypt.** { *; }
--keep interface org.bouncycastle.jsse.** { *; }
--keep interface org.openjsse.javax.net.ssl.** { *; }
-
-# Keep SSL/TLS implementations
--keep class * implements javax.net.ssl.SSLSocket { *; }
--keep class * implements javax.net.ssl.SSLServerSocket { *; }
--keep class * implements javax.net.ssl.SSLSocketFactory { *; }
--keep class * implements javax.net.ssl.SSLServerSocketFactory { *; }
--keep class * implements javax.net.ssl.SSLContext { *; }
--keep class * implements javax.net.ssl.TrustManager { *; }
--keep class * implements javax.net.ssl.X509TrustManager { *; }
-
-# تحسينات عامة
--optimizationpasses 5
--dontusemixedcaseclassnames
--dontskipnonpubliclibraryclasses
--dontpreverify
--verbose
--optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
-
-# تقليل حجم الكود
--assumenosideeffects class android.util.Log {
-    public static *** d(...);
-    public static *** v(...);
-    public static *** i(...);
-    public static *** w(...);
-    public static *** e(...);
-}
-
-# تقليل حجم الموارد
--keepclassmembers class * extends android.app.Activity {
-    public void *(android.view.View);
-    public void *(android.view.Menu);
-}
-
-# تقليل حجم المكتبات
--dontwarn org.bouncycastle.jsse.BCSSLParameters
--dontwarn org.bouncycastle.jsse.BCSSLSocket
--dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider
--dontwarn org.openjsse.javax.net.ssl.SSLParameters
--dontwarn org.openjsse.javax.net.ssl.SSLSocket
--dontwarn org.openjsse.net.ssl.OpenJSSE
-
-# Keep Retrofit and OkHttp
--keepattributes Signature
+# Keep R8
+-keepattributes SourceFile,LineNumberTable
 -keepattributes *Annotation*
--keep class retrofit2.** { *; }
--keepclasseswithmembers class * {
-    @retrofit2.http.* <methods>;
-}
--keep class okhttp3.** { *; }
--keep interface okhttp3.** { *; }
--dontwarn okhttp3.**
--dontwarn okio.**
-
-# Keep Gson
 -keepattributes Signature
--keepattributes *Annotation*
--dontwarn sun.misc.**
--keep class com.google.gson.** { *; }
--keep class * implements com.google.gson.TypeAdapterFactory
--keep class * implements com.google.gson.JsonSerializer
--keep class * implements com.google.gson.JsonDeserializer
-
-# Keep model classes
--keep class com.hillal.hhhhhhh.models.** { *; }
--keep class com.hillal.hhhhhhh.data.room.entities.** { *; }
-
-# Keep Android platform classes
--keep class android.** { *; }
--keep interface android.** { *; }
--dontwarn android.**
-
-# Keep Kotlin Coroutines
--keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
--keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
-
-# Keep Room
--keep class * extends androidx.room.RoomDatabase
--dontwarn androidx.room.paging.**
+-keepattributes Exceptions
