@@ -183,19 +183,19 @@ public class AccountSummaryFragment extends Fragment {
             table.removeAllViews();
 
             // إضافة رأس الجدول
-            addTableRow(table, new String[]{"ID", "الاسم", "العملة", "الرصيد", "المدين", "الدائن"}, true);
+            addTableRow(table, new String[]{"الاسم", "العملة", "الدائن", "المدين", "الرصيد", "ID"}, true);
 
             // إضافة البيانات
             if (accounts != null && !accounts.isEmpty()) {
                 for (AccountSummary account : accounts) {
                     if (account != null) {
                         addTableRow(table, new String[]{
-                            String.valueOf(account.getUserId()),
                             account.getUserName() != null ? account.getUserName() : "-",
                             account.getCurrency() != null ? account.getCurrency() : "-",
-                            numberFormat.format(account.getBalance()),
+                            numberFormat.format(account.getTotalCredits()),
                             numberFormat.format(account.getTotalDebits()),
-                            numberFormat.format(account.getTotalCredits())
+                            numberFormat.format(account.getBalance()),
+                            String.valueOf(account.getUserId())
                         }, false);
                     }
                 }
