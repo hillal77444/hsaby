@@ -50,10 +50,6 @@ android {
             }
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             consumerProguardFiles 'proguard-rules.pro'
-            
-            buildConfigField "boolean", "ENABLE_R8_FULL_MODE", "true"
-            buildConfigField "boolean", "ENABLE_RESOURCE_SHRINKING", "true"
-            buildConfigField "boolean", "ENABLE_CODE_SHRINKING", "true"
         }
         debug {
             debuggable true
@@ -125,13 +121,10 @@ dependencies {
 
     implementation 'com.itextpdf:itextpdf:5.5.13.3'
 
-    // Retrofit
+    // Retrofit for network requests
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    
-    // OkHttp
-    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.3'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
 
     implementation 'com.github.florent37:singledateandtimepicker:2.2.7'
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
@@ -149,9 +142,4 @@ dependencies {
     
     // Test helpers
     testImplementation "androidx.room:room-testing:$room_version"
-
-    // OkHttp Security Dependencies
-    implementation 'org.conscrypt:conscrypt-android:2.5.2'
-    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.3'
 } 
