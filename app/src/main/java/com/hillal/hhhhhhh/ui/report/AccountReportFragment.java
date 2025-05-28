@@ -70,6 +70,7 @@ public class AccountReportFragment extends Fragment {
 
         setupNumberFormat();
         setupApiService();
+        setupWebView();
         loadAccountReport();
     }
 
@@ -81,6 +82,18 @@ public class AccountReportFragment extends Fragment {
 
     private void setupApiService() {
         apiService = RetrofitClient.getInstance().getApiService();
+    }
+
+    private void setupWebView() {
+        if (binding != null && binding.reportWebView != null) {
+            binding.reportWebView.getSettings().setJavaScriptEnabled(true);
+            binding.reportWebView.getSettings().setDomStorageEnabled(true);
+            binding.reportWebView.getSettings().setLoadWithOverviewMode(true);
+            binding.reportWebView.getSettings().setUseWideViewPort(true);
+            binding.reportWebView.getSettings().setBuiltInZoomControls(true);
+            binding.reportWebView.getSettings().setDisplayZoomControls(false);
+            binding.reportWebView.setInitialScale(1);
+        }
     }
 
     private void loadAccountReport() {
@@ -172,6 +185,11 @@ public class AccountReportFragment extends Fragment {
 
     private void updateReportView(AccountReport report) {
         try {
+            if (report == null) {
+                showError("التقرير فارغ");
+                return;
+            }
+
             StringBuilder html = new StringBuilder();
             html.append("<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'><style>");
             html.append("body { font-family: Arial, sans-serif; margin: 0; padding: 16px; -webkit-touch-callout: none; -webkit-user-select: none; }");
@@ -208,12 +226,14 @@ public class AccountReportFragment extends Fragment {
 
             if (report.getTransactions() != null && !report.getTransactions().isEmpty()) {
                 for (AccountReport.Transaction tx : report.getTransactions()) {
-                    html.append("<tr>");
-                    html.append("<td>").append(tx.getDate() != null ? tx.getDate() : "-").append("</td>");
-                    html.append("<td>").append(tx.getType() != null ? (tx.getType().equals("credit") ? "دائن" : "مدين") : "-").append("</td>");
-                    html.append("<td>").append(numberFormat.format(tx.getAmount())).append("</td>");
-                    html.append("<td>").append(tx.getDescription() != null ? tx.getDescription() : "-").append("</td>");
-                    html.append("</tr>");
+                    if (tx != null) {
+                        html.append("<tr>");
+                        html.append("<td>").append(tx.getDate() != null ? tx.getDate() : "-").append("</td>");
+                        html.append("<td>").append(tx.getType() != null ? (tx.getType().equals("credit") ? "دائن" : "مدين") : "-").append("</td>");
+                        html.append("<td>").append(numberFormat.format(tx.getAmount())).append("</td>");
+                        html.append("<td>").append(tx.getDescription() != null ? tx.getDescription() : "-").append("</td>");
+                        html.append("</tr>");
+                    }
                 }
             } else {
                 html.append("<tr><td colspan='4' style='text-align: center;'>لا توجد معاملات</td></tr>");
@@ -221,8 +241,16 @@ public class AccountReportFragment extends Fragment {
 
             html.append("</table></body></html>");
 
-            binding.reportWebView.loadDataWithBaseURL(null, html.toString(), "text/html", "UTF-8", null);
+            String htmlContent = html.toString();
+            Log.d("AccountReport", "HTML Content: " + htmlContent);
+
+            if (binding != null && binding.reportWebView != null) {
+                binding.reportWebView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
+            } else {
+                showError("خطأ في تهيئة WebView");
+            }
         } catch (Exception e) {
+            Log.e("AccountReport", "Error updating report view", e);
             showError("خطأ في عرض التقرير: " + e.getMessage());
         }
     }
