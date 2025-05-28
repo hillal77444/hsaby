@@ -22,6 +22,7 @@ import com.hillal.hhhhhhh.network.ApiService;
 import com.hillal.hhhhhhh.network.RetrofitClient;
 import com.hillal.hhhhhhh.data.preferences.UserPreferences;
 
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
@@ -79,46 +80,67 @@ public class AccountSummaryFragment extends Fragment {
             public void onResponse(@NonNull Call<AccountSummaryResponse> call, @NonNull Response<AccountSummaryResponse> response) {
                 binding.progressBar.setVisibility(View.GONE);
                 try {
-                    if (response.isSuccessful() && response.body() != null) {
+                    if (response.isSuccessful()) {
                         AccountSummaryResponse summaryResponse = response.body();
-                        if (summaryResponse.getCurrencySummary() != null) {
+                        if (summaryResponse == null) {
+                            showError("لم يتم استلام أي بيانات من الخادم");
+                            return;
+                        }
+
+                        // التحقق من البيانات المستلمة
+                        if (summaryResponse.getCurrencySummary() == null || summaryResponse.getCurrencySummary().isEmpty()) {
+                            showError("لا توجد بيانات ملخص العملات");
+                        } else {
                             updateSummaryTable(summaryResponse.getCurrencySummary());
                         }
-                        if (summaryResponse.getAccounts() != null) {
+
+                        if (summaryResponse.getAccounts() == null || summaryResponse.getAccounts().isEmpty()) {
+                            showError("لا توجد بيانات الحسابات");
+                        } else {
                             updateDetailsTable(summaryResponse.getAccounts());
                         }
                     } else {
-                        showError("فشل في تحميل البيانات: " + response.code());
+                        String errorMessage = "فشل في تحميل البيانات";
+                        try {
+                            if (response.errorBody() != null) {
+                                errorMessage += ": " + response.errorBody().string();
+                            } else {
+                                errorMessage += " (رمز الخطأ: " + response.code() + ")";
+                            }
+                        } catch (IOException e) {
+                            errorMessage += " (رمز الخطأ: " + response.code() + ")";
+                        }
+                        showError(errorMessage);
                     }
                 } catch (Exception e) {
-                    showError("حدث خطأ في معالجة البيانات: " + e.getMessage());
+                    String errorMessage = "حدث خطأ في معالجة البيانات";
+                    if (e.getMessage() != null) {
+                        errorMessage += ": " + e.getMessage();
+                    }
+                    showError(errorMessage);
+                    e.printStackTrace(); // طباعة تفاصيل الخطأ في السجل
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<AccountSummaryResponse> call, @NonNull Throwable t) {
                 binding.progressBar.setVisibility(View.GONE);
-                showError("حدث خطأ في الاتصال: " + t.getMessage());
+                String errorMessage = "حدث خطأ في الاتصال";
+                if (t.getMessage() != null) {
+                    errorMessage += ": " + t.getMessage();
+                }
+                showError(errorMessage);
+                t.printStackTrace(); // طباعة تفاصيل الخطأ في السجل
             }
         });
     }
 
     private void updateTitle(String phoneNumber) {
         if (phoneNumber != null && !phoneNumber.isEmpty()) {
-            // تنسيق رقم الهاتف
-            String formattedNumber = formatPhoneNumber(phoneNumber);
-            binding.summaryTitleTextView.setText("ملخص الحسابات لرقم: " + formattedNumber);
+            binding.summaryTitleTextView.setText("ملخص الحسابات لرقم: " + phoneNumber);
         } else {
             binding.summaryTitleTextView.setText("ملخص الحسابات");
         }
-    }
-
-    private String formatPhoneNumber(String phoneNumber) {
-        // إضافة رمز الدولة إذا لم يكن موجوداً
-        if (!phoneNumber.startsWith("+")) {
-            phoneNumber = "+967" + phoneNumber;
-        }
-        return phoneNumber;
     }
 
     private void updateSummaryTable(List<CurrencySummary> summaries) {
@@ -226,14 +248,8 @@ public class AccountSummaryFragment extends Fragment {
                 return null;
             }
             
-            // إزالة أي مسافات أو رموز غير ضرورية
+            // إزالة المسافات فقط
             phoneNumber = phoneNumber.trim();
-            
-            // التحقق من أن الرقم يحتوي على أرقام فقط
-            if (!phoneNumber.matches("\\d+")) {
-                showError("رقم الهاتف غير صالح");
-                return null;
-            }
             
             return phoneNumber;
         } catch (Exception e) {
