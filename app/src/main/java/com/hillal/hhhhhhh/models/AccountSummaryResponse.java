@@ -31,13 +31,21 @@ public class AccountSummaryResponse {
         StringBuilder sb = new StringBuilder();
         sb.append("AccountSummaryResponse{");
         if (accounts != null) {
-            sb.append("accounts=").append(accounts.size()).append(" items");
+            sb.append("accounts=[");
+            for (AccountSummary account : accounts) {
+                sb.append(account.toString()).append(", ");
+            }
+            sb.append("]");
         } else {
             sb.append("accounts=null");
         }
         sb.append(", ");
         if (currencySummary != null) {
-            sb.append("currencySummary=").append(currencySummary.size()).append(" items");
+            sb.append("currencySummary=[");
+            for (CurrencySummary summary : currencySummary) {
+                sb.append(summary.toString()).append(", ");
+            }
+            sb.append("]");
         } else {
             sb.append("currencySummary=null");
         }
