@@ -1,5 +1,6 @@
 package com.hillal.hhhhhhh.ui.summary;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -281,9 +282,14 @@ public class AccountSummaryFragment extends Fragment {
             // طباعة رسالة الخطأ في السجل
             Log.e("AccountSummary", "Error: " + message);
             
-            // عرض رسالة الخطأ في Toast
+            // نسخ رسالة الخطأ إلى الحافظة
             if (getContext() != null) {
-                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                android.content.ClipData clip = android.content.ClipData.newPlainText("Error Details", message);
+                clipboard.setPrimaryClip(clip);
+                
+                // عرض رسالة الخطأ في Toast مع إشعار بنسخ التفاصيل
+                Toast.makeText(getContext(), "تم نسخ تفاصيل الخطأ إلى الحافظة\n" + message, Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
             Log.e("AccountSummary", "Error showing error message", e);
