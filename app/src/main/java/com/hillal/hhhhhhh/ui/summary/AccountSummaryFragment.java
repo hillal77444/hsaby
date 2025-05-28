@@ -86,6 +86,9 @@ public class AccountSummaryFragment extends Fragment {
                     Log.d("AccountSummary", "Response code: " + response.code());
                     
                     if (response.isSuccessful()) {
+                        String responseBody = response.body() != null ? response.body().toString() : "null";
+                        Log.d("AccountSummary", "Raw response body: " + responseBody);
+                        
                         AccountSummaryResponse summaryResponse = response.body();
                         if (summaryResponse == null) {
                             Log.e("AccountSummary", "Response body is null");
