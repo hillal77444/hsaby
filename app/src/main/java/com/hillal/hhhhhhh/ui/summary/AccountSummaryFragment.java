@@ -93,7 +93,7 @@ public class AccountSummaryFragment extends Fragment {
                         AccountSummaryResponse summaryResponse = response.body();
                         if (summaryResponse == null) {
                             Log.e("AccountSummary", "Response body is null");
-                            showError("لم يتم استلام أي بيانات من الخادم");
+                            showError("لم يتم استلام أي بيانات من الخادم", responseBody);
                             return;
                         }
 
@@ -105,25 +105,25 @@ public class AccountSummaryFragment extends Fragment {
                         // التحقق من البيانات المستلمة
                         if (summaryResponse.getCurrencySummary() == null) {
                             Log.e("AccountSummary", "Currency summary is null");
-                            showError("بيانات العملات فارغة");
+                            showError("بيانات العملات فارغة", responseBody);
                             return;
                         }
                         
                         if (summaryResponse.getCurrencySummary().isEmpty()) {
                             Log.e("AccountSummary", "Currency summary is empty");
-                            showError("لا توجد بيانات ملخص العملات");
+                            showError("لا توجد بيانات ملخص العملات", responseBody);
                             return;
                         }
 
                         if (summaryResponse.getAccounts() == null) {
                             Log.e("AccountSummary", "Accounts list is null");
-                            showError("بيانات الحسابات فارغة");
+                            showError("بيانات الحسابات فارغة", responseBody);
                             return;
                         }
                         
                         if (summaryResponse.getAccounts().isEmpty()) {
                             Log.e("AccountSummary", "Accounts list is empty");
-                            showError("لا توجد بيانات الحسابات");
+                            showError("لا توجد بيانات الحسابات", responseBody);
                             return;
                         }
 
@@ -131,7 +131,7 @@ public class AccountSummaryFragment extends Fragment {
                             updateSummaryTable(summaryResponse.getCurrencySummary());
                         } catch (Exception e) {
                             Log.e("AccountSummary", "Error updating currency table", e);
-                            showError("خطأ في تحديث جدول العملات: " + e.getMessage() + "\n" + e.toString());
+                            showError("خطأ في تحديث جدول العملات: " + e.getMessage() + "\n" + e.toString(), responseBody);
                             return;
                         }
 
@@ -139,14 +139,15 @@ public class AccountSummaryFragment extends Fragment {
                             updateDetailsTable(summaryResponse.getAccounts());
                         } catch (Exception e) {
                             Log.e("AccountSummary", "Error updating accounts table", e);
-                            showError("خطأ في تحديث جدول الحسابات: " + e.getMessage() + "\n" + e.toString());
+                            showError("خطأ في تحديث جدول الحسابات: " + e.getMessage() + "\n" + e.toString(), responseBody);
                             return;
                         }
                     } else {
                         String errorMessage = "فشل في تحميل البيانات";
+                        String errorBody = "";
                         try {
                             if (response.errorBody() != null) {
-                                String errorBody = response.errorBody().string();
+                                errorBody = response.errorBody().string();
                                 Log.e("AccountSummary", "Error response body: " + errorBody);
                                 if (errorBody.contains("error")) {
                                     errorMessage = errorBody;
@@ -160,12 +161,12 @@ public class AccountSummaryFragment extends Fragment {
                             Log.e("AccountSummary", "Error reading error body", e);
                             errorMessage += " (رمز الخطأ: " + response.code() + ")";
                         }
-                        showError(errorMessage);
+                        showError(errorMessage, errorBody);
                     }
                 } catch (Exception e) {
                     Log.e("AccountSummary", "Error processing response", e);
                     String errorMessage = "حدث خطأ في معالجة البيانات: " + e.getMessage() + "\n" + e.toString();
-                    showError(errorMessage);
+                    showError(errorMessage, "لا توجد بيانات متاحة");
                 }
             }
 
@@ -174,7 +175,7 @@ public class AccountSummaryFragment extends Fragment {
                 binding.progressBar.setVisibility(View.GONE);
                 Log.e("AccountSummary", "Network error", t);
                 String errorMessage = "حدث خطأ في الاتصال: " + t.getMessage() + "\n" + t.toString();
-                showError(errorMessage);
+                showError(errorMessage, "لا توجد بيانات متاحة");
             }
         });
     }
@@ -211,7 +212,7 @@ public class AccountSummaryFragment extends Fragment {
                 addTableRow(table, new String[]{"لا توجد بيانات", "-", "-", "-"}, false);
             }
         } catch (Exception e) {
-            showError("خطأ في عرض ملخص العملات: " + e.getMessage());
+            showError("خطأ في عرض ملخص العملات: " + e.getMessage(), "");
         }
     }
 
@@ -241,7 +242,7 @@ public class AccountSummaryFragment extends Fragment {
                 addTableRow(table, new String[]{"لا توجد بيانات", "-", "-", "-", "-", "-"}, false);
             }
         } catch (Exception e) {
-            showError("خطأ في عرض تفاصيل الحسابات: " + e.getMessage());
+            showError("خطأ في عرض تفاصيل الحسابات: " + e.getMessage(), "");
         }
     }
 
@@ -273,20 +274,25 @@ public class AccountSummaryFragment extends Fragment {
 
             table.addView(row);
         } catch (Exception e) {
-            showError("خطأ في إضافة صف للجدول: " + e.getMessage());
+            showError("خطأ في إضافة صف للجدول: " + e.getMessage(), "");
         }
     }
 
-    private void showError(String message) {
+    private void showError(String message, String responseData) {
         try {
             // طباعة رسالة الخطأ في السجل
             Log.e("AccountSummary", "Error: " + message);
+            Log.e("AccountSummary", "Response Data: " + responseData);
             
             // إضافة معلومات إضافية للرسالة
             String detailedMessage = "تفاصيل الخطأ:\n" +
                     "الوقت: " + new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date()) + "\n" +
                     "الرسالة: " + message + "\n" +
-                    "نوع الخطأ: " + (message.contains("null") ? "خطأ في البيانات" : "خطأ في المعالجة");
+                    "نوع الخطأ: " + (message.contains("null") ? "خطأ في البيانات" : "خطأ في المعالجة") + "\n" +
+                    "سبب الخطأ: " + (message.contains("ClassCastException") ? 
+                        "خطأ في تحويل نوع البيانات - تأكد من تطابق أنواع البيانات مع الخادم" : 
+                        "خطأ غير معروف") + "\n" +
+                    "البيانات المستلمة من السيرفر:\n" + responseData;
             
             // نسخ رسالة الخطأ إلى الحافظة
             if (getContext() != null) {
@@ -309,7 +315,7 @@ public class AccountSummaryFragment extends Fragment {
             
             // التحقق من صحة الرقم
             if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
-                showError("لم يتم العثور على رقم الهاتف");
+                showError("لم يتم العثور على رقم الهاتف", "");
                 return null;
             }
             
@@ -318,7 +324,7 @@ public class AccountSummaryFragment extends Fragment {
             
             return phoneNumber;
         } catch (Exception e) {
-            showError("حدث خطأ في جلب رقم الهاتف");
+            showError("حدث خطأ في جلب رقم الهاتف", "");
             return null;
         }
     }
