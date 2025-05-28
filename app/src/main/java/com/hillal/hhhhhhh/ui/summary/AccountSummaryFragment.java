@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.JavascriptInterface;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -25,6 +26,7 @@ import com.hillal.hhhhhhh.models.CurrencySummary;
 import com.hillal.hhhhhhh.network.ApiService;
 import com.hillal.hhhhhhh.network.RetrofitClient;
 import com.hillal.hhhhhhh.data.preferences.UserPreferences;
+import com.hillal.hhhhhhh.ui.report.AccountReportFragment;
 
 import java.io.IOException;
 import java.text.NumberFormat;
