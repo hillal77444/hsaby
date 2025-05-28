@@ -1,9 +1,18 @@
 package com.hillal.hhhhhhh.models;
 
+import com.google.gson.annotations.SerializedName;
+
 public class CurrencySummary {
+    @SerializedName("currency")
     private String currency;
+    
+    @SerializedName("totalBalance")
     private double totalBalance;
+    
+    @SerializedName("totalDebits")
     private double totalDebits;
+    
+    @SerializedName("totalCredits")
     private double totalCredits;
 
     public String getCurrency() {
@@ -36,5 +45,15 @@ public class CurrencySummary {
 
     public void setTotalCredits(double totalCredits) {
         this.totalCredits = totalCredits;
+    }
+
+    @Override
+    public String toString() {
+        return "CurrencySummary{" +
+                "currency='" + currency + '\'' +
+                ", totalBalance=" + totalBalance +
+                ", totalDebits=" + totalDebits +
+                ", totalCredits=" + totalCredits +
+                '}';
     }
 } 
