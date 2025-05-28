@@ -263,8 +263,14 @@ public class AccountSummaryFragment extends Fragment {
                 TableLayout.LayoutParams.WRAP_CONTENT
             ));
 
-            // تحديد الأوزان النسبية للأعمدة
-            float[] weights = {0.25f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f}; // مجموع الأوزان = 1
+            // تحديد الأوزان النسبية للأعمدة بناءً على حجم الشاشة
+            float[] weights;
+            int screenWidth = getResources().getDisplayMetrics().widthPixels;
+            if (screenWidth < 600) { // للشاشات الصغيرة
+                weights = new float[]{0.30f, 0.15f, 0.15f, 0.15f, 0.15f, 0.10f};
+            } else { // للشاشات الكبيرة
+                weights = new float[]{0.25f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f};
+            }
 
             for (int i = 0; i < values.length; i++) {
                 TextView textView = new TextView(requireContext());
@@ -284,10 +290,10 @@ public class AccountSummaryFragment extends Fragment {
                 if (isHeader) {
                     textView.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.light_gray));
                     textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
-                    textView.setTextSize(14);
+                    textView.setTextSize(screenWidth < 600 ? 12 : 14);
                     textView.setTypeface(null, android.graphics.Typeface.BOLD);
                 } else {
-                    textView.setTextSize(12);
+                    textView.setTextSize(screenWidth < 600 ? 10 : 12);
                 }
                 
                 row.addView(textView);
