@@ -62,6 +62,9 @@ public class AccountSummaryFragment extends Fragment {
     private void loadAccountSummary() {
         binding.progressBar.setVisibility(View.VISIBLE);
         String phoneNumber = getPhoneNumber();
+        
+        // تحديث عنوان الصفحة
+        updateTitle(phoneNumber);
 
         apiService.getAccountSummary(phoneNumber).enqueue(new Callback<AccountSummaryResponse>() {
             @Override
@@ -90,6 +93,24 @@ public class AccountSummaryFragment extends Fragment {
                 showError("حدث خطأ في الاتصال: " + t.getMessage());
             }
         });
+    }
+
+    private void updateTitle(String phoneNumber) {
+        if (phoneNumber != null && !phoneNumber.isEmpty()) {
+            // تنسيق رقم الهاتف
+            String formattedNumber = formatPhoneNumber(phoneNumber);
+            binding.summaryTitleTextView.setText("ملخص الحسابات لرقم: " + formattedNumber);
+        } else {
+            binding.summaryTitleTextView.setText("ملخص الحسابات");
+        }
+    }
+
+    private String formatPhoneNumber(String phoneNumber) {
+        // إضافة رمز الدولة إذا لم يكن موجوداً
+        if (!phoneNumber.startsWith("+")) {
+            phoneNumber = "+967" + phoneNumber;
+        }
+        return phoneNumber;
     }
 
     private void updateSummaryTable(List<CurrencySummary> summaries) {
