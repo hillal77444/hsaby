@@ -1,6 +1,7 @@
 package com.hillal.hhhhhhh.ui.summary;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,24 +85,51 @@ public class AccountSummaryFragment extends Fragment {
                             return;
                         }
 
+                        // طباعة البيانات المستلمة للتأكد من صحتها
+                        Log.d("AccountSummary", "Response: " + summaryResponse.toString());
+
                         // التحقق من البيانات المستلمة
-                        if (summaryResponse.getCurrencySummary() == null || summaryResponse.getCurrencySummary().isEmpty()) {
+                        if (summaryResponse.getCurrencySummary() == null) {
+                            showError("بيانات العملات فارغة");
+                            return;
+                        }
+                        
+                        if (summaryResponse.getCurrencySummary().isEmpty()) {
                             showError("لا توجد بيانات ملخص العملات");
-                        } else {
-                            updateSummaryTable(summaryResponse.getCurrencySummary());
+                            return;
                         }
 
-                        if (summaryResponse.getAccounts() == null || summaryResponse.getAccounts().isEmpty()) {
+                        if (summaryResponse.getAccounts() == null) {
+                            showError("بيانات الحسابات فارغة");
+                            return;
+                        }
+                        
+                        if (summaryResponse.getAccounts().isEmpty()) {
                             showError("لا توجد بيانات الحسابات");
-                        } else {
+                            return;
+                        }
+
+                        try {
+                            updateSummaryTable(summaryResponse.getCurrencySummary());
+                        } catch (Exception e) {
+                            showError("خطأ في تحديث جدول العملات: " + e.getMessage());
+                            e.printStackTrace();
+                            return;
+                        }
+
+                        try {
                             updateDetailsTable(summaryResponse.getAccounts());
+                        } catch (Exception e) {
+                            showError("خطأ في تحديث جدول الحسابات: " + e.getMessage());
+                            e.printStackTrace();
+                            return;
                         }
                     } else {
                         String errorMessage = "فشل في تحميل البيانات";
                         try {
                             if (response.errorBody() != null) {
                                 String errorBody = response.errorBody().string();
-                                // محاولة تحليل رسالة الخطأ من الخادم
+                                Log.e("AccountSummary", "Error response: " + errorBody);
                                 if (errorBody.contains("error")) {
                                     errorMessage = errorBody;
                                 } else {
@@ -112,28 +140,23 @@ public class AccountSummaryFragment extends Fragment {
                             }
                         } catch (IOException e) {
                             errorMessage += " (رمز الخطأ: " + response.code() + ")";
+                            Log.e("AccountSummary", "Error reading error body", e);
                         }
                         showError(errorMessage);
                     }
                 } catch (Exception e) {
-                    String errorMessage = "حدث خطأ في معالجة البيانات";
-                    if (e.getMessage() != null) {
-                        errorMessage += ": " + e.getMessage();
-                    }
+                    String errorMessage = "حدث خطأ في معالجة البيانات: " + e.getMessage();
+                    Log.e("AccountSummary", "Error processing response", e);
                     showError(errorMessage);
-                    e.printStackTrace();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<AccountSummaryResponse> call, @NonNull Throwable t) {
                 binding.progressBar.setVisibility(View.GONE);
-                String errorMessage = "حدث خطأ في الاتصال";
-                if (t.getMessage() != null) {
-                    errorMessage += ": " + t.getMessage();
-                }
+                String errorMessage = "حدث خطأ في الاتصال: " + t.getMessage();
+                Log.e("AccountSummary", "Network error", t);
                 showError(errorMessage);
-                t.printStackTrace();
             }
         });
     }
