@@ -172,22 +172,26 @@ public class AccountSummaryFragment extends Fragment {
                                         updateSummaryTable(summaryResponse.getCurrencySummary());
                                         updateDetailsTable(summaryResponse.getAccounts());
                                     } catch (Exception e) {
-                                        showError("خطأ في تحديث الجداول: " + e.getMessage(), "");
+                                        showError("خطأ في تحديث الجداول", "");
                                     }
                                 });
                             }
                         } catch (Exception e) {
-                            showError("خطأ في معالجة البيانات: " + e.getMessage(), "");
+                            showError("خطأ في معالجة البيانات", "");
                         }
                     } else {
                         String errorMessage = "فشل في تحميل البيانات";
                         try {
                             if (response.errorBody() != null) {
-                                errorMessage += ": " + response.errorBody().string();
+                                String errorBody = response.errorBody().string();
+                                Log.e("AccountSummary", "Error response body: " + errorBody);
+                                errorMessage += ": " + errorBody;
                             } else {
+                                Log.e("AccountSummary", "Error response code: " + response.code());
                                 errorMessage += " (رمز الخطأ: " + response.code() + ")";
                             }
                         } catch (IOException e) {
+                            Log.e("AccountSummary", "Error reading error body", e);
                             errorMessage += " (رمز الخطأ: " + response.code() + ")";
                         }
                         showError(errorMessage, "");
@@ -197,12 +201,12 @@ public class AccountSummaryFragment extends Fragment {
                 @Override
                 public void onFailure(@NonNull Call<AccountSummaryResponse> call, @NonNull Throwable t) {
                     binding.progressBar.setVisibility(View.GONE);
-                    showError("حدث خطأ في الاتصال: " + t.getMessage(), "");
+                    showError(t.getMessage(), "");
                 }
             });
         } catch (Exception e) {
             binding.progressBar.setVisibility(View.GONE);
-            showError("خطأ في إرسال الطلب: " + e.getMessage(), "");
+            showError(e.getMessage(), "");
         }
     }
 
@@ -325,9 +329,26 @@ public class AccountSummaryFragment extends Fragment {
             // طباعة رسالة الخطأ في السجل
             Log.e("AccountSummary", "Error: " + message);
             
+            // تحويل رسالة الخطأ إلى رسالة آمنة للمستخدم
+            String userMessage;
+            if (message.contains("Network is unreachable") || 
+                message.contains("Unable to resolve host") || 
+                message.contains("Failed to connect") ||
+                message.contains("Connection refused")) {
+                userMessage = "يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى";
+            } else if (message.contains("timeout") || message.contains("timed out")) {
+                userMessage = "انتهت مهلة الاتصال، يرجى المحاولة مرة أخرى";
+            } else if (message.contains("null") || message.contains("empty")) {
+                userMessage = "لم يتم العثور على البيانات المطلوبة";
+            } else if (message.contains("phone number") || message.contains("رقم الهاتف")) {
+                userMessage = "يرجى تسجيل الدخول مرة أخرى";
+            } else {
+                userMessage = "حدث خطأ، يرجى المحاولة مرة أخرى";
+            }
+            
             // عرض رسالة Toast بسيطة للمستخدم
             if (getContext() != null) {
-                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), userMessage, Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
             Log.e("AccountSummary", "خطأ في عرض رسالة الخطأ", e);
