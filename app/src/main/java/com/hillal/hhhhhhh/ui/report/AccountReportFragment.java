@@ -95,6 +95,9 @@ public class AccountReportFragment extends Fragment {
             binding.reportWebView.getSettings().setDisplayZoomControls(false);
             binding.reportWebView.setInitialScale(1);
             
+            // إضافة padding في أسفل WebView
+            binding.reportWebView.setPadding(0, 0, 0, 80);
+            
             // إضافة WebViewClient للتعامل مع الأخطاء
             binding.reportWebView.setWebViewClient(new android.webkit.WebViewClient() {
                 @Override
@@ -318,18 +321,18 @@ public class AccountReportFragment extends Fragment {
             html.append("<meta charset='UTF-8'>");
             html.append("<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>");
             html.append("<style>");
-            html.append("body { font-family: 'Cairo', Arial, sans-serif; margin: 0; padding: 16px; background: #f5f5f5; }");
+            html.append("body { font-family: 'Cairo', Arial, sans-serif; margin: 0; padding: 16px; padding-bottom: 80px; background: #f5f5f5; }");
             html.append(".header { background: linear-gradient(135deg, #1976d2, #2196f3); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }");
             html.append(".header h2 { margin: 0; font-size: 24px; text-align: center; }");
             html.append(".summary-table { width: 100%; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }");
-            html.append(".summary-table th { background: #1976d2; color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 16px; }");
-            html.append(".summary-table td { padding: 15px; text-align: center; border-bottom: 1px solid #eee; font-size: 16px; }");
-            html.append(".summary-table tr:last-child td { border-bottom: none; }");
-            html.append(".summary-table .label { color: #666; font-weight: bold; }");
-            html.append(".summary-table .value { color: #1976d2; font-weight: bold; }");
-            html.append(".summary-table .balance { color: #4caf50; font-weight: bold; font-size: 18px; }");
-            html.append(".summary-table .debits { color: #f44336; font-weight: bold; }");
-            html.append(".summary-table .credits { color: #4caf50; font-weight: bold; }");
+            html.append(".summary-table th { background: #1976d2; color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 18px; }");
+            html.append(".info-row, .balance-row { border-bottom: 1px solid #e0e0e0; }");
+            html.append(".info-cell, .balance-cell { padding: 12px; text-align: center; vertical-align: middle; }");
+            html.append(".info-label, .balance-label { color: #666; font-size: 14px; margin-bottom: 4px; }");
+            html.append(".info-value { color: #333; font-size: 16px; font-weight: 500; }");
+            html.append(".balance { color: #1976d2; font-weight: bold; font-size: 18px; }");
+            html.append(".debits { color: #d32f2f; font-weight: bold; font-size: 18px; }");
+            html.append(".credits { color: #388e3c; font-weight: bold; font-size: 18px; }");
             html.append("table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }");
             html.append("th { background: #1976d2; color: white; padding: 12px; text-align: center; font-weight: bold; }");
             html.append("td { padding: 12px; text-align: center; border-bottom: 1px solid #eee; }");
@@ -338,6 +341,10 @@ public class AccountReportFragment extends Fragment {
             html.append(".credit { color: #4caf50; }");
             html.append(".debit { color: #f44336; }");
             html.append(".balance { font-weight: bold; }");
+            html.append("@media print {");
+            html.append("  .summary-table { box-shadow: none; border: 1px solid #ddd; }");
+            html.append("  .summary-table th { background: #f5f5f5 !important; color: #333 !important; }");
+            html.append("}");
             html.append("</style>");
             html.append("</head>");
             html.append("<body>");
@@ -350,31 +357,35 @@ public class AccountReportFragment extends Fragment {
             // جدول ملخص الحساب
             html.append("<table class='summary-table'>");
             html.append("<tr>");
-            html.append("<th colspan='2'>معلومات الحساب</th>");
+            html.append("<th colspan='3'>معلومات الحساب</th>");
             html.append("</tr>");
-            html.append("<tr>");
-            html.append("<td class='label'>اسم التاجر</td>");
-            html.append("<td class='value'>").append(report.getUserName() != null ? report.getUserName() : "-").append("</td>");
+            html.append("<tr class='info-row'>");
+            html.append("<td class='info-cell'>");
+            html.append("<div class='info-label'>اسم التاجر</div>");
+            html.append("<div class='info-value'>").append(report.getUserName() != null ? report.getUserName() : "-").append("</div>");
+            html.append("</td>");
+            html.append("<td class='info-cell'>");
+            html.append("<div class='info-label'>اسم الحساب</div>");
+            html.append("<div class='info-value'>").append(report.getAccountName() != null ? report.getAccountName() : "-").append("</div>");
+            html.append("</td>");
+            html.append("<td class='info-cell'>");
+            html.append("<div class='info-label'>العملة</div>");
+            html.append("<div class='info-value'>").append(report.getCurrency() != null ? report.getCurrency() : "-").append("</div>");
+            html.append("</td>");
             html.append("</tr>");
-            html.append("<tr>");
-            html.append("<td class='label'>اسم الحساب</td>");
-            html.append("<td class='value'>").append(report.getAccountName() != null ? report.getAccountName() : "-").append("</td>");
-            html.append("</tr>");
-            html.append("<tr>");
-            html.append("<td class='label'>العملة</td>");
-            html.append("<td class='value'>").append(report.getCurrency() != null ? report.getCurrency() : "-").append("</td>");
-            html.append("</tr>");
-            html.append("<tr>");
-            html.append("<td class='label'>الرصيد الحالي</td>");
-            html.append("<td class='balance'>").append(numberFormat.format(report.getBalance())).append("</td>");
-            html.append("</tr>");
-            html.append("<tr>");
-            html.append("<td class='label'>إجمالي المدين</td>");
-            html.append("<td class='debits'>").append(numberFormat.format(report.getTotalDebits())).append("</td>");
-            html.append("</tr>");
-            html.append("<tr>");
-            html.append("<td class='label'>إجمالي الدائن</td>");
-            html.append("<td class='credits'>").append(numberFormat.format(report.getTotalCredits())).append("</td>");
+            html.append("<tr class='balance-row'>");
+            html.append("<td class='balance-cell'>");
+            html.append("<div class='balance-label'>إجمالي الدائن</div>");
+            html.append("<div class='credits'>").append(numberFormat.format(report.getTotalCredits())).append("</div>");
+            html.append("</td>");
+            html.append("<td class='balance-cell'>");
+            html.append("<div class='balance-label'>إجمالي المدين</div>");
+            html.append("<div class='debits'>").append(numberFormat.format(report.getTotalDebits())).append("</div>");
+            html.append("</td>");
+            html.append("<td class='balance-cell'>");
+            html.append("<div class='balance-label'>الرصيد الحالي</div>");
+            html.append("<div class='balance'>").append(numberFormat.format(report.getBalance())).append("</div>");
+            html.append("</td>");
             html.append("</tr>");
             html.append("</table>");
 
