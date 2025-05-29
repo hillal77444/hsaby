@@ -129,6 +129,10 @@ public class DashboardFragment extends Fragment {
         // زر عرض ملخص الحسابات
         binding.viewSummaryButton.setOnClickListener(v -> 
             Navigation.findNavController(requireView()).navigate(R.id.nav_summary));
+
+        // زر + لإضافة معاملة جديدة
+        binding.fabAddTransaction.setOnClickListener(v ->
+            Navigation.findNavController(requireView()).navigate(R.id.addTransactionFragment));
     }
 
     private void observeData() {
