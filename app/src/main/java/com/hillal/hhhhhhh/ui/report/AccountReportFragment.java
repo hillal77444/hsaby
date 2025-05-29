@@ -318,21 +318,29 @@ public class AccountReportFragment extends Fragment {
             html.append("<meta charset='UTF-8'>");
             html.append("<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>");
             html.append("<style>");
-            html.append("body { font-family: Arial, sans-serif; margin: 0; padding: 16px; -webkit-touch-callout: none; -webkit-user-select: none; }");
-            html.append("h2 { color: #333; text-align: center; margin-bottom: 20px; }");
-            html.append("table { width: 100%; border-collapse: collapse; margin-top: 16px; }");
-            html.append("th, td { padding: 8px; text-align: center; border: 1px solid #ddd; }");
-            html.append("th { background-color: #f5f5f5; font-weight: bold; }");
-            html.append("tr:nth-child(even) { background-color: #f9f9f9; }");
-            html.append(".summary { margin: 16px 0; padding: 16px; background-color: #f5f5f5; border-radius: 4px; }");
-            html.append(".summary p { margin: 8px 0; }");
-            html.append(".summary strong { color: #333; }");
+            html.append("body { font-family: 'Cairo', Arial, sans-serif; margin: 0; padding: 16px; background: #f5f5f5; }");
+            html.append(".header { background: linear-gradient(135deg, #1976d2, #2196f3); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }");
+            html.append(".header h2 { margin: 0; font-size: 24px; text-align: center; }");
+            html.append(".summary { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }");
+            html.append(".summary p { margin: 10px 0; font-size: 16px; }");
+            html.append(".summary strong { color: #1976d2; }");
+            html.append("table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }");
+            html.append("th { background: #1976d2; color: white; padding: 12px; text-align: center; font-weight: bold; }");
+            html.append("td { padding: 12px; text-align: center; border-bottom: 1px solid #eee; }");
+            html.append("tr:nth-child(even) { background: #f8f9fa; }");
+            html.append("tr:hover { background: #e3f2fd; }");
+            html.append(".credit { color: #4caf50; }");
+            html.append(".debit { color: #f44336; }");
+            html.append(".balance { font-weight: bold; }");
             html.append("</style>");
             html.append("</head>");
             html.append("<body>");
 
             // معلومات الحساب
+            html.append("<div class='header'>");
             html.append("<h2>تقرير الحساب</h2>");
+            html.append("</div>");
+
             html.append("<div class='summary'>");
             html.append("<p><strong>اسم المستخدم:</strong> ").append(report.getUserName() != null ? report.getUserName() : "-").append("</p>");
             html.append("<p><strong>اسم الحساب:</strong> ").append(report.getAccountName() != null ? report.getAccountName() : "-").append("</p>");
@@ -343,28 +351,49 @@ public class AccountReportFragment extends Fragment {
             html.append("</div>");
 
             // جدول المعاملات
-            html.append("<h3>المعاملات</h3>");
             html.append("<table>");
             html.append("<tr>");
             html.append("<th>التاريخ</th>");
-            html.append("<th>النوع</th>");
-            html.append("<th>المبلغ</th>");
+            html.append("<th>لك</th>");
+            html.append("<th>عليك</th>");
             html.append("<th>الوصف</th>");
+            html.append("<th>الرصيد</th>");
             html.append("</tr>");
 
             if (report.getTransactions() != null && !report.getTransactions().isEmpty()) {
+                double runningBalance = 0;
                 for (AccountReport.Transaction tx : report.getTransactions()) {
                     if (tx != null) {
+                        // حساب الرصيد التراكمي
+                        if (tx.getType() != null) {
+                            if (tx.getType().equals("credit")) {
+                                runningBalance += tx.getAmount();
+                            } else {
+                                runningBalance -= tx.getAmount();
+                            }
+                        }
+
                         html.append("<tr>");
-                        html.append("<td>").append(tx.getDate() != null ? tx.getDate() : "-").append("</td>");
-                        html.append("<td>").append(tx.getType() != null ? (tx.getType().equals("credit") ? "دائن" : "مدين") : "-").append("</td>");
-                        html.append("<td>").append(numberFormat.format(tx.getAmount())).append("</td>");
+                        // تنسيق التاريخ (إزالة الوقت)
+                        String date = tx.getDate() != null ? tx.getDate().split(" ")[0] : "-";
+                        html.append("<td>").append(date).append("</td>");
+                        
+                        // عرض المبلغ في العمود المناسب
+                        if (tx.getType() != null && tx.getType().equals("credit")) {
+                            html.append("<td class='credit'>").append(numberFormat.format(tx.getAmount())).append("</td>");
+                            html.append("<td>-</td>");
+                        } else {
+                            html.append("<td>-</td>");
+                            html.append("<td class='debit'>").append(numberFormat.format(tx.getAmount())).append("</td>");
+                        }
+                        
                         html.append("<td>").append(tx.getDescription() != null ? tx.getDescription() : "-").append("</td>");
+                        html.append("<td class='balance'>").append(numberFormat.format(runningBalance)).append("</td>");
                         html.append("</tr>");
                     }
                 }
             } else {
-                html.append("<tr><td colspan='4' style='text-align: center;'>لا توجد معاملات</td></tr>");
+                html.append("<tr><td colspan='5' style='text-align: center;'>لا توجد معاملات</td></tr>");
             }
 
             html.append("</table></body></html>");
