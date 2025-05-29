@@ -1,6 +1,8 @@
 package com.hillal.hhhhhhh.ui.settings;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -106,6 +108,11 @@ public class SettingsFragment extends Fragment {
 
     private void setupOtherSettings() {
         // هنا يمكن إضافة إعدادات أخرى
+        binding.buttonPrivacyPolicy.setOnClickListener(v -> {
+            String url = "https://alhillal1.github.io/privacy-policy/";
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            startActivity(intent);
+        });
     }
 
     private void showMessage(String message) {
