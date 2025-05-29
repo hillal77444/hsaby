@@ -132,26 +132,30 @@ jobs:
           echo "RELEASE_STORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> app/gradle.properties
           echo "RELEASE_KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> app/gradle.properties
           echo "RELEASE_KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> app/gradle.properties
-      - name: Build Release APK
-        run: ./gradlew assembleRelease --stacktrace
-      - name: Sign APK
+      - name: Build Release AAB
+        run: ./gradlew bundleRelease --stacktrace
+      - name: Check AAB exists
         run: |
-          echo "Checking for APK..."
-          if [ ! -f "app/build/outputs/apk/release/app-release.apk" ]; then
-            echo "Error: app-release.apk not found!"
-            ls -la app/build/outputs/apk/release/
+          if [ ! -f "app/build/outputs/bundle/release/app-release.aab" ]; then
+            echo "AAB file not found!"
+            ls -la app/build/outputs/bundle/release/
             exit 1
           fi
-          echo "Zipaligning APK..."
-          $ANDROID_HOME/build-tools/34.0.0/zipalign -v 4 app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/app-release-aligned.apk
-          echo "Signing APK..."
-          $ANDROID_HOME/build-tools/34.0.0/apksigner sign --ks keystore.jks --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --ks-key-alias ${{ secrets.KEY_ALIAS }} --key-pass pass:${{ secrets.KEY_PASSWORD }} app/build/outputs/apk/release/app-release-aligned.apk
-          echo "Moving final APK..."
-          mv app/build/outputs/apk/release/app-release-aligned.apk app/build/outputs/apk/release/app-release.apk
-          echo "Calculating SHA256 of signed APK..."
-          sha256sum app/build/outputs/apk/release/app-release.apk
-      - name: Upload APK
+          echo "AAB file exists"
+      - name: Sign AAB
+        run: |
+          echo "Checking for AAB..."
+          if [ ! -f "app/build/outputs/bundle/release/app-release.aab" ]; then
+            echo "Error: app-release.aab not found!"
+            ls -la app/build/outputs/bundle/release/
+            exit 1
+          fi
+          echo "Signing AAB..."
+          $ANDROID_HOME/build-tools/34.0.0/jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore keystore.jks -storepass ${{ secrets.KEYSTORE_PASSWORD }} -keypass ${{ secrets.KEY_PASSWORD }} app/build/outputs/bundle/release/app-release.aab ${{ secrets.KEY_ALIAS }}
+          echo "Calculating SHA256 of signed AAB..."
+          sha256sum app/build/outputs/bundle/release/app-release.aab
+      - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
           name: app-release-upload
-          path: app/build/outputs/apk/release/app-release.apk
+          path: app/build/outputs/bundle/release/app-release.aab
