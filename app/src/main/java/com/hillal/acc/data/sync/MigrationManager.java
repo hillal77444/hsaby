@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -74,10 +75,40 @@ public class MigrationManager {
                 return;
             }
 
+            // إنشاء نسخة من المعاملات مع account_id المحدث للخادم
+            List<Transaction> transactionsForServer = new ArrayList<>();
+            for (Transaction transaction : transactionsToMigrate) {
+                Transaction serverTransaction = new Transaction(); // إنشاء نسخة جديدة
+                // نسخ جميع البيانات من المعاملة الأصلية
+                serverTransaction.setId(transaction.getId());
+                serverTransaction.setAmount(transaction.getAmount());
+                serverTransaction.setType(transaction.getType());
+                serverTransaction.setDescription(transaction.getDescription());
+                serverTransaction.setTransactionDate(transaction.getTransactionDate());
+                serverTransaction.setCreatedAt(transaction.getCreatedAt());
+                serverTransaction.setUpdatedAt(transaction.getUpdatedAt());
+                serverTransaction.setLastSyncTime(transaction.getLastSyncTime());
+                serverTransaction.setModified(transaction.isModified());
+                
+                // تحديث account_id بالـ server_id الخاص بالحساب
+                Account relatedAccount = accountDao.getAccountByIdSync(transaction.getAccountId());
+                if (relatedAccount != null && relatedAccount.getServerId() > 0) {
+                    serverTransaction.setAccountId(relatedAccount.getServerId());
+                    Log.d("MigrationManager", "Using server_id " + relatedAccount.getServerId() + 
+                        " for account " + transaction.getAccountId());
+                } else {
+                    serverTransaction.setAccountId(transaction.getAccountId());
+                    Log.e("MigrationManager", "Could not find server_id for account: " + 
+                        transaction.getAccountId());
+                }
+                
+                transactionsForServer.add(serverTransaction);
+            }
+
             Log.d("MigrationManager", "Starting migration with " + accountsToMigrate.size() + " accounts and " + 
                 transactionsToMigrate.size() + " transactions");
 
-            SyncRequest request = new SyncRequest(accountsToMigrate, transactionsToMigrate);
+            SyncRequest request = new SyncRequest(accountsToMigrate, transactionsForServer);
             apiService.syncData("Bearer " + token, request).enqueue(new Callback<SyncResponse>() {
                 @Override
                 public void onResponse(Call<SyncResponse> call, Response<SyncResponse> response) {
