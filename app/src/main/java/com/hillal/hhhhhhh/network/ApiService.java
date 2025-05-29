@@ -14,4 +14,7 @@ public interface ApiService {
 
     @GET("api/accounts/{accountId}/details")
     Call<AccountReport> getAccountDetails(@Path("accountId") int accountId, @Query("currency") String currency);
+
+    @GET("api/accounts/{accountId}/report")
+    Call<AccountReport> getAccountReport(@Path("accountId") int accountId, @Query("currency") String currency);
 } 
