@@ -381,4 +381,17 @@
 
     </androidx.core.widget.NestedScrollView>
 
+    <!-- زر + لإضافة معاملة جديدة -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_transaction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="70dp"
+        android:contentDescription="إضافة معاملة جديدة"
+        app:srcCompat="@android:drawable/ic_input_add"
+        app:backgroundTint="@color/primary_blue"
+        app:tint="@android:color/white" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
