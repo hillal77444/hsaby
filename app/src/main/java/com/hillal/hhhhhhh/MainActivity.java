@@ -31,7 +31,7 @@ import com.hillal.hhhhhhh.data.room.PendingOperationDao;
 import com.hillal.hhhhhhh.databinding.ActivityMainBinding;
 import com.hillal.hhhhhhh.viewmodel.AuthViewModel;
 import com.hillal.hhhhhhh.data.room.AppDatabase;
-import com.hillal.hhhhhhh.data.update.AppUpdateManager;
+import com.hillal.hhhhhhh.data.update.AppUpdateHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private AuthViewModel authViewModel;
     private App app;
     private AppDatabase db;
-    private AppUpdateManager appUpdateManager;
+    private AppUpdateHelper appUpdateHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
             setupUI();
 
             // تهيئة مدير التحديثات
-            appUpdateManager = new AppUpdateManager(this);
+            appUpdateHelper = new AppUpdateHelper(this);
 
         } catch (IllegalStateException e) {
             String errorMessage = "=== خطأ في تهيئة التطبيق ===\n\n" +
@@ -139,14 +139,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         // التحقق من وجود تحديثات عند استئناف النشاط
-        appUpdateManager.checkForUpdates(this);
+        appUpdateHelper.checkForUpdates(this);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // معالجة نتيجة التحديث
-        appUpdateManager.onActivityResult(requestCode, resultCode);
+        appUpdateHelper.onActivityResult(requestCode, resultCode);
     }
 
     private void setupUI() {
