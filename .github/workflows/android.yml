@@ -16,6 +16,7 @@ on:
           - build
           - download
           - clean
+          - upload
 
 jobs:
   build:
@@ -104,3 +105,53 @@ jobs:
         run: chmod +x gradlew
       - name: Clean Gradle cache and dependencies
         run: ./gradlew clean --refresh-dependencies
+
+  upload:
+    if: github.event.inputs.action == 'upload'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Check keystore exists
+        run: |
+          if [ ! -f "keystore.jks" ]; then
+            echo "Error: keystore.jks not found!"
+            exit 1
+          fi
+          echo "Keystore file exists"
+      - name: Create gradle.properties
+        run: |
+          echo "RELEASE_STORE_FILE=keystore.jks" >> app/gradle.properties
+          echo "RELEASE_STORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> app/gradle.properties
+          echo "RELEASE_KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> app/gradle.properties
+          echo "RELEASE_KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> app/gradle.properties
+      - name: Build Release APK
+        run: ./gradlew assembleRelease --stacktrace
+      - name: Sign APK
+        run: |
+          echo "Checking for APK..."
+          if [ ! -f "app/build/outputs/apk/release/app-release.apk" ]; then
+            echo "Error: app-release.apk not found!"
+            ls -la app/build/outputs/apk/release/
+            exit 1
+          fi
+          echo "Zipaligning APK..."
+          $ANDROID_HOME/build-tools/34.0.0/zipalign -v 4 app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/app-release-aligned.apk
+          echo "Signing APK..."
+          $ANDROID_HOME/build-tools/34.0.0/apksigner sign --ks keystore.jks --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --ks-key-alias ${{ secrets.KEY_ALIAS }} --key-pass pass:${{ secrets.KEY_PASSWORD }} app/build/outputs/apk/release/app-release-aligned.apk
+          echo "Moving final APK..."
+          mv app/build/outputs/apk/release/app-release-aligned.apk app/build/outputs/apk/release/app-release.apk
+          echo "Calculating SHA256 of signed APK..."
+          sha256sum app/build/outputs/apk/release/app-release.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-upload
+          path: app/build/outputs/apk/release/app-release.apk
