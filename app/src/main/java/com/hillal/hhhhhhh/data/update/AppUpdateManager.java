@@ -13,13 +13,13 @@ import com.google.android.play.core.install.model.UpdateAvailability;
 import com.google.android.play.core.tasks.OnSuccessListener;
 import com.hillal.hhhhhhh.R;
 
-public class AppUpdateManager {
-    private static final String TAG = "AppUpdateManager";
+public class AppUpdateHelper {
+    private static final String TAG = "AppUpdateHelper";
     private static final int UPDATE_REQUEST_CODE = 500;
     private final Context context;
     private final com.google.android.play.core.appupdate.AppUpdateManager appUpdateManager;
 
-    public AppUpdateManager(Context context) {
+    public AppUpdateHelper(Context context) {
         this.context = context;
         this.appUpdateManager = AppUpdateManagerFactory.create(context);
     }
