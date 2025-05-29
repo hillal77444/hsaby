@@ -109,27 +109,8 @@ public class MainActivity extends AppCompatActivity {
                 binding.bottomNavigation.setVisibility(View.GONE);
             }
 
-            // Setup navigation drawer
-            appBarConfiguration = new AppBarConfiguration.Builder(
-                    R.id.navigation_dashboard,
-                    R.id.nav_accounts,
-                    R.id.nav_transactions,
-                    R.id.nav_reports,
-                    R.id.nav_settings)
-                    .setOpenableLayout(binding.drawerLayout)
-                    .build();
-
-            NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-            NavigationUI.setupWithNavController(binding.navView, navController);
-            Log.d(TAG, "Navigation setup completed successfully");
-
+            // Setup bottom navigation
             binding.bottomNavigation.setOnNavigationItemSelectedListener(navListener);
-            // حذف تعيين الـ fragment الافتراضي
-            // if (savedInstanceState == null) {
-            //     getSupportFragmentManager().beginTransaction()
-            //             .replace(R.id.fragment_container, new DashboardFragment())
-            //             .commit();
-            // }
 
             db = AppDatabase.getInstance(this);
             setupUI();
