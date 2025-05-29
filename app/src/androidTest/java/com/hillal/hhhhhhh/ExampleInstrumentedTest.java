@@ -1,4 +1,4 @@
-package com.hillal.hhhhhhh;
+package com.hillal.acc;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.hillal.hhhhhhh", appContext.getPackageName());
+        assertEquals("com.hillal.acc", appContext.getPackageName());
     }
 }

@@ -7,7 +7,7 @@ app/
 ├── src/
 │   ├── main/
 │   │   ├── java/
-│   │   │   └── com/hillal/hhhhhhh/
+│   │   │   └── com/hillal/acc/
 │   │   │       ├── App.java
 │   │   │       ├── MainActivity.java
 │   │   │       ├── viewmodel/

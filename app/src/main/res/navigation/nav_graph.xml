@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.hillal.hhhhhhh.ui.auth.LoginFragment"
+        android:name="com.hillal.acc.ui.auth.LoginFragment"
         android:label="تسجيل الدخول">
         <action
             android:id="@+id/action_loginFragment_to_homeFragment"
@@ -21,7 +21,7 @@
 
     <fragment
         android:id="@+id/registerFragment"
-        android:name="com.hillal.hhhhhhh.ui.auth.RegisterFragment"
+        android:name="com.hillal.acc.ui.auth.RegisterFragment"
         android:label="إنشاء حساب جديد">
         <action
             android:id="@+id/action_registerFragment_to_loginFragment"
@@ -32,34 +32,34 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.hillal.hhhhhhh.ui.home.HomeFragment"
+        android:name="com.hillal.acc.ui.home.HomeFragment"
         android:label="الرئيسية"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/nav_gallery"
-        android:name="com.hillal.hhhhhhh.ui.gallery.GalleryFragment"
+        android:name="com.hillal.acc.ui.gallery.GalleryFragment"
         android:label="@string/app_name"
         tools:layout="@layout/fragment_gallery" />
 
     <!-- الصفحة الرئيسية -->
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="com.hillal.hhhhhhh.ui.dashboard.DashboardFragment"
+        android:name="com.hillal.acc.ui.dashboard.DashboardFragment"
         android:label="@string/title_dashboard"
         tools:layout="@layout/fragment_dashboard" />
 
     <!-- إضافة حساب جديد -->
     <fragment
         android:id="@+id/addAccountFragment"
-        android:name="com.hillal.hhhhhhh.ui.accounts.AddAccountFragment"
+        android:name="com.hillal.acc.ui.accounts.AddAccountFragment"
         android:label="@string/menu_add_account"
         tools:layout="@layout/fragment_add_account" />
 
     <!-- تعديل حساب -->
     <fragment
         android:id="@+id/editAccountFragment"
-        android:name="com.hillal.hhhhhhh.ui.accounts.EditAccountFragment"
+        android:name="com.hillal.acc.ui.accounts.EditAccountFragment"
         android:label="@string/menu_edit_account"
         tools:layout="@layout/fragment_add_account">
         <argument
@@ -70,7 +70,7 @@
     <!-- تفاصيل الحساب -->
     <fragment
         android:id="@+id/accountDetailsFragment"
-        android:name="com.hillal.hhhhhhh.ui.accounts.AccountDetailsFragment"
+        android:name="com.hillal.acc.ui.accounts.AccountDetailsFragment"
         android:label="@string/menu_account_details"
         tools:layout="@layout/fragment_account_details">
         <argument
@@ -88,7 +88,7 @@
     <!-- إضافة عملية -->
     <fragment
         android:id="@+id/addTransactionFragment"
-        android:name="com.hillal.hhhhhhh.ui.transactions.AddTransactionFragment"
+        android:name="com.hillal.acc.ui.transactions.AddTransactionFragment"
         android:label="@string/menu_add_transaction"
         tools:layout="@layout/fragment_add_transaction">
         <argument
@@ -99,7 +99,7 @@
     <!-- التقارير -->
     <fragment
         android:id="@+id/navigation_reports"
-        android:name="com.hillal.hhhhhhh.ui.reports.ReportsFragment"
+        android:name="com.hillal.acc.ui.reports.ReportsFragment"
         android:label="@string/title_reports"
         tools:layout="@layout/fragment_reports">
         <action
@@ -110,7 +110,7 @@
     <!-- كشف الحساب -->
     <fragment
         android:id="@+id/accountStatementFragment"
-        android:name="com.hillal.hhhhhhh.ui.reports.AccountStatementFragment"
+        android:name="com.hillal.acc.ui.reports.AccountStatementFragment"
         android:label="@string/account_statement"
         tools:layout="@layout/fragment_account_statement">
         <argument
@@ -121,20 +121,20 @@
     <!-- الإعدادات -->
     <fragment
         android:id="@+id/navigation_settings"
-        android:name="com.hillal.hhhhhhh.ui.settings.SettingsFragment"
+        android:name="com.hillal.acc.ui.settings.SettingsFragment"
         android:label="@string/title_settings"
         tools:layout="@layout/fragment_settings" />
 
     <!-- الحسابات -->
     <fragment
         android:id="@+id/navigation_accounts"
-        android:name="com.hillal.hhhhhhh.ui.accounts.AccountsFragment"
+        android:name="com.hillal.acc.ui.accounts.AccountsFragment"
         android:label="@string/title_accounts"
         tools:layout="@layout/fragment_accounts" />
 
     <fragment
         android:id="@+id/transactionsFragment"
-        android:name="com.hillal.hhhhhhh.ui.transactions.TransactionsFragment"
+        android:name="com.hillal.acc.ui.transactions.TransactionsFragment"
         android:label="@string/transactions">
         <action
             android:id="@+id/action_transactions_to_addTransaction"
@@ -146,7 +146,7 @@
 
     <fragment
         android:id="@+id/editTransactionFragment"
-        android:name="com.hillal.hhhhhhh.ui.transactions.EditTransactionFragment"
+        android:name="com.hillal.acc.ui.transactions.EditTransactionFragment"
         android:label="@string/edit_transaction">
         <argument
             android:name="transactionId"
@@ -156,20 +156,20 @@
     <!-- تعديل الملف الشخصي -->
     <fragment
         android:id="@+id/editProfileFragment"
-        android:name="com.hillal.hhhhhhh.ui.profile.EditProfileFragment"
+        android:name="com.hillal.acc.ui.profile.EditProfileFragment"
         android:label="تعديل الملف الشخصي"
         tools:layout="@layout/fragment_edit_profile" />
 
     <!-- ملخص الحسابات -->
     <fragment
         android:id="@+id/nav_summary"
-        android:name="com.hillal.hhhhhhh.ui.summary.AccountSummaryFragment"
+        android:name="com.hillal.acc.ui.summary.AccountSummaryFragment"
         android:label="ملخص الحسابات"
         tools:layout="@layout/fragment_account_summary" />
 
     <fragment
         android:id="@+id/navigation_about"
-        android:name="com.hillal.hhhhhhh.ui.about.AboutFragment"
+        android:name="com.hillal.acc.ui.about.AboutFragment"
         android:label="@string/about_app" />
 
 </navigation>

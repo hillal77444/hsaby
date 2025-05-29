@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.Hhhhhhh" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Theme.acc" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/primary_blue</item>
         <item name="colorPrimaryVariant">@color/primary_blue_dark</item>
@@ -23,13 +23,13 @@
     </style>
 
     <!-- AppBar overlay theme -->
-    <style name="Theme.Hhhhhhh.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+    <style name="Theme.acc.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
 
     <!-- Popup overlay theme -->
-    <style name="Theme.Hhhhhhh.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
+    <style name="Theme.acc.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
 
     <!-- No action bar theme -->
-    <style name="Theme.Hhhhhhh.NoActionBar">
+    <style name="Theme.acc.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>

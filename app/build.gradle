@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace 'com.hillal.hhhhhhh'
+    namespace 'com.hillal.acc'
     compileSdk 34
 
     signingConfigs {
@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.hillal.hhhhhhh"
+        applicationId "com.hillal.acc"
         minSdk 26
         targetSdk 34
         versionCode 1

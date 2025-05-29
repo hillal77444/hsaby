@@ -65,10 +65,10 @@
 -keep class org.apache.pdfbox.filter.** { *; }
 
 # Keep your model classes
--keep class com.hillal.hhhhhhh.data.model.** { *; }
--keep class com.hillal.hhhhhhh.data.remote.** { *; }
--keep class com.hillal.hhhhhhh.ui.** { *; }
--keep class com.hillal.hhhhhhh.utils.** { *; }
+-keep class com.hillal.acc.data.model.** { *; }
+-keep class com.hillal.acc.data.remote.** { *; }
+-keep class com.hillal.acc.ui.** { *; }
+-keep class com.hillal.acc.utils.** { *; }
 
 # Keep Room
 -keep class * extends androidx.room.RoomDatabase

@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/nav_dashboard"
-        android:name="com.hillal.hhhhhhh.ui.dashboard.DashboardFragment"
+        android:name="com.hillal.acc.ui.dashboard.DashboardFragment"
         android:label="@string/menu_dashboard"
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
         android:id="@+id/nav_accounts"
-        android:name="com.hillal.hhhhhhh.ui.accounts.AccountsFragment"
+        android:name="com.hillal.acc.ui.accounts.AccountsFragment"
         android:label="@string/menu_accounts"
         tools:layout="@layout/fragment_accounts" />
 
     <fragment
         android:id="@+id/nav_account_details"
-        android:name="com.hillal.hhhhhhh.ui.accounts.AccountDetailsFragment"
+        android:name="com.hillal.acc.ui.accounts.AccountDetailsFragment"
         android:label="@string/menu_account_details"
         tools:layout="@layout/fragment_account_details">
         <argument
@@ -29,13 +29,13 @@
 
     <fragment
         android:id="@+id/nav_add_account"
-        android:name="com.hillal.hhhhhhh.ui.accounts.AddAccountFragment"
+        android:name="com.hillal.acc.ui.accounts.AddAccountFragment"
         android:label="@string/menu_add_account"
         tools:layout="@layout/fragment_add_account" />
 
     <fragment
         android:id="@+id/nav_add_transaction"
-        android:name="com.hillal.hhhhhhh.ui.transactions.AddTransactionFragment"
+        android:name="com.hillal.acc.ui.transactions.AddTransactionFragment"
         android:label="@string/menu_add_transaction"
         tools:layout="@layout/fragment_add_transaction">
         <argument
@@ -45,7 +45,7 @@
 
     <fragment
         android:id="@+id/nav_transactions"
-        android:name="com.hillal.hhhhhhh.ui.transactions.TransactionsFragment"
+        android:name="com.hillal.acc.ui.transactions.TransactionsFragment"
         android:label="@string/transactions"
         tools:layout="@layout/fragment_transactions">
         <argument
@@ -55,19 +55,19 @@
 
     <fragment
         android:id="@+id/nav_reports"
-        android:name="com.hillal.hhhhhhh.ui.reports.ReportsFragment"
+        android:name="com.hillal.acc.ui.reports.ReportsFragment"
         android:label="@string/menu_reports"
         tools:layout="@layout/fragment_reports" />
 
     <fragment
         android:id="@+id/nav_settings"
-        android:name="com.hillal.hhhhhhh.ui.settings.SettingsFragment"
+        android:name="com.hillal.acc.ui.settings.SettingsFragment"
         android:label="@string/menu_settings"
         tools:layout="@layout/fragment_settings" />
 
     <fragment
         android:id="@+id/nav_summary"
-        android:name="com.hillal.hhhhhhh.ui.summary.AccountSummaryFragment"
+        android:name="com.hillal.acc.ui.summary.AccountSummaryFragment"
         android:label="ملخص الحسابات"
         tools:layout="@layout/fragment_account_summary" />
 
