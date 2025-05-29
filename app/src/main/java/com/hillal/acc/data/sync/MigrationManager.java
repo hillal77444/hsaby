@@ -89,6 +89,8 @@ public class MigrationManager {
                 serverTransaction.setUpdatedAt(transaction.getUpdatedAt());
                 serverTransaction.setLastSyncTime(transaction.getLastSyncTime());
                 serverTransaction.setModified(transaction.isModified());
+                serverTransaction.setNotes(transaction.getNotes());
+                serverTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
                 
                 // تحديث account_id بالـ server_id الخاص بالحساب
                 Account relatedAccount = accountDao.getAccountByIdSync(transaction.getAccountId());
