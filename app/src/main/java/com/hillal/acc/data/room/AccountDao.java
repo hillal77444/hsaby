@@ -79,4 +79,7 @@ public interface AccountDao {
 
     @Query("DELETE FROM accounts")
     void deleteAllAccounts();
+
+    @Query("SELECT * FROM accounts WHERE id = :id")
+    Account getAccountByIdSync(long id);
 } 
