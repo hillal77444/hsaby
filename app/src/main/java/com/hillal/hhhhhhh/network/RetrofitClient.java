@@ -13,6 +13,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import java.util.concurrent.TimeUnit;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 
 public class RetrofitClient {
     private static final String BASE_URL = "http://212.224.88.122:5007/";
@@ -32,12 +33,23 @@ public class RetrofitClient {
 
         GsonBuilder gsonBuilder = new GsonBuilder()
                 .setLenient()
-                .disableHtmlEscaping();
+                .disableHtmlEscaping()
+                .registerTypeAdapter(AccountReport.class, (InstanceCreator<AccountReport>) type -> {
+                    AccountReport report = new AccountReport();
+                    report.setTransactions(new ArrayList<>());
+                    return report;
+                })
+                .registerTypeAdapter(AccountReport.Transaction.class, (InstanceCreator<AccountReport.Transaction>) type -> {
+                    AccountReport.Transaction transaction = new AccountReport.Transaction();
+                    transaction.setDate("");
+                    transaction.setType("");
+                    transaction.setDescription("");
+                    return transaction;
+                });
 
         gsonBuilder.registerTypeAdapter(AccountSummaryResponse.class, (InstanceCreator<AccountSummaryResponse>) type -> new AccountSummaryResponse());
         gsonBuilder.registerTypeAdapter(AccountSummary.class, (InstanceCreator<AccountSummary>) type -> new AccountSummary());
         gsonBuilder.registerTypeAdapter(CurrencySummary.class, (InstanceCreator<CurrencySummary>) type -> new CurrencySummary());
-        gsonBuilder.registerTypeAdapter(AccountReport.class, (InstanceCreator<AccountReport>) type -> new AccountReport());
 
         Gson gson = gsonBuilder.create();
 
