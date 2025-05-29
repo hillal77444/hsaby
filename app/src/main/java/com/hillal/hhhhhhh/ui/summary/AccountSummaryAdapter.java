@@ -58,32 +58,33 @@ public class AccountSummaryAdapter extends RecyclerView.Adapter<AccountSummaryAd
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView textView;
+        private final TextView userNameTextView;
+        private final TextView balanceTextView;
+        private final TextView debitsTextView;
+        private final TextView creditsTextView;
         private final NumberFormat numberFormat;
 
         ViewHolder(View view, NumberFormat numberFormat) {
             super(view);
-            this.textView = view.findViewById(R.id.textView);
+            this.userNameTextView = view.findViewById(R.id.userNameTextView);
+            this.balanceTextView = view.findViewById(R.id.balanceTextView);
+            this.debitsTextView = view.findViewById(R.id.debitsTextView);
+            this.creditsTextView = view.findViewById(R.id.creditsTextView);
             this.numberFormat = numberFormat;
         }
 
         void bind(CurrencySummary summary) {
-            String text = String.format("%s: %s (مدين: %s, دائن: %s)",
-                    summary.getCurrency(),
-                    numberFormat.format(summary.getTotalBalance()),
-                    numberFormat.format(summary.getTotalDebits()),
-                    numberFormat.format(summary.getTotalCredits()));
-            textView.setText(text);
+            userNameTextView.setText(summary.getCurrency());
+            balanceTextView.setText(numberFormat.format(summary.getTotalBalance()));
+            debitsTextView.setText("مدين: " + numberFormat.format(summary.getTotalDebits()));
+            creditsTextView.setText("دائن: " + numberFormat.format(summary.getTotalCredits()));
         }
 
         void bind(AccountSummary account) {
-            String text = String.format("%s - %s: %s (مدين: %s, دائن: %s)",
-                    account.getUserName(),
-                    account.getCurrency(),
-                    numberFormat.format(account.getBalance()),
-                    numberFormat.format(account.getTotalDebits()),
-                    numberFormat.format(account.getTotalCredits()));
-            textView.setText(text);
+            userNameTextView.setText(account.getUserName());
+            balanceTextView.setText(numberFormat.format(account.getBalance()));
+            debitsTextView.setText("مدين: " + numberFormat.format(account.getTotalDebits()));
+            creditsTextView.setText("دائن: " + numberFormat.format(account.getTotalCredits()));
         }
     }
 } 
