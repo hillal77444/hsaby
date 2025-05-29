@@ -125,7 +125,8 @@ public class AccountReportFragment extends Fragment {
         binding.progressBar.setVisibility(View.VISIBLE);
 
         try {
-            Call<AccountReport> call = apiService.getAccountReport(accountId, currency);
+            // تجربة الـ endpoint الأول
+            Call<AccountReport> call = apiService.getAccountDetails(accountId, currency);
             String requestUrl = call.request().url().toString();
             Log.d("AccountReport", "Making request to URL: " + requestUrl);
 
@@ -137,12 +138,14 @@ public class AccountReportFragment extends Fragment {
 
                     if (response.isSuccessful()) {
                         try {
-                            AccountReport report = response.body();
-                            Log.d("AccountReport", "Response body: " + (report != null ? report.toString() : "null"));
+                            String responseBody = response.body() != null ? response.body().toString() : "null";
+                            Log.d("AccountReport", "Raw response body: " + responseBody);
 
+                            AccountReport report = response.body();
                             if (report == null) {
                                 Log.e("AccountReport", "Response body is null");
-                                showError("لم يتم استلام أي بيانات من الخادم");
+                                // تجربة الـ endpoint الثاني
+                                tryAlternativeEndpoint();
                                 return;
                             }
 
@@ -215,6 +218,73 @@ public class AccountReportFragment extends Fragment {
             Log.e("AccountReport", "Error making request", e);
             binding.progressBar.setVisibility(View.GONE);
             showError("خطأ في إرسال الطلب: " + e.getMessage());
+        }
+    }
+
+    private void tryAlternativeEndpoint() {
+        Log.d("AccountReport", "Trying alternative endpoint");
+        try {
+            Call<AccountReport> call = apiService.getAccountReport(accountId, currency);
+            String requestUrl = call.request().url().toString();
+            Log.d("AccountReport", "Making request to alternative URL: " + requestUrl);
+
+            call.enqueue(new Callback<AccountReport>() {
+                @Override
+                public void onResponse(@NonNull Call<AccountReport> call, @NonNull Response<AccountReport> response) {
+                    if (response.isSuccessful()) {
+                        try {
+                            String responseBody = response.body() != null ? response.body().toString() : "null";
+                            Log.d("AccountReport", "Raw response body from alternative endpoint: " + responseBody);
+
+                            AccountReport report = response.body();
+                            if (report == null) {
+                                Log.e("AccountReport", "Alternative endpoint response body is null");
+                                showError("لم يتم استلام أي بيانات من الخادم");
+                                return;
+                            }
+
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(() -> {
+                                    try {
+                                        updateReportView(report);
+                                    } catch (Exception e) {
+                                        Log.e("AccountReport", "Error updating report view from alternative endpoint", e);
+                                        showError("خطأ في تحديث العرض: " + e.getMessage());
+                                    }
+                                });
+                            }
+                        } catch (Exception e) {
+                            Log.e("AccountReport", "Error processing alternative endpoint response", e);
+                            showError("خطأ في معالجة البيانات: " + e.getMessage());
+                        }
+                    } else {
+                        String errorMessage = "فشل في تحميل البيانات من الخادم البديل";
+                        try {
+                            if (response.errorBody() != null) {
+                                String errorBody = response.errorBody().string();
+                                Log.e("AccountReport", "Alternative endpoint error response body: " + errorBody);
+                                errorMessage += ": " + errorBody;
+                            } else {
+                                Log.e("AccountReport", "Alternative endpoint error response code: " + response.code());
+                                errorMessage += " (رمز الخطأ: " + response.code() + ")";
+                            }
+                        } catch (IOException e) {
+                            Log.e("AccountReport", "Error reading alternative endpoint error body", e);
+                            errorMessage += " (رمز الخطأ: " + response.code() + ")";
+                        }
+                        showError(errorMessage);
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<AccountReport> call, @NonNull Throwable t) {
+                    Log.e("AccountReport", "Alternative endpoint network request failed", t);
+                    showError("حدث خطأ في الاتصال بالخادم البديل: " + t.getMessage());
+                }
+            });
+        } catch (Exception e) {
+            Log.e("AccountReport", "Error making alternative endpoint request", e);
+            showError("خطأ في إرسال الطلب للخادم البديل: " + e.getMessage());
         }
     }
 
