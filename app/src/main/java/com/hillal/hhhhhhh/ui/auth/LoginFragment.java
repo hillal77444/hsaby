@@ -1,5 +1,7 @@
 package com.hillal.hhhhhhh.ui.auth;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -50,6 +52,13 @@ public class LoginFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+
+        // إضافة مستمع لرابط سياسة الخصوصية
+        binding.textViewPrivacyPolicy.setOnClickListener(v -> {
+            String url = "https://alhillal1.github.io/privacy-policy/";
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            startActivity(intent);
+        });
 
         binding.buttonLogin.setOnClickListener(v -> {
             String phone = binding.editTextPhone.getText().toString().trim();
