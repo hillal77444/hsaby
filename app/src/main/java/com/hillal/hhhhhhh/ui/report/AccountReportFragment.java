@@ -125,7 +125,7 @@ public class AccountReportFragment extends Fragment {
         binding.progressBar.setVisibility(View.VISIBLE);
 
         try {
-            Call<AccountReport> call = apiService.getAccountDetails(accountId, currency);
+            Call<AccountReport> call = apiService.getAccountReport(accountId, currency);
             String requestUrl = call.request().url().toString();
             Log.d("AccountReport", "Making request to URL: " + requestUrl);
 
