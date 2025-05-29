@@ -139,6 +139,13 @@
     <string name="settings_sync_now">مزامنة الآن</string>
     <string name="settings_security">الأمان</string>
     <string name="settings_encryption">تشفير البيانات المحلية</string>
+    <string name="settings_about">حول التطبيق</string>
+    <string name="privacy_policy">سياسة الخصوصية</string>
+    <string name="about_app">حول التطبيق</string>
+    <string name="app_version">الإصدار 1.0</string>
+    <string name="app_description">تطبيق محاسبة متكامل لإدارة الحسابات والمعاملات المالية</string>
+    <string name="developer_info">تم تطوير هذا التطبيق بواسطة هلال</string>
+    <string name="contact_email">البريد الإلكتروني: hillal@gmail.com</string>
     
     <!-- رسائل الخطأ -->
     <string name="error_initialization">خطأ في تهيئة التطبيق</string>
