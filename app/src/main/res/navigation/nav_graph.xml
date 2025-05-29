@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/loginFragment">
+    app:startDestination="@id/navigation_dashboard">
 
     <fragment
         android:id="@+id/loginFragment"
@@ -166,5 +166,10 @@
         android:name="com.hillal.hhhhhhh.ui.summary.AccountSummaryFragment"
         android:label="ملخص الحسابات"
         tools:layout="@layout/fragment_account_summary" />
+
+    <fragment
+        android:id="@+id/navigation_about"
+        android:name="com.hillal.hhhhhhh.ui.about.AboutFragment"
+        android:label="@string/about_app" />
 
 </navigation>
