@@ -90,7 +90,6 @@ public class MigrationManager {
                 serverTransaction.setLastSyncTime(transaction.getLastSyncTime());
                 serverTransaction.setModified(transaction.isModified());
                 serverTransaction.setNotes(transaction.getNotes());
-                serverTransaction.setserverId(transaction.getserverId());
                 serverTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
                 
                 // تحديث account_id بالـ server_id الخاص بالحساب
