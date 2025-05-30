@@ -70,7 +70,6 @@ public class MigrationManager {
             List<Transaction> transactionsToMigrate = transactionDao.getNewOrModifiedTransactions();
 
             if (accountsToMigrate.isEmpty() && transactionsToMigrate.isEmpty()) {
-                // Toast.makeText(context, "لا توجد حسابات أو معاملات تحتاج إلى ترحيل", Toast.LENGTH_LONG).show());
                 return;
             }
 
@@ -84,50 +83,32 @@ public class MigrationManager {
                     try {
                         if (response.isSuccessful() && response.body() != null) {
                             SyncResponse syncResponse = response.body();
-                            Log.d("MigrationManager", "Received response from server: " + response.body());
                             
                             executor.execute(() -> {
                                 try {
                                     // تحديث الحسابات
                                     for (Account account : accountsToMigrate) {
                                         Long serverId = syncResponse.getAccountServerId(account.getId());
-                                        Log.d("MigrationManager", "Account mapping: localId=" + account.getId() + 
-                                            ", serverId=" + serverId);
                                         
                                         if (serverId != null && serverId > 0) {
                                             account.setServerId(serverId);
                                             account.setSyncStatus(2); 
                                             accountDao.update(account);
                                             migratedAccountsCount++;
-                                            Log.d("MigrationManager", "Account migrated: localId=" + account.getId() + 
-                                                ", serverId=" + serverId + ", total migrated: " + migratedAccountsCount);
-                                        } else {
-                                            Log.e("MigrationManager", "Failed to get server ID for account: localId=" + 
-                                                account.getId());
                                         }
                                     }
 
                                     // تحديث المعاملات
                                     for (Transaction transaction : transactionsToMigrate) {
                                         Long serverId = syncResponse.getTransactionServerId(transaction.getId());
-                                        Log.d("MigrationManager", "Transaction mapping: localId=" + transaction.getId() + 
-                                            ", serverId=" + serverId);
                                         
                                         if (serverId != null && serverId > 0) {
                                             transaction.setServerId(serverId);
                                             transaction.setSyncStatus(2);
                                             transactionDao.update(transaction);
                                             migratedTransactionsCount++;
-                                            Log.d("MigrationManager", "Transaction migrated: localId=" + transaction.getId() + 
-                                                ", serverId=" + serverId + ", total migrated: " + migratedTransactionsCount);
-                                        } else {
-                                            Log.e("MigrationManager", "Failed to get server ID for transaction: localId=" + 
-                                                transaction.getId());
                                         }
                                     }
-
-                                    Log.d("MigrationManager", "Final counts - Accounts: " + migratedAccountsCount + 
-                                        ", Transactions: " + migratedTransactionsCount);
 
                                     new Handler(Looper.getMainLooper()).post(() -> {
                                         if (migratedAccountsCount > 0 || migratedTransactionsCount > 0) {
@@ -139,41 +120,50 @@ public class MigrationManager {
                                         }
                                     });
                                 } catch (Exception e) {
-                                    Log.e("MigrationManager", "Error processing server response: " + e.getMessage(), e);
+                                    Log.e("MigrationManager", "Error processing server response", e);
                                     new Handler(Looper.getMainLooper()).post(() -> 
-                                        Toast.makeText(context, "خطأ في معالجة البيانات: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                                        Toast.makeText(context, "حدث خطأ أثناء معالجة البيانات", Toast.LENGTH_LONG).show());
                                 }
                             });
                         } else {
-                            String errorBody = "خطأ غير معروف";
-                            try {
-                                if (response.errorBody() != null) {
-                                    errorBody = response.errorBody().string();
-                                }
-                            } catch (IOException e) {
-                                Log.e("MigrationManager", "Error reading error body", e);
+                            String errorMessage = "فشل في الاتصال بالخادم";
+                            if (response.code() == 401) {
+                                errorMessage = "انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى";
+                            } else if (response.code() == 403) {
+                                errorMessage = "ليس لديك صلاحية للوصول إلى هذه البيانات";
+                            } else if (response.code() >= 500) {
+                                errorMessage = "الخادم غير متاح حالياً، يرجى المحاولة لاحقاً";
                             }
-                            final String finalErrorBody = errorBody;
+
+                            final String finalErrorMessage = errorMessage;
                             new Handler(Looper.getMainLooper()).post(() -> {
                                 new AlertDialog.Builder(context)
                                     .setTitle("خطأ في المزامنة")
-                                    .setMessage("فشل في الاتصال بالخادم: " + response.code() + "\n" + finalErrorBody)
+                                    .setMessage(finalErrorMessage)
                                     .setPositiveButton("حسناً", null)
                                     .show();
                             });
                         }
                     } catch (Exception e) {
-                        Log.e("MigrationManager", "Unexpected error: " + e.getMessage(), e);
+                        Log.e("MigrationManager", "Unexpected error", e);
                         new Handler(Looper.getMainLooper()).post(() -> 
-                            Toast.makeText(context, "خطأ غير متوقع: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                            Toast.makeText(context, "حدث خطأ غير متوقع", Toast.LENGTH_LONG).show());
                     }
                 }
 
                 @Override
                 public void onFailure(Call<SyncResponse> call, Throwable t) {
-                    Log.e("MigrationManager", "Network error: " + t.getMessage(), t);
+                    Log.e("MigrationManager", "Network error", t);
+                    String errorMessage = "فشل في الاتصال بالخادم";
+                    if (t instanceof java.net.UnknownHostException) {
+                        errorMessage = "لا يمكن الوصول إلى الخادم، يرجى التحقق من اتصال الإنترنت";
+                    } else if (t instanceof java.net.SocketTimeoutException) {
+                        errorMessage = "انتهت مهلة الاتصال بالخادم، يرجى المحاولة مرة أخرى";
+                    }
+                    
+                    final String finalErrorMessage = errorMessage;
                     new Handler(Looper.getMainLooper()).post(() -> 
-                        Toast.makeText(context, "فشل في الاتصال بالخادم: " + t.getMessage(), Toast.LENGTH_SHORT).show());
+                        Toast.makeText(context, finalErrorMessage, Toast.LENGTH_LONG).show());
                 }
             });
         });
