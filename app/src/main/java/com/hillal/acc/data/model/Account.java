@@ -73,6 +73,12 @@ public class Account {
     @SerializedName("currency")
     private String currency;
 
+    @ColumnInfo(name = "local_balance")
+    private double localBalance;
+
+    @ColumnInfo(name = "local_currency")
+    private String localCurrency;
+
     // Constructor
     @Ignore
     public Account(String accountNumber, String name, double balance, String phoneNumber, boolean isDebtor) {
@@ -222,6 +228,22 @@ public class Account {
 
     public void setSyncStatus(int syncStatus) {
         this.syncStatus = syncStatus;
+    }
+
+    public double getLocalBalance() {
+        return localBalance;
+    }
+
+    public void setLocalBalance(double localBalance) {
+        this.localBalance = localBalance;
+    }
+
+    public String getLocalCurrency() {
+        return localCurrency;
+    }
+
+    public void setLocalCurrency(String localCurrency) {
+        this.localCurrency = localCurrency;
     }
 
     @Override
