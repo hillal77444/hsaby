@@ -25,6 +25,10 @@ import android.net.Uri;
 import android.content.Intent;
 import android.os.ParcelFileDescriptor;
 import android.print.PageRange;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.pdf.PdfDocument;
+import java.io.FileOutputStream;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -99,7 +103,23 @@ public class AccountStatementActivity extends AppCompatActivity {
 
         transactionRepository = new TransactionRepository(((App) getApplication()).getDatabase());
 
-        btnPrint.setOnClickListener(v -> shareReportAsPdf());
+        btnPrint.setOnClickListener(v -> {
+            // توليد نص التقرير
+            StringBuilder reportText = new StringBuilder();
+            reportText.append("كشف الحساب التفصيلي\n\n");
+            if (!allAccounts.isEmpty()) {
+                Account acc = allAccounts.get(0); // مثال: أول حساب
+                reportText.append("اسم الحساب: ").append(acc.getName()).append("\n");
+                reportText.append("الرصيد: ").append(acc.getBalance()).append("\n\n");
+            }
+            reportText.append("المعاملات:\n");
+            for (Transaction t : allTransactions) {
+                reportText.append(t.getDescription()).append(" - ")
+                        .append(t.getAmount()).append(" ")
+                        .append(t.getCurrency() != null ? t.getCurrency() : "").append("\n");
+            }
+            generateAndSharePdf(reportText.toString());
+        });
     }
 
     private void initializeViews() {
@@ -470,29 +490,37 @@ public class AccountStatementActivity extends AppCompatActivity {
         transactions.removeIf(t -> !isTransactionInDateRange(t, startDate, endDate));
     }
 
-    public void sharePdfFile(File pdfFile) {
+    private void generateAndSharePdf(String reportText) {
+        PdfDocument pdfDocument = new PdfDocument();
+        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 1).create(); // A4
+        PdfDocument.Page page = pdfDocument.startPage(pageInfo);
+        Canvas canvas = page.getCanvas();
+        Paint paint = new Paint();
+        paint.setTextSize(16);
+        int x = 40, y = 50;
+        for (String line : reportText.split("\n")) {
+            canvas.drawText(line, x, y, paint);
+            y += 25;
+        }
+        pdfDocument.finishPage(page);
+        String fileName = "account_statement_" + System.currentTimeMillis() + ".pdf";
+        File pdfFile = new File(getExternalFilesDir(null), fileName);
+        try {
+            FileOutputStream fos = new FileOutputStream(pdfFile);
+            pdfDocument.writeTo(fos);
+            fos.close();
+        } catch (Exception e) {
+            Toast.makeText(this, "خطأ في حفظ PDF", Toast.LENGTH_SHORT).show();
+            pdfDocument.close();
+            return;
+        }
+        pdfDocument.close();
         Uri uri = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".provider", pdfFile);
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("application/pdf");
         shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(Intent.createChooser(shareIntent, "مشاركة التقرير كـ PDF"));
-    }
-
-    private void shareReportAsPdf() {
-        if (webView.getContentHeight() == 0) {
-            Toast.makeText(this, "لا يوجد تقرير للمشاركة", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        String fileName = "account_statement_" + System.currentTimeMillis() + ".pdf";
-        File pdfFile = new File(getExternalFilesDir(null), fileName);
-        PrintAttributes printAttributes = new PrintAttributes.Builder()
-                .setMediaSize(PrintAttributes.MediaSize.ISO_A4)
-                .setResolution(new PrintAttributes.Resolution("pdf", "pdf", 600, 600))
-                .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
-                .build();
-        PrintDocumentAdapter printAdapter = webView.createPrintDocumentAdapter(fileName);
-        printAdapter.onLayout(null, printAttributes, null, new MyLayoutResultCallback(pdfFile, printAdapter), null);
     }
 
     @Override
@@ -564,7 +592,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             try {
                 if (pfd != null) pfd.close();
             } catch (Exception ignored) {}
-            sharePdfFile(pdfFile);
+            generateAndSharePdf(pdfFile.getAbsolutePath());
         }
     }
 } 
