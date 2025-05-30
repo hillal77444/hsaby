@@ -128,7 +128,7 @@ public interface ApiService {
                 
                 // البحث عن الحساب المرتبط بالمعاملة
                 Account relatedAccount = accounts.stream()
-                    .filter(acc -> acc.getId().equals(transaction.getAccountId()))
+                    .filter(acc -> acc.getId() == transaction.getAccountId())
                     .findFirst()
                     .orElse(null);
                 
