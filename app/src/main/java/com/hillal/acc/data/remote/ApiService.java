@@ -3,6 +3,8 @@ package com.hillal.acc.data.remote;
 import com.hillal.acc.data.model.User;
 import com.hillal.acc.data.model.Account;
 import com.hillal.acc.data.model.Transaction;
+import com.hillal.acc.data.database.AppDatabase;
+import android.util.Log;
 
 import java.util.List;
 import java.util.Map;
@@ -123,7 +125,19 @@ public interface ApiService {
                 newTransaction.setId(transaction.getId());
                 newTransaction.setServerId(transaction.getServerId());
                 newTransaction.setUserId(transaction.getUserId());
-                newTransaction.setAccountId(transaction.getAccountId());
+                
+                // البحث عن الحساب المرتبط بالمعاملة
+                Account relatedAccount = accounts.stream()
+                    .filter(acc -> acc.getId().equals(transaction.getAccountId()))
+                    .findFirst()
+                    .orElse(null);
+                
+                if (relatedAccount != null && relatedAccount.getServerId() > 0) {
+                    newTransaction.setAccountId(relatedAccount.getServerId());
+                } else {
+                    newTransaction.setAccountId(transaction.getAccountId());
+                }
+                
                 newTransaction.setAmount(transaction.getAmount());
                 newTransaction.setType(transaction.getType());
                 newTransaction.setDescription(transaction.getDescription());
@@ -135,7 +149,6 @@ public interface ApiService {
                 newTransaction.setModified(transaction.isModified());
                 newTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
                 newTransaction.setSyncStatus(transaction.getSyncStatus());
-                // تعيين last_sync_time إلى الوقت الحالي
                 transactionsToSend.add(newTransaction);
             }
             return transactionsToSend;
