@@ -483,7 +483,7 @@ public class AccountStatementActivity extends AppCompatActivity {
                 .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
                 .build();
         PrintDocumentAdapter printAdapter = webView.createPrintDocumentAdapter(fileName);
-        printAdapter.onLayout(null, printAttributes, null, new PrintDocumentAdapter.LayoutResultCallback() {
+        PrintDocumentAdapter.LayoutResultCallback layoutCallback = new PrintDocumentAdapter.LayoutResultCallback() {
             @Override
             public void onLayoutFinished(PrintDocumentAdapter.PrintDocumentInfo info, boolean changed) {
                 ParcelFileDescriptor pfd = null;
@@ -493,15 +493,17 @@ public class AccountStatementActivity extends AppCompatActivity {
                     Toast.makeText(AccountStatementActivity.this, "خطأ في إنشاء ملف PDF", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                printAdapter.onWrite(new PageRange[]{PageRange.ALL_PAGES}, pfd, null, new PrintDocumentAdapter.WriteResultCallback() {
+                PrintDocumentAdapter.WriteResultCallback writeCallback = new PrintDocumentAdapter.WriteResultCallback() {
                     @Override
                     public void onWriteFinished(PageRange[] pages) {
                         pfdClose(pfd);
                         sharePdfFile(pdfFile);
                     }
-                });
+                };
+                printAdapter.onWrite(new PageRange[]{PageRange.ALL_PAGES}, pfd, null, writeCallback);
             }
-        }, null);
+        };
+        printAdapter.onLayout(null, printAttributes, null, layoutCallback, null);
     }
 
     private void sharePdfFile(File pdfFile) {
