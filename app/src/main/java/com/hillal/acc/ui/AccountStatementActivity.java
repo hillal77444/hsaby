@@ -414,9 +414,10 @@ public class AccountStatementActivity extends AppCompatActivity {
             }
             // صف الإجمالي
             html.append("<tr style='font-weight:bold;background:#f0f0f0;'>");
-            html.append("<td colspan='2'>الإجمالي خلال الفترة</td>");
+            html.append("<td>الإجمالي خلال الفترة</td>"); // عمود التاريخ فقط
             html.append("<td>").append(String.format(Locale.US, "%.2f", totalDebit)).append("</td>");
             html.append("<td>").append(String.format(Locale.US, "%.2f", totalCredit)).append("</td>");
+            html.append("<td></td>");
             html.append("<td></td>");
             html.append("</tr>");
             html.append("</table>");
