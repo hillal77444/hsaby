@@ -1,79 +1,0 @@
-<!DOCTYPE html>
-<html dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="card">
-        <button onclick="refreshContent()" class="refresh-button">
-            <span>🔄</span> تحديث المحتوى
-        </button>
-
-        <div class="settings-section">
-            <h2>إعدادات الحساب</h2>
-            <div class="form-group">
-                <label for="username">اسم المستخدم</label>
-                <input type="text" id="username" placeholder="أدخل اسم المستخدم">
-            </div>
-            <div class="form-group">
-                <label for="phone">رقم الهاتف</label>
-                <input type="tel" id="phone" placeholder="أدخل رقم الهاتف">
-            </div>
-            <button onclick="updateProfile()" class="save-btn">حفظ التغييرات</button>
-        </div>
-
-        <div class="settings-section">
-            <h2>تغيير كلمة المرور</h2>
-            <div class="form-group">
-                <label for="currentPassword">كلمة المرور الحالية</label>
-                <input type="password" id="currentPassword" placeholder="أدخل كلمة المرور الحالية">
-            </div>
-            <div class="form-group">
-                <label for="newPassword">كلمة المرور الجديدة</label>
-                <input type="password" id="newPassword" placeholder="أدخل كلمة المرور الجديدة">
-            </div>
-            <div class="form-group">
-                <label for="confirmPassword">تأكيد كلمة المرور</label>
-                <input type="password" id="confirmPassword" placeholder="أعد إدخال كلمة المرور الجديدة">
-            </div>
-            <button onclick="changePassword()" class="save-btn">تغيير كلمة المرور</button>
-        </div>
-
-        <div class="settings-section">
-            <h2>إعدادات التطبيق</h2>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" id="darkMode">
-                    الوضع الليلي
-                </label>
-            </div>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" id="notifications">
-                    تفعيل الإشعارات
-                </label>
-            </div>
-            <div class="form-group">
-                <label for="syncInterval">فترة المزامنة التلقائية</label>
-                <select id="syncInterval">
-                    <option value="5">كل 5 دقائق</option>
-                    <option value="15">كل 15 دقيقة</option>
-                    <option value="30">كل 30 دقيقة</option>
-                    <option value="60">كل ساعة</option>
-                </select>
-            </div>
-            <button onclick="saveAppSettings()" class="save-btn">حفظ الإعدادات</button>
-        </div>
-
-        <div class="settings-section danger-zone">
-            <h2>المنطقة الخطرة</h2>
-            <button onclick="clearCache()" class="danger-btn">مسح الذاكرة المؤقتة</button>
-            <button onclick="deleteAccount()" class="danger-btn">حذف الحساب</button>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html> 
