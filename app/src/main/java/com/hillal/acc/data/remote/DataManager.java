@@ -39,6 +39,8 @@ public class DataManager {
     private final Gson gson;
     private static final long TOKEN_REFRESH_THRESHOLD = 3600000; // ساعة واحدة قبل انتهاء الصلاحية
     private static final String TOKEN_EXPIRY_KEY = "token_expiry_time";
+    private static final int MAX_RETRY_ATTEMPTS = 3;
+    private static final long RETRY_DELAY_MS = 2000; // 2 seconds
 
     public DataManager(Context context, AccountDao accountDao, TransactionDao transactionDao, PendingOperationDao pendingOperationDao) {
         this.context = context;
@@ -126,133 +128,114 @@ public class DataManager {
         });
     }
 
-    public void fetchDataFromServer(DataCallback callback) {
-        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                .getString("token", null);
-
-        if (token == null) {
-            Log.e(TAG, "Token is null");
-            callback.onError("User not authenticated");
+    private void retryFetchAccounts(String token, int retryCount, DataCallback callback) {
+        if (retryCount >= MAX_RETRY_ATTEMPTS) {
+            Log.e(TAG, "Max retry attempts reached for fetching accounts");
+            handler.post(() -> callback.onError("فشل الاتصال بالخادم بعد عدة محاولات. يرجى المحاولة لاحقاً"));
             return;
         }
 
-        Log.d(TAG, "Starting fetchDataFromServer with token: " + token);
+        Log.d(TAG, "Retrying to fetch accounts. Attempt: " + (retryCount + 1));
+        handler.postDelayed(() -> {
+            if (!isNetworkAvailable()) {
+                handler.post(() -> callback.onError("لا يوجد اتصال بالإنترنت"));
+                return;
+            }
+            fetchAccountsFromServer(token, retryCount + 1, callback);
+        }, RETRY_DELAY_MS);
+    }
 
-        if (!isNetworkAvailable()) {
-            Log.e(TAG, "No network connection");
-            callback.onError("No internet connection");
-            return;
-        }
-
-        // حذف جميع البيانات المحلية أولاً
-        executor.execute(() -> {
-            try {
-                // حذف جميع الحسابات والمعاملات
-                accountDao.deleteAllAccounts();
-                transactionDao.deleteAllTransactions();
-                if (pendingOperationDao != null) {
-                    pendingOperationDao.deleteAllPendingOperations();
-                }
-                Log.d(TAG, "Local data deleted successfully");
-
-                // جلب الحسابات من السيرفر
-                Log.d(TAG, "Fetching accounts from server...");
-                apiService.getAccounts("Bearer " + token).enqueue(new Callback<List<Account>>() {
-                    @Override
-                    public void onResponse(Call<List<Account>> call, Response<List<Account>> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            List<Account> accounts = response.body();
-                            Log.d(TAG, "Received " + accounts.size() + " accounts from server");
-                            
-                            executor.execute(() -> {
+    private void fetchAccountsFromServer(String token, int retryCount, DataCallback callback) {
+        Log.d(TAG, "Fetching accounts from server... Attempt: " + (retryCount + 1));
+        apiService.getAccounts("Bearer " + token).enqueue(new Callback<List<Account>>() {
+            @Override
+            public void onResponse(Call<List<Account>> call, Response<List<Account>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Account> accounts = response.body();
+                    Log.d(TAG, "Received " + accounts.size() + " accounts from server");
+                    
+                    executor.execute(() -> {
+                        try {
+                            // تحديث وإضافة الحسابات
+                            for (Account account : accounts) {
                                 try {
-                                    // تحديث وقت المزامنة وحالة المزامنة لجميع الحسابات
-                                    for (Account account : accounts) {
-                                        try {
-                                            account.setLastSyncTime(System.currentTimeMillis());
-                                            account.setSyncStatus(2); // SYNCED
-                                            Log.d(TAG, "Processing account: " + account.getName() + 
-                                                  " (ID: " + account.getServerId() + 
-                                                  ", Phone: " + account.getPhoneNumber() + ")");
-                                            
-                                            // التحقق من وجود حساب بنفس server_id
-                                            Account existingAccount = accountDao.getAccountByServerIdSync(account.getServerId());
-                                            if (existingAccount != null) {
-                                                // تحديث الحساب الموجود
-                                                account.setId(existingAccount.getId());
-                                                accountDao.update(account);
-                                                Log.d(TAG, "Updated existing account: " + account.getServerId());
-                                            } else {
-                                                // إضافة حساب جديد
-                                                accountDao.insert(account);
-                                                Log.d(TAG, "Added new account: " + account.getServerId());
-                                            }
-                                        } catch (Exception e) {
-                                            StringBuilder errorBuilder = new StringBuilder("Error processing account: ")
-                                                    .append(account.getServerId())
-                                                    .append("\nError: ")
-                                                    .append(e.getMessage())
-                                                    .append("\nStack trace: ")
-                                                    .append(Log.getStackTraceString(e));
-                                            final String errorMessage = errorBuilder.toString();
-                                            Log.e(TAG, errorMessage);
-                                            throw e;
-                                        }
+                                    account.setLastSyncTime(System.currentTimeMillis());
+                                    account.setSyncStatus(2); // SYNCED
+                                    Log.d(TAG, "Processing account: " + account.getName() + 
+                                          " (ID: " + account.getServerId() + 
+                                          ", Phone: " + account.getPhoneNumber() + ")");
+                                    
+                                    Account existingAccount = accountDao.getAccountByServerIdSync(account.getServerId());
+                                    if (existingAccount != null) {
+                                        account.setId(existingAccount.getId());
+                                        account.setLocalBalance(existingAccount.getLocalBalance());
+                                        account.setLocalCurrency(existingAccount.getLocalCurrency());
+                                        accountDao.update(account);
+                                        Log.d(TAG, "Updated existing account: " + account.getServerId());
+                                    } else {
+                                        accountDao.insert(account);
+                                        Log.d(TAG, "Added new account: " + account.getServerId());
                                     }
-                                    Log.d(TAG, "All accounts processed successfully");
-
-                                    // بعد اكتمال جلب الحسابات، نقوم بجلب المعاملات
-                                    fetchTransactionsPaged(token, callback);
                                 } catch (Exception e) {
-                                    final String errorMessage = "Error saving accounts: " + e.getMessage() + 
-                                                       "\nStack trace: " + Log.getStackTraceString(e);
-                                    Log.e(TAG, errorMessage);
-                                    handler.post(() -> callback.onError(errorMessage));
+                                    Log.e(TAG, "Error processing account: " + account.getServerId(), e);
                                 }
-                            });
-                        } else {
-                            StringBuilder errorBuilder = new StringBuilder("Failed to fetch accounts: ")
-                                    .append(response.code());
-                            try {
-                                if (response.errorBody() != null) {
-                                    errorBuilder.append("\n").append(response.errorBody().string());
-                                }
-                            } catch (IOException e) {
-                                errorBuilder.append("\nError reading response: ").append(e.getMessage());
                             }
-                            final String errorMessage = errorBuilder.toString();
-                            Log.e(TAG, errorMessage);
-                            handler.post(() -> callback.onError(errorMessage));
+                            Log.d(TAG, "All accounts processed successfully");
+                            fetchTransactionsPaged(token, retryCount, callback);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error saving accounts", e);
+                            handler.post(() -> callback.onError("خطأ في حفظ البيانات المحلية"));
                         }
+                    });
+                } else {
+                    String errorMessage = "خطأ في الاتصال بالخادم: " + response.code();
+                    try {
+                        if (response.errorBody() != null) {
+                            errorMessage += "\n" + response.errorBody().string();
+                        }
+                    } catch (IOException e) {
+                        Log.e(TAG, "Error reading error body", e);
                     }
+                    Log.e(TAG, errorMessage);
+                    retryFetchAccounts(token, retryCount, callback);
+                }
+            }
 
-                    @Override
-                    public void onFailure(Call<List<Account>> call, Throwable t) {
-                        final String errorMessage = "Network error while fetching accounts: " + t.getMessage() + 
-                                           "\nStack trace: " + Log.getStackTraceString(t);
-                        Log.e(TAG, errorMessage);
-                        handler.post(() -> callback.onError(errorMessage));
-                    }
-                });
-            } catch (Exception e) {
-                final String errorMessage = "Error in fetchDataFromServer: " + e.getMessage() + 
-                                   "\nStack trace: " + Log.getStackTraceString(e);
-                Log.e(TAG, errorMessage);
-                handler.post(() -> callback.onError(errorMessage));
+            @Override
+            public void onFailure(Call<List<Account>> call, Throwable t) {
+                Log.e(TAG, "Network error while fetching accounts", t);
+                retryFetchAccounts(token, retryCount, callback);
             }
         });
     }
 
-    private void fetchTransactionsPaged(String token, DataCallback callback) {
-        int limit = 100;
-        int offset = 0;
-        fetchBatch(token, limit, offset, callback);
+    private void retryFetchTransactions(String token, int limit, int offset, int retryCount, DataCallback callback) {
+        if (retryCount >= MAX_RETRY_ATTEMPTS) {
+            Log.e(TAG, "Max retry attempts reached for fetching transactions");
+            handler.post(() -> callback.onError("فشل الاتصال بالخادم بعد عدة محاولات. يرجى المحاولة لاحقاً"));
+            return;
+        }
+
+        Log.d(TAG, "Retrying to fetch transactions. Attempt: " + (retryCount + 1));
+        handler.postDelayed(() -> {
+            if (!isNetworkAvailable()) {
+                handler.post(() -> callback.onError("لا يوجد اتصال بالإنترنت"));
+                return;
+            }
+            fetchBatch(token, limit, offset, retryCount + 1, callback);
+        }, RETRY_DELAY_MS);
     }
 
-    private void fetchBatch(String token, int limit, int offset, DataCallback callback) {
-        apiService.getTransactions("Bearer " + token, limit, offset).enqueue(new retrofit2.Callback<List<Transaction>>() {
+    private void fetchTransactionsPaged(String token, int retryCount, DataCallback callback) {
+        int limit = 100;
+        int offset = 0;
+        fetchBatch(token, limit, offset, retryCount, callback);
+    }
+
+    private void fetchBatch(String token, int limit, int offset, int retryCount, DataCallback callback) {
+        apiService.getTransactions("Bearer " + token, limit, offset).enqueue(new Callback<List<Transaction>>() {
             @Override
-            public void onResponse(Call<List<Transaction>> call, retrofit2.Response<List<Transaction>> response) {
+            public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Transaction> transactions = response.body();
                     Log.d(TAG, "Received batch of " + transactions.size() + " transactions from server (offset: " + offset + ")");
@@ -261,55 +244,73 @@ public class DataManager {
                             for (Transaction transaction : transactions) {
                                 try {
                                     transaction.setLastSyncTime(System.currentTimeMillis());
-                                    transaction.setSyncStatus(2); // SYNCED
+                                    transaction.setSyncStatus(2);
+                                    
                                     Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
                                     if (existingTransaction != null) {
                                         transaction.setId(existingTransaction.getId());
+                                        transaction.setLocalAmount(existingTransaction.getLocalAmount());
+                                        transaction.setLocalCurrency(existingTransaction.getLocalCurrency());
                                         transactionDao.update(transaction);
+                                        Log.d(TAG, "Updated existing transaction: " + transaction.getServerId());
                                     } else {
                                         transactionDao.insert(transaction);
+                                        Log.d(TAG, "Added new transaction: " + transaction.getServerId());
                                     }
                                 } catch (Exception e) {
-                                    Log.e(TAG, "Error processing transaction: " + transaction.getServerId() + "\nError: " + e.getMessage() + "\nStack trace: " + Log.getStackTraceString(e));
+                                    Log.e(TAG, "Error processing transaction: " + transaction.getServerId(), e);
                                 }
                             }
                             if (transactions.size() == limit) {
-                                // يوجد المزيد من البيانات
-                                fetchBatch(token, limit, offset + limit, callback);
+                                fetchBatch(token, limit, offset + limit, retryCount, callback);
                             } else {
-                                // انتهت البيانات
                                 Log.d(TAG, "All transactions processed successfully (batched)");
                                 handler.post(callback::onSuccess);
                             }
                         } catch (Exception e) {
-                            final String errorMessage = "Error saving transactions: " + e.getMessage() + "\nStack trace: " + Log.getStackTraceString(e);
-                            Log.e(TAG, errorMessage);
-                            handler.post(() -> callback.onError(errorMessage));
+                            Log.e(TAG, "Error saving transactions", e);
+                            handler.post(() -> callback.onError("خطأ في حفظ البيانات المحلية"));
                         }
                     });
                 } else {
-                    StringBuilder errorBuilder = new StringBuilder("Failed to fetch transactions: ")
-                            .append(response.code());
+                    String errorMessage = "خطأ في الاتصال بالخادم: " + response.code();
                     try {
                         if (response.errorBody() != null) {
-                            errorBuilder.append("\n").append(response.errorBody().string());
+                            errorMessage += "\n" + response.errorBody().string();
                         }
                     } catch (IOException e) {
-                        errorBuilder.append("\nError reading response: ").append(e.getMessage());
+                        Log.e(TAG, "Error reading error body", e);
                     }
-                    final String errorMessage = errorBuilder.toString();
                     Log.e(TAG, errorMessage);
-                    handler.post(() -> callback.onError(errorMessage));
+                    retryFetchTransactions(token, limit, offset, retryCount, callback);
                 }
             }
 
             @Override
             public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                final String errorMessage = "Network error while fetching transactions: " + t.getMessage() + "\nStack trace: " + Log.getStackTraceString(t);
-                Log.e(TAG, errorMessage);
-                handler.post(() -> callback.onError(errorMessage));
+                Log.e(TAG, "Network error while fetching transactions", t);
+                retryFetchTransactions(token, limit, offset, retryCount, callback);
             }
         });
+    }
+
+    public void fetchDataFromServer(DataCallback callback) {
+        String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("token", null);
+
+        if (token == null) {
+            Log.e(TAG, "Token is null");
+            callback.onError("يرجى تسجيل الدخول أولاً");
+            return;
+        }
+
+        if (!isNetworkAvailable()) {
+            Log.e(TAG, "No network connection");
+            callback.onError("لا يوجد اتصال بالإنترنت");
+            return;
+        }
+
+        fetchAccountsFromServer(token, 0, callback);
     }
 
     public void shutdown() {
