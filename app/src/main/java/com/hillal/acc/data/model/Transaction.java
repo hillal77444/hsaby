@@ -52,6 +52,12 @@ public class Transaction {
     @SerializedName("currency")
     private String currency;
 
+    @ColumnInfo(name = "local_amount")
+    private double localAmount;
+
+    @ColumnInfo(name = "local_currency")
+    private String localCurrency;
+
     @ColumnInfo(name = "transaction_date")
     @SerializedName("date")
     private long transactionDate;
@@ -197,6 +203,22 @@ public class Transaction {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public double getLocalAmount() {
+        return localAmount;
+    }
+
+    public void setLocalAmount(double localAmount) {
+        this.localAmount = localAmount;
+    }
+
+    public String getLocalCurrency() {
+        return localCurrency;
+    }
+
+    public void setLocalCurrency(String localCurrency) {
+        this.localCurrency = localCurrency;
     }
 
     public long getTransactionDate() {
