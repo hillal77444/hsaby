@@ -21,6 +21,10 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.TextView;
+import android.net.Uri;
+import android.content.Intent;
+import android.os.ParcelFileDescriptor;
+import android.print.PageRange;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -49,6 +53,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Collections;
+import java.io.File;
 
 public class AccountStatementActivity extends AppCompatActivity {
     private AccountStatementViewModel viewModel;
@@ -93,6 +98,8 @@ public class AccountStatementActivity extends AppCompatActivity {
         setDefaultDates();
 
         transactionRepository = new TransactionRepository(((App) getApplication()).getDatabase());
+
+        btnPrint.setOnClickListener(v -> shareReportAsPdf());
     }
 
     private void initializeViews() {
@@ -104,7 +111,6 @@ public class AccountStatementActivity extends AppCompatActivity {
         btnPrint = findViewById(R.id.btnPrintInCard);
 
         btnShowReport.setOnClickListener(v -> showReport());
-        btnPrint.setOnClickListener(v -> printReport());
 
         // إعداد مستمع النقر على حقل اختيار الحساب
         accountDropdown.setFocusable(false);
@@ -464,18 +470,53 @@ public class AccountStatementActivity extends AppCompatActivity {
         transactions.removeIf(t -> !isTransactionInDateRange(t, startDate, endDate));
     }
 
-    private void printReport() {
+    private void shareReportAsPdf() {
         if (webView.getContentHeight() == 0) {
-            Toast.makeText(this, "لا يوجد تقرير للطباعة", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "لا يوجد تقرير للمشاركة", Toast.LENGTH_SHORT).show();
             return;
         }
+        String fileName = "account_statement_" + System.currentTimeMillis() + ".pdf";
+        File pdfFile = new File(getExternalFilesDir(null), fileName);
+        PrintAttributes printAttributes = new PrintAttributes.Builder()
+                .setMediaSize(PrintAttributes.MediaSize.ISO_A4)
+                .setResolution(new PrintAttributes.Resolution("pdf", "pdf", 600, 600))
+                .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
+                .build();
+        PrintDocumentAdapter printAdapter = webView.createPrintDocumentAdapter(fileName);
+        printAdapter.onLayout(null, printAttributes, null, new PrintDocumentAdapter.LayoutResultCallback() {
+            @Override
+            public void onLayoutFinished(PrintDocumentAdapter.PrintDocumentInfo info, boolean changed) {
+                ParcelFileDescriptor pfd = null;
+                try {
+                    pfd = ParcelFileDescriptor.open(pdfFile, ParcelFileDescriptor.MODE_TRUNCATE | ParcelFileDescriptor.MODE_READ_WRITE);
+                } catch (Exception e) {
+                    Toast.makeText(AccountStatementActivity.this, "خطأ في إنشاء ملف PDF", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                printAdapter.onWrite(new PageRange[]{PageRange.ALL_PAGES}, pfd, null, new PrintDocumentAdapter.WriteResultCallback() {
+                    @Override
+                    public void onWriteFinished(PageRange[] pages) {
+                        pfdClose(pfd);
+                        sharePdfFile(pdfFile);
+                    }
+                });
+            }
+        }, null);
+    }
 
-        PrintManager printManager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
-        String jobName = getString(R.string.app_name) + " Document";
+    private void sharePdfFile(File pdfFile) {
+        Uri uri = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".provider", pdfFile);
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("application/pdf");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(Intent.createChooser(shareIntent, "مشاركة التقرير كـ PDF"));
+    }
 
-        PrintDocumentAdapter printAdapter = webView.createPrintDocumentAdapter(jobName);
-
-        printManager.print(jobName, printAdapter, new PrintAttributes.Builder().build());
+    private void pfdClose(ParcelFileDescriptor pfd) {
+        try {
+            if (pfd != null) pfd.close();
+        } catch (Exception ignored) {}
     }
 
     @Override
