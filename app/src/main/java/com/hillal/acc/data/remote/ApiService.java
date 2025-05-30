@@ -32,7 +32,11 @@ public interface ApiService {
     Call<List<Account>> getAccounts(@Header("Authorization") String token);
 
     @GET("api/transactions")
-    Call<List<Transaction>> getTransactions(@Header("Authorization") String token);
+    Call<List<Transaction>> getTransactions(
+        @Header("Authorization") String token,
+        @Query("limit") int limit,
+        @Query("offset") int offset
+    );
 
     @PUT("api/transactions/{id}")
     Call<Void> updateTransaction(@Header("Authorization") String token, 
