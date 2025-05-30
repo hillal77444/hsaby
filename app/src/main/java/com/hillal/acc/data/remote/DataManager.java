@@ -202,7 +202,7 @@ public class DataManager {
                                     Log.d(TAG, "All accounts processed successfully");
 
                                     // بعد اكتمال جلب الحسابات، نقوم بجلب المعاملات
-                                    fetchTransactions(token, callback);
+                                    fetchTransactionsPaged(token, callback);
                                 } catch (Exception e) {
                                     final String errorMessage = "Error saving accounts: " + e.getMessage() + 
                                                        "\nStack trace: " + Log.getStackTraceString(e);
@@ -243,44 +243,46 @@ public class DataManager {
         });
     }
 
-    private void fetchTransactions(String token, DataCallback callback) {
-        apiService.getTransactions("Bearer " + token).enqueue(new Callback<List<Transaction>>() {
+    private void fetchTransactionsPaged(String token, DataCallback callback) {
+        int limit = 100;
+        int offset = 0;
+        fetchBatch(token, limit, offset, callback);
+    }
+
+    private void fetchBatch(String token, int limit, int offset, DataCallback callback) {
+        apiService.getTransactions("Bearer " + token, limit, offset).enqueue(new retrofit2.Callback<List<Transaction>>() {
             @Override
-            public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
+            public void onResponse(Call<List<Transaction>> call, retrofit2.Response<List<Transaction>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Transaction> transactions = response.body();
-                    Log.d(TAG, "Received " + transactions.size() + " transactions from server");
-                    
+                    Log.d(TAG, "Received batch of " + transactions.size() + " transactions from server (offset: " + offset + ")");
                     executor.execute(() -> {
                         try {
                             for (Transaction transaction : transactions) {
                                 try {
                                     transaction.setLastSyncTime(System.currentTimeMillis());
                                     transaction.setSyncStatus(2); // SYNCED
-                                    
-                                    // التحقق من وجود معاملة بنفس server_id
                                     Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
                                     if (existingTransaction != null) {
-                                        // تحديث المعاملة الموجودة
                                         transaction.setId(existingTransaction.getId());
                                         transactionDao.update(transaction);
-                                        Log.d(TAG, "Updated existing transaction: " + transaction.getServerId());
                                     } else {
-                                        // إضافة معاملة جديدة
                                         transactionDao.insert(transaction);
-                                        Log.d(TAG, "Added new transaction: " + transaction.getServerId());
                                     }
                                 } catch (Exception e) {
-                                    Log.e(TAG, "Error processing transaction: " + transaction.getServerId() + 
-                                          "\nError: " + e.getMessage() + 
-                                          "\nStack trace: " + Log.getStackTraceString(e));
+                                    Log.e(TAG, "Error processing transaction: " + transaction.getServerId() + "\nError: " + e.getMessage() + "\nStack trace: " + Log.getStackTraceString(e));
                                 }
                             }
-                            Log.d(TAG, "All transactions processed successfully");
-                            handler.post(() -> callback.onSuccess());
+                            if (transactions.size() == limit) {
+                                // يوجد المزيد من البيانات
+                                fetchBatch(token, limit, offset + limit, callback);
+                            } else {
+                                // انتهت البيانات
+                                Log.d(TAG, "All transactions processed successfully (batched)");
+                                handler.post(callback::onSuccess);
+                            }
                         } catch (Exception e) {
-                            final String errorMessage = "Error saving transactions: " + e.getMessage() + 
-                                               "\nStack trace: " + Log.getStackTraceString(e);
+                            final String errorMessage = "Error saving transactions: " + e.getMessage() + "\nStack trace: " + Log.getStackTraceString(e);
                             Log.e(TAG, errorMessage);
                             handler.post(() -> callback.onError(errorMessage));
                         }
@@ -303,8 +305,7 @@ public class DataManager {
 
             @Override
             public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                final String errorMessage = "Network error while fetching transactions: " + t.getMessage() + 
-                                   "\nStack trace: " + Log.getStackTraceString(t);
+                final String errorMessage = "Network error while fetching transactions: " + t.getMessage() + "\nStack trace: " + Log.getStackTraceString(t);
                 Log.e(TAG, errorMessage);
                 handler.post(() -> callback.onError(errorMessage));
             }
