@@ -83,27 +83,62 @@ public interface ApiService {
         }
     }
 
-    public static class SyncRequest {
+    class SyncRequest {
         private List<Account> accounts;
-        private List<Transaction> new_transactions;
-        private List<Transaction> modified_transactions;
+        private List<Transaction> transactions;
 
-        public SyncRequest(List<Account> accounts, List<Transaction> newTransactions, List<Transaction> modifiedTransactions) {
+        public SyncRequest(List<Account> accounts, List<Transaction> transactions) {
             this.accounts = accounts;
-            this.new_transactions = newTransactions;
-            this.modified_transactions = modifiedTransactions;
+            this.transactions = transactions;
         }
 
+        // Getters for JSON serialization
         public List<Account> getAccounts() {
-            return accounts;
+            // نسخ الحسابات مع جميع البيانات المطلوبة
+            List<Account> accountsToSend = new ArrayList<>();
+            for (Account account : accounts) {
+                Account newAccount = new Account();
+                newAccount.setId(account.getId());
+                newAccount.setServerId(account.getServerId());
+                newAccount.setAccountNumber(account.getAccountNumber());
+                newAccount.setName(account.getName());
+                newAccount.setBalance(account.getBalance());
+                newAccount.setIsDebtor(account.isDebtor());
+                newAccount.setPhoneNumber(account.getPhoneNumber());
+                newAccount.setNotes(account.getNotes());
+                newAccount.setWhatsappEnabled(account.isWhatsappEnabled());
+                newAccount.setUserId(account.getUserId());
+                newAccount.setCreatedAt(account.getCreatedAt());
+                newAccount.setUpdatedAt(account.getUpdatedAt());
+                accountsToSend.add(newAccount);
+            }
+            return accountsToSend;
         }
 
-        public List<Transaction> getNewTransactions() {
-            return new_transactions;
-        }
-
-        public List<Transaction> getModifiedTransactions() {
-            return modified_transactions;
+        public List<Transaction> getTransactions() {
+            // نسخ المعاملات مع last_sync_time
+            List<Transaction> transactionsToSend = new ArrayList<>();
+            for (Transaction transaction : transactions) {
+                Transaction newTransaction = new Transaction();
+                newTransaction.setId(transaction.getId());
+                newTransaction.setServerId(transaction.getServerId());
+                newTransaction.setUserId(transaction.getUserId());
+                newTransaction.setAccountId(transaction.getAccountId());
+                newTransaction.setAmount(transaction.getAmount());
+                newTransaction.setType(transaction.getType());
+                newTransaction.setDescription(transaction.getDescription());
+                newTransaction.setNotes(transaction.getNotes());
+                newTransaction.setCurrency(transaction.getCurrency());
+                newTransaction.setTransactionDate(transaction.getTransactionDate());
+                newTransaction.setCreatedAt(transaction.getCreatedAt());
+                newTransaction.setUpdatedAt(transaction.getUpdatedAt());
+                newTransaction.setModified(transaction.isModified());
+                newTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
+                newTransaction.setSyncStatus(transaction.getSyncStatus());
+                // تعيين last_sync_time إلى الوقت الحالي
+                transactionsToSend.add(newTransaction);
+            }
+            return transactionsToSend;
         }
     }
 
