@@ -483,9 +483,9 @@ public class AccountStatementActivity extends AppCompatActivity {
                 .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
                 .build();
         PrintDocumentAdapter printAdapter = webView.createPrintDocumentAdapter(fileName);
-        PrintDocumentAdapter.LayoutResultCallback layoutCallback = new PrintDocumentAdapter.LayoutResultCallback() {
+        printAdapter.onLayout(null, printAttributes, null, new android.print.PrintDocumentAdapter.LayoutResultCallback() {
             @Override
-            public void onLayoutFinished(PrintDocumentAdapter.PrintDocumentInfo info, boolean changed) {
+            public void onLayoutFinished(android.print.PrintDocumentAdapter.PrintDocumentInfo info, boolean changed) {
                 ParcelFileDescriptor pfd = null;
                 try {
                     pfd = ParcelFileDescriptor.open(pdfFile, ParcelFileDescriptor.MODE_TRUNCATE | ParcelFileDescriptor.MODE_READ_WRITE);
@@ -493,17 +493,15 @@ public class AccountStatementActivity extends AppCompatActivity {
                     Toast.makeText(AccountStatementActivity.this, "خطأ في إنشاء ملف PDF", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                PrintDocumentAdapter.WriteResultCallback writeCallback = new PrintDocumentAdapter.WriteResultCallback() {
+                printAdapter.onWrite(new PageRange[]{PageRange.ALL_PAGES}, pfd, null, new android.print.PrintDocumentAdapter.WriteResultCallback() {
                     @Override
                     public void onWriteFinished(PageRange[] pages) {
                         pfdClose(pfd);
                         sharePdfFile(pdfFile);
                     }
-                };
-                printAdapter.onWrite(new PageRange[]{PageRange.ALL_PAGES}, pfd, null, writeCallback);
+                });
             }
-        };
-        printAdapter.onLayout(null, printAttributes, null, layoutCallback, null);
+        }, null);
     }
 
     private void sharePdfFile(File pdfFile) {
