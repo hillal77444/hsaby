@@ -332,8 +332,12 @@ def get_transactions():
         user_id = get_jwt_identity()
         logger.info(f"Fetching transactions for user {user_id}")
         
-        transactions = Transaction.query.filter_by(user_id=user_id).all()
-        logger.info(f"Found {len(transactions)} transactions for user {user_id}")
+        # جلب limit و offset من باراميترات الاستعلام مع قيم افتراضية
+        limit = request.args.get('limit', default=100, type=int)
+        offset = request.args.get('offset', default=0, type=int)
+        
+        transactions = Transaction.query.filter_by(user_id=user_id).order_by(Transaction.id).offset(offset).limit(limit).all()
+        logger.info(f"Found {len(transactions)} transactions for user {user_id} (offset={offset}, limit={limit})")
         
         transactions_json = []
         for trans in transactions:
@@ -355,7 +359,7 @@ def get_transactions():
             transactions_json.append(transaction_data)
             logger.debug(f"Transaction data: {transaction_data}")
         
-        logger.info(f"Returning {len(transactions_json)} transactions")
+        logger.info(f"Returning {len(transactions_json)} transactions (offset={offset}, limit={limit})")
         return jsonify(transactions_json)
     except Exception as e:
         logger.error(f"Error fetching transactions: {str(e)}")
