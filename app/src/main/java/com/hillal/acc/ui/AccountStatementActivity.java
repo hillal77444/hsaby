@@ -21,14 +21,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.TextView;
-import android.net.Uri;
-import android.content.Intent;
-import android.os.ParcelFileDescriptor;
-import android.print.PageRange;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.pdf.PdfDocument;
-import java.io.FileOutputStream;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -57,7 +49,6 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Collections;
-import java.io.File;
 
 public class AccountStatementActivity extends AppCompatActivity {
     private AccountStatementViewModel viewModel;
@@ -102,24 +93,6 @@ public class AccountStatementActivity extends AppCompatActivity {
         setDefaultDates();
 
         transactionRepository = new TransactionRepository(((App) getApplication()).getDatabase());
-
-        btnPrint.setOnClickListener(v -> {
-            // توليد نص التقرير
-            StringBuilder reportText = new StringBuilder();
-            reportText.append("كشف الحساب التفصيلي\n\n");
-            if (!allAccounts.isEmpty()) {
-                Account acc = allAccounts.get(0); // مثال: أول حساب
-                reportText.append("اسم الحساب: ").append(acc.getName()).append("\n");
-                reportText.append("الرصيد: ").append(acc.getBalance()).append("\n\n");
-            }
-            reportText.append("المعاملات:\n");
-            for (Transaction t : allTransactions) {
-                reportText.append(t.getDescription()).append(" - ")
-                        .append(t.getAmount()).append(" ")
-                        .append(t.getCurrency() != null ? t.getCurrency() : "").append("\n");
-            }
-            generateAndSharePdf(reportText.toString());
-        });
     }
 
     private void initializeViews() {
@@ -131,6 +104,7 @@ public class AccountStatementActivity extends AppCompatActivity {
         btnPrint = findViewById(R.id.btnPrintInCard);
 
         btnShowReport.setOnClickListener(v -> showReport());
+        btnPrint.setOnClickListener(v -> printReport());
 
         // إعداد مستمع النقر على حقل اختيار الحساب
         accountDropdown.setFocusable(false);
@@ -440,9 +414,10 @@ public class AccountStatementActivity extends AppCompatActivity {
             }
             // صف الإجمالي
             html.append("<tr style='font-weight:bold;background:#f0f0f0;'>");
-            html.append("<td colspan='2'>الإجمالي خلال الفترة</td>");
+            html.append("<td>الإجمالي خلال الفترة</td>"); // عمود التاريخ فقط
             html.append("<td>").append(String.format(Locale.US, "%.2f", totalDebit)).append("</td>");
             html.append("<td>").append(String.format(Locale.US, "%.2f", totalCredit)).append("</td>");
+            html.append("<td></td>");
             html.append("<td></td>");
             html.append("</tr>");
             html.append("</table>");
@@ -489,37 +464,18 @@ public class AccountStatementActivity extends AppCompatActivity {
         transactions.removeIf(t -> !isTransactionInDateRange(t, startDate, endDate));
     }
 
-    private void generateAndSharePdf(String reportText) {
-        PdfDocument pdfDocument = new PdfDocument();
-        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 1).create(); // A4
-        PdfDocument.Page page = pdfDocument.startPage(pageInfo);
-        Canvas canvas = page.getCanvas();
-        Paint paint = new Paint();
-        paint.setTextSize(16);
-        int x = 40, y = 50;
-        for (String line : reportText.split("\n")) {
-            canvas.drawText(line, x, y, paint);
-            y += 25;
-        }
-        pdfDocument.finishPage(page);
-        String fileName = "account_statement_" + System.currentTimeMillis() + ".pdf";
-        File pdfFile = new File(getExternalFilesDir(null), fileName);
-        try {
-            FileOutputStream fos = new FileOutputStream(pdfFile);
-            pdfDocument.writeTo(fos);
-            fos.close();
-        } catch (Exception e) {
-            Toast.makeText(this, "خطأ في حفظ PDF", Toast.LENGTH_SHORT).show();
-            pdfDocument.close();
+    private void printReport() {
+        if (webView.getContentHeight() == 0) {
+            Toast.makeText(this, "لا يوجد تقرير للطباعة", Toast.LENGTH_SHORT).show();
             return;
         }
-        pdfDocument.close();
-        Uri uri = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".provider", pdfFile);
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType("application/pdf");
-        shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
-        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivity(Intent.createChooser(shareIntent, "مشاركة التقرير كـ PDF"));
+
+        PrintManager printManager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
+        String jobName = getString(R.string.app_name) + " Document";
+
+        PrintDocumentAdapter printAdapter = webView.createPrintDocumentAdapter(jobName);
+
+        printManager.print(jobName, printAdapter, new PrintAttributes.Builder().build());
     }
 
     @Override
@@ -553,45 +509,5 @@ public class AccountStatementActivity extends AppCompatActivity {
                     .replace("٧", "7")
                     .replace("٨", "8")
                     .replace("٩", "9");
-    }
-
-    private class MyLayoutResultCallback extends android.print.PrintDocumentAdapter.LayoutResultCallback {
-        private final File pdfFile;
-        private final PrintDocumentAdapter printAdapter;
-
-        MyLayoutResultCallback(File pdfFile, PrintDocumentAdapter printAdapter) {
-            this.pdfFile = pdfFile;
-            this.printAdapter = printAdapter;
-        }
-
-        @Override
-        public void onLayoutFinished(android.print.PrintDocumentAdapter.PrintDocumentInfo info, boolean changed) {
-            ParcelFileDescriptor pfd = null;
-            try {
-                pfd = ParcelFileDescriptor.open(pdfFile, ParcelFileDescriptor.MODE_TRUNCATE | ParcelFileDescriptor.MODE_READ_WRITE);
-            } catch (Exception e) {
-                Toast.makeText(AccountStatementActivity.this, "خطأ في إنشاء ملف PDF", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            printAdapter.onWrite(new PageRange[]{PageRange.ALL_PAGES}, pfd, null, new MyWriteResultCallback(pfd, pdfFile));
-        }
-    }
-
-    private class MyWriteResultCallback extends android.print.PrintDocumentAdapter.WriteResultCallback {
-        private final ParcelFileDescriptor pfd;
-        private final File pdfFile;
-
-        MyWriteResultCallback(ParcelFileDescriptor pfd, File pdfFile) {
-            this.pfd = pfd;
-            this.pdfFile = pdfFile;
-        }
-
-        @Override
-        public void onWriteFinished(PageRange[] pages) {
-            try {
-                if (pfd != null) pfd.close();
-            } catch (Exception ignored) {}
-            generateAndSharePdf(pdfFile.getAbsolutePath());
-        }
     }
 } 
