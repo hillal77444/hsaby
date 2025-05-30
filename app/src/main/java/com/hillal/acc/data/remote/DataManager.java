@@ -168,8 +168,8 @@ public class DataManager {
                                     Account existingAccount = accountDao.getAccountByServerIdSync(account.getServerId());
                                     if (existingAccount != null) {
                                         account.setId(existingAccount.getId());
-                                        account.setLocalBalance(existingAccount.getLocalBalance());
-                                        account.setLocalCurrency(existingAccount.getLocalCurrency());
+                                        account.setBalance(existingAccount.getBalance());
+                                        account.setCurrency(existingAccount.getCurrency());
                                         accountDao.update(account);
                                         Log.d(TAG, "Updated existing account: " + account.getServerId());
                                     } else {
@@ -249,8 +249,8 @@ public class DataManager {
                                     Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
                                     if (existingTransaction != null) {
                                         transaction.setId(existingTransaction.getId());
-                                        transaction.setLocalAmount(existingTransaction.getLocalAmount());
-                                        transaction.setLocalCurrency(existingTransaction.getLocalCurrency());
+                                        transaction.setAmount(existingTransaction.getAmount());
+                                        transaction.setCurrency(existingTransaction.getCurrency());
                                         transactionDao.update(transaction);
                                         Log.d(TAG, "Updated existing transaction: " + transaction.getServerId());
                                     } else {
