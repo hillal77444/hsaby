@@ -25,7 +25,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -74,6 +73,7 @@ public class MigrationManager {
                 return;
             }
 
+<<<<<<< HEAD
             // فصل المعاملات الجديدة عن المعدلة
             List<Transaction> newTransactions = new ArrayList<>();
             List<Transaction> modifiedTransactions = new ArrayList<>();
@@ -143,6 +143,12 @@ public class MigrationManager {
                 newTransactions.size() + " new transactions, and " + modifiedTransactions.size() + " modified transactions");
 
             SyncRequest request = new SyncRequest(accountsToMigrate, newTransactions, modifiedTransactions);
+=======
+            Log.d("MigrationManager", "Starting migration with " + accountsToMigrate.size() + " accounts and " + 
+                transactionsToMigrate.size() + " transactions");
+
+            SyncRequest request = new SyncRequest(accountsToMigrate, transactionsToMigrate);
+>>>>>>> parent of 2a4cddb4 (Update MigrationManager.java)
             apiService.syncData("Bearer " + token, request).enqueue(new Callback<SyncResponse>() {
                 @Override
                 public void onResponse(Call<SyncResponse> call, Response<SyncResponse> response) {
