@@ -470,6 +470,15 @@ public class AccountStatementActivity extends AppCompatActivity {
         transactions.removeIf(t -> !isTransactionInDateRange(t, startDate, endDate));
     }
 
+    public void sharePdfFile(File pdfFile) {
+        Uri uri = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".provider", pdfFile);
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("application/pdf");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(Intent.createChooser(shareIntent, "مشاركة التقرير كـ PDF"));
+    }
+
     private void shareReportAsPdf() {
         if (webView.getContentHeight() == 0) {
             Toast.makeText(this, "لا يوجد تقرير للمشاركة", Toast.LENGTH_SHORT).show();
@@ -483,16 +492,7 @@ public class AccountStatementActivity extends AppCompatActivity {
                 .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
                 .build();
         PrintDocumentAdapter printAdapter = webView.createPrintDocumentAdapter(fileName);
-        printAdapter.onLayout(null, printAttributes, null, new MyLayoutResultCallback(pdfFile, printAdapter, this), null);
-    }
-
-    private void sharePdfFile(File pdfFile) {
-        Uri uri = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".provider", pdfFile);
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType("application/pdf");
-        shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
-        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivity(Intent.createChooser(shareIntent, "مشاركة التقرير كـ PDF"));
+        printAdapter.onLayout(null, printAttributes, null, new MyLayoutResultCallback(pdfFile, printAdapter), null);
     }
 
     @Override
@@ -527,48 +527,44 @@ public class AccountStatementActivity extends AppCompatActivity {
                     .replace("٨", "8")
                     .replace("٩", "9");
     }
-}
 
-class MyLayoutResultCallback extends PrintDocumentAdapter.LayoutResultCallback {
-    private final File pdfFile;
-    private final PrintDocumentAdapter printAdapter;
-    private final AccountStatementActivity activity;
+    private class MyLayoutResultCallback extends android.print.PrintDocumentAdapter.LayoutResultCallback {
+        private final File pdfFile;
+        private final PrintDocumentAdapter printAdapter;
 
-    MyLayoutResultCallback(File pdfFile, PrintDocumentAdapter printAdapter, AccountStatementActivity activity) {
-        this.pdfFile = pdfFile;
-        this.printAdapter = printAdapter;
-        this.activity = activity;
-    }
-
-    @Override
-    public void onLayoutFinished(PrintDocumentAdapter.PrintDocumentInfo info, boolean changed) {
-        ParcelFileDescriptor pfd = null;
-        try {
-            pfd = ParcelFileDescriptor.open(pdfFile, ParcelFileDescriptor.MODE_TRUNCATE | ParcelFileDescriptor.MODE_READ_WRITE);
-        } catch (Exception e) {
-            Toast.makeText(activity, "خطأ في إنشاء ملف PDF", Toast.LENGTH_SHORT).show();
-            return;
+        MyLayoutResultCallback(File pdfFile, PrintDocumentAdapter printAdapter) {
+            this.pdfFile = pdfFile;
+            this.printAdapter = printAdapter;
         }
-        printAdapter.onWrite(new PageRange[]{PageRange.ALL_PAGES}, pfd, null, new MyWriteResultCallback(pfd, pdfFile, activity));
+
+        @Override
+        public void onLayoutFinished(android.print.PrintDocumentAdapter.PrintDocumentInfo info, boolean changed) {
+            ParcelFileDescriptor pfd = null;
+            try {
+                pfd = ParcelFileDescriptor.open(pdfFile, ParcelFileDescriptor.MODE_TRUNCATE | ParcelFileDescriptor.MODE_READ_WRITE);
+            } catch (Exception e) {
+                Toast.makeText(AccountStatementActivity.this, "خطأ في إنشاء ملف PDF", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            printAdapter.onWrite(new PageRange[]{PageRange.ALL_PAGES}, pfd, null, new MyWriteResultCallback(pfd, pdfFile));
+        }
     }
-}
 
-class MyWriteResultCallback extends PrintDocumentAdapter.WriteResultCallback {
-    private final ParcelFileDescriptor pfd;
-    private final File pdfFile;
-    private final AccountStatementActivity activity;
+    private class MyWriteResultCallback extends android.print.PrintDocumentAdapter.WriteResultCallback {
+        private final ParcelFileDescriptor pfd;
+        private final File pdfFile;
 
-    MyWriteResultCallback(ParcelFileDescriptor pfd, File pdfFile, AccountStatementActivity activity) {
-        this.pfd = pfd;
-        this.pdfFile = pdfFile;
-        this.activity = activity;
-    }
+        MyWriteResultCallback(ParcelFileDescriptor pfd, File pdfFile) {
+            this.pfd = pfd;
+            this.pdfFile = pdfFile;
+        }
 
-    @Override
-    public void onWriteFinished(PageRange[] pages) {
-        try {
-            if (pfd != null) pfd.close();
-        } catch (Exception ignored) {}
-        activity.sharePdfFile(pdfFile);
+        @Override
+        public void onWriteFinished(PageRange[] pages) {
+            try {
+                if (pfd != null) pfd.close();
+            } catch (Exception ignored) {}
+            sharePdfFile(pdfFile);
+        }
     }
 } 
