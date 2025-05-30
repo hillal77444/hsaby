@@ -10,7 +10,7 @@ class Config:
     
     # إعدادات JWT
     JWT_SECRET_KEY = 'your-secret-key-here'  # مفتاح آمن للإنتاج
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)  # زيادة مدة صلاحية التوكن
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=365)  # زيادة مدة صلاحية التوكن
     
     # إعدادات الأمان
     SECRET_KEY = 'accounting-app-secure-key-2024'  # مفتاح آمن للإنتاج
