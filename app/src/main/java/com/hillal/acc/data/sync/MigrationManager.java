@@ -70,85 +70,14 @@ public class MigrationManager {
             List<Transaction> transactionsToMigrate = transactionDao.getNewOrModifiedTransactions();
 
             if (accountsToMigrate.isEmpty() && transactionsToMigrate.isEmpty()) {
+                // Toast.makeText(context, "لا توجد حسابات أو معاملات تحتاج إلى ترحيل", Toast.LENGTH_LONG).show());
                 return;
             }
 
-<<<<<<< HEAD
-            // فصل المعاملات الجديدة عن المعدلة
-            List<Transaction> newTransactions = new ArrayList<>();
-            List<Transaction> modifiedTransactions = new ArrayList<>();
-
-            for (Transaction transaction : transactionsToMigrate) {
-                if (transaction.getServerId() < 0) {
-                    // معاملة جديدة
-                    Transaction serverTransaction = new Transaction();
-                    serverTransaction.setId(transaction.getId());
-                    serverTransaction.setAmount(transaction.getAmount());
-                    serverTransaction.setType(transaction.getType());
-                    serverTransaction.setDescription(transaction.getDescription());
-                    serverTransaction.setTransactionDate(transaction.getTransactionDate());
-                    serverTransaction.setCreatedAt(transaction.getCreatedAt());
-                    serverTransaction.setUpdatedAt(transaction.getUpdatedAt());
-                    serverTransaction.setLastSyncTime(transaction.getLastSyncTime());
-                    serverTransaction.setModified(transaction.isModified());
-                    serverTransaction.setNotes(transaction.getNotes());
-                    serverTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
-                    
-                    // تحديث account_id بالـ server_id الخاص بالحساب
-                    Account relatedAccount = accountDao.getAccountByIdSync(transaction.getAccountId());
-                    if (relatedAccount != null && relatedAccount.getServerId() > 0) {
-                        serverTransaction.setAccountId(relatedAccount.getServerId());
-                        Log.d("MigrationManager", "Using server_id " + relatedAccount.getServerId() + 
-                            " for account " + transaction.getAccountId());
-                    } else {
-                        serverTransaction.setAccountId(transaction.getAccountId());
-                        Log.e("MigrationManager", "Could not find server_id for account: " + 
-                            transaction.getAccountId());
-                    }
-                    
-                    newTransactions.add(serverTransaction);
-                } else {
-                    // معاملة معدلة
-                    Transaction serverTransaction = new Transaction();
-                    serverTransaction.setId(transaction.getId());
-                    serverTransaction.setServerId(transaction.getServerId()); // نسخ server_id
-                    serverTransaction.setAmount(transaction.getAmount());
-                    serverTransaction.setType(transaction.getType());
-                    serverTransaction.setDescription(transaction.getDescription());
-                    serverTransaction.setTransactionDate(transaction.getTransactionDate());
-                    serverTransaction.setCreatedAt(transaction.getCreatedAt());
-                    serverTransaction.setUpdatedAt(transaction.getUpdatedAt());
-                    serverTransaction.setLastSyncTime(transaction.getLastSyncTime());
-                    serverTransaction.setModified(transaction.isModified());
-                    serverTransaction.setNotes(transaction.getNotes());
-                    serverTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
-                    
-                    // تحديث account_id بالـ server_id الخاص بالحساب
-                    Account relatedAccount = accountDao.getAccountByIdSync(transaction.getAccountId());
-                    if (relatedAccount != null && relatedAccount.getServerId() > 0) {
-                        serverTransaction.setAccountId(relatedAccount.getServerId());
-                        Log.d("MigrationManager", "Using server_id " + relatedAccount.getServerId() + 
-                            " for account " + transaction.getAccountId());
-                    } else {
-                        serverTransaction.setAccountId(transaction.getAccountId());
-                        Log.e("MigrationManager", "Could not find server_id for account: " + 
-                            transaction.getAccountId());
-                    }
-                    
-                    modifiedTransactions.add(serverTransaction);
-                }
-            }
-
-            Log.d("MigrationManager", "Starting migration with " + accountsToMigrate.size() + " accounts, " + 
-                newTransactions.size() + " new transactions, and " + modifiedTransactions.size() + " modified transactions");
-
-            SyncRequest request = new SyncRequest(accountsToMigrate, newTransactions, modifiedTransactions);
-=======
             Log.d("MigrationManager", "Starting migration with " + accountsToMigrate.size() + " accounts and " + 
                 transactionsToMigrate.size() + " transactions");
 
             SyncRequest request = new SyncRequest(accountsToMigrate, transactionsToMigrate);
->>>>>>> parent of 2a4cddb4 (Update MigrationManager.java)
             apiService.syncData("Bearer " + token, request).enqueue(new Callback<SyncResponse>() {
                 @Override
                 public void onResponse(Call<SyncResponse> call, Response<SyncResponse> response) {
