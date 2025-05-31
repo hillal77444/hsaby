@@ -25,7 +25,9 @@ def create_app():
     
     # تسجيل المسارات
     from app.routes import main
+    from app.admin_routes import admin
     app.register_blueprint(main)
+    app.register_blueprint(admin)
     
     # إنشاء قاعدة البيانات وتطبيق الترحيلات تلقائياً
     with app.app_context():
