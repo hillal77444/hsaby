@@ -203,60 +203,92 @@ def statistics():
 @admin.route('/admin/whatsapp')
 @admin_required
 def whatsapp_dashboard():
-    users = User.query.all()
-    return render_template('admin/whatsapp_dashboard.html', users=users)
+    try:
+        # التحقق من حالة خادم الواتساب
+        try:
+            status_response = requests.get('http://localhost:3002/status', timeout=5)
+            server_status = status_response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Error connecting to WhatsApp server: {str(e)}")
+            server_status = {'error': 'لا يمكن الاتصال بخادم الواتساب'}
+        
+        users = User.query.all()
+        print("Users loaded successfully:", len(users))
+        return render_template('admin/whatsapp_dashboard.html', 
+                             users=users,
+                             server_status=server_status)
+    except Exception as e:
+        print("Error in whatsapp_dashboard:", str(e))
+        return str(e), 500
 
 @admin.route('/admin/whatsapp/start', methods=['POST'])
 @admin_required
 def start_whatsapp_session():
-    session_id = 'admin_main'
-    response = requests.get(f'http://localhost:3002/start/{session_id}')
-    return jsonify(response.json())
+    try:
+        session_id = 'admin_main'
+        response = requests.get(f'http://localhost:3002/start/{session_id}', timeout=5)
+        return jsonify(response.json())
+    except requests.exceptions.RequestException as e:
+        print(f"Error starting WhatsApp session: {str(e)}")
+        return jsonify({'error': 'لا يمكن الاتصال بخادم الواتساب'}), 500
 
 @admin.route('/admin/whatsapp/qr/<session_id>')
 @admin_required
 def get_whatsapp_qr(session_id):
-    response = requests.get(f'http://localhost:3002/qr/{session_id}')
-    return response.text
+    try:
+        response = requests.get(f'http://localhost:3002/qr/{session_id}', timeout=5)
+        return response.text
+    except requests.exceptions.RequestException as e:
+        print(f"Error getting QR code: {str(e)}")
+        return jsonify({'error': 'لا يمكن الاتصال بخادم الواتساب'}), 500
 
 @admin.route('/admin/whatsapp/send', methods=['POST'])
 @admin_required
 def send_whatsapp_message():
-    data = request.json
-    session_id = 'admin_main'
-    
-    # تجهيز قائمة الأرقام
-    numbers = []
-    
-    if data['type'] == 'single_user':
-        user = User.query.get(data['user_id'])
-        if user and user.phone:
-            numbers.append(user.phone)
-    
-    elif data['type'] == 'multiple_users':
-        users = User.query.filter(User.id.in_(data['user_ids'])).all()
-        numbers.extend([user.phone for user in users if user.phone])
-    
-    elif data['type'] == 'user_accounts':
-        user = User.query.get(data['user_id'])
-        if user:
-            accounts = Account.query.filter_by(user_id=user.id).all()
-            numbers.extend([account.phone for account in accounts if account.phone])
-    
-    if not numbers:
-        return jsonify({'error': 'لم يتم العثور على أرقام هواتف صالحة'})
-    
-    response = requests.post(
-        f'http://localhost:3002/send/{session_id}',
-        json={
-            'numbers': numbers,
-            'message': data['message']
-        }
-    )
-    return jsonify(response.json())
+    try:
+        data = request.json
+        session_id = 'admin_main'
+        
+        # تجهيز قائمة الأرقام
+        numbers = []
+        
+        if data['type'] == 'single_user':
+            user = User.query.get(data['user_id'])
+            if user and user.phone:
+                numbers.append(user.phone)
+        
+        elif data['type'] == 'multiple_users':
+            users = User.query.filter(User.id.in_(data['user_ids'])).all()
+            numbers.extend([user.phone for user in users if user.phone])
+        
+        elif data['type'] == 'user_accounts':
+            user = User.query.get(data['user_id'])
+            if user:
+                accounts = Account.query.filter_by(user_id=user.id).all()
+                numbers.extend([account.phone for account in accounts if account.phone])
+        
+        if not numbers:
+            return jsonify({'error': 'لم يتم العثور على أرقام هواتف صالحة'})
+        
+        response = requests.post(
+            f'http://localhost:3002/send/{session_id}',
+            json={
+                'numbers': numbers,
+                'message': data['message']
+            },
+            timeout=5
+        )
+        return jsonify(response.json())
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending WhatsApp message: {str(e)}")
+        return jsonify({'error': 'لا يمكن الاتصال بخادم الواتساب'}), 500
 
 @admin.route('/admin/whatsapp/status')
 @admin_required
 def whatsapp_status():
-    response = requests.get('http://localhost:3002/status')
-    return jsonify(response.json()) 
+    try:
+        response = requests.get('http://localhost:3002/status', timeout=5)
+        return jsonify(response.json())
+    except requests.exceptions.RequestException as e:
+        print(f"Error getting WhatsApp status: {str(e)}")
+        return jsonify({'error': 'لا يمكن الاتصال بخادم الواتساب'}), 500 
