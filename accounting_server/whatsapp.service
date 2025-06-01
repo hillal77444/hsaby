@@ -1,0 +1,41 @@
+[Unit]
+Description=WhatsApp API Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/root/accounting_server
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="NODE_ENV=production"
+Environment="DEBUG=whatsapp-web.js:*"
+
+ExecStart=/usr/bin/node /root/accounting_server/whatsapp_server.js
+Restart=always
+RestartSec=10
+
+# إعدادات الإغلاق
+TimeoutStopSec=10
+KillMode=control-group
+KillSignal=SIGKILL
+SendSIGKILL=yes
+
+StandardOutput=append:/root/accounting_server/logs/whatsapp_api.log
+StandardError=append:/root/accounting_server/logs/whatsapp_api.error.log
+
+# تنظيف العمليات القديمة
+ExecStartPre=/bin/sh -c 'pkill -9 -f "node.*whatsapp_server.js" || true'
+ExecStartPre=/bin/sh -c 'pkill -9 -f "chrome.*whatsapp" || true'
+ExecStartPre=/bin/sleep 2
+
+# إيقاف نظيف
+ExecStop=/bin/sh -c 'pkill -9 -f "node.*whatsapp_server.js" || true'
+ExecStop=/bin/sh -c 'pkill -9 -f "chrome.*whatsapp" || true'
+
+# إعدادات الذاكرة
+MemoryLimit=512M
+MemorySwapMax=0
+
+[Install]
+WantedBy=multi-user.target 
