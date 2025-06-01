@@ -1,6 +1,7 @@
 [Unit]
 Description=WhatsApp API Service
 After=network.target
+Wants=network-online.target
 
 [Service]
 Type=simple
@@ -10,32 +11,45 @@ WorkingDirectory=/root/accounting_server
 Environment="PATH=/usr/local/bin:/usr/bin:/bin"
 Environment="NODE_ENV=production"
 Environment="DEBUG=whatsapp-web.js:*"
+Environment="CHROMIUM_PATH=/usr/bin/google-chrome"
+
+# تحسين إعدادات التشغيل
+ExecStartPre=/bin/mkdir -p /root/accounting_server/logs
+ExecStartPre=/bin/chown -R root:root /root/accounting_server/logs
+ExecStartPre=/bin/sh -c 'pkill -9 -f "node.*whatsapp_server.js" || true'
+ExecStartPre=/bin/sh -c 'pkill -9 -f "chrome.*whatsapp" || true'
+ExecStartPre=/bin/sleep 2
 
 ExecStart=/usr/bin/node /root/accounting_server/whatsapp_server.js
 Restart=always
 RestartSec=10
 
 # إعدادات الإغلاق
-TimeoutStopSec=10
+TimeoutStopSec=20
 KillMode=control-group
-KillSignal=SIGKILL
+KillSignal=SIGTERM
 SendSIGKILL=yes
 
+# إعدادات السجلات
 StandardOutput=append:/root/accounting_server/logs/whatsapp_api.log
 StandardError=append:/root/accounting_server/logs/whatsapp_api.error.log
-
-# تنظيف العمليات القديمة
-ExecStartPre=/bin/sh -c 'pkill -9 -f "node.*whatsapp_server.js" || true'
-ExecStartPre=/bin/sh -c 'pkill -9 -f "chrome.*whatsapp" || true'
-ExecStartPre=/bin/sleep 2
 
 # إيقاف نظيف
 ExecStop=/bin/sh -c 'pkill -9 -f "node.*whatsapp_server.js" || true'
 ExecStop=/bin/sh -c 'pkill -9 -f "chrome.*whatsapp" || true'
 
-# إعدادات الذاكرة
-MemoryLimit=512M
+# إعدادات الذاكرة والموارد
+MemoryLimit=1G
 MemorySwapMax=0
+CPUQuota=80%
+LimitNOFILE=65535
+LimitNPROC=4096
+
+# إعدادات الأمان
+ProtectSystem=full
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
 
 [Install]
 WantedBy=multi-user.target 
