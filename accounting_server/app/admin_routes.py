@@ -12,6 +12,9 @@ admin = Blueprint('admin', __name__)
 # كلمة المرور للإدارة - يمكن تغييرها من ملف الخادم
 ADMIN_PASSWORD = "Hillal774447251"
 
+# تعريف عنوان خادم الواتساب
+WHATSAPP_SERVER = 'http://212.224.88.122:3003'
+
 def admin_required(f):
     def decorated_function(*args, **kwargs):
         if request.cookies.get('admin_auth') != ADMIN_PASSWORD:
@@ -206,7 +209,7 @@ def whatsapp_dashboard():
     try:
         # التحقق من حالة خادم الواتساب
         try:
-            status_response = requests.get('http://localhost:3002/status', timeout=5)
+            status_response = requests.get(f'{WHATSAPP_SERVER}/status', timeout=5)
             server_status = status_response.json()
         except requests.exceptions.RequestException as e:
             print(f"Error connecting to WhatsApp server: {str(e)}")
@@ -226,21 +229,85 @@ def whatsapp_dashboard():
 def start_whatsapp_session():
     try:
         session_id = 'admin_main'
-        response = requests.get(f'http://localhost:3002/start/{session_id}', timeout=5)
-        return jsonify(response.json())
+        print(f"Starting new WhatsApp session: {session_id}")
+        
+        # بدء الجلسة
+        response = requests.get(f'{WHATSAPP_SERVER}/start/{session_id}', timeout=5)
+        if response.status_code != 200:
+            print(f"Failed to start session: {response.text}")
+            return jsonify({'error': 'فشل في بدء الجلسة'}), response.status_code
+            
+        # التحقق من حالة الجلسة
+        status_response = requests.get(f'{WHATSAPP_SERVER}/status', timeout=5)
+        if status_response.status_code == 200:
+            status_data = status_response.json()
+            print(f"Session status: {status_data}")
+            
+            # البحث عن الجلسة الحالية
+            current_session = next((s for s in status_data.get('sessions', []) if s['id'] == session_id), None)
+            if current_session:
+                # محاولة جلب الباركود مباشرة
+                qr_response = requests.get(f'{WHATSAPP_SERVER}/qr/{session_id}', timeout=5)
+                if qr_response.status_code == 200:
+                    print("QR code is available")
+                    return jsonify({
+                        'status': 'success',
+                        'session': current_session,
+                        'message': 'تم بدء الجلسة بنجاح',
+                        'qr_available': True
+                    })
+                else:
+                    print(f"QR code not available: {qr_response.text}")
+                    return jsonify({
+                        'status': 'success',
+                        'session': current_session,
+                        'message': 'تم بدء الجلسة بنجاح',
+                        'qr_available': False,
+                        'qr_error': qr_response.text
+                    })
+        
+        return jsonify({'error': 'فشل في التحقق من حالة الجلسة'}), 500
+        
     except requests.exceptions.RequestException as e:
         print(f"Error starting WhatsApp session: {str(e)}")
-        return jsonify({'error': 'لا يمكن الاتصال بخادم الواتساب'}), 500
+        return jsonify({
+            'error': 'لا يمكن الاتصال بخادم الواتساب',
+            'details': str(e)
+        }), 500
 
 @admin.route('/admin/whatsapp/qr/<session_id>')
 @admin_required
 def get_whatsapp_qr(session_id):
     try:
-        response = requests.get(f'http://localhost:3002/qr/{session_id}', timeout=5)
-        return response.text
+        print(f"Fetching QR code for session: {session_id}")
+        response = requests.get(f'{WHATSAPP_SERVER}/qr/{session_id}', timeout=5)
+        
+        if response.status_code == 200:
+            print("QR code fetched successfully")
+            # التحقق من نوع المحتوى
+            content_type = response.headers.get('content-type', '')
+            if 'image' in content_type:
+                return response.content, 200, {'Content-Type': content_type}
+            else:
+                print(f"Unexpected content type: {content_type}")
+                print(f"Response content: {response.text[:200]}")  # طباعة أول 200 حرف من المحتوى
+                return jsonify({
+                    'error': 'تم استلام استجابة غير صحيحة من الخادم',
+                    'details': f'نوع المحتوى: {content_type}'
+                }), 500
+        else:
+            print(f"Failed to fetch QR code: {response.text}")
+            return jsonify({
+                'error': 'فشل في جلب رمز QR',
+                'details': response.text
+            }), response.status_code
+            
     except requests.exceptions.RequestException as e:
         print(f"Error getting QR code: {str(e)}")
-        return jsonify({'error': 'لا يمكن الاتصال بخادم الواتساب'}), 500
+        return jsonify({
+            'error': 'لا يمكن الاتصال بخادم الواتساب',
+            'details': str(e)
+        }), 500
 
 @admin.route('/admin/whatsapp/send', methods=['POST'])
 @admin_required
@@ -271,7 +338,7 @@ def send_whatsapp_message():
             return jsonify({'error': 'لم يتم العثور على أرقام هواتف صالحة'})
         
         response = requests.post(
-            f'http://localhost:3002/send/{session_id}',
+            f'{WHATSAPP_SERVER}/send/{session_id}',
             json={
                 'numbers': numbers,
                 'message': data['message']
@@ -287,8 +354,93 @@ def send_whatsapp_message():
 @admin_required
 def whatsapp_status():
     try:
-        response = requests.get('http://localhost:3002/status', timeout=5)
-        return jsonify(response.json())
+        print("Checking WhatsApp server status")
+        response = requests.get(f'{WHATSAPP_SERVER}/status', timeout=5)
+        
+        if response.status_code == 200:
+            status_data = response.json()
+            print(f"Server status: {status_data}")
+            
+            # البحث عن الجلسة الرئيسية
+            admin_session = next((s for s in status_data.get('sessions', []) if s['id'] == 'admin_main'), None)
+            if admin_session:
+                status_data['current_session'] = admin_session
+                
+            return jsonify(status_data)
+        else:
+            print(f"Failed to get status: {response.text}")
+            return jsonify({
+                'error': 'فشل في جلب حالة الخادم',
+                'details': response.text
+            }), response.status_code
+            
     except requests.exceptions.RequestException as e:
         print(f"Error getting WhatsApp status: {str(e)}")
-        return jsonify({'error': 'لا يمكن الاتصال بخادم الواتساب'}), 500 
+        return jsonify({
+            'error': 'لا يمكن الاتصال بخادم الواتساب',
+            'details': str(e)
+        }), 500
+
+@admin.route('/admin/whatsapp/delete/<session_id>', methods=['POST'])
+@admin_required
+def delete_whatsapp_session(session_id):
+    try:
+        print(f"Attempting to delete session: {session_id}")
+        response = requests.post(f'{WHATSAPP_SERVER}/delete/{session_id}', timeout=5)
+        
+        if response.status_code == 200:
+            print(f"Successfully deleted session: {session_id}")
+            return jsonify({'status': 'success', 'message': 'تم حذف الجلسة بنجاح'})
+        else:
+            print(f"Failed to delete session: {session_id}, Status code: {response.status_code}")
+            return jsonify({
+                'error': 'فشل في حذف الجلسة',
+                'details': response.text if response.text else 'لا توجد تفاصيل إضافية'
+            }), response.status_code
+            
+    except requests.exceptions.RequestException as e:
+        print(f"Error deleting WhatsApp session: {str(e)}")
+        return jsonify({
+            'error': 'لا يمكن الاتصال بخادم الواتساب',
+            'details': str(e)
+        }), 500
+
+@admin.route('/admin/whatsapp/restart/<session_id>', methods=['POST'])
+@admin_required
+def restart_whatsapp_session(session_id):
+    try:
+        print(f"Attempting to restart session: {session_id}")
+        
+        # أولاً، نحذف الجلسة القديمة
+        delete_response = requests.post(f'{WHATSAPP_SERVER}/delete/{session_id}', timeout=5)
+        if delete_response.status_code != 200:
+            print(f"Failed to delete old session: {session_id}, Status code: {delete_response.status_code}")
+            return jsonify({
+                'error': 'فشل في حذف الجلسة القديمة',
+                'details': delete_response.text if delete_response.text else 'لا توجد تفاصيل إضافية'
+            }), delete_response.status_code
+
+        # ثم نبدأ جلسة جديدة
+        print(f"Starting new session: {session_id}")
+        start_response = requests.get(f'{WHATSAPP_SERVER}/start/{session_id}', timeout=5)
+        
+        if start_response.status_code == 200:
+            print(f"Successfully started new session: {session_id}")
+            return jsonify({
+                'status': 'success',
+                'message': 'تم إعادة تشغيل الجلسة بنجاح',
+                'data': start_response.json()
+            })
+        else:
+            print(f"Failed to start new session: {session_id}, Status code: {start_response.status_code}")
+            return jsonify({
+                'error': 'فشل في بدء الجلسة الجديدة',
+                'details': start_response.text if start_response.text else 'لا توجد تفاصيل إضافية'
+            }), start_response.status_code
+            
+    except requests.exceptions.RequestException as e:
+        print(f"Error restarting WhatsApp session: {str(e)}")
+        return jsonify({
+            'error': 'لا يمكن الاتصال بخادم الواتساب',
+            'details': str(e)
+        }), 500 
