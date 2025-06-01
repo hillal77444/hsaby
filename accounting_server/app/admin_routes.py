@@ -379,6 +379,9 @@ def get_whatsapp_qr(session_id):
 def send_whatsapp_message():
     try:
         data = request.json
+        if not data:
+            return jsonify({'error': 'لم يتم استلام بيانات الرسالة'}), 400
+            
         session_id = 'admin_main'
         
         # دالة للتحقق من مفتاح الدولة وإضافته
@@ -401,60 +404,102 @@ def send_whatsapp_message():
         # تجهيز قائمة الأرقام
         numbers = []
         
-        if data['type'] == 'single_user':
-            user = User.query.get(data['user_id'])
-            if user and user.phone:
-                formatted_number = format_phone_number(user.phone)
-                if formatted_number:
-                    numbers.append(formatted_number)
-        
-        elif data['type'] == 'multiple_users':
-            users = User.query.filter(User.id.in_(data['user_ids'])).all()
-            for user in users:
-                if user.phone:
+        try:
+            if data['type'] == 'single_user':
+                user = User.query.get(data['user_id'])
+                if user and user.phone:
                     formatted_number = format_phone_number(user.phone)
                     if formatted_number:
                         numbers.append(formatted_number)
-        
-        elif data['type'] == 'user_accounts':
-            user = User.query.get(data['user_id'])
-            if user:
-                accounts = Account.query.filter_by(user_id=user.id).all()
-                for account in accounts:
-                    if account.phone:
-                        formatted_number = format_phone_number(account.phone)
+                    else:
+                        print(f"رقم الهاتف غير صالح للمستخدم: {user.id}")
+            
+            elif data['type'] == 'multiple_users':
+                users = User.query.filter(User.id.in_(data['user_ids'])).all()
+                for user in users:
+                    if user.phone:
+                        formatted_number = format_phone_number(user.phone)
                         if formatted_number:
                             numbers.append(formatted_number)
+                        else:
+                            print(f"رقم الهاتف غير صالح للمستخدم: {user.id}")
+            
+            elif data['type'] == 'user_accounts':
+                user = User.query.get(data['user_id'])
+                if user:
+                    accounts = Account.query.filter_by(user_id=user.id).all()
+                    for account in accounts:
+                        if account.phone:
+                            formatted_number = format_phone_number(account.phone)
+                            if formatted_number:
+                                numbers.append(formatted_number)
+                            else:
+                                print(f"رقم الهاتف غير صالح للحساب: {account.id}")
+            
+            else:
+                return jsonify({'error': 'نوع الإرسال غير صالح'}), 400
+                
+        except KeyError as e:
+            print(f"خطأ في البيانات المستلمة: {str(e)}")
+            return jsonify({'error': f'بيانات غير مكتملة: {str(e)}'}), 400
+        except Exception as e:
+            print(f"خطأ في معالجة الأرقام: {str(e)}")
+            return jsonify({'error': f'خطأ في معالجة الأرقام: {str(e)}'}), 500
         
         if not numbers:
             return jsonify({'error': 'لم يتم العثور على أرقام هواتف صالحة'})
         
-        # إضافة الرسائل إلى قائمة الانتظار
-        message_ids = []
-        for number in numbers:
-            message_id = f"{int(time.time() * 1000)}_{len(message_ids)}"
-            message = {
-                'id': message_id,
-                'session_id': session_id,
-                'number': number,
-                'message': data['message'],
-                'created_at': datetime.now().isoformat(),
-                'status': 'pending'
-            }
-            
-            # إضافة الرسالة إلى قائمة الانتظار
-            redis_client.rpush(MESSAGE_QUEUE_KEY, json.dumps(message))
-            message_ids.append(message_id)
+        # إذا كان هناك رقم واحد فقط، نرسل مباشرة بدون قائمة انتظار
+        if len(numbers) == 1:
+            try:
+                response = requests.post(
+                    f'{WHATSAPP_SERVER}/send/{session_id}',
+                    json={
+                        'numbers': numbers,
+                        'message': data['message']
+                    },
+                    timeout=5
+                )
+                return jsonify(response.json())
+            except requests.exceptions.RequestException as e:
+                print(f"خطأ في إرسال الرسالة: {str(e)}")
+                return jsonify({'error': 'لا يمكن الاتصال بخادم الواتساب'}), 500
         
-        return jsonify({
-            'status': 'queued',
-            'message_ids': message_ids,
-            'total_messages': len(numbers)
-        })
+        # إذا كان هناك أكثر من رقم، نستخدم قائمة الانتظار
+        try:
+            message_ids = []
+            for number in numbers:
+                message_id = f"{int(time.time() * 1000)}_{len(message_ids)}"
+                message = {
+                    'id': message_id,
+                    'session_id': session_id,
+                    'number': number,
+                    'message': data['message'],
+                    'created_at': datetime.now().isoformat(),
+                    'status': 'pending'
+                }
+                
+                # إضافة الرسالة إلى قائمة الانتظار
+                redis_client.rpush(MESSAGE_QUEUE_KEY, json.dumps(message))
+                message_ids.append(message_id)
+            
+            return jsonify({
+                'status': 'queued',
+                'message_ids': message_ids,
+                'total_messages': len(numbers),
+                'numbers': numbers
+            })
+            
+        except redis.RedisError as e:
+            print(f"خطأ في الاتصال بـ Redis: {str(e)}")
+            return jsonify({'error': 'خطأ في الاتصال بقاعدة البيانات المؤقتة'}), 500
+        except Exception as e:
+            print(f"خطأ غير متوقع: {str(e)}")
+            return jsonify({'error': f'حدث خطأ غير متوقع: {str(e)}'}), 500
         
     except Exception as e:
-        print(f"Error queueing WhatsApp message: {str(e)}")
-        return jsonify({'error': 'حدث خطأ أثناء إضافة الرسائل إلى قائمة الانتظار'}), 500
+        print(f"خطأ عام في إرسال الرسالة: {str(e)}")
+        return jsonify({'error': f'حدث خطأ أثناء إضافة الرسائل إلى قائمة الانتظار: {str(e)}'}), 500
 
 @admin.route('/admin/whatsapp/status/<message_id>')
 @admin_required
