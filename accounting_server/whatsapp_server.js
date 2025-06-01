@@ -93,6 +93,33 @@ async function killProcessOnPort(port) {
   }
 }
 
+// دالة للتحقق من وجود Chrome/Chromium
+async function checkChromeInstallation() {
+  try {
+    // التحقق من وجود Chrome في المسارات الشائعة
+    const chromePaths = [
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      process.env.LOCALAPPDATA + '\\Google\\Chrome\\Application\\chrome.exe'
+    ];
+
+    for (const chromePath of chromePaths) {
+      if (fs.existsSync(chromePath)) {
+        process.env.CHROMIUM_PATH = chromePath;
+        log(`تم العثور على Chrome في: ${chromePath}`);
+        return true;
+      }
+    }
+
+    // إذا لم يتم العثور على Chrome، استخدم Puppeteer المدمج
+    log('لم يتم العثور على Chrome، سيتم استخدام Puppeteer المدمج');
+    return true;
+  } catch (err) {
+    log(`خطأ في التحقق من تثبيت Chrome: ${err.message}`);
+    return false;
+  }
+}
+
 app.use(express.json());
 const sessions = {};
 
@@ -153,6 +180,10 @@ async function createSession(id, retries = 3) {
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu',
           '--single-process'
         ],
         executablePath: process.env.CHROMIUM_PATH || undefined,
@@ -165,7 +196,7 @@ async function createSession(id, retries = 3) {
       },
       webVersionCache: {
         type: 'remote',
-        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html'
+        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2415.4.html'
       },
       qrMaxRetries: 5,
       authTimeoutMs: 120000,
@@ -385,6 +416,13 @@ app.get('/status', (req, res) => {
 // تحسين بدء تشغيل الخادم
 async function startServer() {
   try {
+    // التحقق من وجود Chrome قبل بدء الخادم
+    const chromeInstalled = await checkChromeInstallation();
+    if (!chromeInstalled) {
+      log('❌ لم يتم العثور على Chrome. يرجى تثبيت Google Chrome');
+      process.exit(1);
+    }
+
     // التأكد من وجود المجلدات المطلوبة
     ensureDirectories();
     
