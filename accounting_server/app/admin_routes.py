@@ -660,10 +660,6 @@ def calculate_and_notify_transaction(transaction_id):
         if not transaction:
             return {'status': 'error', 'message': 'المعاملة غير موجودة'}
 
-        # التحقق من تفعيل الواتساب للمعاملة
-        if not transaction.whatsapp_enabled:
-            return {'status': 'success', 'message': 'إشعارات الواتساب غير مفعلة لهذه المعاملة'}
-
         account = Account.query.get(transaction.account_id)
         if not account:
             return {'status': 'error', 'message': 'الحساب غير موجود'}
