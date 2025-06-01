@@ -625,4 +625,101 @@ def restart_whatsapp_session(session_id):
         return jsonify({
             'error': 'لا يمكن الاتصال بخادم الواتساب',
             'details': str(e)
-        }), 500 
+        }), 500
+
+@admin.route('/admin/transaction/notify', methods=['POST'])
+@admin_required
+def send_transaction_notification():
+    try:
+        data = request.json
+        if not data or 'transaction_id' not in data:
+            return jsonify({'error': 'بيانات المعاملة غير مكتملة'}), 400
+
+        result = calculate_and_notify_transaction(data['transaction_id'])
+        if result.get('status') == 'success':
+            return jsonify({
+                'status': 'success',
+                'message': 'تم إرسال الإشعار بنجاح'
+            })
+        else:
+            return jsonify({
+                'error': result.get('message', 'حدث خطأ أثناء إرسال الإشعار')
+            }), 500
+
+    except Exception as e:
+        print(f"خطأ في إرسال إشعار المعاملة: {str(e)}")
+        return jsonify({
+            'error': 'حدث خطأ أثناء إرسال الإشعار',
+            'details': str(e)
+        }), 500
+
+def calculate_and_notify_transaction(transaction_id):
+    try:
+        # جلب المعاملة والحساب
+        transaction = Transaction.query.get(transaction_id)
+        if not transaction:
+            return {'status': 'error', 'message': 'المعاملة غير موجودة'}
+
+        account = Account.query.get(transaction.account_id)
+        if not account:
+            return {'status': 'error', 'message': 'الحساب غير موجود'}
+
+        # حساب الرصيد حتى هذه المعاملة لنفس الحساب ونفس العملة
+        transactions = Transaction.query.filter(
+            Transaction.account_id == account.id,  # تأكيد نفس الحساب
+            Transaction.currency == transaction.currency,  # تأكيد نفس العملة
+            Transaction.date <= transaction.date,  # المعاملات حتى تاريخ هذه المعاملة
+            Transaction.id <= transaction.id  # المعاملات حتى هذه المعاملة
+        ).order_by(
+            Transaction.date,  # ترتيب حسب التاريخ
+            Transaction.id  # ثم حسب رقم المعاملة
+        ).all()
+
+        # حساب الرصيد النهائي
+        balance = 0
+        for trans in transactions:
+            if trans.type == 'credit':
+                balance += trans.amount
+            else:  # debit
+                balance -= trans.amount
+
+        # تنسيق رقم الهاتف
+        phone = account.phone_number
+        if phone:
+            phone = ''.join(filter(str.isdigit, phone))
+            if phone.startswith('0'):
+                phone = '967' + phone[1:]
+            if not phone.startswith('967'):
+                phone = '967' + phone
+
+            # تنسيق الرسالة
+            transaction_type = "إيداع" if transaction.type == 'credit' else "سحب"
+            message = f"""
+معاملة جديدة:
+نوع المعاملة: {transaction_type}
+المبلغ: {transaction.amount} {transaction.currency or 'ريال'}
+رقم الحساب: {account.account_number}
+التاريخ: {transaction.date.strftime('%Y-%m-%d %H:%M')}
+الرصيد الجديد: {balance} {transaction.currency or 'ريال'}
+            """.strip()
+
+            # إرسال الرسالة
+            response = requests.post(
+                'http://212.224.88.122:3003/send/admin_main',
+                json={
+                    'numbers': [phone],
+                    'message': message
+                },
+                timeout=5
+            )
+
+            if response.status_code == 200:
+                return {'status': 'success', 'message': 'تم إرسال الإشعار بنجاح'}
+            else:
+                return {'status': 'error', 'message': 'فشل في إرسال الإشعار'}
+
+        return {'status': 'error', 'message': 'لا يوجد رقم هاتف للحساب'}
+
+    except Exception as e:
+        logger.error(f"Error in calculate_and_notify_transaction: {str(e)}")
+        return {'status': 'error', 'message': str(e)} 
