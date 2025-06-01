@@ -8,6 +8,8 @@ import logging
 import json
 from sqlalchemy import func
 from sqlalchemy import case
+import requests
+from app.admin_routes import send_transaction_notification, calculate_and_notify_transaction
 
 main = Blueprint('main', __name__)
 logger = logging.getLogger(__name__)
@@ -254,11 +256,11 @@ def sync_data():
                     transaction.user_id = current_user_id
                     logger.info(f"Updated transaction: {transaction.id}")
                 else:
-                    # إنشاء معاملة جديدة
                     # الحصول على آخر server_id
                     last_transaction = Transaction.query.order_by(Transaction.server_id.desc()).first()
                     new_server_id = (last_transaction.server_id + 1) if last_transaction else 1
                     
+                    # إنشاء معاملة جديدة
                     transaction = Transaction(
                         amount=trans_data.get('amount'),
                         type=trans_data.get('type'),
@@ -274,6 +276,17 @@ def sync_data():
                     db.session.add(transaction)
                     db.session.flush()
                     logger.info(f"Added new transaction: {transaction.id}")
+                    
+                    # حساب الرصيد وإرسال الإشعار
+                    try:
+                        result = calculate_and_notify_transaction(transaction.id)
+                        if result.get('status') == 'success':
+                            logger.info(f"Transaction processed successfully: {transaction.id}")
+                        else:
+                            logger.error(f"Error processing transaction: {result.get('message')}")
+                    except Exception as e:
+                        logger.error(f"Error in transaction processing: {str(e)}")
+                        # لا نوقف العملية إذا فشل الإرسال
                 
                 transaction_mappings.append({
                     'local_id': trans_data.get('id'),
