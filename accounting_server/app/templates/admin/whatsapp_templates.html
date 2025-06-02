@@ -1,0 +1,154 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<style>
+.template-textarea {
+    white-space: pre-wrap;
+    font-family: monospace;
+}
+</style>
+
+<div class="container mt-4">
+    <h2>تنسيقات رسائل الواتساب</h2>
+    
+    <div class="alert alert-info mt-3">
+        <h5>دليل المتغيرات المتاحة:</h5>
+        <ul class="mb-0">
+            <li><code>{type}</code> - نوع المعاملة (إيداع/سحب)</li>
+            <li><code>{amount}</code> - المبلغ</li>
+            <li><code>{currency}</code> - العملة</li>
+            <li><code>{user_name}</code> - اسم المستخدم</li>
+            <li><code>{account_name}</code> - اسم الحساب</li>
+            <li><code>{account_number}</code> - رقم الحساب</li>
+            <li><code>{date}</code> - التاريخ والوقت</li>
+            <li><code>{description}</code> - وصف المعاملة</li>
+            <li><code>{balance}</code> - الرصيد الجديد</li>
+        </ul>
+        <hr>
+        <p class="mb-0"><strong>ملاحظة:</strong> استخدم <code>\n</code> لإضافة سطر جديد في الرسالة</p>
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="templateTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="credit-tab" data-toggle="tab" href="#credit" role="tab">تنسيق الإيداع</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="debit-tab" data-toggle="tab" href="#debit" role="tab">تنسيق السحب</a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="templateTabsContent">
+                <div class="tab-pane fade show active" id="credit" role="tabpanel">
+                    <form id="creditForm" class="template-form">
+                        <div class="form-group">
+                            <label>تنسيق رسالة الإيداع</label>
+                            <textarea class="form-control template-textarea" name="credit_template" rows="10" placeholder="أدخل تنسيق رسالة الإيداع"></textarea>
+                            <small class="form-text text-muted">
+                                مثال:
+                                معاملة جديدة:
+                                نوع المعاملة: {type}
+                                المبلغ: {amount} {currency}
+                            </small>
+                        </div>
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="creditEnabled" name="credit_enabled">
+                                <label class="custom-control-label" for="creditEnabled">تفعيل التنسيق المخصص</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">حفظ تنسيق الإيداع</button>
+                    </form>
+                </div>
+                <div class="tab-pane fade" id="debit" role="tabpanel">
+                    <form id="debitForm" class="template-form">
+                        <div class="form-group">
+                            <label>تنسيق رسالة السحب</label>
+                            <textarea class="form-control template-textarea" name="debit_template" rows="10" placeholder="أدخل تنسيق رسالة السحب"></textarea>
+                            <small class="form-text text-muted">
+                                مثال:
+                                معاملة جديدة:
+                                نوع المعاملة: {type}
+                                المبلغ: {amount} {currency}
+                            </small>
+                        </div>
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="debitEnabled" name="debit_enabled">
+                                <label class="custom-control-label" for="debitEnabled">تفعيل التنسيق المخصص</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">حفظ تنسيق السحب</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // تحميل التنسيقات الحالية
+    fetch('/admin/whatsapp/templates')
+        .then(response => response.json())
+        .then(data => {
+            // تحويل \n إلى سطور جديدة في النص
+            const creditTemplate = data.custom.credit.template.replace(/\\n/g, '\n');
+            const debitTemplate = data.custom.debit.template.replace(/\\n/g, '\n');
+            
+            document.querySelector('[name="credit_template"]').value = creditTemplate;
+            document.querySelector('[name="debit_template"]').value = debitTemplate;
+            document.getElementById('creditEnabled').checked = data.custom.credit.enabled;
+            document.getElementById('debitEnabled').checked = data.custom.debit.enabled;
+        });
+
+    // حفظ تنسيق الإيداع
+    document.getElementById('creditForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const template = this.querySelector('[name="credit_template"]').value;
+        const formData = {
+            type: 'credit',
+            template: template,
+            enabled: this.querySelector('[name="credit_enabled"]').checked
+        };
+        saveTemplate(formData);
+    });
+
+    // حفظ تنسيق السحب
+    document.getElementById('debitForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const template = this.querySelector('[name="debit_template"]').value;
+        const formData = {
+            type: 'debit',
+            template: template,
+            enabled: this.querySelector('[name="debit_enabled"]').checked
+        };
+        saveTemplate(formData);
+    });
+});
+
+function saveTemplate(data) {
+    fetch('/admin/whatsapp/templates', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.status === 'success') {
+            alert('تم حفظ التنسيق بنجاح');
+        } else {
+            alert('حدث خطأ أثناء حفظ التنسيق');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('حدث خطأ أثناء حفظ التنسيق');
+    });
+}
+</script>
+{% endblock %} 
