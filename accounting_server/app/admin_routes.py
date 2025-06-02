@@ -10,6 +10,9 @@ import time
 import redis
 import threading
 import queue
+import os
+import re
+import psutil
 
 admin = Blueprint('admin', __name__)
 
@@ -17,7 +20,7 @@ admin = Blueprint('admin', __name__)
 ADMIN_PASSWORD = "Hillal774447251"
 
 # تعريف عنوان خادم الواتساب
-WHATSAPP_SERVER = 'http://212.224.88.122:3003'
+WHATSAPP_SERVER = os.getenv('WHATSAPP_SERVER', 'http://localhost:3003')
 
 # إعداد Redis
 redis_client = redis.Redis(host='localhost', port=6379, db=0)
@@ -297,13 +300,13 @@ def start_whatsapp_session():
         print(f"Starting new WhatsApp session: {session_id}")
         
         # بدء الجلسة
-        response = requests.get(f'{WHATSAPP_SERVER}/start/{session_id}', timeout=5)
+        response = requests.get(f'{WHATSAPP_SERVER}/start/{session_id}', timeout=10)
         if response.status_code != 200:
             print(f"Failed to start session: {response.text}")
             return jsonify({'error': 'فشل في بدء الجلسة'}), response.status_code
             
         # التحقق من حالة الجلسة
-        status_response = requests.get(f'{WHATSAPP_SERVER}/status', timeout=5)
+        status_response = requests.get(f'{WHATSAPP_SERVER}/status', timeout=10)
         if status_response.status_code == 200:
             status_data = status_response.json()
             print(f"Session status: {status_data}")
@@ -312,7 +315,7 @@ def start_whatsapp_session():
             current_session = next((s for s in status_data.get('sessions', []) if s['id'] == session_id), None)
             if current_session:
                 # محاولة جلب الباركود مباشرة
-                qr_response = requests.get(f'{WHATSAPP_SERVER}/qr/{session_id}', timeout=5)
+                qr_response = requests.get(f'{WHATSAPP_SERVER}/qr/{session_id}', timeout=10)
                 if qr_response.status_code == 200:
                     print("QR code is available")
                     return jsonify({
@@ -345,7 +348,7 @@ def start_whatsapp_session():
 def get_whatsapp_qr(session_id):
     try:
         print(f"Fetching QR code for session: {session_id}")
-        response = requests.get(f'{WHATSAPP_SERVER}/qr/{session_id}', timeout=5)
+        response = requests.get(f'{WHATSAPP_SERVER}/qr/{session_id}', timeout=10)
         
         if response.status_code == 200:
             print("QR code fetched successfully")
@@ -353,9 +356,16 @@ def get_whatsapp_qr(session_id):
             content_type = response.headers.get('content-type', '')
             if 'image' in content_type:
                 return response.content, 200, {'Content-Type': content_type}
+            elif 'text/html' in content_type:
+                # استخراج صورة QR من HTML
+                qr_match = re.search(r'src="(data:image/[^"]+)"', response.text)
+                if qr_match:
+                    qr_data = qr_match.group(1)
+                    return qr_data, 200, {'Content-Type': 'text/plain'}
+                else:
+                    return response.text, 200, {'Content-Type': 'text/html'}
             else:
                 print(f"Unexpected content type: {content_type}")
-                print(f"Response content: {response.text[:200]}")  # طباعة أول 200 حرف من المحتوى
                 return jsonify({
                     'error': 'تم استلام استجابة غير صحيحة من الخادم',
                     'details': f'نوع المحتوى: {content_type}'
@@ -568,7 +578,9 @@ def whatsapp_status():
 def delete_whatsapp_session(session_id):
     try:
         print(f"Attempting to delete session: {session_id}")
-        response = requests.post(f'{WHATSAPP_SERVER}/delete/{session_id}', timeout=5)
+        
+        # محاولة حذف الجلسة
+        response = requests.delete(f'{WHATSAPP_SERVER}/delete/{session_id}', timeout=10)
         
         if response.status_code == 200:
             print(f"Successfully deleted session: {session_id}")
@@ -593,18 +605,20 @@ def restart_whatsapp_session(session_id):
     try:
         print(f"Attempting to restart session: {session_id}")
         
-        # أولاً، نحذف الجلسة القديمة
-        delete_response = requests.post(f'{WHATSAPP_SERVER}/delete/{session_id}', timeout=5)
-        if delete_response.status_code != 200:
-            print(f"Failed to delete old session: {session_id}, Status code: {delete_response.status_code}")
-            return jsonify({
-                'error': 'فشل في حذف الجلسة القديمة',
-                'details': delete_response.text if delete_response.text else 'لا توجد تفاصيل إضافية'
-            }), delete_response.status_code
+        # إغلاق جميع الجلسات أولاً
+        try:
+            close_response = requests.post(f'{WHATSAPP_SERVER}/close-all-sessions', timeout=10)
+            if close_response.status_code != 200:
+                print(f"Warning: Failed to close all sessions: {close_response.text}")
+        except Exception as e:
+            print(f"Warning: Error while closing sessions: {str(e)}")
 
-        # ثم نبدأ جلسة جديدة
+        # انتظار قليلاً للتأكد من إغلاق جميع الجلسات
+        time.sleep(3)
+
+        # بدء جلسة جديدة
         print(f"Starting new session: {session_id}")
-        start_response = requests.get(f'{WHATSAPP_SERVER}/start/{session_id}', timeout=5)
+        start_response = requests.get(f'{WHATSAPP_SERVER}/start/{session_id}', timeout=10)
         
         if start_response.status_code == 200:
             print(f"Successfully started new session: {session_id}")
@@ -622,6 +636,34 @@ def restart_whatsapp_session(session_id):
             
     except requests.exceptions.RequestException as e:
         print(f"Error restarting WhatsApp session: {str(e)}")
+        return jsonify({
+            'error': 'لا يمكن الاتصال بخادم الواتساب',
+            'details': str(e)
+        }), 500
+
+@admin.route('/admin/whatsapp/close-all', methods=['POST'])
+@admin_required
+def close_all_whatsapp_sessions():
+    try:
+        print("Attempting to close all WhatsApp sessions")
+        response = requests.post(f'{WHATSAPP_SERVER}/close-all-sessions', timeout=10)
+        
+        if response.status_code == 200:
+            print("Successfully closed all sessions")
+            return jsonify({
+                'status': 'success',
+                'message': 'تم إغلاق جميع الجلسات بنجاح',
+                'data': response.json()
+            })
+        else:
+            print(f"Failed to close all sessions: {response.text}")
+            return jsonify({
+                'error': 'فشل في إغلاق جميع الجلسات',
+                'details': response.text if response.text else 'لا توجد تفاصيل إضافية'
+            }), response.status_code
+            
+    except requests.exceptions.RequestException as e:
+        print(f"Error closing all WhatsApp sessions: {str(e)}")
         return jsonify({
             'error': 'لا يمكن الاتصال بخادم الواتساب',
             'details': str(e)
@@ -664,6 +706,11 @@ def calculate_and_notify_transaction(transaction_id):
         if not account:
             return {'status': 'error', 'message': 'الحساب غير موجود'}
 
+        # جلب معلومات المستخدم
+        user = User.query.get(account.user_id)
+        if not user:
+            return {'status': 'error', 'message': 'المستخدم غير موجود'}
+
         # حساب الرصيد حتى هذه المعاملة لنفس الحساب ونفس العملة
         transactions = Transaction.query.filter(
             Transaction.account_id == account.id,  # تأكيد نفس الحساب
@@ -683,6 +730,25 @@ def calculate_and_notify_transaction(transaction_id):
             else:  # debit
                 balance -= trans.amount
 
+        # تنسيق الرسالة
+        transaction_type = "قيدنا الى حسابكم" if transaction.type == 'credit' else "قيدنا على حسابكم"
+        balance_text = f"الرصيد لكم: {balance} {transaction.currency or 'ريال'}" if balance >= 0 else f"الرصيد عليكم: {abs(balance)} {transaction.currency or 'ريال'}"
+        message = f"""
+🏦 إشعار معاملة جديدة
+
+🏛️ الاخ/: {account.account_name}
+
+💰 تفاصيل المعاملة:
+•  {transaction_type}
+• المبلغ: {transaction.amount} {transaction.currency or 'ريال'}
+• الوصف: {transaction.description or 'لا يوجد وصف'}
+• التاريخ: {transaction.date.strftime('%Y-%m-%d %H:%M')}
+
+💳 {balance_text}
+
+تم الإرسال بواسطة: {user.username}
+        """.strip()
+
         # تنسيق رقم الهاتف
         phone = account.phone_number
         if phone:
@@ -692,34 +758,61 @@ def calculate_and_notify_transaction(transaction_id):
             if not phone.startswith('967'):
                 phone = '967' + phone
 
-            # تنسيق الرسالة
-            transaction_type = "إيداع" if transaction.type == 'credit' else "سحب"
-            message = f"""
-معاملة جديدة:
-نوع المعاملة: {transaction_type}
-المبلغ: {transaction.amount} {transaction.currency or 'ريال'}
-رقم الحساب: {account.account_number}
-التاريخ: {transaction.date.strftime('%Y-%m-%d %H:%M')}
-الرصيد الجديد: {balance} {transaction.currency or 'ريال'}
-            """.strip()
+        # إرسال الرسالة
+        response = requests.post(
+            'http://212.224.88.122:3003/send/admin_main',
+            json={
+                'numbers': [phone],
+                'message': message
+            },
+            timeout=5
+        )
 
-            # إرسال الرسالة
-            response = requests.post(
-                'http://212.224.88.122:3003/send/admin_main',
-                json={
-                    'numbers': [phone],
-                    'message': message
-                },
-                timeout=5
-            )
-
-            if response.status_code == 200:
-                return {'status': 'success', 'message': 'تم إرسال الإشعار بنجاح'}
-            else:
-                return {'status': 'error', 'message': 'فشل في إرسال الإشعار'}
-
-        return {'status': 'error', 'message': 'لا يوجد رقم هاتف للحساب'}
+        if response.status_code == 200:
+            return {'status': 'success', 'message': 'تم إرسال الإشعار بنجاح'}
+        else:
+            return {'status': 'error', 'message': 'فشل في إرسال الإشعار'}
 
     except Exception as e:
         logger.error(f"Error in calculate_and_notify_transaction: {str(e)}")
-        return {'status': 'error', 'message': str(e)} 
+        return {'status': 'error', 'message': str(e)}
+
+@admin.route('/admin/whatsapp/kill-chrome', methods=['POST'])
+@admin_required
+def kill_chrome_processes():
+    try:
+        # البحث عن جميع عمليات كروم
+        chrome_processes = []
+        for proc in psutil.process_iter(['pid', 'name']):
+            try:
+                if 'chrome' in proc.info['name'].lower():
+                    chrome_processes.append(proc)
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+        
+        # إغلاق جميع عمليات كروم
+        for proc in chrome_processes:
+            try:
+                proc.kill()
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+        
+        # إغلاق جميع الجلسات في خادم الواتساب
+        try:
+            response = requests.post(f'{WHATSAPP_SERVER}/close-all-sessions', timeout=10)
+            if response.status_code != 200:
+                print(f"Warning: Failed to close WhatsApp sessions: {response.text}")
+        except Exception as e:
+            print(f"Warning: Error while closing WhatsApp sessions: {str(e)}")
+        
+        return jsonify({
+            'status': 'success',
+            'message': f'تم إغلاق {len(chrome_processes)} عملية كروم'
+        })
+        
+    except Exception as e:
+        print(f"Error killing Chrome processes: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500 
