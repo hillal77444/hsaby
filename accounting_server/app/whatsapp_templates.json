@@ -1,0 +1,22 @@
+{
+    "default": {
+        "credit": {
+            "template": "معاملة جديدة:\nنوع المعاملة: إيداع\nالمبلغ: {amount} {currency}\nرقم الحساب: {account_number}\nالتاريخ: {date}\nالرصيد الجديد: {balance} {currency}",
+            "enabled": true
+        },
+        "debit": {
+            "template": "معاملة جديدة:\nنوع المعاملة: سحب\nالمبلغ: {amount} {currency}\nرقم الحساب: {account_number}\nالتاريخ: {date}\nالرصيد الجديد: {balance} {currency}",
+            "enabled": true
+        }
+    },
+    "custom": {
+        "credit": {
+            "template": "معاملة جديدة:\nنوع المعاملة: إيداع\nالمبلغ: {amount} {currency}\nاسم المستخدم: {user_name}\nاسم الحساب: {account_name}\nرقم الحساب: {account_number}\nالتاريخ: {date}\nالوصف: {description}\nالرصيد الجديد: {balance} {currency}",
+            "enabled": true
+        },
+        "debit": {
+            "template": "معاملة جديدة:\nنوع المعاملة: سحب\nالمبلغ: {amount} {currency}\nاسم المستخدم: {user_name}\nاسم الحساب: {account_name}\nرقم الحساب: {account_number}\nالتاريخ: {date}\nالوصف: {description}\nالرصيد الجديد: {balance} {currency}",
+            "enabled": true
+        }
+    }
+} 
