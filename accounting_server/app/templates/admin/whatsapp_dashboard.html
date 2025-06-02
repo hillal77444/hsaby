@@ -1,82 +1,57 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-<div class="container">
-    <h2 class="mb-4">لوحة تحكم الواتساب</h2>
-
-    <!-- حالة الاتصال -->
+<div class="container mt-4">
+    <h2>لوحة تحكم الواتساب</h2>
+    
+    <!-- حالة الخادم -->
     <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">حالة الخادم</h5>
+        </div>
         <div class="card-body">
-            <h5 class="card-title">حالة الاتصال</h5>
-            <div id="connection-status">
+            <div id="server-status">
                 {% if server_status.error %}
                     <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle"></i> {{ server_status.error }}
+                        {{ server_status.error }}
                     </div>
                 {% else %}
-                    <div class="d-flex align-items-center mb-2">
-                        <div id="status-indicator" class="me-2" style="width: 12px; height: 12px; border-radius: 50%; background-color: #dc3545;"></div>
-                        <p class="mb-0">الحالة: <span id="status-text" class="fw-bold">{{ server_status.status }}</span></p>
+                    <div class="alert alert-success">
+                        الخادم يعمل
                     </div>
-                    <p class="mb-0">آخر تحديث: <span id="last-update">{{ server_status.last_update }}</span></p>
-                    <div id="connection-details" class="mt-2 small text-muted"></div>
                 {% endif %}
             </div>
-        </div>
-    </div>
-
-    <!-- QR Code -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">ربط الواتساب</h5>
-            <div id="qr-container" class="text-center">
-                <div id="qr-code" class="mb-3">
-                    {% if server_status.current_session and not server_status.current_session.ready %}
-                        <div class="alert alert-info">
-                            <i class="fas fa-qrcode"></i> قم بمسح رمز QR باستخدام تطبيق الواتساب
-                        </div>
-                    {% endif %}
-                </div>
-                <div id="qr-status" class="mb-3"></div>
-                <button id="start-session" class="btn btn-primary">
-                    <i class="fas fa-sync"></i> بدء جلسة جديدة
-                </button>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="startSession()">بدء جلسة جديدة</button>
+                <button class="btn btn-warning" onclick="restartSession()">إعادة تشغيل الجلسة</button>
+                <button class="btn btn-danger" onclick="closeAllSessions()">إغلاق جميع الجلسات</button>
+                <button class="btn btn-dark" onclick="killAllChrome()">إغلاق جميع صفحات كروم</button>
             </div>
         </div>
     </div>
 
-    <!-- الجلسات النشطة -->
+    <!-- رمز QR -->
     <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">الجلسات النشطة</h5>
-            <div id="sessions-list">
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>معرف الجلسة</th>
-                                <th>الحالة</th>
-                                <th>آخر تحديث</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="sessions-table-body">
-                            <!-- سيتم ملؤها بواسطة JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
+        <div class="card-header">
+            <h5 class="mb-0">رمز QR</h5>
+        </div>
+        <div class="card-body text-center">
+            <div id="qr-container">
+                <p class="text-muted">اضغط على "بدء جلسة جديدة" لعرض رمز QR</p>
             </div>
         </div>
     </div>
 
-    <!-- إرسال الرسائل -->
+    <!-- إرسال رسالة -->
     <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">إرسال رسالة</h5>
+        </div>
         <div class="card-body">
-            <h5 class="card-title">إرسال رسالة</h5>
             <form id="message-form">
                 <div class="mb-3">
                     <label class="form-label">نوع الإرسال</label>
-                    <select class="form-select" id="send-type">
+                    <select class="form-select" id="send-type" onchange="updateRecipients()">
                         <option value="single_user">مستخدم واحد</option>
                         <option value="multiple_users">عدة مستخدمين</option>
                         <option value="user_accounts">حسابات مستخدم</option>
@@ -87,7 +62,7 @@
                     <label class="form-label">اختر المستخدم</label>
                     <select class="form-select" id="single-user">
                         {% for user in users %}
-                            <option value="{{ user.id }}">{{ user.name }} ({{ user.phone }})</option>
+                            <option value="{{ user.id }}">{{ user.username }} ({{ user.phone }})</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -96,18 +71,19 @@
                     <label class="form-label">اختر المستخدمين</label>
                     <select class="form-select" id="multiple-users" multiple>
                         {% for user in users %}
-                            <option value="{{ user.id }}">{{ user.name }} ({{ user.phone }})</option>
+                            <option value="{{ user.id }}">{{ user.username }} ({{ user.phone }})</option>
                         {% endfor %}
                     </select>
                 </div>
 
                 <div id="user-accounts-section" class="mb-3" style="display: none;">
                     <label class="form-label">اختر المستخدم</label>
-                    <select class="form-select" id="user-accounts">
+                    <select class="form-select" id="user-accounts" onchange="loadUserAccounts()">
                         {% for user in users %}
-                            <option value="{{ user.id }}">{{ user.name }}</option>
+                            <option value="{{ user.id }}">{{ user.username }}</option>
                         {% endfor %}
                     </select>
+                    <div id="accounts-list" class="mt-2"></div>
                 </div>
 
                 <div class="mb-3">
@@ -120,253 +96,233 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // تحديث حالة الاتصال والجلسات كل 5 ثواني
-    function updateStatus() {
-        fetch('/admin/whatsapp/status')
-            .then(response => response.json())
-            .then(data => {
-                // تحديث حالة الاتصال
-                const statusText = document.getElementById('status-text');
-                const statusIndicator = document.getElementById('status-indicator');
-                const connectionDetails = document.getElementById('connection-details');
-                
-                statusText.textContent = data.status;
-                document.getElementById('last-update').textContent = data.last_update;
+let currentSession = null;
 
-                // تحديث مؤشر الحالة
-                if (data.current_session) {
-                    if (data.current_session.ready) {
-                        statusIndicator.style.backgroundColor = '#198754'; // أخضر
-                        connectionDetails.innerHTML = `
-                            <i class="fas fa-check-circle text-success"></i> الجلسة نشطة ومتصل
-                            <br>
-                            <small>معرف الجلسة: ${data.current_session.id}</small>
-                        `;
-                    } else {
-                        statusIndicator.style.backgroundColor = '#ffc107'; // أصفر
-                        connectionDetails.innerHTML = `
-                            <i class="fas fa-exclamation-triangle text-warning"></i> في انتظار مسح رمز QR
-                            <br>
-                            <small>معرف الجلسة: ${data.current_session.id}</small>
-                        `;
-                    }
-                } else {
-                    statusIndicator.style.backgroundColor = '#dc3545'; // أحمر
-                    connectionDetails.innerHTML = `
-                        <i class="fas fa-times-circle text-danger"></i> لا توجد جلسة نشطة
-                    `;
-                }
+function updateRecipients() {
+    const type = document.getElementById('send-type').value;
+    document.getElementById('single-user-section').style.display = type === 'single_user' ? 'block' : 'none';
+    document.getElementById('multiple-users-section').style.display = type === 'multiple_users' ? 'block' : 'none';
+    document.getElementById('user-accounts-section').style.display = type === 'user_accounts' ? 'block' : 'none';
+}
 
-                // تحديث قائمة الجلسات
-                const sessionsTableBody = document.getElementById('sessions-table-body');
-                sessionsTableBody.innerHTML = '';
-                
-                if (data.sessions && data.sessions.length > 0) {
-                    data.sessions.forEach(session => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${session.id}</td>
-                            <td>
-                                <span class="badge ${session.ready ? 'bg-success' : 'bg-warning'}">
-                                    ${session.ready ? 'متصل' : 'في انتظار الاتصال'}
-                                </span>
-                            </td>
-                            <td>${new Date(session.last_update).toLocaleString()}</td>
-                            <td>
-                                <button class="btn btn-sm btn-danger" onclick="deleteSession('${session.id}')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                                <button class="btn btn-sm btn-primary" onclick="restartSession('${session.id}')">
-                                    <i class="fas fa-sync"></i>
-                                </button>
-                            </td>
-                        `;
-                        sessionsTableBody.appendChild(row);
-                    });
-                } else {
-                    sessionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">لا توجد جلسات نشطة</td></tr>';
-                }
-
-                // تحديث حالة QR code
-                if (data.current_session && !data.current_session.ready) {
-                    const qrCode = document.getElementById('qr-code');
-                    qrCode.innerHTML = `
-                        <div class="text-center">
-                            <img src="/admin/whatsapp/qr/admin_main" alt="QR Code" class="img-fluid" 
-                                 onerror="this.onerror=null; this.src=''; document.getElementById('qr-error').style.display='block';">
-                            <div id="qr-error" class="alert alert-danger mt-2" style="display: none;">
-                                <i class="fas fa-exclamation-circle"></i> فشل في تحميل الباركود
-                                <br>
-                                <small>يرجى المحاولة مرة أخرى</small>
-                            </div>
-                        </div>
-                        <div class="alert alert-info mt-2">
-                            <i class="fas fa-qrcode"></i> قم بمسح رمز QR باستخدام تطبيق الواتساب
-                        </div>
-                    `;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('status-text').textContent = 'خطأ في الاتصال';
-                document.getElementById('status-indicator').style.backgroundColor = '#dc3545';
-                document.getElementById('connection-details').innerHTML = `
-                    <i class="fas fa-times-circle text-danger"></i> فشل في الاتصال بالخادم
-                `;
-            });
-    }
-    setInterval(updateStatus, 5000);
-    updateStatus(); // تحديث فوري عند تحميل الصفحة
-
-    // بدء جلسة جديدة
-    document.getElementById('start-session').addEventListener('click', function() {
-        const button = this;
-        button.disabled = true;
-        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> جاري البدء...';
-
-        fetch('/admin/whatsapp/start', {
-            method: 'POST'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                // تحديث QR code
-                const qrCode = document.getElementById('qr-code');
-                if (data.qr_available) {
-                    qrCode.innerHTML = `
-                        <div class="text-center">
-                            <img src="/admin/whatsapp/qr/admin_main" alt="QR Code" class="img-fluid" 
-                                 onerror="this.onerror=null; this.src=''; document.getElementById('qr-error').style.display='block';">
-                            <div id="qr-error" class="alert alert-danger mt-2" style="display: none;">
-                                <i class="fas fa-exclamation-circle"></i> فشل في تحميل الباركود
-                                <br>
-                                <small>يرجى المحاولة مرة أخرى</small>
-                            </div>
-                        </div>
-                        <div class="alert alert-info mt-2">
-                            <i class="fas fa-qrcode"></i> قم بمسح رمز QR باستخدام تطبيق الواتساب
-                        </div>
-                    `;
-                } else {
-                    qrCode.innerHTML = `
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i> لم يتم إنشاء الباركود
-                            <br>
-                            <small>${data.qr_error || 'يرجى المحاولة مرة أخرى'}</small>
-                        </div>
-                    `;
-                }
-                updateStatus(); // تحديث الحالة فوراً
+async function startSession() {
+    try {
+        const response = await fetch('/admin/whatsapp/start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('حدث خطأ أثناء بدء الجلسة');
-        })
-        .finally(() => {
-            button.disabled = false;
-            button.innerHTML = '<i class="fas fa-sync"></i> بدء جلسة جديدة';
         });
-    });
-
-    // تغيير نوع الإرسال
-    document.getElementById('send-type').addEventListener('change', function() {
-        const type = this.value;
-        document.getElementById('single-user-section').style.display = type === 'single_user' ? 'block' : 'none';
-        document.getElementById('multiple-users-section').style.display = type === 'multiple_users' ? 'block' : 'none';
-        document.getElementById('user-accounts-section').style.display = type === 'user_accounts' ? 'block' : 'none';
-    });
-
-    // إرسال الرسالة
-    document.getElementById('message-form').addEventListener('submit', function(e) {
-        e.preventDefault();
+        const data = await response.json();
         
-        const type = document.getElementById('send-type').value;
-        let data = {
-            type: type,
-            message: document.getElementById('message').value
-        };
-
-        if (type === 'single_user') {
-            data.user_id = document.getElementById('single-user').value;
-        } else if (type === 'multiple_users') {
-            data.user_ids = Array.from(document.getElementById('multiple-users').selectedOptions).map(option => option.value);
-        } else if (type === 'user_accounts') {
-            data.user_id = document.getElementById('user-accounts').value;
+        if (data.status === 'success') {
+            currentSession = data.session;
+            if (data.qr_available) {
+                loadQRCode();
+            }
+            updateServerStatus();
+        } else {
+            alert('فشل في بدء الجلسة: ' + data.error);
         }
+    } catch (error) {
+        alert('خطأ في الاتصال بالخادم');
+    }
+}
 
-        fetch('/admin/whatsapp/send', {
+async function restartSession() {
+    if (!confirm('هل أنت متأكد من إعادة تشغيل الجلسة؟')) return;
+    
+    try {
+        const response = await fetch('/admin/whatsapp/restart/admin_main', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            currentSession = data.data;
+            if (data.data.qr_available) {
+                loadQRCode();
+            }
+            updateServerStatus();
+        } else {
+            alert('فشل في إعادة تشغيل الجلسة: ' + data.error);
+        }
+    } catch (error) {
+        alert('خطأ في الاتصال بالخادم');
+    }
+}
+
+async function closeAllSessions() {
+    if (!confirm('هل أنت متأكد من إغلاق جميع الجلسات؟')) return;
+    
+    try {
+        const response = await fetch('/admin/whatsapp/close-all', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            currentSession = null;
+            document.getElementById('qr-container').innerHTML = '<p class="text-muted">اضغط على "بدء جلسة جديدة" لعرض رمز QR</p>';
+            updateServerStatus();
+        } else {
+            alert('فشل في إغلاق الجلسات: ' + data.error);
+        }
+    } catch (error) {
+        alert('خطأ في الاتصال بالخادم');
+    }
+}
+
+async function loadQRCode() {
+    try {
+        const response = await fetch('/admin/whatsapp/qr/admin_main');
+        const qrContainer = document.getElementById('qr-container');
+        
+        if (response.ok) {
+            const contentType = response.headers.get('content-type');
+            if (contentType.includes('image')) {
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                qrContainer.innerHTML = `<img src="${url}" alt="QR Code" style="max-width: 300px;">`;
+            } else if (contentType.includes('text/html')) {
+                const html = await response.text();
+                qrContainer.innerHTML = html;
+            }
+        } else {
+            qrContainer.innerHTML = '<p class="text-danger">فشل في تحميل رمز QR</p>';
+        }
+    } catch (error) {
+        document.getElementById('qr-container').innerHTML = '<p class="text-danger">خطأ في الاتصال بالخادم</p>';
+    }
+}
+
+async function updateServerStatus() {
+    try {
+        const response = await fetch('/admin/whatsapp/status');
+        const data = await response.json();
+        
+        const statusDiv = document.getElementById('server-status');
+        if (data.error) {
+            statusDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+        } else {
+            statusDiv.innerHTML = `
+                <div class="alert alert-success">
+                    الخادم يعمل
+                    <br>
+                    عدد الجلسات النشطة: ${data.sessions.length}
+                </div>
+            `;
+        }
+    } catch (error) {
+        document.getElementById('server-status').innerHTML = '<div class="alert alert-danger">خطأ في الاتصال بالخادم</div>';
+    }
+}
+
+async function loadUserAccounts() {
+    const userId = document.getElementById('user-accounts').value;
+    try {
+        const response = await fetch(`/admin/user/${userId}/accounts`);
+        const accounts = await response.json();
+        
+        const accountsList = document.getElementById('accounts-list');
+        accountsList.innerHTML = accounts.map(account => `
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="${account.id}" id="account-${account.id}">
+                <label class="form-check-label" for="account-${account.id}">
+                    ${account.account_name} (${account.phone_number || 'لا يوجد رقم هاتف'})
+                </label>
+            </div>
+        `).join('');
+    } catch (error) {
+        alert('خطأ في تحميل الحسابات');
+    }
+}
+
+document.getElementById('message-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const type = document.getElementById('send-type').value;
+    const message = document.getElementById('message').value;
+    
+    let data = {
+        type: type,
+        message: message
+    };
+    
+    switch (type) {
+        case 'single_user':
+            data.user_id = document.getElementById('single-user').value;
+            break;
+        case 'multiple_users':
+            data.user_ids = Array.from(document.getElementById('multiple-users').selectedOptions).map(option => option.value);
+            break;
+        case 'user_accounts':
+            data.user_id = document.getElementById('user-accounts').value;
+            data.account_ids = Array.from(document.querySelectorAll('#accounts-list input:checked')).map(input => input.value);
+            break;
+    }
+    
+    try {
+        const response = await fetch('/admin/whatsapp/send', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                alert('تم إرسال الرسالة بنجاح');
-                document.getElementById('message').value = '';
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('حدث خطأ أثناء إرسال الرسالة');
         });
-    });
+        
+        const result = await response.json();
+        if (result.status === 'success' || result.status === 'queued') {
+            alert('تم إرسال الرسالة بنجاح');
+            document.getElementById('message').value = '';
+        } else {
+            alert('فشل في إرسال الرسالة: ' + result.error);
+        }
+    } catch (error) {
+        alert('خطأ في الاتصال بالخادم');
+    }
 });
 
-// حذف جلسة
-function deleteSession(sessionId) {
-    if (confirm('هل أنت متأكد من حذف هذه الجلسة؟')) {
-        fetch(`/admin/whatsapp/delete/${sessionId}`, {
-            method: 'POST'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                alert('تم حذف الجلسة بنجاح');
-                updateStatus();
+async function killAllChrome() {
+    if (!confirm('هل أنت متأكد من إغلاق جميع صفحات كروم؟')) return;
+    
+    try {
+        const response = await fetch('/admin/whatsapp/kill-chrome', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('حدث خطأ أثناء حذف الجلسة');
         });
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            alert('تم إغلاق جميع صفحات كروم بنجاح');
+            currentSession = null;
+            document.getElementById('qr-container').innerHTML = '<p class="text-muted">اضغط على "بدء جلسة جديدة" لعرض رمز QR</p>';
+            updateServerStatus();
+        } else {
+            alert('فشل في إغلاق صفحات كروم: ' + data.error);
+        }
+    } catch (error) {
+        alert('خطأ في الاتصال بالخادم');
     }
 }
 
-// إعادة تشغيل جلسة
-function restartSession(sessionId) {
-    if (confirm('هل تريد إعادة تشغيل هذه الجلسة؟')) {
-        fetch(`/admin/whatsapp/restart/${sessionId}`, {
-            method: 'POST'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                alert('تم إعادة تشغيل الجلسة بنجاح');
-                updateStatus();
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('حدث خطأ أثناء إعادة تشغيل الجلسة');
-        });
+// تحديث حالة الخادم كل 30 ثانية
+setInterval(updateServerStatus, 30000);
+// تحديث رمز QR كل 10 ثواني إذا كانت الجلسة نشطة
+setInterval(() => {
+    if (currentSession && currentSession.qr_available) {
+        loadQRCode();
     }
-}
+}, 10000);
 </script>
 {% endblock %} 
