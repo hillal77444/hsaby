@@ -30,11 +30,15 @@ logger = logging.getLogger(__name__)
 
 def start_node_server():
     try:
-        if not os.path.exists(NODE_DIR) or not os.path.exists(os.path.join(NODE_DIR, 'index.js')):
-            raise Exception("ملف Node.js غير موجود")
+        if not os.path.exists(NODE_DIR):
+            raise Exception("مجلد Node.js غير موجود")
+        
+        # تثبيت المكتبات إذا لم تكن موجودة
+        if not os.path.exists(os.path.join(NODE_DIR, 'node_modules')):
+            subprocess.run(['npm', 'install'], cwd=NODE_DIR, check=True)
         
         process = subprocess.Popen(
-            ['node', 'index.js'],
+            ['node', 'server.js'],
             cwd=NODE_DIR,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -49,7 +53,7 @@ def start_node_server():
 
 def check_api_health():
     try:
-        response = requests.get(f"{WHATSAPP_API}/status", timeout=5)
+        response = requests.get(f"{WHATSAPP_API}/status/admin_main", timeout=5)
         return response.status_code == 200
     except:
         return False
@@ -327,27 +331,23 @@ def whatsapp_sessions():
 @admin.route('/admin/whatsapp/start_session', methods=['POST'])
 @admin_required
 def start_whatsapp_session():
-    session_id = "admin_main"  # اسم ثابت للجلسة
+    session_id = "admin_main"
     try:
-        # تحقق من حالة الجلسة أولاً
-        status_resp = requests.get(f"{WHATSAPP_API}/session_status/{session_id}")
+        # تحقق من حالة الجلسة
+        status_resp = requests.get(f"{WHATSAPP_API}/status/{session_id}")
         if status_resp.status_code == 200:
             status = status_resp.json().get('status', '').lower()
-            if status in ['authenticated', 'connected']:
-                # الجلسة موثقة، لا تعيد إنشاءها ولا تطلب QR جديد
+            if status == 'connected':
                 return jsonify({'success': True, 'session_id': session_id})
-            else:
-                # إذا الجلسة لا تعمل، احذفها أولاً ثم أنشئها من جديد
-                requests.delete(f"{WHATSAPP_API}/reset/{session_id}")
-                requests.get(f"{WHATSAPP_API}/start/{session_id}")
-        else:
-            # إذا لم توجد الجلسة، أنشئها
-            requests.get(f"{WHATSAPP_API}/start/{session_id}")
-
-        return jsonify({'success': True, 'session_id': session_id})
+        
+        # إذا لم تكن الجلسة نشطة، قم بإنشائها
+        response = requests.post(f"{WHATSAPP_API}/start/{session_id}")
+        if response.status_code == 200:
+            return jsonify({'success': True, 'session_id': session_id})
+        return jsonify({'success': False, 'error': 'فشل بدء الجلسة'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
-    
+
 @admin.route('/admin/whatsapp/qr/<session_id>')
 @admin_required
 def get_whatsapp_qr(session_id):
@@ -377,7 +377,7 @@ def send_whatsapp_message():
 
         response = requests.post(
             f"{WHATSAPP_API}/send/{session_id}",
-            data=data,
+            json=data,
             files=files
         )
 
@@ -580,9 +580,9 @@ def calculate_and_notify_transaction(transaction_id):
 
         # إرسال الرسالة
         response = requests.post(
-            'http://212.224.88.122:3002/send/admin_main',
+            f"{WHATSAPP_API}/send/admin_main",
             json={
-                'numbers': [phone],
+                'number': phone,
                 'message': message
             },
             timeout=5
