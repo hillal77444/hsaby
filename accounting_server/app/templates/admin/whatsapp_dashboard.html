@@ -2,327 +2,273 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>لوحة تحكم الواتساب</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>لوحة تحكم الواتساب</h2>
+        <span id="waStatus" class="badge bg-secondary">جاري التحقق من الحالة...</span>
+        <button id="startSessionBtn" class="btn btn-success ms-2">
+            <i class="fas fa-qrcode"></i> بدء جلسة / إظهار QR
+        </button>
+        <a href="{{ url_for('admin.whatsapp_sessions') }}" class="btn btn-primary">
+            <i class="fas fa-cogs"></i> إدارة الجلسات
+        </a>
+    </div>
     
-    <!-- حالة الخادم -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">حالة الخادم</h5>
-        </div>
-        <div class="card-body">
-            <div id="server-status">
-                {% if server_status.error %}
-                    <div class="alert alert-danger">
-                        {{ server_status.error }}
-                    </div>
-                {% else %}
-                    <div class="alert alert-success">
-                        الخادم يعمل
-                    </div>
-                {% endif %}
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>إرسال رسالة</h5>
+                </div>
+                <div class="card-body">
+                    <form id="sendMessageForm">
+                        <div class="mb-3">
+                            <label for="number" class="form-label">رقم الهاتف</label>
+                            <input type="text" class="form-control" id="number" name="number" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">الرسالة</label>
+                            <textarea class="form-control" id="message" name="message" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="image" class="form-label">صورة (اختياري)</label>
+                            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                        </div>
+                        <button type="submit" class="btn btn-primary">إرسال</button>
+                    </form>
+                </div>
             </div>
-            <div class="btn-group">
-                <button class="btn btn-primary" onclick="startSession()">بدء جلسة جديدة</button>
-                <button class="btn btn-warning" onclick="restartSession()">إعادة تشغيل الجلسة</button>
-                <button class="btn btn-danger" onclick="closeAllSessions()">إغلاق جميع الجلسات</button>
-                <button class="btn btn-dark" onclick="killAllChrome()">إغلاق جميع صفحات كروم</button>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>إرسال جماعي</h5>
+                </div>
+                <div class="card-body">
+                    <form id="sendBulkForm">
+                        <div class="mb-3">
+                            <label for="numbers" class="form-label">الأرقام (مفصولة بفواصل)</label>
+                            <textarea class="form-control" id="numbers" name="numbers" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="bulkMessage" class="form-label">الرسالة</label>
+                            <textarea class="form-control" id="bulkMessage" name="message" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="delay" class="form-label">التأخير (بالمللي ثانية)</label>
+                            <input type="number" class="form-control" id="delay" name="delay" value="1000">
+                        </div>
+                        <div class="mb-3">
+                            <label for="bulkImage" class="form-label">صورة (اختياري)</label>
+                            <input type="file" class="form-control" id="bulkImage" name="image" accept="image/*">
+                        </div>
+                        <button type="submit" class="btn btn-primary">إرسال جماعي</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- رمز QR -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">رمز QR</h5>
-        </div>
-        <div class="card-body text-center">
-            <div id="qr-container">
-                <p class="text-muted">اضغط على "بدء جلسة جديدة" لعرض رمز QR</p>
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>المحادثات الأخيرة</h5>
+                </div>
+                <div class="card-body">
+                    <div id="chatsList" class="list-group">
+                        <!-- سيتم ملؤها بواسطة JavaScript -->
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-
-    <!-- إرسال رسالة -->
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">إرسال رسالة</h5>
-        </div>
-        <div class="card-body">
-            <form id="message-form">
-                <div class="mb-3">
-                    <label class="form-label">نوع الإرسال</label>
-                    <select class="form-select" id="send-type" onchange="updateRecipients()">
-                        <option value="single_user">مستخدم واحد</option>
-                        <option value="multiple_users">عدة مستخدمين</option>
-                        <option value="user_accounts">حسابات مستخدم</option>
-                    </select>
-                </div>
-
-                <div id="single-user-section" class="mb-3">
-                    <label class="form-label">اختر المستخدم</label>
-                    <select class="form-select" id="single-user">
-                        {% for user in users %}
-                            <option value="{{ user.id }}">{{ user.username }} ({{ user.phone }})</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div id="multiple-users-section" class="mb-3" style="display: none;">
-                    <label class="form-label">اختر المستخدمين</label>
-                    <select class="form-select" id="multiple-users" multiple>
-                        {% for user in users %}
-                            <option value="{{ user.id }}">{{ user.username }} ({{ user.phone }})</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div id="user-accounts-section" class="mb-3" style="display: none;">
-                    <label class="form-label">اختر المستخدم</label>
-                    <select class="form-select" id="user-accounts" onchange="loadUserAccounts()">
-                        {% for user in users %}
-                            <option value="{{ user.id }}">{{ user.username }}</option>
-                        {% endfor %}
-                    </select>
-                    <div id="accounts-list" class="mt-2"></div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">الرسالة</label>
-                    <textarea class="form-control" id="message" rows="4" required></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary">إرسال</button>
-            </form>
         </div>
     </div>
 </div>
 
 <script>
-let currentSession = null;
+let currentSessionId = 'admin_main';
+let sessionStatus = null;
+let isStartingSession = false;
+let isCheckingStatus = false;
 
-function updateRecipients() {
-    const type = document.getElementById('send-type').value;
-    document.getElementById('single-user-section').style.display = type === 'single_user' ? 'block' : 'none';
-    document.getElementById('multiple-users-section').style.display = type === 'multiple_users' ? 'block' : 'none';
-    document.getElementById('user-accounts-section').style.display = type === 'user_accounts' ? 'block' : 'none';
+// عرض حالة الواتساب
+async function updateWAStatus() {
+    try {
+        const response = await fetch(`/admin/whatsapp/session_status/${currentSessionId}`);
+        const data = await response.json();
+        sessionStatus = (data.status || '').toUpperCase();
+        const waStatus = document.getElementById('waStatus');
+        if (sessionStatus === 'CONNECTED' || sessionStatus === 'AUTHENTICATED') {
+            waStatus.textContent = 'متصل ✅';
+            waStatus.className = 'badge bg-success';
+        } else if (sessionStatus === 'AUTHENTICATING') {
+            waStatus.textContent = 'بانتظار المسح...';
+            waStatus.className = 'badge bg-warning text-dark';
+        } else {
+            waStatus.textContent = 'غير متصل ❌';
+            waStatus.className = 'badge bg-danger';
+        }
+    } catch (e) {
+        const waStatus = document.getElementById('waStatus');
+        waStatus.textContent = 'تعذر التحقق من الحالة';
+        waStatus.className = 'badge bg-danger';
+    }
 }
 
-async function startSession() {
+// عرض رمز QR في صفحة مستقلة
+function showQRCode() {
+    if (!currentSessionId) return;
+    window.open(`/admin/whatsapp/qr/${currentSessionId}`, '_blank');
+}
+
+// بدء جلسة جديدة فقط إذا لم تكن الجلسة متصلة
+async function startSessionIfNeeded() {
+    if (isStartingSession) return; // حماية من التكرار
+    isStartingSession = true;
+    await updateWAStatus();
+    if (sessionStatus === 'CONNECTED' || sessionStatus === 'AUTHENTICATED') {
+        loadChats();
+        isStartingSession = false;
+        return;
+    }
     try {
-        const response = await fetch('/admin/whatsapp/start', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+        const response = await fetch('/admin/whatsapp/start_session', {
+            method: 'POST'
         });
         const data = await response.json();
-        
-        if (data.status === 'success') {
-            currentSession = data.session;
-            if (data.qr_available) {
-                loadQRCode();
-            }
-            updateServerStatus();
+        if (data.success) {
+            currentSessionId = data.session_id;
+            showQRCode();
+            checkSessionStatus();
         } else {
-            alert('فشل في بدء الجلسة: ' + data.error);
+            alert('فشل بدء الجلسة: ' + data.error);
         }
     } catch (error) {
-        alert('خطأ في الاتصال بالخادم');
+        console.error('Error starting session:', error);
+        alert('حدث خطأ أثناء بدء الجلسة');
+    }
+    isStartingSession = false;
+}
+
+// التحقق من حالة الجلسة
+async function checkSessionStatus() {
+    if (isCheckingStatus) return;
+    isCheckingStatus = true;
+    await updateWAStatus();
+    if (sessionStatus === 'CONNECTED' || sessionStatus === 'AUTHENTICATED') {
+        loadChats();
+        isCheckingStatus = false;
+        return;
+    } else if (sessionStatus === 'AUTHENTICATING') {
+        setTimeout(() => {
+            isCheckingStatus = false;
+            checkSessionStatus();
+        }, 5000);
+    } else {
+        isCheckingStatus = false;
     }
 }
 
-async function restartSession() {
-    if (!confirm('هل أنت متأكد من إعادة تشغيل الجلسة؟')) return;
-    
-    try {
-        const response = await fetch('/admin/whatsapp/restart/admin_main', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        const data = await response.json();
-        
-        if (data.status === 'success') {
-            currentSession = data.data;
-            if (data.data.qr_available) {
-                loadQRCode();
-            }
-            updateServerStatus();
-        } else {
-            alert('فشل في إعادة تشغيل الجلسة: ' + data.error);
-        }
-    } catch (error) {
-        alert('خطأ في الاتصال بالخادم');
-    }
-}
-
-async function closeAllSessions() {
-    if (!confirm('هل أنت متأكد من إغلاق جميع الجلسات؟')) return;
-    
-    try {
-        const response = await fetch('/admin/whatsapp/close-all', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        const data = await response.json();
-        
-        if (data.status === 'success') {
-            currentSession = null;
-            document.getElementById('qr-container').innerHTML = '<p class="text-muted">اضغط على "بدء جلسة جديدة" لعرض رمز QR</p>';
-            updateServerStatus();
-        } else {
-            alert('فشل في إغلاق الجلسات: ' + data.error);
-        }
-    } catch (error) {
-        alert('خطأ في الاتصال بالخادم');
-    }
-}
-
-async function loadQRCode() {
-    try {
-        const response = await fetch('/admin/whatsapp/qr/admin_main');
-        const qrContainer = document.getElementById('qr-container');
-        
-        if (response.ok) {
-            const contentType = response.headers.get('content-type');
-            if (contentType.includes('image')) {
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-                qrContainer.innerHTML = `<img src="${url}" alt="QR Code" style="max-width: 300px;">`;
-            } else if (contentType.includes('text/html')) {
-                const html = await response.text();
-                qrContainer.innerHTML = html;
-            }
-        } else {
-            qrContainer.innerHTML = '<p class="text-danger">فشل في تحميل رمز QR</p>';
-        }
-    } catch (error) {
-        document.getElementById('qr-container').innerHTML = '<p class="text-danger">خطأ في الاتصال بالخادم</p>';
-    }
-}
-
-async function updateServerStatus() {
-    try {
-        const response = await fetch('/admin/whatsapp/status');
-        const data = await response.json();
-        
-        const statusDiv = document.getElementById('server-status');
-        if (data.error) {
-            statusDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
-        } else {
-            statusDiv.innerHTML = `
-                <div class="alert alert-success">
-                    الخادم يعمل
-                    <br>
-                    عدد الجلسات النشطة: ${data.sessions.length}
-                </div>
-            `;
-        }
-    } catch (error) {
-        document.getElementById('server-status').innerHTML = '<div class="alert alert-danger">خطأ في الاتصال بالخادم</div>';
-    }
-}
-
-async function loadUserAccounts() {
-    const userId = document.getElementById('user-accounts').value;
-    try {
-        const response = await fetch(`/admin/user/${userId}/accounts`);
-        const accounts = await response.json();
-        
-        const accountsList = document.getElementById('accounts-list');
-        accountsList.innerHTML = accounts.map(account => `
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="${account.id}" id="account-${account.id}">
-                <label class="form-check-label" for="account-${account.id}">
-                    ${account.account_name} (${account.phone_number || 'لا يوجد رقم هاتف'})
-                </label>
-            </div>
-        `).join('');
-    } catch (error) {
-        alert('خطأ في تحميل الحسابات');
-    }
-}
-
-document.getElementById('message-form').addEventListener('submit', async (e) => {
+// إرسال رسالة
+document.getElementById('sendMessageForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
-    const type = document.getElementById('send-type').value;
-    const message = document.getElementById('message').value;
-    
-    let data = {
-        type: type,
-        message: message
-    };
-    
-    switch (type) {
-        case 'single_user':
-            data.user_id = document.getElementById('single-user').value;
-            break;
-        case 'multiple_users':
-            data.user_ids = Array.from(document.getElementById('multiple-users').selectedOptions).map(option => option.value);
-            break;
-        case 'user_accounts':
-            data.user_id = document.getElementById('user-accounts').value;
-            data.account_ids = Array.from(document.querySelectorAll('#accounts-list input:checked')).map(input => input.value);
-            break;
-    }
-    
+    const formData = new FormData(e.target);
+    formData.append('session_id', currentSessionId);
+
     try {
         const response = await fetch('/admin/whatsapp/send', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
+            body: formData
         });
-        
-        const result = await response.json();
-        if (result.status === 'success' || result.status === 'queued') {
+        const data = await response.json();
+        if (data.success) {
             alert('تم إرسال الرسالة بنجاح');
-            document.getElementById('message').value = '';
         } else {
-            alert('فشل في إرسال الرسالة: ' + result.error);
+            alert('فشل إرسال الرسالة: ' + data.error);
         }
     } catch (error) {
-        alert('خطأ في الاتصال بالخادم');
+        console.error('Error sending message:', error);
+        alert('حدث خطأ أثناء إرسال الرسالة');
     }
 });
 
-async function killAllChrome() {
-    if (!confirm('هل أنت متأكد من إغلاق جميع صفحات كروم؟')) return;
-    
+// إرسال جماعي
+document.getElementById('sendBulkForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    formData.append('session_id', currentSessionId);
+
     try {
-        const response = await fetch('/admin/whatsapp/kill-chrome', {
+        const response = await fetch('/admin/whatsapp/send_bulk', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            body: formData
         });
         const data = await response.json();
-        
-        if (data.status === 'success') {
-            alert('تم إغلاق جميع صفحات كروم بنجاح');
-            currentSession = null;
-            document.getElementById('qr-container').innerHTML = '<p class="text-muted">اضغط على "بدء جلسة جديدة" لعرض رمز QR</p>';
-            updateServerStatus();
+        if (data.success) {
+            alert(`تم الإرسال بنجاح: ${data.success.length} | فشل: ${data.failed.length}`);
         } else {
-            alert('فشل في إغلاق صفحات كروم: ' + data.error);
+            alert('فشل إرسال الرسائل: ' + data.error);
         }
     } catch (error) {
-        alert('خطأ في الاتصال بالخادم');
+        console.error('Error sending bulk messages:', error);
+        alert('حدث خطأ أثناء إرسال الرسائل');
+    }
+});
+
+// تحميل المحادثات
+async function loadChats() {
+    if (!currentSessionId) return;
+    
+    try {
+        const response = await fetch(`/admin/whatsapp/chats/${currentSessionId}`);
+        const chats = await response.json();
+        const chatsList = document.getElementById('chatsList');
+        chatsList.innerHTML = chats.map(chat => `
+            <a href="#" class="list-group-item list-group-item-action" onclick="loadMessages('${chat.id}')">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">${chat.name || chat.id}</h6>
+                    <small>${chat.timestamp ? new Date(chat.timestamp).toLocaleString() : ''}</small>
+                </div>
+                <p class="mb-1">${chat.lastMessage || ''}</p>
+            </a>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading chats:', error);
     }
 }
 
-// تحديث حالة الخادم كل 30 ثانية
-setInterval(updateServerStatus, 30000);
-// تحديث رمز QR كل 10 ثواني إذا كانت الجلسة نشطة
-setInterval(() => {
-    if (currentSession && currentSession.qr_available) {
-        loadQRCode();
+// تحميل الرسائل
+async function loadMessages(chatId) {
+    if (!currentSessionId) return;
+    
+    try {
+        const response = await fetch(`/admin/whatsapp/messages/${currentSessionId}/${chatId}`);
+        const messages = await response.json();
+        // عرض الرسائل في نافذة منبثقة أو قسم منفصل
+        console.log(messages);
+    } catch (error) {
+        console.error('Error loading messages:', error);
     }
-}, 10000);
+}
+
+// زر بدء الجلسة/إظهار QR
+const startSessionBtn = document.getElementById('startSessionBtn');
+startSessionBtn.addEventListener('click', async () => {
+    await updateWAStatus();
+    if (sessionStatus === 'CONNECTED' || sessionStatus === 'AUTHENTICATED') {
+        // الجلسة متصلة بالفعل، فقط اعرض المحادثات
+        loadChats();
+        alert('الجلسة متصلة بالفعل!');
+    } else {
+        // الجلسة غير متصلة، ابدأ جلسة جديدة وأظهر QR
+        await startSessionIfNeeded();
+    }
+});
+
+// تحديث المحادثات وحالة الواتساب كل دقيقة
+setInterval(() => {
+    loadChats();
+    updateWAStatus();
+}, 60000);
 </script>
 {% endblock %} 
