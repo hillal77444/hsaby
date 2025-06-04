@@ -147,11 +147,17 @@ public class AccountsFragment extends Fragment {
             Account account = accounts.get(position);
             holder.accountName.setText(account.getName());
             holder.phone.setText(account.getPhoneNumber());
+            
+            // Remove the listener before setting the checked state
+            holder.whatsappSwitch.setOnCheckedChangeListener(null);
             holder.whatsappSwitch.setChecked(account.isWhatsappEnabled());
-
+            
+            // Add the listener after setting the checked state
             holder.whatsappSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                account.setWhatsappEnabled(isChecked);
-                accountViewModel.updateAccount(account);
+                if (isChecked != account.isWhatsappEnabled()) {
+                    account.setWhatsappEnabled(isChecked);
+                    accountViewModel.updateAccount(account);
+                }
             });
 
             // راقب الرصيد اليمني فقط
