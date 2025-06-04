@@ -522,6 +522,10 @@ def calculate_and_notify_transaction(transaction_id):
         if not transaction:
             return {'status': 'error', 'message': 'المعاملة غير موجودة'}
 
+        # التحقق من تفعيل الواتساب
+        if not getattr(transaction, 'whatsapp_enabled', True):
+            return {'status': 'success', 'message': 'تم تخطي الإشعار - الواتساب غير مفعل لهذه المعاملة'}
+
         account = Account.query.get(transaction.account_id)
         if not account:
             return {'status': 'error', 'message': 'الحساب غير موجود'}
@@ -554,19 +558,19 @@ def calculate_and_notify_transaction(transaction_id):
         transaction_type = "قيدنا الى حسابكم" if transaction.type == 'credit' else "قيدنا على حسابكم"
         balance_text = f"الرصيد لكم: {balance} {transaction.currency or 'ريال'}" if balance >= 0 else f"الرصيد عليكم: {abs(balance)} {transaction.currency or 'ريال'}"
         message = f"""
-🏦 إشعار معاملة جديدة
+🏦 إشعار قيد جديدة
 
-🏛️ الاخ/: {account.account_name}
+🏛️ الاخ/: *{account.account_name}*
 
-💰 تفاصيل المعاملة:
+💰 تفاصيل القيد :
 •  {transaction_type}
 • المبلغ: {transaction.amount} {transaction.currency or 'ريال'}
 • الوصف: {transaction.description or 'لا يوجد وصف'}
-• التاريخ: {transaction.date.strftime('%Y-%m-%d %H:%M')}
+• التاريخ: {transaction.date.strftime('%Y-%m-%d')}
 
 💳 {balance_text}
 
-تم الإرسال بواسطة: {user.username}
+تم الإرسال بواسطة: *{user.username}*
         """.strip()
 
         # تنسيق رقم الهاتف
