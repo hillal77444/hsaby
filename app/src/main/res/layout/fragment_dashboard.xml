@@ -108,14 +108,14 @@
                         android:layout_margin="4dp"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:background="@drawable/gradient_green"
+                        android:background="#E8F5E9"
                         android:padding="16dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="حساب"
-                            android:textColor="#FFFFFF"
+                            android:textColor="#1B5E20"
                             android:textStyle="bold"
                             android:textSize="16sp" />
 
@@ -123,7 +123,7 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_arrow_upward"
-                            android:tint="#FFFFFF"
+                            android:tint="#1B5E20"
                             android:layout_marginTop="4dp" />
 
                         <TextView
@@ -131,7 +131,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="24"
-                            android:textColor="#FFFFFF"
+                            android:textColor="#1B5E20"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:layout_marginTop="4dp" />
@@ -145,14 +145,14 @@
                         android:layout_margin="4dp"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:background="@drawable/gradient_blue"
+                        android:background="#E3F2FD"
                         android:padding="16dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="لكم"
-                            android:textColor="#FFFFFF"
+                            android:textColor="#0D47A1"
                             android:textStyle="bold"
                             android:textSize="16sp" />
 
@@ -160,7 +160,7 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_arrow_upward"
-                            android:tint="#FFFFFF"
+                            android:tint="#0D47A1"
                             android:layout_marginTop="4dp" />
 
                         <TextView
@@ -168,7 +168,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="4,394,162"
-                            android:textColor="#FFFFFF"
+                            android:textColor="#0D47A1"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:layout_marginTop="4dp" />
@@ -182,14 +182,14 @@
                         android:layout_margin="4dp"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:background="@drawable/gradient_red"
+                        android:background="#FFEBEE"
                         android:padding="16dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="عليكم"
-                            android:textColor="#FFFFFF"
+                            android:textColor="#B71C1C"
                             android:textStyle="bold"
                             android:textSize="16sp" />
 
@@ -197,7 +197,7 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_arrow_downward"
-                            android:tint="#FFFFFF"
+                            android:tint="#B71C1C"
                             android:layout_marginTop="4dp" />
 
                         <TextView
@@ -205,7 +205,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="4,108,808"
-                            android:textColor="#FFFFFF"
+                            android:textColor="#B71C1C"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:layout_marginTop="4dp" />
@@ -219,14 +219,14 @@
                         android:layout_margin="4dp"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:background="@drawable/gradient_purple"
+                        android:background="#F3E5F5"
                         android:padding="16dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="الرصيد"
-                            android:textColor="#FFFFFF"
+                            android:textColor="#4A148C"
                             android:textStyle="bold"
                             android:textSize="16sp" />
 
@@ -234,7 +234,7 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_arrow_upward"
-                            android:tint="#FFFFFF"
+                            android:tint="#4A148C"
                             android:layout_marginTop="4dp" />
 
                         <TextView
@@ -242,7 +242,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="285,354"
-                            android:textColor="#FFFFFF"
+                            android:textColor="#4A148C"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:layout_marginTop="4dp" />
