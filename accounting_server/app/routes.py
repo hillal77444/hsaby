@@ -3,7 +3,7 @@ from app import db
 from app.models import User, Account, Transaction
 from app.utils import hash_password, verify_password, generate_sync_token
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import logging
 import json
 from sqlalchemy import func
@@ -13,6 +13,13 @@ from app.admin_routes import send_transaction_notification, calculate_and_notify
 
 main = Blueprint('main', __name__)
 logger = logging.getLogger(__name__)
+
+# تعريف توقيت اليمن (UTC+3)
+YEMEN_TIMEZONE = timezone(timedelta(hours=3))
+
+def get_yemen_time():
+    """الحصول على التوقيت الحالي بتوقيت اليمن"""
+    return datetime.now(YEMEN_TIMEZONE)
 
 def json_response(data, status_code=200):
     response = json.dumps(data, ensure_ascii=False)
@@ -201,14 +208,16 @@ def sync_data():
                 # معالجة التاريخ
                 try:
                     if isinstance(trans_data.get('date'), (int, float)):
-                        date = datetime.fromtimestamp(trans_data['date'] / 1000)
+                        # تحويل timestamp إلى datetime بتوقيت اليمن
+                        date = datetime.fromtimestamp(trans_data['date'] / 1000, YEMEN_TIMEZONE)
                     else:
-                        date = datetime.fromisoformat(trans_data['date'].replace('Z', '+00:00'))
+                        # تحويل string إلى datetime بتوقيت اليمن
+                        date = datetime.fromisoformat(trans_data['date'].replace('Z', '+00:00')).astimezone(YEMEN_TIMEZONE)
                 except (ValueError, TypeError) as e:
                     return json_response({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}, 400)
                 
                 # التحقق من صحة التاريخ
-                if date > datetime.now():
+                if date > get_yemen_time():
                     return json_response({'error': 'التاريخ غير صحيح'}, 400)
                 
                 # التحقق من صحة الحساب
@@ -579,9 +588,9 @@ def sync_changes():
                         # معالجة التاريخ
                         try:
                             if isinstance(transaction_data['date'], (int, float)):
-                                date = datetime.fromtimestamp(transaction_data['date'] / 1000)
+                                date = datetime.fromtimestamp(transaction_data['date'] / 1000, YEMEN_TIMEZONE)
                             else:
-                                date = datetime.fromisoformat(transaction_data['date'].replace('Z', '+00:00'))
+                                date = datetime.fromisoformat(transaction_data['date'].replace('Z', '+00:00')).astimezone(YEMEN_TIMEZONE)
                         except (ValueError, TypeError) as e:
                             return json_response({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}, 400)
                         
@@ -635,9 +644,9 @@ def sync_changes():
                         # تحديث المعاملة
                         try:
                             if isinstance(transaction_data['date'], (int, float)):
-                                date = datetime.fromtimestamp(transaction_data['date'] / 1000)
+                                date = datetime.fromtimestamp(transaction_data['date'] / 1000, YEMEN_TIMEZONE)
                             else:
-                                date = datetime.fromisoformat(transaction_data['date'].replace('Z', '+00:00'))
+                                date = datetime.fromisoformat(transaction_data['date'].replace('Z', '+00:00')).astimezone(YEMEN_TIMEZONE)
                         except (ValueError, TypeError) as e:
                             return json_response({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}, 400)
                         
@@ -778,8 +787,8 @@ def get_all_users():
 @main.route('/api/server/time', methods=['GET'])
 def get_server_time():
     try:
-        # إرجاع توقيت الخادم بالميلي ثانية
-        server_time = int(datetime.now().timestamp() * 1000)
+        # إرجاع توقيت الخادم بتوقيت اليمن بالميلي ثانية
+        server_time = int(get_yemen_time().timestamp() * 1000)
         return jsonify(server_time)
     except Exception as e:
         logger.error(f"Error getting server time: {str(e)}")
