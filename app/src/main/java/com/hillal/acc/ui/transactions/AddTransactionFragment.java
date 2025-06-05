@@ -102,6 +102,23 @@ public class AddTransactionFragment extends Fragment {
     private void loadAccounts() {
         accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
             if (accounts != null && !accounts.isEmpty()) {
+                // إنشاء خريطة لتخزين عدد المعاملات لكل حساب
+                Map<Long, Integer> accountTransactionCount = new HashMap<>();
+                
+                // حساب عدد المعاملات لكل حساب
+                for (Transaction transaction : allTransactions) {
+                    long accountId = transaction.getAccountId();
+                    accountTransactionCount.put(accountId, 
+                        accountTransactionCount.getOrDefault(accountId, 0) + 1);
+                }
+                
+                // ترتيب الحسابات حسب عدد المعاملات (تنازلياً)
+                accounts.sort((a1, a2) -> {
+                    int count1 = accountTransactionCount.getOrDefault(a1.getId(), 0);
+                    int count2 = accountTransactionCount.getOrDefault(a2.getId(), 0);
+                    return Integer.compare(count2, count1); // ترتيب تنازلي
+                });
+                
                 allAccounts = accounts;
                 setupAccountDropdown(accounts);
             }
