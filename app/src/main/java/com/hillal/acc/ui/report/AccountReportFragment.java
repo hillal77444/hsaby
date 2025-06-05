@@ -406,9 +406,9 @@ public class AccountReportFragment extends Fragment {
                 // ترتيب المعاملات من الأقدم إلى الأحدث
                 List<AccountReport.Transaction> sortedTransactions = new ArrayList<>(report.getTransactions());
                 Collections.sort(sortedTransactions, (t1, t2) -> {
-                    String date1 = t1.getDate() != null ? t1.getDate().split(" ")[0] : "";
-                    String date2 = t2.getDate() != null ? t2.getDate().split(" ")[0] : "";
-                    return date1.compareTo(date2);
+                    String dateTime1 = t1.getDate() != null ? t1.getDate() : "";
+                    String dateTime2 = t2.getDate() != null ? t2.getDate() : "";
+                    return dateTime1.compareTo(dateTime2);
                 });
 
                 double runningBalance = 0;
