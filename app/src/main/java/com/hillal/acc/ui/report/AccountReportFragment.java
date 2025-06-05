@@ -23,6 +23,9 @@ import com.hillal.acc.network.RetrofitClient;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 import retrofit2.Call;
@@ -400,8 +403,16 @@ public class AccountReportFragment extends Fragment {
             html.append("</tr>");
 
             if (report.getTransactions() != null && !report.getTransactions().isEmpty()) {
+                // ترتيب المعاملات من الأقدم إلى الأحدث
+                List<AccountReport.Transaction> sortedTransactions = new ArrayList<>(report.getTransactions());
+                Collections.sort(sortedTransactions, (t1, t2) -> {
+                    String date1 = t1.getDate() != null ? t1.getDate().split(" ")[0] : "";
+                    String date2 = t2.getDate() != null ? t2.getDate().split(" ")[0] : "";
+                    return date1.compareTo(date2);
+                });
+
                 double runningBalance = 0;
-                for (AccountReport.Transaction tx : report.getTransactions()) {
+                for (AccountReport.Transaction tx : sortedTransactions) {
                     if (tx != null) {
                         // حساب الرصيد التراكمي
                         if (tx.getType() != null) {
