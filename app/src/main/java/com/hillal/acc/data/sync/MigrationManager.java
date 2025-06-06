@@ -81,7 +81,7 @@ public class MigrationManager {
             StringBuilder accountDetails = new StringBuilder();
             for (Account account : accountsToMigrate) {
                 String details = String.format("Account: ID=%d, ServerID=%d, Name=%s\n", 
-                    account.getId(), account.getServerId(), account.getAccountName());
+                    account.getId(), account.getServerId(), account.getAccount_name());
                 accountDetails.append(details);
                 Log.d("MigrationManager", details);
             }
