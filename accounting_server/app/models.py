@@ -1,5 +1,8 @@
 from app import db
-from datetime import datetime
+from datetime import datetime, timedelta
+
+def get_yemen_time():
+    return datetime.utcnow() + timedelta(hours=3)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -21,8 +24,8 @@ class Account(db.Model):
     whatsapp_enabled = db.Column(db.Boolean, default=True)  # إضافة حقل واتساب
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     transactions = db.relationship('Transaction', backref='account', lazy=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=get_yemen_time)
+    updated_at = db.Column(db.DateTime, default=get_yemen_time, onupdate=get_yemen_time)
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -36,5 +39,5 @@ class Transaction(db.Model):
     whatsapp_enabled = db.Column(db.Boolean, default=True)  # إضافة حقل whatsapp_enabled
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     account_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow) 
+    created_at = db.Column(db.DateTime, default=get_yemen_time)
+    updated_at = db.Column(db.DateTime, default=get_yemen_time, onupdate=get_yemen_time) 
