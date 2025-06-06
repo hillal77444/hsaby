@@ -129,26 +129,22 @@ public interface ApiService {
             List<Transaction> transactionsToSend = new ArrayList<>();
             for (Transaction transaction : transactions) {
                 try {
-                    // البحث عن الحساب في قاعدة البيانات المحلية
-                    AppDatabase db = AppDatabase.getInstance(App.getContext());
-                    AccountDao accountDao = db.accountDao();
+                    // استخدام معرف الخادم مباشرة من المعاملة
+                    long accountServerId = transaction.getAccountServerId();
                     
-                    Account relatedAccount = accountDao.getAccountById(transaction.getAccountId());
-                    
-                    // تخطي المعاملة إذا لم يتم العثور على الحساب أو كان serverId غير صالح
-                    if (relatedAccount == null || relatedAccount.getServerId() <= 0) {
+                    if (accountServerId <= 0) {
                         Log.d("SyncRequest", "تخطي المعاملة - معرف الحساب غير صالح: " + transaction.getAccountId());
                         continue;
                     }
 
-                    Log.d("SyncRequest", String.format("تحويل معرف الحساب: المحلي=%d, الخادم=%d", 
-                        transaction.getAccountId(), relatedAccount.getServerId()));
+                    Log.d("SyncRequest", String.format("استخدام معرف الحساب: المحلي=%d, الخادم=%d", 
+                        transaction.getAccountId(), accountServerId));
 
                     Transaction newTransaction = new Transaction();
                     newTransaction.setId(transaction.getId());
                     newTransaction.setServerId(transaction.getServerId());
                     newTransaction.setUserId(transaction.getUserId());
-                    newTransaction.setAccountId(relatedAccount.getServerId()); // استخدام معرف الخادم للحساب
+                    newTransaction.setAccountId(accountServerId); // استخدام معرف الخادم للحساب
                     
                     newTransaction.setAmount(transaction.getAmount());
                     newTransaction.setType(transaction.getType());
