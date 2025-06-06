@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.io.IOException;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -88,25 +89,45 @@ public class MigrationManager {
                                 try {
                                     // تحديث الحسابات
                                     for (Account account : accountsToMigrate) {
-                                        Long serverId = syncResponse.getAccountServerId(account.getId());
+                                        Long serverId = null;
+                                        // البحث عن server_id في الرد باستخدام local_id
+                                        for (Map<String, Long> mapping : syncResponse.getAccountMappings()) {
+                                            if (mapping.get("local_id") != null && 
+                                                mapping.get("local_id").equals(account.getId())) {
+                                                serverId = mapping.get("server_id");
+                                                break;
+                                            }
+                                        }
                                         
                                         if (serverId != null && serverId > 0) {
                                             account.setServerId(serverId);
                                             account.setSyncStatus(2); 
                                             accountDao.update(account);
                                             migratedAccountsCount++;
+                                            Log.d("MigrationManager", "Updated account " + account.getId() + 
+                                                " with server_id " + serverId);
                                         }
                                     }
 
                                     // تحديث المعاملات
                                     for (Transaction transaction : transactionsToMigrate) {
-                                        Long serverId = syncResponse.getTransactionServerId(transaction.getId());
+                                        Long serverId = null;
+                                        // البحث عن server_id في الرد باستخدام local_id
+                                        for (Map<String, Long> mapping : syncResponse.getTransactionMappings()) {
+                                            if (mapping.get("local_id") != null && 
+                                                mapping.get("local_id").equals(transaction.getId())) {
+                                                serverId = mapping.get("server_id");
+                                                break;
+                                            }
+                                        }
                                         
                                         if (serverId != null && serverId > 0) {
                                             transaction.setServerId(serverId);
                                             transaction.setSyncStatus(2);
                                             transactionDao.update(transaction);
                                             migratedTransactionsCount++;
+                                            Log.d("MigrationManager", "Updated transaction " + transaction.getId() + 
+                                                " with server_id " + serverId);
                                         }
                                     }
 
