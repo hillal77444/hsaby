@@ -85,33 +85,53 @@ public class MigrationManager {
                         if (response.isSuccessful() && response.body() != null) {
                             SyncResponse syncResponse = response.body();
                             
+                            // طباعة تفاصيل الرد
+                            Log.d("MigrationManager", "Server Response Details:\n" + syncResponse.getResponseDetails());
+                            
+                            if (!syncResponse.isValid()) {
+                                Log.e("MigrationManager", "Invalid server response: missing mappings");
+                                new Handler(Looper.getMainLooper()).post(() -> 
+                                    Toast.makeText(context, "خطأ في استجابة الخادم", Toast.LENGTH_LONG).show());
+                                return;
+                            }
+                            
                             executor.execute(() -> {
                                 try {
                                     // تحديث الحسابات
                                     for (Account account : accountsToMigrate) {
                                         Long serverId = syncResponse.getAccountServerId(account.getId());
+                                        Log.d("MigrationManager", String.format("Processing account: local_id=%d, server_id=%s", 
+                                            account.getId(), serverId));
                                         
                                         if (serverId != null && serverId > 0) {
                                             account.setServerId(serverId);
                                             account.setSyncStatus(2); 
                                             accountDao.update(account);
                                             migratedAccountsCount++;
-                                            Log.d("MigrationManager", "Updated account " + account.getId() + 
-                                                " with server_id " + serverId);
+                                            Log.d("MigrationManager", String.format("Updated account: local_id=%d, server_id=%d", 
+                                                account.getId(), serverId));
+                                        } else {
+                                            Log.w("MigrationManager", String.format("No server_id found for account: local_id=%d", 
+                                                account.getId()));
                                         }
                                     }
 
                                     // تحديث المعاملات
                                     for (Transaction transaction : transactionsToMigrate) {
                                         Long serverId = syncResponse.getTransactionServerId(transaction.getId());
+                                        Log.d("MigrationManager", String.format("Processing transaction: local_id=%d, server_id=%s", 
+                                            transaction.getId(), serverId));
                                         
                                         if (serverId != null && serverId > 0) {
                                             transaction.setServerId(serverId);
                                             transaction.setSyncStatus(2);
                                             transactionDao.update(transaction);
                                             migratedTransactionsCount++;
-                                            Log.d("MigrationManager", "Updated transaction " + transaction.getId() + 
-                                                " with server_id " + serverId);
+                                            Log.d("MigrationManager", String.format("Updated transaction: local_id=%d, server_id=%d", 
+                                                transaction.getId(), serverId));
+                                        } else {
+                                            Log.w("MigrationManager", String.format("No server_id found for transaction: local_id=%d", 
+                                                transaction.getId()));
                                         }
                                     }
 
