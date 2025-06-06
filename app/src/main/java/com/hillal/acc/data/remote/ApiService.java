@@ -158,17 +158,28 @@ public interface ApiService {
     }
 
     public static class SyncResponse {
-        @SerializedName("account_mappings")
-        private List<Mapping> accountMappings;
-        
-        @SerializedName("transaction_mappings")
-        private List<Mapping> transactionMappings;
+        private String message;
+        private List<Map<String, Long>> account_mappings;
+        private List<Map<String, Long>> transaction_mappings;
+
+        public String getMessage() {
+            return message;
+        }
+
+        public List<Map<String, Long>> getAccountMappings() {
+            return account_mappings;
+        }
+
+        public List<Map<String, Long>> getTransactionMappings() {
+            return transaction_mappings;
+        }
 
         public Long getAccountServerId(Long localId) {
-            if (accountMappings != null) {
-                for (Mapping mapping : accountMappings) {
-                    if (mapping.localId.equals(localId)) {
-                        return mapping.serverId;
+            if (account_mappings != null) {
+                for (Map<String, Long> mapping : account_mappings) {
+                    if (mapping.get("local_id") != null && 
+                        mapping.get("local_id").equals(localId)) {
+                        return mapping.get("server_id");
                     }
                 }
             }
@@ -176,22 +187,15 @@ public interface ApiService {
         }
 
         public Long getTransactionServerId(Long localId) {
-            if (transactionMappings != null) {
-                for (Mapping mapping : transactionMappings) {
-                    if (mapping.localId.equals(localId)) {
-                        return mapping.serverId;
+            if (transaction_mappings != null) {
+                for (Map<String, Long> mapping : transaction_mappings) {
+                    if (mapping.get("local_id") != null && 
+                        mapping.get("local_id").equals(localId)) {
+                        return mapping.get("server_id");
                     }
                 }
             }
             return null;
-        }
-
-        private static class Mapping {
-            @SerializedName("local_id")
-            private Long localId;
-            
-            @SerializedName("server_id")
-            private Long serverId;
         }
     }
 } 
