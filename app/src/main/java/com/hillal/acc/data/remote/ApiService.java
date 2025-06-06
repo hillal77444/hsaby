@@ -3,7 +3,8 @@ package com.hillal.acc.data.remote;
 import com.hillal.acc.data.model.User;
 import com.hillal.acc.data.model.Account;
 import com.hillal.acc.data.model.Transaction;
-import com.hillal.acc.data.database.AccountDatabase;
+import com.hillal.acc.data.local.AccountDatabase;
+import com.hillal.acc.data.local.AccountDao;
 
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,8 @@ import retrofit2.http.Header;
 import retrofit2.http.Query;
 import com.google.gson.annotations.SerializedName;
 import android.util.Log;
+import android.content.Context;
+import com.hillal.acc.AccountingApplication;
 
 public interface ApiService {
     @POST("api/login")
@@ -126,9 +129,11 @@ public interface ApiService {
             List<Transaction> transactionsToSend = new ArrayList<>();
             for (Transaction transaction : transactions) {
                 // البحث عن الحساب في قاعدة البيانات المحلية
-                Account relatedAccount = AccountDatabase.getInstance()
-                    .accountDao()
-                    .getAccountById(transaction.getAccountId());
+                AccountDao accountDao = AccountingApplication.getInstance()
+                    .getDatabase()
+                    .accountDao();
+                
+                Account relatedAccount = accountDao.getAccountById(transaction.getAccountId());
                 
                 // تخطي المعاملة إذا لم يتم العثور على الحساب أو كان serverId غير صالح
                 if (relatedAccount == null || relatedAccount.getServerId() <= 0) {
