@@ -77,6 +77,30 @@ public class MigrationManager {
             Log.d("MigrationManager", "Starting migration with " + accountsToMigrate.size() + " accounts and " + 
                 transactionsToMigrate.size() + " transactions");
 
+            // طباعة تفاصيل الحسابات قبل الإرسال
+            StringBuilder accountDetails = new StringBuilder();
+            for (Account account : accountsToMigrate) {
+                String details = String.format("Account: ID=%d, ServerID=%d, Name=%s\n", 
+                    account.getId(), account.getServerId(), account.getAccountName());
+                accountDetails.append(details);
+                Log.d("MigrationManager", details);
+            }
+
+            // طباعة تفاصيل المعاملات قبل الإرسال
+            StringBuilder transactionDetails = new StringBuilder();
+            for (Transaction transaction : transactionsToMigrate) {
+                String details = String.format("Transaction: ID=%d, AccountID=%d, ServerID=%d\n", 
+                    transaction.getId(), transaction.getAccountId(), transaction.getServerId());
+                transactionDetails.append(details);
+                Log.d("MigrationManager", details);
+            }
+
+            // عرض التفاصيل للمستخدم
+            new Handler(Looper.getMainLooper()).post(() -> {
+                String message = "بيانات المزامنة:\n" + accountDetails.toString() + "\n" + transactionDetails.toString();
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+            });
+
             SyncRequest request = new SyncRequest(accountsToMigrate, transactionsToMigrate);
             apiService.syncData("Bearer " + token, request).enqueue(new Callback<SyncResponse>() {
                 @Override
@@ -87,6 +111,7 @@ public class MigrationManager {
                             
                             // طباعة تفاصيل الرد
                             Log.d("MigrationManager", "Server Response Details:\n" + syncResponse.getResponseDetails());
+                            Log.d("MigrationManager", "Full Response Body: " + response.body().toString());
                             
                             if (!syncResponse.isValid()) {
                                 Log.e("MigrationManager", "Invalid server response: missing mappings");
@@ -119,8 +144,8 @@ public class MigrationManager {
                                     // تحديث المعاملات
                                     for (Transaction transaction : transactionsToMigrate) {
                                         Long serverId = syncResponse.getTransactionServerId(transaction.getId());
-                                        Log.d("MigrationManager", String.format("Processing transaction: local_id=%d, server_id=%s", 
-                                            transaction.getId(), serverId));
+                                        Log.d("MigrationManager", String.format("DEBUG - Full Transaction Details: local_id=%d, server_id=%s, current_server_id=%d, sync_status=%d", 
+                                            transaction.getId(), serverId, transaction.getServerId(), transaction.getSyncStatus()));
                                         
                                         if (serverId != null && serverId > 0) {
                                             transaction.setServerId(serverId);
