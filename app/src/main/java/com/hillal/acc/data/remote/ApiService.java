@@ -123,22 +123,22 @@ public interface ApiService {
             // نسخ المعاملات مع last_sync_time
             List<Transaction> transactionsToSend = new ArrayList<>();
             for (Transaction transaction : transactions) {
-                Transaction newTransaction = new Transaction();
-                newTransaction.setId(transaction.getId());
-                newTransaction.setServerId(transaction.getServerId());
-                newTransaction.setUserId(transaction.getUserId());
-                
                 // البحث عن الحساب المرتبط بالمعاملة
                 Account relatedAccount = accounts.stream()
                     .filter(acc -> acc.getId() == transaction.getAccountId())
                     .findFirst()
                     .orElse(null);
                 
-                if (relatedAccount != null && relatedAccount.getServerId() > 0) {
-                    newTransaction.setAccountId(relatedAccount.getServerId());
-                } else {
-                    newTransaction.setAccountId(transaction.getAccountId());
+                // تخطي المعاملة إذا لم يتم العثور على الحساب أو كان serverId غير صالح
+                if (relatedAccount == null || relatedAccount.getServerId() <= 0) {
+                    continue;
                 }
+
+                Transaction newTransaction = new Transaction();
+                newTransaction.setId(transaction.getId());
+                newTransaction.setServerId(transaction.getServerId());
+                newTransaction.setUserId(transaction.getUserId());
+                newTransaction.setAccountId(relatedAccount.getServerId());
                 
                 newTransaction.setAmount(transaction.getAmount());
                 newTransaction.setType(transaction.getType());
