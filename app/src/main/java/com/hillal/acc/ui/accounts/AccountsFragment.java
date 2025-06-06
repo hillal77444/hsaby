@@ -146,7 +146,7 @@ public class AccountsFragment extends Fragment {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             Account account = accounts.get(position);
             holder.accountName.setText(account.getName());
-            holder.phone.setText(account.getPhoneNumber());
+            holder.phone.setText("Server ID: " + account.getServerId());
             
             // Remove the listener before setting the checked state
             holder.whatsappSwitch.setOnCheckedChangeListener(null);
