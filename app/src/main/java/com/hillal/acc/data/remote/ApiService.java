@@ -22,6 +22,10 @@ import com.google.gson.annotations.SerializedName;
 import android.util.Log;
 import android.content.Context;
 import com.hillal.acc.App;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.Callable;
 
 public interface ApiService {
     @POST("api/login")
@@ -127,24 +131,37 @@ public interface ApiService {
         public List<Transaction> getTransactions() {
             // نسخ المعاملات مع last_sync_time
             List<Transaction> transactionsToSend = new ArrayList<>();
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            
             for (Transaction transaction : transactions) {
                 try {
-                    // استخدام معرف الخادم مباشرة من المعاملة
-                    long accountServerId = transaction.getAccountServerId();
+                    // البحث عن الحساب في قاعدة البيانات المحلية
+                    AppDatabase db = AppDatabase.getInstance(transaction.getContext());
+                    AccountDao accountDao = db.accountDao();
                     
-                    if (accountServerId <= 0) {
+                    // استخدام Executor للتعامل مع قاعدة البيانات
+                    Future<Account> future = executor.submit(new Callable<Account>() {
+                        @Override
+                        public Account call() {
+                            return accountDao.getAccountByIdSync(transaction.getAccountId());
+                        }
+                    });
+                    
+                    Account relatedAccount = future.get(); // انتظار النتيجة
+                    
+                    if (relatedAccount == null || relatedAccount.getServerId() <= 0) {
                         Log.d("SyncRequest", "تخطي المعاملة - معرف الحساب غير صالح: " + transaction.getAccountId());
                         continue;
                     }
 
-                    Log.d("SyncRequest", String.format("استخدام معرف الحساب: المحلي=%d, الخادم=%d", 
-                        transaction.getAccountId(), accountServerId));
+                    Log.d("SyncRequest", String.format("تحويل معرف الحساب: المحلي=%d, الخادم=%d", 
+                        transaction.getAccountId(), relatedAccount.getServerId()));
 
                     Transaction newTransaction = new Transaction();
                     newTransaction.setId(transaction.getId());
                     newTransaction.setServerId(transaction.getServerId());
                     newTransaction.setUserId(transaction.getUserId());
-                    newTransaction.setAccountId(accountServerId); // استخدام معرف الخادم للحساب
+                    newTransaction.setAccountId(relatedAccount.getServerId()); // استخدام معرف الخادم للحساب
                     
                     newTransaction.setAmount(transaction.getAmount());
                     newTransaction.setType(transaction.getType());
@@ -162,6 +179,8 @@ public interface ApiService {
                     Log.e("SyncRequest", "خطأ في معالجة المعاملة: " + e.getMessage());
                 }
             }
+            
+            executor.shutdown();
             return transactionsToSend;
         }
     }
