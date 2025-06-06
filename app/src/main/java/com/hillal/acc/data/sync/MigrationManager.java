@@ -89,15 +89,7 @@ public class MigrationManager {
                                 try {
                                     // تحديث الحسابات
                                     for (Account account : accountsToMigrate) {
-                                        Long serverId = null;
-                                        // البحث عن server_id في الرد باستخدام local_id
-                                        for (Map<String, Long> mapping : syncResponse.getAccountMappings()) {
-                                            if (mapping.get("local_id") != null && 
-                                                mapping.get("local_id").equals(account.getId())) {
-                                                serverId = mapping.get("server_id");
-                                                break;
-                                            }
-                                        }
+                                        Long serverId = syncResponse.getAccountServerId(account.getId());
                                         
                                         if (serverId != null && serverId > 0) {
                                             account.setServerId(serverId);
@@ -111,15 +103,7 @@ public class MigrationManager {
 
                                     // تحديث المعاملات
                                     for (Transaction transaction : transactionsToMigrate) {
-                                        Long serverId = null;
-                                        // البحث عن server_id في الرد باستخدام local_id
-                                        for (Map<String, Long> mapping : syncResponse.getTransactionMappings()) {
-                                            if (mapping.get("local_id") != null && 
-                                                mapping.get("local_id").equals(transaction.getId())) {
-                                                serverId = mapping.get("server_id");
-                                                break;
-                                            }
-                                        }
+                                        Long serverId = syncResponse.getTransactionServerId(transaction.getId());
                                         
                                         if (serverId != null && serverId > 0) {
                                             transaction.setServerId(serverId);
