@@ -158,8 +158,13 @@ public interface ApiService {
     }
 
     public static class SyncResponse {
+        @SerializedName("message")
         private String message;
+        
+        @SerializedName("account_mappings")
         private List<Map<String, Long>> account_mappings;
+        
+        @SerializedName("transaction_mappings")
         private List<Map<String, Long>> transaction_mappings;
 
         public String getMessage() {
@@ -177,9 +182,12 @@ public interface ApiService {
         public Long getAccountServerId(Long localId) {
             if (account_mappings != null) {
                 for (Map<String, Long> mapping : account_mappings) {
-                    if (mapping.get("local_id") != null && 
-                        mapping.get("local_id").equals(localId)) {
-                        return mapping.get("server_id");
+                    Long local_id = mapping.get("local_id");
+                    if (local_id != null && local_id.equals(localId)) {
+                        Long server_id = mapping.get("server_id");
+                        if (server_id != null && server_id > 0) {
+                            return server_id;
+                        }
                     }
                 }
             }
@@ -189,13 +197,47 @@ public interface ApiService {
         public Long getTransactionServerId(Long localId) {
             if (transaction_mappings != null) {
                 for (Map<String, Long> mapping : transaction_mappings) {
-                    if (mapping.get("local_id") != null && 
-                        mapping.get("local_id").equals(localId)) {
-                        return mapping.get("server_id");
+                    Long local_id = mapping.get("local_id");
+                    if (local_id != null && local_id.equals(localId)) {
+                        Long server_id = mapping.get("server_id");
+                        if (server_id != null && server_id > 0) {
+                            return server_id;
+                        }
                     }
                 }
             }
             return null;
+        }
+
+        // إضافة دالة للتحقق من صحة الرد
+        public boolean isValid() {
+            return account_mappings != null && transaction_mappings != null;
+        }
+
+        // إضافة دالة للحصول على تفاصيل الرد
+        public String getResponseDetails() {
+            StringBuilder details = new StringBuilder();
+            details.append("Message: ").append(message).append("\n");
+            
+            if (account_mappings != null) {
+                details.append("Account Mappings:\n");
+                for (Map<String, Long> mapping : account_mappings) {
+                    details.append("  Local ID: ").append(mapping.get("local_id"))
+                           .append(" -> Server ID: ").append(mapping.get("server_id"))
+                           .append("\n");
+                }
+            }
+            
+            if (transaction_mappings != null) {
+                details.append("Transaction Mappings:\n");
+                for (Map<String, Long> mapping : transaction_mappings) {
+                    details.append("  Local ID: ").append(mapping.get("local_id"))
+                           .append(" -> Server ID: ").append(mapping.get("server_id"))
+                           .append("\n");
+                }
+            }
+            
+            return details.toString();
         }
     }
 } 
