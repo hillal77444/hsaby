@@ -3,8 +3,8 @@ package com.hillal.acc.data.remote;
 import com.hillal.acc.data.model.User;
 import com.hillal.acc.data.model.Account;
 import com.hillal.acc.data.model.Transaction;
-import com.hillal.acc.data.local.AccountDatabase;
-import com.hillal.acc.data.local.AccountDao;
+import com.hillal.acc.data.room.AppDatabase;
+import com.hillal.acc.data.room.AccountDao;
 
 import java.util.List;
 import java.util.Map;
@@ -21,7 +21,7 @@ import retrofit2.http.Query;
 import com.google.gson.annotations.SerializedName;
 import android.util.Log;
 import android.content.Context;
-import com.hillal.acc.AccountingApplication;
+import com.hillal.acc.App;
 
 public interface ApiService {
     @POST("api/login")
@@ -128,40 +128,43 @@ public interface ApiService {
             // نسخ المعاملات مع last_sync_time
             List<Transaction> transactionsToSend = new ArrayList<>();
             for (Transaction transaction : transactions) {
-                // البحث عن الحساب في قاعدة البيانات المحلية
-                AccountDao accountDao = AccountingApplication.getInstance()
-                    .getDatabase()
-                    .accountDao();
-                
-                Account relatedAccount = accountDao.getAccountById(transaction.getAccountId());
-                
-                // تخطي المعاملة إذا لم يتم العثور على الحساب أو كان serverId غير صالح
-                if (relatedAccount == null || relatedAccount.getServerId() <= 0) {
-                    Log.d("SyncRequest", "تخطي المعاملة - معرف الحساب غير صالح: " + transaction.getAccountId());
-                    continue;
+                try {
+                    // البحث عن الحساب في قاعدة البيانات المحلية
+                    AppDatabase db = AppDatabase.getInstance(App.getContext());
+                    AccountDao accountDao = db.accountDao();
+                    
+                    Account relatedAccount = accountDao.getAccountById(transaction.getAccountId());
+                    
+                    // تخطي المعاملة إذا لم يتم العثور على الحساب أو كان serverId غير صالح
+                    if (relatedAccount == null || relatedAccount.getServerId() <= 0) {
+                        Log.d("SyncRequest", "تخطي المعاملة - معرف الحساب غير صالح: " + transaction.getAccountId());
+                        continue;
+                    }
+
+                    Log.d("SyncRequest", String.format("تحويل معرف الحساب: المحلي=%d, الخادم=%d", 
+                        transaction.getAccountId(), relatedAccount.getServerId()));
+
+                    Transaction newTransaction = new Transaction();
+                    newTransaction.setId(transaction.getId());
+                    newTransaction.setServerId(transaction.getServerId());
+                    newTransaction.setUserId(transaction.getUserId());
+                    newTransaction.setAccountId(relatedAccount.getServerId()); // استخدام معرف الخادم للحساب
+                    
+                    newTransaction.setAmount(transaction.getAmount());
+                    newTransaction.setType(transaction.getType());
+                    newTransaction.setDescription(transaction.getDescription());
+                    newTransaction.setNotes(transaction.getNotes());
+                    newTransaction.setCurrency(transaction.getCurrency());
+                    newTransaction.setTransactionDate(transaction.getTransactionDate());
+                    newTransaction.setCreatedAt(transaction.getCreatedAt());
+                    newTransaction.setUpdatedAt(transaction.getUpdatedAt());
+                    newTransaction.setModified(transaction.isModified());
+                    newTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
+                    newTransaction.setSyncStatus(transaction.getSyncStatus());
+                    transactionsToSend.add(newTransaction);
+                } catch (Exception e) {
+                    Log.e("SyncRequest", "خطأ في معالجة المعاملة: " + e.getMessage());
                 }
-
-                Log.d("SyncRequest", String.format("تحويل معرف الحساب: المحلي=%d, الخادم=%d", 
-                    transaction.getAccountId(), relatedAccount.getServerId()));
-
-                Transaction newTransaction = new Transaction();
-                newTransaction.setId(transaction.getId());
-                newTransaction.setServerId(transaction.getServerId());
-                newTransaction.setUserId(transaction.getUserId());
-                newTransaction.setAccountId(relatedAccount.getServerId()); // استخدام معرف الخادم للحساب
-                
-                newTransaction.setAmount(transaction.getAmount());
-                newTransaction.setType(transaction.getType());
-                newTransaction.setDescription(transaction.getDescription());
-                newTransaction.setNotes(transaction.getNotes());
-                newTransaction.setCurrency(transaction.getCurrency());
-                newTransaction.setTransactionDate(transaction.getTransactionDate());
-                newTransaction.setCreatedAt(transaction.getCreatedAt());
-                newTransaction.setUpdatedAt(transaction.getUpdatedAt());
-                newTransaction.setModified(transaction.isModified());
-                newTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
-                newTransaction.setSyncStatus(transaction.getSyncStatus());
-                transactionsToSend.add(newTransaction);
             }
             return transactionsToSend;
         }
