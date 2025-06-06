@@ -80,8 +80,8 @@ public class MigrationManager {
             // طباعة تفاصيل الحسابات قبل الإرسال
             StringBuilder accountDetails = new StringBuilder();
             for (Account account : accountsToMigrate) {
-                String details = String.format("Account: ID=%d, ServerID=%d, Name=%s\n", 
-                    account.getId(), account.getServerId(), account.getAccount_name());
+                String details = String.format("Account: ID=%d, ServerID=%d\n", 
+                    account.getId(), account.getServerId());
                 accountDetails.append(details);
                 Log.d("MigrationManager", details);
             }
