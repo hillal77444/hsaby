@@ -3,6 +3,7 @@ package com.hillal.acc.data.remote;
 import com.hillal.acc.data.model.User;
 import com.hillal.acc.data.model.Account;
 import com.hillal.acc.data.model.Transaction;
+import com.hillal.acc.data.database.AccountDatabase;
 
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import retrofit2.http.Path;
 import retrofit2.http.Header;
 import retrofit2.http.Query;
 import com.google.gson.annotations.SerializedName;
+import android.util.Log;
 
 public interface ApiService {
     @POST("api/login")
@@ -123,22 +125,25 @@ public interface ApiService {
             // نسخ المعاملات مع last_sync_time
             List<Transaction> transactionsToSend = new ArrayList<>();
             for (Transaction transaction : transactions) {
-                // البحث عن الحساب المرتبط بالمعاملة
-                Account relatedAccount = accounts.stream()
-                    .filter(acc -> acc.getId() == transaction.getAccountId())
-                    .findFirst()
-                    .orElse(null);
+                // البحث عن الحساب في قاعدة البيانات المحلية
+                Account relatedAccount = AccountDatabase.getInstance()
+                    .accountDao()
+                    .getAccountById(transaction.getAccountId());
                 
                 // تخطي المعاملة إذا لم يتم العثور على الحساب أو كان serverId غير صالح
                 if (relatedAccount == null || relatedAccount.getServerId() <= 0) {
+                    Log.d("SyncRequest", "تخطي المعاملة - معرف الحساب غير صالح: " + transaction.getAccountId());
                     continue;
                 }
+
+                Log.d("SyncRequest", String.format("تحويل معرف الحساب: المحلي=%d, الخادم=%d", 
+                    transaction.getAccountId(), relatedAccount.getServerId()));
 
                 Transaction newTransaction = new Transaction();
                 newTransaction.setId(transaction.getId());
                 newTransaction.setServerId(transaction.getServerId());
                 newTransaction.setUserId(transaction.getUserId());
-                newTransaction.setAccountId(relatedAccount.getServerId());
+                newTransaction.setAccountId(relatedAccount.getServerId()); // استخدام معرف الخادم للحساب
                 
                 newTransaction.setAmount(transaction.getAmount());
                 newTransaction.setType(transaction.getType());
