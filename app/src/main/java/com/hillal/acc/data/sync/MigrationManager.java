@@ -114,7 +114,10 @@ public class MigrationManager {
                                             transaction.setSyncStatus(2);
                                             
                                             // حذف المعاملة القديمة وإدخال المعاملة الجديدة
-                                            transactionDao.deleteTransaction(oldId);
+                                            Transaction oldTransaction = transactionDao.getTransactionByIdSync(oldId);
+                                            if (oldTransaction != null) {
+                                                transactionDao.delete(oldTransaction);
+                                            }
                                             transactionDao.insert(transaction);
                                             migratedTransactionsCount++;
                                         }
