@@ -25,7 +25,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.io.IOException;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -77,30 +76,6 @@ public class MigrationManager {
             Log.d("MigrationManager", "Starting migration with " + accountsToMigrate.size() + " accounts and " + 
                 transactionsToMigrate.size() + " transactions");
 
-            // طباعة تفاصيل الحسابات قبل الإرسال
-            StringBuilder accountDetails = new StringBuilder();
-            for (Account account : accountsToMigrate) {
-                String details = String.format("Account: ID=%d, ServerID=%d\n", 
-                    account.getId(), account.getServerId());
-                accountDetails.append(details);
-                Log.d("MigrationManager", details);
-            }
-
-            // طباعة تفاصيل المعاملات قبل الإرسال
-            StringBuilder transactionDetails = new StringBuilder();
-            for (Transaction transaction : transactionsToMigrate) {
-                String details = String.format("Transaction: ID=%d, AccountID=%d, ServerID=%d\n", 
-                    transaction.getId(), transaction.getAccountId(), transaction.getServerId());
-                transactionDetails.append(details);
-                Log.d("MigrationManager", details);
-            }
-
-            // عرض التفاصيل للمستخدم
-            new Handler(Looper.getMainLooper()).post(() -> {
-                String message = "بيانات المزامنة:\n" + accountDetails.toString() + "\n" + transactionDetails.toString();
-                Toast.makeText(context, message, Toast.LENGTH_LONG).show();
-            });
-
             SyncRequest request = new SyncRequest(accountsToMigrate, transactionsToMigrate);
             apiService.syncData("Bearer " + token, request).enqueue(new Callback<SyncResponse>() {
                 @Override
@@ -109,54 +84,29 @@ public class MigrationManager {
                         if (response.isSuccessful() && response.body() != null) {
                             SyncResponse syncResponse = response.body();
                             
-                            // طباعة تفاصيل الرد
-                            Log.d("MigrationManager", "Server Response Details:\n" + syncResponse.getResponseDetails());
-                            Log.d("MigrationManager", "Full Response Body: " + response.body().toString());
-                            
-                            if (!syncResponse.isValid()) {
-                                Log.e("MigrationManager", "Invalid server response: missing mappings");
-                                new Handler(Looper.getMainLooper()).post(() -> 
-                                    Toast.makeText(context, "خطأ في استجابة الخادم", Toast.LENGTH_LONG).show());
-                                return;
-                            }
-                            
                             executor.execute(() -> {
                                 try {
                                     // تحديث الحسابات
                                     for (Account account : accountsToMigrate) {
                                         Long serverId = syncResponse.getAccountServerId(account.getId());
-                                        Log.d("MigrationManager", String.format("Processing account: local_id=%d, server_id=%s", 
-                                            account.getId(), serverId));
                                         
                                         if (serverId != null && serverId > 0) {
                                             account.setServerId(serverId);
                                             account.setSyncStatus(2); 
                                             accountDao.update(account);
                                             migratedAccountsCount++;
-                                            Log.d("MigrationManager", String.format("Updated account: local_id=%d, server_id=%d", 
-                                                account.getId(), serverId));
-                                        } else {
-                                            Log.w("MigrationManager", String.format("No server_id found for account: local_id=%d", 
-                                                account.getId()));
                                         }
                                     }
 
                                     // تحديث المعاملات
                                     for (Transaction transaction : transactionsToMigrate) {
                                         Long serverId = syncResponse.getTransactionServerId(transaction.getId());
-                                        Log.d("MigrationManager", String.format("DEBUG - Full Transaction Details: local_id=%d, server_id=%s, current_server_id=%d, sync_status=%d", 
-                                            transaction.getId(), serverId, transaction.getServerId(), transaction.getSyncStatus()));
                                         
                                         if (serverId != null && serverId > 0) {
                                             transaction.setServerId(serverId);
                                             transaction.setSyncStatus(2);
                                             transactionDao.update(transaction);
                                             migratedTransactionsCount++;
-                                            Log.d("MigrationManager", String.format("Updated transaction: local_id=%d, server_id=%d", 
-                                                transaction.getId(), serverId));
-                                        } else {
-                                            Log.w("MigrationManager", String.format("No server_id found for transaction: local_id=%d", 
-                                                transaction.getId()));
                                         }
                                     }
 
