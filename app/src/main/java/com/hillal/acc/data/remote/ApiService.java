@@ -3,8 +3,6 @@ package com.hillal.acc.data.remote;
 import com.hillal.acc.data.model.User;
 import com.hillal.acc.data.model.Account;
 import com.hillal.acc.data.model.Transaction;
-import com.hillal.acc.data.room.AppDatabase;
-import com.hillal.acc.data.room.AccountDao;
 
 import java.util.List;
 import java.util.Map;
@@ -19,13 +17,6 @@ import retrofit2.http.Path;
 import retrofit2.http.Header;
 import retrofit2.http.Query;
 import com.google.gson.annotations.SerializedName;
-import android.util.Log;
-import android.content.Context;
-import com.hillal.acc.App;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.Callable;
 
 public interface ApiService {
     @POST("api/login")
@@ -131,91 +122,53 @@ public interface ApiService {
         public List<Transaction> getTransactions() {
             // نسخ المعاملات مع last_sync_time
             List<Transaction> transactionsToSend = new ArrayList<>();
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            
             for (Transaction transaction : transactions) {
-                try {
-                    // البحث عن الحساب في قاعدة البيانات المحلية
-                    AppDatabase db = App.getInstance().getDatabase();
-                    AccountDao accountDao = db.accountDao();
-                    
-                    // استخدام Executor للتعامل مع قاعدة البيانات
-                    Future<Account> future = executor.submit(new Callable<Account>() {
-                        @Override
-                        public Account call() {
-                            return accountDao.getAccountByIdSync(transaction.getAccountId());
-                        }
-                    });
-                    
-                    Account relatedAccount = future.get(); // انتظار النتيجة
-                    
-                    if (relatedAccount == null || relatedAccount.getServerId() <= 0) {
-                        Log.d("SyncRequest", "تخطي المعاملة - معرف الحساب غير صالح: " + transaction.getAccountId());
-                        continue;
-                    }
-
-                    Log.d("SyncRequest", String.format("تحويل معرف الحساب: المحلي=%d, الخادم=%d", 
-                        transaction.getAccountId(), relatedAccount.getServerId()));
-
-                    Transaction newTransaction = new Transaction();
-                    newTransaction.setId(transaction.getId());
-                    newTransaction.setServerId(transaction.getServerId());
-                    newTransaction.setUserId(transaction.getUserId());
-                    newTransaction.setAccountId(relatedAccount.getServerId()); // استخدام معرف الخادم للحساب
-                    
-                    newTransaction.setAmount(transaction.getAmount());
-                    newTransaction.setType(transaction.getType());
-                    newTransaction.setDescription(transaction.getDescription());
-                    newTransaction.setNotes(transaction.getNotes());
-                    newTransaction.setCurrency(transaction.getCurrency());
-                    newTransaction.setTransactionDate(transaction.getTransactionDate());
-                    newTransaction.setCreatedAt(transaction.getCreatedAt());
-                    newTransaction.setUpdatedAt(transaction.getUpdatedAt());
-                    newTransaction.setModified(transaction.isModified());
-                    newTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
-                    newTransaction.setSyncStatus(transaction.getSyncStatus());
-                    transactionsToSend.add(newTransaction);
-                } catch (Exception e) {
-                    Log.e("SyncRequest", "خطأ في معالجة المعاملة: " + e.getMessage());
+                Transaction newTransaction = new Transaction();
+                newTransaction.setId(transaction.getId());
+                newTransaction.setServerId(transaction.getServerId());
+                newTransaction.setUserId(transaction.getUserId());
+                
+                // البحث عن الحساب المرتبط بالمعاملة
+                Account relatedAccount = accounts.stream()
+                    .filter(acc -> acc.getId() == transaction.getAccountId())
+                    .findFirst()
+                    .orElse(null);
+                
+                if (relatedAccount != null && relatedAccount.getServerId() > 0) {
+                    newTransaction.setAccountId(relatedAccount.getServerId());
+                } else {
+                    newTransaction.setAccountId(transaction.getAccountId());
                 }
+                
+                newTransaction.setAmount(transaction.getAmount());
+                newTransaction.setType(transaction.getType());
+                newTransaction.setDescription(transaction.getDescription());
+                newTransaction.setNotes(transaction.getNotes());
+                newTransaction.setCurrency(transaction.getCurrency());
+                newTransaction.setTransactionDate(transaction.getTransactionDate());
+                newTransaction.setCreatedAt(transaction.getCreatedAt());
+                newTransaction.setUpdatedAt(transaction.getUpdatedAt());
+                newTransaction.setModified(transaction.isModified());
+                newTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
+                newTransaction.setSyncStatus(transaction.getSyncStatus());
+                transactionsToSend.add(newTransaction);
             }
-            
-            executor.shutdown();
             return transactionsToSend;
         }
     }
 
     public static class SyncResponse {
-        @SerializedName("message")
-        private String message;
-        
         @SerializedName("account_mappings")
-        private List<Map<String, Long>> account_mappings;
+        private List<Mapping> accountMappings;
         
         @SerializedName("transaction_mappings")
-        private List<Map<String, Long>> transaction_mappings;
-
-        public String getMessage() {
-            return message;
-        }
-
-        public List<Map<String, Long>> getAccountMappings() {
-            return account_mappings;
-        }
-
-        public List<Map<String, Long>> getTransactionMappings() {
-            return transaction_mappings;
-        }
+        private List<Mapping> transactionMappings;
 
         public Long getAccountServerId(Long localId) {
-            if (account_mappings != null) {
-                for (Map<String, Long> mapping : account_mappings) {
-                    Long local_id = mapping.get("local_id");
-                    if (local_id != null && local_id.equals(localId)) {
-                        Long server_id = mapping.get("server_id");
-                        if (server_id != null && server_id > 0) {
-                            return server_id;
-                        }
+            if (accountMappings != null) {
+                for (Mapping mapping : accountMappings) {
+                    if (mapping.localId.equals(localId)) {
+                        return mapping.serverId;
                     }
                 }
             }
@@ -223,49 +176,22 @@ public interface ApiService {
         }
 
         public Long getTransactionServerId(Long localId) {
-            if (transaction_mappings != null) {
-                for (Map<String, Long> mapping : transaction_mappings) {
-                    Long local_id = mapping.get("local_id");
-                    if (local_id != null && local_id.equals(localId)) {
-                        Long server_id = mapping.get("server_id");
-                        if (server_id != null && server_id > 0) {
-                            return server_id;
-                        }
+            if (transactionMappings != null) {
+                for (Mapping mapping : transactionMappings) {
+                    if (mapping.localId.equals(localId)) {
+                        return mapping.serverId;
                     }
                 }
             }
             return null;
         }
 
-        // إضافة دالة للتحقق من صحة الرد
-        public boolean isValid() {
-            return account_mappings != null && transaction_mappings != null;
-        }
-
-        // إضافة دالة للحصول على تفاصيل الرد
-        public String getResponseDetails() {
-            StringBuilder details = new StringBuilder();
-            details.append("Message: ").append(message).append("\n");
+        private static class Mapping {
+            @SerializedName("local_id")
+            private Long localId;
             
-            if (account_mappings != null) {
-                details.append("Account Mappings:\n");
-                for (Map<String, Long> mapping : account_mappings) {
-                    details.append("  Local ID: ").append(mapping.get("local_id"))
-                           .append(" -> Server ID: ").append(mapping.get("server_id"))
-                           .append("\n");
-                }
-            }
-            
-            if (transaction_mappings != null) {
-                details.append("Transaction Mappings:\n");
-                for (Map<String, Long> mapping : transaction_mappings) {
-                    details.append("  Local ID: ").append(mapping.get("local_id"))
-                           .append(" -> Server ID: ").append(mapping.get("server_id"))
-                           .append("\n");
-                }
-            }
-            
-            return details.toString();
+            @SerializedName("server_id")
+            private Long serverId;
         }
     }
 } 
