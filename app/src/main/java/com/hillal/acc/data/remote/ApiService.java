@@ -136,7 +136,7 @@ public interface ApiService {
             for (Transaction transaction : transactions) {
                 try {
                     // البحث عن الحساب في قاعدة البيانات المحلية
-                    AppDatabase db = AppDatabase.getInstance(transaction.getContext());
+                    AppDatabase db = AppDatabase.getInstance(App.getContext());
                     AccountDao accountDao = db.accountDao();
                     
                     // استخدام Executor للتعامل مع قاعدة البيانات
