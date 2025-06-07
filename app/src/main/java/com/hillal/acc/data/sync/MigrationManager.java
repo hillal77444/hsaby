@@ -103,10 +103,20 @@ public class MigrationManager {
                                         Long serverId = syncResponse.getAccountServerId(account.getId());
                                         
                                         if (serverId != null && serverId > 0) {
+                                            Log.d("MigrationManager", String.format("تحديث الحساب: ID=%d, ServerID=%d, Status=%d", 
+                                                account.getId(), serverId, account.getSyncStatus()));
+                                            
                                             account.setServerId(serverId);
-                                            account.setSyncStatus(2); 
-                                            accountDao.update(account);
-                                            migratedAccountsCount++;
+                                            account.setSyncStatus(2); // تم المزامنة
+                                            int updated = accountDao.update(account);
+                                            if (updated > 0) {
+                                                migratedAccountsCount++;
+                                                Log.d("MigrationManager", "تم تحديث الحساب بنجاح");
+                                            } else {
+                                                Log.e("MigrationManager", "فشل في تحديث الحساب");
+                                            }
+                                        } else {
+                                            Log.e("MigrationManager", String.format("لم يتم استلام معرف خادم صالح للحساب: %d", account.getId()));
                                         }
                                     }
 
@@ -115,10 +125,20 @@ public class MigrationManager {
                                         Long serverId = syncResponse.getTransactionServerId(transaction.getId());
                                         
                                         if (serverId != null && serverId > 0) {
+                                            Log.d("MigrationManager", String.format("تحديث المعاملة: ID=%d, ServerID=%d, Status=%d", 
+                                                transaction.getId(), serverId, transaction.getSyncStatus()));
+                                            
                                             transaction.setServerId(serverId);
-                                            transaction.setSyncStatus(2);
-                                            transactionDao.update(transaction);
-                                            migratedTransactionsCount++;
+                                            transaction.setSyncStatus(2); // تم المزامنة
+                                            int updated = transactionDao.update(transaction);
+                                            if (updated > 0) {
+                                                migratedTransactionsCount++;
+                                                Log.d("MigrationManager", "تم تحديث المعاملة بنجاح");
+                                            } else {
+                                                Log.e("MigrationManager", "فشل في تحديث المعاملة");
+                                            }
+                                        } else {
+                                            Log.e("MigrationManager", String.format("لم يتم استلام معرف خادم صالح للمعاملة: %d", transaction.getId()));
                                         }
                                     }
 
