@@ -76,6 +76,18 @@ public class MigrationManager {
             Log.d("MigrationManager", "Starting migration with " + accountsToMigrate.size() + " accounts and " + 
                 transactionsToMigrate.size() + " transactions");
 
+            // تحويل المعرفات المحلية إلى معرفات الخادم
+            for (Transaction transaction : transactionsToMigrate) {
+                Account account = accountDao.getAccountByIdSync(transaction.getAccountId());
+                if (account != null && account.getServerId() > 0) {
+                    Log.d("MigrationManager", String.format("تحويل معرف الحساب: المحلي=%d, الخادم=%d", 
+                        transaction.getAccountId(), account.getServerId()));
+                    transaction.setAccountId(account.getServerId());
+                } else {
+                    Log.e("MigrationManager", "لم يتم العثور على معرف الخادم للحساب: " + transaction.getAccountId());
+                }
+            }
+
             SyncRequest request = new SyncRequest(accountsToMigrate, transactionsToMigrate);
             apiService.syncData("Bearer " + token, request).enqueue(new Callback<SyncResponse>() {
                 @Override
