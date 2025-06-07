@@ -92,6 +92,7 @@ public class MigrationManager {
                                         
                                         if (serverId != null && serverId > 0) {
                                             account.setServerId(serverId);
+                                            account.setId(serverId);
                                             account.setSyncStatus(2); 
                                             accountDao.update(account);
                                             migratedAccountsCount++;
@@ -104,6 +105,7 @@ public class MigrationManager {
                                         
                                         if (serverId != null && serverId > 0) {
                                             transaction.setServerId(serverId);
+                                            transaction.setId(serverId);
                                             transaction.setSyncStatus(2);
                                             transactionDao.update(transaction);
                                             migratedTransactionsCount++;
