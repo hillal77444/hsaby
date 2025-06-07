@@ -91,10 +91,14 @@ public class MigrationManager {
                                         Long serverId = syncResponse.getAccountServerId(account.getId());
                                         
                                         if (serverId != null && serverId > 0) {
+                                            long oldId = account.getId();
                                             account.setServerId(serverId);
                                             account.setId(serverId);
-                                            account.setSyncStatus(2); 
-                                            accountDao.update(account);
+                                            account.setSyncStatus(2);
+                                            
+                                            // حذف الحساب القديم وإدخال الحساب الجديد
+                                            accountDao.deleteAccount(oldId);
+                                            accountDao.insert(account);
                                             migratedAccountsCount++;
                                         }
                                     }
@@ -104,10 +108,14 @@ public class MigrationManager {
                                         Long serverId = syncResponse.getTransactionServerId(transaction.getId());
                                         
                                         if (serverId != null && serverId > 0) {
+                                            long oldId = transaction.getId();
                                             transaction.setServerId(serverId);
                                             transaction.setId(serverId);
                                             transaction.setSyncStatus(2);
-                                            transactionDao.update(transaction);
+                                            
+                                            // حذف المعاملة القديمة وإدخال المعاملة الجديدة
+                                            transactionDao.deleteTransaction(oldId);
+                                            transactionDao.insert(transaction);
                                             migratedTransactionsCount++;
                                         }
                                     }
