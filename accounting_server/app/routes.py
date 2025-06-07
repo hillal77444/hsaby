@@ -127,7 +127,11 @@ def sync_data():
         accounts = data.get('accounts', [])
         account_mappings = []
         
+        print(f"\nعدد الحسابات: {len(accounts)}")
+        
         for acc_data in accounts:
+            print("\nمعالجة الحساب:")
+            print(json.dumps(acc_data, ensure_ascii=False, indent=2))
             try:
                 # التحقق من البيانات المطلوبة للحساب
                 required_fields = ['account_name', 'balance']
@@ -192,12 +196,16 @@ def sync_data():
             except Exception as e:
                 logger.error(f"Error processing account: {str(e)}")
                 return json_response({'error': f'خطأ في معالجة بيانات الحساب: {str(e)}'}, 400)
-        
+        print("Transaction Mappings:", json.dumps(account_mappings, ensure_ascii=False, indent=2))
         # معالجة المعاملات
         transactions = data.get('transactions', [])
         transaction_mappings = []
         
+        print(f"\nعدد المعاملات: {len(transactions)}")
+        
         for trans_data in transactions:
+            print("\nمعالجة المعاملة:")
+            print(json.dumps(trans_data, ensure_ascii=False, indent=2))
             try:
                 # التحقق من البيانات المطلوبة للمعاملة
                 required_fields = ['amount', 'type', 'description', 'account_id', 'date']
@@ -304,6 +312,9 @@ def sync_data():
             except Exception as e:
                 logger.error(f"Error processing transaction: {str(e)}")
                 return json_response({'error': f'خطأ في معالجة بيانات المعاملة: {str(e)}'}, 400)
+        
+        # طباعة محتوى transaction_mappings
+        print("Transaction Mappings:", json.dumps(transaction_mappings, ensure_ascii=False, indent=2))
         
         try:
             db.session.commit()
