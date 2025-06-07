@@ -108,12 +108,12 @@ public class MigrationManager {
                                             
                                             account.setServerId(serverId);
                                             account.setSyncStatus(2); // تم المزامنة
-                                            int updated = accountDao.update(account);
-                                            if (updated > 0) {
+                                            try {
+                                                accountDao.update(account);
                                                 migratedAccountsCount++;
                                                 Log.d("MigrationManager", "تم تحديث الحساب بنجاح");
-                                            } else {
-                                                Log.e("MigrationManager", "فشل في تحديث الحساب");
+                                            } catch (Exception e) {
+                                                Log.e("MigrationManager", "فشل في تحديث الحساب: " + e.getMessage());
                                             }
                                         } else {
                                             Log.e("MigrationManager", String.format("لم يتم استلام معرف خادم صالح للحساب: %d", account.getId()));
@@ -130,12 +130,12 @@ public class MigrationManager {
                                             
                                             transaction.setServerId(serverId);
                                             transaction.setSyncStatus(2); // تم المزامنة
-                                            int updated = transactionDao.update(transaction);
-                                            if (updated > 0) {
+                                            try {
+                                                transactionDao.update(transaction);
                                                 migratedTransactionsCount++;
                                                 Log.d("MigrationManager", "تم تحديث المعاملة بنجاح");
-                                            } else {
-                                                Log.e("MigrationManager", "فشل في تحديث المعاملة");
+                                            } catch (Exception e) {
+                                                Log.e("MigrationManager", "فشل في تحديث المعاملة: " + e.getMessage());
                                             }
                                         } else {
                                             Log.e("MigrationManager", String.format("لم يتم استلام معرف خادم صالح للمعاملة: %d", transaction.getId()));
