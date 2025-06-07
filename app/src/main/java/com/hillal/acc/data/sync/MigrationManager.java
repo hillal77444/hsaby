@@ -103,34 +103,10 @@ public class MigrationManager {
                                         Long serverId = syncResponse.getTransactionServerId(transaction.getId());
                                         
                                         if (serverId != null && serverId > 0) {
-                                            try {
-                                                // التحقق من أن معرف الخادم الجديد مختلف عن المعرف الحالي
-                                                if (transaction.getServerId() != serverId) {
-                                                    // تحديث معرف الخادم للمعاملة
-                                                    transaction.setServerId(serverId);
-                                                    
-                                                    // تحديث معرف الحساب في المعاملة إذا كان مختلفاً
-                                                    Account account = accountDao.getAccountByIdSync(transaction.getAccountId());
-                                                    if (account != null && account.getServerId() > 0) {
-                                                        transaction.setAccountId(account.getServerId());
-                                                        Log.d("MigrationManager", String.format("تم تحديث معرف الحساب في المعاملة: LocalID=%d, NewAccountID=%d", 
-                                                            transaction.getId(), account.getServerId()));
-                                                    }
-                                                    
-                                                    transaction.setSyncStatus(2); // تم المزامنة
-                                                    transactionDao.update(transaction);
-                                                    migratedTransactionsCount++;
-                                                    Log.d("MigrationManager", String.format("تم تحديث المعاملة: LocalID=%d, NewServerID=%d", 
-                                                        transaction.getId(), serverId));
-                                                } else {
-                                                    Log.d("MigrationManager", String.format("المعاملة محدثة بالفعل: LocalID=%d, ServerID=%d", 
-                                                        transaction.getId(), serverId));
-                                                }
-                                            } catch (Exception e) {
-                                                Log.e("MigrationManager", "فشل في تحديث المعاملة: " + e.getMessage());
-                                            }
-                                        } else {
-                                            Log.e("MigrationManager", String.format("لم يتم استلام معرف خادم صالح للمعاملة: LocalID=%d", transaction.getId()));
+                                            transaction.setServerId(serverId);
+                                            transaction.setSyncStatus(2);
+                                            transactionDao.update(transaction);
+                                            migratedTransactionsCount++;
                                         }
                                     }
 
