@@ -136,7 +136,17 @@ public class MigrationManager {
                                             try {
                                                 // التحقق من أن معرف الخادم الجديد مختلف عن المعرف الحالي
                                                 if (transaction.getServerId() != serverId) {
+                                                    // تحديث معرف الخادم للمعاملة
                                                     transaction.setServerId(serverId);
+                                                    
+                                                    // تحديث معرف الحساب في المعاملة إذا كان مختلفاً
+                                                    Account account = accountDao.getAccountByIdSync(transaction.getAccountId());
+                                                    if (account != null && account.getServerId() > 0) {
+                                                        transaction.setAccountId(account.getServerId());
+                                                        Log.d("MigrationManager", String.format("تم تحديث معرف الحساب في المعاملة: LocalID=%d, NewAccountID=%d", 
+                                                            transaction.getId(), account.getServerId()));
+                                                    }
+                                                    
                                                     transaction.setSyncStatus(2); // تم المزامنة
                                                     transactionDao.update(transaction);
                                                     migratedTransactionsCount++;
