@@ -126,18 +126,20 @@ public class MigrationManager {
                                                                     if (serverId != null && serverId > 0) {
                                                                         try {
                                                                             // طباعة معلومات المعاملة قبل التحديث
-                                                                            Log.d("MigrationManager", "محاولة تحديث المعاملة: " + transaction.getId() + 
-                                                                                " معرف الحساب المحلي: " + transaction.getAccountId());
+                                                                            Log.d("MigrationManager", "تحديث المعاملة: " + transaction.getId() + 
+                                                                                " معرف الحساب المحلي: " + transaction.getAccountId() + 
+                                                                                " معرف الخادم الجديد: " + serverId);
 
+                                                                            // نسخ المعاملة الحالية
+                                                                            Transaction updatedTransaction = new Transaction(transaction);
                                                                             // تحديث معرف الخادم وحالة المزامنة فقط
-                                                                            transaction.setServerId(serverId);
-                                                                            transaction.setSyncStatus(2);
+                                                                            updatedTransaction.setServerId(serverId);
+                                                                            updatedTransaction.setSyncStatus(2);
                                                                             
                                                                             // تحديث قاعدة البيانات المحلية
                                                                             database.runInTransaction(() -> {
                                                                                 try {
-                                                                                    // تحديث المعاملة مع الحفاظ على معرف الحساب المحلي
-                                                                                    transactionDao.update(transaction);
+                                                                                    transactionDao.update(updatedTransaction);
                                                                                     migratedTransactionsCount++;
                                                                                     Log.d("MigrationManager", "تم تحديث المعاملة بنجاح: " + transaction.getId());
                                                                                 } catch (Exception e) {
