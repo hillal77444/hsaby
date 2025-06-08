@@ -125,6 +125,11 @@ public class MigrationManager {
                                                                     
                                                                     if (serverId != null && serverId > 0) {
                                                                         try {
+                                                                            // طباعة معلومات المعاملة قبل التحديث
+                                                                            Log.d("MigrationManager", "محاولة تحديث المعاملة: " + transaction.getId() + 
+                                                                                " معرف الحساب: " + transaction.getAccountId() + 
+                                                                                " معرف الخادم: " + serverId);
+
                                                                             // تحديث البيانات في المعاملة
                                                                             transaction.setServerId(serverId);
                                                                             transaction.setSyncStatus(2);
@@ -132,16 +137,26 @@ public class MigrationManager {
                                                                             // تحديث قاعدة البيانات المحلية
                                                                             database.runInTransaction(() -> {
                                                                                 try {
+                                                                                    // التحقق من وجود المعاملة في قاعدة البيانات
+                                                                                    Transaction existingTransaction = transactionDao.getTransactionByIdSync(transaction.getId());
+                                                                                    if (existingTransaction == null) {
+                                                                                        Log.e("MigrationManager", "المعاملة غير موجودة في قاعدة البيانات: " + transaction.getId());
+                                                                                        return;
+                                                                                    }
+
+                                                                                    // تحديث المعاملة
                                                                                     transactionDao.update(transaction);
                                                                                     migratedTransactionsCount++;
                                                                                     Log.d("MigrationManager", "تم تحديث المعاملة بنجاح: " + transaction.getId());
                                                                                 } catch (Exception e) {
-                                                                                    Log.e("MigrationManager", "فشل في تحديث المعاملة في قاعدة البيانات: " + transaction.getId(), e);
-                                                                                    throw e; // إعادة رمي الاستثناء لإيقاف المعاملة
+                                                                                    Log.e("MigrationManager", "فشل في تحديث المعاملة في قاعدة البيانات: " + transaction.getId() + 
+                                                                                        " الخطأ: " + e.getMessage());
+                                                                                    throw e;
                                                                                 }
                                                                             });
                                                                         } catch (Exception e) {
-                                                                            Log.e("MigrationManager", "فشل في تحديث المعاملة: " + transaction.getId(), e);
+                                                                            Log.e("MigrationManager", "فشل في تحديث المعاملة: " + transaction.getId() + 
+                                                                                " الخطأ: " + e.getMessage());
                                                                             new Handler(Looper.getMainLooper()).post(() -> 
                                                                                 Toast.makeText(context, "حدث خطأ أثناء تحديث قاعدة البيانات المحلية", Toast.LENGTH_LONG).show());
                                                                         }
