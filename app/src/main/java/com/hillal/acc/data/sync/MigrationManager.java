@@ -187,29 +187,32 @@ public class MigrationManager {
                     if (response.isSuccessful() && response.body() != null) {
                         SyncResponse syncResponse = response.body();
                         
-                        try {
-                            for (Transaction transaction : transactionsToMigrate) {
-                                Long serverId = syncResponse.getTransactionServerId(transaction.getId());
-                                if (serverId != null && serverId > 0) {
-                                    transaction.setServerId(serverId);
-                                    transaction.setSyncStatus(2);
-                                    transactionDao.update(transaction);
-                                    migratedTransactionsCount++;
+                        executor.execute(() -> {
+                            try {
+                                for (Transaction transaction : transactionsToMigrate) {
+                                    Long serverId = syncResponse.getTransactionServerId(transaction.getId());
+                                    if (serverId != null && serverId > 0) {
+                                        transaction.setServerId(serverId);
+                                        transaction.setSyncStatus(2);
+                                        transaction.setLastSyncTime(System.currentTimeMillis());
+                                        transactionDao.update(transaction);
+                                        migratedTransactionsCount++;
+                                    }
                                 }
-                            }
 
-                            new Handler(Looper.getMainLooper()).post(() -> {
-                                if (migratedTransactionsCount > 0) {
-                                    String summary = String.format("تم ترحيل %d معاملة بنجاح", migratedTransactionsCount);
-                                    Toast.makeText(context, summary, Toast.LENGTH_LONG).show();
-                                } else {
-                                    Toast.makeText(context, "لم يتم تحديث أي معاملات", Toast.LENGTH_LONG).show();
-                                }
-                            });
-                        } catch (Exception e) {
-                            new Handler(Looper.getMainLooper()).post(() -> 
-                                Toast.makeText(context, "حدث خطأ أثناء معالجة البيانات", Toast.LENGTH_LONG).show());
-                        }
+                                new Handler(Looper.getMainLooper()).post(() -> {
+                                    if (migratedTransactionsCount > 0) {
+                                        String summary = String.format("تم ترحيل %d معاملة بنجاح", migratedTransactionsCount);
+                                        Toast.makeText(context, summary, Toast.LENGTH_LONG).show();
+                                    } else {
+                                        Toast.makeText(context, "لم يتم تحديث أي معاملات", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            } catch (Exception e) {
+                                new Handler(Looper.getMainLooper()).post(() -> 
+                                    Toast.makeText(context, "حدث خطأ أثناء معالجة البيانات", Toast.LENGTH_LONG).show());
+                            }
+                        });
                     } else {
                         handleErrorResponse(response);
                     }
