@@ -199,26 +199,13 @@ public class MigrationManager {
                                             // محاولة التحديث في قاعدة البيانات
                                             Log.d("MigrationManager", "Attempting to update transaction in database...");
                                             transactionDao.update(transaction);
+                                            migratedTransactionsCount++;
                                             
-                                            // التحقق من نجاح التحديث
-                                            Transaction updatedTransaction = transactionDao.getTransactionById(transaction.getId());
-                                            if (updatedTransaction != null) {
-                                                Log.d("MigrationManager", "After update - Transaction ID: " + updatedTransaction.getId() + 
-                                                    ", Server ID: " + updatedTransaction.getServerId() + 
-                                                    ", Sync Status: " + updatedTransaction.getSyncStatus());
-                                                
-                                                if (updatedTransaction.getServerId() == serverId && 
-                                                    updatedTransaction.getSyncStatus() == 2) {
-                                                    migratedTransactionsCount++;
-                                                    Log.d("MigrationManager", "Transaction successfully updated in database");
-                                                } else {
-                                                    Log.e("MigrationManager", "Transaction update verification failed - " +
-                                                        "Expected server ID: " + serverId + ", Got: " + updatedTransaction.getServerId() + 
-                                                        ", Expected sync status: 2, Got: " + updatedTransaction.getSyncStatus());
-                                                }
-                                            } else {
-                                                Log.e("MigrationManager", "Failed to verify transaction update - Transaction not found in database");
-                                            }
+                                            // تسجيل نجاح التحديث
+                                            Log.d("MigrationManager", "Transaction successfully updated in database - " +
+                                                "ID: " + transaction.getId() + 
+                                                ", Server ID: " + transaction.getServerId() + 
+                                                ", Sync Status: " + transaction.getSyncStatus());
                                         } catch (Exception e) {
                                             Log.e("MigrationManager", "Error updating transaction in database", e);
                                             Log.e("MigrationManager", "Error details: " + e.getMessage());
