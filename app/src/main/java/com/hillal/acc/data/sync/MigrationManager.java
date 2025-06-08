@@ -114,12 +114,25 @@ public class MigrationManager {
 
                                     // ثم نقوم بمزامنة المعاملات
                                     if (!transactionsToMigrate.isEmpty()) {
-                                        // إضافة الحسابات المرتبطة بالمعاملات
+                                        // إضافة الحسابات المرتبطة بالمعاملات التي لم تتم مزامنتها بعد
                                         List<Account> relatedAccounts = new ArrayList<>();
                                         for (Transaction transaction : transactionsToMigrate) {
                                             Account account = accountDao.getAccountByIdSync(transaction.getAccountId());
-                                            if (account != null && !relatedAccounts.contains(account)) {
-                                                relatedAccounts.add(account);
+                                            if (account != null && account.getServerId() > 0 && !relatedAccounts.contains(account)) {
+                                                // نضيف فقط الحسابات التي لم تتم مزامنتها بعد
+                                                if (account.getSyncStatus() != 2) {
+                                                    relatedAccounts.add(account);
+                                                }
+                                            }
+                                        }
+                                        
+                                        // تحديث معرفات الحساب في المعاملات إلى معرفات الخادم
+                                        for (Transaction transaction : transactionsToMigrate) {
+                                            Account account = accountDao.getAccountByIdSync(transaction.getAccountId());
+                                            if (account != null && account.getServerId() > 0) {
+                                                // نحتفظ بالمعرف المحلي في قاعدة البيانات المحلية
+                                                // لكن نستخدم معرف الخادم عند الإرسال
+                                                transaction.setAccountId(account.getServerId());
                                             }
                                         }
                                         
