@@ -170,59 +170,37 @@ public class MigrationManager {
 
         Log.d("MigrationManager", "Starting transactions migration with " + transactionsToMigrate.size() + " transactions");
         SyncRequest transactionRequest = new SyncRequest(new ArrayList<>(), transactionsToMigrate);
+        
+        // تسجيل بيانات المعاملات المرسلة
+        for (Transaction transaction : transactionsToMigrate) {
+            Log.d("MigrationManager", "Sending transaction - ID: " + transaction.getId() + 
+                ", Account ID: " + transaction.getAccountId() + 
+                ", Amount: " + transaction.getAmount() + 
+                ", Type: " + transaction.getType() + 
+                ", Description: " + transaction.getDescription());
+        }
+        
         apiService.syncData("Bearer " + token, transactionRequest).enqueue(new Callback<SyncResponse>() {
             @Override
             public void onResponse(Call<SyncResponse> call, Response<SyncResponse> response) {
                 try {
                     if (response.isSuccessful() && response.body() != null) {
                         SyncResponse syncResponse = response.body();
+                        Log.d("MigrationManager", "Received sync response - " +
+                            "Account mappings: " + (syncResponse.accountMappings != null ? syncResponse.accountMappings.size() : 0) + 
+                            ", Transaction mappings: " + (syncResponse.transactionMappings != null ? syncResponse.transactionMappings.size() : 0));
                         
                         executor.execute(() -> {
                             try {
                                 // تحديث المعاملات
                                 for (Transaction transaction : transactionsToMigrate) {
                                     Long serverId = syncResponse.getTransactionServerId(transaction.getId());
-                                    Log.d("MigrationManager", "Processing transaction ID: " + transaction.getId() + 
-                                        ", Server ID from response: " + serverId);
                                     
                                     if (serverId != null && serverId > 0) {
-                                        Log.d("MigrationManager", "Before update - Transaction ID: " + transaction.getId() + 
-                                            ", Server ID: " + transaction.getServerId() + 
-                                            ", Sync Status: " + transaction.getSyncStatus());
-                                        
-                                        try {
-                                            // تحديث البيانات
-                                            transaction.setServerId(serverId);
-                                            transaction.setSyncStatus(2);
-                                            transaction.setLastSyncTime(System.currentTimeMillis());
-                                            
-                                            // محاولة التحديث في قاعدة البيانات
-                                            Log.d("MigrationManager", "Attempting to update transaction in database...");
-                                            transactionDao.update(transaction);
-                                            migratedTransactionsCount++;
-                                            
-                                            // تسجيل نجاح التحديث
-                                            Log.d("MigrationManager", "Transaction successfully updated in database - " +
-                                                "ID: " + transaction.getId() + 
-                                                ", Server ID: " + transaction.getServerId() + 
-                                                ", Sync Status: " + transaction.getSyncStatus());
-                                        } catch (Exception e) {
-                                            Log.e("MigrationManager", "Error updating transaction in database", e);
-                                            Log.e("MigrationManager", "Error details: " + e.getMessage());
-                                            Log.e("MigrationManager", "Stack trace: " + Log.getStackTraceString(e));
-                                            
-                                            // محاولة إعادة التحديث مرة أخرى
-                                            try {
-                                                Log.d("MigrationManager", "Retrying transaction update...");
-                                                transactionDao.update(transaction);
-                                                Log.d("MigrationManager", "Retry successful");
-                                            } catch (Exception retryEx) {
-                                                Log.e("MigrationManager", "Retry failed", retryEx);
-                                            }
-                                        }
-                                    } else {
-                                        Log.w("MigrationManager", "No valid server ID received for transaction: " + 
-                                            transaction.getId());
+                                        transaction.setServerId(serverId);
+                                        transaction.setSyncStatus(2);
+                                        transactionDao.update(transaction);
+                                        migratedTransactionsCount++;
                                     }
                                 }
 
