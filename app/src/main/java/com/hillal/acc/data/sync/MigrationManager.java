@@ -23,8 +23,6 @@ import com.hillal.acc.data.preferences.UserPreferences;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -56,8 +54,8 @@ public class MigrationManager {
     public void migrateLocalData() {
         executor.execute(() -> {
             if (!isNetworkAvailable()) {
-                new Handler(Looper.getMainLooper()).post(() -> 
-                    Toast.makeText(context, "لا يوجد اتصال بالإنترنت", Toast.LENGTH_SHORT).show());
+                new Handler(Looper.getMainLooper()).post(() ->
+                        Toast.makeText(context, "لا يوجد اتصال بالإنترنت", Toast.LENGTH_SHORT).show());
                 return;
             }
 
@@ -79,7 +77,7 @@ public class MigrationManager {
             // مزامنة الحسابات أولاً
             if (!accountsToMigrate.isEmpty()) {
                 Log.d("MigrationManager", "Starting accounts migration with " + accountsToMigrate.size() + " accounts");
-                
+
                 SyncRequest accountRequest = new SyncRequest(accountsToMigrate, new ArrayList<>());
                 apiService.syncData("Bearer " + token, accountRequest).enqueue(new Callback<SyncResponse>() {
                     @Override
@@ -87,18 +85,19 @@ public class MigrationManager {
                         try {
                             if (response.isSuccessful() && response.body() != null) {
                                 SyncResponse syncResponse = response.body();
-                                
+
                                 executor.execute(() -> {
                                     try {
                                         // تحديث الحسابات
-                                        for (Account account : accountsToMigrate) {
-                                            Long serverId = syncResponse.getAccountServerId(account.getId());
-                                            
-                                            if (serverId != null && serverId > 0) {
-                                                account.setServerId(serverId);
-                                                account.setSyncStatus(2); 
-                                                accountDao.update(account);
-                                                migratedAccountsCount++;
+                                        if (syncResponse.getAccountMappings() != null) {
+                                            for (SyncResponse.AccountMapping mapping : syncResponse.getAccountMappings()) {
+                                                Account account = accountDao.getAccountById(mapping.getLocalId());
+                                                if (account != null) {
+                                                    account.setServerId(mapping.getServerId());
+                                                    account.setSyncStatus(2);
+                                                    accountDao.update(account);
+                                                    migratedAccountsCount++;
+                                                }
                                             }
                                         }
 
@@ -114,16 +113,16 @@ public class MigrationManager {
                                             migrateTransactions(token, transactionsToMigrate);
                                         }
                                     } catch (Exception e) {
-                                        new Handler(Looper.getMainLooper()).post(() -> 
-                                            Toast.makeText(context, "حدث خطأ أثناء معالجة البيانات", Toast.LENGTH_LONG).show());
+                                        new Handler(Looper.getMainLooper()).post(() ->
+                                                Toast.makeText(context, "حدث خطأ أثناء معالجة البيانات", Toast.LENGTH_LONG).show());
                                     }
                                 });
                             } else {
                                 handleErrorResponse(response);
                             }
                         } catch (Exception e) {
-                            new Handler(Looper.getMainLooper()).post(() -> 
-                                Toast.makeText(context, "حدث خطأ غير متوقع", Toast.LENGTH_LONG).show());
+                            new Handler(Looper.getMainLooper()).post(() ->
+                                    Toast.makeText(context, "حدث خطأ غير متوقع", Toast.LENGTH_LONG).show());
                         }
                     }
 
@@ -149,11 +148,12 @@ public class MigrationManager {
             }
         }
 
-        // تحديث معرفات الحسابات في المعاملات
+        // تحديث معرفات الحسابات في المعاملات وتحديثها في القاعدة المحلية
         for (Transaction transaction : transactionsToMigrate) {
             Long serverAccountId = accountIdMap.get(transaction.getAccountId());
             if (serverAccountId != null) {
                 transaction.setAccountId(serverAccountId);
+                transactionDao.update(transaction); // تحديث المحلي بعد تعديل accountId
             }
         }
 
@@ -164,38 +164,43 @@ public class MigrationManager {
                 try {
                     if (response.isSuccessful() && response.body() != null) {
                         SyncResponse syncResponse = response.body();
-                        
+
                         executor.execute(() -> {
                             try {
-                                for (Transaction transaction : transactionsToMigrate) {
-                                    Long serverId = syncResponse.getTransactionServerId(transaction.getId());
-                                    if (serverId != null && serverId > 0) {
-                                        transaction.setServerId(serverId);
-                                        transaction.setSyncStatus(2);
-                                        transactionDao.update(transaction);
-                                        migratedTransactionsCount++;
+                                int updatedCount = 0;
+                                List<SyncResponse.TransactionMapping> transactionMappings = syncResponse.getTransactionMappings();
+
+                                if (transactionMappings != null) {
+                                    for (SyncResponse.TransactionMapping mapping : transactionMappings) {
+                                        Transaction transaction = transactionDao.getTransactionById(mapping.getLocalId());
+                                        if (transaction != null) {
+                                            transaction.setServerId(mapping.getServerId());
+                                            transaction.setSyncStatus(2);
+                                            transactionDao.update(transaction);
+                                            updatedCount++;
+                                        }
                                     }
                                 }
 
-                                if (migratedTransactionsCount > 0) {
-                                    String summary = String.format("تم ترحيل %d معاملة بنجاح", migratedTransactionsCount);
-                                    new Handler(Looper.getMainLooper()).post(() -> 
-                                        Toast.makeText(context, summary, Toast.LENGTH_LONG).show());
+                                if (updatedCount > 0) {
+                                    String summary = String.format("تم ترحيل %d معاملة بنجاح", updatedCount);
+                                    new Handler(Looper.getMainLooper()).post(() ->
+                                            Toast.makeText(context, summary, Toast.LENGTH_LONG).show());
                                 } else {
-                                    new Handler(Looper.getMainLooper()).post(() -> 
-                                        Toast.makeText(context, "لم يتم تحديث أي معاملات", Toast.LENGTH_LONG).show());
+                                    new Handler(Looper.getMainLooper()).post(() ->
+                                            Toast.makeText(context, "لم يتم تحديث أي معاملات", Toast.LENGTH_LONG).show());
                                 }
                             } catch (Exception e) {
-                                new Handler(Looper.getMainLooper()).post(() -> 
-                                    Toast.makeText(context, "حدث خطأ أثناء معالجة البيانات", Toast.LENGTH_LONG).show());
+                                new Handler(Looper.getMainLooper()).post(() ->
+                                        Toast.makeText(context, "حدث خطأ أثناء معالجة البيانات", Toast.LENGTH_LONG).show());
                             }
                         });
                     } else {
                         handleErrorResponse(response);
                     }
                 } catch (Exception e) {
-                    new Handler(Looper.getMainLooper()).post(() -> 
-                        Toast.makeText(context, "حدث خطأ غير متوقع", Toast.LENGTH_LONG).show());
+                    new Handler(Looper.getMainLooper()).post(() ->
+                            Toast.makeText(context, "حدث خطأ غير متوقع", Toast.LENGTH_LONG).show());
                 }
             }
 
@@ -219,10 +224,10 @@ public class MigrationManager {
         final String finalErrorMessage = errorMessage;
         new Handler(Looper.getMainLooper()).post(() -> {
             new AlertDialog.Builder(context)
-                .setTitle("خطأ في المزامنة")
-                .setMessage(finalErrorMessage)
-                .setPositiveButton("حسناً", null)
-                .show();
+                    .setTitle("خطأ في المزامنة")
+                    .setMessage(finalErrorMessage)
+                    .setPositiveButton("حسناً", null)
+                    .show();
         });
     }
 
@@ -234,10 +239,10 @@ public class MigrationManager {
         } else if (t instanceof java.net.SocketTimeoutException) {
             errorMessage = "انتهت مهلة الاتصال بالخادم، يرجى المحاولة مرة أخرى";
         }
-        
+
         final String finalErrorMessage = errorMessage;
-        new Handler(Looper.getMainLooper()).post(() -> 
-            Toast.makeText(context, finalErrorMessage, Toast.LENGTH_LONG).show());
+        new Handler(Looper.getMainLooper()).post(() ->
+                Toast.makeText(context, finalErrorMessage, Toast.LENGTH_LONG).show());
     }
 
     private boolean isNetworkAvailable() {
@@ -253,10 +258,10 @@ public class MigrationManager {
         String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
                 .getString("token", null);
         if (token == null || token.isEmpty()) {
-            new Handler(Looper.getMainLooper()).post(() -> 
-                Toast.makeText(context, "يرجى تسجيل الدخول أولاً", Toast.LENGTH_SHORT).show());
+            new Handler(Looper.getMainLooper()).post(() ->
+                    Toast.makeText(context, "يرجى تسجيل الدخول أولاً", Toast.LENGTH_SHORT).show());
             return null;
         }
         return token;
     }
-} 
+}
