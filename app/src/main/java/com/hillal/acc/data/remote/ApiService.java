@@ -186,12 +186,12 @@ public interface ApiService {
             return null;
         }
 
-        private static class Mapping {
+        public static class Mapping {
             @SerializedName("local_id")
-            private Long localId;
+            public Long localId;
             
             @SerializedName("server_id")
-            private Long serverId;
+            public Long serverId;
         }
     }
 } 
