@@ -111,10 +111,13 @@ public class MigrationManager {
                                             long oldId = transaction.getId();
                                             long oldAccountId = transaction.getAccountId();
                                             
-                                            // تحديث معرف الحساب إذا تم تحديثه
+                                            // تحديث معرف الحساب في المعاملة
                                             Long newAccountId = syncResponse.getAccountServerId(oldAccountId);
                                             if (newAccountId != null && newAccountId > 0) {
                                                 transaction.setAccountId(newAccountId);
+                                            } else {
+                                                // إذا لم يتم العثور على معرف حساب جديد، نستخدم معرف الحساب القديم
+                                                transaction.setAccountId(oldAccountId);
                                             }
                                             
                                             transaction.setServerId(serverId);
