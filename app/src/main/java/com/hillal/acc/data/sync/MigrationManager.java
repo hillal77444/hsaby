@@ -115,6 +115,8 @@ public class MigrationManager {
                                         }
                                     } catch (Exception e) {
                                         Log.e("MigrationManager", "Error processing server response", e);
+                                        Log.e("MigrationManager", "Error details: " + e.getMessage());
+                                        Log.e("MigrationManager", "Stack trace: " + Log.getStackTraceString(e));
                                         new Handler(Looper.getMainLooper()).post(() -> 
                                             Toast.makeText(context, "حدث خطأ أثناء معالجة البيانات", Toast.LENGTH_LONG).show());
                                     }
@@ -180,12 +182,60 @@ public class MigrationManager {
                                 // تحديث المعاملات
                                 for (Transaction transaction : transactionsToMigrate) {
                                     Long serverId = syncResponse.getTransactionServerId(transaction.getId());
+                                    Log.d("MigrationManager", "Processing transaction ID: " + transaction.getId() + 
+                                        ", Server ID from response: " + serverId);
                                     
                                     if (serverId != null && serverId > 0) {
-                                        transaction.setServerId(serverId);
-                                        transaction.setSyncStatus(2);
-                                        transactionDao.update(transaction);
-                                        migratedTransactionsCount++;
+                                        Log.d("MigrationManager", "Before update - Transaction ID: " + transaction.getId() + 
+                                            ", Server ID: " + transaction.getServerId() + 
+                                            ", Sync Status: " + transaction.getSyncStatus());
+                                        
+                                        try {
+                                            // تحديث البيانات
+                                            transaction.setServerId(serverId);
+                                            transaction.setSyncStatus(2);
+                                            transaction.setLastSyncTime(System.currentTimeMillis());
+                                            
+                                            // محاولة التحديث في قاعدة البيانات
+                                            Log.d("MigrationManager", "Attempting to update transaction in database...");
+                                            transactionDao.update(transaction);
+                                            
+                                            // التحقق من نجاح التحديث
+                                            Transaction updatedTransaction = transactionDao.getTransactionByIdSync(transaction.getId());
+                                            if (updatedTransaction != null) {
+                                                Log.d("MigrationManager", "After update - Transaction ID: " + updatedTransaction.getId() + 
+                                                    ", Server ID: " + updatedTransaction.getServerId() + 
+                                                    ", Sync Status: " + updatedTransaction.getSyncStatus());
+                                                
+                                                if (updatedTransaction.getServerId() == serverId && 
+                                                    updatedTransaction.getSyncStatus() == 2) {
+                                                    migratedTransactionsCount++;
+                                                    Log.d("MigrationManager", "Transaction successfully updated in database");
+                                                } else {
+                                                    Log.e("MigrationManager", "Transaction update verification failed - " +
+                                                        "Expected server ID: " + serverId + ", Got: " + updatedTransaction.getServerId() + 
+                                                        ", Expected sync status: 2, Got: " + updatedTransaction.getSyncStatus());
+                                                }
+                                            } else {
+                                                Log.e("MigrationManager", "Failed to verify transaction update - Transaction not found in database");
+                                            }
+                                        } catch (Exception e) {
+                                            Log.e("MigrationManager", "Error updating transaction in database", e);
+                                            Log.e("MigrationManager", "Error details: " + e.getMessage());
+                                            Log.e("MigrationManager", "Stack trace: " + Log.getStackTraceString(e));
+                                            
+                                            // محاولة إعادة التحديث مرة أخرى
+                                            try {
+                                                Log.d("MigrationManager", "Retrying transaction update...");
+                                                transactionDao.update(transaction);
+                                                Log.d("MigrationManager", "Retry successful");
+                                            } catch (Exception retryEx) {
+                                                Log.e("MigrationManager", "Retry failed", retryEx);
+                                            }
+                                        }
+                                    } else {
+                                        Log.w("MigrationManager", "No valid server ID received for transaction: " + 
+                                            transaction.getId());
                                     }
                                 }
 
@@ -199,6 +249,8 @@ public class MigrationManager {
                                 });
                             } catch (Exception e) {
                                 Log.e("MigrationManager", "Error processing server response", e);
+                                Log.e("MigrationManager", "Error details: " + e.getMessage());
+                                Log.e("MigrationManager", "Stack trace: " + Log.getStackTraceString(e));
                                 new Handler(Looper.getMainLooper()).post(() -> 
                                     Toast.makeText(context, "حدث خطأ أثناء معالجة البيانات", Toast.LENGTH_LONG).show());
                             }
