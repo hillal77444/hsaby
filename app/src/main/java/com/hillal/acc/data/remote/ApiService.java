@@ -167,8 +167,8 @@ public interface ApiService {
         public Long getAccountServerId(Long localId) {
             if (accountMappings != null) {
                 for (Mapping mapping : accountMappings) {
-                    if (mapping.getLocalId() != null && mapping.getLocalId().equals(localId)) {
-                        return mapping.getServerId();
+                    if (mapping.localId.equals(localId)) {
+                        return mapping.serverId;
                     }
                 }
             }
@@ -178,37 +178,20 @@ public interface ApiService {
         public Long getTransactionServerId(Long localId) {
             if (transactionMappings != null) {
                 for (Mapping mapping : transactionMappings) {
-                    if (mapping.getLocalId() != null && mapping.getLocalId().equals(localId)) {
-                        return mapping.getServerId();
+                    if (mapping.localId.equals(localId)) {
+                        return mapping.serverId;
                     }
                 }
             }
             return null;
         }
 
-        // دوال getter للوصول لقوائم المابينغ كاملة (مهم لتحديث المعاملات مباشرة)
-        public List<Mapping> getAccountMappings() {
-            return accountMappings;
-        }
-
-        public List<Mapping> getTransactionMappings() {
-            return transactionMappings;
-        }
-
-        public static class Mapping {
+        private static class Mapping {
             @SerializedName("local_id")
             private Long localId;
             
             @SerializedName("server_id")
             private Long serverId;
-
-            public Long getLocalId() {
-                return localId;
-            }
-
-            public Long getServerId() {
-                return serverId;
-            }
         }
     }
-}
+} 
