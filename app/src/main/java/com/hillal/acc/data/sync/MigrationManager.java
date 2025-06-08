@@ -86,7 +86,7 @@ public class MigrationManager {
                             
                             executor.execute(() -> {
                                 try {
-                                    // تحديث الحسابات
+                                    // تحديث الحسابات أولاً
                                     for (Account account : accountsToMigrate) {
                                         Long serverId = syncResponse.getAccountServerId(account.getId());
                                         
@@ -103,7 +103,7 @@ public class MigrationManager {
                                         }
                                     }
 
-                                    // تحديث المعاملات
+                                    // تحديث المعاملات بعد تحديث الحسابات
                                     for (Transaction transaction : transactionsToMigrate) {
                                         Long serverId = syncResponse.getTransactionServerId(transaction.getId());
                                         
@@ -115,9 +115,6 @@ public class MigrationManager {
                                             Long newAccountId = syncResponse.getAccountServerId(oldAccountId);
                                             if (newAccountId != null && newAccountId > 0) {
                                                 transaction.setAccountId(newAccountId);
-                                            } else {
-                                                // إذا لم يتم العثور على معرف حساب جديد، نستخدم معرف الحساب القديم
-                                                transaction.setAccountId(oldAccountId);
                                             }
                                             
                                             transaction.setServerId(serverId);
@@ -130,6 +127,16 @@ public class MigrationManager {
                                             migratedTransactionsCount++;
                                         }
                                     }
+
+                                    // تحديث حالة المزامنة في قاعدة البيانات
+                                    database.runInTransaction(() -> {
+                                        for (Account account : accountsToMigrate) {
+                                            accountDao.update(account);
+                                        }
+                                        for (Transaction transaction : transactionsToMigrate) {
+                                            transactionDao.update(transaction);
+                                        }
+                                    });
 
                                     new Handler(Looper.getMainLooper()).post(() -> {
                                         if (migratedAccountsCount > 0 || migratedTransactionsCount > 0) {
