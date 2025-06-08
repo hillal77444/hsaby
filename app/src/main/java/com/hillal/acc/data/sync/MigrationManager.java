@@ -114,9 +114,6 @@ public class MigrationManager {
                                             migrateTransactions(token, transactionsToMigrate);
                                         }
                                     } catch (Exception e) {
-                                        Log.e("MigrationManager", "Error processing server response", e);
-                                        Log.e("MigrationManager", "Error details: " + e.getMessage());
-                                        Log.e("MigrationManager", "Stack trace: " + Log.getStackTraceString(e));
                                         new Handler(Looper.getMainLooper()).post(() -> 
                                             Toast.makeText(context, "حدث خطأ أثناء معالجة البيانات", Toast.LENGTH_LONG).show());
                                     }
@@ -125,7 +122,6 @@ public class MigrationManager {
                                 handleErrorResponse(response);
                             }
                         } catch (Exception e) {
-                            Log.e("MigrationManager", "Unexpected error", e);
                             new Handler(Looper.getMainLooper()).post(() -> 
                                 Toast.makeText(context, "حدث خطأ غير متوقع", Toast.LENGTH_LONG).show());
                         }
@@ -150,8 +146,6 @@ public class MigrationManager {
         for (Account account : allAccounts) {
             if (account.getServerId() > 0) {
                 accountIdMap.put(account.getId(), account.getServerId());
-                Log.d("MigrationManager", "Mapped local account ID " + account.getId() + 
-                    " to server ID " + account.getServerId());
             }
         }
 
@@ -160,26 +154,10 @@ public class MigrationManager {
             Long serverAccountId = accountIdMap.get(transaction.getAccountId());
             if (serverAccountId != null) {
                 transaction.setAccountId(serverAccountId);
-                Log.d("MigrationManager", "Updated transaction " + transaction.getId() + 
-                    " account ID from " + transaction.getAccountId() + " to " + serverAccountId);
-            } else {
-                Log.d("MigrationManager", "Warning: No server ID found for local account ID " + 
-                    transaction.getAccountId() + " in transaction " + transaction.getId());
             }
         }
 
-        Log.d("MigrationManager", "Starting transactions migration with " + transactionsToMigrate.size() + " transactions");
         SyncRequest transactionRequest = new SyncRequest(new ArrayList<>(), transactionsToMigrate);
-        
-        // تسجيل بيانات المعاملات المرسلة
-        for (Transaction transaction : transactionsToMigrate) {
-            Log.d("MigrationManager", "Sending transaction - ID: " + transaction.getId() + 
-                ", Account ID: " + transaction.getAccountId() + 
-                ", Amount: " + transaction.getAmount() + 
-                ", Type: " + transaction.getType() + 
-                ", Description: " + transaction.getDescription());
-        }
-        
         apiService.syncData("Bearer " + token, transactionRequest).enqueue(new Callback<SyncResponse>() {
             @Override
             public void onResponse(Call<SyncResponse> call, Response<SyncResponse> response) {
@@ -194,20 +172,19 @@ public class MigrationManager {
                                     if (serverId != null && serverId > 0) {
                                         transaction.setServerId(serverId);
                                         transaction.setSyncStatus(2);
-                                        transaction.setLastSyncTime(System.currentTimeMillis());
                                         transactionDao.update(transaction);
                                         migratedTransactionsCount++;
                                     }
                                 }
 
-                                new Handler(Looper.getMainLooper()).post(() -> {
-                                    if (migratedTransactionsCount > 0) {
-                                        String summary = String.format("تم ترحيل %d معاملة بنجاح", migratedTransactionsCount);
-                                        Toast.makeText(context, summary, Toast.LENGTH_LONG).show();
-                                    } else {
-                                        Toast.makeText(context, "لم يتم تحديث أي معاملات", Toast.LENGTH_LONG).show();
-                                    }
-                                });
+                                if (migratedTransactionsCount > 0) {
+                                    String summary = String.format("تم ترحيل %d معاملة بنجاح", migratedTransactionsCount);
+                                    new Handler(Looper.getMainLooper()).post(() -> 
+                                        Toast.makeText(context, summary, Toast.LENGTH_LONG).show());
+                                } else {
+                                    new Handler(Looper.getMainLooper()).post(() -> 
+                                        Toast.makeText(context, "لم يتم تحديث أي معاملات", Toast.LENGTH_LONG).show());
+                                }
                             } catch (Exception e) {
                                 new Handler(Looper.getMainLooper()).post(() -> 
                                     Toast.makeText(context, "حدث خطأ أثناء معالجة البيانات", Toast.LENGTH_LONG).show());
@@ -217,7 +194,6 @@ public class MigrationManager {
                         handleErrorResponse(response);
                     }
                 } catch (Exception e) {
-                    Log.e("MigrationManager", "Unexpected error", e);
                     new Handler(Looper.getMainLooper()).post(() -> 
                         Toast.makeText(context, "حدث خطأ غير متوقع", Toast.LENGTH_LONG).show());
                 }
