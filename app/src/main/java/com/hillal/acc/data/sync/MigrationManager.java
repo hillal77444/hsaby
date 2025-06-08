@@ -103,7 +103,11 @@ public class MigrationManager {
                                     for (Transaction transaction : transactionsToMigrate) {
                                         Account relatedAccount = accountDao.getAccountByIdSync(transaction.getAccountId());
                                         if (relatedAccount != null && relatedAccount.getServerId() > 0) {
-                                            transaction.setAccountId(relatedAccount.getServerId());
+                                            // نحتفظ بمعرف الحساب المحلي كما هو
+                                            // نستخدم معرف الخادم فقط عند إرسال البيانات للخادم
+                                            Log.d("MigrationManager", "المعاملة " + transaction.getId() + 
+                                                " معرف الحساب المحلي: " + transaction.getAccountId() + 
+                                                " معرف الحساب على الخادم: " + relatedAccount.getServerId());
                                         }
                                     }
 
@@ -137,6 +141,7 @@ public class MigrationManager {
                                                                             // تحديث قاعدة البيانات المحلية
                                                                             database.runInTransaction(() -> {
                                                                                 try {
+                                                                                    // تحديث المعاملة مع الحفاظ على معرف الحساب المحلي الأصلي
                                                                                     transactionDao.update(transaction);
                                                                                     migratedTransactionsCount++;
                                                                                     Log.d("MigrationManager", "تم تحديث المعاملة بنجاح: " + transaction.getId());
