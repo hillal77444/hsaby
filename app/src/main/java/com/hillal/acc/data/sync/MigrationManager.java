@@ -100,6 +100,12 @@ public class MigrationManager {
 
                                     // تحديث المعاملات
                                     for (Transaction transaction : transactionsToMigrate) {
+                                        // تحديث معرف الحساب المحلي بمعرف الحساب على الخادم
+                                        Account relatedAccount = accountDao.getAccountById(transaction.getAccountId());
+                                        if (relatedAccount != null && relatedAccount.getServerId() != null) {
+                                            transaction.setAccountId(relatedAccount.getServerId());
+                                        }
+                                        
                                         Long serverId = syncResponse.getTransactionServerId(transaction.getId());
                                         
                                         if (serverId != null && serverId > 0) {
