@@ -25,6 +25,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.io.IOException;
+import java.util.Map;
+import java.util.HashMap;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -76,6 +78,51 @@ public class MigrationManager {
             Log.d("MigrationManager", "Starting migration with " + accountsToMigrate.size() + " accounts and " + 
                 transactionsToMigrate.size() + " transactions");
 
+            // إنشاء خريطة لجميع الحسابات في قاعدة البيانات المحلية
+            Map<Long, Long> accountIdMap = new HashMap<>();
+            List<Account> allAccounts = accountDao.getAllAccounts();
+            for (Account account : allAccounts) {
+                if (account.getServerId() > 0) {
+                    accountIdMap.put(account.getId(), account.getServerId());
+                    Log.d("MigrationManager", "Mapped local account ID " + account.getId() + 
+                        " to server ID " + account.getServerId());
+                }
+            }
+
+            // تحديث معرفات الحسابات في المعاملات
+            for (Transaction transaction : transactionsToMigrate) {
+                // البحث عن الحساب في قائمة الحسابات التي سيتم مزامنتها
+                Account relatedAccount = accountsToMigrate.stream()
+                    .filter(acc -> acc.getId() == transaction.getAccountId())
+                    .findFirst()
+                    .orElse(null);
+
+                if (relatedAccount != null) {
+                    // إذا كان الحساب سيتم مزامنته مع المعاملة، نستخدم معرف الخادم الجديد
+                    if (relatedAccount.getServerId() > 0) {
+                        transaction.setAccountId(relatedAccount.getServerId());
+                        Log.d("MigrationManager", "Updated transaction " + transaction.getId() + 
+                            " account ID from " + transaction.getAccountId() + " to " + relatedAccount.getServerId() + 
+                            " (account being synced)");
+                    } else {
+                        Log.d("MigrationManager", "Warning: Account " + transaction.getAccountId() + 
+                            " is being synced but has no server ID yet");
+                    }
+                } else {
+                    // إذا كان الحساب قد تم مزامنته مسبقاً، نستخدم معرف الخادم من الخريطة
+                    Long serverAccountId = accountIdMap.get(transaction.getAccountId());
+                    if (serverAccountId != null) {
+                        transaction.setAccountId(serverAccountId);
+                        Log.d("MigrationManager", "Updated transaction " + transaction.getId() + 
+                            " account ID from " + transaction.getAccountId() + " to " + serverAccountId + 
+                            " (previously synced account)");
+                    } else {
+                        Log.d("MigrationManager", "Warning: No server ID found for local account ID " + 
+                            transaction.getAccountId() + " in transaction " + transaction.getId());
+                    }
+                }
+            }
+
             SyncRequest request = new SyncRequest(accountsToMigrate, transactionsToMigrate);
             apiService.syncData("Bearer " + token, request).enqueue(new Callback<SyncResponse>() {
                 @Override
@@ -86,7 +133,7 @@ public class MigrationManager {
                             
                             executor.execute(() -> {
                                 try {
-                                    // تحديث الحسابات
+                                    // تحديث الحسابات أولاً
                                     for (Account account : accountsToMigrate) {
                                         Long serverId = syncResponse.getAccountServerId(account.getId());
                                         
@@ -105,6 +152,7 @@ public class MigrationManager {
                                         if (serverId != null && serverId > 0) {
                                             transaction.setServerId(serverId);
                                             transaction.setSyncStatus(2);
+                                            
                                             transactionDao.update(transaction);
                                             migratedTransactionsCount++;
                                         }
