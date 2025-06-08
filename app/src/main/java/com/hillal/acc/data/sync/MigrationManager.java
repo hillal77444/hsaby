@@ -54,8 +54,8 @@ public class MigrationManager {
     public void migrateLocalData() {
         executor.execute(() -> {
             if (!isNetworkAvailable()) {
-                runOnUiThread(() -> 
-                    Toast.makeText(context, "لا يوجد اتصال بالإنترنت", Toast.LENGTH_SHORT).show());
+                runOnUiThread(() ->
+                        Toast.makeText(context, "لا يوجد اتصال بالإنترنت", Toast.LENGTH_SHORT).show());
                 return;
             }
 
@@ -72,12 +72,12 @@ public class MigrationManager {
 
             if (accountsToMigrate.isEmpty() && transactionsToMigrate.isEmpty()) {
                 runOnUiThread(() ->
-                    Toast.makeText(context, "لا توجد بيانات بحاجة للمزامنة", Toast.LENGTH_SHORT).show());
+                        Toast.makeText(context, "لا توجد بيانات بحاجة للمزامنة", Toast.LENGTH_SHORT).show());
                 return;
             }
 
             if (!accountsToMigrate.isEmpty()) {
-                // أولاً: مزامنة الحسابات
+                // مزامنة الحسابات أولاً ثم مزامنة المعاملات
                 migrateAccounts(token, accountsToMigrate, transactionsToMigrate);
             } else if (!transactionsToMigrate.isEmpty()) {
                 // إذا لم تكن هناك حسابات بحاجة للمزامنة، مزامنة المعاملات مباشرة
@@ -114,8 +114,8 @@ public class MigrationManager {
                                 migrateTransactions(token, transactionsToMigrate);
                             }
                         } catch (Exception e) {
-                            runOnUiThread(() -> 
-                                Toast.makeText(context, "حدث خطأ أثناء تحديث الحسابات", Toast.LENGTH_LONG).show());
+                            runOnUiThread(() ->
+                                    Toast.makeText(context, "حدث خطأ أثناء تحديث الحسابات", Toast.LENGTH_LONG).show());
                         }
                     });
                 } else {
@@ -135,12 +135,13 @@ public class MigrationManager {
             List<Account> allAccounts = accountDao.getAllAccountsSync();
             Map<Long, Long> accountIdMap = new HashMap<>();
             for (Account account : allAccounts) {
-                if (account.getServerId() != null && account.getServerId() > 0) {
+                // الحل الصحيح: serverId من النوع long ولا يمكن مقارنته مع null
+                if (account.getServerId() > 0) {
                     accountIdMap.put(account.getId(), account.getServerId());
                 }
             }
 
-            // استبدال accountId في المعاملات بـ serverId
+            // استبدال accountId في المعاملات بـ serverId قبل الترحيل
             for (Transaction transaction : transactionsToMigrate) {
                 Long serverAccountId = accountIdMap.get(transaction.getAccountId());
                 if (serverAccountId != null) {
@@ -173,8 +174,8 @@ public class MigrationManager {
                                     }
                                 });
                             } catch (Exception e) {
-                                runOnUiThread(() -> 
-                                    Toast.makeText(context, "حدث خطأ أثناء تحديث المعاملات", Toast.LENGTH_LONG).show());
+                                runOnUiThread(() ->
+                                        Toast.makeText(context, "حدث خطأ أثناء تحديث المعاملات", Toast.LENGTH_LONG).show());
                             }
                         });
                     } else {
@@ -202,10 +203,10 @@ public class MigrationManager {
         final String finalErrorMessage = errorMessage;
         runOnUiThread(() -> {
             new AlertDialog.Builder(context)
-                .setTitle("خطأ في المزامنة")
-                .setMessage(finalErrorMessage)
-                .setPositiveButton("حسناً", null)
-                .show();
+                    .setTitle("خطأ في المزامنة")
+                    .setMessage(finalErrorMessage)
+                    .setPositiveButton("حسناً", null)
+                    .show();
         });
     }
 
@@ -218,8 +219,8 @@ public class MigrationManager {
             errorMessage = "انتهت مهلة الاتصال بالخادم، يرجى المحاولة مرة أخرى";
         }
         final String finalErrorMessage = errorMessage;
-        runOnUiThread(() -> 
-            Toast.makeText(context, finalErrorMessage, Toast.LENGTH_LONG).show());
+        runOnUiThread(() ->
+                Toast.makeText(context, finalErrorMessage, Toast.LENGTH_LONG).show());
     }
 
     private boolean isNetworkAvailable() {
@@ -235,8 +236,8 @@ public class MigrationManager {
         String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
                 .getString("token", null);
         if (token == null || token.isEmpty()) {
-            runOnUiThread(() -> 
-                Toast.makeText(context, "يرجى تسجيل الدخول أولاً", Toast.LENGTH_SHORT).show());
+            runOnUiThread(() ->
+                    Toast.makeText(context, "يرجى تسجيل الدخول أولاً", Toast.LENGTH_SHORT).show());
             return null;
         }
         return token;
