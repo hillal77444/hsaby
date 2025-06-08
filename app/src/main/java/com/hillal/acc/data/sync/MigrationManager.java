@@ -86,57 +86,29 @@ public class MigrationManager {
                             
                             executor.execute(() -> {
                                 try {
-                                    // تحديث الحسابات أولاً
+                                    // تحديث الحسابات
                                     for (Account account : accountsToMigrate) {
                                         Long serverId = syncResponse.getAccountServerId(account.getId());
                                         
                                         if (serverId != null && serverId > 0) {
-                                            long oldId = account.getId();
                                             account.setServerId(serverId);
-                                            account.setId(serverId);
-                                            account.setSyncStatus(2);
-                                            
-                                            // حذف الحساب القديم وإدخال الحساب الجديد
-                                            accountDao.deleteAccount(oldId);
-                                            accountDao.insert(account);
+                                            account.setSyncStatus(2); 
+                                            accountDao.update(account);
                                             migratedAccountsCount++;
                                         }
                                     }
 
-                                    // تحديث المعاملات بعد تحديث الحسابات
+                                    // تحديث المعاملات
                                     for (Transaction transaction : transactionsToMigrate) {
                                         Long serverId = syncResponse.getTransactionServerId(transaction.getId());
                                         
                                         if (serverId != null && serverId > 0) {
-                                            long oldId = transaction.getId();
-                                            long oldAccountId = transaction.getAccountId();
-                                            
-                                            // تحديث معرف الحساب في المعاملة
-                                            Long newAccountId = syncResponse.getAccountServerId(oldAccountId);
-                                            if (newAccountId != null && newAccountId > 0) {
-                                                transaction.setAccountId(newAccountId);
-                                            }
-                                            
                                             transaction.setServerId(serverId);
-                                            transaction.setId(serverId);
                                             transaction.setSyncStatus(2);
-                                            
-                                            // حذف المعاملة القديمة وإدخال المعاملة الجديدة
-                                            transactionDao.delete(transaction);
-                                            transactionDao.insert(transaction);
+                                            transactionDao.update(transaction);
                                             migratedTransactionsCount++;
                                         }
                                     }
-
-                                    // تحديث حالة المزامنة في قاعدة البيانات
-                                    database.runInTransaction(() -> {
-                                        for (Account account : accountsToMigrate) {
-                                            accountDao.update(account);
-                                        }
-                                        for (Transaction transaction : transactionsToMigrate) {
-                                            transactionDao.update(transaction);
-                                        }
-                                    });
 
                                     new Handler(Looper.getMainLooper()).post(() -> {
                                         if (migratedAccountsCount > 0 || migratedTransactionsCount > 0) {
