@@ -124,10 +124,27 @@ public class MigrationManager {
                                                                     Long serverId = transactionResponse.getTransactionServerId(transaction.getId());
                                                                     
                                                                     if (serverId != null && serverId > 0) {
-                                                                        transaction.setServerId(serverId);
-                                                                        transaction.setSyncStatus(2);
-                                                                        transactionDao.update(transaction);
-                                                                        migratedTransactionsCount++;
+                                                                        try {
+                                                                            // تحديث البيانات في المعاملة
+                                                                            transaction.setServerId(serverId);
+                                                                            transaction.setSyncStatus(2);
+                                                                            
+                                                                            // تحديث قاعدة البيانات المحلية
+                                                                            database.runInTransaction(() -> {
+                                                                                try {
+                                                                                    transactionDao.update(transaction);
+                                                                                    migratedTransactionsCount++;
+                                                                                    Log.d("MigrationManager", "تم تحديث المعاملة بنجاح: " + transaction.getId());
+                                                                                } catch (Exception e) {
+                                                                                    Log.e("MigrationManager", "فشل في تحديث المعاملة في قاعدة البيانات: " + transaction.getId(), e);
+                                                                                    throw e; // إعادة رمي الاستثناء لإيقاف المعاملة
+                                                                                }
+                                                                            });
+                                                                        } catch (Exception e) {
+                                                                            Log.e("MigrationManager", "فشل في تحديث المعاملة: " + transaction.getId(), e);
+                                                                            new Handler(Looper.getMainLooper()).post(() -> 
+                                                                                Toast.makeText(context, "حدث خطأ أثناء تحديث قاعدة البيانات المحلية", Toast.LENGTH_LONG).show());
+                                                                        }
                                                                     }
                                                                 }
 
