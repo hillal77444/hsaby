@@ -157,6 +157,9 @@ public class MigrationManager {
                                                                                 " معرف الحساب المحلي: " + transaction.getAccountId() + 
                                                                                 " معرف الخادم الجديد: " + serverId);
 
+                                                                            // حفظ المعرف المحلي الأصلي للحساب
+                                                                            long originalAccountId = transaction.getAccountId();
+                                                                            
                                                                             // تحديث معرف الخادم وحالة المزامنة فقط
                                                                             transaction.setServerId(serverId);
                                                                             transaction.setSyncStatus(2);
@@ -164,7 +167,8 @@ public class MigrationManager {
                                                                             // تحديث قاعدة البيانات المحلية
                                                                             database.runInTransaction(() -> {
                                                                                 try {
-                                                                                    // تحديث المعاملة مع الحفاظ على معرف الحساب المحلي الأصلي
+                                                                                    // إعادة معرف الحساب المحلي الأصلي قبل التحديث
+                                                                                    transaction.setAccountId(originalAccountId);
                                                                                     transactionDao.update(transaction);
                                                                                     migratedTransactionsCount++;
                                                                                     Log.d("MigrationManager", "تم تحديث المعاملة بنجاح: " + transaction.getId());
