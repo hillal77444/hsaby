@@ -130,16 +130,14 @@ public class MigrationManager {
                                                                                 " معرف الحساب المحلي: " + transaction.getAccountId() + 
                                                                                 " معرف الخادم الجديد: " + serverId);
 
-                                                                            // نسخ المعاملة الحالية
-                                                                            Transaction updatedTransaction = new Transaction(transaction);
                                                                             // تحديث معرف الخادم وحالة المزامنة فقط
-                                                                            updatedTransaction.setServerId(serverId);
-                                                                            updatedTransaction.setSyncStatus(2);
+                                                                            transaction.setServerId(serverId);
+                                                                            transaction.setSyncStatus(2);
                                                                             
                                                                             // تحديث قاعدة البيانات المحلية
                                                                             database.runInTransaction(() -> {
                                                                                 try {
-                                                                                    transactionDao.update(updatedTransaction);
+                                                                                    transactionDao.update(transaction);
                                                                                     migratedTransactionsCount++;
                                                                                     Log.d("MigrationManager", "تم تحديث المعاملة بنجاح: " + transaction.getId());
                                                                                 } catch (Exception e) {
