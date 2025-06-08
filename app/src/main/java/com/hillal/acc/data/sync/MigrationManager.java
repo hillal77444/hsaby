@@ -80,7 +80,9 @@ public class MigrationManager {
 
             // إنشاء خريطة لجميع الحسابات في قاعدة البيانات المحلية
             Map<Long, Long> accountIdMap = new HashMap<>();
-            List<Account> allAccounts = accountDao.getAllAccounts();
+            
+            // الحصول على جميع الحسابات من قاعدة البيانات
+            List<Account> allAccounts = accountDao.getAllAccountsSync();
             for (Account account : allAccounts) {
                 if (account.getServerId() > 0) {
                     accountIdMap.put(account.getId(), account.getServerId());
