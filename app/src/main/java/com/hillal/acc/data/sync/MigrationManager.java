@@ -201,7 +201,7 @@ public class MigrationManager {
                                             transactionDao.update(transaction);
                                             
                                             // التحقق من نجاح التحديث
-                                            Transaction updatedTransaction = transactionDao.getTransactionByIdSync(transaction.getId());
+                                            Transaction updatedTransaction = transactionDao.getTransactionById(transaction.getId());
                                             if (updatedTransaction != null) {
                                                 Log.d("MigrationManager", "After update - Transaction ID: " + updatedTransaction.getId() + 
                                                     ", Server ID: " + updatedTransaction.getServerId() + 
