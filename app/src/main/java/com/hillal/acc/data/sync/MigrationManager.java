@@ -103,16 +103,23 @@ public class MigrationManager {
                                         // تحديث معرف الحساب المحلي بمعرف الحساب على الخادم
                                         Account relatedAccount = accountDao.getAccountByIdSync(transaction.getAccountId());
                                         if (relatedAccount != null && relatedAccount.getServerId() > 0) {
+                                            // حفظ المعرف المحلي الأصلي
+                                            long originalLocalAccountId = transaction.getAccountId();
+                                            // تحديث المعرف بالمعرف الجديد من الخادم
                                             transaction.setAccountId(relatedAccount.getServerId());
-                                        }
-                                        
-                                        Long serverId = syncResponse.getTransactionServerId(transaction.getId());
-                                        
-                                        if (serverId != null && serverId > 0) {
-                                            transaction.setServerId(serverId);
-                                            transaction.setSyncStatus(2);
-                                            transactionDao.update(transaction);
-                                            migratedTransactionsCount++;
+                                            
+                                            Long serverId = syncResponse.getTransactionServerId(transaction.getId());
+                                            
+                                            if (serverId != null && serverId > 0) {
+                                                transaction.setServerId(serverId);
+                                                transaction.setSyncStatus(2);
+                                                // تحديث المعاملة في قاعدة البيانات المحلية
+                                                transactionDao.update(transaction);
+                                                migratedTransactionsCount++;
+                                            } else {
+                                                // إذا فشل التحديث، نعيد المعرف المحلي الأصلي
+                                                transaction.setAccountId(originalLocalAccountId);
+                                            }
                                         }
                                     }
 
