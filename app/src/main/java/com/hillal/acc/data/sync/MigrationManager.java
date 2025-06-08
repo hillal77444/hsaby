@@ -116,27 +116,37 @@ public class MigrationManager {
                                     if (!transactionsToMigrate.isEmpty()) {
                                         // إضافة الحسابات المرتبطة بالمعاملات التي لم تتم مزامنتها بعد
                                         List<Account> relatedAccounts = new ArrayList<>();
-                                        for (Transaction transaction : transactionsToMigrate) {
-                                            Account account = accountDao.getAccountByIdSync(transaction.getAccountId());
-                                            if (account != null && account.getServerId() > 0 && !relatedAccounts.contains(account)) {
-                                                // نضيف فقط الحسابات التي لم تتم مزامنتها بعد
-                                                if (account.getSyncStatus() != 2) {
-                                                    relatedAccounts.add(account);
-                                                }
-                                            }
-                                        }
+                                        List<Transaction> transactionsForServer = new ArrayList<>();
                                         
-                                        // تحديث معرفات الحساب في المعاملات إلى معرفات الخادم
+                                        // تحضير المعاملات للإرسال للخادم
                                         for (Transaction transaction : transactionsToMigrate) {
                                             Account account = accountDao.getAccountByIdSync(transaction.getAccountId());
                                             if (account != null && account.getServerId() > 0) {
-                                                // نحتفظ بالمعرف المحلي في قاعدة البيانات المحلية
-                                                // لكن نستخدم معرف الخادم عند الإرسال
-                                                transaction.setAccountId(account.getServerId());
+                                                // نضيف الحساب إذا لم تتم مزامنته بعد
+                                                if (account.getSyncStatus() != 2 && !relatedAccounts.contains(account)) {
+                                                    relatedAccounts.add(account);
+                                                }
+                                                
+                                                // إنشاء نسخة من المعاملة للإرسال للخادم
+                                                Transaction serverTransaction = new Transaction();
+                                                serverTransaction.setId(transaction.getId());
+                                                serverTransaction.setAccountId(account.getServerId());
+                                                serverTransaction.setAmount(transaction.getAmount());
+                                                serverTransaction.setType(transaction.getType());
+                                                serverTransaction.setDescription(transaction.getDescription());
+                                                serverTransaction.setNotes(transaction.getNotes());
+                                                serverTransaction.setCurrency(transaction.getCurrency());
+                                                serverTransaction.setTransactionDate(transaction.getTransactionDate());
+                                                serverTransaction.setCreatedAt(transaction.getCreatedAt());
+                                                serverTransaction.setUpdatedAt(transaction.getUpdatedAt());
+                                                serverTransaction.setModified(transaction.isModified());
+                                                serverTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
+                                                serverTransaction.setSyncStatus(transaction.getSyncStatus());
+                                                transactionsForServer.add(serverTransaction);
                                             }
                                         }
                                         
-                                        SyncRequest transactionRequest = new SyncRequest(relatedAccounts, transactionsToMigrate);
+                                        SyncRequest transactionRequest = new SyncRequest(relatedAccounts, transactionsForServer);
                                         apiService.syncData("Bearer " + token, transactionRequest).enqueue(new Callback<SyncResponse>() {
                                             @Override
                                             public void onResponse(Call<SyncResponse> call, Response<SyncResponse> response) {
@@ -157,9 +167,6 @@ public class MigrationManager {
                                                                                 " معرف الحساب المحلي: " + transaction.getAccountId() + 
                                                                                 " معرف الخادم الجديد: " + serverId);
 
-                                                                            // حفظ المعرف المحلي الأصلي للحساب
-                                                                            long originalAccountId = transaction.getAccountId();
-                                                                            
                                                                             // تحديث معرف الخادم وحالة المزامنة فقط
                                                                             transaction.setServerId(serverId);
                                                                             transaction.setSyncStatus(2);
@@ -167,8 +174,6 @@ public class MigrationManager {
                                                                             // تحديث قاعدة البيانات المحلية
                                                                             database.runInTransaction(() -> {
                                                                                 try {
-                                                                                    // إعادة معرف الحساب المحلي الأصلي قبل التحديث
-                                                                                    transaction.setAccountId(originalAccountId);
                                                                                     transactionDao.update(transaction);
                                                                                     migratedTransactionsCount++;
                                                                                     Log.d("MigrationManager", "تم تحديث المعاملة بنجاح: " + transaction.getId());
