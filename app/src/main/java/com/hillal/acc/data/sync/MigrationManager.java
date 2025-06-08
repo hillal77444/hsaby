@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -113,7 +114,16 @@ public class MigrationManager {
 
                                     // ثم نقوم بمزامنة المعاملات
                                     if (!transactionsToMigrate.isEmpty()) {
-                                        SyncRequest transactionRequest = new SyncRequest(null, transactionsToMigrate);
+                                        // إضافة الحسابات المرتبطة بالمعاملات
+                                        List<Account> relatedAccounts = new ArrayList<>();
+                                        for (Transaction transaction : transactionsToMigrate) {
+                                            Account account = accountDao.getAccountByIdSync(transaction.getAccountId());
+                                            if (account != null && !relatedAccounts.contains(account)) {
+                                                relatedAccounts.add(account);
+                                            }
+                                        }
+                                        
+                                        SyncRequest transactionRequest = new SyncRequest(relatedAccounts, transactionsToMigrate);
                                         apiService.syncData("Bearer " + token, transactionRequest).enqueue(new Callback<SyncResponse>() {
                                             @Override
                                             public void onResponse(Call<SyncResponse> call, Response<SyncResponse> response) {
