@@ -186,9 +186,7 @@ public class MigrationManager {
                 try {
                     if (response.isSuccessful() && response.body() != null) {
                         SyncResponse syncResponse = response.body();
-                        Log.d("MigrationManager", "Received sync response - " +
-                            "Account mappings: " + (syncResponse.accountMappings != null ? syncResponse.accountMappings.size() : 0) + 
-                            ", Transaction mappings: " + (syncResponse.transactionMappings != null ? syncResponse.transactionMappings.size() : 0));
+                        Log.d("MigrationManager", "Received sync response");
                         
                         executor.execute(() -> {
                             try {
