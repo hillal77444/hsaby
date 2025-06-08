@@ -103,6 +103,9 @@ public interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE server_id = :serverId")
     Transaction getTransactionByServerIdSync(long serverId);
 
+    @Query("SELECT * FROM transactions WHERE id = :id")
+    Transaction getTransactionByIdSync(long id);
+
     @Query("DELETE FROM transactions")
     void deleteAllTransactions();
 
