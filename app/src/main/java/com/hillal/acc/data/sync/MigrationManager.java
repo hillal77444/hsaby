@@ -186,14 +186,11 @@ public class MigrationManager {
                 try {
                     if (response.isSuccessful() && response.body() != null) {
                         SyncResponse syncResponse = response.body();
-                        Log.d("MigrationManager", "Received sync response");
                         
                         executor.execute(() -> {
                             try {
-                                // تحديث المعاملات
                                 for (Transaction transaction : transactionsToMigrate) {
                                     Long serverId = syncResponse.getTransactionServerId(transaction.getId());
-                                    
                                     if (serverId != null && serverId > 0) {
                                         transaction.setServerId(serverId);
                                         transaction.setSyncStatus(2);
@@ -211,9 +208,6 @@ public class MigrationManager {
                                     }
                                 });
                             } catch (Exception e) {
-                                Log.e("MigrationManager", "Error processing server response", e);
-                                Log.e("MigrationManager", "Error details: " + e.getMessage());
-                                Log.e("MigrationManager", "Stack trace: " + Log.getStackTraceString(e));
                                 new Handler(Looper.getMainLooper()).post(() -> 
                                     Toast.makeText(context, "حدث خطأ أثناء معالجة البيانات", Toast.LENGTH_LONG).show());
                             }
