@@ -56,20 +56,28 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="مرحباً"
-                                android:textSize="@dimen/_12ssp"
-                                android:textColor="@color/white"
-                                android:alpha="0.9" />
+                                android:textSize="@dimen/_16ssp"
+                                android:textColor="#FFFFFF"
+                                android:alpha="1.0"
+                                android:shadowColor="#000000"
+                                android:shadowDx="1"
+                                android:shadowDy="1"
+                                android:shadowRadius="2" />
 
                             <TextView
                                 android:id="@+id/userNameText"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/_2sdp"
+                                android:layout_marginTop="@dimen/_6sdp"
                                 android:ellipsize="end"
                                 android:maxLines="1"
-                                android:textSize="@dimen/_18ssp"
-                                android:textColor="@color/white"
+                                android:textSize="@dimen/_24ssp"
+                                android:textColor="#FFFFFF"
                                 android:textStyle="bold"
+                                android:shadowColor="#000000"
+                                android:shadowDx="2"
+                                android:shadowDy="2"
+                                android:shadowRadius="3"
                                 tools:text="أحمد محمد" />
 
                         </LinearLayout>
@@ -80,17 +88,18 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="تعديل"
-                            android:textSize="@dimen/_10ssp"
-                            android:minHeight="@dimen/_36sdp"
-                            android:paddingHorizontal="@dimen/_8sdp"
-                            android:textColor="@color/white"
+                            android:textSize="@dimen/_14ssp"
+                            android:minHeight="@dimen/_44sdp"
+                            android:paddingHorizontal="@dimen/_16sdp"
+                            android:textColor="#FFFFFF"
                             app:icon="@drawable/ic_edit"
                             app:iconGravity="textStart"
-                            app:iconPadding="@dimen/_2sdp"
-                            app:iconSize="@dimen/_16sdp"
-                            app:iconTint="@color/white"
-                            app:strokeColor="@color/white"
-                            app:cornerRadius="@dimen/_18sdp" />
+                            app:iconPadding="@dimen/_6sdp"
+                            app:iconSize="@dimen/_20sdp"
+                            app:iconTint="#FFFFFF"
+                            app:strokeColor="#FFFFFF"
+                            app:strokeWidth="2dp"
+                            app:cornerRadius="@dimen/_22sdp" />
 
                     </LinearLayout>
 
@@ -413,31 +422,31 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+                android:id="@+id/fabAddTransaction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="@dimen/_16sdp"
+                android:contentDescription="إضافة قيد محاسبي جديد"
+                android:minHeight="@dimen/_48sdp"
+                android:paddingHorizontal="@dimen/_20sdp"
+                android:text="إضافة قيد"
+                android:textSize="@dimen/_14ssp"
+                app:backgroundTint="@color/primary"
+                app:cornerRadius="@dimen/_16sdp"
+                app:elevation="@dimen/_6sdp"
+                app:fabCustomSize="@dimen/_52sdp"
+                app:icon="@drawable/ic_add"
+                app:iconSize="@dimen/_24sdp"
+                app:iconTint="#FFFFFF"
+                app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
+                app:maxImageSize="@dimen/_28sdp"
+                tools:layout_editor_absoluteX="238dp"
+                tools:layout_editor_absoluteY="661dp" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.core.widget.NestedScrollView>
-
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/fabAddTransaction"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/_12sdp"
-        android:layout_marginEnd="@dimen/_12sdp"
-        android:layout_marginBottom="@dimen/_96sdp"
-        android:text="إضافة قيد"
-        android:textSize="@dimen/_12ssp"
-        android:minHeight="@dimen/_44sdp"
-        android:paddingHorizontal="@dimen/_16sdp"
-        app:icon="@drawable/ic_add"
-        app:iconSize="@dimen/_20sdp"
-        app:iconTint="@color/on_primary"
-        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
-        app:fabCustomSize="@dimen/_48sdp"
-        app:elevation="@dimen/_4sdp"
-        app:cornerRadius="@dimen/_12sdp"
-        app:maxImageSize="@dimen/_24sdp"
-        app:backgroundTint="@color/primary"
-        android:contentDescription="إضافة قيد محاسبي جديد" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
