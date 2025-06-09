@@ -83,4 +83,8 @@
     <!-- ألوان الأزرار -->
     <color name="accent_green">#4CAF50</color>
     <color name="accent_green_dark">#388E3C</color>
+
+    <!-- ألوان التموج -->
+    <color name="primary_ripple">#1F2196F3</color>
+    <color name="secondary_ripple">#1F4CAF50</color>
 </resources>
