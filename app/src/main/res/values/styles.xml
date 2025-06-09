@@ -29,6 +29,11 @@
         <item name="android:textColor">?attr/colorOnBackground</item>
     </style>
 
+    <style name="TextAppearance.App.Headline3" parent="TextAppearance.MaterialComponents.Headline3">
+        <item name="android:textSize">@dimen/text_size_headline3</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
+    </style>
+
     <style name="TextAppearance.App.Body1" parent="TextAppearance.MaterialComponents.Body1">
         <item name="android:textSize">@dimen/text_size_body1</item>
         <item name="android:textColor">?attr/colorOnBackground</item>
@@ -54,6 +59,11 @@
         <item name="android:paddingBottom">@dimen/button_padding_vertical</item>
     </style>
 
+    <style name="ButtonStyle" parent="Widget.App.Button">
+        <item name="android:textColor">@color/white</item>
+        <item name="backgroundTint">@color/primary_blue</item>
+    </style>
+
     <!-- أنماط البطاقات -->
     <style name="Widget.App.CardView" parent="Widget.MaterialComponents.CardView">
         <item name="cardElevation">4dp</item>
@@ -71,5 +81,10 @@
         <item name="boxCornerRadiusTopEnd">12dp</item>
         <item name="boxCornerRadiusBottomStart">12dp</item>
         <item name="boxCornerRadiusBottomEnd">12dp</item>
+    </style>
+
+    <style name="TextInputLayoutStyle" parent="Widget.App.TextInputLayout">
+        <item name="boxStrokeColor">@color/primary_blue</item>
+        <item name="hintTextColor">@color/primary_blue</item>
     </style>
 </resources> 
