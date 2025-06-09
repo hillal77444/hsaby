@@ -94,7 +94,7 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- الإحصائيات - توزيع مرن -->
+            <!-- الإحصائيات -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/reportsCard"
                 android:layout_width="0dp"
@@ -132,7 +132,9 @@
                     <!-- حساب -->
                     <include
                         layout="@layout/item_dashboard_stat"
-                        android:id="@+id/stat_accounts"
+                        android:id="@+id/box_accounts"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/guide_v_50"
                         app:layout_constraintTop_toTopOf="parent"
@@ -141,7 +143,9 @@
                     <!-- لكم -->
                     <include
                         layout="@layout/item_dashboard_stat"
-                        android:id="@+id/stat_creditors"
+                        android:id="@+id/box_creditors"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
                         app:layout_constraintStart_toEndOf="@id/guide_v_50"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
@@ -150,7 +154,9 @@
                     <!-- عليكم -->
                     <include
                         layout="@layout/item_dashboard_stat"
-                        android:id="@+id/stat_debtors"
+                        android:id="@+id/box_debtors"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/guide_v_50"
                         app:layout_constraintTop_toBottomOf="@id/guide_h_50"
@@ -159,7 +165,9 @@
                     <!-- الرصيد -->
                     <include
                         layout="@layout/item_dashboard_stat"
-                        android:id="@+id/stat_balance"
+                        android:id="@+id/box_balance"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
                         app:layout_constraintStart_toEndOf="@id/guide_v_50"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/guide_h_50"
