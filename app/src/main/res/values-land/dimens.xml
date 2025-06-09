@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="dashboard_padding">24dp</dimen>
     <dimen name="dashboard_card_margin">20dp</dimen>
@@ -13,4 +14,50 @@
     <dimen name="dashboard_button_text_size">18sp</dimen>
     <dimen name="dashboard_fab_margin">16dp</dimen>
     <dimen name="dashboard_fab_bottom">80dp</dimen>
+
+    <!-- أبعاد النصوص -->
+    <dimen name="text_size_headline1">28sp</dimen>
+    <dimen name="text_size_headline2">24sp</dimen>
+    <dimen name="text_size_body1">16sp</dimen>
+    <dimen name="text_size_body2">14sp</dimen>
+    <dimen name="text_size_caption">12sp</dimen>
+
+    <!-- أبعاد المسافات -->
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_md">16dp</dimen>
+    <dimen name="spacing_lg">24dp</dimen>
+    <dimen name="spacing_xl">32dp</dimen>
+
+    <!-- أبعاد الأزرار -->
+    <dimen name="button_min_height">40dp</dimen>
+    <dimen name="button_padding_horizontal">16dp</dimen>
+    <dimen name="button_padding_vertical">8dp</dimen>
+    <dimen name="button_corner_radius">20dp</dimen>
+
+    <!-- أبعاد البطاقات -->
+    <dimen name="card_elevation">4dp</dimen>
+    <dimen name="card_corner_radius">8dp</dimen>
+    <dimen name="card_padding">12dp</dimen>
+
+    <!-- أبعاد حقول الإدخال -->
+    <dimen name="input_min_height">48dp</dimen>
+    <dimen name="input_padding_horizontal">12dp</dimen>
+    <dimen name="input_padding_vertical">6dp</dimen>
+    <dimen name="input_corner_radius">8dp</dimen>
+
+    <!-- أبعاد القوائم -->
+    <dimen name="menu_item_height">40dp</dimen>
+    <dimen name="menu_padding_horizontal">12dp</dimen>
+    <dimen name="menu_padding_vertical">6dp</dimen>
+
+    <!-- أبعاد شريط التطبيق -->
+    <dimen name="toolbar_height">48dp</dimen>
+    <dimen name="toolbar_padding_horizontal">12dp</dimen>
+    <dimen name="toolbar_padding_vertical">6dp</dimen>
+
+    <!-- أبعاد شريط التنقل -->
+    <dimen name="bottom_nav_height">48dp</dimen>
+    <dimen name="bottom_nav_padding_horizontal">12dp</dimen>
+    <dimen name="bottom_nav_padding_vertical">6dp</dimen>
 </resources>
