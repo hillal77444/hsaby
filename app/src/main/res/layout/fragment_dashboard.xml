@@ -4,375 +4,439 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_light"
+    android:background="?attr/colorBackground"
     tools:context=".ui.dashboard.DashboardFragment">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
-        android:clipToPadding="false"
-        android:paddingBottom="80dp">
+        android:overScrollMode="never"
+        android:scrollbars="none">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="12dp">
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_sm">
 
-            <!-- معلومات المستخدم -->
+            <!-- شريط معلومات المستخدم -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/userInfoCard"
-                android:layout_width="0dp"
+                style="@style/Widget.App.CardView"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="2dp"
-                app:strokeColor="#E2E8F0"
-                app:strokeWidth="1dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintWidth_percent="0.96"
-                android:minHeight="72dp">
+                android:layout_marginBottom="@dimen/spacing_sm">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="12dp">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/spacing_sm">
 
                     <LinearLayout
-                        android:id="@+id/userInfoContainer"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/editProfileButton"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent">
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="مرحباً"
-                            android:textAppearance="?attr/textAppearanceBody1"
-                            android:textColor="@color/text_secondary"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="18sp"
-                            android:autoSizeStepGranularity="1sp" />
+                            android:textAppearance="@style/TextAppearance.App.Body2"
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:id="@+id/userNameText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:textAppearance="?attr/textAppearanceHeadline6"
-                            android:textColor="@color/text_primary"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:textAppearance="@style/TextAppearance.App.Headline2"
+                            android:textColor="?attr/colorOnSurface"
                             android:maxLines="1"
                             android:ellipsize="end"
-                            tools:text="أحمد محمد"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="12sp"
-                            android:autoSizeMaxTextSize="22sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            tools:text="أحمد محمد" />
+
                     </LinearLayout>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/editProfileButton"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.App.Button"
                         android:layout_width="wrap_content"
-                        android:layout_height="40dp"
+                        android:layout_height="wrap_content"
                         android:text="تعديل"
-                        android:textSize="12sp"
-                        app:cornerRadius="20dp"
                         app:icon="@drawable/ic_edit"
                         app:iconGravity="textStart"
-                        app:iconPadding="6dp"
-                        app:strokeColor="@color/primary_blue"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                        app:iconPadding="@dimen/spacing_xs" />
+
+                </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- الإحصائيات -->
+            <!-- بطاقة التقارير -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/reportsCard"
-                android:layout_width="0dp"
+                style="@style/Widget.App.CardView"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="2dp"
-                app:strokeColor="#E2E8F0"
-                app:strokeWidth="1dp"
-                app:layout_constraintTop_toBottomOf="@id/userInfoCard"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintWidth_percent="0.96"
-                android:layout_marginTop="14dp">
+                android:layout_marginBottom="@dimen/spacing_sm">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="8dp">
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_sm">
 
-                    <!-- خطوط إرشادية لتوزيع الإحصائيات على 2×2 تلقائياً -->
-                    <androidx.constraintlayout.widget.Guideline
-                        android:id="@+id/guide_v_50"
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:layout_constraintGuide_percent="0.5"
-                        android:orientation="vertical" />
+                        android:text="ملخص الحسابات"
+                        android:textAppearance="@style/TextAppearance.App.Headline3"
+                        android:textColor="?attr/colorOnSurface"
+                        android:layout_marginBottom="@dimen/spacing_sm"/>
 
-                    <androidx.constraintlayout.widget.Guideline
-                        android:id="@+id/guide_h_50"
-                        android:layout_width="wrap_content"
+                    <GridLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:layout_constraintGuide_percent="0.5"
-                        android:orientation="horizontal" />
+                        android:columnCount="2"
+                        android:rowCount="2"
+                        android:useDefaultMargins="true">
 
-                    <!-- حساب -->
-                    <include
-                        layout="@layout/item_dashboard_stat"
-                        android:id="@+id/box_accounts"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/guide_v_50"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toTopOf="@id/guide_h_50"/>
+                        <!-- مربع حساب -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:layout_rowWeight="1"
+                            app:cardBackgroundColor="@color/credit_background"
+                            app:cardCornerRadius="@dimen/card_corner_radius"
+                            app:cardElevation="0dp">
 
-                    <!-- لكم -->
-                    <include
-                        layout="@layout/item_dashboard_stat"
-                        android:id="@+id/box_creditors"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        app:layout_constraintStart_toEndOf="@id/guide_v_50"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toTopOf="@id/guide_h_50"/>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="@dimen/spacing_sm">
 
-                    <!-- عليكم -->
-                    <include
-                        layout="@layout/item_dashboard_stat"
-                        android:id="@+id/box_debtors"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/guide_v_50"
-                        app:layout_constraintTop_toBottomOf="@id/guide_h_50"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="حساب"
+                                    android:textColor="@color/debit_color"
+                                    android:textAppearance="@style/TextAppearance.App.Body1"
+                                    android:textStyle="bold" />
 
-                    <!-- الرصيد -->
-                    <include
-                        layout="@layout/item_dashboard_stat"
-                        android:id="@+id/box_balance"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        app:layout_constraintStart_toEndOf="@id/guide_v_50"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/guide_h_50"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
+                                <ImageView
+                                    android:layout_width="@dimen/dashboard_stat_icon_size"
+                                    android:layout_height="@dimen/dashboard_stat_icon_size"
+                                    android:src="@drawable/ic_arrow_upward"
+                                    android:tint="@color/debit_color"
+                                    android:layout_marginTop="@dimen/spacing_xs" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                                <TextView
+                                    android:id="@+id/totalAccounts"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="24"
+                                    android:textColor="@color/debit_color"
+                                    android:textAppearance="@style/TextAppearance.App.Headline2"
+                                    android:textStyle="bold"
+                                    android:layout_marginTop="@dimen/spacing_xs" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- مربع لكم -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:layout_rowWeight="1"
+                            app:cardBackgroundColor="@color/credit_background"
+                            app:cardCornerRadius="@dimen/card_corner_radius"
+                            app:cardElevation="0dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="@dimen/spacing_sm">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="لكم"
+                                    android:textColor="@color/debit_color"
+                                    android:textAppearance="@style/TextAppearance.App.Body1"
+                                    android:textStyle="bold" />
+
+                                <ImageView
+                                    android:layout_width="@dimen/dashboard_stat_icon_size"
+                                    android:layout_height="@dimen/dashboard_stat_icon_size"
+                                    android:src="@drawable/ic_arrow_upward"
+                                    android:tint="@color/debit_color"
+                                    android:layout_marginTop="@dimen/spacing_xs" />
+
+                                <TextView
+                                    android:id="@+id/totalCreditors"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="4,394,162"
+                                    android:textColor="@color/debit_color"
+                                    android:textAppearance="@style/TextAppearance.App.Headline2"
+                                    android:textStyle="bold"
+                                    android:layout_marginTop="@dimen/spacing_xs" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- مربع عليكم -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:layout_rowWeight="1"
+                            app:cardBackgroundColor="@color/debit_background"
+                            app:cardCornerRadius="@dimen/card_corner_radius"
+                            app:cardElevation="0dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="@dimen/spacing_sm">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="عليكم"
+                                    android:textColor="@color/credit_color"
+                                    android:textAppearance="@style/TextAppearance.App.Body1"
+                                    android:textStyle="bold" />
+
+                                <ImageView
+                                    android:layout_width="@dimen/dashboard_stat_icon_size"
+                                    android:layout_height="@dimen/dashboard_stat_icon_size"
+                                    android:src="@drawable/ic_arrow_downward"
+                                    android:tint="@color/credit_color"
+                                    android:layout_marginTop="@dimen/spacing_xs" />
+
+                                <TextView
+                                    android:id="@+id/totalDebtors"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="4,108,808"
+                                    android:textColor="@color/credit_color"
+                                    android:textAppearance="@style/TextAppearance.App.Headline2"
+                                    android:textStyle="bold"
+                                    android:layout_marginTop="@dimen/spacing_xs" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- مربع الرصيد -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:layout_rowWeight="1"
+                            app:cardBackgroundColor="@color/primary"
+                            app:cardCornerRadius="@dimen/card_corner_radius"
+                            app:cardElevation="0dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="@dimen/spacing_sm">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="الرصيد"
+                                    android:textColor="@color/on_primary"
+                                    android:textAppearance="@style/TextAppearance.App.Body1"
+                                    android:textStyle="bold" />
+
+                                <ImageView
+                                    android:layout_width="@dimen/dashboard_stat_icon_size"
+                                    android:layout_height="@dimen/dashboard_stat_icon_size"
+                                    android:src="@drawable/ic_arrow_upward"
+                                    android:tint="@color/on_primary"
+                                    android:layout_marginTop="@dimen/spacing_xs" />
+
+                                <TextView
+                                    android:id="@+id/totalBalance"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="285,354"
+                                    android:textColor="@color/on_primary"
+                                    android:textAppearance="@style/TextAppearance.App.Headline2"
+                                    android:textStyle="bold"
+                                    android:layout_marginTop="@dimen/spacing_xs" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                    </GridLayout>
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- بطاقة القيود المحاسبية -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/transactionsCard"
-                android:layout_width="0dp"
+            <!-- صف البطاقات -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="2dp"
-                app:strokeColor="#E2E8F0"
-                app:strokeWidth="1dp"
-                app:layout_constraintTop_toBottomOf="@id/reportsCard"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintWidth_percent="0.96"
-                android:minHeight="72dp">
+                android:orientation="vertical"
+                android:layout_marginBottom="@dimen/spacing_sm">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <!-- بطاقة القيود المحاسبية -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/transactionsCard"
+                    style="@style/Widget.App.CardView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="10dp">
-
-                    <ImageView
-                        android:id="@+id/transactionsIcon"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="@drawable/circle_background"
-                        android:padding="8dp"
-                        android:src="@drawable/ic_transactions"
-                        app:tint="@color/primary_blue"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
+                    android:layout_marginBottom="@dimen/spacing_xs"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:rippleColor="@color/primary_ripple">
 
                     <LinearLayout
-                        android:id="@+id/transactionsInfo"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginStart="8dp"
-                        app:layout_constraintStart_toEndOf="@id/transactionsIcon"
-                        app:layout_constraintEnd_toStartOf="@id/viewTransactionsButton"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent">
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/spacing_sm">
 
-                        <TextView
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/circle_background"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_transactions"
+                            app:tint="@color/primary" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="@dimen/spacing_sm">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/transactions"
+                                android:textAppearance="@style/TextAppearance.App.Body1"
+                                android:textColor="@color/primary" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="إدارة القيود المحاسبية"
+                                android:textAppearance="@style/TextAppearance.App.Body2"
+                                android:textColor="?attr/colorOnSurface" />
+
+                        </LinearLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/viewTransactionsButton"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/transactions"
-                            android:textAppearance="?attr/textAppearanceSubtitle1"
-                            android:textColor="@color/primary_blue"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="16sp"
-                            android:autoSizeStepGranularity="1sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="إدارة القيود المحاسبية"
-                            android:textAppearance="?attr/textAppearanceBody2"
-                            android:textColor="@color/text_secondary"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="14sp"
-                            android:autoSizeStepGranularity="1sp" />
+                            android:text="@string/view_transactions"
+                            android:textColor="@color/primary" />
 
                     </LinearLayout>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/viewTransactionsButton"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/view_transactions"
-                        android:textColor="@color/primary_blue"
-                        android:textSize="10sp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
+                </com.google.android.material.card.MaterialCardView>
 
-            <!-- بطاقة الحسابات -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/accountsCard"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="2dp"
-                app:strokeColor="#E2E8F0"
-                app:strokeWidth="1dp"
-                app:layout_constraintTop_toBottomOf="@id/transactionsCard"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintWidth_percent="0.96"
-                android:minHeight="72dp">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <!-- بطاقة الحسابات -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/accountsCard"
+                    style="@style/Widget.App.CardView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="10dp">
-
-                    <ImageView
-                        android:id="@+id/accountsIcon"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="@drawable/circle_background"
-                        android:padding="8dp"
-                        android:src="@drawable/ic_accounts"
-                        app:tint="@color/accent_green"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:rippleColor="@color/secondary_ripple">
 
                     <LinearLayout
-                        android:id="@+id/accountsInfo"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginStart="8dp"
-                        app:layout_constraintStart_toEndOf="@id/accountsIcon"
-                        app:layout_constraintEnd_toStartOf="@id/viewAccountsButton"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent">
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/spacing_sm">
 
-                        <TextView
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/circle_background"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_accounts"
+                            app:tint="@color/secondary" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="@dimen/spacing_sm">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/accounts"
+                                android:textAppearance="@style/TextAppearance.App.Body1"
+                                android:textColor="@color/secondary" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="إدارة الحسابات"
+                                android:textAppearance="@style/TextAppearance.App.Body2"
+                                android:textColor="?attr/colorOnSurface" />
+
+                        </LinearLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/viewAccountsButton"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/accounts"
-                            android:textAppearance="?attr/textAppearanceSubtitle1"
-                            android:textColor="@color/accent_green"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="16sp"
-                            android:autoSizeStepGranularity="1sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="إدارة الحسابات"
-                            android:textAppearance="?attr/textAppearanceBody2"
-                            android:textColor="@color/text_secondary"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="14sp"
-                            android:autoSizeStepGranularity="1sp" />
+                            android:text="@string/view_accounts"
+                            android:textColor="@color/secondary" />
 
                     </LinearLayout>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/viewAccountsButton"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/view_accounts"
-                        android:textColor="@color/accent_green"
-                        android:textSize="10sp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
 
             <!-- زر متابعة الديون -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/viewSummaryButton"
-                android:layout_width="0dp"
+                style="@style/Widget.App.Button"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/bottom_nav_height"
                 android:text="متابعة الديون"
-                android:textSize="14sp"
-                android:minHeight="48dp"
-                app:cornerRadius="24dp"
                 app:icon="@drawable/ic_summary"
                 app:iconGravity="textStart"
-                app:iconPadding="6dp"
-                app:layout_constraintTop_toBottomOf="@id/accountsCard"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintWidth_percent="0.96"
-                android:layout_marginTop="16dp"/>
+                app:iconPadding="@dimen/spacing_xs" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+
     </androidx.core.widget.NestedScrollView>
 
-    <!-- زر إضافة معاملة جديدة -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add_transaction"
+        android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="32dp"
-        android:contentDescription="إضافة معاملة جديدة"
-        app:srcCompat="@android:drawable/ic_input_add"
-        app:backgroundTint="@color/primary_blue"
-        app:tint="@android:color/white"
-        app:elevation="6dp" />
+        android:layout_margin="@dimen/fab_margin"
+        android:layout_marginBottom="@dimen/bottom_nav_height"
+        app:srcCompat="@drawable/ic_add"
+        app:tint="@color/on_primary" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
