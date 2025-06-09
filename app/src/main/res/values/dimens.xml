@@ -38,4 +38,7 @@
     <dimen name="dashboard_fab_margin">12dp</dimen>
     <dimen name="dashboard_fab_bottom">64dp</dimen>
     <dimen name="dashboard_stat_box_margin">6dp</dimen>
+    <dimen name="dashboard_padding">16dp</dimen>
+    <dimen name="dashboard_stat_height">120dp</dimen>
+    <dimen name="dashboard_button_text_size">16sp</dimen>
 </resources>
