@@ -26,10 +26,10 @@
         android:layout_marginTop="4dp"
         android:layout_marginBottom="4dp"
         android:src="@drawable/ic_arrow_upward"
-        android:tint="#1976D2"
         app:layout_constraintTop_toBottomOf="@id/statTitle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="#1976D2" />
 
     <!-- هذه الـ TextView ستأخذ المعرف النهائي حسب المربع في ملف الواجهة الرئيسي عبر خاصية include_id -->
     <TextView
