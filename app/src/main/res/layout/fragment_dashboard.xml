@@ -52,10 +52,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/spacing_xs"
+                            android:ellipsize="end"
+                            android:maxLines="1"
                             android:textAppearance="@style/TextAppearance.App.Headline2"
                             android:textColor="?attr/colorOnSurface"
-                            android:maxLines="1"
-                            android:ellipsize="end"
                             tools:text="أحمد محمد" />
 
                     </LinearLayout>
@@ -430,7 +430,7 @@
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/fabAddTransaction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
