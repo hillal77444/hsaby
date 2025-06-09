@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- الألوان الأساسية -->
-    <color name="primary">#6200EE</color>
-    <color name="primary_variant">#3700B3</color>
-    <color name="secondary">#03DAC6</color>
-    <color name="secondary_variant">#018786</color>
+    <color name="primary">#2196F3</color>
+    <color name="primary_variant">#1976D2</color>
+    <color name="secondary">#4CAF50</color>
+    <color name="secondary_variant">#388E3C</color>
 
     <!-- ألوان الخلفية -->
     <color name="background">#FFFFFF</color>
@@ -13,7 +13,7 @@
 
     <!-- ألوان النصوص -->
     <color name="on_primary">#FFFFFF</color>
-    <color name="on_secondary">#000000</color>
+    <color name="on_secondary">#FFFFFF</color>
     <color name="on_background">#000000</color>
     <color name="on_surface">#000000</color>
     <color name="on_error">#FFFFFF</color>
@@ -31,28 +31,28 @@
     <color name="text_hint">#94A3B8</color>
 
     <!-- ألوان الخلفيات -->
-    <color name="background_light">#F8FAFC</color>
+    <color name="background_light">#F5F5F5</color>
     <color name="background_dark">#0F172A</color>
     <color name="text_primar">#FFFFFF</color>
 
     <!-- ألوان المعاملات -->
-    <color name="debit_color">#FFFFFF</color>
-    <color name="credit_color">#FFFFFF</color>
-    <color name="debit_background">#8E2D4C</color>
-    <color name="credit_background">#022E73</color>
+    <color name="debit_color">#F44336</color>
+    <color name="credit_color">#4CAF50</color>
+    <color name="debit_background">#FFEBEE</color>
+    <color name="credit_background">#E8F5E9</color>
     <color name="debit">#D32F2F</color>
     <color name="credit">#388E3C</color>
 
     <!-- ألوان الحالات -->
-    <color name="success">#059669</color>
-    <color name="warning">#D97706</color>
+    <color name="success">#4CAF50</color>
+    <color name="warning">#FFC107</color>
     <color name="info">#2563EB</color>
     <color name="red">#FF0000</color>
     <color name="green">#4CAF50</color>
 
     <!-- ألوان إضافية -->
-    <color name="ripple_light">#1A000000</color>
-    <color name="ripple_dark">#1AFFFFFF</color>
+    <color name="ripple_light">#1F000000</color>
+    <color name="ripple_dark">#33FFFFFF</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="transparent">#00000000</color>
@@ -63,12 +63,12 @@
     <color name="purple_700">#3700B3</color>
     <color name="teal_200">#03DAC5</color>
     <color name="teal_700">#018786</color>
-    <color name="primary_blue">#2563EB</color>
-    <color name="primary_blue_dark">#1D4ED8</color>
+    <color name="primary_blue">#2196F3</color>
+    <color name="primary_blue_dark">#1976D2</color>
     <color name="red_100">#FFCDD2</color>
     <color name="green_100">#C8E6C9</color>
     <color name="background_gradient">#F5F6FA</color>
-    <color name="gray">#9E9E9E</color>
+    <color name="gray">#757575</color>
     <color name="red_700">#D32F2F</color>
     <color name="green_700">#388E3C</color>
     <color name="colorPrimary">#1976D2</color>
@@ -78,5 +78,9 @@
     <color name="debit_red">#F44336</color>
 
     <!-- جديدة من التعديل -->
-    <color name="light_gray">#F5F5F5</color>
+    <color name="light_gray">#EEEEEE</color>
+
+    <!-- ألوان الأزرار -->
+    <color name="accent_green">#4CAF50</color>
+    <color name="accent_green_dark">#388E3C</color>
 </resources>
