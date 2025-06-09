@@ -8,6 +8,7 @@
     tools:context=".ui.dashboard.DashboardFragment">
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
@@ -442,8 +443,8 @@
                 app:iconTint="#FFFFFF"
                 app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
                 app:maxImageSize="@dimen/_28sdp"
-                tools:layout_editor_absoluteX="238dp"
-                tools:layout_editor_absoluteY="661dp" />
+                tools:layout_editor_absoluteX="253dp"
+                tools:layout_editor_absoluteY="666dp" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
