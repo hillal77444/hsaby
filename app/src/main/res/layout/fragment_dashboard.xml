@@ -17,22 +17,21 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="8dp">
+            android:padding="12dp">
 
-            <!-- شريط معلومات المستخدم -->
+            <!-- معلومات المستخدم -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/userInfoCard"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/dashboard_card_margin"
-                app:cardCornerRadius="@dimen/dashboard_card_radius"
-                app:cardElevation="0dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="2dp"
                 app:strokeColor="#E2E8F0"
                 app:strokeWidth="1dp"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintWidth_percent="0.95"
+                app:layout_constraintWidth_percent="0.96"
                 android:minHeight="72dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -75,17 +74,15 @@
                             android:autoSizeMinTextSize="12sp"
                             android:autoSizeMaxTextSize="22sp"
                             android:autoSizeStepGranularity="2sp" />
-
                     </LinearLayout>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/editProfileButton"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="40dp"
                         android:text="تعديل"
                         android:textSize="12sp"
-                        android:minHeight="40dp"
                         app:cornerRadius="20dp"
                         app:icon="@drawable/ic_edit"
                         app:iconGravity="textStart"
@@ -93,213 +90,82 @@
                         app:strokeColor="@color/primary_blue"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
-
+                        app:layout_constraintBottom_toBottomOf="parent"/>
                 </androidx.constraintlayout.widget.ConstraintLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- بطاقة التقارير -->
+            <!-- الإحصائيات - توزيع مرن -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/reportsCard"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/dashboard_card_margin"
-                app:cardCornerRadius="@dimen/dashboard_card_radius"
-                app:cardElevation="0dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="2dp"
                 app:strokeColor="#E2E8F0"
                 app:strokeWidth="1dp"
                 app:layout_constraintTop_toBottomOf="@id/userInfoCard"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintWidth_percent="0.95">
+                app:layout_constraintWidth_percent="0.96"
+                android:layout_marginTop="14dp">
 
-                <GridLayout
-                    android:id="@+id/statsGrid"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:columnCount="2"
-                    android:orientation="horizontal"
-                    android:padding="@dimen/dashboard_card_padding"
-                    android:useDefaultMargins="true">
+                    android:padding="8dp">
 
-                    <!-- مربع حساب -->
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <!-- خطوط إرشادية لتوزيع الإحصائيات على 2×2 تلقائياً -->
+                    <androidx.constraintlayout.widget.Guideline
+                        android:id="@+id/guide_v_50"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:background="#E8F5E9"
-                        android:padding="@dimen/dashboard_card_padding"
-                        android:minHeight="@dimen/dashboard_stat_min_height"
-                        android:layout_margin="@dimen/dashboard_stat_box_margin">
+                        app:layout_constraintGuide_percent="0.5"
+                        android:orientation="vertical" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="حساب"
-                            android:textColor="#1B5E20"
-                            android:textStyle="bold"
-                            android:textSize="@dimen/dashboard_stat_text_size"
-                            android:layout_marginBottom="4dp" />
-
-                        <ImageView
-                            android:layout_width="@dimen/dashboard_stat_icon_size"
-                            android:layout_height="@dimen/dashboard_stat_icon_size"
-                            android:src="@drawable/ic_arrow_upward"
-                            android:tint="#1B5E20"
-                            android:layout_marginTop="2dp"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:id="@+id/totalAccounts"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="24"
-                            android:textColor="#1B5E20"
-                            android:textSize="@dimen/dashboard_stat_value_size"
-                            android:textStyle="bold"
-                            android:layout_marginTop="2dp"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="@dimen/dashboard_stat_value_size"
-                            android:autoSizeStepGranularity="1sp" />
-                    </LinearLayout>
-
-                    <!-- مربع لكم -->
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <androidx.constraintlayout.widget.Guideline
+                        android:id="@+id/guide_h_50"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:background="#E3F2FD"
-                        android:padding="@dimen/dashboard_card_padding"
-                        android:minHeight="@dimen/dashboard_stat_min_height"
-                        android:layout_margin="@dimen/dashboard_stat_box_margin">
+                        app:layout_constraintGuide_percent="0.5"
+                        android:orientation="horizontal" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="لكم"
-                            android:textColor="#0D47A1"
-                            android:textStyle="bold"
-                            android:textSize="@dimen/dashboard_stat_text_size"
-                            android:layout_marginBottom="4dp" />
+                    <!-- حساب -->
+                    <include
+                        layout="@layout/item_dashboard_stat"
+                        android:id="@+id/stat_accounts"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/guide_v_50"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/guide_h_50"/>
 
-                        <ImageView
-                            android:layout_width="@dimen/dashboard_stat_icon_size"
-                            android:layout_height="@dimen/dashboard_stat_icon_size"
-                            android:src="@drawable/ic_arrow_upward"
-                            android:tint="#0D47A1"
-                            android:layout_marginTop="2dp"
-                            android:layout_marginBottom="4dp" />
+                    <!-- لكم -->
+                    <include
+                        layout="@layout/item_dashboard_stat"
+                        android:id="@+id/stat_creditors"
+                        app:layout_constraintStart_toEndOf="@id/guide_v_50"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/guide_h_50"/>
 
-                        <TextView
-                            android:id="@+id/totalCreditors"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="4,394,162"
-                            android:textColor="#0D47A1"
-                            android:textSize="@dimen/dashboard_stat_value_size"
-                            android:textStyle="bold"
-                            android:layout_marginTop="2dp"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="@dimen/dashboard_stat_value_size"
-                            android:autoSizeStepGranularity="1sp" />
-                    </LinearLayout>
+                    <!-- عليكم -->
+                    <include
+                        layout="@layout/item_dashboard_stat"
+                        android:id="@+id/stat_debtors"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/guide_v_50"
+                        app:layout_constraintTop_toBottomOf="@id/guide_h_50"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
 
-                    <!-- مربع عليكم -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:background="#FFEBEE"
-                        android:padding="@dimen/dashboard_card_padding"
-                        android:minHeight="@dimen/dashboard_stat_min_height"
-                        android:layout_margin="@dimen/dashboard_stat_box_margin">
+                    <!-- الرصيد -->
+                    <include
+                        layout="@layout/item_dashboard_stat"
+                        android:id="@+id/stat_balance"
+                        app:layout_constraintStart_toEndOf="@id/guide_v_50"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/guide_h_50"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="عليكم"
-                            android:textColor="#B71C1C"
-                            android:textStyle="bold"
-                            android:textSize="@dimen/dashboard_stat_text_size"
-                            android:layout_marginBottom="4dp" />
-
-                        <ImageView
-                            android:layout_width="@dimen/dashboard_stat_icon_size"
-                            android:layout_height="@dimen/dashboard_stat_icon_size"
-                            android:src="@drawable/ic_arrow_downward"
-                            android:tint="#B71C1C"
-                            android:layout_marginTop="2dp"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:id="@+id/totalDebtors"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="4,108,808"
-                            android:textColor="#B71C1C"
-                            android:textSize="@dimen/dashboard_stat_value_size"
-                            android:textStyle="bold"
-                            android:layout_marginTop="2dp"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="@dimen/dashboard_stat_value_size"
-                            android:autoSizeStepGranularity="1sp" />
-                    </LinearLayout>
-
-                    <!-- مربع الرصيد -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:background="#F3E5F5"
-                        android:padding="@dimen/dashboard_card_padding"
-                        android:minHeight="@dimen/dashboard_stat_min_height"
-                        android:layout_margin="@dimen/dashboard_stat_box_margin">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="الرصيد"
-                            android:textColor="#4A148C"
-                            android:textStyle="bold"
-                            android:textSize="@dimen/dashboard_stat_text_size"
-                            android:layout_marginBottom="4dp" />
-
-                        <ImageView
-                            android:layout_width="@dimen/dashboard_stat_icon_size"
-                            android:layout_height="@dimen/dashboard_stat_icon_size"
-                            android:src="@drawable/ic_arrow_upward"
-                            android:tint="#4A148C"
-                            android:layout_marginTop="2dp"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:id="@+id/totalBalance"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="285,354"
-                            android:textColor="#4A148C"
-                            android:textSize="@dimen/dashboard_stat_value_size"
-                            android:textStyle="bold"
-                            android:layout_marginTop="2dp"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="@dimen/dashboard_stat_value_size"
-                            android:autoSizeStepGranularity="1sp" />
-                    </LinearLayout>
-
-                </GridLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <!-- بطاقة القيود المحاسبية -->
@@ -307,15 +173,15 @@
                 android:id="@+id/transactionsCard"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
-                app:cardCornerRadius="@dimen/dashboard_card_radius"
-                app:cardElevation="0dp"
+                android:layout_marginTop="14dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="2dp"
                 app:strokeColor="#E2E8F0"
                 app:strokeWidth="1dp"
                 app:layout_constraintTop_toBottomOf="@id/reportsCard"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintWidth_percent="0.95"
+                app:layout_constraintWidth_percent="0.96"
                 android:minHeight="72dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -381,9 +247,7 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent" />
-
                 </androidx.constraintlayout.widget.ConstraintLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
             <!-- بطاقة الحسابات -->
@@ -391,15 +255,15 @@
                 android:id="@+id/accountsCard"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="@dimen/dashboard_card_radius"
-                app:cardElevation="0dp"
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="2dp"
                 app:strokeColor="#E2E8F0"
                 app:strokeWidth="1dp"
                 app:layout_constraintTop_toBottomOf="@id/transactionsCard"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintWidth_percent="0.95"
+                app:layout_constraintWidth_percent="0.96"
                 android:minHeight="72dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -465,9 +329,7 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent" />
-
                 </androidx.constraintlayout.widget.ConstraintLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
             <!-- زر متابعة الديون -->
@@ -477,18 +339,18 @@
                 android:layout_height="wrap_content"
                 android:text="متابعة الديون"
                 android:textSize="14sp"
-                android:minHeight="@dimen/dashboard_button_height"
-                app:cornerRadius="@dimen/dashboard_button_radius"
+                android:minHeight="48dp"
+                app:cornerRadius="24dp"
                 app:icon="@drawable/ic_summary"
                 app:iconGravity="textStart"
                 app:iconPadding="6dp"
                 app:layout_constraintTop_toBottomOf="@id/accountsCard"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintWidth_percent="0.95" />
+                app:layout_constraintWidth_percent="0.96"
+                android:layout_marginTop="16dp"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
     </androidx.core.widget.NestedScrollView>
 
     <!-- زر إضافة معاملة جديدة -->
@@ -497,8 +359,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="@dimen/dashboard_fab_margin"
-        android:layout_marginBottom="@dimen/dashboard_fab_bottom"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="32dp"
         android:contentDescription="إضافة معاملة جديدة"
         app:srcCompat="@android:drawable/ic_input_add"
         app:backgroundTint="@color/primary_blue"
