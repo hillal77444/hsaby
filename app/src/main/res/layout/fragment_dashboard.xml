@@ -494,8 +494,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/_16sdp"
-        android:layout_marginBottom="@dimen/bottom_nav_height"
         android:layout_marginEnd="@dimen/_16sdp"
+        android:layout_marginBottom="@dimen/_72sdp"
         android:text="إضافة قيد"
         android:textSize="@dimen/_12ssp"
         android:minHeight="@dimen/_48sdp"
@@ -505,7 +505,6 @@
         app:iconTint="@color/on_primary"
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
         app:fabCustomSize="@dimen/_56sdp"
-        app:elevation="@dimen/_6sdp"
-        android:layout_marginBottom="@dimen/_72sdp" />
+        app:elevation="@dimen/_6sdp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
