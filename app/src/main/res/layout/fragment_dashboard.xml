@@ -153,8 +153,8 @@
                                     android:layout_width="@dimen/_24sdp"
                                     android:layout_height="@dimen/_24sdp"
                                     android:src="@drawable/ic_arrow_upward"
-                                    android:tint="@color/debit_color"
-                                    android:layout_marginTop="@dimen/_4sdp" />
+                                    android:layout_marginTop="@dimen/_4sdp"
+                                    app:tint="@color/debit_color" />
 
                                 <TextView
                                     android:id="@+id/totalAccounts"
@@ -198,8 +198,8 @@
                                     android:layout_width="@dimen/_24sdp"
                                     android:layout_height="@dimen/_24sdp"
                                     android:src="@drawable/ic_arrow_upward"
-                                    android:tint="@color/debit_color"
-                                    android:layout_marginTop="@dimen/_4sdp" />
+                                    android:layout_marginTop="@dimen/_4sdp"
+                                    app:tint="@color/debit_color" />
 
                                 <TextView
                                     android:id="@+id/totalCreditors"
@@ -243,8 +243,8 @@
                                     android:layout_width="@dimen/_24sdp"
                                     android:layout_height="@dimen/_24sdp"
                                     android:src="@drawable/ic_arrow_downward"
-                                    android:tint="@color/credit_color"
-                                    android:layout_marginTop="@dimen/_4sdp" />
+                                    android:layout_marginTop="@dimen/_4sdp"
+                                    app:tint="@color/credit_color" />
 
                                 <TextView
                                     android:id="@+id/totalDebtors"
@@ -288,8 +288,8 @@
                                     android:layout_width="@dimen/_24sdp"
                                     android:layout_height="@dimen/_24sdp"
                                     android:src="@drawable/ic_arrow_upward"
-                                    android:tint="@color/on_primary"
-                                    android:layout_marginTop="@dimen/_4sdp" />
+                                    android:layout_marginTop="@dimen/_4sdp"
+                                    app:tint="@color/on_primary" />
 
                                 <TextView
                                     android:id="@+id/totalBalance"
