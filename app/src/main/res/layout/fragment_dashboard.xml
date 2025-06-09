@@ -114,7 +114,6 @@
                     android:layout_height="wrap_content"
                     android:padding="8dp">
 
-                    <!-- خطوط إرشادية لتوزيع الإحصائيات على 2×2 تلقائياً -->
                     <androidx.constraintlayout.widget.Guideline
                         android:id="@+id/guide_v_50"
                         android:layout_width="wrap_content"
@@ -130,49 +129,168 @@
                         android:orientation="horizontal" />
 
                     <!-- حساب -->
-                    <include
-                        layout="@layout/item_dashboard_stat"
-                        android:id="@+id/box_accounts"
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="0dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:background="#E8F5E9"
+                        android:padding="8dp"
+                        android:minHeight="80dp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/guide_v_50"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toTopOf="@id/guide_h_50"/>
+                        app:layout_constraintBottom_toTopOf="@id/guide_h_50">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="حساب"
+                            android:textColor="#1B5E20"
+                            android:textStyle="bold"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_arrow_upward"
+                            android:tint="#1B5E20"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/totalAccounts"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="#1B5E20"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
 
                     <!-- لكم -->
-                    <include
-                        layout="@layout/item_dashboard_stat"
-                        android:id="@+id/box_creditors"
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="0dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:background="#E3F2FD"
+                        android:padding="8dp"
+                        android:minHeight="80dp"
                         app:layout_constraintStart_toEndOf="@id/guide_v_50"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toTopOf="@id/guide_h_50"/>
+                        app:layout_constraintBottom_toTopOf="@id/guide_h_50">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="لكم"
+                            android:textColor="#0D47A1"
+                            android:textStyle="bold"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_arrow_upward"
+                            android:tint="#0D47A1"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/totalCreditors"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="#0D47A1"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
 
                     <!-- عليكم -->
-                    <include
-                        layout="@layout/item_dashboard_stat"
-                        android:id="@+id/box_debtors"
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="0dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:background="#FFEBEE"
+                        android:padding="8dp"
+                        android:minHeight="80dp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/guide_v_50"
                         app:layout_constraintTop_toBottomOf="@id/guide_h_50"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
+                        app:layout_constraintBottom_toBottomOf="parent">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="عليكم"
+                            android:textColor="#B71C1C"
+                            android:textStyle="bold"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_arrow_downward"
+                            android:tint="#B71C1C"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/totalDebtors"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="#B71C1C"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
 
                     <!-- الرصيد -->
-                    <include
-                        layout="@layout/item_dashboard_stat"
-                        android:id="@+id/box_balance"
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="0dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:background="#F3E5F5"
+                        android:padding="8dp"
+                        android:minHeight="80dp"
                         app:layout_constraintStart_toEndOf="@id/guide_v_50"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/guide_h_50"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
+                        app:layout_constraintBottom_toBottomOf="parent">
 
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="الرصيد"
+                            android:textColor="#4A148C"
+                            android:textStyle="bold"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_arrow_upward"
+                            android:tint="#4A148C"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/totalBalance"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="#4A148C"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
