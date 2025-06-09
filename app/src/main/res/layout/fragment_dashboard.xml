@@ -191,7 +191,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="لكم"
                                     android:textColor="@color/debit_color"
-                                    android:textAppearance="@style/TextAppearance.App.Body1"
+                                    android:textSize="@dimen/_14ssp"
                                     android:textStyle="bold" />
 
                                 <ImageView
@@ -207,7 +207,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="4,394,162"
                                     android:textColor="@color/debit_color"
-                                    android:textAppearance="@style/TextAppearance.App.Headline2"
+                                    android:textSize="@dimen/_18ssp"
                                     android:textStyle="bold"
                                     android:layout_marginTop="@dimen/spacing_sm" />
                             </LinearLayout>
@@ -235,7 +235,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="عليكم"
                                     android:textColor="@color/credit_color"
-                                    android:textAppearance="@style/TextAppearance.App.Body1"
+                                    android:textSize="@dimen/_14ssp"
                                     android:textStyle="bold" />
 
                                 <ImageView
@@ -251,7 +251,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="4,108,808"
                                     android:textColor="@color/credit_color"
-                                    android:textAppearance="@style/TextAppearance.App.Headline2"
+                                    android:textSize="@dimen/_18ssp"
                                     android:textStyle="bold"
                                     android:layout_marginTop="@dimen/spacing_sm" />
                             </LinearLayout>
@@ -279,7 +279,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="الرصيد"
                                     android:textColor="@color/on_primary"
-                                    android:textAppearance="@style/TextAppearance.App.Body1"
+                                    android:textSize="@dimen/_14ssp"
                                     android:textStyle="bold" />
 
                                 <ImageView
@@ -295,7 +295,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="285,354"
                                     android:textColor="@color/on_primary"
-                                    android:textAppearance="@style/TextAppearance.App.Headline2"
+                                    android:textSize="@dimen/_18ssp"
                                     android:textStyle="bold"
                                     android:layout_marginTop="@dimen/spacing_sm" />
                             </LinearLayout>
@@ -423,14 +423,14 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/accounts"
-                                android:textAppearance="@style/TextAppearance.App.Body2"
+                                android:textSize="@dimen/_12ssp"
                                 android:textColor="@color/secondary" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="إدارة الحسابات"
-                                android:textAppearance="@style/TextAppearance.App.Caption"
+                                android:textSize="@dimen/_10ssp"
                                 android:textColor="?attr/colorOnSurface" />
 
                         </LinearLayout>
