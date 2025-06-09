@@ -424,7 +424,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/_12sdp"
         android:layout_marginEnd="@dimen/_12sdp"
-        android:layout_marginBottom="@dimen/_88sdp"
+        android:layout_marginBottom="@dimen/_96sdp"
         android:text="إضافة قيد"
         android:textSize="@dimen/_12ssp"
         android:minHeight="@dimen/_44sdp"
@@ -435,6 +435,9 @@
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
         app:fabCustomSize="@dimen/_48sdp"
         app:elevation="@dimen/_4sdp"
-        app:cornerRadius="@dimen/_12sdp" />
+        app:cornerRadius="@dimen/_12sdp"
+        app:maxImageSize="@dimen/_24sdp"
+        app:backgroundTint="@color/primary"
+        android:contentDescription="إضافة قيد محاسبي جديد" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
