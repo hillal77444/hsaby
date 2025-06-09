@@ -4,10 +4,11 @@
     <dimen name="dashboard_card_padding">4dp</dimen>
     <dimen name="dashboard_stat_min_height">64dp</dimen>
     <dimen name="dashboard_stat_icon_size">14dp</dimen>
-    <dimen name="dashboard_stat_text_size">10sp</dimen>
-    <dimen name="dashboard_stat_value_size">12sp</dimen>
+    <dimen name="dashboard_stat_text_size">12sp</dimen>
+    <dimen name="dashboard_stat_value_size">14sp</dimen>
     <dimen name="dashboard_button_height">32dp</dimen>
     <dimen name="dashboard_button_radius">12dp</dimen>
     <dimen name="dashboard_fab_margin">6dp</dimen>
     <dimen name="dashboard_fab_bottom">36dp</dimen>
+    <dimen name="dashboard_stat_box_margin">3dp</dimen>
 </resources> 
