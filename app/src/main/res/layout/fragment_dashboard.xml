@@ -132,7 +132,8 @@
                         android:gravity="center"
                         android:background="#E8F5E9"
                         android:padding="@dimen/dashboard_card_padding"
-                        android:minHeight="@dimen/dashboard_stat_min_height">
+                        android:minHeight="@dimen/dashboard_stat_min_height"
+                        android:layout_margin="@dimen/dashboard_stat_box_margin">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -140,14 +141,16 @@
                             android:text="حساب"
                             android:textColor="#1B5E20"
                             android:textStyle="bold"
-                            android:textSize="@dimen/dashboard_stat_text_size" />
+                            android:textSize="@dimen/dashboard_stat_text_size"
+                            android:layout_marginBottom="4dp" />
 
                         <ImageView
                             android:layout_width="@dimen/dashboard_stat_icon_size"
                             android:layout_height="@dimen/dashboard_stat_icon_size"
                             android:src="@drawable/ic_arrow_upward"
                             android:tint="#1B5E20"
-                            android:layout_marginTop="2dp" />
+                            android:layout_marginTop="2dp"
+                            android:layout_marginBottom="4dp" />
 
                         <TextView
                             android:id="@+id/totalAccounts"
@@ -173,7 +176,8 @@
                         android:gravity="center"
                         android:background="#E3F2FD"
                         android:padding="@dimen/dashboard_card_padding"
-                        android:minHeight="@dimen/dashboard_stat_min_height">
+                        android:minHeight="@dimen/dashboard_stat_min_height"
+                        android:layout_margin="@dimen/dashboard_stat_box_margin">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -181,14 +185,16 @@
                             android:text="لكم"
                             android:textColor="#0D47A1"
                             android:textStyle="bold"
-                            android:textSize="@dimen/dashboard_stat_text_size" />
+                            android:textSize="@dimen/dashboard_stat_text_size"
+                            android:layout_marginBottom="4dp" />
 
                         <ImageView
                             android:layout_width="@dimen/dashboard_stat_icon_size"
                             android:layout_height="@dimen/dashboard_stat_icon_size"
                             android:src="@drawable/ic_arrow_upward"
                             android:tint="#0D47A1"
-                            android:layout_marginTop="2dp" />
+                            android:layout_marginTop="2dp"
+                            android:layout_marginBottom="4dp" />
 
                         <TextView
                             android:id="@+id/totalCreditors"
@@ -214,7 +220,8 @@
                         android:gravity="center"
                         android:background="#FFEBEE"
                         android:padding="@dimen/dashboard_card_padding"
-                        android:minHeight="@dimen/dashboard_stat_min_height">
+                        android:minHeight="@dimen/dashboard_stat_min_height"
+                        android:layout_margin="@dimen/dashboard_stat_box_margin">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -222,14 +229,16 @@
                             android:text="عليكم"
                             android:textColor="#B71C1C"
                             android:textStyle="bold"
-                            android:textSize="@dimen/dashboard_stat_text_size" />
+                            android:textSize="@dimen/dashboard_stat_text_size"
+                            android:layout_marginBottom="4dp" />
 
                         <ImageView
                             android:layout_width="@dimen/dashboard_stat_icon_size"
                             android:layout_height="@dimen/dashboard_stat_icon_size"
                             android:src="@drawable/ic_arrow_downward"
                             android:tint="#B71C1C"
-                            android:layout_marginTop="2dp" />
+                            android:layout_marginTop="2dp"
+                            android:layout_marginBottom="4dp" />
 
                         <TextView
                             android:id="@+id/totalDebtors"
@@ -255,7 +264,8 @@
                         android:gravity="center"
                         android:background="#F3E5F5"
                         android:padding="@dimen/dashboard_card_padding"
-                        android:minHeight="@dimen/dashboard_stat_min_height">
+                        android:minHeight="@dimen/dashboard_stat_min_height"
+                        android:layout_margin="@dimen/dashboard_stat_box_margin">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -263,14 +273,16 @@
                             android:text="الرصيد"
                             android:textColor="#4A148C"
                             android:textStyle="bold"
-                            android:textSize="@dimen/dashboard_stat_text_size" />
+                            android:textSize="@dimen/dashboard_stat_text_size"
+                            android:layout_marginBottom="4dp" />
 
                         <ImageView
                             android:layout_width="@dimen/dashboard_stat_icon_size"
                             android:layout_height="@dimen/dashboard_stat_icon_size"
                             android:src="@drawable/ic_arrow_upward"
                             android:tint="#4A148C"
-                            android:layout_marginTop="2dp" />
+                            android:layout_marginTop="2dp"
+                            android:layout_marginBottom="4dp" />
 
                         <TextView
                             android:id="@+id/totalBalance"
