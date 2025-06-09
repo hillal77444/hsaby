@@ -120,11 +120,11 @@ public class DashboardFragment extends Fragment {
 
         // زر عرض القيود المحاسبية
         binding.transactionsButton.setOnClickListener(v -> 
-            Navigation.findNavController(v).navigate(R.id.action_dashboardFragment_to_transactionsFragment));
+            Navigation.findNavController(v).navigate(R.id.transactionsFragment));
 
         // زر عرض الحسابات
         binding.accountsButton.setOnClickListener(v -> 
-            Navigation.findNavController(v).navigate(R.id.action_dashboardFragment_to_accountsFragment));
+            Navigation.findNavController(v).navigate(R.id.navigation_accounts));
 
         // زر عرض ملخص الحسابات
         binding.viewSummaryButton.setOnClickListener(v -> 
