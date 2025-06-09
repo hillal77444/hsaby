@@ -1,0 +1,16 @@
+<resources>
+    <dimen name="dashboard_padding">12dp</dimen>
+    <dimen name="dashboard_card_margin">12dp</dimen>
+    <dimen name="dashboard_card_radius">12dp</dimen>
+    <dimen name="dashboard_card_padding">12dp</dimen>
+    <dimen name="dashboard_stat_height">100dp</dimen>
+    <dimen name="dashboard_stat_icon_size">20dp</dimen>
+    <dimen name="dashboard_stat_text_size">14sp</dimen>
+    <dimen name="dashboard_stat_value_size">16sp</dimen>
+    <dimen name="dashboard_stat_box_margin">3dp</dimen>
+    <dimen name="dashboard_button_height">48dp</dimen>
+    <dimen name="dashboard_button_radius">20dp</dimen>
+    <dimen name="dashboard_button_text_size">14sp</dimen>
+    <dimen name="dashboard_fab_margin">12dp</dimen>
+    <dimen name="dashboard_fab_bottom">60dp</dimen>
+</resources> 
