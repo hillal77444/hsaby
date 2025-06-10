@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>كشف حساب - {{ account.account_name }}</title>
+    <!-- Bootstrap RTL CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+            }
+            .card-body {
+                padding: 0 !important;
+            }
+            @page {
+                size: A4;
+                margin: 1cm;
+            }
+            .table {
+                box-shadow: none !important;
+            }
+            .table thead th {
+                background-color: #f8f9fc !important;
+                color: #000 !important;
+            }
+        }
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #2d3748;
+        }
+        .print-only {
+            display: none;
+        }
+        .statement-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+        .statement-header h2 {
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .statement-info {
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+        .statement-info p {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: #4a5568;
+        }
+        .statement-info strong {
+            color: #2d3748;
+            font-weight: 600;
+        }
+        .transaction-row:hover {
+            background-color: #f8f9fc;
+        }
+        .balance-positive {
+            color: #38a169;
+            font-weight: 600;
+        }
+        .balance-negative {
+            color: #e53e3e;
+            font-weight: 600;
+        }
+        .table {
+            background-color: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 0;
+            overflow: hidden;
+        }
+        .table thead th {
+            background-color: #4e73df;
+            color: #fff;
+            border: none;
+            padding: 1.25rem 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        .table tbody td {
+            padding: 1.25rem 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #edf2f7;
+            text-align: center;
+        }
+        .badge {
+            padding: 0.5em 0.75em;
+            font-size: 0.9rem;
+            border-radius: 0.5rem;
+        }
+        .amount-cell {
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        .currency-filter {
+            margin-bottom: 1rem;
+        }
+        .currency-filter select {
+            min-width: 200px;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            background-color: #fff;
+            font-size: 1rem;
+            color: #2d3748;
+        }
+        .summary-card {
+            background-color: #fff;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+        .summary-card p {
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+            color: #4a5568;
+        }
+        .summary-card strong {
+            color: #2d3748;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background-color: #4e73df;
+            border-color: #4e73df;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #2e59d9;
+            border-color: #2e59d9;
+            transform: translateY(-1px);
+        }
+        .btn-primary i {
+            margin-left: 0.5rem;
+        }
+        @media (max-width: 768px) {
+            .statement-header {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+            .statement-info {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+            .statement-info p {
+                font-size: 1rem;
+                margin-bottom: 0.75rem;
+            }
+            .table thead th {
+                font-size: 0.9rem;
+                padding: 1rem 0.75rem;
+            }
+            .table tbody td {
+                font-size: 0.9rem;
+                padding: 1rem 0.75rem;
+            }
+            .amount-cell {
+                font-size: 1rem;
+            }
+            .currency-filter select {
+                min-width: 150px;
+                padding: 0.5rem;
+            }
+            .summary-card {
+                padding: 1.5rem;
+                margin-top: 1.5rem;
+            }
+            .summary-card p {
+                font-size: 1rem;
+                margin-bottom: 0.5rem;
+            }
+            .btn-primary {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <!-- أزرار التحكم -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 no-print">
+            <h1 class="h3 text-gray-800 mb-3 mb-md-0">كشف حساب</h1>
+            <div class="d-flex flex-column flex-md-row align-items-center">
+                <!-- فلتر العملة -->
+                <div class="currency-filter me-md-3 mb-3 mb-md-0">
+                    <select class="form-select" id="currencyFilter" onchange="filterByCurrency(this.value)">
+                        <option value="all">جميع العملات</option>
+                        {% for currency in currencies %}
+                        <option value="{{ currency }}" {% if selected_currency == currency %}selected{% endif %}>{{ currency }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button onclick="window.print()" class="btn btn-primary">
+                    <i class="fas fa-print"></i> طباعة
+                </button>
+            </div>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                <!-- رأس الكشف -->
+                <div class="statement-header">
+                    <h2 class="mb-3">كشف حساب</h2>
+                    <p class="text-muted" id="print-date">تاريخ الطباعة: {{ now().strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+
+                <!-- معلومات الحساب -->
+                <div class="statement-info">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>اسم الحساب:</strong> {{ account.account_name }}</p>
+                            <p><strong>رقم الهاتف:</strong> {{ account.phone_number }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>التاجر:</strong> {{ user.username }}</p>
+                            <p><strong>العملة المحددة:</strong> <span id="selectedCurrencyDisplay">{{ selected_currency or 'جميع العملات' }}</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- جدول المعاملات -->
+                <div class="table-responsive">
+                    <table class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>الوصف</th>
+                                <th>دائن</th>
+                                <th>مدين</th>
+                                <th>العملة</th>
+                                <th>الرصيد</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in transactions %}
+                            <tr class="transaction-row" data-currency="{{ transaction.currency }}">
+                                <td>{{ transaction.date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ transaction.description or '-' }}</td>
+                                <td class="amount-cell">
+                                    {% if transaction.type == 'credit' %}
+                                        {{ transaction.amount }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="amount-cell">
+                                    {% if transaction.type == 'debit' %}
+                                        {{ transaction.amount }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>{{ transaction.currency }}</td>
+                                <td class="amount-cell {% if transaction.balance >= 0 %}balance-positive{% else %}balance-negative{% endif %}">
+                                    {{ transaction.balance }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ملخص الكشف -->
+                <div class="summary-card">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>إجمالي المعاملات:</strong> <span id="totalTransactions">{{ transactions|length }}</span></p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            {% if selected_currency != 'all' %}
+                            <p><strong>الرصيد النهائي:</strong> 
+                                <span class="{% if final_balance >= 0 %}balance-positive{% else %}balance-negative{% endif %}">
+                                    {{ final_balance }} {{ selected_currency }}
+                                </span>
+                            </p>
+                            {% else %}
+                            <p><strong>الأرصدة حسب العملة:</strong></p>
+                            {% for currency, balance in currency_balances.items() %}
+                            <p class="mb-1">
+                                <span class="{% if balance >= 0 %}balance-positive{% else %}balance-negative{% endif %}">
+                                    {{ balance }} {{ currency }}
+                                </span>
+                            </p>
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // تحديث تاريخ الطباعة
+        function updatePrintDate() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('ar-SA') + ' ' + now.toLocaleTimeString('ar-SA');
+            document.getElementById('print-date').textContent = 'تاريخ الطباعة: ' + dateStr;
+        }
+        
+        // تصفية المعاملات حسب العملة
+        function filterByCurrency(currency) {
+            const rows = document.querySelectorAll('.transaction-row');
+            let visibleCount = 0;
+            let finalBalance = 0;
+            
+            rows.forEach(row => {
+                if (currency === 'all' || row.dataset.currency === currency) {
+                    row.style.display = '';
+                    visibleCount++;
+                    // تحديث الرصيد النهائي
+                    const balanceCell = row.querySelector('td:last-child');
+                    if (balanceCell) {
+                        finalBalance = parseFloat(balanceCell.textContent.trim());
+                    }
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // تحديث عدد المعاملات المعروضة
+            document.getElementById('totalTransactions').textContent = visibleCount;
+            
+            // تحديث العملة المحددة في المعلومات
+            document.getElementById('selectedCurrencyDisplay').textContent = 
+                currency === 'all' ? 'جميع العملات' : currency;
+            
+            // تحديث الرصيد النهائي
+            const balanceSpan = document.querySelector('.summary-card .balance-positive, .summary-card .balance-negative');
+            if (balanceSpan) {
+                balanceSpan.textContent = finalBalance + ' ' + (currency === 'all' ? '' : currency);
+                balanceSpan.className = finalBalance >= 0 ? 'balance-positive' : 'balance-negative';
+            }
+        }
+        
+        // تحديث التاريخ عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', updatePrintDate);
+    </script>
+</body>
+</html> 
