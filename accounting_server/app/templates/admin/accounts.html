@@ -1,0 +1,66 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">الحسابات</h1>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">قائمة الحسابات</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>اسم الحساب</th>
+                            <th>رقم الهاتف</th>
+                            <th>المستخدم</th>
+                            <th>العملة</th>
+                            <th>عدد المعاملات</th>
+                            <th>إجمالي المدين</th>
+                            <th>إجمالي الدائن</th>
+                            <th>الرصيد</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in account_stats %}
+                        <tr>
+                            <td>{{ stat.account.account_name }}</td>
+                            <td>{{ stat.account.phone_number }}</td>
+                            <td>{{ stat.account.user.username }}</td>
+                            <td>{{ stat.account.currency or 'ريال' }}</td>
+                            <td>{{ stat.transactions_count }}</td>
+                            <td class="text-danger">{{ stat.total_debits }}</td>
+                            <td class="text-success">{{ stat.total_credits }}</td>
+                            <td class="{% if stat.balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ stat.balance }}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin.account_statement', account_id=stat.account.id) }}" 
+                                   class="btn btn-info btn-sm" target="_blank">
+                                    <i class="fas fa-file-invoice"></i> كشف حساب
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    $('#dataTable').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Arabic.json"
+        }
+    });
+});
+</script>
+{% endblock %} 
