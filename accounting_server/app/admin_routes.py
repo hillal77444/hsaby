@@ -66,7 +66,7 @@ def admin_required(f):
     decorated_function.__name__ = f.__name__
     return decorated_function
 
-@admin.route('/admin/login', methods=['GET', 'POST'])
+@admin.route('/api/admin/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         password = request.form.get('password')
@@ -77,13 +77,13 @@ def login():
         flash('كلمة المرور غير صحيحة')
     return render_template('admin/login.html')
 
-@admin.route('/admin/logout')
+@admin.route('/api/admin/logout')
 def logout():
     response = redirect(url_for('admin.login'))
     response.delete_cookie('admin_auth')
     return response
 
-@admin.route('/admin/dashboard')
+@admin.route('/api/admin/dashboard')
 @admin_required
 def dashboard():
     # إحصائيات عامة
@@ -119,7 +119,7 @@ def dashboard():
                          weekly_transactions=weekly_transactions,
                          currency_stats=currency_stats)
 
-@admin.route('/admin/users')
+@admin.route('/api/admin/users')
 @admin_required
 def users():
     users = User.query.all()
@@ -149,7 +149,7 @@ def users():
     
     return render_template('admin/users.html', user_stats=user_stats)
 
-@admin.route('/admin/user/<int:user_id>')
+@admin.route('/api/admin/user/<int:user_id>')
 @admin_required
 def user_details(user_id):
     user = User.query.get_or_404(user_id)
@@ -161,7 +161,7 @@ def user_details(user_id):
                          accounts=accounts,
                          transactions=transactions)
 
-@admin.route('/admin/user/<int:user_id>/update', methods=['POST'])
+@admin.route('/api/admin/user/<int:user_id>/update', methods=['POST'])
 @admin_required
 def update_user(user_id):
     user = User.query.get_or_404(user_id)
@@ -184,7 +184,7 @@ def update_user(user_id):
     flash('تم تحديث بيانات المستخدم بنجاح')
     return redirect(url_for('admin.user_details', user_id=user_id))
 
-@admin.route('/admin/accounts')
+@admin.route('/api/admin/accounts')
 @admin_required
 def accounts():
     accounts = Account.query.all()
@@ -212,13 +212,13 @@ def accounts():
     
     return render_template('admin/accounts.html', account_stats=account_stats)
 
-@admin.route('/admin/transactions')
+@admin.route('/api/admin/transactions')
 @admin_required
 def transactions():
     transactions = Transaction.query.order_by(Transaction.date.desc()).all()
     return render_template('admin/transactions.html', transactions=transactions)
 
-@admin.route('/admin/statistics')
+@admin.route('/api/admin/statistics')
 @admin_required
 def statistics():
     # إحصائيات المستخدمين
@@ -247,7 +247,7 @@ def statistics():
                          transaction_stats=transaction_stats)
 
 # مسارات الواتساب
-@admin.route('/admin/whatsapp')
+@admin.route('/api/admin/whatsapp')
 @admin_required
 def whatsapp_dashboard():
     return render_template('admin/whatsapp_dashboard.html')
@@ -264,7 +264,7 @@ def get_session_size(session_id):
             total_size += os.path.getsize(fp)
     return round(total_size / (1024 * 1024), 2)
 
-@admin.route('/admin/whatsapp/session/<session_id>/<action>', methods=['POST'])
+@admin.route('/api/admin/whatsapp/session/<session_id>/<action>', methods=['POST'])
 @admin_required
 def manage_whatsapp_session(session_id, action):
     try:
@@ -302,7 +302,7 @@ def manage_whatsapp_session(session_id, action):
         flash(f"حدث خطأ: {str(e)}", "error")
         return redirect(url_for('admin.whatsapp_sessions'))
 
-@admin.route('/admin/whatsapp/sessions')
+@admin.route('/api/admin/whatsapp/sessions')
 @admin_required
 def whatsapp_sessions():
     try:
@@ -328,7 +328,7 @@ def whatsapp_sessions():
         flash('خادم الواتساب غير متصل', 'error')
         return redirect(url_for('admin.dashboard'))
 
-@admin.route('/admin/whatsapp/start_session', methods=['POST'])
+@admin.route('/api/admin/whatsapp/start_session', methods=['POST'])
 @admin_required
 def start_whatsapp_session():
     session_id = "admin_main"
@@ -348,13 +348,13 @@ def start_whatsapp_session():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
-@admin.route('/admin/whatsapp/qr/<session_id>')
+@admin.route('/api/admin/whatsapp/qr/<session_id>')
 @admin_required
 def get_whatsapp_qr(session_id):
     # إعادة التوجيه مباشرة إلى صفحة Node.js لعرض رمز QR
     return redirect(f"http://212.224.88.122:3002/qr/{session_id}")
 
-@admin.route('/admin/whatsapp/send', methods=['POST'])
+@admin.route('/api/admin/whatsapp/send', methods=['POST'])
 @admin_required
 def send_whatsapp_message():
     session_id = request.form.get('session_id')
@@ -391,7 +391,7 @@ def send_whatsapp_message():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
-@admin.route('/admin/whatsapp/send_bulk', methods=['POST'])
+@admin.route('/api/admin/whatsapp/send_bulk', methods=['POST'])
 @admin_required
 def send_whatsapp_bulk():
     session_id = request.form.get('session_id')
@@ -433,7 +433,7 @@ def send_whatsapp_bulk():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
-@admin.route('/admin/whatsapp/contacts/<session_id>')
+@admin.route('/api/admin/whatsapp/contacts/<session_id>')
 @admin_required
 def get_whatsapp_contacts(session_id):
     try:
@@ -444,7 +444,7 @@ def get_whatsapp_contacts(session_id):
     except Exception as e:
         return jsonify({'error': str(e)})
 
-@admin.route('/admin/whatsapp/chats/<session_id>')
+@admin.route('/api/admin/whatsapp/chats/<session_id>')
 @admin_required
 def get_whatsapp_chats(session_id):
     try:
@@ -455,7 +455,7 @@ def get_whatsapp_chats(session_id):
     except Exception as e:
         return jsonify({'error': str(e)})
 
-@admin.route('/admin/whatsapp/messages/<session_id>/<chat_id>')
+@admin.route('/api/admin/whatsapp/messages/<session_id>/<chat_id>')
 @admin_required
 def get_whatsapp_messages(session_id, chat_id):
     try:
@@ -466,7 +466,7 @@ def get_whatsapp_messages(session_id, chat_id):
     except Exception as e:
         return jsonify({'error': str(e)})
 
-@admin.route('/admin/whatsapp/reset_session/<session_id>', methods=['POST'])
+@admin.route('/api/admin/whatsapp/reset_session/<session_id>', methods=['POST'])
 @admin_required
 def reset_whatsapp_session(session_id):
     try:
@@ -477,7 +477,7 @@ def reset_whatsapp_session(session_id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
-@admin.route('/admin/whatsapp/session_status/<session_id>')
+@admin.route('/api/admin/whatsapp/session_status/<session_id>')
 @admin_required
 def get_whatsapp_session_status(session_id):
     try:
@@ -489,7 +489,7 @@ def get_whatsapp_session_status(session_id):
         return jsonify({'error': str(e)}) 
     
 
-@admin.route('/admin/transaction/notify', methods=['POST'])
+@admin.route('/api/admin/transaction/notify', methods=['POST'])
 @admin_required
 def send_transaction_notification():
     try:
