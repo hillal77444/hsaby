@@ -222,18 +222,17 @@ def transactions():
 @admin_required
 def statistics():
     # إحصائيات المستخدمين
-    user_stats = db.session.query(
-        func.date(User.created_at).label('date'),
-        func.count(User.id).label('count')
-    ).group_by(func.date(User.created_at)).all()
+    total_users = User.query.count()
     
     # إحصائيات الحسابات
+    total_accounts = Account.query.count()
     account_stats = db.session.query(
         func.date(Account.created_at).label('date'),
         func.count(Account.id).label('count')
     ).group_by(func.date(Account.created_at)).all()
     
     # إحصائيات المعاملات
+    total_transactions = Transaction.query.count()
     transaction_stats = db.session.query(
         func.date(Transaction.date).label('date'),
         func.count(Transaction.id).label('count'),
@@ -241,10 +240,25 @@ def statistics():
         func.sum(case((Transaction.type == 'debit', Transaction.amount), else_=0)).label('debits')
     ).group_by(func.date(Transaction.date)).all()
     
+    # إحصائيات العملات
+    currency_stats = db.session.query(
+        Transaction.currency,
+        func.count(Transaction.id).label('count'),
+        func.sum(case((Transaction.type == 'credit', Transaction.amount), else_=0)).label('credits'),
+        func.sum(case((Transaction.type == 'debit', Transaction.amount), else_=0)).label('debits')
+    ).group_by(Transaction.currency).all()
+    
+    # تحويل التواريخ إلى كائنات datetime
+    account_stats = [{'date': datetime.strptime(str(stat.date), '%Y-%m-%d'), 'count': stat.count} for stat in account_stats]
+    transaction_stats = [{'date': datetime.strptime(str(stat.date), '%Y-%m-%d'), 'count': stat.count, 'credits': stat.credits or 0, 'debits': stat.debits or 0} for stat in transaction_stats]
+    
     return render_template('admin/statistics.html',
-                         user_stats=user_stats,
+                         total_users=total_users,
+                         total_accounts=total_accounts,
+                         total_transactions=total_transactions,
                          account_stats=account_stats,
-                         transaction_stats=transaction_stats)
+                         transaction_stats=transaction_stats,
+                         currency_stats=currency_stats)
 
 # مسارات الواتساب
 @admin.route('/api/admin/whatsapp')
@@ -600,3 +614,87 @@ def calculate_and_notify_transaction(transaction_id):
     except Exception as e:
         logger.error(f"Error in calculate_and_notify_transaction: {str(e)}")
         return {'status': 'error', 'message': str(e)}
+
+@admin.route('/api/admin/account/<int:account_id>/statement')
+def account_statement(account_id):
+    # جلب معلومات الحساب
+    account = Account.query.get_or_404(account_id)
+    user = User.query.get(account.user_id)
+    
+    # العملة المحددة من الطلب
+    selected_currency = request.args.get('currency', 'all')
+    
+    # جلب المعاملات حسب العملة المختارة
+    query = Transaction.query.filter_by(account_id=account_id)
+    if selected_currency != 'all':
+        query = query.filter_by(currency=selected_currency)
+    
+    # جلب المعاملات مرتبة حسب التاريخ
+    transactions = query.order_by(Transaction.date, Transaction.id).all()
+    
+    # جلب قائمة العملات الفريدة
+    currencies = db.session.query(Transaction.currency)\
+        .filter_by(account_id=account_id)\
+        .distinct()\
+        .all()
+    currencies = [c[0] for c in currencies]
+    
+    # حساب الرصيد المتراكم حسب العملة المحددة
+    if selected_currency != 'all':
+        # جلب جميع المعاملات للعملة المحددة مرتبة حسب التاريخ
+        currency_transactions = Transaction.query.filter_by(
+            account_id=account_id,
+            currency=selected_currency
+        ).order_by(Transaction.date, Transaction.id).all()
+        
+        # حساب الرصيد المتراكم
+        balance = 0
+        for transaction in currency_transactions:
+            if transaction.type == 'credit':
+                balance += transaction.amount
+            else:
+                balance -= transaction.amount
+            transaction.balance = balance
+    else:
+        # إذا كانت جميع العملات، نحسب الرصيد لكل معاملة حسب عملتها
+        currency_balances = {}
+        for transaction in transactions:
+            currency = transaction.currency
+            if currency not in currency_balances:
+                currency_balances[currency] = 0
+            
+            if transaction.type == 'credit':
+                currency_balances[currency] += transaction.amount
+            else:
+                currency_balances[currency] -= transaction.amount
+            
+            transaction.balance = currency_balances[currency]
+    
+    # حساب الرصيد النهائي لكل عملة
+    currency_balances = {}
+    for currency in currencies:
+        currency_transactions = Transaction.query.filter_by(
+            account_id=account_id,
+            currency=currency
+        ).order_by(Transaction.date, Transaction.id).all()
+        
+        currency_balance = 0
+        for trans in currency_transactions:
+            if trans.type == 'credit':
+                currency_balance += trans.amount
+            else:
+                currency_balance -= trans.amount
+        currency_balances[currency] = currency_balance
+    
+    # تحديد الرصيد النهائي حسب العملة المحددة
+    final_balance = currency_balances.get(selected_currency, 0) if selected_currency != 'all' else None
+    
+    return render_template('admin/account_statement.html',
+                         account=account,
+                         user=user,
+                         transactions=transactions,
+                         currencies=currencies,
+                         selected_currency=selected_currency,
+                         final_balance=final_balance,
+                         currency_balances=currency_balances,
+                         now=datetime.now)
