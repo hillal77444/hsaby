@@ -1,0 +1,160 @@
+{% extends "admin/base.html" %}
+
+{% block extra_css %}
+<style>
+    .dataTables_wrapper .dataTables_length, 
+    .dataTables_wrapper .dataTables_filter {
+        margin-bottom: 15px;
+    }
+    .dataTables_wrapper .dataTables_filter input {
+        width: 300px;
+        padding: 6px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .dataTables_wrapper .dataTables_length select {
+        padding: 6px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 5px 10px;
+        margin: 0 2px;
+        border-radius: 4px;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: #4e73df !important;
+        color: white !important;
+        border: none !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: #eaecf4 !important;
+        border: 1px solid #ddd !important;
+    }
+    .badge-success {
+        background-color: #198754 !important;
+        color: white !important;
+    }
+    .badge-danger {
+        background-color: #dc3545 !important;
+        color: white !important;
+    }
+    .badge-secondary {
+        background-color: #6c757d !important;
+        color: white !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">المعاملات</h1>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">قائمة المعاملات</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>اسم الحساب</th>
+                            <th>نوع المعاملة</th>
+                            <th>المبلغ</th>
+                            <th>العملة</th>
+                            <th>الوصف</th>
+                            <th>المستخدم</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                        <tr>
+                            <td>{{ transaction.date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>{{ transaction.account.account_name }}</td>
+                            <td>
+                                {% if transaction.type == 'credit' %}
+                                <span class="badge bg-success">دائن</span>
+                                {% elif transaction.type == 'debit' %}
+                                <span class="badge bg-danger">مدين</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ transaction.type }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ transaction.amount }}</td>
+                            <td>{{ transaction.currency or 'ريال' }}</td>
+                            <td>{{ transaction.description or '-' }}</td>
+                            <td>{{ transaction.user.username }}</td>
+                            <td>
+                                <button class="btn btn-info btn-sm" onclick="sendNotification('{{ transaction.id }}')">
+                                    <i class="fas fa-bell"></i> إشعار
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    var table = $('#dataTable').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Arabic.json"
+        },
+        "order": [[0, "desc"]], // ترتيب حسب التاريخ تنازلياً
+        "pageLength": 30, // عدد العناصر في كل صفحة
+        "lengthMenu": [[30, 50, 100, -1], [30, 50, 100, "الكل"]], // خيارات عدد العناصر في الصفحة
+        "searching": true, // تفعيل البحث
+        "search": {
+            "smart": true, // بحث ذكي
+            "caseInsensitive": true // تجاهل حالة الأحرف
+        },
+        "dom": '<"top"lf>rt<"bottom"ip><"clear">', // تخصيص شكل الجدول
+        "initComplete": function() {
+            // تخصيص حقل البحث
+            $('.dataTables_filter input').addClass('form-control');
+            $('.dataTables_filter input').attr('placeholder', 'بحث...');
+            $('.dataTables_length select').addClass('form-control');
+        }
+    });
+
+    // تخصيص شكل أزرار التنقل
+    $('.dataTables_paginate').addClass('pagination-sm');
+    $('.dataTables_paginate .paginate_button').addClass('btn btn-sm btn-outline-primary mx-1');
+    $('.dataTables_paginate .paginate_button.current').addClass('btn-primary');
+});
+
+function sendNotification(transactionId) {
+    if (confirm('هل تريد إرسال إشعار لهذه المعاملة؟')) {
+        fetch('/api/admin/transaction/notify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                transaction_id: parseInt(transactionId)
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('تم إرسال الإشعار بنجاح');
+            } else {
+                alert('حدث خطأ: ' + (data.error || 'فشل إرسال الإشعار'));
+            }
+        })
+        .catch(error => {
+            alert('حدث خطأ: ' + error);
+        });
+    }
+}
+</script>
+{% endblock %} 
