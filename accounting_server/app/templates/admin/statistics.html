@@ -1,0 +1,155 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">الإحصائيات</h1>
+
+    <!-- إحصائيات عامة -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">إجمالي المستخدمين</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_users }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">إجمالي الحسابات</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_accounts }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-wallet fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">إجمالي المعاملات</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_transactions }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exchange-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- إحصائيات العملات -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">إحصائيات العملات</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>العملة</th>
+                            <th>عدد المعاملات</th>
+                            <th>إجمالي المدين</th>
+                            <th>إجمالي الدائن</th>
+                            <th>الرصيد</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in currency_stats %}
+                        <tr>
+                            <td>{{ stat.currency }}</td>
+                            <td>{{ stat.count }}</td>
+                            <td class="text-danger">{{ stat.debits }}</td>
+                            <td class="text-success">{{ stat.credits }}</td>
+                            <td class="{% if stat.credits - stat.debits >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ stat.credits - stat.debits }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- إحصائيات المعاملات -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">إحصائيات المعاملات</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>عدد المعاملات</th>
+                            <th>إجمالي المدين</th>
+                            <th>إجمالي الدائن</th>
+                            <th>صافي المعاملات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in transaction_stats %}
+                        <tr>
+                            <td>{{ stat.date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ stat.count }}</td>
+                            <td class="text-danger">{{ stat.debits }}</td>
+                            <td class="text-success">{{ stat.credits }}</td>
+                            <td class="{% if stat.credits - stat.debits >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ stat.credits - stat.debits }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- إحصائيات الحسابات -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">إحصائيات الحسابات</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>عدد الحسابات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in account_stats %}
+                        <tr>
+                            <td>{{ stat.date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ stat.count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
