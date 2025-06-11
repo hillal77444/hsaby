@@ -44,14 +44,6 @@
         </shape>
     </item>
 
-    <!-- نمط النقاط الخفيف -->
-    <item>
-        <bitmap
-            android:src="@drawable/pattern_background"
-            android:tileMode="repeat"
-            android:alpha="0.06" />
-    </item>
-
     <!-- خطوط متموجة خفيفة -->
     <item>
         <shape android:shape="rectangle">
