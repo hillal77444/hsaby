@@ -46,7 +46,10 @@
             app:boxCornerRadiusTopStart="8dp"
             app:boxCornerRadiusTopEnd="8dp"
             app:boxCornerRadiusBottomStart="8dp"
-            app:boxCornerRadiusBottomEnd="8dp">
+            app:boxCornerRadiusBottomEnd="8dp"
+            app:endIconMode="custom"
+            app:endIconDrawable="@android:drawable/ic_menu_my_calendar"
+            app:endIconTint="@color/primary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/phone_edit_text"
@@ -62,6 +65,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             android:hint="@string/opening_balance"
+            android:visibility="gone"
             app:startIconDrawable="@drawable/ic_money"
             app:startIconTint="@color/primary"
             app:boxBackgroundMode="outline"
