@@ -74,7 +74,7 @@ public class AddAccountFragment extends Fragment {
         binding.cancelButton.setOnClickListener(v -> requireActivity().onBackPressed());
 
         // إضافة مستمع لزر اختيار جهة الاتصال
-        binding.phoneEditText.setOnClickListener(v -> checkContactsPermission());
+        binding.contactsButton.setOnClickListener(v -> checkContactsPermission());
     }
 
     private void checkContactsPermission() {
