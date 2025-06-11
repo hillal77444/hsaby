@@ -92,7 +92,8 @@ public class AddTransactionFragment extends Fragment {
     }
 
     private void setupListeners() {
-        binding.saveButton.setOnClickListener(v -> saveTransaction());
+        binding.debitButton.setOnClickListener(v -> saveTransaction(true));
+        binding.creditButton.setOnClickListener(v -> saveTransaction(false));
         binding.cancelButton.setOnClickListener(v -> Navigation.findNavController(requireView()).navigateUp());
         
         // Date picker listener
@@ -147,7 +148,7 @@ public class AddTransactionFragment extends Fragment {
         binding.dateEditText.setText(dateFormat.format(calendar.getTime()));
     }
 
-    private void saveTransaction() {
+    private void saveTransaction(boolean isDebit) {
         if (selectedAccountId == -1) {
             Toast.makeText(requireContext(), "الرجاء اختيار الحساب", Toast.LENGTH_SHORT).show();
             return;
@@ -156,7 +157,6 @@ public class AddTransactionFragment extends Fragment {
         String amountStr = binding.amountEditText.getText().toString();
         String description = binding.descriptionEditText.getText().toString();
         String notes = binding.notesEditText.getText().toString();
-        boolean isDebit = binding.radioDebit.isChecked();
         String currency = getSelectedCurrency();
 
         if (amountStr.isEmpty()) {
