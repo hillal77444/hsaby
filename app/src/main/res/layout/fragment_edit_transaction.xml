@@ -181,14 +181,14 @@
                             android:id="@+id/radioDebit"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="مدين"/>
+                            android:text="عليه"/>
 
                         <RadioButton
                             android:id="@+id/radioCredit"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
-                            android:text="دائن"/>
+                            android:text="له"/>
 
                     </RadioGroup>
                 </LinearLayout>
