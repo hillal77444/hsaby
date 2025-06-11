@@ -9,12 +9,12 @@
     android:paddingStart="16dp"
     android:paddingEnd="16dp"
     android:paddingTop="16dp"
-    android:paddingBottom="96dp"
-    android:background="@drawable/main_background">
+    android:paddingBottom="96dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@drawable/dashboard_background">
 
         <!-- بطاقة الترحيب واسم المستخدم -->
         <com.google.android.material.card.MaterialCardView
