@@ -1,7 +1,9 @@
 package com.hillal.acc.ui.accounts;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,6 +16,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -28,6 +32,7 @@ import com.hillal.acc.databinding.FragmentAddAccountBinding;
 
 public class AddAccountFragment extends Fragment {
     private static final int PICK_CONTACT_REQUEST = 1;
+    private static final int CONTACTS_PERMISSION_REQUEST = 2;
     private FragmentAddAccountBinding binding;
     private AccountViewModel accountViewModel;
     private TextInputEditText nameEditText;
@@ -69,10 +74,41 @@ public class AddAccountFragment extends Fragment {
         binding.cancelButton.setOnClickListener(v -> requireActivity().onBackPressed());
 
         // إضافة مستمع لزر اختيار جهة الاتصال
-        binding.phoneEditText.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
-            startActivityForResult(intent, PICK_CONTACT_REQUEST);
-        });
+        binding.phoneEditText.setOnClickListener(v -> checkContactsPermission());
+    }
+
+    private void checkContactsPermission() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            // إذا لم يكن لدينا الإذن، نطلبه
+            ActivityCompat.requestPermissions(requireActivity(),
+                    new String[]{Manifest.permission.READ_CONTACTS},
+                    CONTACTS_PERMISSION_REQUEST);
+        } else {
+            // إذا كان لدينا الإذن، نفتح قائمة جهات الاتصال
+            openContactsPicker();
+        }
+    }
+
+    private void openContactsPicker() {
+        Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+        startActivityForResult(intent, PICK_CONTACT_REQUEST);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                         @NonNull int[] grantResults) {
+        if (requestCode == CONTACTS_PERMISSION_REQUEST) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // تم منح الإذن، نفتح قائمة جهات الاتصال
+                openContactsPicker();
+            } else {
+                // تم رفض الإذن
+                Toast.makeText(requireContext(), 
+                    "يجب السماح بالوصول إلى جهات الاتصال لاختيار جهة اتصال", 
+                    Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override
