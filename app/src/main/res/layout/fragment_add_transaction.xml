@@ -147,65 +147,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- بطاقة نوع العملية -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="1dp"
-                app:cardBackgroundColor="@color/white"
-                android:layout_marginHorizontal="2dp"
-                android:layout_marginBottom="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="4dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/transaction_type"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-                        android:textColor="@color/primary"
-                        android:layout_marginBottom="2dp" />
-
-                    <RadioGroup
-                        android:id="@+id/typeRadioGroup"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <RadioButton
-                            android:id="@+id/radioDebit"
-                            android:layout_width="0dp"
-                            android:layout_height="48dp"
-                            android:layout_weight="1"
-                            android:text="@string/debit"
-                            android:textSize="20sp"
-                            android:textColor="@color/red_700"
-                            android:buttonTint="@color/red_700"
-                            android:drawableStart="@drawable/ic_arrow_upward"
-                            android:drawablePadding="4dp"
-                            android:background="@drawable/bg_radio_debit_selector"/>
-
-                        <RadioButton
-                            android:id="@+id/radioCredit"
-                            android:layout_width="0dp"
-                            android:layout_height="48dp"
-                            android:layout_weight="1"
-                            android:text="@string/credit"
-                            android:textSize="20sp"
-                            android:textColor="@color/green_700"
-                            android:buttonTint="@color/green_700"
-                            android:drawableStart="@drawable/ic_arrow_downward"
-                            android:drawablePadding="4dp"
-                            android:background="@drawable/bg_radio_credit_selector"/>
-                    </RadioGroup>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
             <!-- بطاقة العملة -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -337,14 +278,28 @@
                 android:layout_marginBottom="16dp">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/saveButton"
+                    android:id="@+id/debitButton"
                     style="@style/Widget.MaterialComponents.Button"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/save"
-                    android:icon="@android:drawable/ic_menu_save"
-                    android:layout_marginEnd="8dp"/>
+                    android:text="@string/debit"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/red_700"
+                    android:icon="@drawable/ic_arrow_upward"
+                    android:layout_marginEnd="4dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/creditButton"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/credit"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/green_700"
+                    android:icon="@drawable/ic_arrow_downward"
+                    android:layout_marginEnd="4dp"/>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/cancelButton"
