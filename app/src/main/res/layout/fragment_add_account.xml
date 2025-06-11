@@ -48,8 +48,11 @@
             app:boxCornerRadiusBottomStart="8dp"
             app:boxCornerRadiusBottomEnd="8dp"
             app:endIconMode="custom"
-            app:endIconDrawable="@android:drawable/ic_menu_my_calendar"
-            app:endIconTint="@color/primary">
+            app:endIconDrawable="@drawable/ic_contacts"
+            app:endIconTint="@color/primary"
+            app:endIconSize="40dp"
+            app:endIconPadding="12dp"
+            app:endIconMinSize="40dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/phone_edit_text"
