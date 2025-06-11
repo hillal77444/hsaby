@@ -64,7 +64,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="4dp">
+                    android:padding="8dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -74,19 +74,27 @@
                         android:textColor="@color/primary"
                         android:drawableStart="@android:drawable/ic_menu_myplaces"
                         android:drawablePadding="4dp"
-                        android:layout_marginBottom="2dp"/>
+                        android:layout_marginBottom="4dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/accountLayout"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:hint="اختر الحساب"
+                        app:startIconDrawable="@android:drawable/ic_menu_myplaces"
+                        app:startIconTint="@color/primary">
 
                         <AutoCompleteTextView
                             android:id="@+id/accountAutoComplete"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="none" />
+                            android:inputType="none"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:background="@null"
+                            android:padding="12dp"
+                            android:textSize="16sp"/>
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -278,18 +286,6 @@
                 android:layout_marginBottom="16dp">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/debitButton"
-                    style="@style/Widget.MaterialComponents.Button"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/debit"
-                    android:textColor="@color/white"
-                    android:backgroundTint="@color/red_700"
-                    android:icon="@drawable/ic_arrow_upward"
-                    android:layout_marginEnd="4dp"/>
-
-                <com.google.android.material.button.MaterialButton
                     android:id="@+id/creditButton"
                     style="@style/Widget.MaterialComponents.Button"
                     android:layout_width="0dp"
@@ -299,6 +295,18 @@
                     android:textColor="@color/white"
                     android:backgroundTint="@color/green_700"
                     android:icon="@drawable/ic_arrow_downward"
+                    android:layout_marginEnd="4dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/debitButton"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/debit"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/red_700"
+                    android:icon="@drawable/ic_arrow_upward"
                     android:layout_marginEnd="4dp"/>
 
                 <com.google.android.material.button.MaterialButton
