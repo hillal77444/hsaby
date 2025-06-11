@@ -49,17 +49,15 @@
             app:boxCornerRadiusBottomEnd="8dp"
             app:endIconMode="custom"
             app:endIconDrawable="@drawable/ic_contacts"
-            app:endIconTint="@color/primary"
-            app:endIconSize="40dp"
-            app:endIconPadding="12dp"
-            app:endIconMinSize="40dp">
+            app:endIconTint="@color/primary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/phone_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="phone"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:paddingEnd="48dp" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- الرصيد الافتتاحي -->
