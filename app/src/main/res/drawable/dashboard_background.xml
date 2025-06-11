@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- الخلفية الأساسية -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:angle="135"
+                android:startColor="#F0F4F8"
+                android:centerColor="#E8ECF2"
+                android:endColor="#E0E6F0" />
+        </shape>
+    </item>
+
+    <!-- دائرة في الأعلى -->
+    <item
+        android:left="-100dp"
+        android:top="-100dp">
+        <shape android:shape="oval">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="300dp"
+                android:startColor="#3D5AFE"
+                android:endColor="#00000000" />
+            <size
+                android:width="400dp"
+                android:height="400dp" />
+        </shape>
+    </item>
+
+    <!-- دائرة في الأسفل -->
+    <item
+        android:right="-100dp"
+        android:bottom="-100dp">
+        <shape android:shape="oval">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="250dp"
+                android:startColor="#43A047"
+                android:endColor="#00000000" />
+            <size
+                android:width="350dp"
+                android:height="350dp" />
+        </shape>
+    </item>
+
+    <!-- نمط النقاط الخفيف -->
+    <item>
+        <bitmap
+            android:src="@drawable/pattern_background"
+            android:tileMode="repeat"
+            android:alpha="0.06" />
+    </item>
+
+    <!-- خطوط متموجة خفيفة -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:angle="45"
+                android:startColor="#00000000"
+                android:centerColor="#15000000"
+                android:endColor="#00000000" />
+        </shape>
+    </item>
+</layer-list> 
