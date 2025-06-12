@@ -28,6 +28,35 @@ if not os.path.exists(UPLOAD_FOLDER):
 # إعداد التسجيل
 logger = logging.getLogger(__name__)
 
+# حذف استيراد itsdangerous وكل ما يتعلق به
+# من:
+# from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+# SECRET_KEY = 'b2d8e6c7-4f3a-4a1b-9c2e-1f7e2e5a9c3d'
+# serializer = URLSafeTimedSerializer(SECRET_KEY)
+
+# إضافة تخزين مؤقت للكودات القصيرة (في الذاكرة)
+short_links = {}
+
+# دالة توليد رابط كشف حساب مؤقت بكود قصير (6 أحرف)
+def generate_short_statement_link(account_id, expires_sec=600):
+    code = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
+    short_links[code] = {
+        'account_id': account_id,
+        'expires_at': datetime.now() + timedelta(seconds=expires_sec)
+    }
+    url = url_for('admin.short_statement', code=code, _external=True)
+    return url
+
+# مسار مختصر جداً لعرض كشف الحساب المؤقت
+@admin.route('/s/<code>')
+def short_statement(code):
+    data = short_links.get(code)
+    if not data:
+        return "رابط غير صالح", 400
+    if datetime.now() > data['expires_at']:
+        return "انتهت صلاحية الرابط المؤقت", 403
+    return account_statement(data['account_id'])
+
 def start_node_server():
     try:
         if not os.path.exists(NODE_DIR):
@@ -551,13 +580,13 @@ def calculate_and_notify_transaction(transaction_id):
 
         # حساب الرصيد حتى هذه المعاملة لنفس الحساب ونفس العملة
         transactions = Transaction.query.filter(
-            Transaction.account_id == account.id,  # تأكيد نفس الحساب
-            Transaction.currency == transaction.currency,  # تأكيد نفس العملة
-            Transaction.date <= transaction.date,  # المعاملات حتى تاريخ هذه المعاملة
-            Transaction.id <= transaction.id  # المعاملات حتى هذه المعاملة
+            Transaction.account_id == account.id,
+            Transaction.currency == transaction.currency,
+            Transaction.date <= transaction.date,
+            Transaction.id <= transaction.id
         ).order_by(
-            Transaction.date,  # ترتيب حسب التاريخ
-            Transaction.id  # ثم حسب رقم المعاملة
+            Transaction.date,
+            Transaction.id
         ).all()
 
         # حساب الرصيد النهائي
@@ -568,7 +597,10 @@ def calculate_and_notify_transaction(transaction_id):
             else:  # debit
                 balance -= trans.amount
 
-        # تنسيق الرسالة
+        # توليد رابط كشف الحساب المؤقت القصير
+        statement_link = generate_short_statement_link(account.id)
+
+        # تنسيق الرسالة مع الرابط المؤقت
         transaction_type = "قيدنا الى حسابكم" if transaction.type == 'credit' else "قيدنا على حسابكم"
         balance_text = f"الرصيد لكم: {balance} {transaction.currency or 'ريال'}" if balance >= 0 else f"الرصيد عليكم: {abs(balance)} {transaction.currency or 'ريال'}"
         message = f"""
@@ -583,6 +615,8 @@ def calculate_and_notify_transaction(transaction_id):
 • التاريخ: {transaction.date.strftime('%Y-%m-%d')}
 
 💳 {balance_text}
+
+📄 كشف الحساب المؤقت (10 دقائق): {statement_link}
 
 تم الإرسال بواسطة: *{user.username}*
         """.strip()
@@ -697,4 +731,4 @@ def account_statement(account_id):
                          selected_currency=selected_currency,
                          final_balance=final_balance,
                          currency_balances=currency_balances,
-                         now=datetime.now)
+                         now=datetime.now())
