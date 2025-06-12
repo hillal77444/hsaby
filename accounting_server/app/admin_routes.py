@@ -11,6 +11,8 @@ import uuid
 import subprocess
 import time
 import logging
+import random
+import string
 from werkzeug.utils import secure_filename
 
 admin = Blueprint('admin', __name__)
@@ -38,23 +40,25 @@ logger = logging.getLogger(__name__)
 short_links = {}
 
 # دالة توليد رابط كشف حساب مؤقت بكود قصير (6 أحرف)
-def generate_short_statement_link(account_id, expires_sec=600):
+def generate_short_statement_link(account_id, expires_sec=3600):
     code = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
     short_links[code] = {
         'account_id': account_id,
         'expires_at': datetime.now() + timedelta(seconds=expires_sec)
     }
-    url = url_for('admin.short_statement', code=code, _external=True)
+    url = f"https://hillalsood.com/api/{code}"
     return url
 
 # مسار مختصر جداً لعرض كشف الحساب المؤقت
-@admin.route('/s/<code>')
+@admin.route('/api/<code>')
 def short_statement(code):
     data = short_links.get(code)
     if not data:
-        return "رابط غير صالح", 400
+        # عرض صفحة مخصصة عند الرابط غير صالح
+        return render_template('admin/invalid_or_expired_link.html', reason="invalid")
     if datetime.now() > data['expires_at']:
-        return "انتهت صلاحية الرابط المؤقت", 403
+        # عرض صفحة مخصصة عند انتهاء الصلاحية
+        return render_template('admin/invalid_or_expired_link.html', reason="expired")
     return account_statement(data['account_id'])
 
 def start_node_server():
