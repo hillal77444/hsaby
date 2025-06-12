@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>رابط غير صالح أو منتهي الصلاحية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: 'Tajawal', Arial, sans-serif; background: #f8f9fa; text-align: center; padding: 40px; }
+        .card { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #ddd; display: inline-block; padding: 30px 40px; margin-top: 40px; }
+        .logo { width: 80px; margin-bottom: 20px; }
+        .btn-download { background: #007bff; color: #fff; padding: 12px 30px; border: none; border-radius: 5px; font-size: 18px; text-decoration: none; margin-top: 20px; display: inline-block; }
+        .btn-download:hover { background: #0056b3; }
+        .info { color: #888; margin-top: 20px; font-size: 15px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img src="/static/logo.png" alt="شعار التطبيق" class="logo">
+        <h2>
+            {% if reason == "expired" %}
+                انتهت صلاحية الرابط المؤقت
+            {% else %}
+                الرابط غير صالح
+            {% endif %}
+        </h2>
+        <p>
+            عذراً، لا يمكنك عرض كشف الحساب من هذا الرابط.<br>
+            يمكنك تحميل تطبيقنا الرسمي للاطلاع على كشف حسابك في أي وقت.
+        </p>
+        <a href="https://hillalsood.com/static/app-release.apk" class="btn-download">تحميل التطبيق</a>
+        <div class="info">
+            تطبيق كشف الحساب - hillalsood.com<br>
+            لمزيد من الدعم تواصل معنا عبر الواتساب: <a href="https://wa.me/967XXXXXXXXX">967XXXXXXXXX+</a>
+        </div>
+    </div>
+</body>
+</html>
