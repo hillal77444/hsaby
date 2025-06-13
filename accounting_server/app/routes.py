@@ -9,7 +9,7 @@ import json
 from sqlalchemy import func
 from sqlalchemy import case
 import requests
-from app.admin_routes import send_transaction_notification, calculate_and_notify_transaction
+from app.admin_routes import send_transaction_notification, calculate_and_notify_transaction, send_transaction_update_notification, send_transaction_delete_notification
 
 main = Blueprint('main', __name__)
 logger = logging.getLogger(__name__)
@@ -261,6 +261,10 @@ def sync_data():
                         logger.info(f"Found existing transaction: {transaction.id}")
                 
                 if transaction:
+                    # حفظ المبلغ والتاريخ القديم قبل التحديث
+                    old_amount = transaction.amount
+                    old_date = transaction.date
+                    
                     # تحديث المعاملة الموجودة
                     transaction.amount = trans_data.get('amount', transaction.amount)
                     transaction.type = trans_data.get('type', transaction.type)
@@ -272,6 +276,16 @@ def sync_data():
                     transaction.account_id = trans_data.get('account_id', transaction.account_id)
                     transaction.user_id = current_user_id
                     logger.info(f"Updated transaction: {transaction.id}")
+                    
+                    # إرسال إشعار فقط إذا تم تغيير المبلغ
+                    if old_amount != transaction.amount:
+                        try:
+                            notification_result = send_transaction_update_notification(transaction.id, old_amount, old_date)
+                            if notification_result.get('status') == 'error':
+                                logger.error(f"خطأ في إرسال إشعار التحديث: {notification_result.get('message')}")
+                        except Exception as e:
+                            logger.error(f"Error sending transaction update notification: {str(e)}")
+                            # لا نوقف العملية إذا فشل الإرسال
                 else:
                     # الحصول على آخر server_id
                     last_transaction = Transaction.query.order_by(Transaction.server_id.desc()).first()
@@ -501,9 +515,35 @@ def delete_transaction_by_id(transaction_id):
         if not transaction:
             return json_response({'error': 'المعاملة غير موجودة'}, 404)
         
+        # حفظ معلومات المعاملة قبل الحذف
+        account_id = transaction.account_id
+        currency = transaction.currency
+        
         # حذف المعاملة
         db.session.delete(transaction)
         db.session.commit()
+        
+        # حساب الرصيد النهائي بعد الحذف
+        transactions = Transaction.query.filter(
+            Transaction.account_id == account_id,
+            Transaction.currency == currency
+        ).order_by(
+            Transaction.date,
+            Transaction.id
+        ).all()
+
+        # حساب الرصيد النهائي
+        balance = 0
+        for trans in transactions:
+            if trans.type == 'credit':
+                balance += trans.amount
+            else:  # debit
+                balance -= trans.amount
+        
+        # إرسال إشعار الواتساب بعد الحذف
+        notification_result = send_transaction_delete_notification(transaction, balance)
+        if notification_result.get('status') == 'error':
+            logger.error(f"خطأ في إرسال إشعار الحذف: {notification_result.get('message')}")
         
         logger.info(f"Transaction with server_id {transaction_id} deleted successfully by user {user_id}")
         return json_response({'message': 'تم حذف القيد بنجاح'})
@@ -661,6 +701,11 @@ def sync_changes():
                         except (ValueError, TypeError) as e:
                             return json_response({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}, 400)
                         
+                        # حفظ المبلغ والتاريخ القديم قبل التحديث
+                        old_amount = transaction.amount
+                        old_date = transaction.date
+                        
+                        # تحديث المعاملة
                         transaction.date = date
                         transaction.amount = transaction_data['amount']
                         transaction.description = transaction_data['description']
@@ -673,6 +718,16 @@ def sync_changes():
                         if 'whatsapp_enabled' in transaction_data:
                             transaction.whatsapp_enabled = transaction_data['whatsapp_enabled']
                         transaction.account_id = transaction_data['account_id']
+                        
+                        # إرسال إشعار فقط إذا تم تغيير المبلغ
+                        if old_amount != transaction.amount:
+                            try:
+                                notification_result = send_transaction_update_notification(transaction.id, old_amount, old_date)
+                                if notification_result.get('status') == 'error':
+                                    logger.error(f"خطأ في إرسال إشعار التحديث: {notification_result.get('message')}")
+                            except Exception as e:
+                                logger.error(f"Error sending transaction update notification: {str(e)}")
+                                # لا نوقف العملية إذا فشل الإرسال
                     except Exception as e:
                         logger.error(f"Error processing modified transaction: {str(e)}")
                         return json_response({'error': f'خطأ في معالجة بيانات المعاملة المعدلة: {str(e)}'}, 400)
@@ -908,8 +963,7 @@ def get_account_summary(phone):
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-    
+        
     #جلب تفاصيل الحساب حسب العمله http://212.224.88.122:5007/api/accounts/4/details?currency=يمني
 @main.route('/api/accounts/<int:account_id>/details', methods=['GET'])
 def get_account_details(account_id):
