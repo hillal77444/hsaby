@@ -218,6 +218,7 @@ public class EditTransactionFragment extends Fragment {
             transaction.setTransactionDate(calendar.getTimeInMillis());
             transaction.setUpdatedAt(System.currentTimeMillis());
             transaction.setServerId(oldTransaction.getServerId());
+            transaction.setWhatsappEnabled(oldTransaction.isWhatsappEnabled());
             transaction.setSyncStatus(1);
 
             transactionsViewModel.updateTransaction(transaction);
