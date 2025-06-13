@@ -220,6 +220,7 @@ public class EditTransactionFragment extends Fragment {
             transaction.setServerId(oldTransaction.getServerId());
             transaction.setWhatsappEnabled(oldTransaction.isWhatsappEnabled());
             transaction.setSyncStatus(1);
+            transaction.setModified(true);
 
             transactionsViewModel.updateTransaction(transaction);
             Toast.makeText(requireContext(), R.string.transaction_updated, Toast.LENGTH_SHORT).show();
