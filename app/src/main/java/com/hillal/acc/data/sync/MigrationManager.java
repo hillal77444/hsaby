@@ -130,6 +130,7 @@ public class MigrationManager {
                                                 // إنشاء نسخة من المعاملة للإرسال للخادم
                                                 Transaction serverTransaction = new Transaction();
                                                 serverTransaction.setId(transaction.getId());
+                                                serverTransaction.setServerId(transaction.getServerId());
                                                 serverTransaction.setAccountId(account.getServerId());
                                                 serverTransaction.setAmount(transaction.getAmount());
                                                 serverTransaction.setType(transaction.getType());
