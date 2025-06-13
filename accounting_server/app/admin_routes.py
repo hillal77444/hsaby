@@ -46,7 +46,7 @@ def generate_short_statement_link(account_id, expires_sec=3600):
         'account_id': account_id,
         'expires_at': datetime.now() + timedelta(seconds=expires_sec)
     }
-    url = f"https://hillalsood.com/api/{code}"
+    url = f"https://malyp.com/api/{code}"
     return url
 
 # مسار مختصر جداً لعرض كشف الحساب المؤقت
@@ -620,7 +620,7 @@ def calculate_and_notify_transaction(transaction_id):
 
 💳 {balance_text}
 
-📄 كشف الحساب المؤقت (10 دقائق): {statement_link}
+📄 كشف الحساب : {statement_link}
 
 تم الإرسال بواسطة: *{user.username}*
         """.strip()
@@ -736,3 +736,169 @@ def account_statement(account_id):
                          final_balance=final_balance,
                          currency_balances=currency_balances,
                          now=datetime.now())
+
+def send_transaction_update_notification(transaction_id, old_amount, old_date):
+    try:
+        # جلب المعاملة والحساب
+        transaction = Transaction.query.get(transaction_id)
+        if not transaction:
+            return {'status': 'error', 'message': 'المعاملة غير موجودة'}
+
+        # التحقق من تفعيل الواتساب للحساب
+        account = Account.query.get(transaction.account_id)
+        if not account:
+            return {'status': 'error', 'message': 'الحساب غير موجود'}
+        
+        if not account.whatsapp_enabled:
+            return {'status': 'success', 'message': 'تم تخطي الإشعار - الواتساب غير مفعل لهذا الحساب'}
+
+        # جلب معلومات المستخدم
+        user = User.query.get(account.user_id)
+        if not user:
+            return {'status': 'error', 'message': 'المستخدم غير موجود'}
+
+        # حساب الرصيد النهائي الكامل لنفس الحساب ونفس العملة
+        transactions = Transaction.query.filter(
+            Transaction.account_id == account.id,
+            Transaction.currency == transaction.currency
+        ).order_by(
+            Transaction.date,
+            Transaction.id
+        ).all()
+
+        # حساب الرصيد النهائي
+        balance = 0
+        for trans in transactions:
+            if trans.type == 'credit':
+                balance += trans.amount
+            else:  # debit
+                balance -= trans.amount
+
+        # تنسيق الرسالة
+        transaction_type = "قيدنا الى حسابكم" if transaction.type == 'credit' else "قيدنا على حسابكم"
+        balance_text = f"الرصيد لكم: {balance} {transaction.currency or 'ريال'}" if balance >= 0 else f"الرصيد عليكم: {abs(balance)} {transaction.currency or 'ريال'}"
+        
+        # تنسيق التاريخ القديم والجديد
+        old_date_str = old_date.strftime('%Y-%m-%d')
+        new_date_str = transaction.date.strftime('%Y-%m-%d')
+        
+        # تحديد نوع التغيير
+        changes = []
+        if old_amount != transaction.amount:
+            changes.append(f"• المبلغ: من {old_amount} الى {transaction.amount} {transaction.currency or 'ريال'}")
+        if old_date != transaction.date:
+            changes.append(f"• التاريخ: من {old_date_str} الى {new_date_str}")
+        
+        # إذا لم يكن هناك تغييرات، نرجع رسالة
+        if not changes:
+            return {'status': 'success', 'message': 'لم يتم اكتشاف أي تغييرات في المعاملة'}
+
+        message = f"""
+🏦 إشعار تحديث قيد
+
+🏛️ الاخ/: *{account.account_name}*
+
+💰 تفاصيل التحديث:
+{chr(10).join(changes)}
+• نوع القيد: {transaction_type}
+• الوصف: {transaction.description or 'لا يوجد وصف'}
+
+💳 {balance_text}
+
+تم التحديث بواسطة: *{user.username}*
+        """.strip()
+
+        # تنسيق رقم الهاتف
+        phone = account.phone_number
+        if not phone:
+            return {'status': 'error', 'message': 'رقم الهاتف غير متوفر'}
+            
+        phone = ''.join(filter(str.isdigit, phone))
+        if phone.startswith('0'):
+            phone = '967' + phone[1:]
+        if not phone.startswith('967'):
+            phone = '967' + phone
+
+        # إرسال الرسالة
+        response = requests.post(
+            f"{WHATSAPP_API}/send/admin_main",
+            json={
+                'number': phone,
+                'message': message
+            },
+            timeout=5
+        )
+
+        if response.status_code == 200:
+            return {'status': 'success', 'message': 'تم إرسال إشعار التحديث بنجاح'}
+        else:
+            return {'status': 'error', 'message': 'فشل في إرسال إشعار التحديث'}
+
+    except Exception as e:
+        logger.error(f"Error in send_transaction_update_notification: {str(e)}")
+        return {'status': 'error', 'message': str(e)}
+
+def send_transaction_delete_notification(transaction, final_balance):
+    try:
+        # التحقق من تفعيل الواتساب للحساب
+        account = Account.query.get(transaction.account_id)
+        if not account:
+            return {'status': 'error', 'message': 'الحساب غير موجود'}
+        
+        if not account.whatsapp_enabled:
+            return {'status': 'success', 'message': 'تم تخطي الإشعار - الواتساب غير مفعل لهذا الحساب'}
+
+        # جلب معلومات المستخدم
+        user = User.query.get(account.user_id)
+        if not user:
+            return {'status': 'error', 'message': 'المستخدم غير موجود'}
+
+        # تنسيق الرسالة
+        transaction_type = "قيدنا الى حسابكم" if transaction.type == 'credit' else "قيدنا على حسابكم"
+        balance_text = f"الرصيد لكم: {final_balance} {transaction.currency or 'ريال'}" if final_balance >= 0 else f"الرصيد عليكم: {abs(final_balance)} {transaction.currency or 'ريال'}"
+        
+        message = f"""
+🏦 إشعار حذف قيد
+
+🏛️ الاخ/: *{account.account_name}*
+
+💰 تفاصيل القيد المحذوف:
+• نوع القيد: {transaction_type}
+• المبلغ: {transaction.amount} {transaction.currency or 'ريال'}
+• الوصف: {transaction.description or 'لا يوجد وصف'}
+• التاريخ: {transaction.date.strftime('%Y-%m-%d')}
+
+💳 {balance_text}
+
+تم الحذف بواسطة: *{user.username}*
+        """.strip()
+
+        # تنسيق رقم الهاتف
+        phone = account.phone_number
+        if not phone:
+            return {'status': 'error', 'message': 'رقم الهاتف غير متوفر'}
+            
+        phone = ''.join(filter(str.isdigit, phone))
+        if phone.startswith('0'):
+            phone = '967' + phone[1:]
+        if not phone.startswith('967'):
+            phone = '967' + phone
+
+        # إرسال الرسالة
+        response = requests.post(
+            f"{WHATSAPP_API}/send/admin_main",
+            json={
+                'number': phone,
+                'message': message
+            },
+            timeout=5
+        )
+
+        if response.status_code == 200:
+            return {'status': 'success', 'message': 'تم إرسال إشعار الحذف بنجاح'}
+        else:
+            return {'status': 'error', 'message': 'فشل في إرسال إشعار الحذف'}
+
+    except Exception as e:
+        logger.error(f"Error in send_transaction_delete_notification: {str(e)}")
+        return {'status': 'error', 'message': str(e)}
