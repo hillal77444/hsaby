@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request, render_template, redirect, url_fo
 from app import db
 from app.models import User, Account, Transaction
 from app.utils import hash_password
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import func, case
 import json
 import requests
@@ -30,14 +30,41 @@ if not os.path.exists(UPLOAD_FOLDER):
 # إعداد التسجيل
 logger = logging.getLogger(__name__)
 
-# حذف استيراد itsdangerous وكل ما يتعلق به
-# من:
-# from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
-# SECRET_KEY = 'b2d8e6c7-4f3a-4a1b-9c2e-1f7e2e5a9c3d'
-# serializer = URLSafeTimedSerializer(SECRET_KEY)
-
 # إضافة تخزين مؤقت للكودات القصيرة (في الذاكرة)
 short_links = {}
+
+# تعريف توقيت اليمن (UTC+3) - يجب أن يكون متطابقاً مع models.py و routes.py
+YEMEN_TIMEZONE = timezone(timedelta(hours=3))
+
+def get_yemen_time():
+    """الحصول على التوقيت الحالي بتوقيت اليمن"""
+    return datetime.now(YEMEN_TIMEZONE)
+
+def format_last_seen(last_seen_dt):
+    if last_seen_dt is None:
+        return "غير متاح", "text-muted"
+    
+    now = get_yemen_time()
+
+    # Make last_seen_dt timezone-aware if it's naive
+    if last_seen_dt.tzinfo is None or last_seen_dt.tzinfo.utcoffset(last_seen_dt) is None:
+        last_seen_dt = last_seen_dt.replace(tzinfo=YEMEN_TIMEZONE)
+
+    diff = now - last_seen_dt
+    
+    if diff < timedelta(minutes=1):
+        return "متصل الآن", "text-success"
+    elif diff < timedelta(hours=1):
+        minutes = int(diff.total_seconds() / 60)
+        return f"منذ {minutes} دقيقة", "text-warning"
+    elif diff < timedelta(days=1):
+        hours = int(diff.total_seconds() / 3600)
+        return f"منذ {hours} ساعة", "text-warning"
+    elif diff < timedelta(days=30):
+        days = diff.days
+        return f"منذ {days} يوم", "text-warning"
+    else:
+        return last_seen_dt.strftime('%Y-%m-%d %H:%M'), "text-muted"
 
 # دالة توليد رابط كشف حساب مؤقت بكود قصير (6 أحرف)
 def generate_short_statement_link(account_id, expires_sec=3600):
@@ -171,13 +198,20 @@ def users():
             .filter(Transaction.user_id == user.id, Transaction.type == 'credit')\
             .scalar() or 0
         
+        # جلب معلومات الجهاز وآخر ظهور
+        last_seen_formatted, last_seen_color = format_last_seen(user.last_seen)
+        
         user_stats.append({
             'user': user,
             'accounts_count': accounts_count,
             'transactions_count': transactions_count,
             'total_debits': total_debits,
             'total_credits': total_credits,
-            'balance': total_credits - total_debits
+            'balance': total_credits - total_debits,
+            'last_seen': last_seen_formatted,
+            'last_seen_color': last_seen_color,
+            'android_version': user.android_version if user.android_version else "غير متاح",
+            'device_name': user.device_name if user.device_name else "غير متاح"
         })
     
     return render_template('admin/users.html', user_stats=user_stats)
