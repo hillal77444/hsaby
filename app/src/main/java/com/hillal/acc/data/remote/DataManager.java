@@ -88,6 +88,7 @@ public class DataManager {
                 public void onSuccess() {
                     String currentToken = getCurrentToken();
                     if (currentToken == null) {
+                        Log.e(TAG, "فشل في الحصول على التوكن بعد التحديث");
                         handler.post(() -> callback.onError("فشل في الحصول على التوكن بعد التحديث"));
                         return;
                     }
@@ -95,10 +96,12 @@ public class DataManager {
                     // تحويل JSONObject إلى JsonObject
                     com.google.gson.JsonObject gsonUserDetails = gson.fromJson(userDetails.toString(), com.google.gson.JsonObject.class);
 
+                    Log.d(TAG, "Making API call to update user details...");
                     apiService.updateUserDetails("Bearer " + currentToken, gsonUserDetails).enqueue(new Callback<Map<String, String>>() {
                         @Override
                         public void onResponse(Call<Map<String, String>> call, Response<Map<String, String>> response) {
                             if (response.isSuccessful() && response.body() != null) {
+                                Log.d(TAG, "User details updated successfully on server.");
                                 handler.post(() -> callback.onSuccess(null));  // تمرير null لأن هذه العملية لا تحتاج إلى ServerAppUpdateInfo
                             } else {
                                 String errorMessage = "خطأ في تحديث بيانات المستخدم: " + response.code();
@@ -129,7 +132,7 @@ public class DataManager {
         });
     }
 
-    public void checkForUpdates(ApiCallback callback) {
+    public void checkForUpdates(String currentVersion, ApiCallback callback) {
         Log.d(TAG, "Starting update check...");
         executor.execute(() -> {
             if (!isNetworkAvailable()) {
@@ -156,8 +159,8 @@ public class DataManager {
                         return;
                     }
 
-                    Log.d(TAG, "Making API call to check for updates...");
-                    apiService.checkForUpdates("Bearer " + currentToken).enqueue(new Callback<ServerAppUpdateInfo>() {
+                    Log.d(TAG, "Making API call to check for updates with version: " + currentVersion + " ...");
+                    apiService.checkForUpdates("Bearer " + currentToken, currentVersion).enqueue(new Callback<ServerAppUpdateInfo>() {
                         @Override
                         public void onResponse(Call<ServerAppUpdateInfo> call, Response<ServerAppUpdateInfo> response) {
                             if (response.isSuccessful() && response.body() != null) {
