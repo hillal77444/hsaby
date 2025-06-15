@@ -72,7 +72,7 @@ public interface ApiService {
         @Body com.google.gson.JsonObject requestBody
     );
 
-    @GET("app/updates/check")
+    @GET("/api/app/updates/check")
     Call<ServerAppUpdateInfo> checkForUpdates(@Header("Authorization") String token);
 
     class LoginRequest {
