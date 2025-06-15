@@ -149,7 +149,7 @@ public class DashboardFragment extends Fragment {
         if (dataManager != null) {
             dataManager.updateUserDetails(requestBody, new DataManager.ApiCallback() {
                 @Override
-                public void onSuccess() {
+                public void onSuccess(ServerAppUpdateInfo updateInfo) {
                     Log.d(TAG, "User details updated successfully on server.");
                 }
 
