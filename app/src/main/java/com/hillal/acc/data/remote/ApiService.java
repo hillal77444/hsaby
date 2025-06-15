@@ -65,6 +65,12 @@ public interface ApiService {
         @Body Map<String, String> body
     );
 
+    @POST("api/update_user_details")
+    Call<Map<String, String>> updateUserDetails(
+        @Header("Authorization") String token,
+        @Body String requestBody
+    );
+
     class LoginRequest {
         private String phone;
         private String password;
