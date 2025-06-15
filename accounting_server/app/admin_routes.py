@@ -53,18 +53,18 @@ def format_last_seen(last_seen_dt):
     diff = now - last_seen_dt
     
     if diff < timedelta(minutes=1):
-        return "متصل الآن", "text-success"
+        return "متصل الآن", "last-seen-active"
     elif diff < timedelta(hours=1):
         minutes = int(diff.total_seconds() / 60)
-        return f"منذ {minutes} دقيقة", "text-warning"
+        return f"منذ {minutes} دقيقة", "last-seen-recent"
     elif diff < timedelta(days=1):
         hours = int(diff.total_seconds() / 3600)
-        return f"منذ {hours} ساعة", "text-warning"
+        return f"منذ {hours} ساعة", "last-seen-recent"
     elif diff < timedelta(days=30):
         days = diff.days
-        return f"منذ {days} يوم", "text-warning"
+        return f"منذ {days} يوم", "last-seen-recent"
     else:
-        return last_seen_dt.strftime('%Y-%m-%d %H:%M'), "text-muted"
+        return last_seen_dt.strftime('%Y-%m-%d %H:%M'), "last-seen-inactive"
 
 # دالة توليد رابط كشف حساب مؤقت بكود قصير (6 أحرف)
 def generate_short_statement_link(account_id, expires_sec=3600):
