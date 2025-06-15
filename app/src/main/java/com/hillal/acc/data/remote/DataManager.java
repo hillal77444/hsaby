@@ -50,7 +50,7 @@ public class DataManager {
     }
 
     public interface ApiCallback {
-        void onSuccess();
+        void onSuccess(ServerAppUpdateInfo updateInfo);
         void onError(String error);
     }
 
@@ -77,7 +77,7 @@ public class DataManager {
                 return;
             }
 
-            String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE).getString("token", null);
+            String token = getCurrentToken();
             if (token == null) {
                 handler.post(() -> callback.onError("لا يوجد توكن مصادقة"));
                 return;
@@ -86,31 +86,28 @@ public class DataManager {
             checkAndRefreshToken(new DataCallback() {
                 @Override
                 public void onSuccess() {
-                    String currentToken = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE).getString("token", null);
+                    String currentToken = getCurrentToken();
                     if (currentToken == null) {
                         handler.post(() -> callback.onError("فشل في الحصول على التوكن بعد التحديث"));
                         return;
                     }
 
-                    // Convert org.json.JSONObject to com.google.gson.JsonObject
-                    com.google.gson.JsonObject gsonUserDetails = gson.fromJson(userDetails.toString(), com.google.gson.JsonObject.class);
-
-                    // إرسال البيانات إلى الخادم
+                    String gsonUserDetails = gson.toJson(userDetails);
                     apiService.updateUserDetails("Bearer " + currentToken, gsonUserDetails).enqueue(new Callback<Map<String, String>>() {
                         @Override
                         public void onResponse(Call<Map<String, String>> call, Response<Map<String, String>> response) {
-                            if (response.isSuccessful()) {
-                                handler.post(callback::onSuccess);
+                            if (response.isSuccessful() && response.body() != null) {
+                                handler.post(() -> callback.onSuccess(null));  // تمرير null لأن هذه العملية لا تحتاج إلى ServerAppUpdateInfo
                             } else {
-                                String errorMessageBuilder = "خطأ في تحديث بيانات المستخدم: " + response.code();
+                                String errorMessage = "خطأ في تحديث بيانات المستخدم: " + response.code();
                                 try {
                                     if (response.errorBody() != null) {
-                                        errorMessageBuilder += "\n" + response.errorBody().string();
+                                        errorMessage += "\n" + response.errorBody().string();
                                     }
                                 } catch (IOException e) {
                                     Log.e(TAG, "Error reading error body for user details update", e);
                                 }
-                                final String finalErrorMessage = errorMessageBuilder;
+                                final String finalErrorMessage = errorMessage;
                                 handler.post(() -> callback.onError(finalErrorMessage));
                             }
                         }
