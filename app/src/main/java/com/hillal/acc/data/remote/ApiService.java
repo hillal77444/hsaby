@@ -71,6 +71,9 @@ public interface ApiService {
         @Body com.google.gson.JsonObject requestBody
     );
 
+    @GET("app/updates/check")
+    Call<AppUpdateInfo> checkForUpdates(@Header("Authorization") String token);
+
     class LoginRequest {
         private String phone;
         private String password;
