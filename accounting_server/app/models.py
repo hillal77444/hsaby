@@ -43,4 +43,35 @@ class Transaction(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
     account_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False, index=True)
     created_at = db.Column(db.DateTime, default=get_yemen_time)
-    updated_at = db.Column(db.DateTime, default=get_yemen_time, onupdate=get_yemen_time) 
+    updated_at = db.Column(db.DateTime, default=get_yemen_time, onupdate=get_yemen_time)
+
+class AppUpdate(db.Model):
+    __tablename__ = 'app_updates'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    version = db.Column(db.String(20), nullable=False)
+    description = db.Column(db.Text)
+    download_url = db.Column(db.String(255), nullable=False)
+    min_version = db.Column(db.String(20), nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    force_update = db.Column(db.Boolean, default=False)
+    release_date = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<AppUpdate {self.version}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'version': self.version,
+            'description': self.description,
+            'download_url': self.download_url,
+            'min_version': self.min_version,
+            'is_active': self.is_active,
+            'force_update': self.force_update,
+            'release_date': self.release_date.isoformat() if self.release_date else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        } 
