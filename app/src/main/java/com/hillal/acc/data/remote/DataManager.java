@@ -26,6 +26,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import java.util.ArrayList;
 import java.io.IOException;
+import org.json.JSONObject;
 
 public class DataManager {
     private static final String TAG = "DataManager";
@@ -56,6 +57,68 @@ public class DataManager {
     public interface DataCallback {
         void onSuccess();
         void onError(String error);
+    }
+
+    // Added new interface for API callbacks
+    public interface ApiCallback {
+        void onSuccess();
+        void onError(String error);
+    }
+
+    public void updateUserDetails(JSONObject userDetails, ApiCallback callback) {
+        executor.execute(() -> {
+            if (!isNetworkAvailable()) {
+                handler.post(() -> callback.onError("لا يوجد اتصال بالإنترنت"));
+                return;
+            }
+
+            String token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE).getString("token", null);
+            if (token == null) {
+                handler.post(() -> callback.onError("لا يوجد توكن مصادقة"));
+                return;
+            }
+
+            checkAndRefreshToken(new DataCallback() {
+                @Override
+                public void onSuccess() {
+                    String currentToken = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE).getString("token", null);
+                    if (currentToken == null) {
+                        handler.post(() -> callback.onError("فشل في الحصول على التوكن بعد التحديث"));
+                        return;
+                    }
+                    
+                    // إرسال البيانات إلى الخادم
+                    apiService.updateUserDetails("Bearer " + currentToken, userDetails.toString()).enqueue(new Callback<Map<String, String>>() {
+                        @Override
+                        public void onResponse(Call<Map<String, String>> call, Response<Map<String, String>> response) {
+                            if (response.isSuccessful()) {
+                                handler.post(callback::onSuccess);
+                            } else {
+                                String errorMessage = "خطأ في تحديث بيانات المستخدم: " + response.code();
+                                try {
+                                    if (response.errorBody() != null) {
+                                        errorMessage += "\n" + response.errorBody().string();
+                                    }
+                                } catch (IOException e) {
+                                    Log.e(TAG, "Error reading error body for user details update", e);
+                                }
+                                handler.post(() -> callback.onError(errorMessage));
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Map<String, String>> call, Throwable t) {
+                            handler.post(() -> callback.onError("فشل الاتصال بالخادم أثناء تحديث بيانات المستخدم: " + t.getMessage()));
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(String error) {
+                    handler.post(() -> callback.onError("فشل تجديد التوكن قبل تحديث بيانات المستخدم: " + error));
+                }
+            });
+        });
     }
 
     private boolean isNetworkAvailable() {
