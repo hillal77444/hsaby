@@ -17,13 +17,21 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
 import com.google.android.play.core.appupdate.AppUpdateOptions;
 import com.google.android.play.core.install.model.AppUpdateType;
 import com.google.android.play.core.install.model.UpdateAvailability;
+import com.google.android.play.core.tasks.Task;
 import com.hillal.acc.BuildConfig;
-import com.hillal.acc.R;
 import com.hillal.acc.data.model.ServerAppUpdateInfo;
 import com.hillal.acc.data.remote.DataManager;
 import com.hillal.acc.data.room.AccountDao;
 import com.hillal.acc.data.room.TransactionDao;
 import com.hillal.acc.data.room.PendingOperationDao;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AppUpdateHelper {
     private static final String TAG = "AppUpdateHelper";
@@ -134,19 +142,19 @@ public class AppUpdateHelper {
 
     private void showForceUpdateDialog(ServerAppUpdateInfo updateInfo) {
         new AlertDialog.Builder(context)
-            .setTitle(R.string.update_required)
+            .setTitle("تحديث مطلوب")
             .setMessage(updateInfo.getDescription())
             .setCancelable(false)
-            .setPositiveButton(R.string.update_now, (dialog, which) -> downloadAndInstallUpdate(updateInfo.getDownloadUrl()))
+            .setPositiveButton("تحديث الآن", (dialog, which) -> downloadAndInstallUpdate(updateInfo.getDownloadUrl()))
             .show();
     }
 
     private void showUpdateDialog(ServerAppUpdateInfo updateInfo) {
         new AlertDialog.Builder(context)
-            .setTitle(R.string.update_available)
+            .setTitle("تحديث متوفر")
             .setMessage(updateInfo.getDescription())
-            .setPositiveButton(R.string.update_now, (dialog, which) -> downloadAndInstallUpdate(updateInfo.getDownloadUrl()))
-            .setNegativeButton(R.string.later, null)
+            .setPositiveButton("تحديث الآن", (dialog, which) -> downloadAndInstallUpdate(updateInfo.getDownloadUrl()))
+            .setNegativeButton("لاحقاً", null)
             .show();
     }
 
