@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from app import db
-from app.models import User, Account, Transaction
+from app.models import User, Account, Transaction, AppUpdate
 from app.utils import hash_password, verify_password, generate_sync_token
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 from datetime import datetime, timezone, timedelta
@@ -1097,3 +1097,58 @@ def update_user_details():
         logger.error(f"Error updating user details for user {current_user_id}: {str(e)}")
         db.session.rollback()
         return json_response({'error': f'حدث خطأ أثناء تحديث بيانات المستخدم: {str(e)}'}, 500)
+
+@main.route('/api/app/updates/check', methods=['GET'])
+@jwt_required()
+def check_for_updates():
+    try:
+        # الحصول على إصدار التطبيق من query parameter بدلاً من header
+        current_version = request.args.get('current_version')
+        if not current_version:
+            return jsonify({
+                'error': 'missing_version',
+                'message': 'إصدار التطبيق مطلوب'
+            }), 400
+
+        # البحث عن أحدث تحديث متاح
+        latest_update = AppUpdate.query.filter(
+            AppUpdate.version > current_version,
+            AppUpdate.is_active == True
+        ).order_by(AppUpdate.version.desc()).first()
+
+        if not latest_update:
+            return jsonify({
+                'has_update': False
+            })
+
+        # التحقق مما إذا كان التحديث إلزامياً
+        force_update = version_compare(current_version, latest_update.min_version, '<')
+
+        return jsonify({
+            'has_update': True,
+            **latest_update.to_dict(),
+            'force_update': force_update
+        })
+
+    except Exception as e:
+        logger.error(f"Error checking for updates: {str(e)}")
+        return jsonify({
+            'error': 'server_error',
+            'message': 'حدث خطأ أثناء التحقق من التحديثات'
+        }), 500
+
+def version_compare(v1, v2, operator):
+    """مقارنة إصدارين من التطبيق"""
+    v1_parts = [int(x) for x in v1.split('.')]
+    v2_parts = [int(x) for x in v2.split('.')]
+    
+    for i in range(max(len(v1_parts), len(v2_parts))):
+        v1_part = v1_parts[i] if i < len(v1_parts) else 0
+        v2_part = v2_parts[i] if i < len(v2_parts) else 0
+        
+        if v1_part < v2_part:
+            return operator == '<'
+        elif v1_part > v2_part:
+            return operator == '>'
+    
+    return operator == '=='
