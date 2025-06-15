@@ -68,7 +68,7 @@ public interface ApiService {
     @POST("api/update_user_details")
     Call<Map<String, String>> updateUserDetails(
         @Header("Authorization") String token,
-        @Body String requestBody
+        @Body com.google.gson.JsonObject requestBody
     );
 
     class LoginRequest {
