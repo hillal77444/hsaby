@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.os.Build;
+import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -126,13 +127,19 @@ public class DashboardFragment extends Fragment {
 
     private void sendUserDetailsToServer() {
         long lastSeenTimestamp = System.currentTimeMillis();
-        String androidVersion = Build.VERSION.RELEASE;
-        String deviceName = Build.MODEL;
+        String appVersion = "Unknown";
+        try {
+            appVersion = requireContext().getPackageManager().getPackageInfo(requireContext().getPackageName(), 0).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Error getting app version: " + e.getMessage());
+        }
+
+        String deviceName = Build.MODEL + " (Android " + Build.VERSION.RELEASE + ")";
 
         JSONObject requestBody = new JSONObject();
         try {
             requestBody.put("last_seen", lastSeenTimestamp);
-            requestBody.put("android_version", androidVersion);
+            requestBody.put("android_version", appVersion);
             requestBody.put("device_name", deviceName);
         } catch (JSONException e) {
             Log.e(TAG, "Error creating JSON for user details: " + e.getMessage());
