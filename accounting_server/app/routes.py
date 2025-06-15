@@ -1048,3 +1048,37 @@ def update_password_direct(phone, new_password):
         logger.error(f"Error updating password: {str(e)}")
         db.session.rollback()
         return json_response({'error': 'حدث خطأ أثناء تحديث كلمة المرور'}, 500)
+
+@main.route('/api/update_user_details', methods=['POST'])
+@jwt_required()
+def update_user_details():
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+
+        if not user:
+            return json_response({'error': 'المستخدم غير موجود'}, 404)
+
+        data = request.get_json()
+        if not data:
+            return json_response({'error': 'لا توجد بيانات لتحديثها'}, 400)
+
+        if 'last_seen' in data:
+            # تحويل الطابع الزمني (timestamp) إلى كائن datetime مع توقيت اليمن
+            if data['last_seen'] is not None:
+                user.last_seen = datetime.fromtimestamp(data['last_seen'] / 1000, YEMEN_TIMEZONE)
+            else:
+                user.last_seen = None # أو db.Column.NULl إذا كنت تفضل ذلك صراحة
+        if 'android_version' in data:
+            user.android_version = data['android_version']
+        if 'device_name' in data:
+            user.device_name = data['device_name']
+
+        db.session.commit()
+        logger.info(f"User {current_user_id} details updated: last_seen={user.last_seen}, android_version={user.android_version}, device_name={user.device_name}")
+        return json_response({'message': 'تم تحديث بيانات المستخدم بنجاح'}, 200)
+
+    except Exception as e:
+        logger.error(f"Error updating user details for user {current_user_id}: {str(e)}")
+        db.session.rollback()
+        return json_response({'error': f'حدث خطأ أثناء تحديث بيانات المستخدم: {str(e)}'}, 500)
