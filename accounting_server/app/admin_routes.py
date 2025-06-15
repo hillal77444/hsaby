@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash, Response
 from app import db
-from app.models import User, Account, Transaction
+from app.models import User, Account, Transaction, AppUpdate
 from app.utils import hash_password
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import func, case
@@ -14,6 +14,7 @@ import logging
 import random
 import string
 from werkzeug.utils import secure_filename
+from functools import wraps
 
 admin = Blueprint('admin', __name__)
 
@@ -119,6 +120,7 @@ def check_api_health():
         return False
 
 def admin_required(f):
+    @wraps(f)
     def decorated_function(*args, **kwargs):
         if request.cookies.get('admin_auth') != ADMIN_PASSWORD:
             return redirect(url_for('admin.login'))
@@ -936,3 +938,53 @@ def send_transaction_delete_notification(transaction, final_balance):
     except Exception as e:
         logger.error(f"Error in send_transaction_delete_notification: {str(e)}")
         return {'status': 'error', 'message': str(e)}
+
+@admin.route('/api/admin/updates/')
+@admin_required
+def updates():
+    updates = AppUpdate.query.order_by(AppUpdate.release_date.desc()).all()
+    return render_template('admin/updates.html', updates=updates)
+
+@admin.route('/api/admin/updates/add', methods=['GET', 'POST'])
+@admin_required
+def add_update():
+    if request.method == 'POST':
+        try:
+            update = AppUpdate(
+                version=request.form['version'],
+                description=request.form['description'],
+                download_url=request.form['download_url'],
+                min_version=request.form['min_version'],
+                release_date=datetime.strptime(request.form['release_date'], '%Y-%m-%dT%H:%M'),
+                force_update='force_update' in request.form,
+                is_active='is_active' in request.form
+            )
+            db.session.add(update)
+            db.session.commit()
+            flash('تم إضافة التحديث بنجاح', 'success')
+            return redirect(url_for('admin.updates'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'حدث خطأ أثناء إضافة التحديث: {str(e)}', 'error')
+    return render_template('admin/add_update.html')
+
+@admin.route('/api/admin/updates/<int:update_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_update(update_id):
+    update = AppUpdate.query.get_or_404(update_id)
+    if request.method == 'POST':
+        try:
+            update.version = request.form['version']
+            update.description = request.form['description']
+            update.download_url = request.form['download_url']
+            update.min_version = request.form['min_version']
+            update.release_date = datetime.strptime(request.form['release_date'], '%Y-%m-%dT%H:%M')
+            update.force_update = 'force_update' in request.form
+            update.is_active = 'is_active' in request.form
+            db.session.commit()
+            flash('تم تحديث البيانات بنجاح', 'success')
+            return redirect(url_for('admin.updates'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'حدث خطأ أثناء تحديث البيانات: {str(e)}', 'error')
+    return render_template('admin/edit_update.html', update=update)
