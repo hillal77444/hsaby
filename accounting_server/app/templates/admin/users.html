@@ -82,6 +82,9 @@
                                         <th>إجمالي الإيداعات</th>
                                         <th>إجمالي السحوبات</th>
                                         <th>الرصيد</th>
+                                        <th>اسم الجهاز</th>
+                                        <th>إصدار التطبيق</th>
+                                        <th>آخر ظهور</th>
                                         <th>الإجراءات</th>
                                     </tr>
                                 </thead>
@@ -96,6 +99,9 @@
                                         <td>{{ stat.total_credits }}</td>
                                         <td>{{ stat.total_debits }}</td>
                                         <td>{{ stat.balance }}</td>
+                                        <td>{{ stat.device_name }}</td>
+                                        <td>{{ stat.android_version }}</td>
+                                        <td class="{{ stat.last_seen_color }}">{{ stat.last_seen }}</td>
                                         <td>
                                             <a href="{{ url_for('admin.user_details', user_id=stat.user.id) }}" 
                                                class="btn btn-sm btn-primary">
