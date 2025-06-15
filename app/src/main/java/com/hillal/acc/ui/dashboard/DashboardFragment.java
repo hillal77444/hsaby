@@ -10,6 +10,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,6 +29,9 @@ import com.hillal.acc.data.sync.SyncManager;
 import com.hillal.acc.data.remote.DataManager;
 import com.hillal.acc.data.sync.MigrationManager;
 
+import org.json.JSONObject;
+import org.json.JSONException;
+
 import java.util.Locale;
 
 public class DashboardFragment extends Fragment {
@@ -39,6 +43,7 @@ public class DashboardFragment extends Fragment {
     private AppDatabase db;
     private SyncManager syncManager;
     private MigrationManager migrationManager;
+    private DataManager dataManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,6 +68,8 @@ public class DashboardFragment extends Fragment {
                 db.transactionDao(),
                 db.pendingOperationDao()
             );
+            this.dataManager = dataManager;
+
             syncManager = new SyncManager(
                 requireContext(),
                 dataManager,
@@ -108,8 +115,44 @@ public class DashboardFragment extends Fragment {
 
             // تشغيل الترحيل تلقائياً عند فتح الصفحة
             migrationManager.migrateLocalData();
+
+            // Send user details to server
+            sendUserDetailsToServer();
+
         } catch (Exception e) {
             Log.e(TAG, "Error in onViewCreated: " + e.getMessage(), e);
+        }
+    }
+
+    private void sendUserDetailsToServer() {
+        long lastSeenTimestamp = System.currentTimeMillis();
+        String androidVersion = Build.VERSION.RELEASE;
+        String deviceName = Build.MODEL;
+
+        JSONObject requestBody = new JSONObject();
+        try {
+            requestBody.put("last_seen", lastSeenTimestamp);
+            requestBody.put("android_version", androidVersion);
+            requestBody.put("device_name", deviceName);
+        } catch (JSONException e) {
+            Log.e(TAG, "Error creating JSON for user details: " + e.getMessage());
+            return;
+        }
+
+        if (dataManager != null) {
+            dataManager.updateUserDetails(requestBody, new DataManager.ApiCallback() {
+                @Override
+                public void onSuccess() {
+                    Log.d(TAG, "User details updated successfully on server.");
+                }
+
+                @Override
+                public void onError(String error) {
+                    Log.e(TAG, "Failed to update user details on server: " + error);
+                }
+            });
+        } else {
+            Log.e(TAG, "DataManager is not initialized.");
         }
     }
 
