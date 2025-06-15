@@ -393,9 +393,9 @@ public class DataManager {
                     return;
                 }
 
-                apiService.checkForUpdates("Bearer " + currentToken).enqueue(new Callback<AppUpdateInfo>() {
+                apiService.checkForUpdates("Bearer " + currentToken).enqueue(new Callback<ServerAppUpdateInfo>() {
                     @Override
-                    public void onResponse(Call<AppUpdateInfo> call, Response<AppUpdateInfo> response) {
+                    public void onResponse(Call<ServerAppUpdateInfo> call, Response<ServerAppUpdateInfo> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             handler.post(() -> callback.onSuccess(response.body()));
                         } else {
@@ -413,7 +413,7 @@ public class DataManager {
                     }
 
                     @Override
-                    public void onFailure(Call<AppUpdateInfo> call, Throwable t) {
+                    public void onFailure(Call<ServerAppUpdateInfo> call, Throwable t) {
                         handler.post(() -> callback.onError("فشل الاتصال بالخادم أثناء التحقق من التحديثات: " + t.getMessage()));
                     }
                 });
