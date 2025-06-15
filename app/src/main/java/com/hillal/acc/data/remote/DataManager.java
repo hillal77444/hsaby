@@ -27,6 +27,7 @@ import retrofit2.Response;
 import java.util.ArrayList;
 import java.io.IOException;
 import org.json.JSONObject;
+import com.hillal.acc.data.model.ServerAppUpdateInfo;
 
 public class DataManager {
     private static final String TAG = "DataManager";
@@ -43,9 +44,20 @@ public class DataManager {
     private static final int MAX_RETRY_ATTEMPTS = 3;
     private static final long RETRY_DELAY_MS = 2000; // 2 seconds
 
+    public interface DataCallback {
+        void onSuccess();
+        void onError(String error);
+    }
+
+    // Added new interface for API callbacks
+    public interface ApiCallback {
+        void onSuccess(Object response);
+        void onError(String error);
+    }
+
     public DataManager(Context context, AccountDao accountDao, TransactionDao transactionDao, PendingOperationDao pendingOperationDao) {
         this.context = context;
-        this.apiService = RetrofitClient.getApiService();
+        this.apiService = RetrofitClient.getInstance().getApiService();
         this.accountDao = accountDao;
         this.transactionDao = transactionDao;
         this.pendingOperationDao = pendingOperationDao;
@@ -54,15 +66,10 @@ public class DataManager {
         this.gson = new Gson();
     }
 
-    public interface DataCallback {
-        void onSuccess();
-        void onError(String error);
-    }
-
-    // Added new interface for API callbacks
-    public interface ApiCallback {
-        void onSuccess();
-        void onError(String error);
+    private String getCurrentToken() {
+        // استرجاع التوكن من SharedPreferences أو أي مكان آخر
+        return context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("auth_token", null);
     }
 
     public void updateUserDetails(JSONObject userDetails, ApiCallback callback) {
