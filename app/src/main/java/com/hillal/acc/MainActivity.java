@@ -120,7 +120,12 @@ public class MainActivity extends AppCompatActivity {
             setupUI();
 
             // تهيئة مدير التحديثات
-            appUpdateHelper = new AppUpdateHelper(this);
+            appUpdateHelper = new AppUpdateHelper(
+                this,
+                db.accountDao(),
+                db.transactionDao(),
+                db.pendingOperationDao()
+            );
 
         } catch (IllegalStateException e) {
             String errorMessage = "=== خطأ في تهيئة التطبيق ===\n\n" +
