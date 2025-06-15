@@ -3,6 +3,7 @@ package com.hillal.acc.data.remote;
 import com.hillal.acc.data.model.User;
 import com.hillal.acc.data.model.Account;
 import com.hillal.acc.data.model.Transaction;
+import com.hillal.acc.data.model.ServerAppUpdateInfo;
 
 import java.util.List;
 import java.util.Map;
