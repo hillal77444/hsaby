@@ -10,6 +10,7 @@ from sqlalchemy import func
 from sqlalchemy import case
 import requests
 from app.admin_routes import send_transaction_notification, calculate_and_notify_transaction, send_transaction_update_notification, send_transaction_delete_notification
+import traceback
 
 main = Blueprint('main', __name__)
 logger = logging.getLogger(__name__)
@@ -1060,18 +1061,30 @@ def update_user_details():
             return json_response({'error': 'المستخدم غير موجود'}, 404)
 
         data = request.get_json()
+        print(f"Received data for user details update: {data}")
+        print(f"Type of received data: {type(data)}")
+        
         if not data:
             return json_response({'error': 'لا توجد بيانات لتحديثها'}, 400)
 
         if 'last_seen' in data:
-            # تحويل الطابع الزمني (timestamp) إلى كائن datetime مع توقيت اليمن
+            print(f"DEBUG: Processing last_seen. Value: {data['last_seen']}, Type: {type(data['last_seen'])}")
             if data['last_seen'] is not None:
-                user.last_seen = datetime.fromtimestamp(data['last_seen'] / 1000, YEMEN_TIMEZONE)
+                try:
+                    # تحويل الطابع الزمني (timestamp) إلى كائن datetime مع توقيت اليمن
+                    user.last_seen = datetime.fromtimestamp(data['last_seen'] / 1000, YEMEN_TIMEZONE)
+                    print(f"DEBUG: last_seen converted successfully to: {user.last_seen}")
+                except Exception as convert_e:
+                    print(f"ERROR during last_seen conversion: {convert_e}")
+                    traceback.print_exc() # Print full traceback for this specific conversion
+                    # لا نرفع الاستثناء هنا حتى نرى الخطأ الرئيسي في except outer
             else:
                 user.last_seen = None # أو db.Column.NULl إذا كنت تفضل ذلك صراحة
         if 'android_version' in data:
+            print(f"DEBUG: Processing android_version. Value: {data['android_version']}, Type: {type(data['android_version'])}")
             user.android_version = data['android_version']
         if 'device_name' in data:
+            print(f"DEBUG: Processing device_name. Value: {data['device_name']}, Type: {type(data['device_name'])}")
             user.device_name = data['device_name']
 
         db.session.commit()
@@ -1079,6 +1092,8 @@ def update_user_details():
         return json_response({'message': 'تم تحديث بيانات المستخدم بنجاح'}, 200)
 
     except Exception as e:
+        print(f"Raw exception in update_user_details: {e}")
+        traceback.print_exc() # Print full traceback for the main exception
         logger.error(f"Error updating user details for user {current_user_id}: {str(e)}")
         db.session.rollback()
         return json_response({'error': f'حدث خطأ أثناء تحديث بيانات المستخدم: {str(e)}'}, 500)
