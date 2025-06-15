@@ -159,8 +159,14 @@ public class AppUpdateHelper {
     }
 
     private void downloadAndInstallUpdate(String downloadUrl) {
-        // تنفيذ عملية التحميل والتثبيت
-        // يمكنك استخدام DownloadManager أو أي مكتبة أخرى للتحميل
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(downloadUrl));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "Error opening download link: " + e.getMessage());
+        }
     }
 
     public void onActivityResult(int requestCode, int resultCode) {
