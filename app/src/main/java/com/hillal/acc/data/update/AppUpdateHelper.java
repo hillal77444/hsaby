@@ -77,17 +77,29 @@ public class AppUpdateHelper {
     }
 
     private void checkServerUpdates(Activity activity) {
+        Log.d(TAG, "Checking for server updates...");
         dataManager.checkForUpdates(new DataManager.ApiCallback() {
             @Override
-            public void onSuccess() {
+            public void onSuccess(ServerAppUpdateInfo updateInfo) {
+                Log.d(TAG, "Received update info: " + (updateInfo != null ? updateInfo.getVersion() : "null"));
                 if (updateInfo != null) {
                     handleUpdateInfo(updateInfo);
+                } else {
+                    Log.d(TAG, "No updates available from server");
                 }
             }
 
             @Override
             public void onError(String error) {
                 Log.e(TAG, "Error checking for updates: " + error);
+                // إظهار رسالة للمستخدم
+                activity.runOnUiThread(() -> {
+                    new AlertDialog.Builder(context)
+                        .setTitle("خطأ في التحقق من التحديثات")
+                        .setMessage("حدث خطأ أثناء التحقق من وجود تحديثات: " + error)
+                        .setPositiveButton("حسناً", null)
+                        .show();
+                });
             }
         });
     }
@@ -110,14 +122,23 @@ public class AppUpdateHelper {
     }
 
     private void handleUpdateInfo(ServerAppUpdateInfo updateInfo) {
-        if (updateInfo == null) return;
+        if (updateInfo == null) {
+            Log.d(TAG, "Update info is null");
+            return;
+        }
 
+        Log.d(TAG, "Current version: " + currentVersion + ", New version: " + updateInfo.getVersion());
         if (isNewVersionAvailable(updateInfo.getVersion())) {
+            Log.d(TAG, "New version is available");
             if (updateInfo.isForceUpdate()) {
+                Log.d(TAG, "This is a forced update");
                 showForceUpdateDialog(updateInfo);
             } else {
+                Log.d(TAG, "This is an optional update");
                 showUpdateDialog(updateInfo);
             }
+        } else {
+            Log.d(TAG, "No new version available");
         }
     }
 
