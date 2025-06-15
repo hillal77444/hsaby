@@ -131,32 +131,39 @@ public class DataManager {
     }
 
     public void checkForUpdates(ApiCallback callback) {
+        Log.d(TAG, "Starting update check...");
         executor.execute(() -> {
             if (!isNetworkAvailable()) {
+                Log.e(TAG, "No network connection available");
                 handler.post(() -> callback.onError("لا يوجد اتصال بالإنترنت"));
                 return;
             }
 
             String token = getCurrentToken();
             if (token == null) {
+                Log.e(TAG, "No authentication token available");
                 handler.post(() -> callback.onError("لا يوجد توكن مصادقة"));
                 return;
             }
 
+            Log.d(TAG, "Checking and refreshing token...");
             checkAndRefreshToken(new DataCallback() {
                 @Override
                 public void onSuccess() {
                     String currentToken = getCurrentToken();
                     if (currentToken == null) {
+                        Log.e(TAG, "Failed to get token after refresh");
                         handler.post(() -> callback.onError("فشل في الحصول على التوكن بعد التحديث"));
                         return;
                     }
 
+                    Log.d(TAG, "Making API call to check for updates...");
                     apiService.checkForUpdates("Bearer " + currentToken).enqueue(new Callback<ServerAppUpdateInfo>() {
                         @Override
                         public void onResponse(Call<ServerAppUpdateInfo> call, Response<ServerAppUpdateInfo> response) {
                             if (response.isSuccessful() && response.body() != null) {
-                                handler.post(callback::onSuccess);
+                                Log.d(TAG, "Update check successful, version: " + response.body().getVersion());
+                                handler.post(() -> callback.onSuccess(response.body()));
                             } else {
                                 String errorMessage = "خطأ في التحقق من التحديثات: " + response.code();
                                 try {
@@ -167,12 +174,14 @@ public class DataManager {
                                     Log.e(TAG, "Error reading error body for update check", e);
                                 }
                                 final String finalErrorMessage = errorMessage;
+                                Log.e(TAG, finalErrorMessage);
                                 handler.post(() -> callback.onError(finalErrorMessage));
                             }
                         }
 
                         @Override
                         public void onFailure(Call<ServerAppUpdateInfo> call, Throwable t) {
+                            Log.e(TAG, "Network error while checking for updates", t);
                             handler.post(() -> callback.onError("فشل الاتصال بالخادم أثناء التحقق من التحديثات: " + t.getMessage()));
                         }
                     });
@@ -180,6 +189,7 @@ public class DataManager {
 
                 @Override
                 public void onError(String error) {
+                    Log.e(TAG, "Token refresh failed: " + error);
                     handler.post(() -> callback.onError("فشل تجديد التوكن قبل التحقق من التحديثات: " + error));
                 }
             });
@@ -194,7 +204,8 @@ public class DataManager {
 
     private void checkAndRefreshToken(DataCallback callback) {
         if (!isNetworkAvailable()) {
-            callback.onSuccess();
+            Log.e(TAG, "No network connection available for token refresh");
+            callback.onError("لا يوجد اتصال بالإنترنت");
             return;
         }
 
@@ -202,16 +213,17 @@ public class DataManager {
                 .getString("token", null);
         
         if (currentToken == null) {
+            Log.e(TAG, "No token available for refresh");
             callback.onError("لا يوجد توكن للتجديد");
             return;
         }
 
+        Log.d(TAG, "Attempting to refresh token...");
         // إزالة "Bearer " إذا كان موجوداً
         if (currentToken.startsWith("Bearer ")) {
             currentToken = currentToken.substring(7);
         }
 
-        // محاولة تجديد التوكن مباشرة
         apiService.refreshToken("Bearer " + currentToken).enqueue(new Callback<Map<String, String>>() {
             @Override
             public void onResponse(Call<Map<String, String>> call, Response<Map<String, String>> response) {
@@ -225,14 +237,13 @@ public class DataManager {
                     
                     long newExpiryTime = System.currentTimeMillis() + (24 * 60 * 60 * 1000); // 24 ساعة
                     
-                    // حفظ التوكن الجديد ووقت انتهاء الصلاحية
                     context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
                             .edit()
                             .putString("token", newToken)
                             .putLong(TOKEN_EXPIRY_KEY, newExpiryTime)
                             .apply();
                     
-                    Log.d(TAG, "تم تجديد التوكن بنجاح");
+                    Log.d(TAG, "Token refreshed successfully");
                     callback.onSuccess();
                 } else {
                     String errorMessage = "Unknown error";
@@ -243,14 +254,14 @@ public class DataManager {
                     } catch (IOException e) {
                         errorMessage = "Error reading response";
                     }
-                    Log.e(TAG, "فشل في تجديد التوكن: " + errorMessage + ", Response code: " + response.code());
+                    Log.e(TAG, "Failed to refresh token: " + errorMessage + ", Response code: " + response.code());
                     callback.onError("فشل في تجديد التوكن: " + errorMessage);
                 }
             }
 
             @Override
             public void onFailure(Call<Map<String, String>> call, Throwable t) {
-                Log.e(TAG, "خطأ في تجديد التوكن: " + t.getMessage());
+                Log.e(TAG, "Network error while refreshing token", t);
                 callback.onError("خطأ في تجديد التوكن: " + t.getMessage());
             }
         });
