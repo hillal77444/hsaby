@@ -15,6 +15,9 @@ import com.google.android.play.core.install.model.AppUpdateType;
 import com.google.android.play.core.install.model.UpdateAvailability;
 import com.hillal.acc.data.model.ServerAppUpdateInfo;
 import com.hillal.acc.data.remote.DataManager;
+import com.hillal.acc.data.room.AccountDao;
+import com.hillal.acc.data.room.TransactionDao;
+import com.hillal.acc.data.room.PendingOperationDao;
 
 public class AppUpdateHelper {
     private static final String TAG = "AppUpdateHelper";
@@ -23,9 +26,9 @@ public class AppUpdateHelper {
     private final DataManager dataManager;
     private final AppUpdateManager appUpdateManager;
 
-    public AppUpdateHelper(Context context) {
+    public AppUpdateHelper(Context context, AccountDao accountDao, TransactionDao transactionDao, PendingOperationDao pendingOperationDao) {
         this.context = context;
-        this.dataManager = new DataManager(context);
+        this.dataManager = new DataManager(context, accountDao, transactionDao, pendingOperationDao);
         this.appUpdateManager = AppUpdateManagerFactory.create(context);
     }
 
