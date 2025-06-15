@@ -3,9 +3,13 @@ package com.hillal.acc.data.update;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.FileProvider;
 
 import com.google.android.play.core.appupdate.AppUpdateInfo;
 import com.google.android.play.core.appupdate.AppUpdateManager;
@@ -13,6 +17,8 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
 import com.google.android.play.core.appupdate.AppUpdateOptions;
 import com.google.android.play.core.install.model.AppUpdateType;
 import com.google.android.play.core.install.model.UpdateAvailability;
+import com.hillal.acc.BuildConfig;
+import com.hillal.acc.R;
 import com.hillal.acc.data.model.ServerAppUpdateInfo;
 import com.hillal.acc.data.remote.DataManager;
 import com.hillal.acc.data.room.AccountDao;
@@ -25,11 +31,24 @@ public class AppUpdateHelper {
     private final Context context;
     private final DataManager dataManager;
     private final AppUpdateManager appUpdateManager;
+    private final String currentVersion;
+    private ServerAppUpdateInfo updateInfo;
 
     public AppUpdateHelper(Context context, AccountDao accountDao, TransactionDao transactionDao, PendingOperationDao pendingOperationDao) {
         this.context = context;
         this.dataManager = new DataManager(context, accountDao, transactionDao, pendingOperationDao);
         this.appUpdateManager = AppUpdateManagerFactory.create(context);
+        this.currentVersion = getCurrentVersion();
+    }
+
+    private String getCurrentVersion() {
+        try {
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            return pInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Error getting current version", e);
+            return "0.0.0";
+        }
     }
 
     public void checkForUpdates(Activity activity) {
@@ -52,16 +71,15 @@ public class AppUpdateHelper {
     private void checkServerUpdates(Activity activity) {
         dataManager.checkForUpdates(new DataManager.ApiCallback() {
             @Override
-            public void onSuccess(Object response) {
-                if (response instanceof ServerAppUpdateInfo) {
-                    ServerAppUpdateInfo updateInfo = (ServerAppUpdateInfo) response;
-                    showServerUpdateDialog(activity, updateInfo);
+            public void onSuccess() {
+                if (updateInfo != null) {
+                    handleUpdateInfo(updateInfo);
                 }
             }
 
             @Override
             public void onError(String error) {
-                Log.e(TAG, "Error checking for server updates: " + error);
+                Log.e(TAG, "Error checking for updates: " + error);
             }
         });
     }
@@ -83,32 +101,58 @@ public class AppUpdateHelper {
         }
     }
 
-    private void showServerUpdateDialog(Activity activity, ServerAppUpdateInfo updateInfo) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity)
-                .setTitle("تحديث جديد متوفر")
-                .setMessage("الإصدار الجديد: " + updateInfo.getVersion() + "\n\n" + updateInfo.getDescription())
-                .setPositiveButton("تحديث", (dialog, which) -> {
-                    openDownloadLink(updateInfo.getDownloadUrl());
-                });
+    private void handleUpdateInfo(ServerAppUpdateInfo updateInfo) {
+        if (updateInfo == null) return;
 
-        if (!updateInfo.isForceUpdate()) {
-            builder.setNegativeButton("لاحقاً", null);
+        if (isNewVersionAvailable(updateInfo.getVersion())) {
+            if (updateInfo.isForceUpdate()) {
+                showForceUpdateDialog(updateInfo);
+            } else {
+                showUpdateDialog(updateInfo);
+            }
         }
-
-        AlertDialog dialog = builder.create();
-        dialog.setCancelable(!updateInfo.isForceUpdate());
-        dialog.show();
     }
 
-    private void openDownloadLink(String url) {
-        try {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse(url));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
-        } catch (Exception e) {
-            Log.e(TAG, "Error opening download link: " + e.getMessage());
+    private boolean isNewVersionAvailable(String newVersion) {
+        return compareVersions(newVersion, currentVersion) > 0;
+    }
+
+    private int compareVersions(String version1, String version2) {
+        String[] v1 = version1.split("\\.");
+        String[] v2 = version2.split("\\.");
+        
+        int length = Math.max(v1.length, v2.length);
+        for (int i = 0; i < length; i++) {
+            int num1 = i < v1.length ? Integer.parseInt(v1[i]) : 0;
+            int num2 = i < v2.length ? Integer.parseInt(v2[i]) : 0;
+            
+            if (num1 > num2) return 1;
+            if (num1 < num2) return -1;
         }
+        return 0;
+    }
+
+    private void showForceUpdateDialog(ServerAppUpdateInfo updateInfo) {
+        new AlertDialog.Builder(context)
+            .setTitle(R.string.update_required)
+            .setMessage(updateInfo.getDescription())
+            .setCancelable(false)
+            .setPositiveButton(R.string.update_now, (dialog, which) -> downloadAndInstallUpdate(updateInfo.getDownloadUrl()))
+            .show();
+    }
+
+    private void showUpdateDialog(ServerAppUpdateInfo updateInfo) {
+        new AlertDialog.Builder(context)
+            .setTitle(R.string.update_available)
+            .setMessage(updateInfo.getDescription())
+            .setPositiveButton(R.string.update_now, (dialog, which) -> downloadAndInstallUpdate(updateInfo.getDownloadUrl()))
+            .setNegativeButton(R.string.later, null)
+            .show();
+    }
+
+    private void downloadAndInstallUpdate(String downloadUrl) {
+        // تنفيذ عملية التحميل والتثبيت
+        // يمكنك استخدام DownloadManager أو أي مكتبة أخرى للتحميل
     }
 
     public void onActivityResult(int requestCode, int resultCode) {
