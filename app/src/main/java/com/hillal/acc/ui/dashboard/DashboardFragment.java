@@ -29,6 +29,7 @@ import com.hillal.acc.data.room.AppDatabase;
 import com.hillal.acc.data.sync.SyncManager;
 import com.hillal.acc.data.remote.DataManager;
 import com.hillal.acc.data.sync.MigrationManager;
+import com.hillal.acc.data.model.ServerAppUpdateInfo;
 
 import org.json.JSONObject;
 import org.json.JSONException;
