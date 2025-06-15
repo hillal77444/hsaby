@@ -92,7 +92,9 @@ public class DataManager {
                         return;
                     }
 
-                    String gsonUserDetails = gson.toJson(userDetails);
+                    // تحويل JSONObject إلى JsonObject
+                    com.google.gson.JsonObject gsonUserDetails = gson.fromJson(userDetails.toString(), com.google.gson.JsonObject.class);
+
                     apiService.updateUserDetails("Bearer " + currentToken, gsonUserDetails).enqueue(new Callback<Map<String, String>>() {
                         @Override
                         public void onResponse(Call<Map<String, String>> call, Response<Map<String, String>> response) {
