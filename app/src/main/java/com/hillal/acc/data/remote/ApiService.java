@@ -73,7 +73,7 @@ public interface ApiService {
     );
 
     @GET("/api/app/updates/check")
-    Call<ServerAppUpdateInfo> checkForUpdates(@Header("Authorization") String token);
+    Call<ServerAppUpdateInfo> checkForUpdates(@Header("Authorization") String token, @Query("current_version") String currentVersion);
 
     class LoginRequest {
         private String phone;
