@@ -49,9 +49,8 @@ public class DataManager {
         void onError(String error);
     }
 
-    // Added new interface for API callbacks
     public interface ApiCallback {
-        void onSuccess(Object response);
+        void onSuccess();
         void onError(String error);
     }
 
@@ -67,9 +66,8 @@ public class DataManager {
     }
 
     private String getCurrentToken() {
-        // استرجاع التوكن من SharedPreferences أو أي مكان آخر
         return context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                .getString("auth_token", null);
+                .getString("token", null);
     }
 
     public void updateUserDetails(JSONObject userDetails, ApiCallback callback) {
@@ -93,7 +91,7 @@ public class DataManager {
                         handler.post(() -> callback.onError("فشل في الحصول على التوكن بعد التحديث"));
                         return;
                     }
-                    
+
                     // Convert org.json.JSONObject to com.google.gson.JsonObject
                     com.google.gson.JsonObject gsonUserDetails = gson.fromJson(userDetails.toString(), com.google.gson.JsonObject.class);
 
@@ -112,7 +110,7 @@ public class DataManager {
                                 } catch (IOException e) {
                                     Log.e(TAG, "Error reading error body for user details update", e);
                                 }
-                                final String finalErrorMessage = errorMessageBuilder; // Make it effectively final
+                                final String finalErrorMessage = errorMessageBuilder;
                                 handler.post(() -> callback.onError(finalErrorMessage));
                             }
                         }
@@ -127,6 +125,62 @@ public class DataManager {
                 @Override
                 public void onError(String error) {
                     handler.post(() -> callback.onError("فشل تجديد التوكن قبل تحديث بيانات المستخدم: " + error));
+                }
+            });
+        });
+    }
+
+    public void checkForUpdates(ApiCallback callback) {
+        executor.execute(() -> {
+            if (!isNetworkAvailable()) {
+                handler.post(() -> callback.onError("لا يوجد اتصال بالإنترنت"));
+                return;
+            }
+
+            String token = getCurrentToken();
+            if (token == null) {
+                handler.post(() -> callback.onError("لا يوجد توكن مصادقة"));
+                return;
+            }
+
+            checkAndRefreshToken(new DataCallback() {
+                @Override
+                public void onSuccess() {
+                    String currentToken = getCurrentToken();
+                    if (currentToken == null) {
+                        handler.post(() -> callback.onError("فشل في الحصول على التوكن بعد التحديث"));
+                        return;
+                    }
+
+                    apiService.checkForUpdates("Bearer " + currentToken).enqueue(new Callback<ServerAppUpdateInfo>() {
+                        @Override
+                        public void onResponse(Call<ServerAppUpdateInfo> call, Response<ServerAppUpdateInfo> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                handler.post(callback::onSuccess);
+                            } else {
+                                String errorMessage = "خطأ في التحقق من التحديثات: " + response.code();
+                                try {
+                                    if (response.errorBody() != null) {
+                                        errorMessage += "\n" + response.errorBody().string();
+                                    }
+                                } catch (IOException e) {
+                                    Log.e(TAG, "Error reading error body for update check", e);
+                                }
+                                final String finalErrorMessage = errorMessage;
+                                handler.post(() -> callback.onError(finalErrorMessage));
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ServerAppUpdateInfo> call, Throwable t) {
+                            handler.post(() -> callback.onError("فشل الاتصال بالخادم أثناء التحقق من التحديثات: " + t.getMessage()));
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(String error) {
+                    handler.post(() -> callback.onError("فشل تجديد التوكن قبل التحقق من التحديثات: " + error));
                 }
             });
         });
@@ -389,44 +443,5 @@ public class DataManager {
 
     public void shutdown() {
         executor.shutdown();
-    }
-
-    public void checkForUpdates(ApiCallback callback) {
-        executor.execute(() -> {
-            try {
-                String currentToken = getCurrentToken();
-                if (currentToken == null) {
-                    handler.post(() -> callback.onError("لم يتم العثور على رمز المصادقة"));
-                    return;
-                }
-
-                apiService.checkForUpdates("Bearer " + currentToken).enqueue(new Callback<ServerAppUpdateInfo>() {
-                    @Override
-                    public void onResponse(Call<ServerAppUpdateInfo> call, Response<ServerAppUpdateInfo> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            handler.post(() -> callback.onSuccess(response.body()));
-                        } else {
-                            String errorMessage = "خطأ في التحقق من التحديثات: " + response.code();
-                            try {
-                                if (response.errorBody() != null) {
-                                    errorMessage += "\n" + response.errorBody().string();
-                                }
-                            } catch (IOException e) {
-                                Log.e(TAG, "Error reading error body for update check", e);
-                            }
-                            final String finalErrorMessage = errorMessage;
-                            handler.post(() -> callback.onError(finalErrorMessage));
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<ServerAppUpdateInfo> call, Throwable t) {
-                        handler.post(() -> callback.onError("فشل الاتصال بالخادم أثناء التحقق من التحديثات: " + t.getMessage()));
-                    }
-                });
-            } catch (Exception e) {
-                handler.post(() -> callback.onError("خطأ أثناء التحقق من التحديثات: " + e.getMessage()));
-            }
-        });
     }
 } 
