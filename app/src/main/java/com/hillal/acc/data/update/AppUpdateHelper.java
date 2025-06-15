@@ -13,7 +13,7 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
 import com.google.android.play.core.appupdate.AppUpdateOptions;
 import com.google.android.play.core.install.model.AppUpdateType;
 import com.google.android.play.core.install.model.UpdateAvailability;
-import com.hillal.acc.data.model.AppUpdateInfo;
+import com.hillal.acc.data.model.ServerAppUpdateInfo;
 import com.hillal.acc.data.remote.DataManager;
 
 public class AppUpdateHelper {
@@ -50,8 +50,8 @@ public class AppUpdateHelper {
         dataManager.checkForUpdates(new DataManager.ApiCallback() {
             @Override
             public void onSuccess(Object response) {
-                if (response instanceof AppUpdateInfo) {
-                    AppUpdateInfo updateInfo = (AppUpdateInfo) response;
+                if (response instanceof ServerAppUpdateInfo) {
+                    ServerAppUpdateInfo updateInfo = (ServerAppUpdateInfo) response;
                     showServerUpdateDialog(activity, updateInfo);
                 }
             }
@@ -80,7 +80,7 @@ public class AppUpdateHelper {
         }
     }
 
-    private void showServerUpdateDialog(Activity activity, AppUpdateInfo updateInfo) {
+    private void showServerUpdateDialog(Activity activity, ServerAppUpdateInfo updateInfo) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity)
                 .setTitle("تحديث جديد متوفر")
                 .setMessage("الإصدار الجديد: " + updateInfo.getVersion() + "\n\n" + updateInfo.getDescription())
