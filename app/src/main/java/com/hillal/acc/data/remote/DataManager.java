@@ -94,15 +94,16 @@ public class DataManager {
                             if (response.isSuccessful()) {
                                 handler.post(callback::onSuccess);
                             } else {
-                                String errorMessage = "خطأ في تحديث بيانات المستخدم: " + response.code();
+                                String errorMessageBuilder = "خطأ في تحديث بيانات المستخدم: " + response.code();
                                 try {
                                     if (response.errorBody() != null) {
-                                        errorMessage += "\n" + response.errorBody().string();
+                                        errorMessageBuilder += "\n" + response.errorBody().string();
                                     }
                                 } catch (IOException e) {
                                     Log.e(TAG, "Error reading error body for user details update", e);
                                 }
-                                handler.post(() -> callback.onError(errorMessage));
+                                final String finalErrorMessage = errorMessageBuilder; // Make it effectively final
+                                handler.post(() -> callback.onError(finalErrorMessage));
                             }
                         }
 
