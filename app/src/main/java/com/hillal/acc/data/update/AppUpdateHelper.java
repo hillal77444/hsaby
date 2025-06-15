@@ -78,7 +78,7 @@ public class AppUpdateHelper {
 
     private void checkServerUpdates(Activity activity) {
         Log.d(TAG, "Checking for server updates...");
-        dataManager.checkForUpdates(new DataManager.ApiCallback() {
+        dataManager.checkForUpdates(currentVersion, new DataManager.ApiCallback() {
             @Override
             public void onSuccess(ServerAppUpdateInfo updateInfo) {
                 Log.d(TAG, "Received update info: " + (updateInfo != null ? updateInfo.getVersion() : "null"));
