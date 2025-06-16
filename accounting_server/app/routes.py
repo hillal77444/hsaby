@@ -1152,3 +1152,21 @@ def version_compare(v1, v2, operator):
             return operator == '>'
     
     return operator == '=='
+
+@main.route('/api/user/delete/<string:phone>', methods=['DELETE'])
+@jwt_required()
+def delete_user_account(current_user, phone):
+    if current_user.phone != phone:
+        return jsonify({"message": "You are not authorized to delete this account"}), 403
+
+    try:
+        user = User.query.filter_by(phone=phone).first()
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"message": "User account deleted successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": f"Error deleting account: {str(e)}"}), 500
