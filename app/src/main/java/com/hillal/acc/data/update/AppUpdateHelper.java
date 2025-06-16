@@ -22,9 +22,12 @@ import com.google.android.play.core.appupdate.AppUpdateInfo;
 import com.google.android.play.core.appupdate.AppUpdateManager;
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
 import com.google.android.play.core.appupdate.AppUpdateOptions;
-import com.google.android.play.core.appupdate.AppUpdateType;
-import com.google.android.play.core.appupdate.AppUpdateAvailability;
-import com.google.android.play.core.tasks.Task;
+import com.google.android.play.core.install.model.AppUpdateType;
+import com.google.android.play.core.install.model.UpdateAvailability;
+import com.google.android.play.core.install.model.InstallStatus;
+import com.google.android.play.core.install.model.InstallErrorCode;
+import com.google.android.play.core.install.InstallStateUpdatedListener;
+import com.google.android.play.core.install.InstallState;
 import com.hillal.acc.BuildConfig;
 import com.hillal.acc.data.model.ServerAppUpdateInfo;
 import com.hillal.acc.data.remote.DataManager;
@@ -76,7 +79,7 @@ public class AppUpdateHelper {
 
     private void checkGooglePlayUpdates(Activity activity) {
         appUpdateManager.getAppUpdateInfo().addOnSuccessListener(appUpdateInfo -> {
-            if (appUpdateInfo.updateAvailability() == AppUpdateAvailability.UPDATE_AVAILABLE
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
                     && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
                 startGooglePlayUpdate(activity, appUpdateInfo);
             }
