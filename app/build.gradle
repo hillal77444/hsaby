@@ -134,15 +134,16 @@ dependencies {
     // Test helpers
     testImplementation "androidx.room:room-testing:$room_version"
 
+    implementation 'com.google.android.gms:play-services-tasks:18.3.0'
+    implementation 'com.google.android.gms:play-services-basement:18.7.0'
     implementation 'com.google.android.play:app-update:2.1.0'
     implementation 'com.google.android.play:app-update-ktx:2.1.0'
-    implementation 'com.google.android.gms:play-services-tasks:18.3.0'
+    implementation 'com.intuit.sdp:sdp-android:1.1.0'
+    implementation 'com.intuit.ssp:ssp-android:1.1.0'
 
     // Responsive Design Libraries
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
     implementation 'androidx.percentlayout:percentlayout:1.0.0'
-    implementation 'com.intuit.sdp:sdp-android:1.1.0'
-    implementation 'com.intuit.ssp:ssp-android:1.1.0'
 
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
 } 
