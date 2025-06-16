@@ -126,6 +126,8 @@ public class AppUpdateHelper {
         }
 
         Log.d(TAG, "Current version: " + currentVersion + ", New version: " + updateInfo.getVersion());
+        Log.d(TAG, "Download URL: " + updateInfo.getDownloadUrl());
+        
         if (isNewVersionAvailable(updateInfo.getVersion())) {
             Log.d(TAG, "New version is available");
             if (updateInfo.isForceUpdate()) {
@@ -160,6 +162,7 @@ public class AppUpdateHelper {
     }
 
     private void showForceUpdateDialog(ServerAppUpdateInfo updateInfo) {
+        Log.d(TAG, "Showing force update dialog with URL: " + updateInfo.getDownloadUrl());
         new AlertDialog.Builder(context)
             .setTitle("تحديث مطلوب")
             .setMessage(updateInfo.getDescription())
@@ -169,6 +172,7 @@ public class AppUpdateHelper {
     }
 
     private void showUpdateDialog(ServerAppUpdateInfo updateInfo) {
+        Log.d(TAG, "Showing update dialog with URL: " + updateInfo.getDownloadUrl());
         new AlertDialog.Builder(context)
             .setTitle("تحديث متوفر")
             .setMessage(updateInfo.getDescription())
@@ -179,6 +183,16 @@ public class AppUpdateHelper {
 
     private void downloadAndInstallUpdate(String downloadUrl) {
         Log.d(TAG, "Attempting to open download URL in browser: " + downloadUrl);
+        if (downloadUrl == null || downloadUrl.trim().isEmpty()) {
+            Log.e(TAG, "Download URL is null or empty");
+            new AlertDialog.Builder(context)
+                .setTitle("خطأ")
+                .setMessage("رابط التحديث غير صالح")
+                .setPositiveButton("حسناً", null)
+                .show();
+            return;
+        }
+
         try {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(downloadUrl));
