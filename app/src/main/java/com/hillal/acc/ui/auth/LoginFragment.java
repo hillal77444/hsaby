@@ -55,7 +55,7 @@ public class LoginFragment extends Fragment {
 
         // إضافة مستمع لرابط سياسة الخصوصية
         binding.textViewPrivacyPolicy.setOnClickListener(v -> {
-            String url = "https://alhillal1.github.io/privacy-policy/";
+            String url = "https://malyp.com/api/privacy-policy";
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             startActivity(intent);
         });
