@@ -40,7 +40,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class AppUpdateHelper {
-    private static final String TAG = "AppUpdateHelper";
+    private static final String TAG = "HILLAL_APP_UPDATE";
     private static final int UPDATE_REQUEST_CODE = 500;
     private final Context context;
     private final DataManager dataManager;
