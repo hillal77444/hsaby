@@ -18,16 +18,6 @@ import android.os.Environment;
 import android.app.ProgressDialog;
 import android.widget.Toast;
 
-import com.google.android.play.core.appupdate.AppUpdateInfo;
-import com.google.android.play.core.appupdate.AppUpdateManager;
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
-import com.google.android.play.core.appupdate.AppUpdateOptions;
-import com.google.android.play.core.install.model.AppUpdateType;
-import com.google.android.play.core.install.model.UpdateAvailability;
-import com.google.android.play.core.install.model.InstallStatus;
-import com.google.android.play.core.install.model.InstallErrorCode;
-import com.google.android.play.core.install.InstallStateUpdatedListener;
-import com.google.android.play.core.install.InstallState;
 import com.hillal.acc.BuildConfig;
 import com.hillal.acc.data.model.ServerAppUpdateInfo;
 import com.hillal.acc.data.remote.DataManager;
@@ -45,17 +35,14 @@ import retrofit2.Response;
 
 public class AppUpdateHelper {
     private static final String TAG = "HILLAL_APP_UPDATE";
-    private static final int UPDATE_REQUEST_CODE = 500;
     private final Context context;
     private final DataManager dataManager;
-    private final AppUpdateManager appUpdateManager;
     private final String currentVersion;
     private ServerAppUpdateInfo updateInfo;
 
     public AppUpdateHelper(Context context, AccountDao accountDao, TransactionDao transactionDao, PendingOperationDao pendingOperationDao) {
         this.context = context;
         this.dataManager = new DataManager(context, accountDao, transactionDao, pendingOperationDao);
-        this.appUpdateManager = AppUpdateManagerFactory.create(context);
         this.currentVersion = getCurrentVersion();
     }
 
@@ -70,20 +57,8 @@ public class AppUpdateHelper {
     }
 
     public void checkForUpdates(Activity activity) {
-        // التحقق من تحديثات Google Play
-        checkGooglePlayUpdates(activity);
-        
         // التحقق من تحديثات الخادم
         checkServerUpdates(activity);
-    }
-
-    private void checkGooglePlayUpdates(Activity activity) {
-        appUpdateManager.getAppUpdateInfo().addOnSuccessListener(appUpdateInfo -> {
-            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-                    && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
-                startGooglePlayUpdate(activity, appUpdateInfo);
-            }
-        });
     }
 
     private void checkServerUpdates(Activity activity) {
@@ -104,23 +79,6 @@ public class AppUpdateHelper {
                 Log.e(TAG, "Error checking for updates: " + error);
             }
         });
-    }
-
-    private void startGooglePlayUpdate(Activity activity, AppUpdateInfo appUpdateInfo) {
-        try {
-            AppUpdateOptions options = AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE)
-                    .setAllowAssetPackDeletion(true)
-                    .build();
-
-            appUpdateManager.startUpdateFlowForResult(
-                    appUpdateInfo,
-                    activity,
-                    options,
-                    UPDATE_REQUEST_CODE
-            );
-        } catch (Exception e) {
-            Log.e(TAG, "Error starting Google Play update: " + e.getMessage());
-        }
     }
 
     private void handleUpdateInfo(ServerAppUpdateInfo updateInfo) {
@@ -256,10 +214,6 @@ public class AppUpdateHelper {
     }
 
     public void onActivityResult(int requestCode, int resultCode) {
-        if (requestCode == UPDATE_REQUEST_CODE) {
-            if (resultCode != Activity.RESULT_OK) {
-                Log.d(TAG, "Google Play update flow failed! Result code: " + resultCode);
-            }
-        }
+        // No longer needed for Google Play in-app updates
     }
 } 
