@@ -22,8 +22,8 @@ android {
         applicationId "com.hillal.acc"
         minSdk 26
         targetSdk 34
-        versionCode 2
-        versionName "1.1"
+        versionCode 3
+        versionName "1.2"
         
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         
@@ -45,11 +45,11 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            consumerProguardFiles 'proguard-rules.pro'
             ndk {
                 debugSymbolLevel 'FULL'
             }
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            consumerProguardFiles 'proguard-rules.pro'
         }
         debug {
             debuggable true
