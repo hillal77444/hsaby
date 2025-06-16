@@ -988,3 +988,7 @@ def edit_update(update_id):
             db.session.rollback()
             flash(f'حدث خطأ أثناء تحديث البيانات: {str(e)}', 'error')
     return render_template('admin/edit_update.html', update=update)
+
+@admin.route('/api/privacy-policy')
+def privacy_policy():
+    return render_template('privacy_policy.html')
