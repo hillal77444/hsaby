@@ -16,6 +16,7 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Environment;
 import android.app.ProgressDialog;
+import android.widget.Toast;
 
 import com.google.android.play.core.appupdate.AppUpdateInfo;
 import com.google.android.play.core.appupdate.AppUpdateManager;
@@ -194,23 +195,40 @@ public class AppUpdateHelper {
         }
 
         try {
+            // إنشاء Intent لفتح الرابط في المتصفح
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(downloadUrl));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.addCategory(Intent.CATEGORY_BROWSABLE);
             
-            // التحقق من وجود تطبيق يمكنه فتح الرابط
+            // محاولة فتح الرابط في المتصفح
             if (intent.resolveActivity(context.getPackageManager()) != null) {
                 context.startActivity(intent);
-                Log.d(TAG, "Successfully launched intent to open URL.");
+                Log.d(TAG, "Successfully launched browser to open URL.");
             } else {
-                Log.e(TAG, "No application can handle this URL");
-                // عرض رسالة للمستخدم
-                new AlertDialog.Builder(context)
-                    .setTitle("خطأ")
-                    .setMessage("لا يمكن فتح رابط التحديث. يرجى نسخ الرابط وفتحه يدوياً في المتصفح.")
-                    .setPositiveButton("حسناً", null)
-                    .show();
+                // إذا لم يتم العثور على متصفح، حاول فتح الرابط في أي تطبيق متاح
+                intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(downloadUrl));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                
+                if (intent.resolveActivity(context.getPackageManager()) != null) {
+                    context.startActivity(intent);
+                    Log.d(TAG, "Successfully launched app to open URL.");
+                } else {
+                    Log.e(TAG, "No application can handle this URL");
+                    // عرض رسالة للمستخدم مع خيار نسخ الرابط
+                    new AlertDialog.Builder(context)
+                        .setTitle("خطأ")
+                        .setMessage("لا يمكن فتح رابط التحديث. هل تريد نسخ الرابط؟")
+                        .setPositiveButton("نسخ الرابط", (dialog, which) -> {
+                            android.content.ClipboardManager clipboard = (android.content.ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                            android.content.ClipData clip = android.content.ClipData.newPlainText("Download URL", downloadUrl);
+                            clipboard.setPrimaryClip(clip);
+                            Toast.makeText(context, "تم نسخ الرابط", Toast.LENGTH_SHORT).show();
+                        })
+                        .setNegativeButton("إلغاء", null)
+                        .show();
+                }
             }
         } catch (Exception e) {
             Log.e(TAG, "Error opening download link: " + e.getMessage(), e);
