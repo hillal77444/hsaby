@@ -236,4 +236,11 @@
         <item>من الأكبر إلى الأصغر</item>
         <item>من الأصغر إلى الأكبر</item>
     </string-array>
+
+    <!-- Permission Explanations -->
+    <string name="permission_contacts_rationale">يحتاج التطبيق إلى الوصول إلى جهات الاتصال لإدارة معلومات العملاء</string>
+    <string name="permission_storage_rationale">يحتاج التطبيق إلى الوصول إلى التخزين لحفظ التقارير والملفات</string>
+    <string name="permission_notification_rationale">يحتاج التطبيق إلى إرسال الإشعارات لإعلامك بالتحديثات المهمة</string>
+    <string name="permission_install_rationale">يحتاج التطبيق إلى تثبيت التحديثات الجديدة</string>
+    <string name="permission_media_rationale">يحتاج التطبيق إلى الوصول إلى الوسائط لإدارة المرفقات</string>
 </resources>
