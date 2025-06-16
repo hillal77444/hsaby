@@ -10,6 +10,12 @@ import android.os.Build;
 import android.util.Log;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
+import android.database.Cursor;
+import android.os.Environment;
+import android.app.ProgressDialog;
 
 import com.google.android.play.core.appupdate.AppUpdateInfo;
 import com.google.android.play.core.appupdate.AppUpdateManager;
@@ -180,14 +186,85 @@ public class AppUpdateHelper {
     }
 
     private void downloadAndInstallUpdate(String downloadUrl) {
+        // ==================================================================================
+        // هذا الجزء من الكود يقوم بتنزيل وتثبيت التحديث مباشرة.
+        // إذا كنت تنوي رفع التطبيق على متجر Google Play، يجب إزالة هذا الجزء واستخدام Google Play In-App Updates API.
+        // ==================================================================================
         try {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse(downloadUrl));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+            Log.d(TAG, "Attempting to download and install from URL: " + downloadUrl);
+
+            String fileName = "app-release.apk"; // اسم الملف الذي سيتم تنزيله
+            File outputFile = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName);
+            if (outputFile.exists()) {
+                outputFile.delete(); // حذف الملف القديم إذا كان موجوداً
+            }
+
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
+            request.setMimeType("application/vnd.android.package-archive");
+            request.setTitle("تحميل تحديث التطبيق");
+            request.setDescription("جاري تنزيل الإصدار الجديد من التطبيق...");
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+            request.setDestinationUri(Uri.fromFile(outputFile)); // تعيين الوجهة المحلية للملف
+
+            DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+            long downloadId = downloadManager.enqueue(request);
+
+            // تسجيل BroadcastReceiver للاستماع عند اكتمال التنزيل
+            BroadcastReceiver onComplete = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                    if (downloadId == id) {
+                        context.unregisterReceiver(this); // إلغاء تسجيل المستقبل لتجنب تسرب الذاكرة
+
+                        DownloadManager.Query query = new DownloadManager.Query();
+                        query.setFilterById(downloadId);
+                        Cursor cursor = downloadManager.query(query);
+
+                        if (cursor.moveToFirst()) {
+                            int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                            if (DownloadManager.STATUS_SUCCESSFUL == cursor.getInt(columnIndex)) {
+                                Log.d(TAG, "APK Download successful. Installing...");
+                                installApk(outputFile);
+                            } else {
+                                int reasonIndex = cursor.getColumnIndex(DownloadManager.COLUMN_REASON);
+                                int reason = cursor.getInt(reasonIndex);
+                                Log.e(TAG, "APK Download failed. Reason: " + reason);
+                                showSimpleAlertDialog("خطأ في التحميل", "فشل تنزيل ملف التحديث. يرجى المحاولة لاحقاً. رمز الخطأ: " + reason);
+                            }
+                        }
+                        cursor.close();
+                    }
+                }
+            };
+            context.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+
         } catch (Exception e) {
-            Log.e(TAG, "Error opening download link: " + e.getMessage());
+            Log.e(TAG, "Error initiating APK download: " + e.getMessage(), e);
+            showSimpleAlertDialog("خطأ", "حدث خطأ أثناء بدء عملية التحديث. يرجى المحاولة لاحقاً.");
         }
+    }
+
+    private void installApk(File apkFile) {
+        try {
+            Uri apkUri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", apkFile);
+            Intent installIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+            installIntent.setData(apkUri);
+            installIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            context.startActivity(installIntent);
+        } catch (Exception e) {
+            Log.e(TAG, "Error installing APK: " + e.getMessage(), e);
+            showSimpleAlertDialog("خطأ في التثبيت", "حدث خطأ أثناء تثبيت التحديث. يرجى المحاولة يدوياً أو إعادة المحاولة لاحقاً.");
+        }
+    }
+
+    // دالة مساعدة لعرض AlertDialog بسيط
+    private void showSimpleAlertDialog(String title, String message) {
+        new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("حسناً", null)
+                .show();
     }
 
     public void onActivityResult(int requestCode, int resultCode) {
