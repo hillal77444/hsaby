@@ -122,7 +122,13 @@ public class AppUpdateHelper {
 
     private void handleUpdateInfo(ServerAppUpdateInfo updateInfo) {
         if (updateInfo == null) {
-            Log.d(TAG, "Update info is null");
+            Log.d(TAG, "No updates available from server");
+            return;
+        }
+
+        // التحقق من أن جميع البيانات المطلوبة موجودة
+        if (updateInfo.getVersion() == null || updateInfo.getVersion().trim().isEmpty()) {
+            Log.d(TAG, "Update version is null or empty");
             return;
         }
 
@@ -144,22 +150,36 @@ public class AppUpdateHelper {
     }
 
     private boolean isNewVersionAvailable(String newVersion) {
+        if (newVersion == null || newVersion.trim().isEmpty()) {
+            Log.d(TAG, "New version is null or empty");
+            return false;
+        }
         return compareVersions(newVersion, currentVersion) > 0;
     }
 
     private int compareVersions(String version1, String version2) {
-        String[] v1 = version1.split("\\.");
-        String[] v2 = version2.split("\\.");
-        
-        int length = Math.max(v1.length, v2.length);
-        for (int i = 0; i < length; i++) {
-            int num1 = i < v1.length ? Integer.parseInt(v1[i]) : 0;
-            int num2 = i < v2.length ? Integer.parseInt(v2[i]) : 0;
-            
-            if (num1 > num2) return 1;
-            if (num1 < num2) return -1;
+        if (version1 == null || version2 == null) {
+            Log.d(TAG, "One of the versions is null");
+            return 0;
         }
-        return 0;
+
+        try {
+            String[] v1 = version1.split("\\.");
+            String[] v2 = version2.split("\\.");
+            
+            int length = Math.max(v1.length, v2.length);
+            for (int i = 0; i < length; i++) {
+                int num1 = i < v1.length ? Integer.parseInt(v1[i]) : 0;
+                int num2 = i < v2.length ? Integer.parseInt(v2[i]) : 0;
+                
+                if (num1 > num2) return 1;
+                if (num1 < num2) return -1;
+            }
+            return 0;
+        } catch (Exception e) {
+            Log.e(TAG, "Error comparing versions: " + e.getMessage());
+            return 0;
+        }
     }
 
     private void showForceUpdateDialog(ServerAppUpdateInfo updateInfo) {
