@@ -24,7 +24,7 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
 import com.google.android.play.core.appupdate.AppUpdateOptions;
 import com.google.android.play.core.install.model.AppUpdateType;
 import com.google.android.play.core.install.model.UpdateAvailability;
-import com.google.android.play.core.tasks.Task;
+import com.google.android.gms.tasks.Task;
 import com.hillal.acc.BuildConfig;
 import com.hillal.acc.data.model.ServerAppUpdateInfo;
 import com.hillal.acc.data.remote.DataManager;
@@ -75,11 +75,14 @@ public class AppUpdateHelper {
     }
 
     private void checkGooglePlayUpdates(Activity activity) {
-        appUpdateManager.getAppUpdateInfo().addOnSuccessListener(appUpdateInfo -> {
+        Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
+        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
             if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
                     && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
                 startGooglePlayUpdate(activity, appUpdateInfo);
             }
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "Error checking for Google Play updates: " + e.getMessage());
         });
     }
 
@@ -114,7 +117,9 @@ public class AppUpdateHelper {
                     activity,
                     options,
                     UPDATE_REQUEST_CODE
-            );
+            ).addOnFailureListener(e -> {
+                Log.e(TAG, "Error starting update flow: " + e.getMessage());
+            });
         } catch (Exception e) {
             Log.e(TAG, "Error starting Google Play update: " + e.getMessage());
         }
