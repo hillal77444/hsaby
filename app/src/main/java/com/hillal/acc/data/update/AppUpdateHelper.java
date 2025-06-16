@@ -195,26 +195,12 @@ public class AppUpdateHelper {
         }
 
         try {
-            // محاولة فتح الرابط في Chrome أولاً
-            Intent chromeIntent = new Intent(Intent.ACTION_VIEW);
-            chromeIntent.setData(Uri.parse(downloadUrl));
-            chromeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            chromeIntent.setPackage("com.android.chrome");
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(downloadUrl));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             
-            if (chromeIntent.resolveActivity(context.getPackageManager()) != null) {
-                context.startActivity(chromeIntent);
-                Log.d(TAG, "Successfully launched Chrome to open URL.");
-                return;
-            }
-
-            // إذا لم يكن Chrome متاحاً، حاول فتح الرابط في أي متصفح
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW);
-            browserIntent.setData(Uri.parse(downloadUrl));
-            browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            browserIntent.addCategory(Intent.CATEGORY_BROWSABLE);
-            
-            // إضافة قائمة المتصفحات المتاحة
-            Intent chooser = Intent.createChooser(browserIntent, "اختر المتصفح لفتح رابط التحديث");
+            // إنشاء قائمة التطبيقات المتاحة لفتح الرابط
+            Intent chooser = Intent.createChooser(intent, "اختر المتصفح لتحميل التحديث");
             chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             
             if (chooser.resolveActivity(context.getPackageManager()) != null) {
