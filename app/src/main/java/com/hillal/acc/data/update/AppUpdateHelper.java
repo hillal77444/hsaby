@@ -183,10 +183,29 @@ public class AppUpdateHelper {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(downloadUrl));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
-            Log.d(TAG, "Successfully launched intent to open URL.");
+            intent.addCategory(Intent.CATEGORY_BROWSABLE);
+            
+            // التحقق من وجود تطبيق يمكنه فتح الرابط
+            if (intent.resolveActivity(context.getPackageManager()) != null) {
+                context.startActivity(intent);
+                Log.d(TAG, "Successfully launched intent to open URL.");
+            } else {
+                Log.e(TAG, "No application can handle this URL");
+                // عرض رسالة للمستخدم
+                new AlertDialog.Builder(context)
+                    .setTitle("خطأ")
+                    .setMessage("لا يمكن فتح رابط التحديث. يرجى نسخ الرابط وفتحه يدوياً في المتصفح.")
+                    .setPositiveButton("حسناً", null)
+                    .show();
+            }
         } catch (Exception e) {
             Log.e(TAG, "Error opening download link: " + e.getMessage(), e);
+            // عرض رسالة للمستخدم في حالة حدوث خطأ
+            new AlertDialog.Builder(context)
+                .setTitle("خطأ")
+                .setMessage("حدث خطأ أثناء محاولة فتح رابط التحديث: " + e.getMessage())
+                .setPositiveButton("حسناً", null)
+                .show();
         }
     }
 
