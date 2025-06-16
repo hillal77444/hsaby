@@ -243,4 +243,7 @@
     <string name="permission_notification_rationale">يحتاج التطبيق إلى إرسال الإشعارات لإعلامك بالتحديثات المهمة</string>
     <string name="permission_install_rationale">يحتاج التطبيق إلى تثبيت التحديثات الجديدة</string>
     <string name="permission_media_rationale">يحتاج التطبيق إلى الوصول إلى الوسائط لإدارة المرفقات</string>
+    
+    <!-- Auto Update Feature Description -->
+    <string name="auto_update_feature_description">يستخدم التطبيق ميزة التحديث التلقائي لتثبيت التحديثات الجديدة مباشرة من Google Play Store، مما يضمن حصولك دائماً على أحدث الميزات والتحسينات الأمنية.</string>
 </resources>
