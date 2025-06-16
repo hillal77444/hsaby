@@ -1,0 +1,184 @@
+{% extends "admin/base.html" %}
+
+{% block title %}تحديثات التطبيق{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    /* تحميل الخطوط محلياً */
+    @font-face {
+        font-family: 'Bootstrap Icons';
+        src: url('/static/fonts/bootstrap-icons.woff2') format('woff2'),
+             url('/static/fonts/bootstrap-icons.woff') format('woff');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    /* Fallback للخطوط */
+    .bi {
+        font-family: 'Bootstrap Icons', 'Font Awesome 5 Free', sans-serif;
+    }
+
+    /* تحسين أداء التحميل */
+    .table {
+        will-change: transform;
+    }
+
+    .badge {
+        font-size: 0.85em;
+        padding: 0.5em 0.75em;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #e9ecef;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h4 {
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- رأس الصفحة -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">تحديثات التطبيق</h1>
+        <a href="{{ url_for('admin.add_update') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> إضافة تحديث جديد
+        </a>
+    </div>
+
+    <!-- جدول التحديثات -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            {% if updates %}
+            <div class="table-responsive">
+                <table class="table table-bordered" id="updatesTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>الإصدار</th>
+                            <th>الوصف</th>
+                            <th>رابط التحميل</th>
+                            <th>الحد الأدنى</th>
+                            <th>نوع التحديث</th>
+                            <th>الحالة</th>
+                            <th>تاريخ الإصدار</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for update in updates %}
+                        <tr>
+                            <td>{{ update.version }}</td>
+                            <td>{{ update.description }}</td>
+                            <td>
+                                <a href="{{ update.download_url }}" target="_blank" class="btn btn-sm btn-info">
+                                    <i class="fas fa-download"></i> تحميل
+                                </a>
+                            </td>
+                            <td>{{ update.min_version }}</td>
+                            <td>
+                                {% if update.force_update %}
+                                <span class="badge bg-danger">إلزامي</span>
+                                {% else %}
+                                <span class="badge bg-warning">اختياري</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if update.is_active %}
+                                <span class="badge bg-success">نشط</span>
+                                {% else %}
+                                <span class="badge bg-secondary">غير نشط</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ update.release_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                <a href="{{ url_for('admin.edit_update', update_id=update.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-sm btn-danger delete-update" data-id="{{ update.id }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-cloud-download"></i>
+                <h4>لا توجد تحديثات حالياً</h4>
+                <p>يمكنك إضافة تحديث جديد باستخدام الزر أعلاه</p>
+                <a href="{{ url_for('admin.add_update') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> إضافة تحديث جديد
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // تهيئة DataTable مع تحسين الأداء
+    $('#updatesTable').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Arabic.json"
+        },
+        "deferRender": true,
+        "processing": true,
+        "pageLength": 10,
+        "order": [[6, 'desc']], // ترتيب حسب تاريخ الإصدار تنازلياً
+        "dom": '<"top"lf>rt<"bottom"ip><"clear">'
+    });
+
+    // حذف تحديث
+    $('.delete-update').click(function() {
+        if (confirm('هل أنت متأكد من حذف هذا التحديث؟')) {
+            var id = $(this).data('id');
+            $.ajax({
+                url: '/api/admin/app-updates/' + id,
+                method: 'DELETE',
+                success: function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert('حدث خطأ أثناء حذف التحديث: ' + (response.error || 'خطأ غير معروف'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('حدث خطأ أثناء حذف التحديث: ' + (xhr.responseJSON?.error || error));
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %} 
