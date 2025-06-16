@@ -164,13 +164,28 @@ public class DataManager {
                         @Override
                         public void onResponse(Call<ServerAppUpdateInfo> call, Response<ServerAppUpdateInfo> response) {
                             if (response.isSuccessful() && response.body() != null) {
-                                Log.d(TAG, "Update check successful, version: " + response.body().getVersion());
-                                handler.post(() -> callback.onSuccess(response.body()));
+                                ServerAppUpdateInfo updateInfo = response.body();
+                                Log.d(TAG, "Update check successful, version: " + updateInfo.getVersion());
+                                Log.d(TAG, "Download URL from server: " + updateInfo.getDownloadUrl());
+                                Log.d(TAG, "Description: " + updateInfo.getDescription());
+                                Log.d(TAG, "Force update: " + updateInfo.isForceUpdate());
+                                
+                                // طباعة البيانات الخام من الاستجابة
+                                try {
+                                    String rawResponse = new Gson().toJson(response.body());
+                                    Log.d(TAG, "Raw server response: " + rawResponse);
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error printing raw response", e);
+                                }
+                                
+                                handler.post(() -> callback.onSuccess(updateInfo));
                             } else {
                                 String errorMessage = "خطأ في التحقق من التحديثات: " + response.code();
                                 try {
                                     if (response.errorBody() != null) {
-                                        errorMessage += "\n" + response.errorBody().string();
+                                        String errorBody = response.errorBody().string();
+                                        Log.e(TAG, "Error response body: " + errorBody);
+                                        errorMessage += "\n" + errorBody;
                                     }
                                 } catch (IOException e) {
                                     Log.e(TAG, "Error reading error body for update check", e);
