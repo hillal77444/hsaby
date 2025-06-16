@@ -178,13 +178,15 @@ public class AppUpdateHelper {
     }
 
     private void downloadAndInstallUpdate(String downloadUrl) {
+        Log.d(TAG, "Attempting to open download URL in browser: " + downloadUrl);
         try {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(downloadUrl));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
+            Log.d(TAG, "Successfully launched intent to open URL.");
         } catch (Exception e) {
-            Log.e(TAG, "Error opening download link: " + e.getMessage());
+            Log.e(TAG, "Error opening download link: " + e.getMessage(), e);
         }
     }
 
