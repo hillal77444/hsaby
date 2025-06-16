@@ -109,7 +109,7 @@ public class SettingsFragment extends Fragment {
     private void setupOtherSettings() {
         // هنا يمكن إضافة إعدادات أخرى
         binding.buttonPrivacyPolicy.setOnClickListener(v -> {
-            String url = "https://alhillal1.github.io/privacy-policy/";
+            String url = "https://malyp.com/api/privacy-policy";
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             startActivity(intent);
         });
