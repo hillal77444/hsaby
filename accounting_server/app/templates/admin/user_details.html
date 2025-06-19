@@ -68,9 +68,14 @@
             <div class="col-md-9 col-lg-10 p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2>تفاصيل المستخدم</h2>
-                    <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-right"></i> العودة للقائمة
-                    </a>
+                    <div>
+                        <a href="{{ url_for('admin.import_accounts_text', user_id=user.id) }}" class="btn btn-primary ms-2">
+                            <i class="bi bi-upload"></i> استيراد حسابات من نص
+                        </a>
+                        <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-right"></i> العودة للقائمة
+                        </a>
+                    </div>
                 </div>
 
                 {% with messages = get_flashed_messages() %}
