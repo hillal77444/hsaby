@@ -143,8 +143,11 @@ app.post('/send/:sessionId', async (req, res) => {
 
         // أرسل الرسالة
         const formattedNumber = number.replace(/[^0-9]/g, '');
-        const fullNumber = formattedNumber.startsWith('967') ? formattedNumber : `967${formattedNumber}`;
+        const fullNumber = (formattedNumber.startsWith('967') || formattedNumber.startsWith('966'))
+            ? formattedNumber
+            : `967${formattedNumber}`;
         await sock.sendMessage(`${fullNumber}@s.whatsapp.net`, { text: message });
+        
 
         // جدولة إغلاق الجلسة بعد 10 دقائق من آخر استخدام
         scheduleSessionClose(sessionId, 10);
@@ -170,7 +173,9 @@ app.post('/send_bulk/:sessionId', async (req, res) => {
         for (const number of numbers) {
             try {
                 const formattedNumber = number.replace(/[^0-9]/g, '');
-                const fullNumber = formattedNumber.startsWith('967') ? formattedNumber : `967${formattedNumber}`;
+                const fullNumber = (formattedNumber.startsWith('967') || formattedNumber.startsWith('966'))
+                    ? formattedNumber
+                    : `967${formattedNumber}`;
                 
                 await sock.sendMessage(`${fullNumber}@s.whatsapp.net`, { text: message });
                 results.push({ number, success: true });
