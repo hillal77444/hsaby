@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash, Response
+from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash, Response, session
 from app import db
 from app.models import User, Account, Transaction, AppUpdate
 from app.utils import hash_password
@@ -665,9 +665,11 @@ def calculate_and_notify_transaction(transaction_id):
         phone = account.phone_number
         if phone:
             phone = ''.join(filter(str.isdigit, phone))
-            if phone.startswith('0'):
+            if phone.startswith('966'):
+                pass  # يظل كما هو
+            elif phone.startswith('0'):
                 phone = '967' + phone[1:]
-            if not phone.startswith('967'):
+            elif not phone.startswith('967'):
                 phone = '967' + phone
 
         # إرسال الرسالة
@@ -850,9 +852,11 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
             return {'status': 'error', 'message': 'رقم الهاتف غير متوفر'}
             
         phone = ''.join(filter(str.isdigit, phone))
-        if phone.startswith('0'):
+        if phone.startswith('966'):
+            pass  # يظل كما هو
+        elif phone.startswith('0'):
             phone = '967' + phone[1:]
-        if not phone.startswith('967'):
+        elif not phone.startswith('967'):
             phone = '967' + phone
 
         # إرسال الرسالة
@@ -915,9 +919,11 @@ def send_transaction_delete_notification(transaction, final_balance):
             return {'status': 'error', 'message': 'رقم الهاتف غير متوفر'}
             
         phone = ''.join(filter(str.isdigit, phone))
-        if phone.startswith('0'):
+        if phone.startswith('966'):
+            pass  # يظل كما هو
+        elif phone.startswith('0'):
             phone = '967' + phone[1:]
-        if not phone.startswith('967'):
+        elif not phone.startswith('967'):
             phone = '967' + phone
 
         # إرسال الرسالة
@@ -992,3 +998,77 @@ def edit_update(update_id):
 @admin.route('/api/privacy-policy')
 def privacy_policy():
     return render_template('privacy_policy.html')
+
+@admin.route('/api/admin/import_accounts_text/<int:user_id>', methods=['GET', 'POST'])
+@admin_required
+def import_accounts_text(user_id):
+    user = User.query.get_or_404(user_id)
+    if request.method == 'POST':
+        data = request.form.get('accounts_data', '')
+        accounts = []
+        for line in data.strip().split('\n'):
+            line = line.strip()
+            if not line:
+                continue  # تجاهل الأسطر الفارغة
+            # تقسيم السطر على أول tab أو أكثر من space
+            parts = line.split('\t')
+            if len(parts) < 2:
+                parts = line.split()
+                if len(parts) < 2:
+                    continue
+                account_name = ' '.join(parts[:-1])
+                phone_number = parts[-1]
+            else:
+                account_name, phone_number = parts[0], parts[1]
+            accounts.append({
+                'account_name': account_name.strip(),
+                'phone_number': phone_number.strip()
+            })
+        # حفظ الحسابات مؤقتاً في session لعرضها للموافقة
+        session['pending_accounts'] = accounts
+        session['pending_user_id'] = user_id
+        return render_template('admin/confirm_import_accounts.html', user=user, accounts=accounts)
+    return render_template('admin/import_accounts_text.html', user=user)
+
+@admin.route('/api/admin/confirm_import_accounts', methods=['POST'])
+@admin_required
+def confirm_import_accounts():
+    accounts = session.get('pending_accounts', [])
+    user_id = session.get('pending_user_id')
+    if not accounts or not user_id:
+        flash('لا توجد بيانات لاستيرادها', 'error')
+        return redirect(url_for('admin.users'))
+    user = User.query.get_or_404(user_id)
+    count = 0
+    skipped = 0  # عدد الحسابات التي تم تجاهلها بسبب التكرار
+    # جلب آخر server_id مستخدم
+    last_account = Account.query.order_by(Account.server_id.desc()).first()
+    new_server_id = (last_account.server_id + 1) if last_account and last_account.server_id else 1
+    for acc in accounts:
+        # تحقق من وجود حساب بنفس رقم الهاتف لنفس المستخدم
+        existing_account = Account.query.filter_by(
+            user_id=user.id,
+            phone_number=acc['phone_number']
+        ).first()
+        if existing_account:
+            skipped += 1
+            continue  # تجاهل الحساب المكرر
+        account = Account(
+            user_id=user.id,
+            account_name=acc['account_name'],
+            phone_number=acc['phone_number'],
+            account_number=str(uuid.uuid4())[:8],  # رقم حساب عشوائي قصير
+            server_id=new_server_id,
+            created_at=datetime.now()
+        )
+        db.session.add(account)
+        count += 1
+        new_server_id += 1
+    db.session.commit()
+    session.pop('pending_accounts', None)
+    session.pop('pending_user_id', None)
+    msg = f'تم استيراد {count} حساب بنجاح.'
+    if skipped:
+        msg += f' تم تجاهل {skipped} حساب بسبب التكرار.'
+    flash(msg, 'success')
+    return redirect(url_for('admin.user_details', user_id=user.id))
