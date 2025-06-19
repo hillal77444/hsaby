@@ -1,0 +1,9 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<h3>استيراد حسابات للمستخدم: {{ user.username }}</h3>
+<form method="post">
+    <label>الصق بيانات الحسابات (كل سطر: الاسم <tab> الرقم أو الاسم ثم الرقم بمسافة):</label>
+    <textarea name="accounts_data" rows="15" style="width:100%;" required></textarea>
+    <button type="submit" class="btn btn-primary mt-2">عرض الحسابات قبل الحفظ</button>
+</form>
+{% endblock %} 
