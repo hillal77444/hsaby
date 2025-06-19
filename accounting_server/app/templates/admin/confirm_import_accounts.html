@@ -1,0 +1,29 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<h3>تأكيد استيراد الحسابات للمستخدم: {{ user.username }}</h3>
+<form method="post" action="{{ url_for('admin.confirm_import_accounts') }}">
+    <div class="alert alert-info">يرجى مراجعة الحسابات التالية قبل الحفظ. إذا كانت صحيحة اضغط "حفظ الحسابات".</div>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>اسم الحساب</th>
+                    <th>رقم الهاتف</th>
+                    <th>اسم المستخدم</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for acc in accounts %}
+                <tr>
+                    <td>{{ acc.account_name }}</td>
+                    <td>{{ acc.phone_number }}</td>
+                    <td>{{ user.username }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <button type="submit" class="btn btn-success">حفظ الحسابات</button>
+    <a href="{{ url_for('admin.user_details', user_id=user.id) }}" class="btn btn-secondary">إلغاء</a>
+</form>
+{% endblock %} 
