@@ -522,7 +522,7 @@ public class AccountStatementActivity extends AppCompatActivity {
         // اجعل التاريخ الافتراضي يغطي كل المعاملات (من تاريخ قديم جدًا إلى اليوم)
         Calendar cal = Calendar.getInstance();
         String toDate = dateFormat.format(cal.getTime());
-        cal.add(Calendar.YEAR, -10); // قبل 10 سنوات
+        cal.add(Calendar.DATE, -4); // قبل 10 سنوات
         String fromDate = dateFormat.format(cal.getTime());
         startDateInput.setText(fromDate);
         endDateInput.setText(toDate);
