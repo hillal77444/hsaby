@@ -437,8 +437,27 @@ public class AccountStatementActivity extends AppCompatActivity {
         double previousBalance = previousBalances != null && previousBalances.containsKey(selectedCurrency) ? previousBalances.get(selectedCurrency) : 0;
         double totalDebit = 0;
         double totalCredit = 0;
+        
+        // تحويل التواريخ إلى بداية اليوم ونهاية اليوم للمقارنة
+        Calendar startCal = Calendar.getInstance();
+        startCal.setTime(startDate);
+        startCal.set(Calendar.HOUR_OF_DAY, 0);
+        startCal.set(Calendar.MINUTE, 0);
+        startCal.set(Calendar.SECOND, 0);
+        startCal.set(Calendar.MILLISECOND, 0);
+        
+        Calendar endCal = Calendar.getInstance();
+        endCal.setTime(endDate);
+        endCal.set(Calendar.HOUR_OF_DAY, 23);
+        endCal.set(Calendar.MINUTE, 59);
+        endCal.set(Calendar.SECOND, 59);
+        endCal.set(Calendar.MILLISECOND, 999);
+        
+        long startTime = startCal.getTimeInMillis();
+        long endTime = endCal.getTimeInMillis();
+        
         for (Transaction t : transactions) {
-            if (t.getTransactionDate() >= startDate.getTime() && t.getTransactionDate() <= endDate.getTime()) {
+            if (t.getTransactionDate() >= startTime && t.getTransactionDate() <= endTime) {
                 if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
                     totalDebit += t.getAmount();
                 } else {
@@ -462,7 +481,7 @@ public class AccountStatementActivity extends AppCompatActivity {
         html.append("</tr>");
         double runningBalance = previousBalance;
         for (Transaction transaction : transactions) {
-            if (transaction.getTransactionDate() >= startDate.getTime() && transaction.getTransactionDate() <= endDate.getTime()) {
+            if (transaction.getTransactionDate() >= startTime && transaction.getTransactionDate() <= endTime) {
                 html.append("<tr>");
                 html.append("<td>").append(dateFormat.format(new Date(transaction.getTransactionDate()))).append("</td>");
                 if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
