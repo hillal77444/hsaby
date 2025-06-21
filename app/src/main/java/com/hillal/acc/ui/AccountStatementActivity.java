@@ -359,24 +359,27 @@ public class AccountStatementActivity extends AppCompatActivity {
         html.append("<head>");
         html.append("<meta charset='UTF-8'>");
         html.append("<style>");
-        html.append("body { font-family: 'Cairo', Arial, sans-serif; margin: 0; background: #f9f9f9; }");
-        html.append(".report-header { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px #eee; padding: 10px 8px 8px 8px; margin-bottom: 10px; text-align: center; }");
-        html.append(".report-header h2 { color: #1976d2; margin-bottom: 4px; font-size: 1.2em; }");
-        html.append(".report-header p { color: #333; margin: 2px 0; font-size: 1em; }");
-        html.append("table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px #eee; }");
-        html.append("th, td { border: 1px solid #ddd; padding: 8px 6px; text-align: right; font-size: 1em; }");
-        html.append("th { background-color: #e3eafc; color: #1976d2; font-weight: bold; }");
-        html.append("tr:nth-child(even) { background: #f7faff; }");
-        html.append("tr:hover { background: #e3eafc33; }");
-        html.append("@media print { .report-header { box-shadow: none; } table { box-shadow: none; } body { background: #fff; } }");
+        html.append("body { font-family: 'Cairo', Arial, sans-serif; margin: 0; background: #f5f7fa; }");
+        html.append(".report-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); padding: 16px 12px 12px 12px; margin: 8px; text-align: center; color: white; }");
+        html.append(".report-header p { color: #fff; margin: 3px 0; font-size: 0.9em; font-weight: 500; }");
+        html.append(".report-header .account-name { font-size: 1.1em; font-weight: bold; margin-bottom: 6px; }");
+        html.append(".report-header .period { font-size: 0.85em; opacity: 0.9; }");
+        html.append(".report-header .currency { font-size: 0.85em; opacity: 0.9; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; display: inline-block; margin-top: 4px; }");
+        html.append("table { width: calc(100% - 16px); border-collapse: collapse; margin: 8px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }");
+        html.append("th, td { border: 1px solid #e8eaed; padding: 10px 8px; text-align: right; font-size: 0.9em; }");
+        html.append("th { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); color: #495057; font-weight: 600; font-size: 0.85em; }");
+        html.append("tr:nth-child(even) { background: #f8f9fa; }");
+        html.append("tr:hover { background: #e3f2fd; transition: background 0.2s; }");
+        html.append(".balance-row { background: #e8f5e8 !important; font-weight: 500; }");
+        html.append(".total-row { background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%) !important; font-weight: bold; color: #2c3e50; }");
+        html.append("@media print { .report-header { box-shadow: none; background: #f8f9fa; color: #333; } table { box-shadow: none; } body { background: #fff; } }");
         html.append("</style>");
         html.append("</head>");
         html.append("<body>");
         html.append("<div class='report-header'>");
-        html.append("<h2>كشف الحساب التفصيلي</h2>");
-        html.append("<p>الحساب: <b>").append(account.getName()).append("</b></p>");
-        html.append("<p>الفترة: من <b>").append(dateFormat.format(startDate)).append("</b> إلى <b>").append(dateFormat.format(endDate)).append("</b></p>");
-        html.append("<p>العملة: <b>").append(selectedCurrency).append("</b></p>");
+        html.append("<p class='account-name'>").append(account.getName()).append("</p>");
+        html.append("<p class='period'>من <b>").append(dateFormat.format(startDate)).append("</b> إلى <b>").append(dateFormat.format(endDate)).append("</b></p>");
+        html.append("<p class='currency'>").append(selectedCurrency).append("</p>");
         html.append("</div>");
         sortTransactionsByDate(transactions);
         double previousBalance = previousBalances != null && previousBalances.containsKey(selectedCurrency) ? previousBalances.get(selectedCurrency) : 0;
@@ -399,7 +402,7 @@ public class AccountStatementActivity extends AppCompatActivity {
         html.append("<th>الوصف</th>");
         html.append("<th>الرصيد</th>");
         html.append("</tr>");
-        html.append("<tr>");
+        html.append("<tr class='balance-row'>");
         html.append("<td>").append(dateFormat.format(startDate)).append("</td>");
         html.append("<td></td><td></td>");
         html.append("<td>الرصيد السابق</td>");
@@ -412,9 +415,9 @@ public class AccountStatementActivity extends AppCompatActivity {
                 html.append("<td>").append(dateFormat.format(new Date(transaction.getTransactionDate()))).append("</td>");
                 if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
                     html.append("<td></td>");
-                    html.append("<td>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
+                    html.append("<td style='color: #d32f2f;'>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
                 } else {
-                    html.append("<td>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
+                    html.append("<td style='color: #388e3c;'>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
                     html.append("<td></td>");
                 }
                 html.append("<td>").append(transaction.getDescription()).append("</td>");
@@ -423,14 +426,14 @@ public class AccountStatementActivity extends AppCompatActivity {
                 } else {
                     runningBalance += transaction.getAmount();
                 }
-                html.append("<td>").append(String.format(Locale.US, "%.2f", runningBalance)).append("</td>");
+                html.append("<td style='font-weight: 500;'>").append(String.format(Locale.US, "%.2f", runningBalance)).append("</td>");
                 html.append("</tr>");
             }
         }
-        html.append("<tr style='font-weight:bold;background:#f0f0f0;'>");
+        html.append("<tr class='total-row'>");
         html.append("<td>الإجمالي خلال الفترة</td>");
-        html.append("<td>").append(String.format(Locale.US, "%.2f", totalCredit)).append("</td>");
-        html.append("<td>").append(String.format(Locale.US, "%.2f", totalDebit)).append("</td>");
+        html.append("<td style='color: #388e3c;'>").append(String.format(Locale.US, "%.2f", totalCredit)).append("</td>");
+        html.append("<td style='color: #d32f2f;'>").append(String.format(Locale.US, "%.2f", totalDebit)).append("</td>");
         html.append("<td></td>");
         html.append("<td></td>");
         html.append("</tr>");
