@@ -495,4 +495,14 @@ public class AccountStatementActivity extends AppCompatActivity {
                     .replace("٨", "8")
                     .replace("٩", "9");
     }
+
+    private void setNumberPickerSelectionBg(NumberPicker picker) {
+        try {
+            java.lang.reflect.Field selectionDividerField = NumberPicker.class.getDeclaredField("mSelectionDivider");
+            selectionDividerField.setAccessible(true);
+            selectionDividerField.set(picker, getDrawable(R.drawable.picker_selected_bg));
+        } catch (Exception e) {
+            // تجاهل أي خطأ (قد لا يعمل على كل الأجهزة)
+        }
+    }
 } 
