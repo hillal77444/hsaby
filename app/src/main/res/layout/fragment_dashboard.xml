@@ -174,7 +174,7 @@
                 android:layout_height="wrap_content"
                 android:text="المعاملات"
                 android:icon="@drawable/ic_transactions"
-                android:iconGravity="textStart"
+                app:iconGravity="textStart"
                 android:layout_marginBottom="12dp"/>
 
             <com.google.android.material.button.MaterialButton
@@ -184,7 +184,7 @@
                 android:layout_height="wrap_content"
                 android:text="الحسابات"
                 android:icon="@drawable/ic_accounts"
-                android:iconGravity="textStart"
+                app:iconGravity="textStart"
                 android:layout_marginBottom="12dp"/>
 
             <com.google.android.material.button.MaterialButton
@@ -194,7 +194,7 @@
                 android:layout_height="wrap_content"
                 android:text="متابعة الديون"
                 android:icon="@drawable/ic_summary"
-                android:iconGravity="textStart"
+                app:iconGravity="textStart"
                 android:layout_marginBottom="12dp"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
