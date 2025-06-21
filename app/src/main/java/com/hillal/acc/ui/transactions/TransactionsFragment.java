@@ -438,6 +438,25 @@ public class TransactionsFragment extends Fragment {
 
     private void applyAllFilters() {
         List<Transaction> filtered = new ArrayList<>();
+        
+        // تحويل التواريخ إلى بداية اليوم ونهاية اليوم للمقارنة
+        Calendar startCal = Calendar.getInstance();
+        startCal.setTimeInMillis(startDate.getTimeInMillis());
+        startCal.set(Calendar.HOUR_OF_DAY, 0);
+        startCal.set(Calendar.MINUTE, 0);
+        startCal.set(Calendar.SECOND, 0);
+        startCal.set(Calendar.MILLISECOND, 0);
+        
+        Calendar endCal = Calendar.getInstance();
+        endCal.setTimeInMillis(endDate.getTimeInMillis());
+        endCal.set(Calendar.HOUR_OF_DAY, 23);
+        endCal.set(Calendar.MINUTE, 59);
+        endCal.set(Calendar.SECOND, 59);
+        endCal.set(Calendar.MILLISECOND, 999);
+        
+        long startTime = startCal.getTimeInMillis();
+        long endTime = endCal.getTimeInMillis();
+        
         for (Transaction t : allTransactions) {
             boolean match = true;
             if (selectedAccount != null && !selectedAccount.isEmpty()) {
@@ -451,10 +470,13 @@ public class TransactionsFragment extends Fragment {
             if (selectedCurrency != null && !selectedCurrency.isEmpty()) {
                 if (!selectedCurrency.equals(t.getCurrency())) match = false;
             }
+            
+            // مقارنة التاريخ فقط (بدون وقت)
             long transactionDate = t.getTransactionDate();
-            if (transactionDate < startDate.getTimeInMillis() || transactionDate > endDate.getTimeInMillis()) {
+            if (transactionDate < startTime || transactionDate > endTime) {
                 match = false;
             }
+            
             if (match) filtered.add(t);
         }
         adapter.submitList(filtered);
