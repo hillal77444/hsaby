@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.TextView;
+import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -49,6 +50,8 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Collections;
+import java.util.Set;
+import java.util.LinkedHashSet;
 
 public class AccountStatementActivity extends AppCompatActivity {
     private AccountStatementViewModel viewModel;
@@ -63,6 +66,9 @@ public class AccountStatementActivity extends AppCompatActivity {
     private List<Transaction> allTransactions = new ArrayList<>();
     private Map<Long, Map<String, Double>> accountBalancesMap = new HashMap<>();
     private TransactionRepository transactionRepository;
+    private LinearLayout currencyButtonsLayout;
+    private String selectedCurrency = null;
+    private ImageButton btnPrintInCard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,10 +107,11 @@ public class AccountStatementActivity extends AppCompatActivity {
         endDateInput = findViewById(R.id.endDateInput);
         btnShowReport = findViewById(R.id.btnShowReport);
         webView = findViewById(R.id.webView);
-        btnPrint = findViewById(R.id.btnPrintInCard);
+        btnPrintInCard = findViewById(R.id.btnPrintInCard);
+        currencyButtonsLayout = findViewById(R.id.currencyButtonsLayout);
 
         btnShowReport.setOnClickListener(v -> showReport());
-        btnPrint.setOnClickListener(v -> printReport());
+        btnPrintInCard.setOnClickListener(v -> printReport());
 
         // إعداد مستمع النقر على حقل اختيار الحساب
         accountDropdown.setFocusable(false);
@@ -229,7 +236,6 @@ public class AccountStatementActivity extends AppCompatActivity {
             Toast.makeText(this, "جاري تحميل الحسابات...", Toast.LENGTH_SHORT).show();
             return;
         }
-
         AccountPickerDialog dialog = new AccountPickerDialog(
             this,
             allAccounts,
@@ -237,112 +243,92 @@ public class AccountStatementActivity extends AppCompatActivity {
             accountBalancesMap,
             account -> {
                 accountDropdown.setText(account.getName());
+                onAccountSelected(account);
             }
         );
         dialog.show();
     }
 
-    private void setupWebView() {
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setBuiltInZoomControls(true);
-        webView.getSettings().setDisplayZoomControls(false);
-    }
-
-    private void showReport() {
-        String selectedAccountName = accountDropdown.getText().toString();
-        String startDate = startDateInput.getText().toString();
-        String endDate = endDateInput.getText().toString();
-
-        if (selectedAccountName.isEmpty()) {
-            Toast.makeText(this, "الرجاء اختيار الحساب", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (startDate.isEmpty() || endDate.isEmpty()) {
-            Toast.makeText(this, "الرجاء تحديد الفترة الزمنية", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        try {
-            Date start = dateFormat.parse(startDate);
-            Date end = dateFormat.parse(endDate);
-
-            // اجعل endDate نهاية اليوم
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(end);
-            cal.set(Calendar.HOUR_OF_DAY, 23);
-            cal.set(Calendar.MINUTE, 59);
-            cal.set(Calendar.SECOND, 59);
-            cal.set(Calendar.MILLISECOND, 999);
-            Date endOfDay = cal.getTime();
-
-            if (start.after(endOfDay)) {
-                Toast.makeText(this, "تاريخ البداية يجب أن يكون قبل تاريخ النهاية", Toast.LENGTH_SHORT).show();
+    private void onAccountSelected(Account account) {
+        viewModel.getTransactionsForAccount(account.getId()).observe(this, transactions -> {
+            if (transactions == null || transactions.isEmpty()) {
+                currencyButtonsLayout.setVisibility(View.GONE);
+                webView.loadDataWithBaseURL(null, "<p>لا توجد بيانات</p>", "text/html", "UTF-8", null);
                 return;
             }
-
-            // البحث عن الحساب المحدد
-            viewModel.getAllAccounts().observe(this, accounts -> {
-                final Account selectedAccount = getSelectedAccount(accounts, selectedAccountName);
-                final Date startFinal = start;
-                final Date endFinal = endOfDay;
-
-                if (selectedAccount != null) {
-                    viewModel.getTransactionsForAccountInDateRange(
-                        selectedAccount.getId(),
-                        startFinal.getTime(),
-                        endFinal.getTime()
-                    ).observe(this, transactions -> {
-                        // افصل المعاملات حسب العملة
-                        Map<String, List<Transaction>> currencyMap = new HashMap<>();
-                        for (Transaction transaction : transactions) {
-                            String currency = transaction.getCurrency();
-                            if (!currencyMap.containsKey(currency)) {
-                                currencyMap.put(currency, new ArrayList<>());
-                            }
-                            currencyMap.get(currency).add(transaction);
-                        }
-                        // سنبني التقرير بعد جلب جميع أرصدة العملات
-                        Map<String, Double> previousBalances = new HashMap<>();
-                        final int[] counter = {0};
-                        if (currencyMap.isEmpty()) {
-                            String htmlContent = generateReportHtml(selectedAccount, startFinal, endFinal, transactions, previousBalances, currencyMap);
-                            webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
-                        }
-                        for (String currency : currencyMap.keySet()) {
-                            LiveData<Double> prevBalanceLive = transactionRepository.getBalanceUntilDate(selectedAccount.getId(), startFinal.getTime() - 1, currency);
-                            prevBalanceLive.observe(this, prevBalance -> {
-                                previousBalances.put(currency, prevBalance != null ? prevBalance : 0.0);
-                                counter[0]++;
-                                if (counter[0] == currencyMap.size()) {
-                                    String htmlContent = generateReportHtml(selectedAccount, startFinal, endFinal, transactions, previousBalances, currencyMap);
-                                    webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
-                                }
-                            });
-                        }
-                    });
-                } else {
-                    Toast.makeText(this, "لم يتم العثور على الحساب المحدد", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } catch (ParseException e) {
-            Toast.makeText(this, "خطأ في تنسيق التاريخ", Toast.LENGTH_SHORT).show();
-        }
+            Set<String> currencies = new LinkedHashSet<>();
+            for (Transaction t : transactions) {
+                currencies.add(t.getCurrency());
+            }
+            currencyButtonsLayout.removeAllViews();
+            currencyButtonsLayout.setVisibility(View.VISIBLE);
+            for (String currency : currencies) {
+                MaterialButton btn = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+                btn.setText(currency);
+                btn.setCheckable(true);
+                btn.setChecked(false);
+                btn.setTextColor(getResources().getColor(R.color.primary_text));
+                btn.setStrokeColorResource(R.color.primary);
+                btn.setStrokeWidth(2);
+                btn.setCornerRadius(16);
+                btn.setBackgroundResource(R.drawable.bg_currency_button);
+                btn.setOnClickListener(v -> setSelectedCurrency(currency, account, transactions));
+                currencyButtonsLayout.addView(btn);
+            }
+            if (!currencies.isEmpty()) {
+                setSelectedCurrency(currencies.iterator().next(), account, transactions);
+            }
+        });
     }
 
-    private String generateReportHtml(Account account, Date startDate, Date endDate, List<Transaction> transactions, Map<String, Double> previousBalances, Map<String, List<Transaction>> currencyMap) {
+    private void setSelectedCurrency(String currency, Account account, List<Transaction> transactions) {
+        selectedCurrency = currency;
+        for (int i = 0; i < currencyButtonsLayout.getChildCount(); i++) {
+            MaterialButton btn = (MaterialButton) currencyButtonsLayout.getChildAt(i);
+            btn.setChecked(btn.getText().toString().equals(currency));
+            btn.setBackgroundResource(btn.isChecked() ? R.drawable.bg_currency_button_selected : R.drawable.bg_currency_button);
+            btn.setTextColor(btn.isChecked() ? Color.WHITE : getResources().getColor(R.color.primary_text));
+        }
+        showReportForCurrency(account, transactions, currency);
+    }
+
+    private void showReportForCurrency(Account account, List<Transaction> transactions, String currency) {
+        List<Transaction> filtered = new ArrayList<>();
+        for (Transaction t : transactions) {
+            if (t.getCurrency().equals(currency)) filtered.add(t);
+        }
+        long startDateMillis = 0;
+        long endDateMillis = 0;
+        try {
+            startDateMillis = dateFormat.parse(startDateInput.getText().toString()).getTime();
+            endDateMillis = dateFormat.parse(endDateInput.getText().toString()).getTime();
+        } catch (Exception ignored) {}
+        LiveData<Double> prevBalanceLive = transactionRepository.getBalanceUntilDate(account.getId(), startDateMillis - 1, currency);
+        long finalStartDateMillis = startDateMillis;
+        long finalEndDateMillis = endDateMillis;
+        prevBalanceLive.observe(this, prevBalance -> {
+            Map<String, Double> previousBalances = new HashMap<>();
+            previousBalances.put(currency, prevBalance != null ? prevBalance : 0.0);
+            Map<String, List<Transaction>> currencyMap = new HashMap<>();
+            currencyMap.put(currency, filtered);
+            String htmlContent = generateReportHtmlSingleCurrency(account, new Date(finalStartDateMillis), new Date(finalEndDateMillis), filtered, previousBalances, currency);
+            webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
+        });
+    }
+
+    private String generateReportHtmlSingleCurrency(Account account, Date startDate, Date endDate, List<Transaction> transactions, Map<String, Double> previousBalances, String currency) {
         StringBuilder html = new StringBuilder();
         html.append("<!DOCTYPE html>");
         html.append("<html dir='rtl' lang='ar'>");
         html.append("<head>");
         html.append("<meta charset='UTF-8'>");
         html.append("<style>");
-        html.append("body { font-family: 'Cairo', Arial, sans-serif; margin: 20px; background: #f9f9f9; }");
-        html.append(".report-header { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #eee; padding: 24px 20px 16px 20px; margin-bottom: 24px; text-align: center; }");
-        html.append(".report-header h2 { color: #1976d2; margin-bottom: 8px; font-size: 2em; }");
-        html.append(".report-header p { color: #333; margin: 4px 0; font-size: 1.1em; }");
-        html.append("table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px #eee; }");
-        html.append("th, td { border: 1px solid #ddd; padding: 10px 8px; text-align: right; font-size: 1em; }");
+        html.append("body { font-family: 'Cairo', Arial, sans-serif; margin: 0; background: #f9f9f9; }");
+        html.append(".report-header { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px #eee; padding: 10px 8px 8px 8px; margin-bottom: 10px; text-align: center; }");
+        html.append(".report-header h2 { color: #1976d2; margin-bottom: 4px; font-size: 1.2em; }");
+        html.append(".report-header p { color: #333; margin: 2px 0; font-size: 1em; }");
+        html.append("table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px #eee; }");
+        html.append("th, td { border: 1px solid #ddd; padding: 8px 6px; text-align: right; font-size: 1em; }");
         html.append("th { background-color: #e3eafc; color: #1976d2; font-weight: bold; }");
         html.append("tr:nth-child(even) { background: #f7faff; }");
         html.append("tr:hover { background: #e3eafc33; }");
@@ -354,75 +340,65 @@ public class AccountStatementActivity extends AppCompatActivity {
         html.append("<h2>كشف الحساب التفصيلي</h2>");
         html.append("<p>الحساب: <b>").append(account.getName()).append("</b></p>");
         html.append("<p>الفترة: من <b>").append(dateFormat.format(startDate)).append("</b> إلى <b>").append(dateFormat.format(endDate)).append("</b></p>");
+        html.append("<p>العملة: <b>").append(currency).append("</b></p>");
         html.append("</div>");
-        
-        for (String currency : currencyMap.keySet()) {
-            List<Transaction> allCurrencyTransactions = currencyMap.get(currency);
-            sortTransactionsByDate(allCurrencyTransactions);
-            // الرصيد السابق من قاعدة البيانات
-            double previousBalance = previousBalances != null && previousBalances.containsKey(currency) ? previousBalances.get(currency) : 0;
-            // احسب إجمالي المدين والدائن خلال الفترة
-            double totalDebit = 0;
-            double totalCredit = 0;
-            for (Transaction t : allCurrencyTransactions) {
-                if (t.getTransactionDate() >= startDate.getTime() && t.getTransactionDate() <= endDate.getTime()) {
-                    if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
-                        totalDebit += t.getAmount();
-                    } else {
-                        totalCredit += t.getAmount();
-                    }
+        sortTransactionsByDate(transactions);
+        double previousBalance = previousBalances != null && previousBalances.containsKey(currency) ? previousBalances.get(currency) : 0;
+        double totalDebit = 0;
+        double totalCredit = 0;
+        for (Transaction t : transactions) {
+            if (t.getTransactionDate() >= startDate.getTime() && t.getTransactionDate() <= endDate.getTime()) {
+                if (t.getType().equals("عليه") || t.getType().equalsIgnoreCase("debit")) {
+                    totalDebit += t.getAmount();
+                } else {
+                    totalCredit += t.getAmount();
                 }
             }
-            html.append("<h3>العملة: ").append(currency).append("</h3>");
-            html.append("<table>");
-            html.append("<tr>");
-            html.append("<th>التاريخ</th>");
-            html.append("<th>له</th>");
-            html.append("<th>عليه</th>");
-            html.append("<th>الوصف</th>");
-            html.append("<th>الرصيد</th>");
-            html.append("</tr>");
-            // صف الرصيد السابق
-            html.append("<tr>");
-            html.append("<td>").append(dateFormat.format(startDate)).append("</td>");
-            html.append("<td></td><td></td>");
-            html.append("<td>الرصيد السابق</td>");
-            html.append("<td>").append(String.format(Locale.US, "%.2f", previousBalance)).append("</td>");
-            html.append("</tr>");
-            // العمليات خلال الفترة
-            double runningBalance = previousBalance;
-            for (Transaction transaction : allCurrencyTransactions) {
-                if (transaction.getTransactionDate() >= startDate.getTime() && transaction.getTransactionDate() <= endDate.getTime()) {
-                    html.append("<tr>");
-                    html.append("<td>").append(dateFormat.format(new Date(transaction.getTransactionDate()))).append("</td>");
-                    if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
-                        html.append("<td></td>");
-                        html.append("<td>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
-                    } else {
-                        html.append("<td>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
-                        html.append("<td></td>");
-                    }
-                    html.append("<td>").append(transaction.getDescription()).append("</td>");
-                    if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
-                        runningBalance -= transaction.getAmount();
-                    } else {
-                        runningBalance += transaction.getAmount();
-                    }
-                    html.append("<td>").append(String.format(Locale.US, "%.2f", runningBalance)).append("</td>");
-                    html.append("</tr>");
-                }
-            }
-            // صف الإجمالي
-            html.append("<tr style='font-weight:bold;background:#f0f0f0;'>");
-            html.append("<td>الإجمالي خلال الفترة</td>"); // عمود التاريخ فقط
-            html.append("<td>").append(String.format(Locale.US, "%.2f", totalCredit)).append("</td>");
-            html.append("<td>").append(String.format(Locale.US, "%.2f", totalDebit)).append("</td>");
-            html.append("<td></td>");
-            html.append("<td></td>");
-            html.append("</tr>");
-            html.append("</table>");
         }
-
+        html.append("<table>");
+        html.append("<tr>");
+        html.append("<th>التاريخ</th>");
+        html.append("<th>له</th>");
+        html.append("<th>عليه</th>");
+        html.append("<th>الوصف</th>");
+        html.append("<th>الرصيد</th>");
+        html.append("</tr>");
+        html.append("<tr>");
+        html.append("<td>").append(dateFormat.format(startDate)).append("</td>");
+        html.append("<td></td><td></td>");
+        html.append("<td>الرصيد السابق</td>");
+        html.append("<td>").append(String.format(Locale.US, "%.2f", previousBalance)).append("</td>");
+        html.append("</tr>");
+        double runningBalance = previousBalance;
+        for (Transaction transaction : transactions) {
+            if (transaction.getTransactionDate() >= startDate.getTime() && transaction.getTransactionDate() <= endDate.getTime()) {
+                html.append("<tr>");
+                html.append("<td>").append(dateFormat.format(new Date(transaction.getTransactionDate()))).append("</td>");
+                if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
+                    html.append("<td></td>");
+                    html.append("<td>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
+                } else {
+                    html.append("<td>").append(String.format(Locale.US, "%.2f", transaction.getAmount())).append("</td>");
+                    html.append("<td></td>");
+                }
+                html.append("<td>").append(transaction.getDescription()).append("</td>");
+                if (transaction.getType().equals("عليه") || transaction.getType().equalsIgnoreCase("debit")) {
+                    runningBalance -= transaction.getAmount();
+                } else {
+                    runningBalance += transaction.getAmount();
+                }
+                html.append("<td>").append(String.format(Locale.US, "%.2f", runningBalance)).append("</td>");
+                html.append("</tr>");
+            }
+        }
+        html.append("<tr style='font-weight:bold;background:#f0f0f0;'>");
+        html.append("<td>الإجمالي خلال الفترة</td>");
+        html.append("<td>").append(String.format(Locale.US, "%.2f", totalCredit)).append("</td>");
+        html.append("<td>").append(String.format(Locale.US, "%.2f", totalDebit)).append("</td>");
+        html.append("<td></td>");
+        html.append("<td></td>");
+        html.append("</tr>");
+        html.append("</table>");
         html.append("</body>");
         html.append("</html>");
         return html.toString();
