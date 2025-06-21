@@ -76,7 +76,16 @@ public class TransactionsFragment extends Fragment {
         // تهيئة التواريخ الافتراضية
         startDate = Calendar.getInstance();
         startDate.add(Calendar.DAY_OF_MONTH, -4); // قبل 4 أيام
+        startDate.set(Calendar.HOUR_OF_DAY, 0);
+        startDate.set(Calendar.MINUTE, 0);
+        startDate.set(Calendar.SECOND, 0);
+        startDate.set(Calendar.MILLISECOND, 0);
+        
         endDate = Calendar.getInstance(); // اليوم الحالي
+        endDate.set(Calendar.HOUR_OF_DAY, 23);
+        endDate.set(Calendar.MINUTE, 59);
+        endDate.set(Calendar.SECOND, 59);
+        endDate.set(Calendar.MILLISECOND, 999);
     }
 
     @Nullable
