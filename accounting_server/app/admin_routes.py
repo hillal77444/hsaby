@@ -249,6 +249,15 @@ def update_user(user_id):
             return redirect(url_for('admin.user_details', user_id=user_id))
         user.password_hash = hash_password(new_password)
     
+    if 'session_name' in request.form:
+        user.session_name = request.form['session_name'] or 'admin_main'
+    if 'session_expiry' in request.form:
+        session_expiry_val = request.form['session_expiry']
+        if session_expiry_val:
+            user.session_expiry = datetime.fromisoformat(session_expiry_val)
+        else:
+            user.session_expiry = None
+    
     db.session.commit()
     flash('تم تحديث بيانات المستخدم بنجاح')
     return redirect(url_for('admin.user_details', user_id=user_id))
@@ -672,9 +681,16 @@ def calculate_and_notify_transaction(transaction_id):
             elif not phone.startswith('967'):
                 phone = '967' + phone
 
+        # --- منطق الجلسة وتاريخ الانتهاء ---
+        session_name = user.session_name or 'admin_main'
+        if session_name != 'admin_main':
+            if not user.session_expiry or user.session_expiry < datetime.now():
+                return  # لا ترسل الرسالة ولا ترجع رد
+        # --- نهاية المنطق ---
+
         # إرسال الرسالة
         response = requests.post(
-            f"{WHATSAPP_API}/send/admin_main",
+            f"{WHATSAPP_API}/send/{session_name}",
             json={
                 'number': phone,
                 'message': message
@@ -859,9 +875,16 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
         elif not phone.startswith('967'):
             phone = '967' + phone
 
+        # --- منطق الجلسة وتاريخ الانتهاء ---
+        session_name = user.session_name or 'admin_main'
+        if session_name != 'admin_main':
+            if not user.session_expiry or user.session_expiry < datetime.now():
+                return  # لا ترسل الرسالة ولا ترجع رد
+        # --- نهاية المنطق ---
+
         # إرسال الرسالة
         response = requests.post(
-            f"{WHATSAPP_API}/send/admin_main",
+            f"{WHATSAPP_API}/send/{session_name}",
             json={
                 'number': phone,
                 'message': message
@@ -926,9 +949,16 @@ def send_transaction_delete_notification(transaction, final_balance):
         elif not phone.startswith('967'):
             phone = '967' + phone
 
+        # --- منطق الجلسة وتاريخ الانتهاء ---
+        session_name = user.session_name or 'admin_main'
+        if session_name != 'admin_main':
+            if not user.session_expiry or user.session_expiry < datetime.now():
+                return  # لا ترسل الرسالة ولا ترجع رد
+        # --- نهاية المنطق ---
+
         # إرسال الرسالة
         response = requests.post(
-            f"{WHATSAPP_API}/send/admin_main",
+            f"{WHATSAPP_API}/send/{session_name}",
             json={
                 'number': phone,
                 'message': message
