@@ -87,21 +87,10 @@
             android:gravity="center_vertical|end"
             android:layout_marginTop="6dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/endDateInput"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_edittext"
-                android:focusable="false"
-                android:gravity="end|center_vertical"
-                android:drawableStart="@drawable/ic_calendar"
-                android:textSize="15sp"/>
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
-                android:text="الى"
+                android:text="من"
                 android:gravity="center"
                 android:textSize="15sp"
                 android:textColor="#333"
@@ -121,11 +110,22 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
-                android:text="من"
+                android:text="الى"
                 android:gravity="center"
                 android:textSize="15sp"
                 android:textColor="#333"
                 android:paddingHorizontal="4dp"/>
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/endDateInput"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_edittext"
+                android:focusable="false"
+                android:gravity="end|center_vertical"
+                android:drawableStart="@drawable/ic_calendar"
+                android:textSize="15sp"/>
         </LinearLayout>
 
         <!-- أزرار العملات -->
