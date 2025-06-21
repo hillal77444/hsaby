@@ -258,32 +258,51 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private void onAccountSelected(Account account) {
-        viewModel.getTransactionsForAccount(account.getId()).observe(this, transactions -> {
-            lastAccountTransactions = transactions != null ? transactions : new ArrayList<>();
-            if (lastAccountTransactions.isEmpty()) {
-                currencyButtonsLayout.setVisibility(View.GONE);
-                webView.loadDataWithBaseURL(null, "<p>لا توجد بيانات</p>", "text/html", "UTF-8", null);
-                return;
+        // استخدم allTransactions بدلاً من جلب البيانات من جديد
+        List<Transaction> accountTransactions = new ArrayList<>();
+        for (Transaction t : allTransactions) {
+            if (t.getAccountId() == account.getId()) {
+                accountTransactions.add(t);
             }
-            java.util.LinkedHashSet<String> currencies = new java.util.LinkedHashSet<>();
-            for (Transaction t : lastAccountTransactions) {
-                currencies.add(t.getCurrency().trim());
-            }
-            currencyButtonsLayout.removeAllViews();
-            for (String currency : currencies) {
-                MaterialButton btn = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
-                btn.setText(currency);
-                btn.setCheckable(true);
-                btn.setChecked(currency.equals(selectedCurrency) || (selectedCurrency == null && currencies.iterator().next().equals(currency)));
-                btn.setOnClickListener(v -> setSelectedCurrency(currency));
-                currencyButtonsLayout.addView(btn);
-            }
-            currencyButtonsLayout.setVisibility(View.VISIBLE);
-            if (selectedCurrency == null || !currencies.contains(selectedCurrency)) {
-                selectedCurrency = currencies.iterator().next();
-            }
-            setSelectedCurrency(selectedCurrency);
-        });
+        }
+        
+        android.util.Log.d("AccountStatement", "Account ID: " + account.getId());
+        android.util.Log.d("AccountStatement", "All transactions count: " + allTransactions.size());
+        android.util.Log.d("AccountStatement", "Account transactions count: " + accountTransactions.size());
+        
+        lastAccountTransactions = accountTransactions;
+        if (lastAccountTransactions.isEmpty()) {
+            currencyButtonsLayout.setVisibility(View.GONE);
+            webView.loadDataWithBaseURL(null, "<p>لا توجد بيانات</p>", "text/html", "UTF-8", null);
+            return;
+        }
+        
+        // طباعة تفاصيل المعاملات للفحص
+        for (Transaction t : lastAccountTransactions) {
+            android.util.Log.d("AccountStatement", "Transaction: ID=" + t.getId() + ", AccountID=" + t.getAccountId() + ", Amount=" + t.getAmount() + ", Currency=" + t.getCurrency());
+        }
+        
+        java.util.LinkedHashSet<String> currencies = new java.util.LinkedHashSet<>();
+        for (Transaction t : lastAccountTransactions) {
+            currencies.add(t.getCurrency().trim());
+        }
+        
+        android.util.Log.d("AccountStatement", "Currencies found: " + currencies);
+        
+        currencyButtonsLayout.removeAllViews();
+        for (String currency : currencies) {
+            MaterialButton btn = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+            btn.setText(currency);
+            btn.setCheckable(true);
+            btn.setChecked(currency.equals(selectedCurrency) || (selectedCurrency == null && currencies.iterator().next().equals(currency)));
+            btn.setOnClickListener(v -> setSelectedCurrency(currency));
+            currencyButtonsLayout.addView(btn);
+        }
+        currencyButtonsLayout.setVisibility(View.VISIBLE);
+        if (selectedCurrency == null || !currencies.contains(selectedCurrency)) {
+            selectedCurrency = currencies.iterator().next();
+        }
+        setSelectedCurrency(selectedCurrency);
     }
 
     private void setSelectedCurrency(String currency) {
