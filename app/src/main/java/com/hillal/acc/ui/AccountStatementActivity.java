@@ -333,36 +333,69 @@ public class AccountStatementActivity extends AppCompatActivity {
 
     private void updateReport() {
         if (lastSelectedAccount == null || selectedCurrency == null) return;
-        long startDateMillis = 0;
-        long endDateMillis = 0;
+        
+        Date startDate = null;
+        Date endDate = null;
+        
         try {
-            startDateMillis = dateFormat.parse(startDateInput.getText().toString()).getTime();
-            endDateMillis = dateFormat.parse(endDateInput.getText().toString()).getTime();
-        } catch (Exception ignored) {}
-        if (startDateMillis > endDateMillis) {
-            long temp = startDateMillis;
-            startDateMillis = endDateMillis;
-            endDateMillis = temp;
+            startDate = dateFormat.parse(startDateInput.getText().toString());
+            endDate = dateFormat.parse(endDateInput.getText().toString());
+        } catch (Exception ignored) {
+            return;
         }
+        
+        // إذا كانت التواريخ معكوسة، بدّل القيم
+        if (startDate.after(endDate)) {
+            Date temp = startDate;
+            startDate = endDate;
+            endDate = temp;
+        }
+        
         List<Transaction> filtered = new ArrayList<>();
         for (Transaction t : lastAccountTransactions) {
-            if (t.getCurrency().trim().equals(selectedCurrency.trim()) && t.getTransactionDate() >= startDateMillis && t.getTransactionDate() <= endDateMillis) {
-                filtered.add(t);
+            if (t.getCurrency().trim().equals(selectedCurrency.trim())) {
+                // تحويل تاريخ المعاملة إلى تاريخ فقط (بدون وقت)
+                Calendar transactionCal = Calendar.getInstance();
+                transactionCal.setTimeInMillis(t.getTransactionDate());
+                transactionCal.set(Calendar.HOUR_OF_DAY, 0);
+                transactionCal.set(Calendar.MINUTE, 0);
+                transactionCal.set(Calendar.SECOND, 0);
+                transactionCal.set(Calendar.MILLISECOND, 0);
+                Date transactionDateOnly = transactionCal.getTime();
+                
+                // مقارنة التواريخ فقط (بدون وقت)
+                if (!transactionDateOnly.before(startDate) && !transactionDateOnly.after(endDate)) {
+                    filtered.add(t);
+                }
             }
         }
+        
         if (filtered.isEmpty()) {
             webView.loadDataWithBaseURL(null, "<p>لا توجد بيانات لهذه العملة أو الفترة</p>", "text/html", "UTF-8", null);
             return;
         }
-        LiveData<Double> prevBalanceLive = transactionRepository.getBalanceUntilDate(lastSelectedAccount.getId(), startDateMillis - 1, selectedCurrency);
-        long finalStartDateMillis = startDateMillis;
-        long finalEndDateMillis = endDateMillis;
+        
+        // استخدام بداية اليوم السابق للحصول على الرصيد السابق
+        Calendar prevDayCal = Calendar.getInstance();
+        prevDayCal.setTime(startDate);
+        prevDayCal.add(Calendar.DAY_OF_MONTH, -1);
+        prevDayCal.set(Calendar.HOUR_OF_DAY, 23);
+        prevDayCal.set(Calendar.MINUTE, 59);
+        prevDayCal.set(Calendar.SECOND, 59);
+        prevDayCal.set(Calendar.MILLISECOND, 999);
+        
+        LiveData<Double> prevBalanceLive = transactionRepository.getBalanceUntilDate(
+            lastSelectedAccount.getId(), 
+            prevDayCal.getTimeInMillis(), 
+            selectedCurrency
+        );
+        
         prevBalanceLive.observe(this, prevBalance -> {
             Map<String, Double> previousBalances = new HashMap<>();
             previousBalances.put(selectedCurrency, prevBalance != null ? prevBalance : 0.0);
             Map<String, List<Transaction>> currencyMap = new HashMap<>();
             currencyMap.put(selectedCurrency, filtered);
-            String htmlContent = generateReportHtml(lastSelectedAccount, new Date(finalStartDateMillis), new Date(finalEndDateMillis), filtered, previousBalances, currencyMap);
+            String htmlContent = generateReportHtml(lastSelectedAccount, startDate, endDate, filtered, previousBalances, currencyMap);
             webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
         });
     }
