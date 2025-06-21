@@ -294,7 +294,22 @@ public class AccountStatementActivity extends AppCompatActivity {
             MaterialButton btn = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
             btn.setText(currency);
             btn.setCheckable(true);
-            btn.setChecked(currency.equals(selectedCurrency) || (selectedCurrency == null && currencies.iterator().next().equals(currency)));
+            boolean isSelected = currency.equals(selectedCurrency) || (selectedCurrency == null && currencies.iterator().next().equals(currency));
+            btn.setChecked(isSelected);
+            
+            // إعداد الألوان والتصميم
+            btn.setTextColor(isSelected ? Color.WHITE : Color.parseColor("#1976d2"));
+            btn.setBackgroundColor(isSelected ? Color.parseColor("#1976d2") : Color.parseColor("#e3f0ff"));
+            btn.setCornerRadius(40); // حواف دائرية
+            btn.setTextSize(16);
+            
+            // إضافة تباعد بين الأزرار
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.setMarginEnd(16);
+            params.setMarginBottom(8);
+            btn.setLayoutParams(params);
+            
             btn.setOnClickListener(v -> setSelectedCurrency(currency));
             currencyButtonsLayout.addView(btn);
         }
@@ -309,9 +324,10 @@ public class AccountStatementActivity extends AppCompatActivity {
         selectedCurrency = currency;
         for (int i = 0; i < currencyButtonsLayout.getChildCount(); i++) {
             MaterialButton btn = (MaterialButton) currencyButtonsLayout.getChildAt(i);
-            btn.setChecked(btn.getText().toString().equals(currency));
-            btn.setBackgroundResource(btn.isChecked() ? R.drawable.bg_currency_button_selected : R.drawable.bg_currency_button);
-            btn.setTextColor(btn.isChecked() ? Color.WHITE : Color.BLACK);
+            boolean isSelected = btn.getText().toString().equals(currency);
+            btn.setChecked(isSelected);
+            btn.setBackgroundColor(isSelected ? Color.parseColor("#1976d2") : Color.parseColor("#e3f0ff"));
+            btn.setTextColor(isSelected ? Color.WHITE : Color.parseColor("#1976d2"));
         }
         updateReport();
     }
