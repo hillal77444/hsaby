@@ -106,6 +106,14 @@
                                     <label class="form-label">كلمة المرور الجديدة</label>
                                     <input type="password" name="password" class="form-control" placeholder="اتركها فارغة إذا لم ترد تغييرها">
                                 </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">اسم الجلسة</label>
+                                    <input type="text" name="session_name" class="form-control" value="{{ user.session_name or 'admin_main' }}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">تاريخ انتهاء الجلسة</label>
+                                    <input type="datetime-local" name="session_expiry" class="form-control" value="{{ user.session_expiry.strftime('%Y-%m-%dT%H:%M') if user.session_expiry else '' }}">
+                                </div>
                                 <div class="col-12">
                                     <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
                                 </div>
