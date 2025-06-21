@@ -84,23 +84,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="end"
+            android:gravity="center_vertical|end"
             android:layout_marginTop="6dp">
 
-            <com.google.android.material.textfield.TextInputLayout
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/endDateInput"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:layout_weight="1"
-                android:hint="الى">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/endDateInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:background="@drawable/bg_edittext"
-                    android:focusable="false"
-                    android:gravity="end|center_vertical"
-                    android:drawableStart="@drawable/ic_calendar"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                android:background="@drawable/bg_edittext"
+                android:focusable="false"
+                android:gravity="end|center_vertical"
+                android:drawableStart="@drawable/ic_calendar"
+                android:textSize="15sp"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -111,20 +107,16 @@
                 android:textColor="#333"
                 android:paddingHorizontal="4dp"/>
 
-            <com.google.android.material.textfield.TextInputLayout
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/startDateInput"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:layout_weight="1"
-                android:hint="من">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/startDateInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:background="@drawable/bg_edittext"
-                    android:focusable="false"
-                    android:gravity="end|center_vertical"
-                    android:drawableStart="@drawable/ic_calendar"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                android:background="@drawable/bg_edittext"
+                android:focusable="false"
+                android:gravity="end|center_vertical"
+                android:drawableStart="@drawable/ic_calendar"
+                android:textSize="15sp"/>
 
             <TextView
                 android:layout_width="wrap_content"
