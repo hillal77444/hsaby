@@ -58,7 +58,6 @@ public class AccountStatementActivity extends AppCompatActivity {
     private TransactionsViewModel transactionsViewModel;
     private AutoCompleteTextView accountDropdown;
     private TextInputEditText startDateInput, endDateInput;
-    private MaterialButton btnShowReport, btnPrint;
     private WebView webView;
     private Calendar calendar;
     private SimpleDateFormat dateFormat;
@@ -93,7 +92,6 @@ public class AccountStatementActivity extends AppCompatActivity {
         initializeViews();
         setupDatePickers();
         loadAccounts();
-        setupWebView();
 
         // تعيين التواريخ الافتراضية
         setDefaultDates();
@@ -105,15 +103,10 @@ public class AccountStatementActivity extends AppCompatActivity {
         accountDropdown = findViewById(R.id.accountDropdown);
         startDateInput = findViewById(R.id.startDateInput);
         endDateInput = findViewById(R.id.endDateInput);
-        btnShowReport = findViewById(R.id.btnShowReport);
         webView = findViewById(R.id.webView);
         btnPrintInCard = findViewById(R.id.btnPrintInCard);
         currencyButtonsLayout = findViewById(R.id.currencyButtonsLayout);
-
-        btnShowReport.setOnClickListener(v -> showReport());
         btnPrintInCard.setOnClickListener(v -> printReport());
-
-        // إعداد مستمع النقر على حقل اختيار الحساب
         accountDropdown.setFocusable(false);
         accountDropdown.setOnClickListener(v -> showAccountPicker());
     }
@@ -267,7 +260,7 @@ public class AccountStatementActivity extends AppCompatActivity {
                 btn.setText(currency);
                 btn.setCheckable(true);
                 btn.setChecked(false);
-                btn.setTextColor(getResources().getColor(R.color.primary_text));
+                btn.setTextColor(Color.BLACK);
                 btn.setStrokeColorResource(R.color.primary);
                 btn.setStrokeWidth(2);
                 btn.setCornerRadius(16);
@@ -287,7 +280,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             MaterialButton btn = (MaterialButton) currencyButtonsLayout.getChildAt(i);
             btn.setChecked(btn.getText().toString().equals(currency));
             btn.setBackgroundResource(btn.isChecked() ? R.drawable.bg_currency_button_selected : R.drawable.bg_currency_button);
-            btn.setTextColor(btn.isChecked() ? Color.WHITE : getResources().getColor(R.color.primary_text));
+            btn.setTextColor(btn.isChecked() ? Color.WHITE : Color.BLACK);
         }
         showReportForCurrency(account, transactions, currency);
     }
