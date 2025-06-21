@@ -344,11 +344,17 @@ public class AccountStatementActivity extends AppCompatActivity {
             return;
         }
         
+        // إنشاء نسخ final من التواريخ قبل التعديل
+        final Date finalStartDate;
+        final Date finalEndDate;
+        
         // إذا كانت التواريخ معكوسة، بدّل القيم
         if (startDate.after(endDate)) {
-            Date temp = startDate;
-            startDate = endDate;
-            endDate = temp;
+            finalStartDate = endDate;
+            finalEndDate = startDate;
+        } else {
+            finalStartDate = startDate;
+            finalEndDate = endDate;
         }
         
         List<Transaction> filtered = new ArrayList<>();
@@ -364,7 +370,7 @@ public class AccountStatementActivity extends AppCompatActivity {
                 Date transactionDateOnly = transactionCal.getTime();
                 
                 // مقارنة التواريخ فقط (بدون وقت)
-                if (!transactionDateOnly.before(startDate) && !transactionDateOnly.after(endDate)) {
+                if (!transactionDateOnly.before(finalStartDate) && !transactionDateOnly.after(finalEndDate)) {
                     filtered.add(t);
                 }
             }
@@ -377,7 +383,7 @@ public class AccountStatementActivity extends AppCompatActivity {
         
         // استخدام بداية اليوم السابق للحصول على الرصيد السابق
         Calendar prevDayCal = Calendar.getInstance();
-        prevDayCal.setTime(startDate);
+        prevDayCal.setTime(finalStartDate);
         prevDayCal.add(Calendar.DAY_OF_MONTH, -1);
         prevDayCal.set(Calendar.HOUR_OF_DAY, 23);
         prevDayCal.set(Calendar.MINUTE, 59);
@@ -391,10 +397,6 @@ public class AccountStatementActivity extends AppCompatActivity {
         );
         
         prevBalanceLive.observe(this, prevBalance -> {
-            // إنشاء نسخ final من التواريخ لتجنب مشكلة lambda expression
-            final Date finalStartDate = startDate;
-            final Date finalEndDate = endDate;
-            
             Map<String, Double> previousBalances = new HashMap<>();
             previousBalances.put(selectedCurrency, prevBalance != null ? prevBalance : 0.0);
             Map<String, List<Transaction>> currencyMap = new HashMap<>();
