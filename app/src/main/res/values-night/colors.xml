@@ -30,7 +30,6 @@
     <color name="text_hint">#94A3B8</color>
     <color name="background_light">#23272F</color>
     <color name="background_dark">#0F172A</color>
-    <color name="card_background">#23272F</color>
     <color name="divider">#333C4D</color>
     <color name="ripple_light">#33FFFFFF</color>
     <color name="ripple_dark">#1F000000</color>
