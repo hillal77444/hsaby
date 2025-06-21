@@ -313,6 +313,12 @@ public class AccountStatementActivity extends AppCompatActivity {
             startDateMillis = dateFormat.parse(startDateInput.getText().toString()).getTime();
             endDateMillis = dateFormat.parse(endDateInput.getText().toString()).getTime();
         } catch (Exception ignored) {}
+        // إذا كانت التواريخ معكوسة، بدّل القيم
+        if (startDateMillis > endDateMillis) {
+            long temp = startDateMillis;
+            startDateMillis = endDateMillis;
+            endDateMillis = temp;
+        }
         for (Transaction t : transactions) {
             if (t.getCurrency().equals(currency) && t.getTransactionDate() >= startDateMillis && t.getTransactionDate() <= endDateMillis) {
                 filtered.add(t);
