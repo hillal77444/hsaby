@@ -244,69 +244,31 @@ public class AccountStatementActivity extends AppCompatActivity {
 
     private void onAccountSelected(Account account) {
         viewModel.getTransactionsForAccount(account.getId()).observe(this, transactions -> {
+            android.util.Log.d("AccountStatement", "Transactions size: " + (transactions == null ? "null" : transactions.size()));
             if (transactions == null || transactions.isEmpty()) {
                 currencyButtonsLayout.setVisibility(View.GONE);
                 webView.loadDataWithBaseURL(null, "<p>لا توجد بيانات</p>", "text/html", "UTF-8", null);
                 return;
             }
-            // استخراج العملات التي لها معاملات فعلية فقط
-            LinkedHashMap<String, List<Transaction>> currencyMap = new LinkedHashMap<>();
-            long minDate = Long.MAX_VALUE;
-            long maxDate = Long.MIN_VALUE;
             for (Transaction t : transactions) {
-                if (!currencyMap.containsKey(t.getCurrency())) {
-                    currencyMap.put(t.getCurrency(), new ArrayList<>());
-                }
-                currencyMap.get(t.getCurrency()).add(t);
-                if (t.getTransactionDate() < minDate) minDate = t.getTransactionDate();
-                if (t.getTransactionDate() > maxDate) maxDate = t.getTransactionDate();
+                android.util.Log.d("AccountStatement", "Transaction: " + t.getAmount() + " " + t.getCurrency() + " " + new java.util.Date(t.getTransactionDate()));
             }
-            // اضبط التواريخ الافتراضية لتغطي كل المعاملات
-            if (minDate != Long.MAX_VALUE && maxDate != Long.MIN_VALUE) {
-                startDateInput.setText(dateFormat.format(new Date(minDate)));
-                endDateInput.setText(dateFormat.format(new Date(maxDate)));
+            // للفحص فقط: اعرض كل المعاملات في التقرير بدون فلترة عملة أو تاريخ
+            StringBuilder html = new StringBuilder();
+            html.append("<html><body><h2>كل المعاملات لهذا الحساب</h2><table border='1'><tr><th>التاريخ</th><th>العملة</th><th>المبلغ</th><th>الوصف</th></tr>");
+            for (Transaction t : transactions) {
+                html.append("<tr>")
+                    .append("<td>").append(dateFormat.format(new java.util.Date(t.getTransactionDate()))).append("</td>")
+                    .append("<td>").append(t.getCurrency()).append("</td>")
+                    .append("<td>").append(t.getAmount()).append("</td>")
+                    .append("<td>").append(t.getDescription()).append("</td>")
+                    .append("</tr>");
             }
-            currencyButtonsLayout.removeAllViews();
-            currencyButtonsLayout.setVisibility(View.VISIBLE);
-            for (String currency : currencyMap.keySet()) {
-                MaterialButton btn = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
-                btn.setText(currency);
-                btn.setCheckable(true);
-                btn.setChecked(false);
-                btn.setTextColor(Color.BLACK);
-                btn.setStrokeColorResource(R.color.primary);
-                btn.setStrokeWidth(2);
-                btn.setCornerRadius(16);
-                btn.setBackgroundResource(R.drawable.bg_currency_button);
-                btn.setOnClickListener(v -> setSelectedCurrency(currency, account, transactions));
-                currencyButtonsLayout.addView(btn);
-            }
-            // اختر أول عملة بها معاملات فعلية فقط
-            String firstCurrencyWithData = null;
-            for (String currency : currencyMap.keySet()) {
-                if (!currencyMap.get(currency).isEmpty()) {
-                    firstCurrencyWithData = currency;
-                    break;
-                }
-            }
-            if (firstCurrencyWithData != null) {
-                // فعّل الزر الأول للعملة في الواجهة برمجيًا
-                for (int i = 0; i < currencyButtonsLayout.getChildCount(); i++) {
-                    MaterialButton btn = (MaterialButton) currencyButtonsLayout.getChildAt(i);
-                    if (btn.getText().toString().equals(firstCurrencyWithData)) {
-                        btn.setChecked(true);
-                        btn.setBackgroundResource(R.drawable.bg_currency_button_selected);
-                        btn.setTextColor(Color.WHITE);
-                    } else {
-                        btn.setChecked(false);
-                        btn.setBackgroundResource(R.drawable.bg_currency_button);
-                        btn.setTextColor(Color.BLACK);
-                    }
-                }
-                setSelectedCurrency(firstCurrencyWithData, account, transactions);
-            } else {
-                webView.loadDataWithBaseURL(null, "<p>لا توجد بيانات لهذه العملات</p>", "text/html", "UTF-8", null);
-            }
+            html.append("</table></body></html>");
+            webView.loadDataWithBaseURL(null, html.toString(), "text/html", "UTF-8", null);
+            // أوقف باقي الكود مؤقتًا
+            return;
+            // ... باقي الكود الأصلي معطل مؤقتًا للفحص ...
         });
     }
 
@@ -333,7 +295,8 @@ public class AccountStatementActivity extends AppCompatActivity {
             endDateMillis = temp;
         }
         for (Transaction t : transactions) {
-            if (t.getCurrency().equals(currency) && t.getTransactionDate() >= startDateMillis && t.getTransactionDate() <= endDateMillis) {
+            android.util.Log.d("CurrencyDebug", "Transaction currency: [" + t.getCurrency() + "] - Button currency: [" + currency + "]");
+            if (t.getCurrency().trim().equals(currency.trim()) && t.getTransactionDate() >= startDateMillis && t.getTransactionDate() <= endDateMillis) {
                 filtered.add(t);
             }
         }
