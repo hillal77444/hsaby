@@ -15,29 +15,21 @@
         android:layout_marginBottom="4dp"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/search_layout"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        <EditText
+            android:id="@+id/search_edit_text"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
-            app:boxBackgroundMode="outline"
-            app:boxCornerRadiusTopStart="12dp"
-            app:boxCornerRadiusTopEnd="12dp"
-            app:boxCornerRadiusBottomStart="12dp"
-            app:boxCornerRadiusBottomEnd="12dp">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/search_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:hint="@string/search_hint"
-                android:inputType="text"
-                android:maxLines="1"
-                android:textColor="@color/text_primary"
-                android:textSize="16sp" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:hint="@string/search_hint"
+            android:inputType="text"
+            android:maxLines="1"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:background="@drawable/bg_edittext"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:gravity="center_vertical" />
 
         <Spinner
             android:id="@+id/sort_spinner"
