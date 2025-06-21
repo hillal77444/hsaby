@@ -14,7 +14,8 @@
         android:background="#3f51b5"
         android:gravity="center_vertical"
         android:paddingStart="8dp"
-        android:paddingEnd="8dp">
+        android:paddingEnd="8dp"
+        android:visibility="gone">
 
         <ImageButton
             android:id="@+id/menuButton"
