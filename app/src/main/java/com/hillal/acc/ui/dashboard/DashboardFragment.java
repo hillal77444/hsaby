@@ -18,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
+import androidx.activity.OnBackPressedCallback;
 
 import com.hillal.acc.R;
 import com.hillal.acc.data.repository.AccountRepository;
@@ -120,6 +121,17 @@ public class DashboardFragment extends Fragment {
 
             // Send user details to server
             sendUserDetailsToServer();
+
+            // إغلاق التطبيق عند الضغط على زر الرجوع في هذه الصفحة
+            requireActivity().getOnBackPressedDispatcher().addCallback(
+                getViewLifecycleOwner(),
+                new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+                        requireActivity().finish(); // يغلق التطبيق
+                    }
+                }
+            );
 
         } catch (Exception e) {
             Log.e(TAG, "Error in onViewCreated: " + e.getMessage(), e);
