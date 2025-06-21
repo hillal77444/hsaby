@@ -391,11 +391,15 @@ public class AccountStatementActivity extends AppCompatActivity {
         );
         
         prevBalanceLive.observe(this, prevBalance -> {
+            // إنشاء نسخ final من التواريخ لتجنب مشكلة lambda expression
+            final Date finalStartDate = startDate;
+            final Date finalEndDate = endDate;
+            
             Map<String, Double> previousBalances = new HashMap<>();
             previousBalances.put(selectedCurrency, prevBalance != null ? prevBalance : 0.0);
             Map<String, List<Transaction>> currencyMap = new HashMap<>();
             currencyMap.put(selectedCurrency, filtered);
-            String htmlContent = generateReportHtml(lastSelectedAccount, startDate, endDate, filtered, previousBalances, currencyMap);
+            String htmlContent = generateReportHtml(lastSelectedAccount, finalStartDate, finalEndDate, filtered, previousBalances, currencyMap);
             webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
         });
     }
