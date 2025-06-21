@@ -290,6 +290,19 @@ public class AccountStatementActivity extends AppCompatActivity {
                 }
             }
             if (firstCurrencyWithData != null) {
+                // فعّل الزر الأول للعملة في الواجهة برمجيًا
+                for (int i = 0; i < currencyButtonsLayout.getChildCount(); i++) {
+                    MaterialButton btn = (MaterialButton) currencyButtonsLayout.getChildAt(i);
+                    if (btn.getText().toString().equals(firstCurrencyWithData)) {
+                        btn.setChecked(true);
+                        btn.setBackgroundResource(R.drawable.bg_currency_button_selected);
+                        btn.setTextColor(Color.WHITE);
+                    } else {
+                        btn.setChecked(false);
+                        btn.setBackgroundResource(R.drawable.bg_currency_button);
+                        btn.setTextColor(Color.BLACK);
+                    }
+                }
                 setSelectedCurrency(firstCurrencyWithData, account, transactions);
             } else {
                 webView.loadDataWithBaseURL(null, "<p>لا توجد بيانات لهذه العملات</p>", "text/html", "UTF-8", null);
@@ -324,6 +337,8 @@ public class AccountStatementActivity extends AppCompatActivity {
                 filtered.add(t);
             }
         }
+        // Log مؤقت لعدد المعاملات بعد الفلترة
+        android.util.Log.d("AccountStatement", "Filtered transactions count: " + filtered.size());
         if (filtered.isEmpty()) {
             webView.loadDataWithBaseURL(null, "<p>لا توجد بيانات لهذه العملة أو الفترة</p>", "text/html", "UTF-8", null);
             return;
