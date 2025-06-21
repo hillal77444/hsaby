@@ -201,13 +201,13 @@ public class DashboardFragment extends Fragment {
     private void observeData() {
         dashboardViewModel.getTotalDebtors().observe(getViewLifecycleOwner(), total -> {
             if (total != null) {
-                binding.totalDebtors.setText(String.format(Locale.US, "%d يمني", (int) Math.round(total)));
+                binding.totalDebtors.setText(String.format(Locale.US, "%d ", (int) Math.round(total)));
             }
         });
 
         dashboardViewModel.getTotalCreditors().observe(getViewLifecycleOwner(), total -> {
             if (total != null) {
-                binding.totalCreditors.setText(String.format(Locale.US, "%d يمني", (int) Math.round(total)));
+                binding.totalCreditors.setText(String.format(Locale.US, "%d ", (int) Math.round(total)));
             }
         });
 
