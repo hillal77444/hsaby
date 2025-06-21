@@ -10,6 +10,8 @@ import android.widget.Spinner;
 import android.widget.AdapterView;
 import android.widget.Switch;
 import android.widget.EditText;
+import android.text.Editable;
+import android.text.TextWatcher;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -72,20 +74,28 @@ public class AccountsFragment extends Fragment {
         });
 
         // Setup search functionality
-        searchEditText.setOnEditorActionListener((v, actionId, event) -> {
-            String query = v.getText().toString();
-            if (!query.isEmpty()) {
-                accountViewModel.searchAccounts(query).observe(getViewLifecycleOwner(), accounts -> {
-                    currentAccounts[0] = new ArrayList<>(accounts);
-                    accountsAdapter.updateAccounts(accounts);
-                });
-            } else {
-                accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
-                    currentAccounts[0] = new ArrayList<>(accounts);
-                    accountsAdapter.updateAccounts(accounts);
-                });
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String query = s.toString();
+                if (!query.isEmpty()) {
+                    accountViewModel.searchAccounts(query).observe(getViewLifecycleOwner(), accounts -> {
+                        currentAccounts[0] = new ArrayList<>(accounts);
+                        accountsAdapter.updateAccounts(accounts);
+                    });
+                } else {
+                    accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
+                        currentAccounts[0] = new ArrayList<>(accounts);
+                        accountsAdapter.updateAccounts(accounts);
+                    });
+                }
             }
-            return true;
+
+            @Override
+            public void afterTextChanged(Editable s) {}
         });
 
         // Spinner: ترتيب القائمة
