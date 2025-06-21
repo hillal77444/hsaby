@@ -9,6 +9,7 @@ import android.widget.TextView;
 import android.widget.Spinner;
 import android.widget.AdapterView;
 import android.widget.Switch;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -19,7 +20,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.acc.R;
 import com.hillal.acc.data.model.Account;
 import com.hillal.acc.data.model.Transaction;
@@ -36,7 +36,7 @@ public class AccountsFragment extends Fragment {
     private AccountViewModel accountViewModel;
     private RecyclerView accountsRecyclerView;
     private AccountsAdapter accountsAdapter;
-    private TextInputEditText searchEditText;
+    private EditText searchEditText;
     private Map<Long, Double> accountBalances = new HashMap<>();
 
     @Override
