@@ -52,6 +52,7 @@ import java.util.HashMap;
 import java.util.Collections;
 import java.util.Set;
 import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 
 public class AccountStatementActivity extends AppCompatActivity {
     private AccountStatementViewModel viewModel;
@@ -190,7 +191,6 @@ public class AccountStatementActivity extends AppCompatActivity {
         }
 
         dialog.show();
-
         setNumberPickerSelectionBg(dayPicker);
         setNumberPickerSelectionBg(monthPicker);
         setNumberPickerSelectionBg(yearPicker);
@@ -249,13 +249,26 @@ public class AccountStatementActivity extends AppCompatActivity {
                 webView.loadDataWithBaseURL(null, "<p>لا توجد بيانات</p>", "text/html", "UTF-8", null);
                 return;
             }
-            Set<String> currencies = new LinkedHashSet<>();
+            // استخراج العملات التي لها معاملات فعلية فقط
+            LinkedHashMap<String, List<Transaction>> currencyMap = new LinkedHashMap<>();
+            long minDate = Long.MAX_VALUE;
+            long maxDate = Long.MIN_VALUE;
             for (Transaction t : transactions) {
-                currencies.add(t.getCurrency());
+                if (!currencyMap.containsKey(t.getCurrency())) {
+                    currencyMap.put(t.getCurrency(), new ArrayList<>());
+                }
+                currencyMap.get(t.getCurrency()).add(t);
+                if (t.getTransactionDate() < minDate) minDate = t.getTransactionDate();
+                if (t.getTransactionDate() > maxDate) maxDate = t.getTransactionDate();
+            }
+            // اضبط التواريخ الافتراضية لتغطي كل المعاملات
+            if (minDate != Long.MAX_VALUE && maxDate != Long.MIN_VALUE) {
+                startDateInput.setText(dateFormat.format(new Date(minDate)));
+                endDateInput.setText(dateFormat.format(new Date(maxDate)));
             }
             currencyButtonsLayout.removeAllViews();
             currencyButtonsLayout.setVisibility(View.VISIBLE);
-            for (String currency : currencies) {
+            for (String currency : currencyMap.keySet()) {
                 MaterialButton btn = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
                 btn.setText(currency);
                 btn.setCheckable(true);
@@ -268,8 +281,18 @@ public class AccountStatementActivity extends AppCompatActivity {
                 btn.setOnClickListener(v -> setSelectedCurrency(currency, account, transactions));
                 currencyButtonsLayout.addView(btn);
             }
-            if (!currencies.isEmpty()) {
-                setSelectedCurrency(currencies.iterator().next(), account, transactions);
+            // اختر أول عملة بها معاملات فعلية فقط
+            String firstCurrencyWithData = null;
+            for (String currency : currencyMap.keySet()) {
+                if (!currencyMap.get(currency).isEmpty()) {
+                    firstCurrencyWithData = currency;
+                    break;
+                }
+            }
+            if (firstCurrencyWithData != null) {
+                setSelectedCurrency(firstCurrencyWithData, account, transactions);
+            } else {
+                webView.loadDataWithBaseURL(null, "<p>لا توجد بيانات لهذه العملات</p>", "text/html", "UTF-8", null);
             }
         });
     }
@@ -282,20 +305,23 @@ public class AccountStatementActivity extends AppCompatActivity {
             btn.setBackgroundResource(btn.isChecked() ? R.drawable.bg_currency_button_selected : R.drawable.bg_currency_button);
             btn.setTextColor(btn.isChecked() ? Color.WHITE : Color.BLACK);
         }
-        showReportForCurrency(account, transactions, currency);
-    }
-
-    private void showReportForCurrency(Account account, List<Transaction> transactions, String currency) {
+        // فلترة المعاملات للعملة المختارة فقط
         List<Transaction> filtered = new ArrayList<>();
-        for (Transaction t : transactions) {
-            if (t.getCurrency().equals(currency)) filtered.add(t);
-        }
         long startDateMillis = 0;
         long endDateMillis = 0;
         try {
             startDateMillis = dateFormat.parse(startDateInput.getText().toString()).getTime();
             endDateMillis = dateFormat.parse(endDateInput.getText().toString()).getTime();
         } catch (Exception ignored) {}
+        for (Transaction t : transactions) {
+            if (t.getCurrency().equals(currency) && t.getTransactionDate() >= startDateMillis && t.getTransactionDate() <= endDateMillis) {
+                filtered.add(t);
+            }
+        }
+        if (filtered.isEmpty()) {
+            webView.loadDataWithBaseURL(null, "<p>لا توجد بيانات لهذه العملة أو الفترة</p>", "text/html", "UTF-8", null);
+            return;
+        }
         LiveData<Double> prevBalanceLive = transactionRepository.getBalanceUntilDate(account.getId(), startDateMillis - 1, currency);
         long finalStartDateMillis = startDateMillis;
         long finalEndDateMillis = endDateMillis;
@@ -402,9 +428,10 @@ public class AccountStatementActivity extends AppCompatActivity {
     }
 
     private void setDefaultDates() {
+        // اجعل التاريخ الافتراضي يغطي كل المعاملات (من تاريخ قديم جدًا إلى اليوم)
         Calendar cal = Calendar.getInstance();
         String toDate = dateFormat.format(cal.getTime());
-        cal.add(Calendar.DATE, -3); // أول أمس
+        cal.add(Calendar.YEAR, -10); // قبل 10 سنوات
         String fromDate = dateFormat.format(cal.getTime());
         startDateInput.setText(fromDate);
         endDateInput.setText(toDate);
@@ -454,17 +481,6 @@ public class AccountStatementActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    // أضف هذه الدالة للمساعدة في تلوين العنصر المختار
-    private void setNumberPickerSelectionBg(NumberPicker picker) {
-        try {
-            java.lang.reflect.Field selectionDividerField = NumberPicker.class.getDeclaredField("mSelectionDivider") ;
-            selectionDividerField.setAccessible(true);
-            selectionDividerField.set(picker, getDrawable(R.drawable.picker_selected_bg));
-        } catch (Exception e) {
-            // تجاهل أي خطأ (قد لا يعمل على كل الأجهزة)
-        }
     }
 
     private String toEnglishDigits(String value) {
