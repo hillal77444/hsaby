@@ -68,7 +68,9 @@ public class AccountStatementActivity extends AppCompatActivity {
     private TransactionRepository transactionRepository;
     private LinearLayout currencyButtonsLayout;
     private String selectedCurrency = null;
-    private ImageButton btnPrintInCard;
+    private List<Transaction> lastAccountTransactions = new ArrayList<>();
+    private Account lastSelectedAccount = null;
+    private ImageButton btnPrint;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,22 +107,22 @@ public class AccountStatementActivity extends AppCompatActivity {
         startDateInput = findViewById(R.id.startDateInput);
         endDateInput = findViewById(R.id.endDateInput);
         webView = findViewById(R.id.webView);
-        btnPrintInCard = findViewById(R.id.btnPrintInCard);
+        btnPrint = findViewById(R.id.btnPrintInCard);
         currencyButtonsLayout = findViewById(R.id.currencyButtonsLayout);
         currencyButtonsLayout.setVisibility(View.GONE);
-        btnPrintInCard.setOnClickListener(v -> printReport());
+        btnPrint.setOnClickListener(v -> printReport());
         accountDropdown.setFocusable(false);
         accountDropdown.setOnClickListener(v -> showAccountPicker());
-        // إضافة TextWatcher للتواريخ
+        // TextWatcher للتواريخ
         startDateInput.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable s) { triggerReportIfReady(); }
+            @Override public void afterTextChanged(Editable s) { updateReport(); }
         });
         endDateInput.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable s) { triggerReportIfReady(); }
+            @Override public void afterTextChanged(Editable s) { updateReport(); }
         });
     }
 
@@ -248,6 +250,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             accountBalancesMap,
             account -> {
                 accountDropdown.setText(account.getName());
+                lastSelectedAccount = account;
                 onAccountSelected(account);
             }
         );
@@ -256,60 +259,60 @@ public class AccountStatementActivity extends AppCompatActivity {
 
     private void onAccountSelected(Account account) {
         viewModel.getTransactionsForAccount(account.getId()).observe(this, transactions -> {
-            if (transactions == null || transactions.isEmpty()) {
+            lastAccountTransactions = transactions != null ? transactions : new ArrayList<>();
+            if (lastAccountTransactions.isEmpty()) {
                 currencyButtonsLayout.setVisibility(View.GONE);
                 webView.loadDataWithBaseURL(null, "<p>لا توجد بيانات</p>", "text/html", "UTF-8", null);
                 return;
             }
-            // استخراج العملات الفريدة
-            java.util.Set<String> currencies = new java.util.LinkedHashSet<>();
-            for (Transaction t : transactions) {
+            java.util.LinkedHashSet<String> currencies = new java.util.LinkedHashSet<>();
+            for (Transaction t : lastAccountTransactions) {
                 currencies.add(t.getCurrency().trim());
             }
-            // إنشاء أزرار العملات
             currencyButtonsLayout.removeAllViews();
             for (String currency : currencies) {
                 MaterialButton btn = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
                 btn.setText(currency);
                 btn.setCheckable(true);
                 btn.setChecked(currency.equals(selectedCurrency) || (selectedCurrency == null && currencies.iterator().next().equals(currency)));
-                btn.setOnClickListener(v -> setSelectedCurrency(currency, account, transactions));
+                btn.setOnClickListener(v -> setSelectedCurrency(currency));
                 currencyButtonsLayout.addView(btn);
             }
             currencyButtonsLayout.setVisibility(View.VISIBLE);
-            // اختر أول عملة تلقائيًا إذا لم يكن هناك عملة مختارة أو العملة المختارة غير موجودة
             if (selectedCurrency == null || !currencies.contains(selectedCurrency)) {
                 selectedCurrency = currencies.iterator().next();
             }
-            setSelectedCurrency(selectedCurrency, account, transactions);
+            setSelectedCurrency(selectedCurrency);
         });
     }
 
-    private void setSelectedCurrency(String currency, Account account, List<Transaction> transactions) {
+    private void setSelectedCurrency(String currency) {
         selectedCurrency = currency;
-        // تحديث حالة الأزرار
         for (int i = 0; i < currencyButtonsLayout.getChildCount(); i++) {
             MaterialButton btn = (MaterialButton) currencyButtonsLayout.getChildAt(i);
             btn.setChecked(btn.getText().toString().equals(currency));
             btn.setBackgroundResource(btn.isChecked() ? R.drawable.bg_currency_button_selected : R.drawable.bg_currency_button);
             btn.setTextColor(btn.isChecked() ? Color.WHITE : Color.BLACK);
         }
-        // فلترة المعاملات للعملة المختارة فقط
-        List<Transaction> filtered = new ArrayList<>();
+        updateReport();
+    }
+
+    private void updateReport() {
+        if (lastSelectedAccount == null || selectedCurrency == null) return;
         long startDateMillis = 0;
         long endDateMillis = 0;
         try {
             startDateMillis = dateFormat.parse(startDateInput.getText().toString()).getTime();
             endDateMillis = dateFormat.parse(endDateInput.getText().toString()).getTime();
         } catch (Exception ignored) {}
-        // إذا كانت التواريخ معكوسة، بدّل القيم
         if (startDateMillis > endDateMillis) {
             long temp = startDateMillis;
             startDateMillis = endDateMillis;
             endDateMillis = temp;
         }
-        for (Transaction t : transactions) {
-            if (t.getCurrency().trim().equals(currency.trim()) && t.getTransactionDate() >= startDateMillis && t.getTransactionDate() <= endDateMillis) {
+        List<Transaction> filtered = new ArrayList<>();
+        for (Transaction t : lastAccountTransactions) {
+            if (t.getCurrency().trim().equals(selectedCurrency.trim()) && t.getTransactionDate() >= startDateMillis && t.getTransactionDate() <= endDateMillis) {
                 filtered.add(t);
             }
         }
@@ -317,18 +320,20 @@ public class AccountStatementActivity extends AppCompatActivity {
             webView.loadDataWithBaseURL(null, "<p>لا توجد بيانات لهذه العملة أو الفترة</p>", "text/html", "UTF-8", null);
             return;
         }
-        LiveData<Double> prevBalanceLive = transactionRepository.getBalanceUntilDate(account.getId(), startDateMillis - 1, currency);
+        LiveData<Double> prevBalanceLive = transactionRepository.getBalanceUntilDate(lastSelectedAccount.getId(), startDateMillis - 1, selectedCurrency);
         long finalStartDateMillis = startDateMillis;
         long finalEndDateMillis = endDateMillis;
         prevBalanceLive.observe(this, prevBalance -> {
             Map<String, Double> previousBalances = new HashMap<>();
-            previousBalances.put(currency, prevBalance != null ? prevBalance : 0.0);
-            String htmlContent = generateReportHtmlSingleCurrency(account, new Date(finalStartDateMillis), new Date(finalEndDateMillis), filtered, previousBalances, currency);
+            previousBalances.put(selectedCurrency, prevBalance != null ? prevBalance : 0.0);
+            Map<String, List<Transaction>> currencyMap = new HashMap<>();
+            currencyMap.put(selectedCurrency, filtered);
+            String htmlContent = generateReportHtml(lastSelectedAccount, new Date(finalStartDateMillis), new Date(finalEndDateMillis), filtered, previousBalances, currencyMap);
             webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null);
         });
     }
 
-    private String generateReportHtmlSingleCurrency(Account account, Date startDate, Date endDate, List<Transaction> transactions, Map<String, Double> previousBalances, String currency) {
+    private String generateReportHtml(Account account, Date startDate, Date endDate, List<Transaction> transactions, Map<String, Double> previousBalances, Map<String, List<Transaction>> currencyMap) {
         StringBuilder html = new StringBuilder();
         html.append("<!DOCTYPE html>");
         html.append("<html dir='rtl' lang='ar'>");
@@ -352,10 +357,10 @@ public class AccountStatementActivity extends AppCompatActivity {
         html.append("<h2>كشف الحساب التفصيلي</h2>");
         html.append("<p>الحساب: <b>").append(account.getName()).append("</b></p>");
         html.append("<p>الفترة: من <b>").append(dateFormat.format(startDate)).append("</b> إلى <b>").append(dateFormat.format(endDate)).append("</b></p>");
-        html.append("<p>العملة: <b>").append(currency).append("</b></p>");
+        html.append("<p>العملة: <b>").append(selectedCurrency).append("</b></p>");
         html.append("</div>");
         sortTransactionsByDate(transactions);
-        double previousBalance = previousBalances != null && previousBalances.containsKey(currency) ? previousBalances.get(currency) : 0;
+        double previousBalance = previousBalances != null && previousBalances.containsKey(selectedCurrency) ? previousBalances.get(selectedCurrency) : 0;
         double totalDebit = 0;
         double totalCredit = 0;
         for (Transaction t : transactions) {
@@ -496,15 +501,6 @@ public class AccountStatementActivity extends AppCompatActivity {
             selectionDividerField.set(picker, getDrawable(R.drawable.picker_selected_bg));
         } catch (Exception e) {
             // تجاهل أي خطأ (قد لا يعمل على كل الأجهزة)
-        }
-    }
-
-    private void triggerReportIfReady() {
-        String accName = accountDropdown.getText().toString();
-        if (accName.isEmpty() || selectedCurrency == null) return;
-        Account acc = getSelectedAccount(allAccounts, accName);
-        if (acc != null) {
-            onAccountSelected(acc);
         }
     }
 } 
