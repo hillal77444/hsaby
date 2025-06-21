@@ -307,7 +307,6 @@ public class AccountStatementActivity extends AppCompatActivity {
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.setMarginEnd(16);
-            params.setMarginBottom(8);
             btn.setLayoutParams(params);
             
             btn.setOnClickListener(v -> setSelectedCurrency(currency));
