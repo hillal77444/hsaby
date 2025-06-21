@@ -104,7 +104,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/bg_edittext"
                 android:focusable="false"
-                android:gravity="end|center_vertical"
+                android:gravity="center"
                 android:drawableStart="@drawable/ic_calendar"
                 android:textSize="15sp"/>
 
@@ -124,7 +124,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/bg_edittext"
                 android:focusable="false"
-                android:gravity="end|center_vertical"
+                android:gravity="center"
                 android:drawableStart="@drawable/ic_calendar"
                 android:textSize="15sp"/>
         </LinearLayout>
