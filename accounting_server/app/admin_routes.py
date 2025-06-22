@@ -3,7 +3,7 @@ from app import db
 from app.models import User, Account, Transaction, AppUpdate
 from app.utils import hash_password
 from datetime import datetime, timedelta, timezone
-from sqlalchemy import func, case
+from sqlalchemy import func, case, and_, or_
 import json
 import requests
 import os
@@ -627,24 +627,40 @@ def calculate_and_notify_transaction(transaction_id):
         if not user:
             return {'status': 'error', 'message': 'المستخدم غير موجود'}
 
-        # حساب الرصيد حتى هذه المعاملة لنفس الحساب ونفس العملة
-        transactions = Transaction.query.filter(
+        # التأكد من أن transaction.date هو datetime وليس string
+        transaction_date = transaction.date
+        if isinstance(transaction_date, str):
+            try:
+                transaction_date = datetime.fromisoformat(transaction_date)
+            except Exception:
+                transaction_date = datetime.strptime(transaction_date, "%Y-%m-%d %H:%M:%S.%f")
+
+        # شرط حتى المعاملة المطلوبة
+        date_id_filter = or_(
+            Transaction.date < transaction_date,
+            and_(
+                Transaction.date == transaction_date,
+                Transaction.id <= transaction.id
+            )
+        )
+
+        # مجموع الإيداعات
+        total_credits = db.session.query(func.coalesce(func.sum(Transaction.amount), 0)).filter(
             Transaction.account_id == account.id,
             Transaction.currency == transaction.currency,
-            Transaction.date <= transaction.date,
-            Transaction.id <= transaction.id
-        ).order_by(
-            Transaction.date,
-            Transaction.id
-        ).all()
+            Transaction.type == 'credit',
+            date_id_filter
+        ).scalar()
 
-        # حساب الرصيد النهائي
-        balance = 0
-        for trans in transactions:
-            if trans.type == 'credit':
-                balance += trans.amount
-            else:  # debit
-                balance -= trans.amount
+        # مجموع السحوبات
+        total_debits = db.session.query(func.coalesce(func.sum(Transaction.amount), 0)).filter(
+            Transaction.account_id == account.id,
+            Transaction.currency == transaction.currency,
+            Transaction.type == 'debit',
+            date_id_filter
+        ).scalar()
+
+        balance = total_credits - total_debits
 
         # توليد رابط كشف الحساب المؤقت القصير
         statement_link = generate_short_statement_link(account.id)
@@ -661,7 +677,7 @@ def calculate_and_notify_transaction(transaction_id):
 •  {transaction_type}
 • المبلغ: {transaction.amount} {transaction.currency or 'ريال'}
 • الوصف: {transaction.description or 'لا يوجد وصف'}
-• التاريخ: {transaction.date.strftime('%Y-%m-%d')}
+• التاريخ: {transaction_date.strftime('%Y-%m-%d')}
 
 💳 {balance_text}
 
