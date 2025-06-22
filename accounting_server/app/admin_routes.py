@@ -827,22 +827,26 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
         if not user:
             return {'status': 'error', 'message': 'المستخدم غير موجود'}
 
-        # حساب الرصيد النهائي الكامل لنفس الحساب ونفس العملة
-        transactions = Transaction.query.filter(
-            Transaction.account_id == account.id,
-            Transaction.currency == transaction.currency
-        ).order_by(
-            Transaction.date,
-            Transaction.id
-        ).all()
+        # معالجة التاريخ
+        transaction_date = transaction.date
+        if isinstance(transaction_date, str):
+            try:
+                transaction_date = datetime.fromisoformat(transaction_date)
+            except Exception:
+                transaction_date = datetime.strptime(transaction_date, "%Y-%m-%d %H:%M:%S.%f")
 
-        # حساب الرصيد النهائي
-        balance = 0
-        for trans in transactions:
-            if trans.type == 'credit':
-                balance += trans.amount
-            else:  # debit
-                balance -= trans.amount
+        # حساب الرصيد النهائي الكامل لنفس الحساب ونفس العملة (مباشرة في قاعدة البيانات)
+        total_credits = db.session.query(func.coalesce(func.sum(Transaction.amount), 0)).filter(
+            Transaction.account_id == account.id,
+            Transaction.currency == transaction.currency,
+            Transaction.type == 'credit'
+        ).scalar()
+        total_debits = db.session.query(func.coalesce(func.sum(Transaction.amount), 0)).filter(
+            Transaction.account_id == account.id,
+            Transaction.currency == transaction.currency,
+            Transaction.type == 'debit'
+        ).scalar()
+        balance = total_credits - total_debits
 
         # تنسيق الرسالة
         transaction_type = "قيدنا الى حسابكم" if transaction.type == 'credit' else "قيدنا على حسابكم"
@@ -850,13 +854,13 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
         
         # تنسيق التاريخ القديم والجديد
         old_date_str = old_date.strftime('%Y-%m-%d')
-        new_date_str = transaction.date.strftime('%Y-%m-%d')
+        new_date_str = transaction_date.strftime('%Y-%m-%d')
         
         # تحديد نوع التغيير
         changes = []
         if old_amount != transaction.amount:
             changes.append(f"• المبلغ: من {old_amount} الى {transaction.amount} {transaction.currency or 'ريال'}")
-        if old_date != transaction.date:
+        if old_date != transaction_date:
             changes.append(f"• التاريخ: من {old_date_str} الى {new_date_str}")
         
         # إذا لم يكن هناك تغييرات، نرجع رسالة
@@ -916,7 +920,7 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
     except Exception as e:
         logger.error(f"Error in send_transaction_update_notification: {str(e)}")
         return {'status': 'error', 'message': str(e)}
-
+    
 def send_transaction_delete_notification(transaction, final_balance):
     try:
         # التحقق من تفعيل الواتساب للحساب
