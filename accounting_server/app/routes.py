@@ -392,7 +392,7 @@ def get_transactions():
             transaction_data = {
                 'id': trans.id,
                 'server_id': trans.server_id,
-                'date': int(trans.date.timestamp() * 1000),
+                'date': int((trans.date - timedelta(hours=3)).timestamp() * 1000),
                 'amount': trans.amount,
                 'description': trans.description,
                 'account_id': trans.account_id,
