@@ -30,6 +30,9 @@ const reconnectAttempts = new Map();
 // متغير جديد لتخزين آخر وقت إرسال رسالة لكل جلسة
 const lastMessageSentAt = new Map(); // sessionId => timestamp
 
+// متغير جديد لتتبع الجلسات التي أغلقت بسبب عدم النشاط
+const closedByInactivity = {};
+
 // دالة إنشاء جلسة واتساب
 async function createWhatsAppSession(sessionId) {
     // إذا كانت الجلسة نشطة بالفعل، أرجعها فورًا
@@ -89,6 +92,8 @@ async function createWhatsAppSession(sessionId) {
                             console.log(`[SEND][QUEUE] Sending pending message to ${fullNumber} from session ${sessionId}: "${message}"`);
                             await sock.sendMessage(`${fullNumber}@s.whatsapp.net`, { text: message });
                             console.log(`[SEND][QUEUE] Message sent successfully to ${fullNumber}`);
+                            // جدولة الإغلاق بعد إرسال كل رسالة من قائمة الانتظار
+                            scheduleSessionClose(sessionId, 3);
                         } catch (e) {
                             console.error(`[SEND][QUEUE][ERROR] Failed to send pending message: ${e.message}`);
                         }
@@ -121,6 +126,12 @@ async function createWhatsAppSession(sessionId) {
                     }
                     
                     if (shouldReconnect && !isReconnecting) {
+                        // تحقق إذا كانت الجلسة أغلقت بسبب عدم النشاط
+                        if (closedByInactivity[sessionId]) {
+                            console.log(`[DEBUG] لن يتم إعادة تشغيل الجلسة ${sessionId} لأنها أغلقت بسبب عدم النشاط.`);
+                            delete closedByInactivity[sessionId];
+                            return;
+                        }
                         let attempts = reconnectAttempts.get(sessionId) || 0;
                         if (attempts >= 5) {
                             console.error(`🚫 Too many reconnect attempts for session ${sessionId}. Stopping further attempts.`);
@@ -222,22 +233,32 @@ function cleanSessionTempFiles(sessionId) {
     }
 }
 
-function scheduleSessionClose(sessionId, minutes = 10) {
+function scheduleSessionClose(sessionId, minutes = 3) {
+    console.log(`[DEBUG] scheduleSessionClose: سيتم إغلاق الجلسة ${sessionId} بعد ${minutes} دقائق (الوقت الحالي: ${new Date().toISOString()})`);
     if (sessionTimeouts.has(sessionId)) {
         clearTimeout(sessionTimeouts.get(sessionId));
+        console.log(`[DEBUG] scheduleSessionClose: تم إعادة ضبط المؤقت لجلسة ${sessionId}`);
     }
     const timeout = setTimeout(() => {
+        console.log(`[DEBUG] Timeout fired: محاولة إغلاق الجلسة ${sessionId} الآن (الوقت الحالي: ${new Date().toISOString()})`);
         const sock = activeSessions.get(sessionId);
         if (sock) {
-            sock.end();
-            activeSessions.delete(sessionId);
-            sessionTimeouts.delete(sessionId);
-            // تنظيف الملفات المؤقتة فقط
-            cleanSessionTempFiles(sessionId);
-            console.log(`✅ Session ${sessionId} closed after ${minutes} minutes of inactivity.`);
+            try {
+                closedByInactivity[sessionId] = true; // ضع العلامة أولاً قبل إنهاء الجلسة
+                sock.end();
+                activeSessions.delete(sessionId);
+                sessionTimeouts.delete(sessionId);
+                cleanSessionTempFiles(sessionId);
+                console.log(`✅ Session ${sessionId} closed after ${minutes} minutes of inactivity.`);
+            } catch (e) {
+                console.error(`[ERROR] scheduleSessionClose: فشل إغلاق الجلسة ${sessionId}:`, e);
+            }
+        } else {
+            console.log(`[DEBUG] Timeout fired: لم يتم العثور على جلسة ${sessionId} عند محاولة الإغلاق.`);
         }
     }, minutes * 60 * 1000);
     sessionTimeouts.set(sessionId, timeout);
+    console.log(`[DEBUG] scheduleSessionClose: sessionTimeouts keys الآن: [${Array.from(sessionTimeouts.keys()).join(', ')}]`);
 }
 
 // API Endpoints
@@ -267,7 +288,7 @@ app.post('/send/:sessionId', async (req, res) => {
             console.log(`[SEND] Sending message to ${fullNumber} from session ${sessionId}: "${message}"`);
             await sock.sendMessage(`${fullNumber}@s.whatsapp.net`, { text: message });
             console.log(`[SEND] Message sent successfully to ${fullNumber}`);
-            scheduleSessionClose(sessionId, 10);
+            scheduleSessionClose(sessionId, 3);
             // تحديث آخر وقت إرسال
             lastMessageSentAt.set(sessionId, Date.now());
             return res.json({ success: true });
@@ -599,6 +620,8 @@ app.get('/session_size/:sessionId', (req, res) => {
     res.json({ sessionId, sizeBytes: size, sizeMB: (size / (1024 * 1024)).toFixed(2) });
 });
 
+// --- تم التعليق مؤقتًا لمنع إنشاء الجلسة تلقائيًا عند بدء السيرفر ---
+/*
 const sessionId = 'admin_main';
 const sessionPath = `sessions/${sessionId}`;
 
@@ -645,6 +668,8 @@ fs.readdir(sessionPath, (err, files) => {
         });
     }
 });
+*/
+// --- نهاية التعليق ---
 
 // Add new endpoint to check connection status
 app.get('/check_connection/:sessionId', async (req, res) => {
@@ -1322,30 +1347,9 @@ app.get('/sessions_dashboard', async (req, res) => {
     }
 });
 
-// دالة إغلاق الجلسات غير النشطة
-function closeInactiveSessions() {
-    const now = Date.now();
-    const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 دقائق
-    for (const [sessionId, sock] of activeSessions.entries()) {
-        // فقط الجلسات المتصلة
-        if (sock && sock.user) {
-            const lastSent = lastMessageSentAt.get(sessionId) || 0;
-            if (now - lastSent > INACTIVITY_LIMIT) {
-                try {
-                    sock.end();
-                    activeSessions.delete(sessionId);
-                    lastMessageSentAt.delete(sessionId);
-                    console.log(`✅ Session ${sessionId} closed due to inactivity (no messages sent in last 10 minutes).`);
-                } catch (e) {
-                    console.error(`❌ Error closing session ${sessionId}:`, e);
-                }
-            }
-        }
-    }
-}
-
-// تشغيل الفحص كل دقيقة
-setInterval(closeInactiveSessions, 60 * 1000);
+// --- تم التعليق مؤقتًا لمنع الفحص الدوري للجلسات غير النشطة ---
+// setInterval(closeInactiveSessions, 60 * 1000);
+// --- نهاية التعليق ---
 
 const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {
