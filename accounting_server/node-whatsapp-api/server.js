@@ -250,6 +250,13 @@ function scheduleSessionClose(sessionId, minutes = 3) {
                 sessionTimeouts.delete(sessionId);
                 cleanSessionTempFiles(sessionId);
                 console.log(`✅ Session ${sessionId} closed after ${minutes} minutes of inactivity.`);
+                // محاولة تحرير الذاكرة يدويًا إذا كان GC مفعلًا
+                if (global.gc) {
+                    console.log('[DEBUG] Forcing GC after session close');
+                    global.gc();
+                } else {
+                    console.log('[DEBUG] GC is NOT enabled. Run node with --expose-gc to enable manual GC.');
+                }
             } catch (e) {
                 console.error(`[ERROR] scheduleSessionClose: فشل إغلاق الجلسة ${sessionId}:`, e);
             }
@@ -1077,6 +1084,11 @@ app.get('/sessions_dashboard', async (req, res) => {
         const activeSessionsCount = sessionsInfo.filter(s => s.isActive).length;
         const connectedSessions = sessionsInfo.filter(s => s.isConnected).length;
         
+        // حساب استهلاك الذاكرة للعملية
+        const mem = process.memoryUsage();
+        const rssMB = (mem.rss / 1024 / 1024).toFixed(2);
+        const heapUsedMB = (mem.heapUsed / 1024 / 1024).toFixed(2);
+        
         res.send(`
             <!DOCTYPE html>
             <html dir="rtl" lang="ar">
@@ -1173,11 +1185,15 @@ app.get('/sessions_dashboard', async (req, res) => {
                         <p>مراقبة وإدارة جميع الجلسات النشطة</p>
                     </div>
                     
-                    <input type="hidden" id="sessionIdToDelete" value="">
-                    
-                    <button class="refresh-btn" onclick="location.reload()">🔄 تحديث البيانات</button>
-                    
                     <div class="stats">
+                        <div class="stat-card" style="background:#e3f2fd;">
+                            <div class="stat-number">${rssMB} MB</div>
+                            <div class="stat-label">RAM المستخدمة (RSS)</div>
+                        </div>
+                        <div class="stat-card" style="background:#e3f2fd;">
+                            <div class="stat-number">${heapUsedMB} MB</div>
+                            <div class="stat-label">Heap مستخدم فعليًا</div>
+                        </div>
                         <div class="stat-card">
                             <div class="stat-number">${totalSessions}</div>
                             <div class="stat-label">إجمالي الجلسات</div>
