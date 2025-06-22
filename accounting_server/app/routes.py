@@ -519,27 +519,32 @@ def delete_transaction_by_id(transaction_id):
         # حفظ معلومات المعاملة قبل الحذف
         account_id = transaction.account_id
         currency = transaction.currency
+
+        # معالجة التاريخ قبل أي حسابات
+        transaction_date = transaction.date
+        if isinstance(transaction_date, str):
+            try:
+                transaction_date = datetime.fromisoformat(transaction_date)
+            except Exception:
+                transaction_date = datetime.strptime(transaction_date, "%Y-%m-%d %H:%M:%S.%f")
+        transaction.date = transaction_date
         
         # حذف المعاملة
         db.session.delete(transaction)
         db.session.commit()
         
-        # حساب الرصيد النهائي بعد الحذف
-        transactions = Transaction.query.filter(
+        # حساب الرصيد النهائي بعد الحذف (مباشرة في قاعدة البيانات)
+        total_credits = db.session.query(func.coalesce(func.sum(Transaction.amount), 0)).filter(
             Transaction.account_id == account_id,
-            Transaction.currency == currency
-        ).order_by(
-            Transaction.date,
-            Transaction.id
-        ).all()
-
-        # حساب الرصيد النهائي
-        balance = 0
-        for trans in transactions:
-            if trans.type == 'credit':
-                balance += trans.amount
-            else:  # debit
-                balance -= trans.amount
+            Transaction.currency == currency,
+            Transaction.type == 'credit'
+        ).scalar()
+        total_debits = db.session.query(func.coalesce(func.sum(Transaction.amount), 0)).filter(
+            Transaction.account_id == account_id,
+            Transaction.currency == currency,
+            Transaction.type == 'debit'
+        ).scalar()
+        balance = total_credits - total_debits
         
         # إرسال إشعار الواتساب بعد الحذف
         notification_result = send_transaction_delete_notification(transaction, balance)
@@ -553,6 +558,7 @@ def delete_transaction_by_id(transaction_id):
         logger.error(f"Error deleting transaction: {str(e)}")
         db.session.rollback()
         return json_response({'error': 'حدث خطأ أثناء حذف المعاملة'}, 500)
+
 
 @main.route('/api/sync/changes', methods=['POST', 'GET'])
 @jwt_required()
