@@ -42,6 +42,8 @@ public class AccountsFragment extends Fragment {
     private TextView totalAccountsText;
     private TextView activeAccountsText;
     private Map<Long, Double> accountBalances = new HashMap<>();
+    private boolean isAscendingSort = true; // true = من الأصغر إلى الأكبر، false = من الأكبر إلى الأصغر
+    private String currentSortType = "balance"; // balance, name, date
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -118,12 +120,70 @@ public class AccountsFragment extends Fragment {
         // Setup sort button
         sortButton.setOnClickListener(v -> {
             List<Account> sorted = new ArrayList<>(currentAccounts[0]);
-            Collections.sort(sorted, (a, b) -> Double.compare(
-                accountBalances.getOrDefault(b.getId(), 0.0),
-                accountBalances.getOrDefault(a.getId(), 0.0)
-            ));
+            
+            // تبديل نوع الترتيب
+            switch (currentSortType) {
+                case "balance":
+                    currentSortType = "name";
+                    sortButton.setText("ترتيب (الاسم)");
+                    break;
+                case "name":
+                    currentSortType = "date";
+                    sortButton.setText("ترتيب (التاريخ)");
+                    break;
+                case "date":
+                    currentSortType = "balance";
+                    sortButton.setText("ترتيب (الرصيد)");
+                    break;
+            }
+            
+            // تطبيق الترتيب حسب النوع
+            switch (currentSortType) {
+                case "balance":
+                    if (isAscendingSort) {
+                        // ترتيب من الأصغر إلى الأكبر (رصيد)
+                        Collections.sort(sorted, (a, b) -> Double.compare(
+                            accountBalances.getOrDefault(a.getId(), 0.0),
+                            accountBalances.getOrDefault(b.getId(), 0.0)
+                        ));
+                        Toast.makeText(getContext(), "تم الترتيب حسب الرصيد (من الأصغر إلى الأكبر)", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // ترتيب من الأكبر إلى الأصغر (رصيد)
+                        Collections.sort(sorted, (a, b) -> Double.compare(
+                            accountBalances.getOrDefault(b.getId(), 0.0),
+                            accountBalances.getOrDefault(a.getId(), 0.0)
+                        ));
+                        Toast.makeText(getContext(), "تم الترتيب حسب الرصيد (من الأكبر إلى الأصغر)", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                    
+                case "name":
+                    if (isAscendingSort) {
+                        // ترتيب من أ إلى ي (اسم)
+                        Collections.sort(sorted, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
+                        Toast.makeText(getContext(), "تم الترتيب حسب الاسم (أ → ي)", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // ترتيب من ي إلى أ (اسم)
+                        Collections.sort(sorted, (a, b) -> b.getName().compareToIgnoreCase(a.getName()));
+                        Toast.makeText(getContext(), "تم الترتيب حسب الاسم (ي → أ)", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                    
+                case "date":
+                    if (isAscendingSort) {
+                        // ترتيب من الأقدم إلى الأحدث (تاريخ)
+                        Collections.sort(sorted, (a, b) -> Long.compare(a.getCreatedAt(), b.getCreatedAt()));
+                        Toast.makeText(getContext(), "تم الترتيب حسب التاريخ (الأقدم أولاً)", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // ترتيب من الأحدث إلى الأقدم (تاريخ)
+                        Collections.sort(sorted, (a, b) -> Long.compare(b.getCreatedAt(), a.getCreatedAt()));
+                        Toast.makeText(getContext(), "تم الترتيب حسب التاريخ (الأحدث أولاً)", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+            }
+            
+            isAscendingSort = !isAscendingSort; // تبديل اتجاه الترتيب
             accountsAdapter.updateAccounts(sorted);
-            Toast.makeText(getContext(), "تم الترتيب حسب الرصيد (من الأكبر)", Toast.LENGTH_SHORT).show();
         });
 
         // Setup add account button
