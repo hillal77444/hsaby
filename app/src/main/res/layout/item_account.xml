@@ -93,32 +93,39 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginStart="8dp">
+            android:layout_marginStart="12dp"
+            android:background="@drawable/bg_buttons_container"
+            android:padding="8dp">
 
-            <!-- زر واتساب -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/whatsapp_button"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:icon="@drawable/ic_whatsapp"
-                app:iconSize="18dp"
-                app:iconTint="#FFFFFF"
-                android:backgroundTint="#25D366"
-                app:cornerRadius="18dp"
-                android:layout_marginBottom="4dp"
-                android:contentDescription="واتساب" />
+            <!-- زر واتساب (Toggle Switch) -->
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/whatsapp_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="واتساب"
+                android:textSize="11sp"
+                android:textColor="#666"
+                app:thumbTint="#25D366"
+                app:trackTint="#E0E0E0"
+                app:thumbTintMode="src_atop"
+                app:trackTintMode="src_atop" />
 
             <!-- زر التعديل -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/edit_button"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="تعديل"
+                android:textSize="10sp"
+                android:textColor="#FFFFFF"
                 android:icon="@drawable/ic_edit"
-                app:iconSize="18dp"
-                app:iconTint="#FFFFFF"
+                app:iconSize="12dp"
+                app:iconGravity="textStart"
+                app:iconPadding="3dp"
                 android:backgroundTint="#152FD9"
-                app:cornerRadius="18dp"
-                android:contentDescription="تعديل" />
+                app:cornerRadius="16dp"
+                android:contentDescription="تعديل الحساب" />
 
         </LinearLayout>
     </LinearLayout>
