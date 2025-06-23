@@ -2,6 +2,7 @@ package com.hillal.acc.ui.dashboard;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,6 +32,7 @@ import com.hillal.acc.data.sync.SyncManager;
 import com.hillal.acc.data.remote.DataManager;
 import com.hillal.acc.data.sync.MigrationManager;
 import com.hillal.acc.data.model.ServerAppUpdateInfo;
+import com.hillal.acc.ui.AccountStatementActivity;
 
 import org.json.JSONObject;
 import org.json.JSONException;
@@ -190,8 +192,23 @@ public class DashboardFragment extends Fragment {
             Navigation.findNavController(requireView()).navigate(R.id.addTransactionFragment));
 
         // زر كشف الحساب (التقارير)
-        binding.reportButton.setOnClickListener(v ->
-            Navigation.findNavController(requireView()).navigate(R.id.accountStatementFragment));
+        binding.reportButton.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), AccountStatementActivity.class);
+            startActivity(intent);
+        });
+
+        // بطاقات شبكة الروابط المختصرة
+        binding.accountsCard.setOnClickListener(v ->
+            Navigation.findNavController(requireView()).navigate(R.id.navigation_accounts));
+
+        binding.transactionsCard.setOnClickListener(v ->
+            Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment));
+
+        binding.reportsCard.setOnClickListener(v ->
+            Navigation.findNavController(requireView()).navigate(R.id.navigation_reports));
+
+        binding.debtsCard.setOnClickListener(v ->
+            Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment));
     }
 
     private void observeData() {
@@ -309,23 +326,5 @@ public class DashboardFragment extends Fragment {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    // دوال شبكة الروابط المختصرة
-    public void onAccountsClick(View view) {
-        Navigation.findNavController(requireView()).navigate(R.id.navigation_accounts);
-    }
-
-    public void onTransactionsClick(View view) {
-        Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment);
-    }
-
-    public void onReportsClick(View view) {
-        Navigation.findNavController(requireView()).navigate(R.id.navigation_reports);
-    }
-
-    public void onDebtsClick(View view) {
-        // بما أنه لا يوجد debtsFragment، سننتقل إلى صفحة التقارير أو المعاملات
-        Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment);
     }
 } 
