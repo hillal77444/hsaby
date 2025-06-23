@@ -344,6 +344,7 @@
             android:layout_gravity="center">
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/accountsCard"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
                 android:layout_rowWeight="1"
@@ -351,8 +352,7 @@
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp"
                 android:layout_margin="8dp"
-                app:cardBackgroundColor="#FFFFFF"
-                android:onClick="onAccountsClick">
+                app:cardBackgroundColor="#FFFFFF">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -374,6 +374,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/transactionsCard"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
                 android:layout_rowWeight="1"
@@ -381,8 +382,7 @@
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp"
                 android:layout_margin="8dp"
-                app:cardBackgroundColor="#FFFFFF"
-                android:onClick="onTransactionsClick">
+                app:cardBackgroundColor="#FFFFFF">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -404,6 +404,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/reportsCard"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
                 android:layout_rowWeight="1"
@@ -411,8 +412,7 @@
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp"
                 android:layout_margin="8dp"
-                app:cardBackgroundColor="#FFFFFF"
-                android:onClick="onReportsClick">
+                app:cardBackgroundColor="#FFFFFF">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -434,6 +434,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/debtsCard"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
                 android:layout_rowWeight="1"
@@ -441,8 +442,7 @@
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp"
                 android:layout_margin="8dp"
-                app:cardBackgroundColor="#FFFFFF"
-                android:onClick="onDebtsClick">
+                app:cardBackgroundColor="#FFFFFF">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
