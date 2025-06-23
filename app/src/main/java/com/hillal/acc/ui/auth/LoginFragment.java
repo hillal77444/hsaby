@@ -54,7 +54,7 @@ public class LoginFragment extends Fragment {
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
         // إضافة مستمع لرابط سياسة الخصوصية
-        binding.textViewPrivacyPolicy.setOnClickListener(v -> {
+        binding.buttonPrivacy.setOnClickListener(v -> {
             String url = "https://malyp.com/api/privacy-policy";
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             startActivity(intent);
@@ -76,7 +76,6 @@ public class LoginFragment extends Fragment {
 
             // تعطيل الزر أثناء عملية تسجيل الدخول
             binding.buttonLogin.setEnabled(false);
-            binding.progressBar.setVisibility(View.VISIBLE);
 
             Log.d(TAG, "Attempting to login with phone: " + phone);
             
@@ -84,7 +83,6 @@ public class LoginFragment extends Fragment {
                 @Override
                 public void onSuccess() {
                     Log.d(TAG, "Login successful");
-                    binding.progressBar.setVisibility(View.GONE);
                     Toast.makeText(getContext(), "تم تسجيل الدخول بنجاح", Toast.LENGTH_SHORT).show();
 
                     // حفظ اسم المستخدم في UserPreferences
@@ -158,7 +156,6 @@ public class LoginFragment extends Fragment {
                 @Override
                 public void onError(String error) {
                     Log.e(TAG, "Login failed: " + error);
-                    binding.progressBar.setVisibility(View.GONE);
                     binding.buttonLogin.setEnabled(true);
                     
                     // عرض رسالة الخطأ مباشرة
