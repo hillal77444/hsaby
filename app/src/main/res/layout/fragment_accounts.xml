@@ -127,7 +127,7 @@
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1"
-                            android:text="ترتيب"
+                            android:text="ترتيب (الرصيد)"
                             android:textSize="12sp"
                             android:icon="@drawable/ic_sort"
                             app:iconSize="16dp"
