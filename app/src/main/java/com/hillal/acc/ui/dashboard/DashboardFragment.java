@@ -321,10 +321,11 @@ public class DashboardFragment extends Fragment {
     }
 
     public void onReportsClick(View view) {
-        Navigation.findNavController(requireView()).navigate(R.id.reportsFragment);
+        Navigation.findNavController(requireView()).navigate(R.id.navigation_reports);
     }
 
     public void onDebtsClick(View view) {
-        Navigation.findNavController(requireView()).navigate(R.id.debtsFragment);
+        // بما أنه لا يوجد debtsFragment، سننتقل إلى صفحة التقارير أو المعاملات
+        Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment);
     }
 } 
