@@ -171,6 +171,26 @@ public class LoginFragment extends Fragment {
             NavHostFragment.findNavController(LoginFragment.this)
                     .navigate(R.id.action_loginFragment_to_registerFragment)
         );
+
+        // زر أرقام التواصل
+        binding.buttonContact.setOnClickListener(v -> {
+            Toast.makeText(getContext(), "رقم التواصل: 774447251", Toast.LENGTH_LONG).show();
+        });
+
+        // زر عن التطبيق
+        binding.buttonAbout.setOnClickListener(v -> {
+            String about = "تطبيق مالي برو هو رفيقك الذكي لإدارة الحسابات والمعاملات المالية بسهولة واحترافية.\n\n" +
+                    "أهم المميزات:\n" +
+                    "- العمل أونلاين أو أوفلاين بدون انقطاع.\n" +
+                    "- استرداد قاعدة البيانات في أي وقت.\n" +
+                    "- تقارير مالية دقيقة وشاملة.\n" +
+                    "- إرسال إشعارات واتساب تلقائيًا (اختياري عند التفعيل).";
+            new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle("عن تطبيق مالي برو")
+                    .setMessage(about)
+                    .setPositiveButton("حسناً", null)
+                    .show();
+        });
     }
 
     @Override
