@@ -134,7 +134,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="إنشاء حساب جديد"
-        android:backgroundTint="#22C55E"
+        android:backgroundTint="#152FD9"
         android:textColor="#FFFFFF"
         android:textStyle="bold"
         app:iconPadding="8dp"
@@ -187,7 +187,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="عن التطبيق"
-            android:backgroundTint="#22C55E"
+            android:backgroundTint="#152FD9"
             android:textColor="#FFFFFF"
             android:layout_marginStart="4dp" />
     </LinearLayout>
