@@ -672,6 +672,7 @@ def calculate_and_notify_transaction(transaction_id):
 🏦 إشعار قيد جديدة
 
 🏛️ الاخ/: *{account.account_name}*
+🔢 رقم الحساب: *{account.server_id}*
 
 💰 تفاصيل القيد :
 •  {transaction_type}
@@ -868,18 +869,20 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
             return {'status': 'success', 'message': 'لم يتم اكتشاف أي تغييرات في المعاملة'}
 
         message = f"""
-🏦 إشعار تحديث قيد
+🏦 إشعار تعديل قيد
 
 🏛️ الاخ/: *{account.account_name}*
+🔢 رقم الحساب: *{account.server_id}*
 
-💰 تفاصيل التحديث:
+
+💰 تفاصيل التعديل:
 {chr(10).join(changes)}
 • نوع القيد: {transaction_type}
 • الوصف: {transaction.description or 'لا يوجد وصف'}
 
 💳 {balance_text}
 
-تم التحديث بواسطة: *{user.username}*
+تم التعديل بواسطة: *{user.username}*
         """.strip()
 
         # تنسيق رقم الهاتف
@@ -944,6 +947,8 @@ def send_transaction_delete_notification(transaction, final_balance):
 🏦 إشعار حذف قيد
 
 🏛️ الاخ/: *{account.account_name}*
+🔢 رقم الحساب: *{account.server_id}*
+
 
 💰 تفاصيل القيد المحذوف:
 • نوع القيد: {transaction_type}
