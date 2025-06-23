@@ -155,7 +155,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="العودة لتسجيل الدخول"
-            android:backgroundTint="#22C55E"
+            android:backgroundTint="#152FD9"
             android:textColor="#FFFFFF"
             android:layout_gravity="center"
             android:layout_marginTop="12dp" />
