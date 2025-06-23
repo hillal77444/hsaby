@@ -181,21 +181,17 @@ public class DashboardFragment extends Fragment {
         binding.editProfileButton.setOnClickListener(v -> 
             Navigation.findNavController(requireView()).navigate(R.id.editProfileFragment));
 
-        // زر عرض القيود المحاسبية
-        binding.transactionsButton.setOnClickListener(v -> 
-            Navigation.findNavController(v).navigate(R.id.transactionsFragment));
+        // زر إضافة حساب جديد
+        binding.addAccountButton.setOnClickListener(v ->
+            Navigation.findNavController(requireView()).navigate(R.id.addAccountFragment));
 
-        // زر عرض الحسابات
-        binding.accountsButton.setOnClickListener(v -> 
-            Navigation.findNavController(v).navigate(R.id.navigation_accounts));
-
-        // زر عرض ملخص الحسابات
-        binding.viewSummaryButton.setOnClickListener(v -> 
-            Navigation.findNavController(requireView()).navigate(R.id.nav_summary));
-
-        // زر + لإضافة معاملة جديدة
-        binding.fabAddTransaction.setOnClickListener(v ->
+        // زر إضافة معاملة جديدة
+        binding.addTransactionButton.setOnClickListener(v ->
             Navigation.findNavController(requireView()).navigate(R.id.addTransactionFragment));
+
+        // زر كشف الحساب (التقارير)
+        binding.reportButton.setOnClickListener(v ->
+            Navigation.findNavController(requireView()).navigate(R.id.accountStatementFragment));
     }
 
     private void observeData() {
@@ -313,5 +309,22 @@ public class DashboardFragment extends Fragment {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    // دوال شبكة الروابط المختصرة
+    public void onAccountsClick(View view) {
+        Navigation.findNavController(requireView()).navigate(R.id.navigation_accounts);
+    }
+
+    public void onTransactionsClick(View view) {
+        Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment);
+    }
+
+    public void onReportsClick(View view) {
+        Navigation.findNavController(requireView()).navigate(R.id.reportsFragment);
+    }
+
+    public void onDebtsClick(View view) {
+        Navigation.findNavController(requireView()).navigate(R.id.debtsFragment);
     }
 } 
