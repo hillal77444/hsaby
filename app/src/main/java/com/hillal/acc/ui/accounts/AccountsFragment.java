@@ -6,10 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import android.widget.TextView;
-import android.widget.Spinner;
-import android.widget.AdapterView;
-import android.widget.Switch;
-import android.widget.EditText;
 import android.text.Editable;
 import android.text.TextWatcher;
 
@@ -22,6 +18,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.acc.R;
 import com.hillal.acc.data.model.Account;
 import com.hillal.acc.data.model.Transaction;
@@ -31,14 +29,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 
 public class AccountsFragment extends Fragment {
     private AccountViewModel accountViewModel;
     private RecyclerView accountsRecyclerView;
     private AccountsAdapter accountsAdapter;
-    private EditText searchEditText;
+    private TextInputEditText searchEditText;
+    private MaterialButton filterButton;
+    private MaterialButton sortButton;
+    private TextView totalAccountsText;
+    private TextView activeAccountsText;
     private Map<Long, Double> accountBalances = new HashMap<>();
 
     @Override
@@ -48,7 +49,10 @@ public class AccountsFragment extends Fragment {
         // Initialize views
         accountsRecyclerView = root.findViewById(R.id.accounts_list);
         searchEditText = root.findViewById(R.id.search_edit_text);
-        Spinner sortSpinner = root.findViewById(R.id.sort_spinner);
+        filterButton = root.findViewById(R.id.filterButton);
+        sortButton = root.findViewById(R.id.sortButton);
+        totalAccountsText = root.findViewById(R.id.totalAccountsText);
+        activeAccountsText = root.findViewById(R.id.activeAccountsText);
         FloatingActionButton addAccountButton = root.findViewById(R.id.fab_add_account);
 
         // Initialize ViewModel
@@ -65,6 +69,13 @@ public class AccountsFragment extends Fragment {
         // Observe accounts data
         accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
             currentAccounts[0] = new ArrayList<>(accounts);
+            
+            // تحديث الإحصائيات
+            totalAccountsText.setText(String.valueOf(accounts.size()));
+            long activeCount = accounts.stream().filter(Account::isWhatsappEnabled).count();
+            activeAccountsText.setText(String.valueOf(activeCount));
+            
+            // تحديث الأرصدة
             for (Account account : accounts) {
                 accountViewModel.getAccountBalanceYemeni(account.getId()).observe(getViewLifecycleOwner(), balance -> {
                     accountBalances.put(account.getId(), balance != null ? balance : 0.0);
@@ -98,26 +109,20 @@ public class AccountsFragment extends Fragment {
             public void afterTextChanged(Editable s) {}
         });
 
-        // Spinner: ترتيب القائمة
-        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                List<Account> sorted = new ArrayList<>(currentAccounts[0]);
-                if (position == 1) { // من الأكبر إلى الأصغر
-                    Collections.sort(sorted, (a, b) -> Double.compare(
-                        accountBalances.getOrDefault(b.getId(), 0.0),
-                        accountBalances.getOrDefault(a.getId(), 0.0)
-                    ));
-                } else if (position == 2) { // من الأصغر إلى الأكبر
-                    Collections.sort(sorted, (a, b) -> Double.compare(
-                        accountBalances.getOrDefault(a.getId(), 0.0),
-                        accountBalances.getOrDefault(b.getId(), 0.0)
-                    ));
-                }
-                accountsAdapter.updateAccounts(sorted);
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+        // Setup filter button
+        filterButton.setOnClickListener(v -> {
+            Toast.makeText(getContext(), "سيتم إضافة خيارات التصفية قريباً", Toast.LENGTH_SHORT).show();
+        });
+
+        // Setup sort button
+        sortButton.setOnClickListener(v -> {
+            List<Account> sorted = new ArrayList<>(currentAccounts[0]);
+            Collections.sort(sorted, (a, b) -> Double.compare(
+                accountBalances.getOrDefault(b.getId(), 0.0),
+                accountBalances.getOrDefault(a.getId(), 0.0)
+            ));
+            accountsAdapter.updateAccounts(sorted);
+            Toast.makeText(getContext(), "تم الترتيب حسب الرصيد (من الأكبر)", Toast.LENGTH_SHORT).show();
         });
 
         // Setup add account button
@@ -157,18 +162,6 @@ public class AccountsFragment extends Fragment {
             Account account = accounts.get(position);
             holder.accountName.setText(account.getName());
             holder.phone.setText(account.getPhoneNumber());
-            
-            // Remove the listener before setting the checked state
-            holder.whatsappSwitch.setOnCheckedChangeListener(null);
-            holder.whatsappSwitch.setChecked(account.isWhatsappEnabled());
-            
-            // Add the listener after setting the checked state
-            holder.whatsappSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked != account.isWhatsappEnabled()) {
-                    account.setWhatsappEnabled(isChecked);
-                    accountViewModel.updateAccount(account);
-                }
-            });
 
             // راقب الرصيد اليمني فقط
             accountViewModel.getAccountBalanceYemeni(account.getId()).observe(lifecycleOwner, balance -> {
@@ -176,14 +169,27 @@ public class AccountsFragment extends Fragment {
                 String balanceText;
                 if (value < 0) {
                     balanceText = String.format(java.util.Locale.US, "عليه %,d يمني", Math.abs((long)value));
-                    holder.balance.setTextColor(holder.itemView.getContext().getColor(R.color.red));
+                    holder.balance.setTextColor(holder.itemView.getContext().getColor(R.color.debit_red));
                 } else {
                     balanceText = String.format(java.util.Locale.US, "له %,d يمني", (long)value);
-                    holder.balance.setTextColor(holder.itemView.getContext().getColor(R.color.green));
+                    holder.balance.setTextColor(holder.itemView.getContext().getColor(R.color.credit_green));
                 }
                 holder.balance.setText(balanceText);
             });
 
+            // Setup WhatsApp button
+            holder.whatsappButton.setOnClickListener(v -> {
+                Toast.makeText(v.getContext(), "سيتم إرسال كشف الحساب عبر واتساب", Toast.LENGTH_SHORT).show();
+            });
+
+            // Setup edit button
+            holder.editButton.setOnClickListener(v -> {
+                Bundle args = new Bundle();
+                args.putLong("accountId", account.getId());
+                Navigation.findNavController(v).navigate(R.id.editAccountFragment, args);
+            });
+
+            // Setup item click
             holder.itemView.setOnClickListener(v -> {
                 Bundle args = new Bundle();
                 args.putLong("accountId", account.getId());
@@ -200,14 +206,16 @@ public class AccountsFragment extends Fragment {
             TextView accountName;
             TextView phone;
             TextView balance;
-            Switch whatsappSwitch;
+            MaterialButton whatsappButton;
+            MaterialButton editButton;
 
             ViewHolder(View itemView) {
                 super(itemView);
                 accountName = itemView.findViewById(R.id.account_name);
                 phone = itemView.findViewById(R.id.phone);
                 balance = itemView.findViewById(R.id.balance);
-                whatsappSwitch = itemView.findViewById(R.id.whatsapp_switch);
+                whatsappButton = itemView.findViewById(R.id.whatsapp_button);
+                editButton = itemView.findViewById(R.id.edit_button);
             }
         }
     }
