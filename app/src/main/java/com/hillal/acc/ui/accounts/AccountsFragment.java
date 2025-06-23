@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.hillal.acc.R;
 import com.hillal.acc.data.model.Account;
 import com.hillal.acc.data.model.Transaction;
@@ -177,9 +178,15 @@ public class AccountsFragment extends Fragment {
                 holder.balance.setText(balanceText);
             });
 
-            // Setup WhatsApp button
-            holder.whatsappButton.setOnClickListener(v -> {
-                Toast.makeText(v.getContext(), "سيتم إرسال كشف الحساب عبر واتساب", Toast.LENGTH_SHORT).show();
+            // Setup WhatsApp switch
+            holder.whatsappSwitch.setChecked(account.isWhatsappEnabled());
+            holder.whatsappSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                // تحديث حالة واتساب الحساب
+                account.setWhatsappEnabled(isChecked);
+                accountViewModel.updateAccount(account);
+                
+                String message = isChecked ? "تم تفعيل واتساب للحساب" : "تم إيقاف واتساب للحساب";
+                Toast.makeText(buttonView.getContext(), message, Toast.LENGTH_SHORT).show();
             });
 
             // Setup edit button
@@ -206,7 +213,7 @@ public class AccountsFragment extends Fragment {
             TextView accountName;
             TextView phone;
             TextView balance;
-            MaterialButton whatsappButton;
+            SwitchMaterial whatsappSwitch;
             MaterialButton editButton;
 
             ViewHolder(View itemView) {
@@ -214,7 +221,7 @@ public class AccountsFragment extends Fragment {
                 accountName = itemView.findViewById(R.id.account_name);
                 phone = itemView.findViewById(R.id.phone);
                 balance = itemView.findViewById(R.id.balance);
-                whatsappButton = itemView.findViewById(R.id.whatsapp_button);
+                whatsappSwitch = itemView.findViewById(R.id.whatsapp_switch);
                 editButton = itemView.findViewById(R.id.edit_button);
             }
         }
