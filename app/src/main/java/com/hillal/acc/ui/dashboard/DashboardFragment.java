@@ -208,7 +208,7 @@ public class DashboardFragment extends Fragment {
             Navigation.findNavController(requireView()).navigate(R.id.navigation_reports));
 
         binding.debtsCard.setOnClickListener(v ->
-            Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment));
+            Navigation.findNavController(requireView()).navigate(R.id.nav_summary));
     }
 
     private void observeData() {
