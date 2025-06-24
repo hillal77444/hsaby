@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -16,65 +16,76 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp"
-            android:gravity="center_horizontal">
+            android:background="#F8F8F8">
 
-            <!-- صورة أو أيقونة دائرية في الأعلى -->
-            <ImageView
-                android:id="@+id/transactionIcon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_edit"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="2dp"
-                android:background="@drawable/circle_bg"
-                android:padding="4dp"
-                android:elevation="2dp"
-                android:contentDescription="@string/edit_transaction" />
+            <!-- رأس الصفحة -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:background="@color/info"
+                android:scaleX="2.2"
+                android:scaleY="1.2" />
 
-            <!-- عنوان رئيسي -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                app:cardCornerRadius="36dp"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="#FFFFFF"
+                android:layout_gravity="center"
+                android:layout_marginTop="-100dp">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_edit"
+                    android:scaleType="centerInside"
+                    android:tint="#1976D2" />
+            </androidx.cardview.widget.CardView>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="تعديل القيد المحاسبي"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-                android:textColor="@color/primary"
-                android:layout_marginBottom="2dp"
-                android:fontFamily="sans-serif-medium"/>
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="#1976D2"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp" />
 
-            <!-- وصف مختصر -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="قم بتعديل تفاصيل القيد المحاسبي"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-                android:textColor="@color/gray"
-                android:layout_marginBottom="4dp"/>
+                android:textSize="14sp"
+                android:textColor="#666"
+                android:layout_gravity="center"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="16dp" />
 
             <!-- بطاقة الحساب -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="1dp"
-                app:cardBackgroundColor="@color/white"
-                android:layout_margin="2dp">
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="4dp">
+                    android:padding="16dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="الحساب"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-                        android:textColor="@color/primary"
-                        android:drawableStart="@android:drawable/ic_menu_myplaces"
-                        android:drawablePadding="4dp"
-                        android:layout_marginBottom="2dp"/>
+                        android:textSize="16sp"
+                        android:textColor="#1976D2"
+                        android:layout_marginBottom="4dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/accountLayout"
@@ -95,18 +106,19 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="1dp"
-                app:cardBackgroundColor="@color/white"
-                android:layout_marginHorizontal="2dp"
-                android:layout_marginBottom="2dp">
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:weightSum="2"
-                    android:padding="4dp">
+                    android:padding="8dp">
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/amountLayout"
@@ -114,7 +126,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginEnd="2dp"
+                        android:layout_marginEnd="8dp"
                         android:hint="المبلغ">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -132,7 +144,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="2dp"
+                        android:layout_marginStart="8dp"
                         android:hint="التاريخ">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -147,30 +159,31 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- بطاقة نوع العملية -->
+            <!-- بطاقة نوع العملية (مخفاة فقط) -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="1dp"
-                app:cardBackgroundColor="@color/white"
-                android:layout_marginHorizontal="2dp"
-                android:layout_marginBottom="2dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFFFF"
                 android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="4dp">
+                    android:padding="8dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="نوع العملية"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-                        android:textColor="@color/primary"
-                        android:layout_marginBottom="2dp" />
+                        android:textSize="16sp"
+                        android:textColor="#1976D2"
+                        android:layout_marginBottom="4dp" />
 
                     <RadioGroup
                         android:id="@+id/typeRadioGroup"
@@ -195,30 +208,31 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- بطاقة العملة -->
+            <!-- بطاقة العملة (مخفاة فقط) -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="1dp"
-                app:cardBackgroundColor="@color/white"
-                android:layout_marginHorizontal="2dp"
-                android:layout_marginBottom="2dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFFFF"
                 android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="4dp">
+                    android:padding="8dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="العملة"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-                        android:textColor="@color/primary"
-                        android:layout_marginBottom="2dp" />
+                        android:textSize="16sp"
+                        android:textColor="#1976D2"
+                        android:layout_marginBottom="4dp" />
 
                     <RadioGroup
                         android:id="@+id/currencyRadioGroup"
@@ -254,17 +268,18 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="1dp"
-                app:cardBackgroundColor="@color/white"
-                android:layout_marginHorizontal="2dp"
-                android:layout_marginBottom="2dp">
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="4dp">
+                    android:padding="8dp">
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/descriptionLayout"
@@ -283,22 +298,23 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- بطاقة الملاحظات -->
+            <!-- بطاقة الملاحظات (مخفاة فقط) -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="1dp"
-                app:cardBackgroundColor="@color/white"
-                android:layout_marginHorizontal="2dp"
-                android:layout_marginBottom="2dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFFFF"
                 android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="4dp">
+                    android:padding="8dp">
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/notesLayout"
@@ -324,7 +340,7 @@
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="32dp">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/saveButton"
@@ -334,6 +350,8 @@
                     android:layout_weight="1"
                     android:text="حفظ"
                     android:icon="@android:drawable/ic_menu_save"
+                    android:backgroundTint="#1976D2"
+                    android:textColor="#fff"
                     android:layout_marginEnd="8dp"/>
 
                 <com.google.android.material.button.MaterialButton
@@ -343,10 +361,12 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="إلغاء"
-                    android:icon="@android:drawable/ic_menu_close_clear_cancel"/>
+                    android:icon="@android:drawable/ic_menu_close_clear_cancel"
+                    android:backgroundTint="#F3F4F6"
+                    android:textColor="#222"/>
             </LinearLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout> 
+</FrameLayout> 
