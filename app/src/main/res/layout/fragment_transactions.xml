@@ -1,26 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:background="#F8F8F8">
 
-            <!-- قسم التصفية -->
+            <!-- الدائرة العلوية والشعار والعنوان -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:background="@color/info"
+                android:scaleX="2.2"
+                android:scaleY="1.2" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                app:cardCornerRadius="40dp"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="#FFFFFF"
+                android:layout_gravity="center"
+                android:layout_marginTop="-120dp">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_transactions"
+                    android:scaleType="centerInside"
+                    android:tint="#152FD9" />
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="القيود المحاسبية"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#152FD9"
+                android:layout_gravity="center"
+                android:layout_marginTop="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="عرض وإدارة جميع المعاملات المالية"
+                android:textSize="14sp"
+                android:textColor="#666"
+                android:layout_gravity="center"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="16dp" />
+
+            <!-- قسم التصفية والفلترة -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp">
+                app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -33,10 +81,16 @@
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginBottom="12dp"
                         android:hint="اختر الحساب"
-                        app:boxStrokeColor="@color/primary"
-                        app:hintTextColor="@color/primary">
+                        app:startIconDrawable="@drawable/ic_accounts"
+                        app:startIconTint="#152FD9"
+                        app:boxStrokeColor="#152FD9"
+                        app:hintTextColor="#152FD9"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp">
 
                         <AutoCompleteTextView
                             android:id="@+id/accountFilterDropdown"
@@ -47,40 +101,19 @@
                             android:maxLines="1"
                             android:singleLine="true"
                             android:textSize="14sp"
-                            android:textColor="@color/text_primary" />
+                            android:textColor="#152FD9" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- تصفية العملة -->
-                    <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/currencyChipGroup"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        app:singleSelection="true">
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipYer"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/currency_yer"
-                            android:checked="true" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipSar"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/currency_sar" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipUsd"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/currency_usd" />
-
-                    </com.google.android.material.chip.ChipGroup>
-
                     <!-- تصفية التاريخ -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="الفترة الزمنية:"
+                        android:textSize="14sp"
+                        android:textColor="#666"
+                        android:layout_marginBottom="8dp" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -93,14 +126,23 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:layout_marginEnd="8dp"
-                            android:hint="@string/from_date">
+                            android:hint="@string/from_date"
+                            app:startIconDrawable="@drawable/ic_calendar"
+                            app:startIconTint="#152FD9"
+                            app:boxStrokeColor="#152FD9"
+                            app:hintTextColor="#152FD9"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/startDateFilter"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:focusable="false"
-                                android:clickable="true" />
+                                android:clickable="true"
+                                android:textColor="#152FD9" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -111,14 +153,23 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:layout_marginStart="8dp"
-                            android:hint="@string/to_date">
+                            android:hint="@string/to_date"
+                            app:startIconDrawable="@drawable/ic_calendar"
+                            app:startIconTint="#152FD9"
+                            app:boxStrokeColor="#152FD9"
+                            app:hintTextColor="#152FD9"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/endDateFilter"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:focusable="false"
-                                android:clickable="true" />
+                                android:clickable="true"
+                                android:textColor="#152FD9" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -128,13 +179,90 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- إحصائيات سريعة -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="16dp">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="4dp"
+                    app:cardBackgroundColor="#E3F9F1">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:id="@+id/totalTransactionsText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textStyle="bold"
+                            android:textColor="#152FD9"
+                            android:textSize="16sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="إجمالي القيود"
+                            android:textColor="#666"
+                            android:textSize="10sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="8dp"
+                    app:cardBackgroundColor="#E3E8FD">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:id="@+id/totalAmountText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textStyle="bold"
+                            android:textColor="#152FD9"
+                            android:textSize="16sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="إجمالي المبالغ"
+                            android:textColor="#666"
+                            android:textSize="10sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
             <!-- قائمة القيود -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/transactionsRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
-                android:paddingBottom="100dp" />
+                android:padding="8dp"
+                android:nestedScrollingEnabled="false" />
+
+            <!-- مساحة للزر العائم -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="140dp" />
 
         </LinearLayout>
 
@@ -149,7 +277,9 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="80dp"
         android:contentDescription="@string/add_transaction"
-        app:srcCompat="@drawable/ic_add" />
+        app:srcCompat="@drawable/ic_add"
+        app:backgroundTint="#152FD9"
+        app:tint="#FFFFFF" />
 
     <!-- ProgressBar -->
     <ProgressBar
@@ -159,12 +289,42 @@
         android:visibility="gone"
         android:layout_gravity="center" />
 
-    <TextView
+    <!-- رسالة فارغة -->
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/emptyView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/no_transactions"
         android:visibility="gone"
-        android:layout_gravity="center" />
+        android:layout_gravity="center"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#FFFFFF"
+        android:layout_margin="32dp">
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout> 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="24dp">
+
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_transactions"
+                android:tint="#CCCCCC"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/no_transactions"
+                android:textSize="16sp"
+                android:textColor="#666"
+                android:textAlignment="center" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</FrameLayout> 
