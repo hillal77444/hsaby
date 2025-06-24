@@ -731,84 +731,102 @@ def account_statement(account_id):
     # جلب معلومات الحساب
     account = Account.query.get_or_404(account_id)
     user = User.query.get(account.user_id)
-    
+
     # العملة المحددة من الطلب
     selected_currency = request.args.get('currency', 'all')
-    
-    # جلب المعاملات حسب العملة المختارة
-    query = Transaction.query.filter_by(account_id=account_id)
-    if selected_currency != 'all':
-        query = query.filter_by(currency=selected_currency)
-    
-    # جلب المعاملات مرتبة حسب التاريخ
-    transactions = query.order_by(Transaction.date, Transaction.id).all()
-    
+    from_date_str = request.args.get('from_date')
+    to_date_str = request.args.get('to_date')
+
+    from datetime import datetime, timedelta
+    from sqlalchemy import func, case
+
+    # تحديد الفترة الزمنية
+    if from_date_str:
+        start_date = datetime.strptime(from_date_str, '%Y-%m-%d')
+    else:
+        start_date = datetime.now() - timedelta(days=4)
+    if to_date_str:
+        end_date = datetime.strptime(to_date_str, '%Y-%m-%d') + timedelta(days=1)  # نهاية اليوم
+    else:
+        end_date = datetime.now()
+
     # جلب قائمة العملات الفريدة
     currencies = db.session.query(Transaction.currency)\
         .filter_by(account_id=account_id)\
         .distinct()\
         .all()
     currencies = [c[0] for c in currencies]
-    
-    # حساب الرصيد المتراكم حسب العملة المحددة
+
+    # إذا لم يتم تحديد عملة، اختر أول عملة تلقائيًا (إن وجدت)
+    if selected_currency == 'all' and currencies:
+        selected_currency = currencies[0]
+
+    # جلب المعاملات حسب العملة والتاريخ
+    base_query = Transaction.query.filter(
+        Transaction.account_id == account_id,
+        Transaction.date >= start_date,
+        Transaction.date < end_date
+    )
     if selected_currency != 'all':
-        # جلب جميع المعاملات للعملة المحددة مرتبة حسب التاريخ
-        currency_transactions = Transaction.query.filter_by(
-            account_id=account_id,
-            currency=selected_currency
-        ).order_by(Transaction.date, Transaction.id).all()
-        
-        # حساب الرصيد المتراكم
-        balance = 0
-        for transaction in currency_transactions:
-            if transaction.type == 'credit':
-                balance += transaction.amount
-            else:
-                balance -= transaction.amount
-            transaction.balance = balance
-    else:
-        # إذا كانت جميع العملات، نحسب الرصيد لكل معاملة حسب عملتها
-        currency_balances = {}
-        for transaction in transactions:
-            currency = transaction.currency
-            if currency not in currency_balances:
-                currency_balances[currency] = 0
-            
-            if transaction.type == 'credit':
-                currency_balances[currency] += transaction.amount
-            else:
-                currency_balances[currency] -= transaction.amount
-            
-            transaction.balance = currency_balances[currency]
-    
-    # حساب الرصيد النهائي لكل عملة
+        base_query = base_query.filter(Transaction.currency == selected_currency)
+
+    transactions = base_query.order_by(Transaction.date, Transaction.id).all()
+
+    # حساب الرصيد النهائي لكل عملة (لكل الفترة)
     currency_balances = {}
     for currency in currencies:
-        currency_transactions = Transaction.query.filter_by(
-            account_id=account_id,
-            currency=currency
-        ).order_by(Transaction.date, Transaction.id).all()
-        
-        currency_balance = 0
-        for trans in currency_transactions:
-            if trans.type == 'credit':
-                currency_balance += trans.amount
-            else:
-                currency_balance -= trans.amount
+        currency_balance = db.session.query(
+            func.sum(case((Transaction.type == 'credit', Transaction.amount), else_=-Transaction.amount))
+        ).filter(
+            Transaction.account_id == account_id,
+            Transaction.currency == currency,
+            Transaction.date >= start_date,
+            Transaction.date < end_date
+        ).scalar() or 0
         currency_balances[currency] = currency_balance
-    
+
     # تحديد الرصيد النهائي حسب العملة المحددة
     final_balance = currency_balances.get(selected_currency, 0) if selected_currency != 'all' else None
-    
+
+    # حساب الرصيد السابق قبل الفترة
+    previous_balance = db.session.query(
+        func.sum(case((Transaction.type == 'credit', Transaction.amount), else_=-Transaction.amount))
+    ).filter(
+        Transaction.account_id == account_id,
+        Transaction.date < start_date
+    )
+    if selected_currency != 'all':
+        previous_balance = previous_balance.filter(Transaction.currency == selected_currency)
+    previous_balance = previous_balance.scalar() or 0
+
+    # تجهيز المعاملات مع الرصيد التراكمي الصحيح
+    class TxnObj:
+        def __init__(self, txn, balance):
+            self.__dict__.update(txn.__dict__)
+            self.balance = balance
+    running_balance = previous_balance
+    txn_objs = []
+    for txn in transactions:
+        if txn.type == 'credit':
+            running_balance += txn.amount
+        else:
+            running_balance -= txn.amount
+        txn_objs.append(TxnObj(txn, running_balance))
+
+    default_from_date = (datetime.now() - timedelta(days=4)).strftime('%Y-%m-%d')
+    default_to_date = datetime.now().strftime('%Y-%m-%d')
     return render_template('admin/account_statement.html',
                          account=account,
                          user=user,
-                         transactions=transactions,
+                         transactions=txn_objs,
                          currencies=currencies,
                          selected_currency=selected_currency,
                          final_balance=final_balance,
                          currency_balances=currency_balances,
-                         now=datetime.now())
+                         now=datetime.now(),
+                         default_from_date=default_from_date,
+                         default_to_date=default_to_date,
+                         previous_balance=previous_balance)
 
 def send_transaction_update_notification(transaction_id, old_amount, old_date):
     try:
