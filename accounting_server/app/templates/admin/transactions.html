@@ -55,6 +55,35 @@
             <h6 class="m-0 font-weight-bold text-primary">قائمة المعاملات</h6>
         </div>
         <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="accountSelect" class="form-label">اختر الحساب</label>
+                    <select id="accountSelect" class="form-control select2" data-placeholder="اختر الحساب">
+                        <option value="">كل الحسابات</option>
+                        {% for account in accounts %}
+                            <option value="{{ account.id }}" {% if selected_account_id and account.id == selected_account_id %}selected{% endif %}>{{ account.account_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="userSelect" class="form-label">اختر المستخدم</label>
+                    <select id="userSelect" class="form-control select2" data-placeholder="اختر المستخدم">
+                        <option value="">كل المستخدمين</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}" {% if selected_user_id and user.id == selected_user_id %}selected{% endif %}>{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="currencySelect" class="form-label">اختر العملة</label>
+                    <select id="currencySelect" class="form-control select2" data-placeholder="اختر العملة">
+                        <option value="">كل العملات</option>
+                        {% for curr in currencies %}
+                            <option value="{{ curr }}" {% if selected_currency and curr == selected_currency %}selected{% endif %}>{{ curr }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
@@ -70,30 +99,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for transaction in transactions %}
-                        <tr>
-                            <td>{{ transaction.date.strftime('%Y-%m-%d %H:%M') }}</td>
-                            <td>{{ transaction.account.account_name }}</td>
-                            <td>
-                                {% if transaction.type == 'credit' %}
-                                <span class="badge bg-success">دائن</span>
-                                {% elif transaction.type == 'debit' %}
-                                <span class="badge bg-danger">مدين</span>
-                                {% else %}
-                                <span class="badge bg-secondary">{{ transaction.type }}</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ transaction.amount }}</td>
-                            <td>{{ transaction.currency or 'ريال' }}</td>
-                            <td>{{ transaction.description or '-' }}</td>
-                            <td>{{ transaction.user.username }}</td>
-                            <td>
-                                <button class="btn btn-info btn-sm" onclick="sendNotification('{{ transaction.id }}')">
-                                    <i class="fas fa-bell"></i> إشعار
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
+                        <!-- سيتم تعبئة الصفوف عبر DataTables/AJAX -->
                     </tbody>
                 </table>
             </div>
@@ -103,30 +109,61 @@
 {% endblock %}
 
 {% block extra_js %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 $(document).ready(function() {
+    $('.select2').select2({
+        width: '100%',
+        dir: 'rtl',
+        placeholder: function(){
+            return $(this).data('placeholder');
+        }
+    });
+    // عند تغيير أي فلتر، أعد تحميل الجدول مع الفلاتر
+    $('#accountSelect, #userSelect, #currencySelect').on('change', function() {
+        table.ajax.reload();
+    });
     var table = $('#dataTable').DataTable({
+        "processing": true,
+        "serverSide": true,
+        "ajax": {
+            "url": "/api/admin/transactions/data",
+            "data": function (d) {
+                d.account_id = $('#accountSelect').val();
+                d.user_id = $('#userSelect').val();
+                d.currency = $('#currencySelect').val();
+            }
+        },
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Arabic.json"
         },
-        "order": [[0, "desc"]], // ترتيب حسب التاريخ تنازلياً
-        "pageLength": 30, // عدد العناصر في كل صفحة
-        "lengthMenu": [[30, 50, 100, -1], [30, 50, 100, "الكل"]], // خيارات عدد العناصر في الصفحة
-        "searching": true, // تفعيل البحث
-        "search": {
-            "smart": true, // بحث ذكي
-            "caseInsensitive": true // تجاهل حالة الأحرف
-        },
-        "dom": '<"top"lf>rt<"bottom"ip><"clear">', // تخصيص شكل الجدول
+        "order": [[0, "desc"]],
+        "pageLength": 30,
+        "lengthMenu": [[30, 50, 100, -1], [30, 50, 100, "الكل"]],
+        "columns": [
+            { "data": "date" },
+            { "data": "account_name" },
+            { "data": "type", "render": function(data, type, row) {
+                if(data === 'credit') return '<span class="badge bg-success">دائن</span>';
+                if(data === 'debit') return '<span class="badge bg-danger">مدين</span>';
+                return '<span class="badge bg-secondary">'+data+'</span>';
+            }},
+            { "data": "amount" },
+            { "data": "currency" },
+            { "data": "description" },
+            { "data": "username" },
+            { "data": null, "orderable": false, "searchable": false, "render": function(data, type, row) {
+                return '<button class="btn btn-info btn-sm" onclick="sendNotification(\''+row.id+'\')">\n<i class="fas fa-bell"></i> إشعار\n</button>';
+            }}
+        ],
+        "dom": '<"top"lf>rt<"bottom"ip><"clear">',
         "initComplete": function() {
-            // تخصيص حقل البحث
             $('.dataTables_filter input').addClass('form-control');
             $('.dataTables_filter input').attr('placeholder', 'بحث...');
             $('.dataTables_length select').addClass('form-control');
         }
     });
-
-    // تخصيص شكل أزرار التنقل
     $('.dataTables_paginate').addClass('pagination-sm');
     $('.dataTables_paginate .paginate_button').addClass('btn btn-sm btn-outline-primary mx-1');
     $('.dataTables_paginate .paginate_button.current').addClass('btn-primary');
