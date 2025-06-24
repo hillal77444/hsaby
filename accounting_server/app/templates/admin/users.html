@@ -202,33 +202,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for stat in user_stats %}
-                                    <tr>
-                                        <td>{{ stat.user.id }}</td>
-                                        <td>{{ stat.user.username }}</td>
-                                        <td>{{ stat.user.phone }}</td>
-                                        <td><span class="badge bg-info">{{ stat.accounts_count }}</span></td>
-                                        <td><span class="badge bg-secondary">{{ stat.transactions_count }}</span></td>
-                                        <td class="text-success">{{ stat.total_credits }}</td>
-                                        <td class="text-danger">{{ stat.total_debits }}</td>
-                                        <td class="{% if stat.balance >= 0 %}text-success{% else %}text-danger{% endif %}">
-                                            {{ stat.balance }}
-                                        </td>
-                                        <td>{{ stat.device_name }}</td>
-                                        <td>{{ stat.android_version }}</td>
-                                        <td>
-                                            <span class="badge {{ stat.last_seen_color }}">
-                                                {{ stat.last_seen }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <a href="{{ url_for('admin.user_details', user_id=stat.user.id) }}" 
-                                               class="btn btn-primary btn-details">
-                                                <i class="bi bi-eye"></i> التفاصيل
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
+                                    <!-- سيتم تعبئة الصفوف عبر DataTables/AJAX -->
                                 </tbody>
                             </table>
                         </div>
@@ -244,15 +218,35 @@
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
     <script>
     $(document).ready(function() {
-        $('#dataTable').DataTable({
+        var table = $('#dataTable').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": "/api/admin/users/data",
+                "type": "GET"
+            },
             "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Arabic.json"
             },
-            "order": [[0, "desc"]],
+            "order": [[0, "asc"]],
             "pageLength": 30,
             "lengthMenu": [[30, 50, 100, -1], [30, 50, 100, "الكل"]],
-            "searching": true,
-            "search": { "smart": true, "caseInsensitive": true },
+            "columns": [
+                { "data": "id" },
+                { "data": "username" },
+                { "data": "phone" },
+                { "data": "accounts_count", "render": function(data) { return '<span class=\'badge bg-info\'>' + data + '</span>'; } },
+                { "data": "transactions_count", "render": function(data) { return '<span class=\'badge bg-secondary\'>' + data + '</span>'; } },
+                { "data": "total_credits", "className": "text-success" },
+                { "data": "total_debits", "className": "text-danger" },
+                { "data": "balance", "render": function(data) { return '<span class="' + (data >= 0 ? 'text-success' : 'text-danger') + '">' + data + '</span>'; } },
+                { "data": "device_name" },
+                { "data": "android_version" },
+                { "data": null, "render": function(data, type, row) { return '<span class="badge ' + row.last_seen_color + '">' + row.last_seen + '</span>'; } },
+                { "data": null, "orderable": false, "searchable": false, "render": function(data, type, row) {
+                    return '<a href="/api/admin/user/' + row.id + '" class="btn btn-info btn-sm">تفاصيل</a>';
+                }}
+            ],
             "dom": '<"top"lf>rt<"bottom"ip><"clear">',
             "initComplete": function() {
                 $('.dataTables_filter input').addClass('form-control');
@@ -260,9 +254,6 @@
                 $('.dataTables_length select').addClass('form-control');
             }
         });
-        $('.dataTables_paginate').addClass('pagination-sm');
-        $('.dataTables_paginate .paginate_button').addClass('btn btn-sm btn-outline-primary mx-1');
-        $('.dataTables_paginate .paginate_button.current').addClass('btn-primary');
     });
     </script>
 </body>
