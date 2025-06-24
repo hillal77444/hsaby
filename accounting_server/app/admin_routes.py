@@ -740,15 +740,16 @@ def account_statement(account_id):
     from datetime import datetime, timedelta
     from sqlalchemy import func, case
 
-    # تحديد الفترة الزمنية
+    # تحديد الفترة الزمنية بتوقيت اليمن
+    yemen_now = get_yemen_time()
     if from_date_str:
-        start_date = datetime.strptime(from_date_str, '%Y-%m-%d')
+        start_date = datetime.strptime(from_date_str, '%Y-%m-%d').replace(tzinfo=YEMEN_TIMEZONE)
     else:
-        start_date = datetime.now() - timedelta(days=4)
+        start_date = yemen_now - timedelta(days=4)
     if to_date_str:
-        end_date = datetime.strptime(to_date_str, '%Y-%m-%d') + timedelta(days=1)  # نهاية اليوم
+        end_date = datetime.strptime(to_date_str, '%Y-%m-%d').replace(tzinfo=YEMEN_TIMEZONE) + timedelta(days=1)  # نهاية اليوم
     else:
-        end_date = datetime.now()
+        end_date = yemen_now
 
     # جلب قائمة العملات الفريدة
     currencies = db.session.query(Transaction.currency)\
@@ -813,8 +814,9 @@ def account_statement(account_id):
             running_balance -= txn.amount
         txn_objs.append(TxnObj(txn, running_balance))
 
-    default_from_date = (datetime.now() - timedelta(days=4)).strftime('%Y-%m-%d')
-    default_to_date = datetime.now().strftime('%Y-%m-%d')
+    # استخدام توقيت اليمن للتواريخ الافتراضية
+    default_from_date = (yemen_now - timedelta(days=4)).strftime('%Y-%m-%d')
+    default_to_date = yemen_now.strftime('%Y-%m-%d')
     return render_template('admin/account_statement.html',
                          account=account,
                          user=user,
@@ -823,7 +825,7 @@ def account_statement(account_id):
                          selected_currency=selected_currency,
                          final_balance=final_balance,
                          currency_balances=currency_balances,
-                         now=datetime.now(),
+                         now=yemen_now,
                          default_from_date=default_from_date,
                          default_to_date=default_to_date,
                          previous_balance=previous_balance)
