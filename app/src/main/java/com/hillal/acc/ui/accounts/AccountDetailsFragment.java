@@ -100,13 +100,6 @@ public class AccountDetailsFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.editAccountFragment, args);
         });
 
-        FloatingActionButton fab = binding.fabAddTransaction;
-        fab.setOnClickListener(v -> {
-            Bundle bundle = new Bundle();
-            bundle.putLong("accountId", accountId);
-            Navigation.findNavController(v).navigate(R.id.nav_add_transaction, bundle);
-        });
-
         // إضافة زر كشف الحساب التفصيلي
         binding.viewAccountStatementButton.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), AccountStatementActivity.class);
