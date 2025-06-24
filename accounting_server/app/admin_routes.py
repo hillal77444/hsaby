@@ -1127,3 +1127,15 @@ def confirm_import_accounts():
         msg += f' تم تجاهل {skipped} حساب بسبب التكرار.'
     flash(msg, 'success')
     return redirect(url_for('admin.user_details', user_id=user.id))
+
+@admin.route('/api/admin/delete_account_with_transactions/<int:account_id>', methods=['POST'])
+@admin_required
+def delete_account_with_transactions(account_id):
+    account = Account.query.get_or_404(account_id)
+    # حذف جميع العمليات المرتبطة بالحساب
+    Transaction.query.filter_by(account_id=account.id).delete()
+    # حذف الحساب نفسه
+    db.session.delete(account)
+    db.session.commit()
+    flash('تم حذف الحساب وجميع العمليات المرتبطة به بنجاح.', 'success')
+    return redirect(url_for('admin.accounts'))
