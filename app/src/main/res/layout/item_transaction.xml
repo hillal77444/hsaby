@@ -137,9 +137,10 @@
                 app:iconGravity="textStart"
                 app:iconTint="#25D366"
                 app:strokeColor="#25D366"
-                app:strokeWidth="1dp"
+                app:strokeWidth="2dp"
                 app:cornerRadius="22dp"
-                android:textColor="#25D366" />
+                android:textColor="#25D366"
+                android:backgroundTint="#FFFFFF" />
 
             <!-- زر تعديل -->
             <com.google.android.material.button.MaterialButton
@@ -153,11 +154,12 @@
                 app:icon="@drawable/ic_edit"
                 app:iconSize="16dp"
                 app:iconGravity="textStart"
-                app:iconTint="#152FD9"
-                app:strokeColor="#152FD9"
-                app:strokeWidth="1dp"
+                app:iconTint="#2196F3"
+                app:strokeColor="#2196F3"
+                app:strokeWidth="2dp"
                 app:cornerRadius="22dp"
-                android:textColor="#152FD9" />
+                android:textColor="#2196F3"
+                android:backgroundTint="#FFFFFF" />
 
             <!-- زر حذف -->
             <com.google.android.material.button.MaterialButton
@@ -170,11 +172,12 @@
                 app:icon="@drawable/ic_delete"
                 app:iconSize="16dp"
                 app:iconGravity="textStart"
-                app:iconTint="#FF5252"
-                app:strokeColor="#FF5252"
-                app:strokeWidth="1dp"
+                app:iconTint="#F44336"
+                app:strokeColor="#F44336"
+                app:strokeWidth="2dp"
                 app:cornerRadius="22dp"
-                android:textColor="#FF5252" />
+                android:textColor="#F44336"
+                android:backgroundTint="#FFFFFF" />
 
         </LinearLayout>
 
