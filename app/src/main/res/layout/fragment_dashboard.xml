@@ -14,17 +14,7 @@
         android:background="#F8F8F8">
 
         <!-- شريط حالة صغير أعلى الصفحة -->
-        <TextView
-            android:id="@+id/statusBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="آخر تحديث: اليوم - 12:00م"
-            android:textColor="#888"
-            android:textSize="11sp"
-            android:gravity="center"
-            android:background="#F5F5F5"
-            android:padding="4dp"
-            android:elevation="2dp" />
+
 
         <!-- الدائرة العلوية والشعار وعبارة ترحيبية -->
         <View
