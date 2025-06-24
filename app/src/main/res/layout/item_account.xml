@@ -76,6 +76,30 @@
                     android:textColor="#666" />
             </LinearLayout>
 
+            <!-- رقم الحساب -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="2dp">
+
+                <ImageView
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:src="@drawable/ic_accounts"
+                    app:tint="#666" />
+
+                <TextView
+                    android:id="@+id/account_number"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:textSize="12sp"
+                    android:textColor="#999"
+                    android:textStyle="italic" />
+            </LinearLayout>
+
             <!-- الرصيد -->
             <TextView
                 android:id="@+id/balance"
@@ -109,7 +133,8 @@
                 app:thumbTint="#25D366"
                 app:trackTint="#E0E0E0"
                 app:thumbTintMode="src_atop"
-                app:trackTintMode="src_atop" />
+                app:trackTintMode="src_atop"
+                android:checked="true" />
 
             <!-- زر التعديل -->
             <com.google.android.material.button.MaterialButton
