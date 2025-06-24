@@ -204,6 +204,23 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                 binding.transactionDescription.setTextColor(context.getResources().getColor(R.color.debit_text_secondary));
                 binding.transactionTypeIcon.setImageResource(R.drawable.ic_debit);
                 binding.transactionTypeIcon.setVisibility(android.view.View.VISIBLE);
+                
+                // تعيين ألوان الأزرار للمعاملات الحمراء
+                binding.whatsappButton.setStrokeColorResource(R.color.accent_green);
+                binding.whatsappButton.setTextColor(context.getResources().getColor(R.color.accent_green));
+                binding.whatsappButton.setIconTintResource(R.color.accent_green);
+                binding.whatsappButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
+                
+                binding.editButton.setStrokeColorResource(R.color.primary_blue);
+                binding.editButton.setTextColor(context.getResources().getColor(R.color.primary_blue));
+                binding.editButton.setIconTintResource(R.color.primary_blue);
+                binding.editButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
+                
+                binding.deleteButton.setStrokeColorResource(R.color.error);
+                binding.deleteButton.setTextColor(context.getResources().getColor(R.color.error));
+                binding.deleteButton.setIconTintResource(R.color.error);
+                binding.deleteButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
+                
             } else if ((type.equals("له") || type.equalsIgnoreCase("credit")) && amount != 0) {
                 binding.innerLayout.setBackgroundResource(R.drawable.rounded_inner_background_credit);
                 binding.transactionAmount.setTextColor(context.getResources().getColor(R.color.credit_text_primary));
@@ -212,6 +229,23 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                 binding.transactionDescription.setTextColor(context.getResources().getColor(R.color.credit_text_secondary));
                 binding.transactionTypeIcon.setImageResource(R.drawable.ic_credit);
                 binding.transactionTypeIcon.setVisibility(android.view.View.VISIBLE);
+                
+                // تعيين ألوان الأزرار للمعاملات الخضراء
+                binding.whatsappButton.setStrokeColorResource(R.color.accent_green);
+                binding.whatsappButton.setTextColor(context.getResources().getColor(R.color.accent_green));
+                binding.whatsappButton.setIconTintResource(R.color.accent_green);
+                binding.whatsappButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
+                
+                binding.editButton.setStrokeColorResource(R.color.primary_blue);
+                binding.editButton.setTextColor(context.getResources().getColor(R.color.primary_blue));
+                binding.editButton.setIconTintResource(R.color.primary_blue);
+                binding.editButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
+                
+                binding.deleteButton.setStrokeColorResource(R.color.error);
+                binding.deleteButton.setTextColor(context.getResources().getColor(R.color.error));
+                binding.deleteButton.setIconTintResource(R.color.error);
+                binding.deleteButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
+                
             } else {
                 binding.innerLayout.setBackgroundResource(R.drawable.rounded_inner_background_default);
                 binding.transactionAmount.setTextColor(context.getResources().getColor(R.color.neutral_text_primary));
@@ -219,6 +253,22 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                 binding.transactionDate.setTextColor(context.getResources().getColor(R.color.neutral_text_secondary));
                 binding.transactionDescription.setTextColor(context.getResources().getColor(R.color.neutral_text_secondary));
                 binding.transactionTypeIcon.setVisibility(android.view.View.GONE);
+                
+                // تعيين ألوان الأزرار للمعاملات الافتراضية
+                binding.whatsappButton.setStrokeColorResource(R.color.accent_green);
+                binding.whatsappButton.setTextColor(context.getResources().getColor(R.color.accent_green));
+                binding.whatsappButton.setIconTintResource(R.color.accent_green);
+                binding.whatsappButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
+                
+                binding.editButton.setStrokeColorResource(R.color.primary_blue);
+                binding.editButton.setTextColor(context.getResources().getColor(R.color.primary_blue));
+                binding.editButton.setIconTintResource(R.color.primary_blue);
+                binding.editButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
+                
+                binding.deleteButton.setStrokeColorResource(R.color.error);
+                binding.deleteButton.setTextColor(context.getResources().getColor(R.color.error));
+                binding.deleteButton.setIconTintResource(R.color.error);
+                binding.deleteButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(context.getResources().getColor(R.color.white)));
             }
         }
     }
