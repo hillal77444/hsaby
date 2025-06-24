@@ -265,36 +265,38 @@ def update_user(user_id):
 @admin.route('/api/admin/accounts')
 @admin_required
 def accounts():
-    accounts = Account.query.all()
-    account_stats = []
-    
-    for account in accounts:
-        transactions_count = Transaction.query.filter_by(account_id=account.id).count()
-        
-        # حساب إجمالي المعاملات
-        total_debits = db.session.query(func.sum(Transaction.amount))\
-            .filter(Transaction.account_id == account.id, Transaction.type == 'debit')\
-            .scalar() or 0
-        
-        total_credits = db.session.query(func.sum(Transaction.amount))\
-            .filter(Transaction.account_id == account.id, Transaction.type == 'credit')\
-            .scalar() or 0
-        
-        account_stats.append({
-            'account': account,
-            'transactions_count': transactions_count,
-            'total_debits': total_debits,
-            'total_credits': total_credits,
-            'balance': total_credits - total_debits
-        })
-    
-    return render_template('admin/accounts.html', account_stats=account_stats)
+    users = User.query.all()
+    return render_template('admin/accounts.html', users=users)
 
 @admin.route('/api/admin/transactions')
 @admin_required
 def transactions():
-    transactions = Transaction.query.order_by(Transaction.date.desc()).all()
-    return render_template('admin/transactions.html', transactions=transactions)
+    account_id = request.args.get('account_id', type=int)
+    user_id = request.args.get('user_id', type=int)
+    currency = request.args.get('currency', type=str)
+
+    query = Transaction.query.order_by(Transaction.date.desc())
+    if account_id:
+        query = query.filter(Transaction.account_id == account_id)
+    if user_id:
+        query = query.filter(Transaction.user_id == user_id)
+    if currency:
+        query = query.filter(Transaction.currency == currency)
+
+    transactions = query.all()
+    accounts = Account.query.all()
+    users = User.query.all()
+    currencies = db.session.query(Transaction.currency).distinct().all()
+    currencies = [c[0] for c in currencies if c[0]]
+
+    return render_template('admin/transactions.html',
+        transactions=transactions,
+        accounts=accounts,
+        users=users,
+        currencies=currencies,
+        selected_account_id=account_id,
+        selected_user_id=user_id,
+        selected_currency=currency)
 
 @admin.route('/api/admin/statistics')
 @admin_required
@@ -1139,3 +1141,277 @@ def delete_account_with_transactions(account_id):
     db.session.commit()
     flash('تم حذف الحساب وجميع العمليات المرتبطة به بنجاح.', 'success')
     return redirect(url_for('admin.accounts'))
+
+@admin.route('/api/admin/transactions/data')
+@admin_required
+def transactions_data():
+    # باراميترات DataTables
+    draw = int(request.args.get('draw', 1))
+    start = int(request.args.get('start', 0))
+    length = int(request.args.get('length', 30))
+    search_value = request.args.get('search[value]', '').strip()
+    order_column_index = int(request.args.get('order[0][column]', 0))
+    order_dir = request.args.get('order[0][dir]', 'desc')
+
+    # فلاتر إضافية
+    account_id = request.args.get('account_id', type=int)
+    user_id = request.args.get('user_id', type=int)
+    currency = request.args.get('currency', type=str)
+
+    # الأعمدة بالترتيب
+    columns = ['date', 'account_name', 'type', 'amount', 'currency', 'description', 'username']
+    order_column = columns[order_column_index] if order_column_index < len(columns) else 'date'
+
+    # بناء الاستعلام
+    query = db.session.query(Transaction, Account, User).join(Account, Transaction.account_id == Account.id).join(User, Transaction.user_id == User.id)
+    if account_id:
+        query = query.filter(Transaction.account_id == account_id)
+    if user_id:
+        query = query.filter(Transaction.user_id == user_id)
+    if currency:
+        query = query.filter(Transaction.currency == currency)
+    if search_value:
+        like = f"%{search_value}%"
+        query = query.filter(
+            db.or_(
+                Account.account_name.ilike(like),
+                User.username.ilike(like),
+                Transaction.description.ilike(like),
+                Transaction.currency.ilike(like),
+                func.cast(Transaction.amount, db.String).ilike(like)
+            )
+        )
+    records_total = db.session.query(func.count(Transaction.id)).scalar()
+    records_filtered = query.count()
+    # ترتيب
+    if order_column == 'date':
+        order_by = Transaction.date.desc() if order_dir == 'desc' else Transaction.date.asc()
+    elif order_column == 'account_name':
+        order_by = Account.account_name.desc() if order_dir == 'desc' else Account.account_name.asc()
+    elif order_column == 'username':
+        order_by = User.username.desc() if order_dir == 'desc' else User.username.asc()
+    elif order_column == 'amount':
+        order_by = Transaction.amount.desc() if order_dir == 'desc' else Transaction.amount.asc()
+    else:
+        order_by = Transaction.date.desc()
+    query = query.order_by(order_by)
+    # pagination
+    results = query.offset(start).limit(length).all()
+    data = []
+    for t, a, u in results:
+        data.append({
+            'date': t.date.strftime('%Y-%m-%d %H:%M'),
+            'account_name': a.account_name,
+            'type': t.type,
+            'amount': t.amount,
+            'currency': t.currency or 'ريال',
+            'description': t.description or '-',
+            'username': u.username,
+            'id': t.id
+        })
+    return jsonify({
+        'draw': draw,
+        'recordsTotal': records_total,
+        'recordsFiltered': records_filtered,
+        'data': data
+    })
+
+@admin.route('/api/admin/users/data')
+@admin_required
+def users_data():
+    draw = int(request.args.get('draw', 1))
+    start = int(request.args.get('start', 0))
+    length = int(request.args.get('length', 30))
+    search_value = request.args.get('search[value]', '').strip()
+    order_column_index = int(request.args.get('order[0][column]', 0))
+    order_dir = request.args.get('order[0][dir]', 'desc')
+
+    columns = ['id', 'username', 'phone', 'accounts_count', 'transactions_count', 'total_credits', 'total_debits', 'balance', 'device_name', 'android_version', 'last_seen']
+    order_column = columns[order_column_index] if order_column_index < len(columns) else 'username'
+
+    query = db.session.query(User)
+    if search_value:
+        like = f"%{search_value}%"
+        query = query.filter(
+            db.or_(
+                User.username.ilike(like),
+                User.phone.ilike(like)
+            )
+        )
+    records_total = db.session.query(func.count(User.id)).scalar()
+    records_filtered = query.count()
+    # ترتيب
+    if order_column == 'id':
+        order_by = User.id.desc() if order_dir == 'desc' else User.id.asc()
+    elif order_column == 'username':
+        order_by = User.username.desc() if order_dir == 'desc' else User.username.asc()
+    elif order_column == 'phone':
+        order_by = User.phone.desc() if order_dir == 'desc' else User.phone.asc()
+    elif order_column == 'accounts_count':
+        subq = db.session.query(Account.user_id, func.count(Account.id).label('ac')).group_by(Account.user_id).subquery()
+        query = query.outerjoin(subq, User.id == subq.c.user_id)
+        order_by = subq.c.ac.desc() if order_dir == 'desc' else subq.c.ac.asc()
+    elif order_column == 'transactions_count':
+        subq = db.session.query(Transaction.user_id, func.count(Transaction.id).label('tc')).group_by(Transaction.user_id).subquery()
+        query = query.outerjoin(subq, User.id == subq.c.user_id)
+        order_by = subq.c.tc.desc() if order_dir == 'desc' else subq.c.tc.asc()
+    elif order_column == 'total_credits':
+        subq = db.session.query(Transaction.user_id, func.coalesce(func.sum(case((Transaction.type == 'credit', Transaction.amount), else_=0)), 0).label('credits')).group_by(Transaction.user_id).subquery()
+        query = query.outerjoin(subq, User.id == subq.c.user_id)
+        order_by = subq.c.credits.desc() if order_dir == 'desc' else subq.c.credits.asc()
+    elif order_column == 'total_debits':
+        subq = db.session.query(Transaction.user_id, func.coalesce(func.sum(case((Transaction.type == 'debit', Transaction.amount), else_=0)), 0).label('debits')).group_by(Transaction.user_id).subquery()
+        query = query.outerjoin(subq, User.id == subq.c.user_id)
+        order_by = subq.c.debits.desc() if order_dir == 'desc' else subq.c.debits.asc()
+    elif order_column == 'balance':
+        subq = db.session.query(
+            Transaction.user_id,
+            (func.coalesce(func.sum(case((Transaction.type == 'credit', Transaction.amount), else_=0)), 0) -
+             func.coalesce(func.sum(case((Transaction.type == 'debit', Transaction.amount), else_=0)), 0)).label('balance')
+        ).group_by(Transaction.user_id).subquery()
+        query = query.outerjoin(subq, User.id == subq.c.user_id)
+        order_by = subq.c.balance.desc() if order_dir == 'desc' else subq.c.balance.asc()
+    elif order_column == 'device_name':
+        order_by = User.device_name.desc() if order_dir == 'desc' else User.device_name.asc()
+    elif order_column == 'android_version':
+        order_by = User.android_version.desc() if order_dir == 'desc' else User.android_version.asc()
+    elif order_column == 'last_seen':
+        order_by = User.last_seen.desc() if order_dir == 'desc' else User.last_seen.asc()
+    else:
+        order_by = User.id.desc()
+    query = query.order_by(order_by)
+    results = query.offset(start).limit(length).all()
+    data = []
+    for u in results:
+        accounts_count = Account.query.filter_by(user_id=u.id).count()
+        transactions_count = Transaction.query.filter_by(user_id=u.id).count()
+        total_credits = db.session.query(func.sum(Transaction.amount)).filter(Transaction.user_id == u.id, Transaction.type == 'credit').scalar() or 0
+        total_debits = db.session.query(func.sum(Transaction.amount)).filter(Transaction.user_id == u.id, Transaction.type == 'debit').scalar() or 0
+        balance = total_credits - total_debits
+        last_seen, last_seen_color = format_last_seen(u.last_seen)
+        data.append({
+            'id': u.id,
+            'username': u.username,
+            'phone': u.phone,
+            'accounts_count': accounts_count,
+            'transactions_count': transactions_count,
+            'total_credits': total_credits,
+            'total_debits': total_debits,
+            'balance': balance,
+            'device_name': u.device_name,
+            'android_version': u.android_version,
+            'last_seen': last_seen,
+            'last_seen_color': last_seen_color
+        })
+    return jsonify({
+        'draw': draw,
+        'recordsTotal': records_total,
+        'recordsFiltered': records_filtered,
+        'data': data
+    })
+
+@admin.route('/api/admin/accounts/data')
+@admin_required
+def accounts_data():
+    draw = int(request.args.get('draw', 1))
+    start = int(request.args.get('start', 0))
+    length = int(request.args.get('length', 30))
+    search_value = request.args.get('search[value]', '').strip()
+    user_id = request.args.get('user_id', type=int)
+    currency = request.args.get('currency', type=str)
+    order_column_index = int(request.args.get('order[0][column]', 0))
+    order_dir = request.args.get('order[0][dir]', 'desc')
+
+    columns = ['server_id', 'account_name', 'phone_number', 'user', 'currency', 'transactions_count', 'total_debits', 'total_credits', 'balance', 'created_at', 'updated_at', 'notes', 'whatsapp_enabled']
+    order_column = columns[order_column_index] if order_column_index < len(columns) else 'server_id'
+
+    query = db.session.query(Account, User).join(User, Account.user_id == User.id)
+    if user_id:
+        query = query.filter(Account.user_id == user_id)
+    if currency:
+        query = query.filter(Account.currency == currency)
+    if search_value:
+        like = f"%{search_value}%"
+        query = query.filter(
+            db.or_(
+                Account.account_name.ilike(like),
+                Account.phone_number.ilike(like),
+                User.username.ilike(like),
+                Account.currency.ilike(like),
+                Account.notes.ilike(like)
+            )
+        )
+    records_total = db.session.query(func.count(Account.id)).scalar()
+    records_filtered = query.count()
+    # ترتيب
+    if order_column == 'server_id':
+        order_by = Account.server_id.desc() if order_dir == 'desc' else Account.server_id.asc()
+    elif order_column == 'account_name':
+        order_by = Account.account_name.desc() if order_dir == 'desc' else Account.account_name.asc()
+    elif order_column == 'phone_number':
+        order_by = Account.phone_number.desc() if order_dir == 'desc' else Account.phone_number.asc()
+    elif order_column == 'user':
+        order_by = User.username.desc() if order_dir == 'desc' else User.username.asc()
+    elif order_column == 'transactions_count':
+        # ترتيب حسب عدد المعاملات
+        subq = db.session.query(Transaction.account_id, func.count(Transaction.id).label('tc')).group_by(Transaction.account_id).subquery()
+        query = query.outerjoin(subq, Account.id == subq.c.account_id)
+        order_by = subq.c.tc.desc() if order_dir == 'desc' else subq.c.tc.asc()
+    elif order_column == 'total_debits':
+        # ترتيب حسب إجمالي المدين
+        subq = db.session.query(Transaction.account_id, func.coalesce(func.sum(case((Transaction.type == 'debit', Transaction.amount), else_=0)), 0).label('debits')).group_by(Transaction.account_id).subquery()
+        query = query.outerjoin(subq, Account.id == subq.c.account_id)
+        order_by = subq.c.debits.desc() if order_dir == 'desc' else subq.c.debits.asc()
+    elif order_column == 'total_credits':
+        # ترتيب حسب إجمالي الدائن
+        subq = db.session.query(Transaction.account_id, func.coalesce(func.sum(case((Transaction.type == 'credit', Transaction.amount), else_=0)), 0).label('credits')).group_by(Transaction.account_id).subquery()
+        query = query.outerjoin(subq, Account.id == subq.c.account_id)
+        order_by = subq.c.credits.desc() if order_dir == 'desc' else subq.c.credits.asc()
+    elif order_column == 'balance':
+        # ترتيب حسب الرصيد (الدائن - المدين)
+        subq = db.session.query(
+            Transaction.account_id,
+            (func.coalesce(func.sum(case((Transaction.type == 'credit', Transaction.amount), else_=0)), 0) -
+             func.coalesce(func.sum(case((Transaction.type == 'debit', Transaction.amount), else_=0)), 0)).label('balance')
+        ).group_by(Transaction.account_id).subquery()
+        query = query.outerjoin(subq, Account.id == subq.c.account_id)
+        order_by = subq.c.balance.desc() if order_dir == 'desc' else subq.c.balance.asc()
+    elif order_column == 'created_at':
+        order_by = Account.created_at.desc() if order_dir == 'desc' else Account.created_at.asc()
+    elif order_column == 'updated_at':
+        order_by = Account.updated_at.desc() if order_dir == 'desc' else Account.updated_at.asc()
+    elif order_column == 'notes':
+        order_by = Account.notes.desc() if order_dir == 'desc' else Account.notes.asc()
+    elif order_column == 'whatsapp_enabled':
+        order_by = Account.whatsapp_enabled.desc() if order_dir == 'desc' else Account.whatsapp_enabled.asc()
+    else:
+        order_by = Account.server_id.desc()
+    query = query.order_by(order_by)
+    results = query.offset(start).limit(length).all()
+    data = []
+    for a, u in results:
+        transactions_count = Transaction.query.filter_by(account_id=a.id).count()
+        total_debits = db.session.query(func.sum(Transaction.amount)).filter(Transaction.account_id == a.id, Transaction.type == 'debit').scalar() or 0
+        total_credits = db.session.query(func.sum(Transaction.amount)).filter(Transaction.account_id == a.id, Transaction.type == 'credit').scalar() or 0
+        balance = total_credits - total_debits
+        data.append({
+            'server_id': a.server_id,
+            'account_name': a.account_name,
+            'phone_number': a.phone_number,
+            'user': u.username,
+            'transactions_count': transactions_count,
+            'total_debits': total_debits,
+            'total_credits': total_credits,
+            'balance': balance,
+            'created_at': a.created_at.strftime('%Y-%m-%d %H:%M') if a.created_at else f'#{a.server_id}',
+            'updated_at': a.updated_at.strftime('%Y-%m-%d %H:%M') if a.updated_at else f'#{a.server_id}',
+            'notes': a.notes or '',
+            'whatsapp_enabled': 'نعم' if a.whatsapp_enabled else 'لا',
+            'id': a.id
+        })
+    return jsonify({
+        'draw': draw,
+        'recordsTotal': records_total,
+        'recordsFiltered': records_filtered,
+        'data': data
+    })
