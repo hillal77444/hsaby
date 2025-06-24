@@ -476,8 +476,7 @@ public class TransactionsFragment extends Fragment {
         
         // تحديث الإحصائيات
         binding.totalTransactionsText.setText(String.valueOf(filtered.size()));
-        binding.totalAmountText.setText(String.format("%.2f", totalAmount));
-        
+        binding.totalAmountText.setText(String.format(Locale.ENGLISH, "%.2f", totalAmount));        
         adapter.submitList(filtered);
         binding.transactionsRecyclerView.setVisibility(filtered.isEmpty() ? View.GONE : View.VISIBLE);
         binding.emptyView.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
