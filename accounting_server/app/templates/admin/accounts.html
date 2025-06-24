@@ -9,6 +9,17 @@
             <h6 class="m-0 font-weight-bold text-primary">قائمة الحسابات</h6>
         </div>
         <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="userSelect" class="form-label">اختر المستخدم</label>
+                    <select id="userSelect" class="form-control select2" data-placeholder="اختر المستخدم">
+                        <option value="">كل المستخدمين</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
@@ -17,41 +28,19 @@
                             <th>اسم الحساب</th>
                             <th>رقم الهاتف</th>
                             <th>المستخدم</th>
-                            <th>العملة</th>
                             <th>عدد المعاملات</th>
                             <th>إجمالي المدين</th>
                             <th>إجمالي الدائن</th>
                             <th>الرصيد</th>
+                            <th>تاريخ الإنشاء</th>
+                            <th>تاريخ التعديل</th>
+                            <th>ملاحظات</th>
+                            <th>واتساب مفعل</th>
                             <th>الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for stat in account_stats %}
-                        <tr>
-                            <td>{{ stat.account.server_id }}</td>
-                            <td>{{ stat.account.account_name }}</td>
-                            <td>{{ stat.account.phone_number }}</td>
-                            <td>{{ stat.account.user.username }}</td>
-                            <td>{{ stat.account.currency or 'ريال' }}</td>
-                            <td>{{ stat.transactions_count }}</td>
-                            <td class="text-danger">{{ stat.total_debits }}</td>
-                            <td class="text-success">{{ stat.total_credits }}</td>
-                            <td class="{% if stat.balance >= 0 %}text-success{% else %}text-danger{% endif %}">
-                                {{ stat.balance }}
-                            </td>
-                            <td>
-                                <a href="{{ url_for('admin.account_statement', account_id=stat.account.id) }}" 
-                                   class="btn btn-info btn-sm" target="_blank">
-                                    <i class="fas fa-file-invoice"></i> كشف حساب
-                                </a>
-                                <form method="post" action="{{ url_for('admin.delete_account_with_transactions', account_id=stat.account.id) }}" style="display:inline;" onsubmit="return confirm('هل أنت متأكد أنك تريد حذف هذا الحساب وجميع العمليات المرتبطة به؟ لا يمكن التراجع!');">
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-trash-alt"></i> حذف الحساب
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
+                        <!-- سيتم تعبئة الصفوف عبر DataTables/AJAX -->
                     </tbody>
                 </table>
             </div>
@@ -61,11 +50,60 @@
 {% endblock %}
 
 {% block extra_js %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 $(document).ready(function() {
-    $('#dataTable').DataTable({
+    $('.select2').select2({
+        width: '100%',
+        dir: 'rtl',
+        placeholder: function(){
+            return $(this).data('placeholder');
+        }
+    });
+    $('#userSelect').on('change', function() {
+        table.ajax.reload();
+    });
+    var table = $('#dataTable').DataTable({
+        "processing": true,
+        "serverSide": true,
+        "ajax": {
+            "url": "/api/admin/accounts/data",
+            "data": function (d) {
+                d.user_id = $('#userSelect').val();
+            }
+        },
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Arabic.json"
+        },
+        "order": [[0, "desc"]],
+        "pageLength": 30,
+        "lengthMenu": [[30, 50, 100, -1], [30, 50, 100, "الكل"]],
+        "columns": [
+            { "data": "server_id" },
+            { "data": "account_name" },
+            { "data": "phone_number" },
+            { "data": "user" },
+            { "data": "transactions_count" },
+            { "data": "total_debits", "className": "text-danger" },
+            { "data": "total_credits", "className": "text-success" },
+            { "data": "balance", "render": function(data, type, row) {
+                return '<span class="' + (data >= 0 ? 'text-success' : 'text-danger') + '">' + data + '</span>';
+            }},
+            { "data": "created_at" },
+            { "data": "updated_at" },
+            { "data": "notes" },
+            { "data": "whatsapp_enabled" },
+            { "data": null, "orderable": false, "searchable": false, "render": function(data, type, row) {
+                return '<a href="/api/admin/account/' + row.id + '/statement" class="btn btn-info btn-sm" target="_blank"><i class="fas fa-file-invoice"></i> كشف حساب</a> ' +
+                       '<form method="post" action="/api/admin/delete_account_with_transactions/' + row.id + '" style="display:inline;" onsubmit="return confirm(\'هل أنت متأكد أنك تريد حذف هذا الحساب وجميع العمليات المرتبطة به؟ لا يمكن التراجع!\');"><button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> حذف الحساب</button></form>';
+            }}
+        ],
+        "dom": '<"top"lf>rt<"bottom"ip><"clear">',
+        "initComplete": function() {
+            $('.dataTables_filter input').addClass('form-control');
+            $('.dataTables_filter input').attr('placeholder', 'بحث...');
+            $('.dataTables_length select').addClass('form-control');
         }
     });
 });
