@@ -119,6 +119,9 @@ public class AccountsFragment extends Fragment {
 
         // Setup sort button
         sortButton.setOnClickListener(v -> {
+            // منع انتشار الحدث
+            v.setEnabled(false);
+            
             List<Account> sorted = new ArrayList<>(currentAccounts[0]);
             
             // تبديل نوع الترتيب
@@ -128,6 +131,10 @@ public class AccountsFragment extends Fragment {
                     sortButton.setText("ترتيب (الاسم)");
                     break;
                 case "name":
+                    currentSortType = "number";
+                    sortButton.setText("ترتيب (الرقم)");
+                    break;
+                case "number":
                     currentSortType = "date";
                     sortButton.setText("ترتيب (التاريخ)");
                     break;
@@ -169,6 +176,18 @@ public class AccountsFragment extends Fragment {
                     }
                     break;
                     
+                case "number":
+                    if (isAscendingSort) {
+                        // ترتيب من الأصغر إلى الأكبر (server_id)
+                        Collections.sort(sorted, (a, b) -> Long.compare(a.getServerId(), b.getServerId()));
+                        Toast.makeText(getContext(), "تم الترتيب حسب رقم الحساب (من الأصغر إلى الأكبر)", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // ترتيب من الأكبر إلى الأصغر (server_id)
+                        Collections.sort(sorted, (a, b) -> Long.compare(b.getServerId(), a.getServerId()));
+                        Toast.makeText(getContext(), "تم الترتيب حسب رقم الحساب (من الأكبر إلى الأصغر)", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                    
                 case "date":
                     if (isAscendingSort) {
                         // ترتيب من الأقدم إلى الأحدث (تاريخ)
@@ -184,6 +203,11 @@ public class AccountsFragment extends Fragment {
             
             isAscendingSort = !isAscendingSort; // تبديل اتجاه الترتيب
             accountsAdapter.updateAccounts(sorted);
+            
+            // إعادة تفعيل الزر بعد فترة قصيرة
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                sortButton.setEnabled(true);
+            }, 500);
         });
 
         // Setup add account button
@@ -223,6 +247,14 @@ public class AccountsFragment extends Fragment {
             Account account = accounts.get(position);
             holder.accountName.setText(account.getName());
             holder.phone.setText(account.getPhoneNumber());
+            
+            // عرض رقم الحساب مع تنسيق
+            long serverId = account.getServerId();
+            if (serverId > 0) {
+                holder.accountNumber.setText("رقم: " + serverId);
+            } else {
+                holder.accountNumber.setText("رقم: غير محدد");
+            }
 
             // راقب الرصيد اليمني فقط
             accountViewModel.getAccountBalanceYemeni(account.getId()).observe(lifecycleOwner, balance -> {
@@ -239,28 +271,79 @@ public class AccountsFragment extends Fragment {
             });
 
             // Setup WhatsApp switch
+            // منع الاستدعاء المزدوج
+            holder.whatsappSwitch.setOnCheckedChangeListener(null);
             holder.whatsappSwitch.setChecked(account.isWhatsappEnabled());
+            
+            // تعيين اللون الأولي
+            if (account.isWhatsappEnabled()) {
+                holder.whatsappSwitch.setThumbTintList(android.content.res.ColorStateList.valueOf(holder.itemView.getContext().getColor(R.color.credit_green)));
+                holder.whatsappSwitch.setTrackTintList(android.content.res.ColorStateList.valueOf(holder.itemView.getContext().getColor(R.color.credit_green)));
+            } else {
+                holder.whatsappSwitch.setThumbTintList(android.content.res.ColorStateList.valueOf(holder.itemView.getContext().getColor(R.color.gray)));
+                holder.whatsappSwitch.setTrackTintList(android.content.res.ColorStateList.valueOf(holder.itemView.getContext().getColor(R.color.gray)));
+            }
+            
             holder.whatsappSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                // منع التحديث إذا كانت القيمة نفسها
+                if (account.isWhatsappEnabled() == isChecked) {
+                    return;
+                }
+                
+                // منع انتشار الحدث
+                buttonView.setEnabled(false);
+                
                 // تحديث حالة واتساب الحساب
                 account.setWhatsappEnabled(isChecked);
+                account.setUpdatedAt(System.currentTimeMillis());
                 accountViewModel.updateAccount(account);
+                
+                // تغيير لون الزر
+                if (isChecked) {
+                    holder.whatsappSwitch.setThumbTintList(android.content.res.ColorStateList.valueOf(holder.itemView.getContext().getColor(R.color.credit_green)));
+                    holder.whatsappSwitch.setTrackTintList(android.content.res.ColorStateList.valueOf(holder.itemView.getContext().getColor(R.color.credit_green)));
+                } else {
+                    holder.whatsappSwitch.setThumbTintList(android.content.res.ColorStateList.valueOf(holder.itemView.getContext().getColor(R.color.gray)));
+                    holder.whatsappSwitch.setTrackTintList(android.content.res.ColorStateList.valueOf(holder.itemView.getContext().getColor(R.color.gray)));
+                }
                 
                 String message = isChecked ? "تم تفعيل واتساب للحساب" : "تم إيقاف واتساب للحساب";
                 Toast.makeText(buttonView.getContext(), message, Toast.LENGTH_SHORT).show();
+                
+                // إعادة تفعيل الزر بعد فترة قصيرة
+                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                    holder.whatsappSwitch.setEnabled(true);
+                }, 300);
             });
 
             // Setup edit button
             holder.editButton.setOnClickListener(v -> {
+                // منع انتشار الحدث
+                v.setEnabled(false);
+                
                 Bundle args = new Bundle();
                 args.putLong("accountId", account.getId());
                 Navigation.findNavController(v).navigate(R.id.editAccountFragment, args);
+                
+                // إعادة تفعيل الزر بعد فترة قصيرة
+                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                    holder.editButton.setEnabled(true);
+                }, 300);
             });
 
             // Setup item click
             holder.itemView.setOnClickListener(v -> {
+                // منع انتشار الحدث
+                v.setEnabled(false);
+                
                 Bundle args = new Bundle();
                 args.putLong("accountId", account.getId());
                 Navigation.findNavController(v).navigate(R.id.accountDetailsFragment, args);
+                
+                // إعادة تفعيل العنصر بعد فترة قصيرة
+                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                    holder.itemView.setEnabled(true);
+                }, 300);
             });
         }
 
@@ -272,6 +355,7 @@ public class AccountsFragment extends Fragment {
         static class ViewHolder extends RecyclerView.ViewHolder {
             TextView accountName;
             TextView phone;
+            TextView accountNumber;
             TextView balance;
             SwitchMaterial whatsappSwitch;
             MaterialButton editButton;
@@ -280,6 +364,7 @@ public class AccountsFragment extends Fragment {
                 super(itemView);
                 accountName = itemView.findViewById(R.id.account_name);
                 phone = itemView.findViewById(R.id.phone);
+                accountNumber = itemView.findViewById(R.id.account_number);
                 balance = itemView.findViewById(R.id.balance);
                 whatsappSwitch = itemView.findViewById(R.id.whatsapp_switch);
                 editButton = itemView.findViewById(R.id.edit_button);
