@@ -251,7 +251,7 @@ public class AccountsFragment extends Fragment {
             // عرض رقم الحساب مع تنسيق
             long serverId = account.getServerId();
             if (serverId > 0) {
-                holder.accountNumber.setText("رقم: " + serverId);
+                holder.accountNumber.setText("رقم الحساب: " + serverId);
             } else {
                 holder.accountNumber.setText("رقم: غير محدد");
             }
