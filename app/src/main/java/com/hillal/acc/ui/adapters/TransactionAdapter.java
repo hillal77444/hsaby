@@ -198,13 +198,27 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             Context context = binding.getRoot().getContext();
             if ((type.equals("عليه") || type.equalsIgnoreCase("debit")) && amount != 0) {
                 binding.innerLayout.setBackgroundResource(R.drawable.rounded_inner_background_debit);
-                binding.transactionAmount.setTextColor(context.getResources().getColor(R.color.debit_color));
+                binding.transactionAmount.setTextColor(context.getResources().getColor(R.color.debit_text_primary));
+                binding.accountNameTextView.setTextColor(context.getResources().getColor(R.color.debit_text_primary));
+                binding.transactionDate.setTextColor(context.getResources().getColor(R.color.debit_text_secondary));
+                binding.transactionDescription.setTextColor(context.getResources().getColor(R.color.debit_text_secondary));
+                binding.transactionTypeIcon.setImageResource(R.drawable.ic_debit);
+                binding.transactionTypeIcon.setVisibility(android.view.View.VISIBLE);
             } else if ((type.equals("له") || type.equalsIgnoreCase("credit")) && amount != 0) {
                 binding.innerLayout.setBackgroundResource(R.drawable.rounded_inner_background_credit);
-                binding.transactionAmount.setTextColor(context.getResources().getColor(R.color.credit_color));
+                binding.transactionAmount.setTextColor(context.getResources().getColor(R.color.credit_text_primary));
+                binding.accountNameTextView.setTextColor(context.getResources().getColor(R.color.credit_text_primary));
+                binding.transactionDate.setTextColor(context.getResources().getColor(R.color.credit_text_secondary));
+                binding.transactionDescription.setTextColor(context.getResources().getColor(R.color.credit_text_secondary));
+                binding.transactionTypeIcon.setImageResource(R.drawable.ic_credit);
+                binding.transactionTypeIcon.setVisibility(android.view.View.VISIBLE);
             } else {
                 binding.innerLayout.setBackgroundResource(R.drawable.rounded_inner_background_default);
-                binding.transactionAmount.setTextColor(context.getResources().getColor(R.color.text_primary));
+                binding.transactionAmount.setTextColor(context.getResources().getColor(R.color.neutral_text_primary));
+                binding.accountNameTextView.setTextColor(context.getResources().getColor(R.color.neutral_text_primary));
+                binding.transactionDate.setTextColor(context.getResources().getColor(R.color.neutral_text_secondary));
+                binding.transactionDescription.setTextColor(context.getResources().getColor(R.color.neutral_text_secondary));
+                binding.transactionTypeIcon.setVisibility(android.view.View.GONE);
             }
         }
     }
