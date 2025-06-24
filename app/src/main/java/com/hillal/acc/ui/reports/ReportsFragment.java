@@ -88,7 +88,7 @@ public class ReportsFragment extends Fragment {
             }
             totalDebtorsText.setText(String.format(Locale.ENGLISH, "إجمالي المدينين: %.2f", totalDebit));
             totalCreditorsText.setText(String.format(Locale.ENGLISH, "إجمالي الدائنين: %.2f", totalCredit));
-            netBalanceText.setText(String.format(Locale.ENGLISH, "الرصيد: %.2f", totalDebit - totalCredit));
+            netBalanceText.setText(String.format(Locale.ENGLISH, "الرصيد: %.2f", totalCredit - totalDebit));
             totalTransactionsText.setText(String.format(Locale.ENGLISH, "%d", count));
             averageTransactionText.setText(count > 0 ? String.format(Locale.ENGLISH, "%.2f", sum / count) : "0");
         });
