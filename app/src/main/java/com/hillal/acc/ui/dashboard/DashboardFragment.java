@@ -39,6 +39,8 @@ import org.json.JSONException;
 
 import java.util.Locale;
 
+import com.google.android.material.snackbar.Snackbar;
+
 public class DashboardFragment extends Fragment {
     private static final String TAG = "DashboardFragment";
     private FragmentDashboardBinding binding;
@@ -267,12 +269,8 @@ public class DashboardFragment extends Fragment {
             .show();
     }
 
-    private void showErrorDialog(String message) {
-        new AlertDialog.Builder(requireContext())
-            .setTitle("خطأ")
-            .setMessage(message)
-            .setPositiveButton("حسناً", null)
-            .show();
+    private void showErrorSnackbar(String message) {
+        Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_LONG).show();
     }
 
     private void loadAccounts() {
@@ -320,7 +318,7 @@ public class DashboardFragment extends Fragment {
                 @Override
                 public void onError(String error) {
                     hideLoadingDialog();
-                    showErrorDialog("فشلت المزامنة الكاملة: " + error);
+                    showErrorSnackbar("فشلت المزامنة الكاملة: " + error);
                 }
             });
             return true;
