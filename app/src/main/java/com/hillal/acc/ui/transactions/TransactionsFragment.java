@@ -53,7 +53,6 @@ public class TransactionsFragment extends Fragment {
     private Calendar startDate;
     private Calendar endDate;
     private String selectedAccount = null;
-    private String selectedCurrency = null;
     private List<Transaction> allTransactions = new ArrayList<>();
     private List<Account> allAccounts = new ArrayList<>();
     private Map<Long, Map<String, Double>> accountBalancesMap = new HashMap<>();
@@ -108,7 +107,6 @@ public class TransactionsFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         setupAccountFilter();
-        setupCurrencyFilter();
         setupDateFilter();
         setupFab();
         
@@ -245,21 +243,6 @@ public class TransactionsFragment extends Fragment {
             }
         );
         dialog.show();
-    }
-
-    private void setupCurrencyFilter() {
-        binding.currencyChipGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.chipYer) {
-                selectedCurrency = getString(R.string.currency_yer);
-            } else if (checkedId == R.id.chipSar) {
-                selectedCurrency = getString(R.string.currency_sar);
-            } else if (checkedId == R.id.chipUsd) {
-                selectedCurrency = getString(R.string.currency_usd);
-            } else {
-                selectedCurrency = null;
-            }
-            applyAllFilters();
-        });
     }
 
     private void setupDateFilter() {
@@ -466,6 +449,8 @@ public class TransactionsFragment extends Fragment {
         long startTime = startCal.getTimeInMillis();
         long endTime = endCal.getTimeInMillis();
         
+        double totalAmount = 0.0;
+        
         for (Transaction t : allTransactions) {
             boolean match = true;
             if (selectedAccount != null && !selectedAccount.isEmpty()) {
@@ -476,9 +461,6 @@ public class TransactionsFragment extends Fragment {
                 String accountName = (account != null) ? account.getName() : null;
                 if (accountName == null || !accountName.equals(selectedAccount)) match = false;
             }
-            if (selectedCurrency != null && !selectedCurrency.isEmpty()) {
-                if (!selectedCurrency.equals(t.getCurrency())) match = false;
-            }
             
             // مقارنة التاريخ فقط (بدون وقت)
             long transactionDate = t.getTransactionDate();
@@ -486,10 +468,19 @@ public class TransactionsFragment extends Fragment {
                 match = false;
             }
             
-            if (match) filtered.add(t);
+            if (match) {
+                filtered.add(t);
+                totalAmount += t.getAmount();
+            }
         }
+        
+        // تحديث الإحصائيات
+        binding.totalTransactionsText.setText(String.valueOf(filtered.size()));
+        binding.totalAmountText.setText(String.format("%.2f", totalAmount));
+        
         adapter.submitList(filtered);
         binding.transactionsRecyclerView.setVisibility(filtered.isEmpty() ? View.GONE : View.VISIBLE);
+        binding.emptyView.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     private boolean isUserLoggedIn() {
