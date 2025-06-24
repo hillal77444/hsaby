@@ -13,6 +13,7 @@
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
+                            <th>رقم الحساب</th>
                             <th>اسم الحساب</th>
                             <th>رقم الهاتف</th>
                             <th>المستخدم</th>
@@ -27,6 +28,7 @@
                     <tbody>
                         {% for stat in account_stats %}
                         <tr>
+                            <td>{{ stat.account.server_id }}</td>
                             <td>{{ stat.account.account_name }}</td>
                             <td>{{ stat.account.phone_number }}</td>
                             <td>{{ stat.account.user.username }}</td>
@@ -42,6 +44,11 @@
                                    class="btn btn-info btn-sm" target="_blank">
                                     <i class="fas fa-file-invoice"></i> كشف حساب
                                 </a>
+                                <form method="post" action="{{ url_for('admin.delete_account_with_transactions', account_id=stat.account.id) }}" style="display:inline;" onsubmit="return confirm('هل أنت متأكد أنك تريد حذف هذا الحساب وجميع العمليات المرتبطة به؟ لا يمكن التراجع!');">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash-alt"></i> حذف الحساب
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                         {% endfor %}
