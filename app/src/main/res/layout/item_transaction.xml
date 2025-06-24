@@ -11,8 +11,8 @@
     app:strokeWidth="0dp"
     android:clickable="true"
     android:focusable="true"
-    app:rippleColor="@color/ripple_light"
-    app:cardBackgroundColor="@android:color/transparent"
+    app:rippleColor="#E3E8FD"
+    app:cardBackgroundColor="#FFFFFF"
     app:cardPreventCornerOverlap="true"
     app:cardUseCompatPadding="true"
     android:stateListAnimator="@animator/card_state_list_anim"
@@ -30,7 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="12dp">
+            android:padding="16dp">
 
             <!-- معلومات الحساب -->
             <LinearLayout
@@ -45,7 +45,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/text_primar"
+                    android:textColor="#152FD9"
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:fontFamily="sans-serif-medium"
@@ -55,9 +55,9 @@
                     android:id="@+id/transactionDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
+                    android:layout_marginTop="4dp"
                     android:textSize="14sp"
-                    android:textColor="@color/text_secondary"
+                    android:textColor="#666"
                     android:fontFamily="sans-serif"
                     tools:text="2024/03/20" />
 
@@ -80,18 +80,19 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/divider"
-            android:layout_marginHorizontal="12dp" />
+            android:background="#E3E8FD"
+            android:layout_marginHorizontal="16dp" />
 
         <!-- صف الوصف -->
         <TextView
             android:id="@+id/transactionDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp"
             android:textSize="14sp"
-            android:textColor="@color/text_secondary"
+            android:textColor="#666"
             android:maxLines="2"
             android:ellipsize="end"
             android:fontFamily="sans-serif"
@@ -102,43 +103,61 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="12dp"
+            android:padding="16dp"
             android:gravity="center">
 
             <!-- زر واتساب -->
-            <ImageButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/whatsappButton"
-                android:layout_width="44dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
                 android:layout_height="44dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/rounded_button_background"
-                android:src="@drawable/ic_whatsapp"
-                android:contentDescription="إرسال عبر واتساب"
-                android:padding="10dp"
-                app:tint="@color/accent_green" />
+                android:layout_marginEnd="8dp"
+                android:text="واتساب"
+                android:textSize="12sp"
+                app:icon="@drawable/ic_whatsapp"
+                app:iconSize="16dp"
+                app:iconGravity="textStart"
+                app:iconTint="#25D366"
+                app:strokeColor="#25D366"
+                app:strokeWidth="1dp"
+                app:cornerRadius="22dp"
+                android:textColor="#25D366" />
 
             <!-- زر تعديل -->
-            <ImageButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/editButton"
-                android:layout_width="44dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
                 android:layout_height="44dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/rounded_button_background"
-                android:src="@drawable/ic_edit"
-                android:contentDescription="تعديل"
-                android:padding="10dp"
-                app:tint="@color/primary_blue" />
+                android:layout_marginEnd="8dp"
+                android:text="تعديل"
+                android:textSize="12sp"
+                app:icon="@drawable/ic_edit"
+                app:iconSize="16dp"
+                app:iconGravity="textStart"
+                app:iconTint="#152FD9"
+                app:strokeColor="#152FD9"
+                app:strokeWidth="1dp"
+                app:cornerRadius="22dp"
+                android:textColor="#152FD9" />
 
             <!-- زر حذف -->
-            <ImageButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/deleteButton"
-                android:layout_width="44dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
                 android:layout_height="44dp"
-                android:background="@drawable/rounded_button_background"
-                android:src="@drawable/ic_delete"
-                android:contentDescription="حذف"
-                android:padding="10dp"
-                app:tint="@color/error" />
+                android:text="حذف"
+                android:textSize="12sp"
+                app:icon="@drawable/ic_delete"
+                app:iconSize="16dp"
+                app:iconGravity="textStart"
+                app:iconTint="#FF5252"
+                app:strokeColor="#FF5252"
+                app:strokeWidth="1dp"
+                app:cornerRadius="22dp"
+                android:textColor="#FF5252" />
 
         </LinearLayout>
 
