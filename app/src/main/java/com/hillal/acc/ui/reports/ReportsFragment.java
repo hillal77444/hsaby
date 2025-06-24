@@ -32,6 +32,8 @@ public class ReportsFragment extends Fragment {
     private TextView totalDebtorsText;
     private TextView totalCreditorsText;
     private TextView netBalanceText;
+    private TextView totalTransactionsText;
+    private TextView averageTransactionText;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -45,6 +47,8 @@ public class ReportsFragment extends Fragment {
         totalDebtorsText = view.findViewById(R.id.total_debtors);
         totalCreditorsText = view.findViewById(R.id.total_creditors);
         netBalanceText = view.findViewById(R.id.net_balance);
+        totalTransactionsText = view.findViewById(R.id.total_transactions);
+        averageTransactionText = view.findViewById(R.id.average_transaction);
         
         // Setup RecyclerView
         RecyclerView recyclerView = view.findViewById(R.id.accounts_recycler_view);
@@ -69,6 +73,8 @@ public class ReportsFragment extends Fragment {
         transactionViewModel.getAllTransactions().observe(getViewLifecycleOwner(), transactions -> {
             double totalDebit = 0;
             double totalCredit = 0;
+            int count = 0;
+            double sum = 0;
             if (transactions != null) {
                 for (Transaction transaction : transactions) {
                     if ("debit".equals(transaction.getType())) {
@@ -76,11 +82,15 @@ public class ReportsFragment extends Fragment {
                     } else if ("credit".equals(transaction.getType())) {
                         totalCredit += transaction.getAmount();
                     }
+                    sum += transaction.getAmount();
+                    count++;
                 }
             }
             totalDebtorsText.setText(String.format("إجمالي المدينين: %.2f", totalDebit));
             totalCreditorsText.setText(String.format("إجمالي الدائنين: %.2f", totalCredit));
             netBalanceText.setText(String.format("الرصيد: %.2f", totalDebit - totalCredit));
+            totalTransactionsText.setText(String.valueOf(count));
+            averageTransactionText.setText(count > 0 ? String.format("%.2f", sum / count) : "0");
         });
     }
 } 
