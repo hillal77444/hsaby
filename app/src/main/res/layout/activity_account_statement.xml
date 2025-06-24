@@ -38,107 +38,112 @@
     </LinearLayout>
 
     <!-- البطاقة العلوية المصغرة -->
-    <LinearLayout
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="#fff"
-        android:layout_margin="8dp"
-        android:padding="8dp"
-        android:elevation="2dp"
-        android:radius="10dp">
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        android:layout_margin="12dp"
+        app:cardBackgroundColor="#FFFFFF">
 
-        <!-- اختيار الحساب وزر الطباعة -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end|center_vertical">
+            android:orientation="vertical"
+            android:padding="12dp">
 
-            <AutoCompleteTextView
-                android:id="@+id/accountDropdown"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:hint="اختر الحساب"
-                android:background="@drawable/bg_edittext"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:textSize="15sp"
-                android:inputType="none"
-                android:focusable="false"
-                android:gravity="end|center_vertical"/>
+            <!-- اختيار الحساب وزر الطباعة -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end|center_vertical">
 
-            <ImageButton
-                android:id="@+id/btnPrintInCard"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:background="@drawable/bg_print_button"
-                android:src="@drawable/ic_print"
-                android:tint="#1976d2"
-                android:contentDescription="طباعة"
-                android:layout_marginStart="8dp"/>
+                <AutoCompleteTextView
+                    android:id="@+id/accountDropdown"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:hint="اختر الحساب"
+                    android:background="@drawable/bg_edittext"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:textSize="15sp"
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:gravity="end|center_vertical"/>
+
+                <ImageButton
+                    android:id="@+id/btnPrintInCard"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_print_button"
+                    android:src="@drawable/ic_print"
+                    android:tint="#1976d2"
+                    android:contentDescription="طباعة"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
+
+            <!-- التواريخ بشكل أفقي ومضغوط -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical|end"
+                android:layout_marginTop="6dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="من"
+                    android:gravity="center"
+                    android:textSize="15sp"
+                    android:textColor="#333"
+                    android:paddingHorizontal="4dp"/>
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/startDateInput"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_edittext"
+                    android:focusable="false"
+                    android:gravity="center"
+                    android:drawableStart="@drawable/ic_calendar"
+                    android:textSize="15sp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="الى"
+                    android:gravity="center"
+                    android:textSize="15sp"
+                    android:textColor="#333"
+                    android:paddingHorizontal="4dp"/>
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/endDateInput"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_edittext"
+                    android:focusable="false"
+                    android:gravity="center"
+                    android:drawableStart="@drawable/ic_calendar"
+                    android:textSize="15sp"/>
+            </LinearLayout>
+
+            <!-- أزرار العملات -->
+            <LinearLayout
+                android:id="@+id/currencyButtonsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="10dp"
+                android:visibility="gone"/>
         </LinearLayout>
-
-        <!-- التواريخ بشكل أفقي ومضغوط -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical|end"
-            android:layout_marginTop="6dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="من"
-                android:gravity="center"
-                android:textSize="15sp"
-                android:textColor="#333"
-                android:paddingHorizontal="4dp"/>
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/startDateInput"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_edittext"
-                android:focusable="false"
-                android:gravity="center"
-                android:drawableStart="@drawable/ic_calendar"
-                android:textSize="15sp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="الى"
-                android:gravity="center"
-                android:textSize="15sp"
-                android:textColor="#333"
-                android:paddingHorizontal="4dp"/>
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/endDateInput"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_edittext"
-                android:focusable="false"
-                android:gravity="center"
-                android:drawableStart="@drawable/ic_calendar"
-                android:textSize="15sp"/>
-        </LinearLayout>
-
-        <!-- أزرار العملات -->
-        <LinearLayout
-            android:id="@+id/currencyButtonsLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginTop="10dp"
-            android:visibility="gone"/>
-    </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- مكان التقرير -->
     <WebView
