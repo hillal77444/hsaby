@@ -133,17 +133,15 @@
                 android:layout_marginEnd="8dp"
                 android:minWidth="0dp"
                 android:gravity="center"
-                android:text="واتساب"
-                android:textSize="13sp"
                 app:icon="@drawable/ic_whatsapp"
-                app:iconSize="18dp"
+                app:iconSize="22dp"
                 app:iconGravity="textStart"
                 app:iconTint="#25D366"
                 app:strokeColor="#25D366"
                 app:strokeWidth="2dp"
                 app:cornerRadius="22dp"
-                android:textColor="#25D366"
-                android:backgroundTint="#FFFFFF" />
+                android:backgroundTint="#FFFFFF"
+                android:contentDescription="إرسال عبر واتساب" />
 
             <!-- زر SMS جديد -->
             <com.google.android.material.button.MaterialButton
@@ -155,17 +153,15 @@
                 android:layout_marginEnd="8dp"
                 android:minWidth="0dp"
                 android:gravity="center"
-                android:text="SMS"
-                android:textSize="13sp"
                 app:icon="@drawable/ic_sms"
-                app:iconSize="18dp"
+                app:iconSize="22dp"
                 app:iconGravity="textStart"
                 app:iconTint="#2196F3"
                 app:strokeColor="#2196F3"
                 app:strokeWidth="2dp"
                 app:cornerRadius="22dp"
-                android:textColor="#2196F3"
-                android:backgroundTint="#FFFFFF" />
+                android:backgroundTint="#FFFFFF"
+                android:contentDescription="إرسال رسالة نصية" />
 
             <!-- زر تعديل -->
             <com.google.android.material.button.MaterialButton
@@ -177,17 +173,15 @@
                 android:layout_marginEnd="8dp"
                 android:minWidth="0dp"
                 android:gravity="center"
-                android:text="تعديل"
-                android:textSize="13sp"
                 app:icon="@drawable/ic_edit"
-                app:iconSize="18dp"
+                app:iconSize="22dp"
                 app:iconGravity="textStart"
                 app:iconTint="#2196F3"
                 app:strokeColor="#2196F3"
                 app:strokeWidth="2dp"
                 app:cornerRadius="22dp"
-                android:textColor="#2196F3"
-                android:backgroundTint="#FFFFFF" />
+                android:backgroundTint="#FFFFFF"
+                android:contentDescription="تعديل" />
 
             <!-- زر حذف -->
             <com.google.android.material.button.MaterialButton
@@ -198,17 +192,15 @@
                 android:layout_weight="1"
                 android:minWidth="0dp"
                 android:gravity="center"
-                android:text="حذف"
-                android:textSize="13sp"
                 app:icon="@drawable/ic_delete"
-                app:iconSize="18dp"
+                app:iconSize="22dp"
                 app:iconGravity="textStart"
                 app:iconTint="#F44336"
                 app:strokeColor="#F44336"
                 app:strokeWidth="2dp"
                 app:cornerRadius="22dp"
-                android:textColor="#F44336"
-                android:backgroundTint="#FFFFFF" />
+                android:backgroundTint="#FFFFFF"
+                android:contentDescription="حذف" />
 
         </LinearLayout>
 
