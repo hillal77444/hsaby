@@ -33,6 +33,16 @@ const lastMessageSentAt = new Map(); // sessionId => timestamp
 // متغير جديد لتتبع الجلسات التي أغلقت بسبب عدم النشاط
 const closedByInactivity = {};
 
+// نظام انتظار (Queue) حقيقي لكل جلسة
+const sessionQueues = {};
+function enqueue(sessionId, task) {
+    if (!sessionQueues[sessionId]) {
+        sessionQueues[sessionId] = Promise.resolve();
+    }
+    sessionQueues[sessionId] = sessionQueues[sessionId].then(() => task()).catch(() => {});
+    return sessionQueues[sessionId];
+}
+
 // دالة إنشاء جلسة واتساب
 async function createWhatsAppSession(sessionId) {
     // إذا كانت الجلسة نشطة بالفعل، أرجعها فورًا
@@ -281,70 +291,74 @@ app.post('/start/:sessionId', async (req, res) => {
 
 // إرسال رسالة
 app.post('/send/:sessionId', async (req, res) => {
-    try {
-        const { sessionId } = req.params;
-        const { number, message } = req.body;
+    const { sessionId } = req.params;
+    const { number, message } = req.body;
 
-        let sock = activeSessions.get(sessionId);
-        if (sock && sock.user) {
-            // الجلسة متصلة: أرسل فورًا
+    enqueue(sessionId, async () => {
+        try {
+            let sock = activeSessions.get(sessionId);
+            if (!sock) {
+                // الجلسة غير متصلة: أضف الرسالة للانتظار
+                if (!pendingMessages.has(sessionId)) pendingMessages.set(sessionId, []);
+                pendingMessages.get(sessionId).push({ number, message });
+                // شغل الجلسة إذا لم تكن تعمل
+                await createWhatsAppSession(sessionId);
+                return res.json({ success: true, message: "سيتم إرسال الرسالة خلال 5 دقائق إذا تم الاتصال بالجهاز" });
+            }
+            // تحقق من وجود الرقم على واتساب
             const formattedNumber = number.replace(/[^0-9]/g, '');
-            const fullNumber = (formattedNumber.startsWith('967') || formattedNumber.startsWith('966'))
-                ? formattedNumber
-                : `967${formattedNumber}`;
-            console.log(`[SEND] Sending message to ${fullNumber} from session ${sessionId}: "${message}"`);
-            await sock.sendMessage(`${fullNumber}@s.whatsapp.net`, { text: message });
-            console.log(`[SEND] Message sent successfully to ${fullNumber}`);
+            const fullNumber = (formattedNumber.startsWith('967') || formattedNumber.startsWith('966')) ? formattedNumber : `967${formattedNumber}`;
+            const waId = `${fullNumber}@s.whatsapp.net`;
+            const [result] = await sock.onWhatsApp(waId);
+            if (!result || !result.exists) {
+                return res.status(400).json({ success: false, error: 'الرقم غير مسجل في واتساب' });
+            }
+            await sock.sendMessage(waId, { text: message });
             scheduleSessionClose(sessionId, 3);
-            // تحديث آخر وقت إرسال
             lastMessageSentAt.set(sessionId, Date.now());
             return res.json({ success: true });
-        } else {
-            // الجلسة غير متصلة: أضف الرسالة للانتظار
-            if (!pendingMessages.has(sessionId)) pendingMessages.set(sessionId, []);
-            pendingMessages.get(sessionId).push({ number, message });
-            // شغل الجلسة إذا لم تكن تعمل
-            if (!sock) await createWhatsAppSession(sessionId);
-            return res.json({ success: true, message: "سيتم إرسال الرسالة خلال 5 دقائق إذا تم الاتصال بالجهاز" });
+        } catch (error) {
+            console.error(`[SEND][ERROR] Failed to send message: ${error.message}`);
+            res.status(500).json({ success: false, error: error.message });
         }
-    } catch (error) {
-        console.error(`[SEND][ERROR] Failed to send message: ${error.message}`);
-        res.status(500).json({ success: false, error: error.message });
-    }
+    });
 });
 
 // إرسال رسائل جماعية
 app.post('/send_bulk/:sessionId', async (req, res) => {
-    try {
-        const { sessionId } = req.params;
-        const { numbers, message, delay = 1000 } = req.body;
-        
-        const sock = activeSessions.get(sessionId);
-        if (!sock) {
-            return res.status(404).json({ success: false, error: 'Session not found' });
-        }
+    const { sessionId } = req.params;
+    const { numbers, message, delay = 1000 } = req.body;
 
-        const results = [];
-        for (const number of numbers) {
-            try {
-                const formattedNumber = number.replace(/[^0-9]/g, '');
-                const fullNumber = (formattedNumber.startsWith('967') || formattedNumber.startsWith('966'))
-                    ? formattedNumber
-                    : `967${formattedNumber}`;
-                
-                await sock.sendMessage(`${fullNumber}@s.whatsapp.net`, { text: message });
-                results.push({ number, success: true });
-                
-                await new Promise(resolve => setTimeout(resolve, delay));
-            } catch (error) {
-                results.push({ number, success: false, error: error.message });
+    enqueue(sessionId, async () => {
+        try {
+            const sock = activeSessions.get(sessionId);
+            if (!sock) {
+                return res.status(404).json({ success: false, error: 'Session not found' });
             }
+            const results = [];
+            for (const number of numbers) {
+                try {
+                    const formattedNumber = number.replace(/[^0-9]/g, '');
+                    const fullNumber = (formattedNumber.startsWith('967') || formattedNumber.startsWith('966')) ? formattedNumber : `967${formattedNumber}`;
+                    const waId = `${fullNumber}@s.whatsapp.net`;
+                    // تحقق من وجود الرقم على واتساب
+                    const [result] = await sock.onWhatsApp(waId);
+                    if (!result || !result.exists) {
+                        results.push({ number, success: false, error: 'الرقم غير مسجل في واتساب' });
+                        continue;
+                    }
+                    await sock.sendMessage(waId, { text: message });
+                    results.push({ number, success: true });
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                } catch (error) {
+                    results.push({ number, success: false, error: error.message });
+                }
+            }
+            res.json({ success: true, results });
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
         }
-
-        res.json({ success: true, results });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
+    });
 });
 
 // الحصول على حالة الجلسة
