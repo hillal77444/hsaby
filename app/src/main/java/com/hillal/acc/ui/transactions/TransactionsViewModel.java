@@ -134,4 +134,8 @@ public class TransactionsViewModel extends AndroidViewModel {
         });
         return balancesLiveData;
     }
+
+    public LiveData<List<Transaction>> searchTransactionsByDescription(String query) {
+        return repository.searchTransactionsByDescription(query);
+    }
 } 
