@@ -65,6 +65,8 @@ public class TransactionsFragment extends Fragment {
     private boolean isFirstLoad = true;
     private long lastSyncTime = 0;
     private Map<Long, Account> accountMap = new HashMap<>();
+    private boolean isSearchActive = false; // متغير لتتبع حالة البحث
+    private String currentSearchText = ""; // متغير لتخزين نص البحث الحالي
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -112,6 +114,16 @@ public class TransactionsFragment extends Fragment {
 
         // إعداد المستمعين للأزرار بشكل منفصل
         setupAdapterListeners();
+        
+        // إعداد الفلاتر
+        setupAccountFilter();
+        setupDateFilter();
+        
+        // إعداد FAB
+        setupFab();
+        
+        // مراقبة البيانات
+        observeAccountsAndTransactions();
     }
 
     @Override
@@ -128,24 +140,27 @@ public class TransactionsFragment extends Fragment {
                 @Override
                 public boolean onQueryTextChange(String newText) {
                     String query = newText.trim();
+                    isSearchActive = !query.isEmpty(); // تحديث حالة البحث
+                    currentSearchText = query.toLowerCase(); // تحديث نص البحث الحالي
                     if (query.isEmpty()) {
+                        // عند إفراغ البحث، نعود للسلوك القديم
                         viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
                     } else {
-                        viewModel.searchTransactionsByDescription("%" + query + "%").observe(getViewLifecycleOwner(), results -> {
-                            adapter.submitList(results);
-                            double totalAmount = 0.0;
-                            if (results != null) {
-                                for (Transaction t : results) totalAmount += t.getAmount();
-                            }
-                            binding.totalTransactionsText.setText(results != null ? String.valueOf(results.size()) : "0");
-                            binding.totalAmountText.setText(String.format(java.util.Locale.ENGLISH, "%.2f", totalAmount));
-                            binding.transactionsRecyclerView.setVisibility(results != null && !results.isEmpty() ? View.VISIBLE : View.GONE);
-                            binding.emptyView.setVisibility(results == null || results.isEmpty() ? View.VISIBLE : View.GONE);
-                        });
+                        // عند البحث، نتجاهل التاريخ ونطبق الفلاتر الأخرى
+                        applyAllFilters();
                     }
                     return true;
                 }
             });
+            
+            // إضافة مستمع لإغلاق البحث
+            searchView.setOnCloseListener(() -> {
+                isSearchActive = false; // إعادة تعيين حالة البحث
+                currentSearchText = ""; // إفراغ نص البحث
+                applyAllFilters(); // إعادة تطبيق الفلاتر بالسلوك القديم
+                return false;
+            });
+            
             // منع الإغلاق التلقائي عند فقدان التركيز (إغلاق الكيبورد فقط)
             searchView.setOnQueryTextFocusChangeListener((v, hasFocus) -> {
                 if (!hasFocus && !searchView.isIconified()) {
@@ -394,7 +409,14 @@ public class TransactionsFragment extends Fragment {
                 endDate = selectedCal;
             }
             updateDateInputs();
-            viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
+            
+            // إذا كان البحث نشط، نطبق الفلاتر مباشرة
+            // وإلا نعيد تحميل البيانات بالتواريخ الجديدة
+            if (isSearchActive) {
+                applyAllFilters();
+            } else {
+                viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
+            }
             dialog.dismiss();
         });
         btnCancel.setOnClickListener(v -> dialog.dismiss());
@@ -528,6 +550,8 @@ public class TransactionsFragment extends Fragment {
         
         for (Transaction t : allTransactions) {
             boolean match = true;
+            
+            // فلترة الحساب
             if (selectedAccount != null && !selectedAccount.isEmpty()) {
                 Account account = null;
                 if (adapter != null && adapter.getAccountMap() != null) {
@@ -537,10 +561,20 @@ public class TransactionsFragment extends Fragment {
                 if (accountName == null || !accountName.equals(selectedAccount)) match = false;
             }
             
-            // مقارنة التاريخ فقط (بدون وقت)
-            long transactionDate = t.getTransactionDate();
-            if (transactionDate < startTime || transactionDate > endTime) {
-                match = false;
+            // فلترة التاريخ - نتجاهلها فقط إذا كان البحث نشط
+            if (!isSearchActive) {
+                long transactionDate = t.getTransactionDate();
+                if (transactionDate < startTime || transactionDate > endTime) {
+                    match = false;
+                }
+            }
+            
+            // فلترة الوصف - نطبقها فقط إذا كان البحث نشط
+            if (isSearchActive && !currentSearchText.isEmpty()) {
+                String description = t.getDescription() != null ? t.getDescription().toLowerCase() : "";
+                if (!description.contains(currentSearchText)) {
+                    match = false;
+                }
             }
             
             if (match) {
