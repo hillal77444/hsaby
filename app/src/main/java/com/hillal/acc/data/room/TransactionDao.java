@@ -111,4 +111,7 @@ public interface TransactionDao {
 
     @Query("SELECT SUM(CASE WHEN type = 'credit' OR type = 'له' THEN amount ELSE -amount END) FROM transactions WHERE account_id = :accountId AND currency = 'يمني'")
     LiveData<Double> getAccountBalanceYemeni(long accountId);
+
+    @Query("SELECT * FROM transactions WHERE description LIKE :query ORDER BY transaction_date DESC")
+    LiveData<List<Transaction>> searchTransactionsByDescription(String query);
 } 
