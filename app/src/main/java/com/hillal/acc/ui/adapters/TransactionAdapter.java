@@ -132,6 +132,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
 
             // إضافة مستمع النقر لزر واتساب
             holder.binding.whatsappButton.setOnClickListener(v -> {
+                android.widget.Toast.makeText(v.getContext(), "WhatsApp Clicked", android.widget.Toast.LENGTH_SHORT).show();
                 if (onWhatsAppClickListener != null && accountMap != null && accountMap.containsKey(transaction.getAccountId())) {
                     String phoneNumber = accountMap.get(transaction.getAccountId()).getPhoneNumber();
                     onWhatsAppClickListener.onWhatsAppClick(transaction, phoneNumber);
@@ -140,6 +141,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
 
             // إضافة مستمع النقر لزر SMS
             holder.binding.smsButton.setOnClickListener(v -> {
+                android.widget.Toast.makeText(v.getContext(), "SMS Clicked", android.widget.Toast.LENGTH_SHORT).show();
                 if (onSmsClickListener != null && accountMap != null && accountMap.containsKey(transaction.getAccountId())) {
                     String phoneNumber = accountMap.get(transaction.getAccountId()).getPhoneNumber();
                     onSmsClickListener.onSmsClick(transaction, phoneNumber);
