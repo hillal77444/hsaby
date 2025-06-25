@@ -36,6 +36,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
     private OnDeleteClickListener onDeleteClickListener;
     private OnEditClickListener onEditClickListener;
     private OnWhatsAppClickListener onWhatsAppClickListener;
+    private OnSmsClickListener onSmsClickListener;
     private Map<Long, Account> accountMap;
     private final TransactionRepository transactionRepository;
     private final LifecycleOwner lifecycleOwner;
@@ -60,6 +61,10 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
         void onWhatsAppClick(Transaction transaction, String phoneNumber);
     }
 
+    public interface OnSmsClickListener {
+        void onSmsClick(Transaction transaction, String phoneNumber);
+    }
+
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.onItemClickListener = listener;
     }
@@ -78,6 +83,10 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
 
     public void setOnWhatsAppClickListener(OnWhatsAppClickListener listener) {
         this.onWhatsAppClickListener = listener;
+    }
+
+    public void setOnSmsClickListener(OnSmsClickListener listener) {
+        this.onSmsClickListener = listener;
     }
 
     public void setAccountMap(Map<Long, Account> accountMap) {
@@ -126,6 +135,14 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                 if (onWhatsAppClickListener != null && accountMap != null && accountMap.containsKey(transaction.getAccountId())) {
                     String phoneNumber = accountMap.get(transaction.getAccountId()).getPhoneNumber();
                     onWhatsAppClickListener.onWhatsAppClick(transaction, phoneNumber);
+                }
+            });
+
+            // إضافة مستمع النقر لزر SMS
+            holder.binding.smsButton.setOnClickListener(v -> {
+                if (onSmsClickListener != null && accountMap != null && accountMap.containsKey(transaction.getAccountId())) {
+                    String phoneNumber = accountMap.get(transaction.getAccountId()).getPhoneNumber();
+                    onSmsClickListener.onSmsClick(transaction, phoneNumber);
                 }
             });
         }
