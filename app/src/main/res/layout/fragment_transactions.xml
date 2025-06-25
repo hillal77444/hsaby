@@ -15,18 +15,6 @@
             android:orientation="vertical"
             android:background="#F8F8F8">
 
-            <!-- AppBar مع العنوان وزر البحث -->
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="#FFFFFF"
-                android:background="#FFFFFF"
-                app:title="القيود المحاسبية"
-                app:titleTextColor="#152FD9"
-                app:navigationIconTint="#152FD9"
-                app:menu="@menu/transactions_toolbar_menu" />
-
             <!-- الدائرة العلوية والشعار والعنوان -->
             <View
                 android:layout_width="match_parent"
