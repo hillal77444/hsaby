@@ -119,32 +119,34 @@ public class TransactionsFragment extends Fragment {
         inflater.inflate(R.menu.transactions_toolbar_menu, menu);
         MenuItem searchItem = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setQueryHint("بحث في الوصف...");
-        searchView.setMaxWidth(Integer.MAX_VALUE);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) { return true; }
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                String query = newText.trim();
-                if (query.isEmpty()) {
-                    viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
-                } else {
-                    viewModel.searchTransactionsByDescription("%" + query + "%").observe(getViewLifecycleOwner(), results -> {
-                        adapter.submitList(results);
-                        double totalAmount = 0.0;
-                        if (results != null) {
-                            for (Transaction t : results) totalAmount += t.getAmount();
-                        }
-                        binding.totalTransactionsText.setText(results != null ? String.valueOf(results.size()) : "0");
-                        binding.totalAmountText.setText(String.format(java.util.Locale.ENGLISH, "%.2f", totalAmount));
-                        binding.transactionsRecyclerView.setVisibility(results != null && !results.isEmpty() ? View.VISIBLE : View.GONE);
-                        binding.emptyView.setVisibility(results == null || results.isEmpty() ? View.VISIBLE : View.GONE);
-                    });
+        if (searchView != null) {
+            searchView.setQueryHint("بحث في الوصف...");
+            searchView.setMaxWidth(Integer.MAX_VALUE);
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) { return true; }
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    String query = newText.trim();
+                    if (query.isEmpty()) {
+                        viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
+                    } else {
+                        viewModel.searchTransactionsByDescription("%" + query + "%").observe(getViewLifecycleOwner(), results -> {
+                            adapter.submitList(results);
+                            double totalAmount = 0.0;
+                            if (results != null) {
+                                for (Transaction t : results) totalAmount += t.getAmount();
+                            }
+                            binding.totalTransactionsText.setText(results != null ? String.valueOf(results.size()) : "0");
+                            binding.totalAmountText.setText(String.format(java.util.Locale.ENGLISH, "%.2f", totalAmount));
+                            binding.transactionsRecyclerView.setVisibility(results != null && !results.isEmpty() ? View.VISIBLE : View.GONE);
+                            binding.emptyView.setVisibility(results == null || results.isEmpty() ? View.VISIBLE : View.GONE);
+                        });
+                    }
+                    return true;
                 }
-                return true;
-            }
-        });
+            });
+        }
         super.onCreateOptionsMenu(menu, inflater);
     }
 
