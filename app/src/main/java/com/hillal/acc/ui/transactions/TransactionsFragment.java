@@ -205,6 +205,37 @@ public class TransactionsFragment extends Fragment {
                 }
             });
         });
+
+        // مستمع SMS
+        adapter.setOnSmsClickListener((transaction, phoneNumber) -> {
+            if (phoneNumber == null || phoneNumber.isEmpty()) {
+                Toast.makeText(requireContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            accountViewModel.getAccountById(transaction.getAccountId()).observe(getViewLifecycleOwner(), account -> {
+                if (account != null) {
+                    transactionRepository.getBalanceUntilDate(transaction.getAccountId(), transaction.getTransactionDate(), transaction.getCurrency())
+                        .observe(getViewLifecycleOwner(), balance -> {
+                            if (balance != null) {
+                                String type = transaction.getType();
+                                String amountStr = String.format("%,.0f", transaction.getAmount());
+                                String balanceStr = String.format("%,.0f", Math.abs(balance));
+                                String currency = transaction.getCurrency();
+                                String typeText = (type.equalsIgnoreCase("credit") || type.equals("له")) ? "لكم" : "عليكم";
+                                String balanceText = (balance >= 0) ? "الرصيد لكم " : "الرصيد عليكم ";
+                                String message = "حسابكم لدينا:\n"
+                                        + typeText + " " + amountStr + " " + currency + "\n"
+                                        + transaction.getDescription() + "\n"
+                                        + balanceText + balanceStr + " " + currency;
+                                Intent smsIntent = new Intent(Intent.ACTION_VIEW);
+                                smsIntent.setData(Uri.parse("smsto:" + phoneNumber));
+                                smsIntent.putExtra("sms_body", message);
+                                startActivity(smsIntent);
+                            }
+                        });
+                }
+            });
+        });
     }
 
     private void setupAccountFilter() {
