@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.io.IOException;
 import org.json.JSONObject;
 import com.hillal.acc.data.model.ServerAppUpdateInfo;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DataManager {
     private static final String TAG = "DataManager";
@@ -43,6 +45,7 @@ public class DataManager {
     private static final String TOKEN_EXPIRY_KEY = "token_expiry_time";
     private static final int MAX_RETRY_ATTEMPTS = 3;
     private static final long RETRY_DELAY_MS = 2000; // 2 seconds
+    private Set<Long> serverTransactionIds = new HashSet<>();
 
     public interface DataCallback {
         void onSuccess();
@@ -385,6 +388,7 @@ public class DataManager {
     private void fetchTransactionsPaged(String token, int retryCount, DataCallback callback) {
         int limit = 100;
         int offset = 0;
+        serverTransactionIds.clear(); // تأكد من تفريغ القائمة قبل البدء
         fetchBatch(token, limit, offset, retryCount, callback);
     }
 
@@ -397,11 +401,16 @@ public class DataManager {
                     Log.d(TAG, "Received batch of " + transactions.size() + " transactions from server (offset: " + offset + ")");
                     executor.execute(() -> {
                         try {
+                            // أضف كل server_id من هذه الدفعة إلى المتغير الخارجي
+                            for (Transaction transaction : transactions) {
+                                if (transaction.getServerId() > 0) {
+                                    serverTransactionIds.add(transaction.getServerId());
+                                }
+                            }
                             for (Transaction transaction : transactions) {
                                 try {
                                     transaction.setLastSyncTime(System.currentTimeMillis());
                                     transaction.setSyncStatus(2);
-                                    
                                     Transaction existingTransaction = transactionDao.getTransactionByServerIdSync(transaction.getServerId());
                                     if (existingTransaction != null) {
                                         transaction.setId(existingTransaction.getId());
@@ -421,6 +430,19 @@ public class DataManager {
                                 fetchBatch(token, limit, offset + limit, retryCount, callback);
                             } else {
                                 Log.d(TAG, "All transactions processed successfully (batched)");
+                                try {
+                                    // جلب كل المعاملات المحلية
+                                    List<Transaction> localTransactions = transactionDao.getAllTransactionsSync();
+                                    // حذف المعاملات التي كانت مزامنة مع الخادم وحُذفت منه
+                                    for (Transaction t : localTransactions) {
+                                        if (t.getServerId() > 0 && !serverTransactionIds.contains(t.getServerId())) {
+                                            transactionDao.delete(t);
+                                            Log.d(TAG, "Deleted local transaction not found on server: " + t.getServerId());
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error deleting local transactions not found on server", e);
+                                }
                                 handler.post(callback::onSuccess);
                             }
                         } catch (Exception e) {
