@@ -288,6 +288,10 @@ public class TransactionsFragment extends Fragment {
                 for (Account account : accounts) {
                     accountMap.put(account.getId(), account);
                 }
+                // تعيين الخريطة للـ adapter بعد كل تحديث
+                if (adapter != null) {
+                    adapter.setAccountMap(accountMap);
+                }
             }
         });
 
