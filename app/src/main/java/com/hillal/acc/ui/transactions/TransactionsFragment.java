@@ -218,8 +218,8 @@ public class TransactionsFragment extends Fragment {
                         .observe(getViewLifecycleOwner(), balance -> {
                             if (balance != null) {
                                 String type = transaction.getType();
-                                String amountStr = String.format("%,.0f", transaction.getAmount());
-                                String balanceStr = String.format("%,.0f", Math.abs(balance));
+                                String amountStr = String.format(Locale.US, "%.0f", transaction.getAmount());
+                                String balanceStr = String.format(Locale.US, "%.0f", Math.abs(balance));
                                 String currency = transaction.getCurrency();
                                 String typeText = (type.equalsIgnoreCase("credit") || type.equals("له")) ? "لكم" : "عليكم";
                                 String balanceText = (balance >= 0) ? "الرصيد لكم " : "الرصيد عليكم ";
