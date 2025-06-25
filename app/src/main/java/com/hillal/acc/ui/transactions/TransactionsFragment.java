@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -15,6 +18,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -42,6 +46,7 @@ import com.hillal.acc.data.remote.RetrofitClient;
 import com.hillal.acc.data.remote.ApiService;
 import com.hillal.acc.ui.common.AccountPickerDialog;
 import com.hillal.acc.data.preferences.UserPreferences;
+import com.google.android.material.appbar.MaterialToolbar;
 
 public class TransactionsFragment extends Fragment {
     private FragmentTransactionsBinding binding;
@@ -97,6 +102,55 @@ public class TransactionsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // تهيئة الـ Toolbar
+        MaterialToolbar toolbar = binding.toolbar;
+        toolbar.setTitle("القيود المحاسبية");
+        toolbar.inflateMenu(R.menu.transactions_toolbar_menu);
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_search) {
+                MenuItem searchItem = item;
+                SearchView searchView = (SearchView) searchItem.getActionView();
+                searchView.setQueryHint("بحث في الوصف...");
+                searchView.setMaxWidth(Integer.MAX_VALUE);
+                searchView.setIconified(false);
+                searchView.requestFocus();
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        // لا حاجة لتنفيذ شيء عند الإرسال
+                        return true;
+                    }
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        String query = newText.trim();
+                        if (query.isEmpty()) {
+                            viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
+                        } else {
+                            viewModel.searchTransactionsByDescription("%" + query + "%").observe(getViewLifecycleOwner(), results -> {
+                                adapter.submitList(results);
+                                double totalAmount = 0.0;
+                                if (results != null) {
+                                    for (Transaction t : results) totalAmount += t.getAmount();
+                                }
+                                binding.totalTransactionsText.setText(results != null ? String.valueOf(results.size()) : "0");
+                                binding.totalAmountText.setText(String.format(java.util.Locale.ENGLISH, "%.2f", totalAmount));
+                                binding.transactionsRecyclerView.setVisibility(results != null && !results.isEmpty() ? View.VISIBLE : View.GONE);
+                                binding.emptyView.setVisibility(results == null || results.isEmpty() ? View.VISIBLE : View.GONE);
+                            });
+                        }
+                        return true;
+                    }
+                });
+                searchView.setOnCloseListener(() -> {
+                    toolbar.setTitle("القيود المحاسبية");
+                    viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
+                    return false;
+                });
+                return true;
+            }
+            return false;
+        });
 
         // تهيئة RecyclerView
         RecyclerView recyclerView = view.findViewById(R.id.transactionsRecyclerView);
