@@ -104,6 +104,12 @@ public class TransactionsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // تهيئة الـ RecyclerView والـ Adapter بشكل صحيح
+        RecyclerView recyclerView = view.findViewById(R.id.transactionsRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        adapter = new TransactionAdapter(new TransactionAdapter.TransactionDiffCallback(), requireContext(), getViewLifecycleOwner());
+        recyclerView.setAdapter(adapter);
+
         // إعداد المستمعين للأزرار بشكل منفصل
         setupAdapterListeners();
     }
