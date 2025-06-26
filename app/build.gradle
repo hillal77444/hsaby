@@ -22,7 +22,7 @@ android {
         applicationId "com.hillal.acc"
         minSdk 26
         targetSdk 34
-        versionCode 6
+        versionCode 9
         versionName "1.6"
         
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
