@@ -90,7 +90,7 @@
                         app:boxCornerRadiusBottomEnd="12dp"
                         android:layout_marginBottom="12dp"
                         app:hintTextColor="#666666"
-                        app:boxStrokeColor="#1976D2"
+                        app:boxStrokeColor="#222222"
                         android:background="#FFFFFF"
                         style="@style/SearchTextInputLayout">
 
@@ -101,8 +101,7 @@
                             android:inputType="text"
                             android:maxLines="1"
                             android:textColor="#000000"
-                            android:textColorHint="#666666"
-                            android:background="#FFFFFF" />
+                            android:textColorHint="#666666" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
