@@ -134,6 +134,24 @@ public class TransactionsFragment extends Fragment {
         if (searchView != null) {
             searchView.setQueryHint("بحث في الوصف...");
             searchView.setMaxWidth(Integer.MAX_VALUE);
+            
+            // منع إغلاق البحث عند فقدان التركيز
+            searchView.setIconifiedByDefault(false);
+            searchView.setIconified(false);
+            
+            // منع إغلاق البحث عند النقر خارجها
+            searchView.setOnSearchClickListener(v -> {
+                searchView.setIconified(false);
+            });
+            
+            // منع إغلاق البحث عند فقدان التركيز
+            searchView.setOnQueryTextFocusChangeListener((v, hasFocus) -> {
+                if (!hasFocus) {
+                    // عند فقدان التركيز، نمنع إغلاق البحث
+                    searchView.setIconified(false);
+                }
+            });
+            
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String query) { return true; }
@@ -194,13 +212,6 @@ public class TransactionsFragment extends Fragment {
                 // إعادة تحميل البيانات بالتواريخ المحددة (السلوك القديم)
                 viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
                 return false;
-            });
-            
-            // منع الإغلاق التلقائي عند فقدان التركيز (إغلاق الكيبورد فقط)
-            searchView.setOnQueryTextFocusChangeListener((v, hasFocus) -> {
-                if (!hasFocus && !searchView.isIconified()) {
-                    v.post(() -> searchView.requestFocus());
-                }
             });
         }
         super.onCreateOptionsMenu(menu, inflater);
