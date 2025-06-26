@@ -44,7 +44,7 @@ import com.hillal.acc.data.repository.AccountRepository;
 import com.hillal.acc.ui.transactions.TransactionViewModelFactory;
 import com.hillal.acc.data.remote.RetrofitClient;
 import com.hillal.acc.data.remote.ApiService;
-import com.hillal.acc.ui.common.AccountPickerDialog;
+import com.hillal.acc.ui.common.AccountPickerBottomSheet;
 import com.hillal.acc.data.preferences.UserPreferences;
 import com.google.android.material.appbar.MaterialToolbar;
 
@@ -363,9 +363,7 @@ public class TransactionsFragment extends Fragment {
             Toast.makeText(requireContext(), "جاري تحميل الحسابات...", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        AccountPickerDialog dialog = new AccountPickerDialog(
-            requireContext(),
+        AccountPickerBottomSheet bottomSheet = new AccountPickerBottomSheet(
             allAccounts,
             allTransactions,
             accountBalancesMap,
@@ -375,7 +373,7 @@ public class TransactionsFragment extends Fragment {
                 applyAllFilters();
             }
         );
-        dialog.show();
+        bottomSheet.show(getParentFragmentManager(), "AccountPicker");
     }
 
     private void setupDateFilter() {
