@@ -1,6 +1,5 @@
 package com.hillal.acc.ui.settings;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +14,7 @@ import com.hillal.acc.databinding.FragmentSettingsBinding;
 import com.hillal.acc.viewmodel.SettingsViewModel;
 import com.hillal.acc.data.room.AppDatabase;
 import com.hillal.acc.data.security.EncryptionManager;
+import java.io.File;
 import java.util.concurrent.Executors;
 
 public class SettingsFragment extends Fragment {
@@ -46,7 +46,6 @@ public class SettingsFragment extends Fragment {
     }
 
     private void setupUI() {
-        // إعدادات أخرى
         setupOtherSettings();
     }
 
@@ -75,21 +74,30 @@ public class SettingsFragment extends Fragment {
         });
     }
 
-    // تسجيل الخروج بشكل آمن في خيط خلفي
     private void performLogout() {
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
-                // حذف جميع بيانات قاعدة البيانات المحلية
+                // 1. حذف جميع بيانات قاعدة البيانات
                 db.clearAllTables();
 
-                // بعد الانتهاء من حذف البيانات، ننفذ باقي العمليات على الـ UI Thread
-                requireActivity().runOnUiThread(() -> {
-                    // مسح جميع SharedPreferences
-                    requireContext().getSharedPreferences("auth_prefs", 0).edit().clear().apply();
-                    requireContext().getSharedPreferences("user_prefs", 0).edit().clear().apply();
-                    requireContext().getSharedPreferences("app_settings", 0).edit().clear().apply();
+                // 2. حذف جميع SharedPreferences تلقائياً لأي اسم (بما فيها user_preferences)
+                File sharedPrefsDir = new File(requireContext().getApplicationInfo().dataDir, "shared_prefs");
+                if (sharedPrefsDir.exists() && sharedPrefsDir.isDirectory()) {
+                    File[] files = sharedPrefsDir.listFiles();
+                    if (files != null) {
+                        for (File file : files) {
+                            String fileName = file.getName();
+                            if (fileName.endsWith(".xml")) {
+                                String prefName = fileName.substring(0, fileName.length() - 4);
+                                requireContext().getSharedPreferences(prefName, 0).edit().clear().apply();
+                            }
+                        }
+                    }
+                }
 
-                    // إغلاق التطبيق نهائياً
+                // 3. إغلاق التطبيق نهائياً على الـ UI Thread
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "تم تسجيل الخروج بنجاح", Toast.LENGTH_SHORT).show();
                     requireActivity().finishAffinity();
                     System.exit(0);
                 });
@@ -102,7 +110,6 @@ public class SettingsFragment extends Fragment {
     }
 
     private void setupOtherSettings() {
-        // هنا يمكن إضافة إعدادات أخرى
         binding.buttonPrivacyPolicy.setOnClickListener(v -> {
             String url = "https://malyp.com/api/privacy-policy";
             startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url)));
