@@ -13,7 +13,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#F8F8F8">
+            android:background="#FFFFFF">
 
             <!-- الدائرة العلوية والشعار والعنوان -->
             <View
@@ -45,7 +45,7 @@
                 android:text="إدارة الحسابات"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                android:textColor="#152FD9"
+                android:textColor="#1976D2"
                 android:layout_gravity="center"
                 android:layout_marginTop="12dp" />
 
@@ -54,7 +54,7 @@
                 android:layout_height="wrap_content"
                 android:text="عرض وإدارة جميع الحسابات"
                 android:textSize="14sp"
-                android:textColor="#666"
+                android:textColor="#666666"
                 android:layout_gravity="center"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="16dp" />
@@ -88,14 +88,21 @@
                         app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusBottomStart="12dp"
                         app:boxCornerRadiusBottomEnd="12dp"
-                        android:layout_marginBottom="12dp">
+                        android:layout_marginBottom="12dp"
+                        app:hintTextColor="#666666"
+                        app:boxStrokeColor="#1976D2"
+                        android:background="#FFFFFF"
+                        style="@style/SearchTextInputLayout">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/search_edit_text"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="text"
-                            android:maxLines="1" />
+                            android:maxLines="1"
+                            android:textColor="#000000"
+                            android:textColorHint="#666666"
+                            android:background="#FFFFFF" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -158,7 +165,7 @@
                     app:cardElevation="2dp"
                     android:layout_marginStart="8dp"
                     android:layout_marginEnd="4dp"
-                    app:cardBackgroundColor="#E3F9F1">
+                    app:cardBackgroundColor="#FFFFFF">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -170,13 +177,13 @@
                             android:layout_height="wrap_content"
                             android:text="0"
                             android:textStyle="bold"
-                            android:textColor="#152FD9"
+                            android:textColor="#1976D2"
                             android:textSize="16sp" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="إجمالي الحسابات"
-                            android:textColor="#666"
+                            android:textColor="#666666"
                             android:textSize="10sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -189,7 +196,7 @@
                     app:cardElevation="2dp"
                     android:layout_marginStart="4dp"
                     android:layout_marginEnd="8dp"
-                    app:cardBackgroundColor="#E3E8FD">
+                    app:cardBackgroundColor="#FFFFFF">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -201,13 +208,13 @@
                             android:layout_height="wrap_content"
                             android:text="0"
                             android:textStyle="bold"
-                            android:textColor="#152FD9"
+                            android:textColor="#1976D2"
                             android:textSize="16sp" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="الحسابات النشطة"
-                            android:textColor="#666"
+                            android:textColor="#666666"
                             android:textSize="10sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
