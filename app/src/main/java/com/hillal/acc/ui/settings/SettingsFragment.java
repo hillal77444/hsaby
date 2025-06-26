@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -14,6 +15,7 @@ import com.hillal.acc.databinding.FragmentSettingsBinding;
 import com.hillal.acc.viewmodel.SettingsViewModel;
 import com.hillal.acc.data.room.AppDatabase;
 import com.hillal.acc.data.security.EncryptionManager;
+import java.util.concurrent.Executors;
 
 public class SettingsFragment extends Fragment {
     private FragmentSettingsBinding binding;
@@ -73,18 +75,30 @@ public class SettingsFragment extends Fragment {
         });
     }
 
+    // تسجيل الخروج بشكل آمن في خيط خلفي
     private void performLogout() {
-        // حذف قاعدة البيانات المحلية
-        db.clearAllTables();
+        Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                // حذف جميع بيانات قاعدة البيانات المحلية
+                db.clearAllTables();
 
-        // مسح جميع SharedPreferences
-        requireContext().getSharedPreferences("auth_prefs", 0).edit().clear().apply();
-        requireContext().getSharedPreferences("user_prefs", 0).edit().clear().apply();
-        requireContext().getSharedPreferences("app_settings", 0).edit().clear().apply();
+                // بعد الانتهاء من حذف البيانات، ننفذ باقي العمليات على الـ UI Thread
+                requireActivity().runOnUiThread(() -> {
+                    // مسح جميع SharedPreferences
+                    requireContext().getSharedPreferences("auth_prefs", 0).edit().clear().apply();
+                    requireContext().getSharedPreferences("user_prefs", 0).edit().clear().apply();
+                    requireContext().getSharedPreferences("app_settings", 0).edit().clear().apply();
 
-        // إغلاق التطبيق نهائياً
-        requireActivity().finishAffinity();
-        System.exit(0);
+                    // إغلاق التطبيق نهائياً
+                    requireActivity().finishAffinity();
+                    System.exit(0);
+                });
+            } catch (Exception e) {
+                requireActivity().runOnUiThread(() ->
+                    Toast.makeText(requireContext(), "حدث خطأ أثناء تسجيل الخروج", Toast.LENGTH_SHORT).show()
+                );
+            }
+        });
     }
 
     private void setupOtherSettings() {
