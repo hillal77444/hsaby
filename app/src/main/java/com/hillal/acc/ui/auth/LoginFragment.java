@@ -18,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.activity.OnBackPressedCallback;
 
 import com.hillal.acc.R;
 import com.hillal.acc.databinding.FragmentLoginBinding;
@@ -188,6 +189,17 @@ public class LoginFragment extends Fragment {
                     .setPositiveButton("حسناً", null)
                     .show();
         });
+
+        // إغلاق التطبيق عند الضغط على زر الرجوع في صفحة تسجيل الدخول
+        requireActivity().getOnBackPressedDispatcher().addCallback(
+            getViewLifecycleOwner(),
+            new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    requireActivity().finishAffinity();
+                }
+            }
+        );
     }
 
     @Override
