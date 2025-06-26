@@ -80,7 +80,7 @@ public class SettingsFragment extends Fragment {
                 // 1. حذف جميع بيانات قاعدة البيانات
                 db.clearAllTables();
 
-                // 2. حذف جميع SharedPreferences تلقائياً لأي اسم (بما فيها user_preferences)
+                // 2. حذف جميع SharedPreferences تلقائياً لأي اسم (بما فيها security_prefs و backup_prefs)
                 File sharedPrefsDir = new File(requireContext().getApplicationInfo().dataDir, "shared_prefs");
                 if (sharedPrefsDir.exists() && sharedPrefsDir.isDirectory()) {
                     File[] files = sharedPrefsDir.listFiles();
@@ -89,14 +89,14 @@ public class SettingsFragment extends Fragment {
                             String fileName = file.getName();
                             if (fileName.endsWith(".xml")) {
                                 String prefName = fileName.substring(0, fileName.length() - 4);
-                                requireContext().getSharedPreferences("auth_prefs", 0).edit().clear().apply();
-requireContext().getSharedPreferences("user_prefs", 0).edit().clear().apply();
-requireContext().getSharedPreferences("app_settings", 0).edit().clear().apply();
-requireContext().getSharedPreferences("user_preferences", 0).edit().clear().apply();
+                                requireContext().getSharedPreferences(prefName, 0).edit().clear().apply();
                             }
                         }
                     }
                 }
+                // تأكيد مسح security_prefs و backup_prefs حتى لو لم تكن موجودة في shared_prefs
+                requireContext().getSharedPreferences("security_prefs", 0).edit().clear().apply();
+                requireContext().getSharedPreferences("backup_prefs", 0).edit().clear().apply();
 
                 // 3. إغلاق التطبيق نهائياً على الـ UI Thread
                 requireActivity().runOnUiThread(() -> {
