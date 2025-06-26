@@ -1,5 +1,6 @@
 package com.hillal.acc.ui.settings;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import com.hillal.acc.data.room.AppDatabase;
 import com.hillal.acc.data.security.EncryptionManager;
 import java.io.File;
 import java.util.concurrent.Executors;
+import android.content.SharedPreferences;
 
 public class SettingsFragment extends Fragment {
     private FragmentSettingsBinding binding;
@@ -80,8 +82,9 @@ public class SettingsFragment extends Fragment {
                 // 1. حذف جميع بيانات قاعدة البيانات
                 db.clearAllTables();
 
-                // 2. حذف جميع SharedPreferences تلقائياً لأي اسم (بما فيها security_prefs و backup_prefs)
-                File sharedPrefsDir = new File(requireContext().getApplicationInfo().dataDir, "shared_prefs");
+                // 2. حذف جميع SharedPreferences تلقائياً لأي اسم (بما فيها security_prefs و backup_prefs) باستخدام Application Context
+                Context appContext = requireContext().getApplicationContext();
+                File sharedPrefsDir = new File(appContext.getApplicationInfo().dataDir, "shared_prefs");
                 if (sharedPrefsDir.exists() && sharedPrefsDir.isDirectory()) {
                     File[] files = sharedPrefsDir.listFiles();
                     if (files != null) {
@@ -89,25 +92,31 @@ public class SettingsFragment extends Fragment {
                             String fileName = file.getName();
                             if (fileName.endsWith(".xml")) {
                                 String prefName = fileName.substring(0, fileName.length() - 4);
-                                requireContext().getSharedPreferences(prefName, 0).edit().clear().apply();
+                                appContext.getSharedPreferences(prefName, 0).edit().clear().commit();
                             }
                         }
                     }
                 }
                 // تأكيد مسح security_prefs و backup_prefs حتى لو لم تكن موجودة في shared_prefs
-                requireContext().getSharedPreferences("security_prefs", 0).edit().clear().apply();
-                requireContext().getSharedPreferences("backup_prefs", 0).edit().clear().apply();
+                appContext.getSharedPreferences("security_prefs", 0).edit().clear().commit();
+                appContext.getSharedPreferences("backup_prefs", 0).edit().clear().commit();
 
-                // حذف التوكن من auth_prefs بشكل صريح
-                requireContext().getSharedPreferences("auth_prefs", 0).edit().remove("token").apply();
-                // تحقق لوج أن التوكن أصبح null
-                android.util.Log.d("Logout", "Token after clear: " + requireContext().getSharedPreferences("auth_prefs", 0).getString("token", null));
+                // حذف التوكن وكل القيم من auth_prefs بشكل صريح وباستخدام commit
+                appContext.getSharedPreferences("auth_prefs", 0).edit().clear().commit();
+                // تحقق Log أن جميع القيم أصبحت null أو -1
+                SharedPreferences prefs = appContext.getSharedPreferences("auth_prefs", 0);
+                android.util.Log.d("Logout", "token=" + prefs.getString("token", null) +
+                        ", user_id=" + prefs.getLong("user_id", -1) +
+                        ", username=" + prefs.getString("username", null) +
+                        ", phone=" + prefs.getString("phone", null));
 
-                // 3. إغلاق التطبيق نهائياً على الـ UI Thread
+                // 3. إغلاق التطبيق بعد تأخير بسيط
                 requireActivity().runOnUiThread(() -> {
                     Toast.makeText(requireContext(), "تم تسجيل الخروج بنجاح", Toast.LENGTH_SHORT).show();
-                    requireActivity().finishAffinity();
-                    System.exit(0);
+                    new android.os.Handler().postDelayed(() -> {
+                        requireActivity().finishAffinity();
+                        System.exit(0);
+                    }, 300); // تأخير 300 مللي ثانية
                 });
             } catch (Exception e) {
                 requireActivity().runOnUiThread(() ->
