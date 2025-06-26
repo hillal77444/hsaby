@@ -671,7 +671,7 @@ def calculate_and_notify_transaction(transaction_id):
         transaction_type = "قيدنا الى حسابكم" if transaction.type == 'credit' else "قيدنا على حسابكم"
         balance_text = f"الرصيد لكم: {balance:g} {transaction.currency or 'ريال'}" if balance >= 0 else f"الرصيد عليكم: {abs(balance):g} {transaction.currency or 'ريال'}"
         message = f"""
-🏦 إشعار قيد جديدة
+🏦 إشعار قيد جديد
 
 🏛️ الاخ/: *{account.account_name}*
 🔢 رقم الحساب: *{account.server_id}*
@@ -686,7 +686,8 @@ def calculate_and_notify_transaction(transaction_id):
 
 📄 كشف الحساب : {statement_link}
 
-تم الإرسال بواسطة: *{user.username}*
+تم الإرسال بواسطة: 
+*{user.username}*
         """.strip()
 
         # تنسيق رقم الهاتف
@@ -725,7 +726,6 @@ def calculate_and_notify_transaction(transaction_id):
     except Exception as e:
         logger.error(f"Error in calculate_and_notify_transaction: {str(e)}")
         return {'status': 'error', 'message': str(e)}
-
 @admin.route('/api/admin/account/<int:account_id>/statement')
 def account_statement(account_id):
     # جلب معلومات الحساب
@@ -830,6 +830,7 @@ def account_statement(account_id):
                          default_to_date=default_to_date,
                          previous_balance=previous_balance)
 
+
 def send_transaction_update_notification(transaction_id, old_amount, old_date):
     try:
         # جلب المعاملة والحساب
@@ -873,7 +874,7 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
 
         # تنسيق الرسالة
         transaction_type = "قيدنا الى حسابكم" if transaction.type == 'credit' else "قيدنا على حسابكم"
-        balance_text = f"الرصيد لكم: {balance:g} {transaction.currency or 'ريال'}" if balance >= 0 else f"الرصيد عليكم: {abs(balance):g} {transaction.currency or 'ريال'}"
+        balance_text = f"الرصيد لكم: {balance} {transaction.currency or 'ريال'}" if balance >= 0 else f"الرصيد عليكم: {abs(balance)} {transaction.currency or 'ريال'}"
         
         # تنسيق التاريخ القديم والجديد
         old_date_str = old_date.strftime('%Y-%m-%d')
@@ -882,7 +883,7 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
         # تحديد نوع التغيير
         changes = []
         if old_amount != transaction.amount:
-            changes.append(f"• المبلغ: من {old_amount:g} الى {transaction.amount:g} {transaction.currency or 'ريال'}")
+            changes.append(f"• المبلغ: من {old_amount} الى {transaction.amount} {transaction.currency or 'ريال'}")
         if old_date != transaction_date:
             changes.append(f"• التاريخ: من {old_date_str} الى {new_date_str}")
         
@@ -963,7 +964,7 @@ def send_transaction_delete_notification(transaction, final_balance):
 
         # تنسيق الرسالة
         transaction_type = "قيدنا الى حسابكم" if transaction.type == 'credit' else "قيدنا على حسابكم"
-        balance_text = f"الرصيد لكم: {final_balance:g} {transaction.currency or 'ريال'}" if final_balance >= 0 else f"الرصيد عليكم: {abs(final_balance):g} {transaction.currency or 'ريال'}"
+        balance_text = f"الرصيد لكم: {final_balance} {transaction.currency or 'ريال'}" if final_balance >= 0 else f"الرصيد عليكم: {abs(final_balance)} {transaction.currency or 'ريال'}"
         
         message = f"""
 🏦 إشعار حذف قيد
@@ -974,7 +975,7 @@ def send_transaction_delete_notification(transaction, final_balance):
 
 💰 تفاصيل القيد المحذوف:
 • نوع القيد: {transaction_type}
-• المبلغ: {transaction.amount:g} {transaction.currency or 'ريال'}
+• المبلغ: {transaction.amount} {transaction.currency or 'ريال'}
 • الوصف: {transaction.description or 'لا يوجد وصف'}
 • التاريخ: {transaction.date.strftime('%Y-%m-%d')}
 
