@@ -12,34 +12,37 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.hillal.acc.R;
-import com.hillal.acc.data.backup.BackupManager;
 import com.hillal.acc.data.security.EncryptionManager;
 import com.hillal.acc.databinding.FragmentSettingsBinding;
 import com.hillal.acc.viewmodel.SettingsViewModel;
 import com.hillal.acc.data.room.AppDatabase;
+import com.hillal.acc.data.repository.AuthRepository;
+import com.hillal.acc.App;
 
 public class SettingsFragment extends Fragment {
     private static final String TAG = "SettingsFragment";
     private FragmentSettingsBinding binding;
     private SettingsViewModel settingsViewModel;
     private SharedPreferences sharedPreferences;
-    private BackupManager backupManager;
     private EncryptionManager encryptionManager;
     private AppDatabase db;
+    private AuthRepository authRepository;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         settingsViewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
-        backupManager = new BackupManager(requireContext());
         db = AppDatabase.getInstance(requireContext());
         encryptionManager = new EncryptionManager(requireContext());
         sharedPreferences = requireContext().getSharedPreferences("app_settings", 0);
+        authRepository = new AuthRepository(requireActivity().getApplication());
     }
 
     @Nullable
@@ -63,37 +66,8 @@ public class SettingsFragment extends Fragment {
     }
 
     private void setupViews() {
-        setupBackupSettings();
         setupSecuritySettings();
-    }
-
-    private void setupBackupSettings() {
-        binding.switchAutoBackup.setChecked(backupManager.isAutoBackupEnabled());
-        binding.switchAutoBackup.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            backupManager.enableAutoBackup(isChecked);
-            Toast.makeText(getContext(), 
-                isChecked ? R.string.msg_backup_enabled : R.string.msg_backup_disabled, 
-                Toast.LENGTH_SHORT).show();
-        });
-
-        binding.buttonBackupNow.setOnClickListener(v -> {
-            backupManager.createBackup(new BackupManager.BackupCallback() {
-                @Override
-                public void onSuccess(String backupPath) {
-                    Toast.makeText(getContext(), R.string.msg_backup_success, Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onError(String error) {
-                    Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
-
-        binding.buttonRestore.setOnClickListener(v -> {
-            // TODO: Implement file picker for backup selection
-            Toast.makeText(getContext(), R.string.msg_restore_not_implemented, Toast.LENGTH_SHORT).show();
-        });
+        setupLogoutButton();
     }
 
     private void setupSecuritySettings() {
@@ -104,6 +78,50 @@ public class SettingsFragment extends Fragment {
                 isChecked ? R.string.msg_encryption_enabled : R.string.msg_encryption_disabled, 
                 Toast.LENGTH_SHORT).show();
         });
+    }
+
+    private void setupLogoutButton() {
+        binding.buttonLogout.setOnClickListener(v -> {
+            new AlertDialog.Builder(requireContext())
+                .setTitle("تأكيد تسجيل الخروج")
+                .setMessage("هل أنت متأكد من تسجيل الخروج؟ سيتم حذف جميع البيانات المحلية.")
+                .setPositiveButton("نعم", (dialog, which) -> {
+                    performLogout();
+                })
+                .setNegativeButton("لا", null)
+                .show();
+        });
+    }
+
+    private void performLogout() {
+        try {
+            // حذف قاعدة البيانات المحلية
+            db.clearAllTables();
+            
+            // تسجيل الخروج من AuthRepository
+            authRepository.logout();
+            
+            // مسح جميع SharedPreferences
+            SharedPreferences authPrefs = requireContext().getSharedPreferences("auth_prefs", 0);
+            SharedPreferences userPrefs = requireContext().getSharedPreferences("user_prefs", 0);
+            SharedPreferences appSettings = requireContext().getSharedPreferences("app_settings", 0);
+            
+            authPrefs.edit().clear().apply();
+            userPrefs.edit().clear().apply();
+            appSettings.edit().clear().apply();
+            
+            Toast.makeText(requireContext(), "تم تسجيل الخروج بنجاح", Toast.LENGTH_SHORT).show();
+            
+            // إغلاق النشاط الرئيسي وإعادة تشغيله من صفحة تسجيل الدخول
+            Intent intent = new Intent(requireContext(), com.hillal.acc.MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            requireActivity().finish();
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error during logout", e);
+            Toast.makeText(requireContext(), "حدث خطأ أثناء تسجيل الخروج", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setupOtherSettings() {
