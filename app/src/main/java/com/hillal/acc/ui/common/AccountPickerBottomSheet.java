@@ -104,13 +104,9 @@ public class AccountPickerBottomSheet extends BottomSheetDialogFragment {
         super.onStart();
         View view = getView();
         if (view != null) {
-            View parent = (View) view.getParent();
-            if (parent != null) {
-                parent.setBackgroundResource(android.R.color.transparent);
-                int height = requireContext().getResources().getDisplayMetrics().heightPixels;
-                parent.getLayoutParams().height = height;
-                parent.requestLayout();
-            }
+            ViewGroup.LayoutParams params = view.getLayoutParams();
+            params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            view.setLayoutParams(params);
         }
     }
 
