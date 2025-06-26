@@ -98,6 +98,11 @@ public class SettingsFragment extends Fragment {
                 requireContext().getSharedPreferences("security_prefs", 0).edit().clear().apply();
                 requireContext().getSharedPreferences("backup_prefs", 0).edit().clear().apply();
 
+                // حذف التوكن من auth_prefs بشكل صريح
+                requireContext().getSharedPreferences("auth_prefs", 0).edit().remove("token").apply();
+                // تحقق لوج أن التوكن أصبح null
+                android.util.Log.d("Logout", "Token after clear: " + requireContext().getSharedPreferences("auth_prefs", 0).getString("token", null));
+
                 // 3. إغلاق التطبيق نهائياً على الـ UI Thread
                 requireActivity().runOnUiThread(() -> {
                     Toast.makeText(requireContext(), "تم تسجيل الخروج بنجاح", Toast.LENGTH_SHORT).show();
