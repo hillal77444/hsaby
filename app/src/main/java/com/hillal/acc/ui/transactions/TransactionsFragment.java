@@ -195,13 +195,6 @@ public class TransactionsFragment extends Fragment {
                 viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
                 return false;
             });
-            
-            // منع الإغلاق التلقائي عند فقدان التركيز (إغلاق الكيبورد فقط)
-            searchView.setOnQueryTextFocusChangeListener((v, hasFocus) -> {
-                if (!hasFocus && !searchView.isIconified()) {
-                    v.post(() -> searchView.requestFocus());
-                }
-            });
         }
         super.onCreateOptionsMenu(menu, inflater);
     }
