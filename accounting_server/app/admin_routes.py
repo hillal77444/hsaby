@@ -1357,9 +1357,7 @@ def accounts_data():
             db.or_(
                 Account.account_name.ilike(like),
                 Account.phone_number.ilike(like),
-                User.username.ilike(like),
-                Account.currency.ilike(like),
-                Account.notes.ilike(like)
+                User.username.ilike(like)
             )
         )
     records_total = db.session.query(func.count(Account.id)).scalar()
