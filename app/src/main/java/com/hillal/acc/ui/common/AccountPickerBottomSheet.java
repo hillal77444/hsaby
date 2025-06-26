@@ -1,19 +1,23 @@
 package com.hillal.acc.ui.common;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.hillal.acc.R;
 import com.hillal.acc.data.model.Account;
 import com.hillal.acc.data.model.Transaction;
@@ -24,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AccountPickerBottomSheet extends BottomSheetDialogFragment {
+public class AccountPickerBottomSheet extends DialogFragment {
     private List<Account> allAccounts = new ArrayList<>();
     private List<Transaction> allTransactions = new ArrayList<>();
     private Map<Long, Map<String, Double>> accountBalancesMap = new HashMap<>();
@@ -102,16 +106,15 @@ public class AccountPickerBottomSheet extends BottomSheetDialogFragment {
     @Override
     public void onStart() {
         super.onStart();
-        View view = getView();
-        if (view != null) {
-            ViewGroup.LayoutParams params = view.getLayoutParams();
-            params.height = ViewGroup.LayoutParams.MATCH_PARENT;
-            view.setLayoutParams(params);
+        Dialog dialog = getDialog();
+        if (dialog != null && dialog.getWindow() != null) {
+            Window window = dialog.getWindow();
+            window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            window.setGravity(Gravity.BOTTOM);
+            window.setBackgroundDrawableResource(android.R.color.white);
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.windowAnimations = R.style.DialogAnimation_SlideUp;
+            window.setAttributes(params);
         }
-    }
-
-    @Override
-    public int getTheme() {
-        return R.style.BottomSheetDialogTheme_FullScreen;
     }
 } 
