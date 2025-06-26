@@ -37,7 +37,7 @@ import com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePick
 import com.hillal.acc.data.repository.TransactionRepository;
 import com.hillal.acc.data.room.AppDatabase;
 import com.hillal.acc.App;
-import com.hillal.acc.ui.common.AccountPickerDialog;
+import com.hillal.acc.ui.common.AccountPickerBottomSheet;
 import com.hillal.acc.ui.transactions.TransactionsViewModel;
 
 import java.text.SimpleDateFormat;
@@ -243,8 +243,7 @@ public class AccountStatementActivity extends AppCompatActivity {
             Toast.makeText(this, "جاري تحميل الحسابات...", Toast.LENGTH_SHORT).show();
             return;
         }
-        AccountPickerDialog dialog = new AccountPickerDialog(
-            this,
+        AccountPickerBottomSheet bottomSheet = new AccountPickerBottomSheet(
             allAccounts,
             allTransactions,
             accountBalancesMap,
@@ -254,7 +253,7 @@ public class AccountStatementActivity extends AppCompatActivity {
                 onAccountSelected(account);
             }
         );
-        dialog.show();
+        bottomSheet.show(getSupportFragmentManager(), "AccountPicker");
     }
 
     private void onAccountSelected(Account account) {
