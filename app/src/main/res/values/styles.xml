@@ -114,4 +114,13 @@
         <item name="android:textColorHint">@color/hint_gray</item>
         <item name="android:background">#FFFFFF</item>
     </style>
+
+    <style name="BottomSheetDialogTheme.FullScreen" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/BottomSheetStyle.FullScreen</item>
+    </style>
+
+    <style name="BottomSheetStyle.FullScreen" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">@android:color/white</item>
+    </style>
 </resources> 
