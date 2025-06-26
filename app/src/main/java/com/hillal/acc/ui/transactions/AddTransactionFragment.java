@@ -214,58 +214,16 @@ public class AddTransactionFragment extends Fragment {
             Toast.makeText(requireContext(), "جاري تحميل الحسابات...", Toast.LENGTH_SHORT).show();
             return;
         }
-        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
-        View sheetView = getLayoutInflater().inflate(R.layout.bottomsheet_account_picker, null);
-        dialog.setContentView(sheetView);
-        
-        // تعديل إعدادات الـ BottomSheetDialog
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-        }
-        
-        EditText searchEditText = sheetView.findViewById(R.id.searchEditText);
-        RecyclerView accountsRecyclerView = sheetView.findViewById(R.id.accountsRecyclerView);
-        accountsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-
-        Map<Long, List<Transaction>> accountTxMap = new HashMap<>();
-        for (Transaction t : allTransactions) {
-            if (!accountTxMap.containsKey(t.getAccountId())) accountTxMap.put(t.getAccountId(), new ArrayList<>());
-            accountTxMap.get(t.getAccountId()).add(t);
-        }
-        AccountPickerAdapter adapter = new AccountPickerAdapter(requireContext(), allAccounts, accountTxMap, account -> {
-            binding.accountAutoComplete.setText(account.getName());
-            selectedAccountId = account.getId();
-            dialog.dismiss();
-        });
-        adapter.setBalancesMap(accountBalancesMap);
-        accountsRecyclerView.setAdapter(adapter);
-
-        // مراقبة تحديث الأرصدة أثناء فتح الصفحة
-        transactionsViewModel.getAccountBalancesMap().observe(getViewLifecycleOwner(), balancesMap -> {
-            adapter.setBalancesMap(balancesMap != null ? balancesMap : new HashMap<>());
-            adapter.notifyDataSetChanged();
-        });
-
-        // البحث
-        searchEditText.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                String query = s.toString().trim();
-                if (query.isEmpty()) {
-                    adapter.updateList(allAccounts);
-                } else {
-                    List<Account> filtered = new ArrayList<>();
-                    for (Account acc : allAccounts) {
-                        if (acc.getName() != null && acc.getName().contains(query)) {
-                            filtered.add(acc);
-                        }
-                    }
-                    adapter.updateList(filtered);
-                }
+        AccountPickerBottomSheet bottomSheet = new AccountPickerBottomSheet(
+            allAccounts,
+            allTransactions,
+            accountBalancesMap,
+            account -> {
+                binding.accountAutoComplete.setText(account.getName());
+                selectedAccountId = account.getId();
             }
-            @Override public void afterTextChanged(Editable s) {}
-        });
-        dialog.show();
+        );
+        bottomSheet.show(getParentFragmentManager(), "AccountPicker");
     }
 
     private void loadAllTransactions() {
