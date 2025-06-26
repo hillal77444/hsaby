@@ -19,33 +19,14 @@
             android:textStyle="bold"
             android:layout_marginBottom="16dp"/>
 
-        <!-- النسخ الاحتياطي -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/settings_backup"
-            android:textAppearance="?attr/textAppearanceHeadline6"
-            android:layout_marginBottom="16dp"/>
-
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switchAutoBackup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/settings_auto_backup"
-            android:layout_marginBottom="8dp"/>
-
+        <!-- زر تسجيل الخروج في الأعلى -->
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonBackupNow"
+            android:id="@+id/buttonLogout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/settings_backup_now"
-            android:layout_marginBottom="8dp"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonRestore"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/settings_restore"
+            android:text="تسجيل الخروج"
+            android:textColor="@android:color/white"
+            app:backgroundTint="@android:color/holo_red_dark"
             android:layout_marginBottom="24dp"/>
 
         <!-- الأمان -->
