@@ -76,7 +76,7 @@
     <!-- أنماط حقول الإدخال -->
     <style name="Widget.App.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="boxStrokeColor">@color/primary_blue</item>
-        <item name="hintTextColor">@color/primary_blue</item>
+        <item name="hintTextColor">@color/hint_gray</item>
         <item name="boxCornerRadiusTopStart">12dp</item>
         <item name="boxCornerRadiusTopEnd">12dp</item>
         <item name="boxCornerRadiusBottomStart">12dp</item>
@@ -85,16 +85,16 @@
 
     <style name="TextInputLayoutStyle" parent="Widget.App.TextInputLayout">
         <item name="boxStrokeColor">@color/primary_blue</item>
-        <item name="hintTextColor">@color/primary_blue</item>
+        <item name="hintTextColor">@color/hint_gray</item>
     </style>
 
     <style name="CustomTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="hintTextColor">#666666</item>
-        <item name="android:textColorHint">#666666</item>
+        <item name="hintTextColor">@color/hint_gray</item>
+        <item name="android:textColorHint">@color/hint_gray</item>
         <item name="boxStrokeColor">#1976D2</item>
         <item name="android:textColor">#000000</item>
-        <item name="helperTextTextColor">#666666</item>
-        <item name="counterTextColor">#666666</item>
+        <item name="helperTextTextColor">@color/hint_gray</item>
+        <item name="counterTextColor">@color/hint_gray</item>
         <item name="errorTextColor">#F44336</item>
         <item name="android:background">#FFFFFF</item>
     </style>
@@ -102,14 +102,14 @@
     <style name="SearchTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="android:background">#FFFFFF</item>
         <item name="boxBackgroundColor">#FFFFFF</item>
-        <item name="hintTextColor">#666666</item>
-        <item name="android:textColorHint">#666666</item>
+        <item name="hintTextColor">@color/hint_gray</item>
+        <item name="android:textColorHint">@color/hint_gray</item>
         <item name="boxStrokeColor">#1976D2</item>
     </style>
 
     <style name="CustomTextInputEditText" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
         <item name="android:textColor">#000000</item>
-        <item name="android:textColorHint">#666666</item>
+        <item name="android:textColorHint">@color/hint_gray</item>
         <item name="android:background">#FFFFFF</item>
     </style>
 </resources> 
