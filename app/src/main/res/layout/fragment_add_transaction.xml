@@ -89,7 +89,7 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/accountLayout"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        style="@style/CustomTextInputLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="اختر الحساب"
@@ -134,7 +134,7 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/amountLayout"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        style="@style/CustomTextInputLayout"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -156,7 +156,7 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/dateLayout"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        style="@style/CustomTextInputLayout"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -215,21 +215,24 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="ريال يمني" />
+                            android:text="ريال يمني"
+                            android:textColor="#1976D2" />
 
                         <RadioButton
                             android:id="@+id/radioSar"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="ريال سعودي" />
+                            android:text="ريال سعودي"
+                            android:textColor="#1976D2" />
 
                         <RadioButton
                             android:id="@+id/radioUsd"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="دولار أمريكي" />
+                            android:text="دولار أمريكي"
+                            android:textColor="#1976D2" />
                     </RadioGroup>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -253,7 +256,7 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/descriptionLayout"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        style="@style/CustomTextInputLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/description"
@@ -292,7 +295,7 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/notesLayout"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        style="@style/CustomTextInputLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/transaction_notes"
