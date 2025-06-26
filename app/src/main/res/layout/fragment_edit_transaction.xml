@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#F8F8F8">
+            android:background="#FFFFFF">
 
             <!-- رأس الصفحة -->
             <View
@@ -57,7 +57,7 @@
                 android:layout_height="wrap_content"
                 android:text="قم بتعديل تفاصيل القيد المحاسبي"
                 android:textSize="14sp"
-                android:textColor="#666"
+                android:textColor="#666666"
                 android:layout_gravity="center"
                 android:layout_marginTop="2dp"
                 android:layout_marginBottom="16dp" />
@@ -89,15 +89,17 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/accountLayout"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        style="@style/CustomTextInputLayout"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        app:boxBackgroundColor="#FFFFFF">
 
                         <AutoCompleteTextView
                             android:id="@+id/accountAutoComplete"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="none" />
+                            android:inputType="none"
+                            style="@style/CustomTextInputEditText" />
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -122,7 +124,7 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/amountLayout"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        style="@style/CustomTextInputLayout"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -135,12 +137,13 @@
                             android:layout_height="wrap_content"
                             android:inputType="numberDecimal"
                             android:drawableStart="@drawable/ic_money"
-                            android:drawablePadding="4dp"/>
+                            android:drawablePadding="4dp"
+                            style="@style/CustomTextInputEditText" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/dateLayout"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        style="@style/CustomTextInputLayout"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -154,7 +157,8 @@
                             android:focusable="false"
                             android:inputType="none"
                             android:drawableStart="@drawable/ic_calendar"
-                            android:drawablePadding="4dp"/>
+                            android:drawablePadding="4dp"
+                            style="@style/CustomTextInputEditText" />
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -195,14 +199,16 @@
                             android:id="@+id/radioDebit"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="عليه"/>
+                            android:text="عليه"
+                            android:textColor="#1976D2" />
 
                         <RadioButton
                             android:id="@+id/radioCredit"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
-                            android:text="له"/>
+                            android:text="له"
+                            android:textColor="#1976D2" />
 
                     </RadioGroup>
                 </LinearLayout>
@@ -244,21 +250,24 @@
                             android:id="@+id/radioYer"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="يمني"/>
+                            android:text="يمني"
+                            android:textColor="#1976D2" />
 
                         <RadioButton
                             android:id="@+id/radioSar"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
-                            android:text="سعودي"/>
+                            android:text="سعودي"
+                            android:textColor="#1976D2" />
 
                         <RadioButton
                             android:id="@+id/radioUsd"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
-                            android:text="دولار"/>
+                            android:text="دولار"
+                            android:textColor="#1976D2" />
 
                     </RadioGroup>
                 </LinearLayout>
@@ -283,7 +292,7 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/descriptionLayout"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        style="@style/CustomTextInputLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="الوصف">
@@ -293,7 +302,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textMultiLine"
-                            android:minLines="2" />
+                            android:minLines="2"
+                            style="@style/CustomTextInputEditText" />
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -318,7 +328,7 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/notesLayout"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        style="@style/CustomTextInputLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="الملاحظات">
@@ -328,7 +338,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textMultiLine"
-                            android:minLines="2" />
+                            android:minLines="2"
+                            style="@style/CustomTextInputEditText" />
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
