@@ -98,4 +98,19 @@ public class AccountPickerBottomSheet extends BottomSheetDialogFragment {
             public void afterTextChanged(Editable s) {}
         });
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        View view = getView();
+        if (view != null) {
+            View parent = (View) view.getParent();
+            if (parent != null) {
+                parent.setBackgroundResource(android.R.color.transparent);
+                int height = requireContext().getResources().getDisplayMetrics().heightPixels;
+                parent.getLayoutParams().height = height;
+                parent.requestLayout();
+            }
+        }
+    }
 } 
