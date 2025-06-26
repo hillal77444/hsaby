@@ -89,7 +89,10 @@ public class SettingsFragment extends Fragment {
                             String fileName = file.getName();
                             if (fileName.endsWith(".xml")) {
                                 String prefName = fileName.substring(0, fileName.length() - 4);
-                                requireContext().getSharedPreferences(prefName, 0).edit().clear().apply();
+                                requireContext().getSharedPreferences("auth_prefs", 0).edit().clear().apply();
+requireContext().getSharedPreferences("user_prefs", 0).edit().clear().apply();
+requireContext().getSharedPreferences("app_settings", 0).edit().clear().apply();
+requireContext().getSharedPreferences("user_preferences", 0).edit().clear().apply();
                             }
                         }
                     }
