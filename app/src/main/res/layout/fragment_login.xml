@@ -70,7 +70,7 @@
                     android:id="@+id/textInputLayoutPhone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="رقم الهاتف "
+                    android:hint="رقم التلفون "
                     app:endIconDrawable="@drawable/ic_check"
                     app:endIconMode="custom"
                     app:hintTextColor="#3F51B5"
