@@ -195,6 +195,16 @@ public class TransactionsFragment extends Fragment {
                 viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
                 return false;
             });
+            
+            // منع إغلاق SearchView عند فقدان التركيز (إغلاق الكيبورد)
+            searchView.setOnQueryTextFocusChangeListener((v, hasFocus) -> {
+                if (!hasFocus) {
+                    // عند فقدان التركيز، نحافظ على حالة البحث النشطة
+                    // ولا نسمح بإغلاق SearchView تلقائياً
+                    searchView.setIconified(false);
+                    searchView.setQuery(currentSearchText, false);
+                }
+            });
         }
         super.onCreateOptionsMenu(menu, inflater);
     }
