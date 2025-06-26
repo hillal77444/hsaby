@@ -325,7 +325,7 @@ public class TransactionsFragment extends Fragment {
                                         + typeText + " " + amountStr + " " + currency + "\n"
                                         + transaction.getDescription() + "\n"
                                         + balanceText + balanceStr + " " + currency;
-                                Intent smsIntent = new Intent(Intent.ACTION_VIEW);
+                                Intent smsIntent = new Intent(Intent.ACTION_SENDTO);
                                 smsIntent.setData(Uri.parse("smsto:" + phoneNumber));
                                 smsIntent.putExtra("sms_body", message);
                                 startActivity(smsIntent);
