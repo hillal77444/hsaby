@@ -134,6 +134,11 @@ public class TransactionsFragment extends Fragment {
         if (searchView != null) {
             searchView.setQueryHint("بحث في الوصف...");
             searchView.setMaxWidth(Integer.MAX_VALUE);
+            
+            // إعدادات إضافية لضمان نوع كيبورد ثابت
+            searchView.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_NORMAL);
+            searchView.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_DONE);
+            
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String query) { return true; }
