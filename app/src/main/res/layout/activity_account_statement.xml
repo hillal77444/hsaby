@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:background="#e3f0ff"
+    android:background="#FFFFFF"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -71,7 +71,10 @@
                     android:textSize="15sp"
                     android:inputType="none"
                     android:focusable="false"
-                    android:gravity="end|center_vertical"/>
+                    android:gravity="end|center_vertical"
+                    style="@style/CustomTextInputEditText"
+                    android:textColor="#000000"
+                    android:textColorHint="#666666"/>
 
                 <ImageButton
                     android:id="@+id/btnPrintInCard"
@@ -98,7 +101,7 @@
                     android:text="من"
                     android:gravity="center"
                     android:textSize="15sp"
-                    android:textColor="#333"
+                    android:textColor="#666666"
                     android:paddingHorizontal="4dp"/>
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -110,7 +113,10 @@
                     android:focusable="false"
                     android:gravity="center"
                     android:drawableStart="@drawable/ic_calendar"
-                    android:textSize="15sp"/>
+                    android:textSize="15sp"
+                    style="@style/CustomTextInputEditText"
+                    android:textColor="#000000"
+                    android:textColorHint="#666666"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -118,7 +124,7 @@
                     android:text="الى"
                     android:gravity="center"
                     android:textSize="15sp"
-                    android:textColor="#333"
+                    android:textColor="#666666"
                     android:paddingHorizontal="4dp"/>
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -130,7 +136,10 @@
                     android:focusable="false"
                     android:gravity="center"
                     android:drawableStart="@drawable/ic_calendar"
-                    android:textSize="15sp"/>
+                    android:textSize="15sp"
+                    style="@style/CustomTextInputEditText"
+                    android:textColor="#000000"
+                    android:textColorHint="#666666"/>
             </LinearLayout>
 
             <!-- أزرار العملات -->
@@ -151,6 +160,6 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="#fff"
+        android:background="#FFFFFF"
         android:layout_margin="8dp"/>
 </LinearLayout>
