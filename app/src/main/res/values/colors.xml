@@ -106,4 +106,7 @@
 
     <!-- جديدة من التعديل -->
     <color name="primary_text">#222222</color>
+
+    <!-- جديدة من التعديل -->
+    <color name="hint_gray">#666666</color>
 </resources>
