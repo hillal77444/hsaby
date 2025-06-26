@@ -55,7 +55,7 @@
                 android:layout_height="wrap_content"
                 android:text="يرجى تعبئة بيانات الحساب بدقة"
                 android:textSize="14sp"
-                android:textColor="#666"
+                android:textColor="#666666"
                 android:layout_gravity="center"
                 android:layout_marginTop="2dp"
                 android:layout_marginBottom="16dp" />
@@ -89,14 +89,19 @@
                         app:boxCornerRadiusTopStart="12dp"
                         app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp">
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:hintTextColor="#666666"
+                        app:boxStrokeColor="#1976D2"
+                        style="@style/CustomTextInputLayout">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/name_edit_text"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textPersonName"
-                            android:maxLines="1" />
+                            android:maxLines="1"
+                            android:textColor="#000000"
+                            android:textColorHint="#666666" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- الهاتف -->
@@ -118,14 +123,19 @@
                             app:boxCornerRadiusTopStart="12dp"
                             app:boxCornerRadiusTopEnd="12dp"
                             app:boxCornerRadiusBottomStart="12dp"
-                            app:boxCornerRadiusBottomEnd="12dp">
+                            app:boxCornerRadiusBottomEnd="12dp"
+                            app:hintTextColor="#666666"
+                            app:boxStrokeColor="#1976D2"
+                            style="@style/CustomTextInputLayout">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/phone_edit_text"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="phone"
-                                android:maxLines="1" />
+                                android:maxLines="1"
+                                android:textColor="#000000"
+                                android:textColorHint="#666666" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <com.google.android.material.button.MaterialButton
@@ -160,13 +170,18 @@
                         app:boxCornerRadiusTopStart="12dp"
                         app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp">
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:hintTextColor="#666666"
+                        app:boxStrokeColor="#1976D2"
+                        style="@style/CustomTextInputLayout">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/openingBalanceEditText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="numberDecimal" />
+                            android:inputType="numberDecimal"
+                            android:textColor="#000000"
+                            android:textColorHint="#666666" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- الملاحظات (مخفاة فقط) -->
@@ -182,14 +197,19 @@
                         app:boxCornerRadiusTopStart="12dp"
                         app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp">
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:hintTextColor="#666666"
+                        app:boxStrokeColor="#1976D2"
+                        style="@style/CustomTextInputLayout">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/notes_edit_text"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textMultiLine"
-                            android:minLines="3" />
+                            android:minLines="3"
+                            android:textColor="#000000"
+                            android:textColorHint="#666666" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- خيار واتساب -->
@@ -219,7 +239,7 @@
                             android:layout_marginTop="4dp"
                             android:text="سيتم إرسال إشعارات واتساب للعميل عند إضافة معاملات جديدة"
                             android:textSize="12sp"
-                            android:textColor="#757575" />
+                            android:textColor="#666666" />
                     </LinearLayout>
 
                     <!-- أزرار -->
