@@ -102,5 +102,16 @@ public class AccountPickerDialog {
         });
 
         dialog.show();
+
+        // حل مشكلة المساحة البيضاء فوق الكيبورد في بعض الأجهزة
+        dialog.setOnShowListener(d -> {
+            BottomSheetDialog bottomSheetDialog = (BottomSheetDialog) d;
+            android.widget.FrameLayout bottomSheet = bottomSheetDialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            if (bottomSheet != null) {
+                com.google.android.material.bottomsheet.BottomSheetBehavior<?> behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet);
+                behavior.setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
+                behavior.setSkipCollapsed(true);
+            }
+        });
     }
 } 
