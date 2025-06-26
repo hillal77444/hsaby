@@ -146,8 +146,42 @@ public class TransactionsFragment extends Fragment {
                         // عند إفراغ البحث، نعود للسلوك القديم
                         viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
                     } else {
-                        // عند البحث، نتجاهل التاريخ ونطبق الفلاتر الأخرى
-                        applyAllFilters();
+                        // عند البحث، نبحث في قاعدة البيانات مباشرة بالوصف
+                        viewModel.searchTransactionsByDescription("%" + query + "%").observe(getViewLifecycleOwner(), results -> {
+                            if (results != null) {
+                                // تطبيق فلتر الحساب فقط على النتائج
+                                List<Transaction> filtered = new ArrayList<>();
+                                double totalAmount = 0.0;
+                                
+                                for (Transaction t : results) {
+                                    boolean match = true;
+                                    
+                                    // فلترة الحساب فقط
+                                    if (selectedAccount != null && !selectedAccount.isEmpty()) {
+                                        Account account = null;
+                                        if (adapter != null && adapter.getAccountMap() != null) {
+                                            account = adapter.getAccountMap().get(t.getAccountId());
+                                        }
+                                        String accountName = (account != null) ? account.getName() : null;
+                                        if (accountName == null || !accountName.equals(selectedAccount)) {
+                                            match = false;
+                                        }
+                                    }
+                                    
+                                    if (match) {
+                                        filtered.add(t);
+                                        totalAmount += t.getAmount();
+                                    }
+                                }
+                                
+                                // تحديث الإحصائيات والقائمة
+                                binding.totalTransactionsText.setText(String.valueOf(filtered.size()));
+                                binding.totalAmountText.setText(String.format(Locale.ENGLISH, "%.2f", totalAmount));
+                                adapter.submitList(filtered);
+                                binding.transactionsRecyclerView.setVisibility(filtered.isEmpty() ? View.GONE : View.VISIBLE);
+                                binding.emptyView.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
+                            }
+                        });
                     }
                     return true;
                 }
@@ -157,7 +191,8 @@ public class TransactionsFragment extends Fragment {
             searchView.setOnCloseListener(() -> {
                 isSearchActive = false; // إعادة تعيين حالة البحث
                 currentSearchText = ""; // إفراغ نص البحث
-                applyAllFilters(); // إعادة تطبيق الفلاتر بالسلوك القديم
+                // إعادة تحميل البيانات بالتواريخ المحددة (السلوك القديم)
+                viewModel.loadTransactionsByDateRange(startDate.getTimeInMillis(), endDate.getTimeInMillis());
                 return false;
             });
             
@@ -561,20 +596,10 @@ public class TransactionsFragment extends Fragment {
                 if (accountName == null || !accountName.equals(selectedAccount)) match = false;
             }
             
-            // فلترة التاريخ - نتجاهلها فقط إذا كان البحث نشط
-            if (!isSearchActive) {
-                long transactionDate = t.getTransactionDate();
-                if (transactionDate < startTime || transactionDate > endTime) {
-                    match = false;
-                }
-            }
-            
-            // فلترة الوصف - نطبقها فقط إذا كان البحث نشط
-            if (isSearchActive && !currentSearchText.isEmpty()) {
-                String description = t.getDescription() != null ? t.getDescription().toLowerCase() : "";
-                if (!description.contains(currentSearchText)) {
-                    match = false;
-                }
+            // فلترة التاريخ
+            long transactionDate = t.getTransactionDate();
+            if (transactionDate < startTime || transactionDate > endTime) {
+                match = false;
             }
             
             if (match) {
