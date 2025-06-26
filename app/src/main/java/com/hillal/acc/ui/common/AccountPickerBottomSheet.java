@@ -113,4 +113,9 @@ public class AccountPickerBottomSheet extends BottomSheetDialogFragment {
             }
         }
     }
+
+    @Override
+    public int getTheme() {
+        return R.style.BottomSheetDialogTheme_FullScreen;
+    }
 } 
