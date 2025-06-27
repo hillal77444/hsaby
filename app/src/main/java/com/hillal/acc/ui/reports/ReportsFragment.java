@@ -10,8 +10,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.hillal.acc.R;
 import com.hillal.acc.data.model.Account;
@@ -28,7 +26,6 @@ import java.util.Locale;
 public class ReportsFragment extends Fragment {
     private AccountViewModel accountViewModel;
     private TransactionViewModel transactionViewModel;
-    private ReportAdapter reportAdapter;
     private TextView totalDebtorsText;
     private TextView totalCreditorsText;
     private TextView netBalanceText;
@@ -49,12 +46,6 @@ public class ReportsFragment extends Fragment {
         netBalanceText = view.findViewById(R.id.net_balance);
         totalTransactionsText = view.findViewById(R.id.total_transactions);
         averageTransactionText = view.findViewById(R.id.average_transaction);
-        
-        // Setup RecyclerView
-        RecyclerView recyclerView = view.findViewById(R.id.accounts_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        reportAdapter = new ReportAdapter();
-        recyclerView.setAdapter(reportAdapter);
         
         // ربط زر كشف الحساب التفصيلي
         MaterialButton viewAccountStatementButton = view.findViewById(R.id.viewAccountStatementButton);
