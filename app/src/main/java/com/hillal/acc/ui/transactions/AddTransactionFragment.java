@@ -37,6 +37,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import com.hillal.acc.ui.common.AccountPickerBottomSheet;
+import com.hillal.acc.ui.transactions.NotificationUtils;
+import com.hillal.acc.data.repository.TransactionRepository;
+import com.hillal.acc.App;
 
 public class AddTransactionFragment extends Fragment {
     private FragmentAddTransactionBinding binding;
@@ -49,6 +52,10 @@ public class AddTransactionFragment extends Fragment {
     private List<Account> allAccounts = new ArrayList<>();
     private List<Transaction> allTransactions = new ArrayList<>();
     private Map<Long, Map<String, Double>> accountBalancesMap = new HashMap<>();
+    private Transaction lastSavedTransaction = null;
+    private Account lastSavedAccount = null;
+    private double lastSavedBalance = 0.0;
+    private TransactionRepository transactionRepository;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,6 +63,8 @@ public class AddTransactionFragment extends Fragment {
         transactionsViewModel = new ViewModelProvider(this).get(TransactionsViewModel.class);
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
         userPreferences = new UserPreferences(requireContext());
+        App app = (App) requireActivity().getApplication();
+        transactionRepository = new TransactionRepository(app.getDatabase());
     }
 
     @Nullable
@@ -168,7 +177,6 @@ public class AddTransactionFragment extends Fragment {
         try {
             double amount = Double.parseDouble(amountStr);
 
-            // الحصول على معلومات الحساب
             accountViewModel.getAccountById(selectedAccountId).observe(getViewLifecycleOwner(), account -> {
                 if (account != null) {
                     Transaction transaction = new Transaction(
@@ -181,12 +189,18 @@ public class AddTransactionFragment extends Fragment {
                     transaction.setNotes(notes);
                     transaction.setTransactionDate(calendar.getTimeInMillis());
                     transaction.setUpdatedAt(System.currentTimeMillis());
-                    transaction.setServerId(-1); // تعيين serverId إلى -1 للمعاملات الجديدة
-                    transaction.setWhatsappEnabled(account.isWhatsappEnabled()); // تعيين حالة واتساب الحساب
+                    transaction.setServerId(-1);
+                    transaction.setWhatsappEnabled(account.isWhatsappEnabled());
 
                     transactionsViewModel.insertTransaction(transaction);
-                    Toast.makeText(requireContext(), R.string.transaction_saved, Toast.LENGTH_SHORT).show();
-                    Navigation.findNavController(requireView()).navigateUp();
+                    lastSavedTransaction = transaction;
+                    lastSavedAccount = account;
+                    // احسب الرصيد حتى تاريخ المعاملة
+                    transactionRepository.getBalanceUntilDate(selectedAccountId, transaction.getTransactionDate(), currency)
+                        .observe(getViewLifecycleOwner(), balance -> {
+                            lastSavedBalance = (balance != null) ? balance : 0.0;
+                            showSuccessDialog();
+                        });
                 }
             });
         } catch (NumberFormatException e) {
@@ -233,6 +247,73 @@ public class AddTransactionFragment extends Fragment {
             if (txs != null) allTransactions = txs;
         });
         txViewModel.loadAllTransactions();
+    }
+
+    private void showSuccessDialog() {
+        if (getContext() == null) return;
+        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+        View sheetView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_transaction_success, null);
+        dialog.setContentView(sheetView);
+        // أزرار
+        View btnWhatsapp = sheetView.findViewById(R.id.btnSendWhatsapp);
+        View btnSms = sheetView.findViewById(R.id.btnSendSms);
+        View btnAddAnother = sheetView.findViewById(R.id.btnAddAnother);
+        View btnExit = sheetView.findViewById(R.id.btnExit);
+        // واتساب
+        btnWhatsapp.setOnClickListener(v -> {
+            if (lastSavedAccount != null && lastSavedTransaction != null) {
+                String phone = lastSavedAccount.getPhone();
+                if (phone == null || phone.isEmpty()) {
+                    Toast.makeText(getContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                String msg = NotificationUtils.buildWhatsAppMessage(getContext(), lastSavedAccount.getName(), lastSavedTransaction, lastSavedBalance, lastSavedTransaction.getType());
+                NotificationUtils.sendWhatsAppMessage(getContext(), phone, msg);
+            }
+        });
+        // SMS
+        btnSms.setOnClickListener(v -> {
+            if (lastSavedAccount != null && lastSavedTransaction != null) {
+                String phone = lastSavedAccount.getPhone();
+                if (phone == null || phone.isEmpty()) {
+                    Toast.makeText(getContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                String type = lastSavedTransaction.getType();
+                String amountStr = String.format(java.util.Locale.US, "%.0f", lastSavedTransaction.getAmount());
+                String balanceStr = String.format(java.util.Locale.US, "%.0f", Math.abs(lastSavedBalance));
+                String currency = lastSavedTransaction.getCurrency();
+                String typeText = (type.equalsIgnoreCase("credit") || type.equals("له")) ? "لكم" : "عليكم";
+                String balanceText = (lastSavedBalance >= 0) ? "الرصيد لكم " : "الرصيد عليكم ";
+                String message = "حسابكم لدينا:\n"
+                        + typeText + " " + amountStr + " " + currency + "\n"
+                        + lastSavedTransaction.getDescription() + "\n"
+                        + balanceText + balanceStr + " " + currency;
+                NotificationUtils.sendSmsMessage(getContext(), phone, message);
+            }
+        });
+        // رجوع (إضافة قيد جديد لنفس العميل)
+        btnAddAnother.setOnClickListener(v -> {
+            dialog.dismiss();
+            clearFieldsForAnother();
+        });
+        // خروج
+        btnExit.setOnClickListener(v -> {
+            dialog.dismiss();
+            Navigation.findNavController(requireView()).navigateUp();
+        });
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
+    private void clearFieldsForAnother() {
+        binding.amountEditText.setText("");
+        binding.descriptionEditText.setText("");
+        // لا تفرغ الحساب المختار
+        // لا تفرغ العملة
+        // لا تفرغ الملاحظات
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        updateDateField();
     }
 
     @Override
