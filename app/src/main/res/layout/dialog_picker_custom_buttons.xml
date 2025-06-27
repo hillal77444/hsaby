@@ -16,7 +16,8 @@
         android:layout_weight="1"
         android:background="@android:color/transparent"
         android:textSize="18sp"
-        android:gravity="start" />
+        android:gravity="start"
+        style="@style/Widget.App.Button" />
 
     <View
         android:layout_width="0dp"
@@ -32,6 +33,7 @@
         android:layout_weight="1"
         android:background="@android:color/transparent"
         android:textSize="18sp"
-        android:gravity="end" />
+        android:gravity="end"
+        style="@style/Widget.App.Button" />
 
 </LinearLayout> 
