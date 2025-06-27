@@ -19,6 +19,8 @@ import com.hillal.acc.data.model.Account;
 import com.hillal.acc.data.model.Transaction;
 import com.hillal.acc.ui.accounts.AccountViewModel;
 import com.hillal.acc.ui.transactions.TransactionsViewModel;
+import com.hillal.acc.App;
+import com.hillal.acc.ui.accounts.AccountViewModelFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,7 +85,9 @@ public class AccountsSummaryReportFragment extends Fragment {
     }
 
     private void loadData() {
-        AccountViewModel accountViewModel = new ViewModelProvider(requireActivity()).get(AccountViewModel.class);
+        App app = (App) requireActivity().getApplication();
+        AccountViewModelFactory factory = new AccountViewModelFactory(app.getAccountRepository());
+        AccountViewModel accountViewModel = new ViewModelProvider(requireActivity(), factory).get(AccountViewModel.class);
         TransactionsViewModel transactionsViewModel = new ViewModelProvider(requireActivity()).get(TransactionsViewModel.class);
         accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accounts -> {
             if (accounts != null) {
