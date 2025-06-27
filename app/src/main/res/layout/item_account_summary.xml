@@ -13,70 +13,80 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
-            android:id="@+id/userNameTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/black"
-            android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="8sp"
-            android:autoSizeMaxTextSize="24sp"
-            android:autoSizeStepGranularity="2sp" />
-
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_height="48dp"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:background="#fff">
+
+            <TextView
+                android:id="@+id/userNameTextView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:gravity="center|right"
+                android:textColor="#222"
+                android:textSize="15sp"
+                android:background="@drawable/table_border"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="10sp"
+                android:autoSizeMaxTextSize="18sp"
+                android:autoSizeStepGranularity="2sp" />
 
             <TextView
                 android:id="@+id/debitsTextView"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="@color/design_default_color_error"
+                android:layout_height="match_parent"
+                android:layout_weight="1.2"
+                android:gravity="center"
+                android:textColor="#F44336"
+                android:textSize="15sp"
+                android:background="@drawable/table_border"
                 android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="8sp"
-                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeMinTextSize="10sp"
+                android:autoSizeMaxTextSize="18sp"
                 android:autoSizeStepGranularity="2sp" />
 
             <TextView
                 android:id="@+id/creditsTextView"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="@color/design_default_color_primary"
+                android:layout_height="match_parent"
+                android:layout_weight="1.2"
+                android:gravity="center"
+                android:textColor="#4CAF50"
+                android:textSize="15sp"
+                android:background="@drawable/table_border"
                 android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="8sp"
-                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeMinTextSize="10sp"
+                android:autoSizeMaxTextSize="18sp"
                 android:autoSizeStepGranularity="2sp" />
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:layout_weight="1.2"
                 android:orientation="horizontal"
-                android:gravity="end|center_vertical">
+                android:gravity="center"
+                android:background="@drawable/table_border">
 
                 <TextView
                     android:id="@+id/balanceTextView"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="16sp"
-                    android:textColor="@color/design_default_color_primary"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:textColor="#152FD9"
+                    android:textSize="15sp"
                     android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="8sp"
-                    android:autoSizeMaxTextSize="24sp"
+                    android:autoSizeMinTextSize="10sp"
+                    android:autoSizeMaxTextSize="18sp"
                     android:autoSizeStepGranularity="2sp" />
 
                 <ImageView
                     android:id="@+id/ivArrow"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:layout_marginStart="6dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="4dp"
                     android:src="@drawable/ic_arrow_upward"
                     android:contentDescription="سهم الرصيد" />
             </LinearLayout>
