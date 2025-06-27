@@ -14,6 +14,7 @@ import com.hillal.acc.R;
 import com.hillal.acc.data.model.Account;
 
 import java.util.List;
+import java.util.Locale;
 
 public class AccountsSummaryAdapter extends RecyclerView.Adapter<AccountsSummaryAdapter.ViewHolder> {
     public static class AccountSummary {
@@ -51,9 +52,9 @@ public class AccountsSummaryAdapter extends RecyclerView.Adapter<AccountsSummary
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         AccountSummary item = data.get(position);
         holder.tvAccountName.setText(item.accountName);
-        holder.tvCredit.setText(String.format("%,.0f", item.credit));
-        holder.tvDebit.setText(String.format("%,.0f", item.debit));
-        holder.tvBalance.setText(String.format("%,.0f", item.balance));
+        holder.tvCredit.setText(String.format(Locale.US, "%,.0f", item.credit));
+        holder.tvDebit.setText(String.format(Locale.US, "%,.0f", item.debit));
+        holder.tvBalance.setText(String.format(Locale.US, "%,.0f", item.balance));
         if (item.balance > 0) {
             holder.ivArrow.setImageResource(R.drawable.ic_arrow_upward);
             holder.ivArrow.setColorFilter(Color.parseColor("#4CAF50"));
@@ -67,6 +68,10 @@ public class AccountsSummaryAdapter extends RecyclerView.Adapter<AccountsSummary
             holder.ivArrow.setColorFilter(Color.GRAY);
             holder.tvBalance.setTextColor(Color.GRAY);
         }
+        holder.tvAccountName.setGravity(android.view.Gravity.RIGHT | android.view.Gravity.CENTER_VERTICAL);
+        holder.tvCredit.setGravity(android.view.Gravity.CENTER);
+        holder.tvDebit.setGravity(android.view.Gravity.CENTER);
+        holder.tvBalance.setGravity(android.view.Gravity.CENTER);
     }
 
     @Override
