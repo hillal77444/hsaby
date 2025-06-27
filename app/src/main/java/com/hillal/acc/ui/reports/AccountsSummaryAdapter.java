@@ -63,7 +63,7 @@ public class AccountsSummaryAdapter extends RecyclerView.Adapter<AccountsSummary
             holder.ivArrow.setColorFilter(Color.parseColor("#F44336"));
             holder.tvBalance.setTextColor(Color.parseColor("#F44336"));
         } else {
-            holder.ivArrow.setImageResource(R.drawable.ic_arrow_right);
+            holder.ivArrow.setImageResource(R.drawable.ic_arrow_upward);
             holder.ivArrow.setColorFilter(Color.GRAY);
             holder.tvBalance.setTextColor(Color.GRAY);
         }
@@ -79,10 +79,10 @@ public class AccountsSummaryAdapter extends RecyclerView.Adapter<AccountsSummary
         ImageView ivArrow;
         ViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvAccountName = itemView.findViewById(R.id.tvAccountName);
-            tvCredit = itemView.findViewById(R.id.tvCredit);
-            tvDebit = itemView.findViewById(R.id.tvDebit);
-            tvBalance = itemView.findViewById(R.id.tvBalance);
+            tvAccountName = itemView.findViewById(R.id.userNameTextView);
+            tvCredit = itemView.findViewById(R.id.creditsTextView);
+            tvDebit = itemView.findViewById(R.id.debitsTextView);
+            tvBalance = itemView.findViewById(R.id.balanceTextView);
             ivArrow = itemView.findViewById(R.id.ivArrow);
         }
     }
