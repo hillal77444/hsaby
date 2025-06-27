@@ -47,6 +47,7 @@ import com.hillal.acc.data.remote.ApiService;
 import com.hillal.acc.ui.common.AccountPickerBottomSheet;
 import com.hillal.acc.data.preferences.UserPreferences;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.hillal.acc.ui.transactions.NotificationUtils;
 
 public class TransactionsFragment extends Fragment {
     private FragmentTransactionsBinding binding;
@@ -325,10 +326,7 @@ public class TransactionsFragment extends Fragment {
                                         + typeText + " " + amountStr + " " + currency + "\n"
                                         + transaction.getDescription() + "\n"
                                         + balanceText + balanceStr + " " + currency;
-                                Intent smsIntent = new Intent(Intent.ACTION_SENDTO);
-                                smsIntent.setData(Uri.parse("smsto:" + phoneNumber));
-                                smsIntent.putExtra("sms_body", message);
-                                startActivity(smsIntent);
+                                sendSmsMessage(requireContext(), phoneNumber, message);
                             }
                         });
                 }
@@ -687,64 +685,16 @@ public class TransactionsFragment extends Fragment {
     }
 
     private String buildWhatsAppMessage(String accountName, Transaction transaction, double balance, String type) {
-        // تنسيق التاريخ بالإنجليزي
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
-        String date = dateFormat.format(new Date(transaction.getTransactionDate()));
-    
-        // تحديد الجملة حسب النوع
-        String typeMessage;
-        if ("credit".equalsIgnoreCase(type)) {
-            typeMessage = "قيدنا إلى حسابكم";
-        } else if ("debit".equalsIgnoreCase(type)) {
-            typeMessage = "قيد على حسابكم";
-        } else {
-            typeMessage = "تفاصيل القيد المحاسبي";
-        }
-    
-        // تحديد جملة الرصيد حسب القيمة
-        String balanceMessage;
-        if (balance >= 0) {
-            balanceMessage = String.format(Locale.ENGLISH, "الرصيد لكم: %.2f %s", balance, transaction.getCurrency());
-        } else {
-            balanceMessage = String.format(Locale.ENGLISH, "الرصيد عليكم: %.2f %s", Math.abs(balance), transaction.getCurrency());
-        }
-
-        // جلب اسم المستخدم من التفضيلات
-        String userName = new UserPreferences(requireContext()).getUserName();
-
-        // بناء الرسالة مع جميع الأرقام بالإنجليزي واسم المرسل في النهاية
-        return String.format(Locale.ENGLISH,
-            "السيد / *%s*\n" +
-            "──────────────\n" +
-            "%s\n" +
-            "──────────────\n" +
-            "التاريخ: %s\n" +
-            "المبلغ: %.2f %s\n" +
-            "البيان: %s\n" +
-            "%s\n" +
-            "──────────────\n" +
-            "تم الإرسال بواسطة:\n*%s*",
-            accountName,
-            typeMessage,
-            date,
-            transaction.getAmount(),
-            transaction.getCurrency(),
-            transaction.getDescription(),
-            balanceMessage,
-            userName
-        );
+        // استخدم الدالة المساعدة الجديدة
+        return NotificationUtils.buildWhatsAppMessage(requireContext(), accountName, transaction, balance, type);
     }
 
     private void sendWhatsAppMessage(Context context, String phoneNumber, String message) {
-        try {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            String url = "https://api.whatsapp.com/send?phone=" + phoneNumber + "&text=" + Uri.encode(message);
-            intent.setData(Uri.parse(url));
-            Intent chooser = Intent.createChooser(intent, "اختر تطبيق واتساب");
-            startActivity(chooser);
-        } catch (Exception e) {
-            Toast.makeText(context, "حدث خطأ أثناء فتح واتساب", Toast.LENGTH_SHORT).show();
-        }
+        NotificationUtils.sendWhatsAppMessage(context, phoneNumber, message);
+    }
+
+    private void sendSmsMessage(Context context, String phoneNumber, String message) {
+        NotificationUtils.sendSmsMessage(context, phoneNumber, message);
     }
 
     // دالة للتحقق من وجود اتصال بالإنترنت
