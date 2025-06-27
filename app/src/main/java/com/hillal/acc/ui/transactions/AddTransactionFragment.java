@@ -56,6 +56,7 @@ public class AddTransactionFragment extends Fragment {
     private Account lastSavedAccount = null;
     private double lastSavedBalance = 0.0;
     private TransactionRepository transactionRepository;
+    private boolean isDialogShown = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -250,7 +251,8 @@ public class AddTransactionFragment extends Fragment {
     }
 
     private void showSuccessDialog() {
-        if (getContext() == null) return;
+        if (getContext() == null || isDialogShown) return;
+        isDialogShown = true;
         BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
         View sheetView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_transaction_success, null);
         dialog.setContentView(sheetView);
@@ -295,11 +297,13 @@ public class AddTransactionFragment extends Fragment {
         // رجوع (إضافة قيد جديد لنفس العميل)
         btnAddAnother.setOnClickListener(v -> {
             dialog.dismiss();
+            isDialogShown = false;
             clearFieldsForAnother();
         });
         // خروج
         btnExit.setOnClickListener(v -> {
             dialog.dismiss();
+            isDialogShown = false;
             View view = getView();
             if (isAdded() && view != null) {
                 Navigation.findNavController(view).navigateUp();
