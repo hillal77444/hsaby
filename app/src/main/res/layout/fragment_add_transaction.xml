@@ -333,7 +333,11 @@
                     android:textColor="#FFFFFF"
                     android:backgroundTint="#4CAF50"
                     android:icon="@drawable/ic_arrow_downward"
-                    android:layout_marginEnd="8dp"/>
+                    android:layout_marginEnd="8dp"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="8sp"
+                    android:autoSizeMaxTextSize="24sp"
+                    android:autoSizeStepGranularity="2sp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/debitButton"
@@ -345,7 +349,11 @@
                     android:textColor="#FFFFFF"
                     android:backgroundTint="#F44336"
                     android:icon="@drawable/ic_arrow_upward"
-                    android:layout_marginEnd="8dp"/>
+                    android:layout_marginEnd="8dp"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="8sp"
+                    android:autoSizeMaxTextSize="24sp"
+                    android:autoSizeStepGranularity="2sp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/cancelButton"
@@ -354,7 +362,11 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/cancel"
-                    android:icon="@android:drawable/ic_menu_close_clear_cancel"/>
+                    android:icon="@android:drawable/ic_menu_close_clear_cancel"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="8sp"
+                    android:autoSizeMaxTextSize="24sp"
+                    android:autoSizeStepGranularity="2sp" />
             </LinearLayout>
 
         </LinearLayout>
