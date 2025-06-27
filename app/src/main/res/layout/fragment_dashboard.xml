@@ -44,11 +44,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="مرحباً، اسم المستخدم!"
-            android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="#152FD9"
             android:layout_gravity="center"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeMaxTextSize="24sp"
+            android:autoSizeStepGranularity="2sp" />
 
         <!-- بطاقة اسم المستخدم مع زر التعديل -->
         <com.google.android.material.card.MaterialCardView
@@ -72,9 +75,12 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="اسم المستخدم"
-                    android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="#152FD9" />
+                    android:textColor="#152FD9"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="8sp"
+                    android:autoSizeMaxTextSize="24sp"
+                    android:autoSizeStepGranularity="2sp" />
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/editProfileButton"
                     android:layout_width="40dp"
@@ -85,7 +91,11 @@
                     app:cornerRadius="20dp"
                     android:layout_marginStart="8dp"
                     android:contentDescription="تعديل الملف"
-                    app:rippleColor="#D1D5DB" />
+                    app:rippleColor="#D1D5DB"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="8sp"
+                    android:autoSizeMaxTextSize="24sp"
+                    android:autoSizeStepGranularity="2sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -133,13 +143,21 @@
                             android:text="0 يمني"
                             android:textStyle="bold"
                             android:textColor="#152FD9"
-                            android:textSize="11sp" />
+                            android:textSize="11sp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="الرصيد الكلي"
                             android:textColor="#888"
-                            android:textSize="8sp" />
+                            android:textSize="8sp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -168,13 +186,21 @@
                             android:text="0"
                             android:textStyle="bold"
                             android:textColor="#152FD9"
-                            android:textSize="11sp" />
+                            android:textSize="11sp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="عدد الحسابات"
                             android:textColor="#888"
-                            android:textSize="8sp" />
+                            android:textSize="8sp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -203,13 +229,21 @@
                             android:text="0"
                             android:textStyle="bold"
                             android:textColor="#22C55E"
-                            android:textSize="11sp" />
+                            android:textSize="11sp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="إجمالي لكم"
                             android:textColor="#888"
-                            android:textSize="8sp" />
+                            android:textSize="8sp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -238,13 +272,21 @@
                             android:text="0"
                             android:textStyle="bold"
                             android:textColor="#F59E42"
-                            android:textSize="11sp" />
+                            android:textSize="11sp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="إجمالي عليكم"
                             android:textColor="#888"
-                            android:textSize="8sp" />
+                            android:textSize="8sp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -281,7 +323,11 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="4dp"
                 app:cornerRadius="12dp"
-                app:rippleColor="#D1D5DB" />
+                app:rippleColor="#D1D5DB"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeStepGranularity="2sp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/addAccountButton"
@@ -298,7 +344,11 @@
                 android:layout_marginStart="4dp"
                 android:layout_marginEnd="4dp"
                 app:cornerRadius="12dp"
-                app:rippleColor="#D1D5DB" />
+                app:rippleColor="#D1D5DB"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeStepGranularity="2sp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/reportButton"
@@ -315,7 +365,11 @@
                 android:layout_marginStart="4dp"
                 android:layout_marginEnd="8dp"
                 app:cornerRadius="12dp"
-                app:rippleColor="#D1D5DB" />
+                app:rippleColor="#D1D5DB"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeStepGranularity="2sp" />
         </LinearLayout>
 
         <!-- مسافة واضحة -->
@@ -359,7 +413,11 @@
                         android:text="الحسابات"
                         android:textColor="#152FD9"
                         android:textStyle="bold"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="8sp"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeStepGranularity="2sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -389,7 +447,11 @@
                         android:text="المعاملات"
                         android:textColor="#F59E42"
                         android:textStyle="bold"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="8sp"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeStepGranularity="2sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -419,7 +481,11 @@
                         android:text="التقارير"
                         android:textColor="#22C55E"
                         android:textStyle="bold"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="8sp"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeStepGranularity="2sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -449,7 +515,11 @@
                         android:text="متابعة الديون"
                         android:textColor="#F44336"
                         android:textStyle="bold"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="8sp"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeStepGranularity="2sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </GridLayout>
