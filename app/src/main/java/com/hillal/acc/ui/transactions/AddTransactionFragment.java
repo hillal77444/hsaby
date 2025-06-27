@@ -262,6 +262,11 @@ public class AddTransactionFragment extends Fragment {
         View btnAddAnother = sheetView.findViewById(R.id.btnAddAnother);
         View btnExit = sheetView.findViewById(R.id.btnExit);
         // واتساب
+        if (lastSavedAccount != null && lastSavedAccount.isWhatsappEnabled()) {
+            btnWhatsapp.setVisibility(View.GONE);
+        } else {
+            btnWhatsapp.setVisibility(View.VISIBLE);
+        }
         btnWhatsapp.setOnClickListener(v -> {
             if (lastSavedAccount != null && lastSavedTransaction != null) {
                 String phone = lastSavedAccount.getPhoneNumber();
