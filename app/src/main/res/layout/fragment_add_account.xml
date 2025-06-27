@@ -48,7 +48,11 @@
                 android:textStyle="bold"
                 android:textColor="#1976D2"
                 android:layout_gravity="center"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeStepGranularity="2sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -58,7 +62,11 @@
                 android:textColor="#666666"
                 android:layout_gravity="center"
                 android:layout_marginTop="2dp"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="16dp"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeStepGranularity="2sp" />
 
             <!-- البطاقة -->
             <com.google.android.material.card.MaterialCardView
@@ -101,7 +109,11 @@
                             android:inputType="textPersonName"
                             android:maxLines="1"
                             android:textColor="#000000"
-                            android:textColorHint="#666666" />
+                            android:textColorHint="#666666"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- الهاتف -->
@@ -135,7 +147,11 @@
                                 android:inputType="phone"
                                 android:maxLines="1"
                                 android:textColor="#000000"
-                                android:textColorHint="#666666" />
+                                android:textColorHint="#666666"
+                                android:autoSizeTextType="uniform"
+                                android:autoSizeMinTextSize="8sp"
+                                android:autoSizeMaxTextSize="24sp"
+                                android:autoSizeStepGranularity="2sp" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <com.google.android.material.button.MaterialButton
@@ -153,7 +169,11 @@
                             app:iconGravity="textStart"
                             app:iconPadding="0dp"
                             app:cornerRadius="24dp"
-                            android:backgroundTint="#E3F2FD" />
+                            android:backgroundTint="#E3F2FD"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
 
                     </LinearLayout>
 
@@ -181,7 +201,11 @@
                             android:layout_height="wrap_content"
                             android:inputType="numberDecimal"
                             android:textColor="#000000"
-                            android:textColorHint="#666666" />
+                            android:textColorHint="#666666"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- الملاحظات (مخفاة فقط) -->
@@ -209,7 +233,11 @@
                             android:inputType="textMultiLine"
                             android:minLines="3"
                             android:textColor="#000000"
-                            android:textColorHint="#666666" />
+                            android:textColorHint="#666666"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- خيار واتساب -->
@@ -230,7 +258,11 @@
                             android:textAppearance="?attr/textAppearanceBody1"
                             android:minHeight="48dp"
                             android:paddingStart="0dp"
-                            android:paddingEnd="0dp" />
+                            android:paddingEnd="0dp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
 
                         <TextView
                             android:layout_width="match_parent"
@@ -239,7 +271,11 @@
                             android:layout_marginTop="4dp"
                             android:text="سيتم إرسال إشعارات واتساب للعميل عند إضافة معاملات جديدة"
                             android:textSize="12sp"
-                            android:textColor="#666666" />
+                            android:textColor="#666666"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
                     </LinearLayout>
 
                     <!-- أزرار -->
@@ -250,7 +286,11 @@
                         android:layout_marginTop="12dp"
                         android:backgroundTint="@color/primary"
                         android:textColor="@android:color/white"
-                        android:text="@string/save" />
+                        android:text="@string/save"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="8sp"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeStepGranularity="2sp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/cancel_button"
@@ -259,7 +299,11 @@
                         android:layout_marginTop="8dp"
                         android:text="@string/cancel"
                         android:backgroundTint="#F3F4F6"
-                        android:textColor="#222" />
+                        android:textColor="#222"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="8sp"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeStepGranularity="2sp" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
