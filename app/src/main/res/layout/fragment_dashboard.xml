@@ -105,7 +105,7 @@
             android:layout_height="10dp"
             android:background="@android:color/transparent" />
 
-        <!-- بطاقات الإحصائيات: صف أفقي -->
+        <!-- بطاقات الإحصائيات: صف أفقي في المنتصف -->
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -119,54 +119,11 @@
                 android:gravity="center">
 
                 <com.google.android.material.card.MaterialCardView
-                    android:layout_width="100dp"
+                    android:layout_width="70dp"
                     android:layout_height="70dp"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="4dp"
                     android:layout_marginStart="6dp"
-                    android:layout_marginEnd="3dp"
-                    app:cardBackgroundColor="#E3F9F1">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:gravity="center">
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/ic_money"
-                            android:tint="#22C55E" />
-                        <TextView
-                            android:id="@+id/totalBalance"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0 يمني"
-                            android:textStyle="bold"
-                            android:textColor="#152FD9"
-                            android:textSize="11sp"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="الرصيد الكلي"
-                            android:textColor="#888"
-                            android:textSize="8sp"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="100dp"
-                    android:layout_height="70dp"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="4dp"
-                    android:layout_marginStart="3dp"
                     android:layout_marginEnd="3dp"
                     app:cardBackgroundColor="#E3E8FD">
                     <LinearLayout
@@ -205,7 +162,7 @@
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
-                    android:layout_width="100dp"
+                    android:layout_width="70dp"
                     android:layout_height="70dp"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="4dp"
@@ -248,12 +205,12 @@
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
-                    android:layout_width="100dp"
+                    android:layout_width="70dp"
                     android:layout_height="70dp"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="4dp"
                     android:layout_marginStart="3dp"
-                    android:layout_marginEnd="6dp"
+                    android:layout_marginEnd="3dp"
                     app:cardBackgroundColor="#FFF4E3">
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -281,6 +238,49 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="إجمالي عليكم"
+                            android:textColor="#888"
+                            android:textSize="8sp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="4dp"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginEnd="6dp"
+                    app:cardBackgroundColor="#E3F9F1">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_money"
+                            android:tint="#22C55E" />
+                        <TextView
+                            android:id="@+id/totalBalance"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 يمني"
+                            android:textStyle="bold"
+                            android:textColor="#152FD9"
+                            android:textSize="11sp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="الرصيد الكلي"
                             android:textColor="#888"
                             android:textSize="8sp"
                             android:autoSizeTextType="uniform"
