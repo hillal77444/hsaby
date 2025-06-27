@@ -47,7 +47,11 @@
                 android:textStyle="bold"
                 android:textColor="#152FD9"
                 android:layout_gravity="center"
-                android:layout_marginTop="12dp" />
+                android:layout_marginTop="12dp"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeStepGranularity="2sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -57,7 +61,11 @@
                 android:textColor="#666"
                 android:layout_gravity="center"
                 android:layout_marginTop="4dp"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="16dp"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeStepGranularity="2sp" />
 
             <!-- كرت ملخص الحسابات -->
             <com.google.android.material.card.MaterialCardView
@@ -82,7 +90,11 @@
                         android:text="اجمالي الارصده لجميع العملات "
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="#152FD9" />
+                        android:textColor="#152FD9"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="8sp"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeStepGranularity="2sp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -101,7 +113,11 @@
                                 android:layout_height="wrap_content"
                                 android:text="مدينون"
                                 android:textSize="14sp"
-                                android:textColor="#F44336" />
+                                android:textColor="#F44336"
+                                android:autoSizeTextType="uniform"
+                                android:autoSizeMinTextSize="8sp"
+                                android:autoSizeMaxTextSize="24sp"
+                                android:autoSizeStepGranularity="2sp" />
 
                             <TextView
                                 android:id="@+id/total_debtors"
@@ -110,7 +126,11 @@
                                 android:layout_marginTop="4dp"
                                 android:textSize="20sp"
                                 android:textStyle="bold"
-                                android:textColor="#F44336" />
+                                android:textColor="#F44336"
+                                android:autoSizeTextType="uniform"
+                                android:autoSizeMinTextSize="8sp"
+                                android:autoSizeMaxTextSize="24sp"
+                                android:autoSizeStepGranularity="2sp" />
 
                         </LinearLayout>
 
@@ -125,7 +145,11 @@
                                 android:layout_height="wrap_content"
                                 android:text="دائنون"
                                 android:textSize="14sp"
-                                android:textColor="#4CAF50" />
+                                android:textColor="#4CAF50"
+                                android:autoSizeTextType="uniform"
+                                android:autoSizeMinTextSize="8sp"
+                                android:autoSizeMaxTextSize="24sp"
+                                android:autoSizeStepGranularity="2sp" />
 
                             <TextView
                                 android:id="@+id/total_creditors"
@@ -134,7 +158,11 @@
                                 android:layout_marginTop="4dp"
                                 android:textSize="20sp"
                                 android:textStyle="bold"
-                                android:textColor="#4CAF50" />
+                                android:textColor="#4CAF50"
+                                android:autoSizeTextType="uniform"
+                                android:autoSizeMinTextSize="8sp"
+                                android:autoSizeMaxTextSize="24sp"
+                                android:autoSizeStepGranularity="2sp" />
 
                         </LinearLayout>
 
@@ -151,7 +179,11 @@
                         android:layout_height="wrap_content"
                         android:text="صافي الرصيد"
                         android:textSize="14sp"
-                        android:textColor="#152FD9" />
+                        android:textColor="#152FD9"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="8sp"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeStepGranularity="2sp" />
 
                     <TextView
                         android:id="@+id/net_balance"
@@ -160,7 +192,11 @@
                         android:layout_marginTop="4dp"
                         android:textSize="22sp"
                         android:textStyle="bold"
-                        android:textColor="#152FD9" />
+                        android:textColor="#152FD9"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="8sp"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeStepGranularity="2sp" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -188,7 +224,11 @@
                         android:text="ملخص المعاملات"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="#152FD9" />
+                        android:textColor="#152FD9"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="8sp"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeStepGranularity="2sp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -207,7 +247,11 @@
                                 android:layout_height="wrap_content"
                                 android:text="عدد العمليات"
                                 android:textSize="14sp"
-                                android:textColor="#666" />
+                                android:textColor="#666"
+                                android:autoSizeTextType="uniform"
+                                android:autoSizeMinTextSize="8sp"
+                                android:autoSizeMaxTextSize="24sp"
+                                android:autoSizeStepGranularity="2sp" />
 
                             <TextView
                                 android:id="@+id/total_transactions"
@@ -216,7 +260,11 @@
                                 android:layout_marginTop="4dp"
                                 android:textSize="20sp"
                                 android:textStyle="bold"
-                                android:textColor="#152FD9" />
+                                android:textColor="#152FD9"
+                                android:autoSizeTextType="uniform"
+                                android:autoSizeMinTextSize="8sp"
+                                android:autoSizeMaxTextSize="24sp"
+                                android:autoSizeStepGranularity="2sp" />
 
                         </LinearLayout>
 
@@ -231,7 +279,11 @@
                                 android:layout_height="wrap_content"
                                 android:text="متوسط العملية"
                                 android:textSize="14sp"
-                                android:textColor="#666" />
+                                android:textColor="#666"
+                                android:autoSizeTextType="uniform"
+                                android:autoSizeMinTextSize="8sp"
+                                android:autoSizeMaxTextSize="24sp"
+                                android:autoSizeStepGranularity="2sp" />
 
                             <TextView
                                 android:id="@+id/average_transaction"
@@ -240,7 +292,11 @@
                                 android:layout_marginTop="4dp"
                                 android:textSize="20sp"
                                 android:textStyle="bold"
-                                android:textColor="#152FD9" />
+                                android:textColor="#152FD9"
+                                android:autoSizeTextType="uniform"
+                                android:autoSizeMinTextSize="8sp"
+                                android:autoSizeMaxTextSize="24sp"
+                                android:autoSizeStepGranularity="2sp" />
 
                         </LinearLayout>
 
@@ -272,7 +328,11 @@
                         android:text="الحسابات"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="#152FD9" />
+                        android:textColor="#152FD9"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="8sp"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeStepGranularity="2sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -280,7 +340,11 @@
                         android:layout_marginTop="8dp"
                         android:text="يمكنك استعراض كشف حساب أي حساب من القائمة أدناه"
                         android:textSize="14sp"
-                        android:textColor="#666" />
+                        android:textColor="#666"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="8sp"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeStepGranularity="2sp" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/accounts_recycler_view"
@@ -288,7 +352,11 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:overScrollMode="never"
-                        android:background="#F8F8F8" />
+                        android:background="#F8F8F8"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="8sp"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeStepGranularity="2sp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/viewAccountStatementButton"
@@ -300,7 +368,11 @@
                         app:icon="@drawable/ic_statement"
                         android:textColor="#FFFFFF"
                         app:backgroundTint="#152FD9"
-                        app:iconTint="#FFFFFF" />
+                        app:iconTint="#FFFFFF"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="8sp"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeStepGranularity="2sp" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
