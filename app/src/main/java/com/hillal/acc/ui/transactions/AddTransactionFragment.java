@@ -300,7 +300,10 @@ public class AddTransactionFragment extends Fragment {
         // خروج
         btnExit.setOnClickListener(v -> {
             dialog.dismiss();
-            Navigation.findNavController(requireView()).navigateUp();
+            View view = getView();
+            if (isAdded() && view != null) {
+                Navigation.findNavController(view).navigateUp();
+            }
         });
         dialog.setCancelable(false);
         dialog.show();
