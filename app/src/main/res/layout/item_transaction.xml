@@ -55,7 +55,11 @@
                         android:maxLines="1"
                         android:ellipsize="end"
                         android:fontFamily="sans-serif-medium"
-                        tools:text="اسم الحساب" />
+                        tools:text="اسم الحساب"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="8sp"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeStepGranularity="2sp" />
 
                     <ImageView
                         android:id="@+id/transactionTypeIcon"
@@ -76,7 +80,11 @@
                     android:textSize="14sp"
                     android:textColor="#666"
                     android:fontFamily="sans-serif"
-                    tools:text="2024/03/20" />
+                    tools:text="2024/03/20"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="8sp"
+                    android:autoSizeMaxTextSize="24sp"
+                    android:autoSizeStepGranularity="2sp" />
 
             </LinearLayout>
 
@@ -89,7 +97,11 @@
                 android:textStyle="bold"
                 android:textColor="@drawable/transaction_amount_text_color"
                 android:fontFamily="sans-serif-medium"
-                tools:text="1,000,000 ريال" />
+                tools:text="1,000,000 ريال"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeStepGranularity="2sp" />
 
         </LinearLayout>
 
@@ -113,7 +125,11 @@
             android:maxLines="2"
             android:ellipsize="end"
             android:fontFamily="sans-serif"
-            tools:text="وصف القيد المحاسبي" />
+            tools:text="وصف القيد المحاسبي"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeMaxTextSize="24sp"
+            android:autoSizeStepGranularity="2sp" />
 
         <!-- صف الأزرار -->
         <LinearLayout
@@ -141,7 +157,11 @@
                 app:strokeWidth="2dp"
                 app:cornerRadius="22dp"
                 android:backgroundTint="#FFFFFF"
-                android:contentDescription="إرسال عبر واتساب" />
+                android:contentDescription="إرسال عبر واتساب"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeStepGranularity="2sp" />
 
             <!-- زر SMS جديد -->
             <com.google.android.material.button.MaterialButton
@@ -161,7 +181,11 @@
                 app:strokeWidth="2dp"
                 app:cornerRadius="22dp"
                 android:backgroundTint="#FFFFFF"
-                android:contentDescription="إرسال رسالة نصية" />
+                android:contentDescription="إرسال رسالة نصية"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeStepGranularity="2sp" />
 
             <!-- زر تعديل -->
             <com.google.android.material.button.MaterialButton
@@ -181,7 +205,11 @@
                 app:strokeWidth="2dp"
                 app:cornerRadius="22dp"
                 android:backgroundTint="#FFFFFF"
-                android:contentDescription="تعديل" />
+                android:contentDescription="تعديل"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeStepGranularity="2sp" />
 
             <!-- زر حذف -->
             <com.google.android.material.button.MaterialButton
@@ -200,7 +228,11 @@
                 app:strokeWidth="2dp"
                 app:cornerRadius="22dp"
                 android:backgroundTint="#FFFFFF"
-                android:contentDescription="حذف" />
+                android:contentDescription="حذف"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeStepGranularity="2sp" />
 
         </LinearLayout>
 
