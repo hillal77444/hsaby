@@ -512,6 +512,17 @@
                     />
                 </div>
                 <div>
+                    <label for="currencyFilter" class="form-label mb-0">
+                        <i class="fas fa-coins"></i> اختيار العملة
+                    </label>
+                    <select class="form-select currency-filter ms-2" id="currencyFilter" name="currency" onchange="this.form.submit()">
+                        <option value="all" {% if selected_currency == 'all' %}selected{% endif %}>جميع العملات</option>
+                        {% for currency in currencies %}
+                        <option value="{{ currency }}" {% if selected_currency == currency %}selected{% endif %}>{{ currency }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="fas fa-search"></i> تقرير
                     </button>
@@ -537,16 +548,6 @@
                 <span class="icon"><i class="fas fa-user-tie"></i></span>
                 <strong>التاجر:</strong>
                 <span>{{ user.username }}</span>
-                <span class="vr mx-2"></span>
-                <label for="currencyFilter" class="form-label mb-0">
-                    <i class="fas fa-coins"></i> اختيار العملة
-                </label>
-                <select class="form-select currency-filter ms-2" id="currencyFilter" name="currency">
-                    <option value="all" {% if selected_currency == 'all' %}selected{% endif %}>جميع العملات</option>
-                    {% for currency in currencies %}
-                    <option value="{{ currency }}" {% if selected_currency == currency %}selected{% endif %}>{{ currency }}</option>
-                    {% endfor %}
-                </select>
             </div>
         </div>
 
@@ -633,27 +634,9 @@
             }
         }
 
-        // تصفية المعاملات حسب العملة
-        function filterByCurrency(currency) {
-            const rows = document.querySelectorAll(".transaction-row");
-            
-            rows.forEach((row) => {
-                if (currency === "all" || row.dataset.currency === currency) {
-                    row.style.display = "";
-                } else {
-                    row.style.display = "none";
-                }
-            });
-        }
-
-        document.getElementById("currencyFilter").addEventListener("change", function () {
-            filterByCurrency(this.value);
-        });
-
         // تحديث التاريخ عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
             updatePrintDate();
-            filterByCurrency(document.getElementById("currencyFilter").value);
         });
 
         // تحديث التاريخ عند الطباعة
