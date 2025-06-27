@@ -63,6 +63,13 @@ public class ReportsFragment extends Fragment {
             startActivity(intent);
         });
         
+        // زر تقرير ملخص الحسابات
+        MaterialButton btnAccountsSummaryReport = view.findViewById(R.id.btnAccountsSummaryReport);
+        btnAccountsSummaryReport.setOnClickListener(v -> {
+            androidx.navigation.Navigation.findNavController(v)
+                .navigate(R.id.action_reports_to_accountsSummaryReport);
+        });
+        
         // Observe data
         observeTransactions();
         
