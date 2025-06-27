@@ -9,6 +9,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Toast;
 import android.widget.EditText;
 import android.view.WindowManager;
+import android.app.Dialog;
+import android.view.Window;
+import android.view.Gravity;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -253,9 +256,18 @@ public class AddTransactionFragment extends Fragment {
     private void showSuccessDialog() {
         if (getContext() == null || isDialogShown) return;
         isDialogShown = true;
-        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+        Dialog dialog = new Dialog(requireContext());
         View sheetView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_transaction_success, null);
         dialog.setContentView(sheetView);
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        Window window = dialog.getWindow();
+        if (window != null) {
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.width = WindowManager.LayoutParams.WRAP_CONTENT;
+            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            params.gravity = Gravity.CENTER;
+            window.setAttributes(params);
+        }
         // أزرار
         View btnWhatsapp = sheetView.findViewById(R.id.btnSendWhatsapp);
         View btnSms = sheetView.findViewById(R.id.btnSendSms);
