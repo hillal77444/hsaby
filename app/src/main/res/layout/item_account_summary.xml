@@ -19,7 +19,11 @@
             android:layout_height="wrap_content"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@color/black" />
+            android:textColor="@color/black"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeMaxTextSize="24sp"
+            android:autoSizeStepGranularity="2sp" />
 
         <TextView
             android:id="@+id/balanceTextView"
@@ -27,7 +31,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:textSize="16sp"
-            android:textColor="@color/design_default_color_primary" />
+            android:textColor="@color/design_default_color_primary"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeMaxTextSize="24sp"
+            android:autoSizeStepGranularity="2sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -40,14 +48,22 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textColor="@color/design_default_color_error" />
+                android:textColor="@color/design_default_color_error"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeStepGranularity="2sp" />
 
             <TextView
                 android:id="@+id/creditsTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textColor="@color/design_default_color_primary" />
+                android:textColor="@color/design_default_color_primary"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeStepGranularity="2sp" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView> 
