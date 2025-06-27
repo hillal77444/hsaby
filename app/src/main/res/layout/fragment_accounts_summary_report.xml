@@ -91,6 +91,73 @@
             android:autoSizeStepGranularity="2sp" />
     </LinearLayout>
 
+    <!-- ترويسة الأعمدة -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:background="#E3E8FD"
+        android:paddingVertical="4dp"
+        android:paddingHorizontal="2dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:text="الحساب"
+            android:gravity="center|right"
+            android:textStyle="bold"
+            android:textColor="#152FD9"
+            android:textSize="16sp"
+            android:background="@drawable/table_border"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeStepGranularity="2sp" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.2"
+            android:text="عليه"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="#F44336"
+            android:textSize="16sp"
+            android:background="@drawable/table_border"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeStepGranularity="2sp" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.2"
+            android:text="له"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="#4CAF50"
+            android:textSize="16sp"
+            android:background="@drawable/table_border"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeStepGranularity="2sp" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.2"
+            android:text="الرصيد"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="#152FD9"
+            android:textSize="16sp"
+            android:background="@drawable/table_border"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeStepGranularity="2sp" />
+    </LinearLayout>
+
     <!-- الجدول -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/accountsSummaryRecyclerView"
