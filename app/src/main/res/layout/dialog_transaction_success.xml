@@ -13,7 +13,7 @@
         android:id="@+id/successTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="تم حفظ المعاملة بنجاح"
+        android:text="تم حفظ القيد بنجاح"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="@android:color/holo_green_dark"
