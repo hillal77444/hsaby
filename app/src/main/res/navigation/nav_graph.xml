@@ -105,6 +105,9 @@
         <action
             android:id="@+id/action_reports_to_accountStatement"
             app:destination="@id/accountStatementFragment" />
+        <action
+            android:id="@+id/action_reports_to_accountsSummaryReport"
+            app:destination="@id/accountsSummaryReportFragment" />
     </fragment>
 
     <!-- كشف الحساب -->
@@ -166,6 +169,12 @@
         android:name="com.hillal.acc.ui.summary.AccountSummaryFragment"
         android:label="ملخص الحسابات"
         tools:layout="@layout/fragment_account_summary" />
+
+    <fragment
+        android:id="@+id/accountsSummaryReportFragment"
+        android:name="com.hillal.acc.ui.reports.AccountsSummaryReportFragment"
+        android:label="تقرير ملخص الحسابات"
+        tools:layout="@layout/fragment_accounts_summary_report" />
 
     <fragment
         android:id="@+id/navigation_about"
