@@ -262,7 +262,7 @@ public class AddTransactionFragment extends Fragment {
         // واتساب
         btnWhatsapp.setOnClickListener(v -> {
             if (lastSavedAccount != null && lastSavedTransaction != null) {
-                String phone = lastSavedAccount.getPhone();
+                String phone = lastSavedAccount.getPhoneNumber();
                 if (phone == null || phone.isEmpty()) {
                     Toast.makeText(getContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show();
                     return;
@@ -274,7 +274,7 @@ public class AddTransactionFragment extends Fragment {
         // SMS
         btnSms.setOnClickListener(v -> {
             if (lastSavedAccount != null && lastSavedTransaction != null) {
-                String phone = lastSavedAccount.getPhone();
+                String phone = lastSavedAccount.getPhoneNumber();
                 if (phone == null || phone.isEmpty()) {
                     Toast.makeText(getContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show();
                     return;
