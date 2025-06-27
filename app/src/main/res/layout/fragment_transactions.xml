@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:text="عرض وإدارة جميع المعاملات المالية"
                 android:textSize="14sp"
-                android:textColor="#666"
+                android:textColor="#FFFFFF"
                 android:layout_gravity="center"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="16dp" />
