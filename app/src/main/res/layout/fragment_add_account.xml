@@ -46,7 +46,7 @@
                 android:text="إضافة حساب جديد"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:textColor="#1976D2"
+                android:textColor="#FFFFFF"
                 android:layout_gravity="center"
                 android:layout_marginTop="8dp"
                 android:autoSizeTextType="uniform"
