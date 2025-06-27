@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="24dp"
     android:background="@android:color/white"
-    android:gravity="center_horizontal"
+    android:gravity="center"
+    android:layout_gravity="center"
     android:layoutDirection="rtl">
 
     <TextView
@@ -16,38 +17,94 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="@android:color/holo_green_dark"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="14sp"
+        android:autoSizeMaxTextSize="24sp"
+        android:autoSizeStepGranularity="2sp" />
 
-    <Button
-        android:id="@+id/btnSendWhatsapp"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="320dp"
         android:layout_height="wrap_content"
-        android:text="إرسال إشعار واتساب"
-        android:drawableStart="@android:drawable/ic_menu_send"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="8dp"
+        android:gravity="center"
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/btnSendSms"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="إرسال رسالة نصية"
-        android:drawableStart="@android:drawable/ic_dialog_email"
-        android:layout_marginBottom="8dp" />
+        <Button
+            android:id="@+id/btnSendWhatsapp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeStepGranularity="2sp"
+            android:autoSizeTextType="uniform"
+            android:drawableStart="@android:drawable/ic_menu_send"
+            android:minWidth="72dp"
+            android:minHeight="48dp"
+            android:paddingLeft="12dp"
+            android:paddingTop="8dp"
+            android:paddingRight="12dp"
+            android:paddingBottom="8dp"
+            android:text="واتساب"
+            android:textSize="14sp" />
 
-    <Button
-        android:id="@+id/btnAddAnother"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="إضافة قيد جديد لنفس العميل"
-        android:drawableStart="@android:drawable/ic_input_add"
-        android:layout_marginBottom="8dp" />
+        <Button
+            android:id="@+id/btnSendSms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeStepGranularity="2sp"
+            android:autoSizeTextType="uniform"
+            android:drawableStart="@android:drawable/ic_dialog_email"
+            android:minWidth="72dp"
+            android:minHeight="48dp"
+            android:paddingLeft="12dp"
+            android:paddingTop="8dp"
+            android:paddingRight="12dp"
+            android:paddingBottom="8dp"
+            android:text="SMS"
+            android:textSize="14sp" />
 
-    <Button
-        android:id="@+id/btnExit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="خروج"
-        android:drawableStart="@android:drawable/ic_menu_close_clear_cancel"
-        android:textColor="@android:color/holo_red_dark" />
+        <Button
+            android:id="@+id/btnAddAnother"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeStepGranularity="2sp"
+            android:autoSizeTextType="uniform"
+            android:drawableStart="@android:drawable/ic_input_add"
+            android:minWidth="72dp"
+            android:minHeight="48dp"
+            android:paddingLeft="12dp"
+            android:paddingTop="8dp"
+            android:paddingRight="12dp"
+            android:paddingBottom="8dp"
+            android:text="قيد جديد"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btnExit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeStepGranularity="2sp"
+            android:autoSizeTextType="uniform"
+            android:drawableStart="@android:drawable/ic_menu_close_clear_cancel"
+            android:minWidth="72dp"
+            android:minHeight="48dp"
+            android:paddingLeft="12dp"
+            android:paddingTop="8dp"
+            android:paddingRight="12dp"
+            android:paddingBottom="8dp"
+            android:text="خروج"
+            android:textColor="@android:color/holo_red_dark"
+            android:textSize="14sp" />
+    </LinearLayout>
 
 </LinearLayout> 
