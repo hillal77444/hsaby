@@ -67,6 +67,26 @@
                 android:autoSizeMaxTextSize="24sp"
                 android:autoSizeStepGranularity="2sp" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAccountsSummaryReport"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginTop="12dp"
+                android:text="تقرير ملخص الحسابات"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/teal_700"
+                android:icon="@drawable/ic_summary"
+                android:iconGravity="textStart"
+                android:iconPadding="8dp"
+                android:textSize="18sp"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="12sp"
+                android:autoSizeMaxTextSize="22sp"
+                android:autoSizeStepGranularity="2sp" />
+
             <!-- كرت ملخص الحسابات -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
