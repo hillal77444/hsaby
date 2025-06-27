@@ -20,12 +20,12 @@
             android:layout_weight="2"
             android:gravity="center|right"
             android:textColor="#222"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:background="@drawable/table_border"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="10sp"
-            android:autoSizeMaxTextSize="18sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="9sp"
+            android:autoSizeMaxTextSize="15sp"
+            android:autoSizeStepGranularity="1sp" />
 
         <TextView
             android:id="@+id/debitsTextView"
@@ -34,12 +34,12 @@
             android:layout_weight="1.2"
             android:gravity="center"
             android:textColor="#F44336"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:background="@drawable/table_border"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="10sp"
-            android:autoSizeMaxTextSize="18sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="9sp"
+            android:autoSizeMaxTextSize="15sp"
+            android:autoSizeStepGranularity="1sp" />
 
         <TextView
             android:id="@+id/creditsTextView"
@@ -48,12 +48,12 @@
             android:layout_weight="1.2"
             android:gravity="center"
             android:textColor="#4CAF50"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:background="@drawable/table_border"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="10sp"
-            android:autoSizeMaxTextSize="18sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="9sp"
+            android:autoSizeMaxTextSize="15sp"
+            android:autoSizeStepGranularity="1sp" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -69,11 +69,11 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:textColor="#152FD9"
-                android:textSize="15sp"
+                android:textSize="13sp"
                 android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="10sp"
-                android:autoSizeMaxTextSize="18sp"
-                android:autoSizeStepGranularity="2sp" />
+                android:autoSizeMinTextSize="9sp"
+                android:autoSizeMaxTextSize="15sp"
+                android:autoSizeStepGranularity="1sp" />
 
             <ImageView
                 android:id="@+id/ivArrow"
