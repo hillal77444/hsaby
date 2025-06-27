@@ -5,45 +5,6 @@
     android:orientation="vertical"
     android:background="#F8F8F8">
 
-    <!-- شريط العنوان وأزرار التصفية -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:background="@color/info"
-        android:padding="12dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="تقرير"
-            android:textColor="#fff"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="12sp"
-            android:autoSizeMaxTextSize="22sp"
-            android:autoSizeStepGranularity="2sp" />
-
-        <ImageButton
-            android:id="@+id/btnExportPdf"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_pdf"
-            android:contentDescription="تصدير PDF" />
-
-        <ImageButton
-            android:id="@+id/btnShare"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_print"
-            android:contentDescription="مشاركة" />
-    </LinearLayout>
-
     <!-- أزرار تصفية العملة -->
     <LinearLayout
         android:layout_width="match_parent"
