@@ -540,7 +540,8 @@ public class DataManager {
                         Log.e(TAG, "Error reading error body", e);
                     }
                     Log.e(TAG, errorMessage);
-                    handler.post(() -> callback.onError(errorMessage));
+                    final String finalErrorMessage = errorMessage;
+                    handler.post(() -> callback.onError(finalErrorMessage));
                 }
             }
             @Override
