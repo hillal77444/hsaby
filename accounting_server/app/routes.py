@@ -266,6 +266,26 @@ def sync_data():
                     old_amount = transaction.amount
                     old_date = transaction.date
                     
+                    # معالجة cashbox_id
+                    new_cashbox_id = trans_data.get('cashbox_id')
+                    print(f"Original cashbox_id from request: {new_cashbox_id}")
+                    print(f"Current transaction cashbox_id: {transaction.cashbox_id}")
+                    
+                    if not new_cashbox_id or new_cashbox_id == -1:
+                        print(f"Cashbox_id is invalid ({new_cashbox_id}), using main cashbox")
+                        # إذا لم يتم تحديد صندوق أو كان -1، استخدم الصندوق الرئيسي
+                        main_cashbox = Cashbox.query.filter_by(user_id=current_user_id, name='الصندوق الرئيسي').first()
+                        if not main_cashbox:
+                            print("Main cashbox not found, creating new one")
+                            # إنشاء صندوق رئيسي إذا لم يكن موجوداً
+                            main_cashbox = Cashbox(name='الصندوق الرئيسي', user_id=current_user_id)
+                            db.session.add(main_cashbox)
+                            db.session.commit()
+                        new_cashbox_id = main_cashbox.id
+                        print(f"Using main cashbox ID: {new_cashbox_id}")
+                    else:
+                        print(f"Using provided cashbox_id: {new_cashbox_id}")
+                    
                     # تحديث المعاملة الموجودة
                     transaction.amount = trans_data.get('amount', transaction.amount)
                     transaction.type = trans_data.get('type', transaction.type)
@@ -275,7 +295,9 @@ def sync_data():
                     transaction.currency = trans_data.get('currency', transaction.currency)
                     transaction.whatsapp_enabled = trans_data.get('whatsapp_enabled', transaction.whatsapp_enabled)
                     transaction.account_id = trans_data.get('account_id', transaction.account_id)
+                    transaction.cashbox_id = new_cashbox_id  # تحديث cashbox_id
                     transaction.user_id = current_user_id
+                    print(f"Updated transaction cashbox_id to: {transaction.cashbox_id}")
                     logger.info(f"Updated transaction: {transaction.id}")
                     
                     # إرسال إشعار فقط إذا تم تغيير المبلغ
@@ -294,15 +316,22 @@ def sync_data():
                     
                     # منطق اختيار الصندوق
                     cashbox_id = trans_data.get('cashbox_id')
+                    print(f"New transaction - Original cashbox_id from request: {cashbox_id}")
+                    
                     if not cashbox_id or cashbox_id == -1:
+                        print(f"New transaction - Cashbox_id is invalid ({cashbox_id}), using main cashbox")
                         # إذا لم يتم تحديد صندوق أو كان -1، استخدم الصندوق الرئيسي
                         main_cashbox = Cashbox.query.filter_by(user_id=current_user_id, name='الصندوق الرئيسي').first()
                         if not main_cashbox:
+                            print("New transaction - Main cashbox not found, creating new one")
                             # إنشاء صندوق رئيسي إذا لم يكن موجوداً
                             main_cashbox = Cashbox(name='الصندوق الرئيسي', user_id=current_user_id)
                             db.session.add(main_cashbox)
                             db.session.commit()
                         cashbox_id = main_cashbox.id
+                        print(f"New transaction - Using main cashbox ID: {cashbox_id}")
+                    else:
+                        print(f"New transaction - Using provided cashbox_id: {cashbox_id}")
 
                     # إنشاء معاملة جديدة
                     transaction = Transaction(
@@ -318,6 +347,7 @@ def sync_data():
                         server_id=new_server_id,
                         cashbox_id=cashbox_id
                     )
+                    print(f"New transaction - Final cashbox_id: {transaction.cashbox_id}")
                     db.session.add(transaction)
                     db.session.flush()
                     logger.info(f"Added new transaction: {transaction.id}")
@@ -746,6 +776,26 @@ def sync_changes():
                         old_amount = transaction.amount
                         old_date = transaction.date
                         
+                        # معالجة cashbox_id
+                        new_cashbox_id = transaction_data.get('cashbox_id')
+                        print(f"Original cashbox_id from request: {new_cashbox_id}")
+                        print(f"Current transaction cashbox_id: {transaction.cashbox_id}")
+                        
+                        if not new_cashbox_id or new_cashbox_id == -1:
+                            print(f"Cashbox_id is invalid ({new_cashbox_id}), using main cashbox")
+                            # إذا لم يتم تحديد صندوق أو كان -1، استخدم الصندوق الرئيسي
+                            main_cashbox = Cashbox.query.filter_by(user_id=current_user_id, name='الصندوق الرئيسي').first()
+                            if not main_cashbox:
+                                print("Main cashbox not found, creating new one")
+                                # إنشاء صندوق رئيسي إذا لم يكن موجوداً
+                                main_cashbox = Cashbox(name='الصندوق الرئيسي', user_id=current_user_id)
+                                db.session.add(main_cashbox)
+                                db.session.commit()
+                            new_cashbox_id = main_cashbox.id
+                            print(f"Using main cashbox ID: {new_cashbox_id}")
+                        else:
+                            print(f"Using provided cashbox_id: {new_cashbox_id}")
+                        
                         # تحديث المعاملة
                         transaction.date = date
                         transaction.amount = transaction_data['amount']
@@ -759,10 +809,10 @@ def sync_changes():
                         if 'whatsapp_enabled' in transaction_data:
                             transaction.whatsapp_enabled = transaction_data['whatsapp_enabled']
                         transaction.account_id = transaction_data['account_id']
-                        
-                        # تحديث الصندوق إذا تم إرساله
-                        if 'cashbox_id' in transaction_data:
-                            transaction.cashbox_id = transaction_data['cashbox_id']
+                        transaction.cashbox_id = new_cashbox_id  # تحديث cashbox_id
+                        transaction.user_id = current_user_id
+                        print(f"Updated transaction cashbox_id to: {transaction.cashbox_id}")
+                        logger.info(f"Updated transaction: {transaction.id}")
                         
                         # إرسال إشعار فقط إذا تم تغيير المبلغ
                         if old_amount != transaction.amount:
