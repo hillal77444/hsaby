@@ -410,6 +410,7 @@ def get_transactions():
                 'notes': trans.notes,
                 'whatsapp_enabled': trans.whatsapp_enabled,
                 'user_id': trans.user_id,
+                'cashbox_id': trans.cashbox_id,
                 'created_at': int(trans.created_at.timestamp() * 1000) if trans.created_at else None,
                 'updated_at': int(trans.updated_at.timestamp() * 1000) if trans.updated_at else None
             }
