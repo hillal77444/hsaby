@@ -210,30 +210,53 @@ public class EditTransactionFragment extends Fragment implements com.hillal.acc.
             names.add("➕ إضافة صندوق جديد...");
             ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, names);
             binding.cashboxAutoComplete.setAdapter(adapter);
+            
             // اختيار الصندوق المرتبط بالمعاملة أو الرئيسي
             if (oldTransaction != null && oldTransaction.getCashboxId() != -1) {
-                int idx = 0;
-                for (int i = 0; i < allCashboxes.size(); i++) {
-                    if (allCashboxes.get(i).id == oldTransaction.getCashboxId()) { idx = i; break; }
+                // البحث عن الصندوق المرتبط بالمعاملة
+                Cashbox transactionCashbox = null;
+                for (Cashbox cashbox : allCashboxes) {
+                    if (cashbox.id == oldTransaction.getCashboxId()) {
+                        transactionCashbox = cashbox;
+                        break;
+                    }
                 }
-                binding.cashboxAutoComplete.setText(allCashboxes.get(idx).name, false);
-                selectedCashboxId = oldTransaction.getCashboxId();
+                
+                if (transactionCashbox != null) {
+                    binding.cashboxAutoComplete.setText(transactionCashbox.name, false);
+                    selectedCashboxId = transactionCashbox.id;
+                } else if (mainCashboxId != -1) {
+                    // إذا لم يتم العثور على الصندوق المرتبط، استخدم الرئيسي
+                    for (Cashbox cashbox : allCashboxes) {
+                        if (cashbox.id == mainCashboxId) {
+                            binding.cashboxAutoComplete.setText(cashbox.name, false);
+                            selectedCashboxId = mainCashboxId;
+                            break;
+                        }
+                    }
+                }
             } else if (mainCashboxId != -1) {
-                int idx = 0;
-                for (int i = 0; i < allCashboxes.size(); i++) {
-                    if (allCashboxes.get(i).id == mainCashboxId) { idx = i; break; }
+                // إذا لم تكن هناك معاملة قديمة، استخدم الصندوق الرئيسي
+                for (Cashbox cashbox : allCashboxes) {
+                    if (cashbox.id == mainCashboxId) {
+                        binding.cashboxAutoComplete.setText(cashbox.name, false);
+                        selectedCashboxId = mainCashboxId;
+                        break;
+                    }
                 }
-                binding.cashboxAutoComplete.setText(allCashboxes.get(idx).name, false);
-                selectedCashboxId = mainCashboxId;
             }
+            
             binding.cashboxAutoComplete.setOnItemClickListener((parent, v, position, id) -> {
                 if (position == allCashboxes.size()) {
                     // خيار إضافة صندوق جديد
                     openAddCashboxDialog();
                 } else {
                     selectedCashboxId = allCashboxes.get(position).id;
+                    // إزالة رسالة الخطأ إذا كانت موجودة
+                    binding.cashboxAutoComplete.setError(null);
                 }
             });
+            
             // تفعيل القائمة المنسدلة عند النقر
             binding.cashboxAutoComplete.setFocusable(false);
             binding.cashboxAutoComplete.setOnClickListener(v -> binding.cashboxAutoComplete.showDropDown());
@@ -300,6 +323,14 @@ public class EditTransactionFragment extends Fragment implements com.hillal.acc.
             return;
         }
 
+        // التحقق من اختيار الصندوق
+        String selectedCashboxName = binding.cashboxAutoComplete.getText().toString().trim();
+        if (selectedCashboxName.isEmpty() || selectedCashboxName.equals("➕ إضافة صندوق جديد...")) {
+            Toast.makeText(requireContext(), "الرجاء اختيار الصندوق", Toast.LENGTH_SHORT).show();
+            binding.cashboxAutoComplete.setError("مطلوب اختيار صندوق");
+            return;
+        }
+
         try {
             double amount = Double.parseDouble(amountStr);
 
@@ -322,17 +353,14 @@ public class EditTransactionFragment extends Fragment implements com.hillal.acc.
             transaction.setWhatsappEnabled(oldTransaction.isWhatsappEnabled());
             transaction.setSyncStatus(0);
 
-            // تحسين منطق اختيار الصندوق - البحث عن الصندوق المختار من النص المعروض
+            // البحث عن الصندوق المختار من النص المعروض
             long cashboxIdToSave = -1;
-            String selectedCashboxName = binding.cashboxAutoComplete.getText().toString().trim();
             
             // البحث عن الصندوق المختار من النص المعروض
-            if (!selectedCashboxName.isEmpty() && !selectedCashboxName.equals("➕ إضافة صندوق جديد...")) {
-                for (Cashbox cashbox : allCashboxes) {
-                    if (cashbox.name.equals(selectedCashboxName)) {
-                        cashboxIdToSave = cashbox.id;
-                        break;
-                    }
+            for (Cashbox cashbox : allCashboxes) {
+                if (cashbox.name.equals(selectedCashboxName)) {
+                    cashboxIdToSave = cashbox.id;
+                    break;
                 }
             }
             
@@ -355,8 +383,15 @@ public class EditTransactionFragment extends Fragment implements com.hillal.acc.
             if (cashboxIdToSave == -1) {
                 cashboxIdToSave = oldTransaction.getCashboxId();
                 if (cashboxIdToSave == -1) {
-                    Toast.makeText(requireContext(), "تحذير: لا توجد صناديق متاحة", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "خطأ: لا توجد صناديق متاحة", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+            }
+            
+            // التحقق النهائي من أن الصندوق صحيح
+            if (cashboxIdToSave == -1) {
+                Toast.makeText(requireContext(), "خطأ: لم يتم تحديد صندوق صحيح", Toast.LENGTH_SHORT).show();
+                return;
             }
             
             transaction.setCashboxId(cashboxIdToSave);
