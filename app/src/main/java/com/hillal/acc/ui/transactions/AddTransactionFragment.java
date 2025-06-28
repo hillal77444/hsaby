@@ -211,7 +211,23 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
                     transaction.setServerId(-1);
                     transaction.setWhatsappEnabled(account.isWhatsappEnabled());
 
-                    long cashboxIdToSave = (selectedCashboxId != -1) ? selectedCashboxId : mainCashboxId;
+                    // تحسين منطق اختيار الصندوق
+                    long cashboxIdToSave;
+                    if (selectedCashboxId != -1) {
+                        // إذا تم اختيار صندوق محدد
+                        cashboxIdToSave = selectedCashboxId;
+                    } else if (mainCashboxId != -1) {
+                        // إذا لم يتم اختيار صندوق، استخدم الصندوق الرئيسي
+                        cashboxIdToSave = mainCashboxId;
+                    } else if (!allCashboxes.isEmpty()) {
+                        // إذا لم يكن هناك صندوق رئيسي، استخدم أول صندوق متاح
+                        cashboxIdToSave = allCashboxes.get(0).id;
+                    } else {
+                        // إذا لم تكن هناك صناديق على الإطلاق، لا تحفظ صندوق
+                        cashboxIdToSave = -1;
+                        Toast.makeText(requireContext(), "تحذير: لا توجد صناديق متاحة", Toast.LENGTH_SHORT).show();
+                    }
+                    
                     transaction.setCashboxId(cashboxIdToSave);
 
                     transactionsViewModel.insertTransaction(transaction);
