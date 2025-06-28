@@ -508,10 +508,10 @@ public class DataManager {
 
     private void fetchCashboxesFromServer(String token, int retryCount, DataCallback callback) {
         Log.d(TAG, "Fetching cashboxes from server... Attempt: " + (retryCount + 1));
-        ApiService api = RetrofitClient.getApiService();
         AppDatabase db = AppDatabase.getInstance(context);
         CashboxDao cashboxDao = db.cashboxDao();
-        api.getCashboxes("Bearer " + token).enqueue(new Callback<List<Cashbox>>() {
+        
+        apiService.getCashboxes("Bearer " + token).enqueue(new Callback<List<Cashbox>>() {
             @Override
             public void onResponse(Call<List<Cashbox>> call, Response<List<Cashbox>> response) {
                 if (response.isSuccessful() && response.body() != null) {
