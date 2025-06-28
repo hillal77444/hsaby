@@ -51,7 +51,7 @@ import com.hillal.acc.data.entities.Cashbox;
 import com.hillal.acc.viewmodel.CashboxViewModel;
 import com.hillal.acc.ui.cashbox.AddCashboxDialog;
 import com.hillal.acc.data.repository.CashboxRepository;
-import com.hillal.acc.ui.cashbox.CashboxHelper;
+import com.hillal.acc.ui.transactions.CashboxHelper;
 
 public class AddTransactionFragment extends Fragment implements com.hillal.acc.ui.cashbox.AddCashboxDialog.OnCashboxAddedListener {
     private FragmentAddTransactionBinding binding;
