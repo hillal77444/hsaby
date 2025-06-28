@@ -305,14 +305,21 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
     }
 
     private void openAddCashboxDialog() {
+        android.util.Log.d("AddTransactionFragment", "openAddCashboxDialog called");
         AddCashboxDialog dialog = new AddCashboxDialog();
-        dialog.setTargetFragment(this, 0);
+        android.util.Log.d("AddTransactionFragment", "AddCashboxDialog created");
+        dialog.setListener(this);
+        android.util.Log.d("AddTransactionFragment", "setListener called");
         dialog.show(getParentFragmentManager(), "AddCashboxDialog");
+        android.util.Log.d("AddTransactionFragment", "Dialog shown");
     }
 
     @Override
     public void onCashboxAdded(String name) {
-        android.util.Log.d("AddTransactionFragment", "onCashboxAdded called with name: " + name);
+        android.util.Log.d("AddTransactionFragment", "=== onCashboxAdded called ===");
+        android.util.Log.d("AddTransactionFragment", "Name received: " + name);
+        android.util.Log.d("AddTransactionFragment", "Context: " + (getContext() != null));
+        android.util.Log.d("AddTransactionFragment", "isAdded: " + isAdded());
         
         // التحقق من الاتصال بالإنترنت
         if (!isNetworkAvailable()) {
