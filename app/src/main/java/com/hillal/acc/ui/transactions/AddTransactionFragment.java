@@ -340,6 +340,7 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
         loadingDialog.show();
 
         // إرسال الصندوق إلى الخادم
+        android.util.Log.d("AddTransactionFragment", "Calling addCashboxToServer");
         cashboxViewModel.addCashboxToServer("https://malyp.com/", "Bearer " + token, name, 
             new CashboxRepository.CashboxCallback() {
                 @Override
