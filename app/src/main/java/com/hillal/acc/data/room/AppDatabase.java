@@ -15,6 +15,8 @@ import com.hillal.acc.data.model.Transaction;
 import com.hillal.acc.data.model.Settings;
 import com.hillal.acc.data.model.PendingOperation;
 import com.hillal.acc.data.model.User;
+import com.hillal.acc.data.entities.Cashbox;
+import com.hillal.acc.data.dao.CashboxDao;
 import com.hillal.acc.data.room.migrations.Migration_2;
 import com.hillal.acc.data.room.migrations.Migration_3;
 import com.hillal.acc.data.room.migrations.Migration_4;
@@ -26,7 +28,8 @@ import com.hillal.acc.data.room.Converters;
         Transaction.class,
         User.class,
         Settings.class,
-        PendingOperation.class
+        PendingOperation.class,
+        Cashbox.class
 }, version = 1, exportSchema = true)
 @TypeConverters(Converters.class)
 public abstract class AppDatabase extends RoomDatabase {
@@ -38,6 +41,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract SettingsDao settingsDao();
     public abstract PendingOperationDao pendingOperationDao();
     public abstract UserDao userDao();
+    public abstract CashboxDao cashboxDao();
 
     public static AppDatabase getInstance(Context context) {
         if (INSTANCE == null) {
