@@ -20,12 +20,16 @@ import com.hillal.acc.data.model.Transaction;
 import com.hillal.acc.databinding.FragmentEditTransactionBinding;
 import com.hillal.acc.viewmodel.AccountViewModel;
 import com.hillal.acc.data.preferences.UserPreferences;
+import com.hillal.acc.data.entities.Cashbox;
+import com.hillal.acc.viewmodel.CashboxViewModel;
+import com.hillal.acc.ui.cashbox.AddCashboxDialog;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.ArrayList;
 
 public class EditTransactionFragment extends Fragment {
     private FragmentEditTransactionBinding binding;
@@ -37,6 +41,10 @@ public class EditTransactionFragment extends Fragment {
     private final Calendar calendar = Calendar.getInstance();
     private Transaction oldTransaction;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", new Locale("ar"));
+    private long selectedCashboxId = -1;
+    private long mainCashboxId = -1;
+    private List<Cashbox> allCashboxes = new ArrayList<>();
+    private CashboxViewModel cashboxViewModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,6 +52,7 @@ public class EditTransactionFragment extends Fragment {
         transactionsViewModel = new ViewModelProvider(this).get(TransactionsViewModel.class);
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
         userPreferences = new UserPreferences(requireContext());
+        cashboxViewModel = new ViewModelProvider(this).get(CashboxViewModel.class);
         
         if (getArguments() != null) {
             transactionId = getArguments().getLong("transactionId", -1);
@@ -64,6 +73,7 @@ public class EditTransactionFragment extends Fragment {
         setupListeners();
         loadAccounts();
         loadTransaction();
+        setupCashboxDropdown();
     }
 
     private void setupViews() {
@@ -86,9 +96,6 @@ public class EditTransactionFragment extends Fragment {
             }
         });
     }
-
-
-    
 
     private void setupAccountDropdown(List<Account> accounts) {
         String[] accountNames = new String[accounts.size()];
@@ -182,6 +189,73 @@ public class EditTransactionFragment extends Fragment {
         binding.dateEditText.setText(dateFormat.format(calendar.getTime()));
     }
 
+    private void setupCashboxDropdown() {
+        cashboxViewModel.getAllCashboxes().observe(getViewLifecycleOwner(), cashboxes -> {
+            allCashboxes = cashboxes != null ? cashboxes : new ArrayList<>();
+            List<String> names = new ArrayList<>();
+            mainCashboxId = -1;
+            for (Cashbox c : allCashboxes) {
+                names.add(c.name);
+                if (mainCashboxId == -1 && (c.name.equals("الرئيسي") || c.name.equalsIgnoreCase("main"))) {
+                    mainCashboxId = c.id;
+                }
+            }
+            if (mainCashboxId == -1 && !allCashboxes.isEmpty()) mainCashboxId = allCashboxes.get(0).id;
+            names.add("➕ إضافة صندوق جديد...");
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, names);
+            binding.cashboxAutoComplete.setAdapter(adapter);
+            // اختيار الصندوق المرتبط بالمعاملة أو الرئيسي
+            if (oldTransaction != null && oldTransaction.getCashboxId() != -1) {
+                int idx = 0;
+                for (int i = 0; i < allCashboxes.size(); i++) {
+                    if (allCashboxes.get(i).id == oldTransaction.getCashboxId()) { idx = i; break; }
+                }
+                binding.cashboxAutoComplete.setText(allCashboxes.get(idx).name, false);
+                selectedCashboxId = oldTransaction.getCashboxId();
+            } else if (mainCashboxId != -1) {
+                int idx = 0;
+                for (int i = 0; i < allCashboxes.size(); i++) {
+                    if (allCashboxes.get(i).id == mainCashboxId) { idx = i; break; }
+                }
+                binding.cashboxAutoComplete.setText(allCashboxes.get(idx).name, false);
+                selectedCashboxId = mainCashboxId;
+            }
+            binding.cashboxAutoComplete.setOnItemClickListener((parent, v, position, id) -> {
+                if (position == allCashboxes.size()) {
+                    // خيار إضافة صندوق جديد
+                    openAddCashboxDialog();
+                } else {
+                    selectedCashboxId = allCashboxes.get(position).id;
+                }
+            });
+        });
+    }
+
+    private void openAddCashboxDialog() {
+        AddCashboxDialog dialog = new AddCashboxDialog();
+        dialog.setTargetFragment(this, 0);
+        dialog.show(getParentFragmentManager(), "AddCashboxDialog");
+    }
+
+    @Override
+    public void onCashboxAdded(String name) {
+        // أضف الصندوق الجديد عبر ViewModel
+        Cashbox newCashbox = new Cashbox();
+        newCashbox.name = name;
+        newCashbox.createdAt = String.valueOf(System.currentTimeMillis());
+        cashboxViewModel.insert(newCashbox);
+        // سيتم تحديث القائمة تلقائياً عبر LiveData
+        // حدد الصندوق الجديد تلقائياً بعد إضافته
+        binding.cashboxAutoComplete.setText(name, false);
+        // ابحث عن id الصندوق الجديد
+        for (Cashbox c : allCashboxes) {
+            if (c.name.equals(name)) {
+                selectedCashboxId = c.id;
+                break;
+            }
+        }
+    }
+
     private void updateTransaction() {
         if (selectedAccountId == -1) {
             Toast.makeText(requireContext(), "الرجاء اختيار الحساب", Toast.LENGTH_SHORT).show();
@@ -220,6 +294,9 @@ public class EditTransactionFragment extends Fragment {
             transaction.setServerId(oldTransaction.getServerId());
             transaction.setWhatsappEnabled(oldTransaction.isWhatsappEnabled());
             transaction.setSyncStatus(0);
+
+            long cashboxIdToSave = (selectedCashboxId != -1) ? selectedCashboxId : mainCashboxId;
+            transaction.setCashboxId(cashboxIdToSave);
 
             transactionsViewModel.updateTransaction(transaction);
             Toast.makeText(requireContext(), R.string.transaction_updated, Toast.LENGTH_SHORT).show();
