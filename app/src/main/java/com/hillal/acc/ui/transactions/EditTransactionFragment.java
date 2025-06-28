@@ -238,7 +238,7 @@ public class EditTransactionFragment extends Fragment implements com.hillal.acc.
 
     private void openAddCashboxDialog() {
         AddCashboxDialog dialog = new AddCashboxDialog();
-        dialog.setTargetFragment(this, 0);
+        dialog.setListener(this);
         dialog.show(getParentFragmentManager(), "AddCashboxDialog");
     }
 
