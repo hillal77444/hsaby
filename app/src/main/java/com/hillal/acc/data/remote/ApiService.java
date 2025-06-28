@@ -140,6 +140,8 @@ public interface ApiService {
             // نسخ المعاملات مع last_sync_time
             List<Transaction> transactionsToSend = new ArrayList<>();
             for (Transaction transaction : transactions) {
+                android.util.Log.d("ApiService", "Processing transaction ID: " + transaction.getId() + ", Original cashbox_id: " + transaction.getCashboxId());
+                
                 Transaction newTransaction = new Transaction();
                 newTransaction.setId(transaction.getId());
                 newTransaction.setServerId(transaction.getServerId());
@@ -169,6 +171,8 @@ public interface ApiService {
                 newTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
                 newTransaction.setSyncStatus(transaction.getSyncStatus());
                 newTransaction.setCashboxId(transaction.getCashboxId());
+                
+                android.util.Log.d("ApiService", "New transaction cashbox_id: " + newTransaction.getCashboxId());
                 transactionsToSend.add(newTransaction);
             }
             return transactionsToSend;
