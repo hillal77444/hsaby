@@ -80,6 +80,10 @@ public class Transaction {
     @SerializedName("sync_status")
     private int syncStatus;
 
+    @ColumnInfo(name = "cashbox_id")
+    @SerializedName("cashbox_id")
+    private long cashboxId = -1;
+
     // Constructor
     @Ignore
     public Transaction(long accountId, double amount, String type, String description, String currency) {
@@ -253,6 +257,14 @@ public class Transaction {
 
     public void setSyncStatus(int syncStatus) {
         this.syncStatus = syncStatus;
+    }
+
+    public long getCashboxId() {
+        return cashboxId;
+    }
+
+    public void setCashboxId(long cashboxId) {
+        this.cashboxId = cashboxId;
     }
 
     @Override
