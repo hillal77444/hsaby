@@ -290,6 +290,9 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
                     selectedCashboxId = allCashboxes.get(position).id;
                 }
             });
+            // تفعيل القائمة المنسدلة عند النقر
+            binding.cashboxAutoComplete.setFocusable(false);
+            binding.cashboxAutoComplete.setOnClickListener(v -> binding.cashboxAutoComplete.showDropDown());
         });
     }
 
