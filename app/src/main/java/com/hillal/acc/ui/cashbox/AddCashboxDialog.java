@@ -29,6 +29,7 @@ public class AddCashboxDialog extends DialogFragment {
         } else if (context instanceof OnCashboxAddedListener) {
             listener = (OnCashboxAddedListener) context;
         }
+        android.util.Log.d("AddCashboxDialog", "Listener set: " + (listener != null ? "YES" : "NO"));
     }
 
     @NonNull
@@ -41,10 +42,15 @@ public class AddCashboxDialog extends DialogFragment {
                 .setView(view)
                 .setPositiveButton("حفظ", (dialog, which) -> {
                     String name = editName.getText().toString().trim();
+                    android.util.Log.d("AddCashboxDialog", "Save button clicked, name: '" + name + "', listener: " + (listener != null ? "YES" : "NO"));
                     if (name.isEmpty()) {
                         Toast.makeText(getContext(), "يرجى إدخال اسم الصندوق", Toast.LENGTH_SHORT).show();
                     } else if (listener != null) {
+                        android.util.Log.d("AddCashboxDialog", "Calling listener.onCashboxAdded");
                         listener.onCashboxAdded(name);
+                    } else {
+                        android.util.Log.e("AddCashboxDialog", "Listener is null! Cannot add cashbox");
+                        Toast.makeText(getContext(), "خطأ في إضافة الصندوق", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("إلغاء", null)
