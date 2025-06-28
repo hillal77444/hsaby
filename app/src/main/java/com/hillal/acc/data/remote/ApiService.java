@@ -79,6 +79,9 @@ public interface ApiService {
     @GET("api/cashboxes")
     Call<List<Cashbox>> getCashboxes(@Header("Authorization") String token);
 
+    @POST("api/cashboxes")
+    Call<Cashbox> addCashbox(@Header("Authorization") String token, @Body AddCashboxRequest request);
+
     class LoginRequest {
         private String phone;
         private String password;
@@ -206,6 +209,18 @@ public interface ApiService {
             
             @SerializedName("server_id")
             public Long serverId;
+        }
+    }
+
+    class AddCashboxRequest {
+        private String name;
+
+        public AddCashboxRequest(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
         }
     }
 } 
