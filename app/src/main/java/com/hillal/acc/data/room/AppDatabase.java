@@ -30,7 +30,7 @@ import com.hillal.acc.data.room.Converters;
         Settings.class,
         PendingOperation.class,
         Cashbox.class
-}, version = 1, exportSchema = true)
+}, version = 6, exportSchema = true)
 @TypeConverters(Converters.class)
 public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG = "AppDatabase";
@@ -43,6 +43,14 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract UserDao userDao();
     public abstract CashboxDao cashboxDao();
 
+    public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS `Cashbox` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `createdAt` TEXT)");
+            db.execSQL("ALTER TABLE `transactions` ADD COLUMN `cashbox_id` INTEGER DEFAULT -1");
+        }
+    };
+
     public static AppDatabase getInstance(Context context) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
@@ -52,7 +60,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             AppDatabase.class,
                             "accounting_database"
                     )
-                    .fallbackToDestructiveMigration()
+                    .addMigrations(MIGRATION_1_2, new Migration_2(), new Migration_3(), new Migration_4(), new Migration_5())
                     .build();
                     Log.d(TAG, "Database instance created");
                 }
