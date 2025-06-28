@@ -272,23 +272,16 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
             mainCashboxId = -1;
             for (Cashbox c : allCashboxes) {
                 names.add(c.name);
-                if (mainCashboxId == -1 && (c.name.equals("الرئيسي") || c.name.equalsIgnoreCase("main"))) {
-                    mainCashboxId = c.id;
-                }
             }
-            if (mainCashboxId == -1 && !allCashboxes.isEmpty()) mainCashboxId = allCashboxes.get(0).id;
+            if (!allCashboxes.isEmpty()) {
+                // اختر أول صندوق كافتراضي
+                mainCashboxId = allCashboxes.get(0).id;
+                binding.cashboxAutoComplete.setText(allCashboxes.get(0).name, false);
+                selectedCashboxId = mainCashboxId;
+            }
             names.add("➕ إضافة صندوق جديد...");
             ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, names);
             binding.cashboxAutoComplete.setAdapter(adapter);
-            // اختيار الصندوق الرئيسي تلقائياً
-            if (mainCashboxId != -1) {
-                int idx = 0;
-                for (int i = 0; i < allCashboxes.size(); i++) {
-                    if (allCashboxes.get(i).id == mainCashboxId) { idx = i; break; }
-                }
-                binding.cashboxAutoComplete.setText(allCashboxes.get(idx).name, false);
-                selectedCashboxId = mainCashboxId;
-            }
             binding.cashboxAutoComplete.setOnItemClickListener((parent, v, position, id) -> {
                 if (position == allCashboxes.size()) {
                     // خيار إضافة صندوق جديد
