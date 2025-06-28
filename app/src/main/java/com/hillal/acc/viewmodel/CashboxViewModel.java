@@ -44,4 +44,8 @@ public class CashboxViewModel extends AndroidViewModel {
     public void fetchCashboxesFromApi(String baseUrl, String token, Runnable onDone) {
         repository.fetchCashboxesFromApi(baseUrl, token, onDone);
     }
+
+    public void addCashboxToServer(String baseUrl, String token, String name, CashboxRepository.CashboxCallback callback) {
+        repository.addCashboxToServer(baseUrl, token, name, callback);
+    }
 } 
