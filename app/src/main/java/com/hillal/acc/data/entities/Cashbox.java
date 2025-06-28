@@ -4,7 +4,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.annotation.NonNull;
 
-@Entity(tableName = "Cashbox")
+@Entity(tableName = "cashboxes")
 public class Cashbox {
     @PrimaryKey
     @NonNull
