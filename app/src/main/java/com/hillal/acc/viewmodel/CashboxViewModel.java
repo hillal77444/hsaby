@@ -41,11 +41,11 @@ public class CashboxViewModel extends AndroidViewModel {
         repository.deleteAll();
     }
 
-    public void fetchCashboxesFromApi(String baseUrl, String token, Runnable onDone) {
-        repository.fetchCashboxesFromApi(baseUrl, token, onDone);
+    public void fetchCashboxesFromApi(String token, Runnable onDone) {
+        repository.fetchCashboxesFromApi(token, onDone);
     }
 
-    public void addCashboxToServer(String baseUrl, String token, String name, CashboxRepository.CashboxCallback callback) {
-        repository.addCashboxToServer(baseUrl, token, name, callback);
+    public void addCashboxToServer(String token, String name, CashboxRepository.CashboxCallback callback) {
+        repository.addCashboxToServer(token, name, callback);
     }
 } 
