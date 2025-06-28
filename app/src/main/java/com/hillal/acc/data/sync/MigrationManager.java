@@ -143,6 +143,10 @@ public class MigrationManager {
                                                 serverTransaction.setModified(transaction.isModified());
                                                 serverTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
                                                 serverTransaction.setSyncStatus(transaction.getSyncStatus());
+                                                serverTransaction.setCashboxId(transaction.getCashboxId());
+                                                
+                                                Log.d("MigrationManager", "Creating server transaction: ID=" + transaction.getId() + 
+                                                    ", CashboxID=" + transaction.getCashboxId());
                                                 transactionsForServer.add(serverTransaction);
                                             }
                                         }
