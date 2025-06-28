@@ -325,4 +325,33 @@ public class DashboardFragment extends Fragment {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // تحقق إذا كانت القاعدة فارغة (لا يوجد حسابات ولا صناديق)
+        new Thread(() -> {
+            boolean noAccounts = db.accountDao().getAllAccountsSync().isEmpty();
+            boolean noCashboxes = db.cashboxDao().getAll().isEmpty();
+            if (noAccounts && noCashboxes) {
+                requireActivity().runOnUiThread(() -> {
+                    showLoadingDialog("جاري المزامنة التلقائية...");
+                    syncManager.performFullSync(new SyncManager.SyncCallback() {
+                        @Override
+                        public void onSuccess() {
+                            hideLoadingDialog();
+                            showSuccessDialog("تمت المزامنة التلقائية بنجاح");
+                            loadAccounts();
+                            loadTransactions();
+                        }
+                        @Override
+                        public void onError(String error) {
+                            hideLoadingDialog();
+                            showErrorSnackbar("فشلت المزامنة التلقائية: " + error);
+                        }
+                    });
+                });
+            }
+        }).start();
+    }
 } 
