@@ -22,6 +22,11 @@ import com.hillal.acc.data.room.migrations.Migration_3;
 import com.hillal.acc.data.room.migrations.Migration_4;
 import com.hillal.acc.data.room.migrations.Migration_5;
 import com.hillal.acc.data.room.Converters;
+import com.hillal.acc.data.room.AccountDao;
+import com.hillal.acc.data.room.TransactionDao;
+import com.hillal.acc.data.room.SettingsDao;
+import com.hillal.acc.data.room.PendingOperationDao;
+import com.hillal.acc.data.room.UserDao;
 
 @Database(entities = {
         Account.class,
@@ -36,8 +41,8 @@ public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG = "AppDatabase";
     private static volatile AppDatabase INSTANCE;
 
-    public abstract com.hillal.acc.data.room.AccountDao accountDao();
-    public abstract com.hillal.acc.data.room.TransactionDao transactionDao();
+    public abstract AccountDao accountDao();
+    public abstract TransactionDao transactionDao();
     public abstract SettingsDao settingsDao();
     public abstract PendingOperationDao pendingOperationDao();
     public abstract UserDao userDao();
