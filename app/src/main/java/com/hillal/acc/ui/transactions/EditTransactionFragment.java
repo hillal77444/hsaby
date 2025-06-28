@@ -322,19 +322,37 @@ public class EditTransactionFragment extends Fragment implements com.hillal.acc.
             transaction.setWhatsappEnabled(oldTransaction.isWhatsappEnabled());
             transaction.setSyncStatus(0);
 
-            // تحسين منطق اختيار الصندوق
-            long cashboxIdToSave;
-            if (selectedCashboxId != -1) {
-                // إذا تم اختيار صندوق محدد
+            // تحسين منطق اختيار الصندوق - البحث عن الصندوق المختار من النص المعروض
+            long cashboxIdToSave = -1;
+            String selectedCashboxName = binding.cashboxAutoComplete.getText().toString().trim();
+            
+            // البحث عن الصندوق المختار من النص المعروض
+            if (!selectedCashboxName.isEmpty() && !selectedCashboxName.equals("➕ إضافة صندوق جديد...")) {
+                for (Cashbox cashbox : allCashboxes) {
+                    if (cashbox.name.equals(selectedCashboxName)) {
+                        cashboxIdToSave = cashbox.id;
+                        break;
+                    }
+                }
+            }
+            
+            // إذا لم يتم العثور على الصندوق من النص، استخدم selectedCashboxId
+            if (cashboxIdToSave == -1 && selectedCashboxId != -1) {
                 cashboxIdToSave = selectedCashboxId;
-            } else if (mainCashboxId != -1) {
-                // إذا لم يتم اختيار صندوق، استخدم الصندوق الرئيسي
+            }
+            
+            // إذا لم يتم العثور على صندوق محدد، استخدم الصندوق الرئيسي
+            if (cashboxIdToSave == -1 && mainCashboxId != -1) {
                 cashboxIdToSave = mainCashboxId;
-            } else if (!allCashboxes.isEmpty()) {
-                // إذا لم يكن هناك صندوق رئيسي، استخدم أول صندوق متاح
+            }
+            
+            // إذا لم يكن هناك صندوق رئيسي، استخدم أول صندوق متاح
+            if (cashboxIdToSave == -1 && !allCashboxes.isEmpty()) {
                 cashboxIdToSave = allCashboxes.get(0).id;
-            } else {
-                // إذا لم تكن هناك صناديق على الإطلاق، احتفظ بالصندوق القديم
+            }
+            
+            // إذا لم تكن هناك صناديق على الإطلاق، احتفظ بالصندوق القديم
+            if (cashboxIdToSave == -1) {
                 cashboxIdToSave = oldTransaction.getCashboxId();
                 if (cashboxIdToSave == -1) {
                     Toast.makeText(requireContext(), "تحذير: لا توجد صناديق متاحة", Toast.LENGTH_SHORT).show();
