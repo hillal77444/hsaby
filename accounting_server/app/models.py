@@ -1,5 +1,6 @@
 from app import db
 from datetime import datetime, timedelta
+from sqlalchemy import event
 
 def get_yemen_time():
     return datetime.utcnow() + timedelta(hours=3)
@@ -12,6 +13,8 @@ class User(db.Model):
     last_seen = db.Column(db.DateTime, default=get_yemen_time, onupdate=get_yemen_time)
     android_version = db.Column(db.String(50), default='Unknown')
     device_name = db.Column(db.String(100), default='Unknown Device')
+    session_name = db.Column(db.String(100), default='admin_main')  # اسم جلسة الواتساب
+    session_expiry = db.Column(db.DateTime, nullable=True)  # تاريخ انتهاء الجلسة
     accounts = db.relationship('Account', backref='user', lazy=True)
     transactions = db.relationship('Transaction', backref='user', lazy=True)
 
@@ -30,6 +33,14 @@ class Account(db.Model):
     created_at = db.Column(db.DateTime, default=get_yemen_time)
     updated_at = db.Column(db.DateTime, default=get_yemen_time, onupdate=get_yemen_time)
 
+class Cashbox(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
+    created_at = db.Column(db.DateTime, default=get_yemen_time)
+    # علاقة: كل صندوق له معاملات
+    transactions = db.relationship('Transaction', backref='cashbox', lazy=True)
+
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     server_id = db.Column(db.Integer, unique=True, autoincrement=True)
@@ -42,6 +53,7 @@ class Transaction(db.Model):
     whatsapp_enabled = db.Column(db.Boolean, default=True)  # إضافة حقل whatsapp_enabled
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
     account_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False, index=True)
+    cashbox_id = db.Column(db.Integer, db.ForeignKey('cashbox.id'), nullable=True, index=True)  # الصندوق المرتبط بالمعاملة
     created_at = db.Column(db.DateTime, default=get_yemen_time)
     updated_at = db.Column(db.DateTime, default=get_yemen_time, onupdate=get_yemen_time)
 
@@ -74,4 +86,13 @@ class AppUpdate(db.Model):
             'release_date': self.release_date.isoformat() if self.release_date else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
-        } 
+        }
+
+# منطق إنشاء الصندوق الرئيسي تلقائيًا عند إنشاء مستخدم جديد
+def create_main_cashbox(mapper, connection, target):
+    from app import db
+    main_cashbox = Cashbox(name='الصندوق الرئيسي', user_id=target.id)
+    db.session.add(main_cashbox)
+
+# ربط الحدث بإنشاء مستخدم جديد
+event.listen(User, 'after_insert', create_main_cashbox) 
