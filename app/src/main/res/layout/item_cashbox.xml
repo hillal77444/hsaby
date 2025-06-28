@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@drawable/bg_account_picker_item">
+
+    <TextView
+        android:id="@+id/text_cashbox_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="اسم الصندوق"
+        android:textStyle="bold"
+        android:textSize="18sp"/>
+
+    <TextView
+        android:id="@+id/text_cashbox_created_at"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="تاريخ الإنشاء"
+        android:textSize="14sp"
+        android:textColor="#888888"/>
+
+</LinearLayout> 
