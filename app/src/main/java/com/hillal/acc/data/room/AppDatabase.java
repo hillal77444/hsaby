@@ -53,6 +53,41 @@ public abstract class AppDatabase extends RoomDatabase {
                             "accounting_database"
                     )
                     .fallbackToDestructiveMigration()
+                    .addCallback(new RoomDatabase.Callback() {
+                        @Override
+                        public void onCreate(@NonNull SupportSQLiteDatabase db) {
+                            super.onCreate(db);
+                            Log.d(TAG, "Database created - starting sync from server");
+                            // جلب البيانات من الخادم بعد إعادة الإنشاء
+                            new Thread(() -> {
+                                Context appContext = context.getApplicationContext();
+                                AppDatabase database = AppDatabase.getInstance(appContext);
+                                com.hillal.acc.data.remote.DataManager dataManager = new com.hillal.acc.data.remote.DataManager(
+                                    appContext,
+                                    database.accountDao(),
+                                    database.transactionDao(),
+                                    database.pendingOperationDao()
+                                );
+                                com.hillal.acc.data.sync.SyncManager syncManager = new com.hillal.acc.data.sync.SyncManager(
+                                    appContext,
+                                    dataManager,
+                                    database.accountDao(),
+                                    database.transactionDao(),
+                                    database.pendingOperationDao()
+                                );
+                                syncManager.performFullSync(new com.hillal.acc.data.sync.SyncManager.SyncCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "Sync from server completed after destructive migration");
+                                    }
+                                    @Override
+                                    public void onError(String error) {
+                                        Log.e(TAG, "Sync from server failed after destructive migration: " + error);
+                                    }
+                                });
+                            }).start();
+                        }
+                    })
                     .build();
                     Log.d(TAG, "Database instance created");
                 }
