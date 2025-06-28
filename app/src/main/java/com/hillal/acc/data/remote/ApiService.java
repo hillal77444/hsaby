@@ -4,6 +4,7 @@ import com.hillal.acc.data.model.User;
 import com.hillal.acc.data.model.Account;
 import com.hillal.acc.data.model.Transaction;
 import com.hillal.acc.data.model.ServerAppUpdateInfo;
+import com.hillal.acc.data.entities.Cashbox;
 
 import java.util.List;
 import java.util.Map;
@@ -74,6 +75,9 @@ public interface ApiService {
 
     @GET("/api/app/updates/check")
     Call<ServerAppUpdateInfo> checkForUpdates(@Header("Authorization") String token, @Query("current_version") String currentVersion);
+
+    @GET("api/cashboxes")
+    Call<List<Cashbox>> getCashboxes(@Header("Authorization") String token);
 
     class LoginRequest {
         private String phone;
