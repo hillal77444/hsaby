@@ -168,6 +168,7 @@ public interface ApiService {
                 newTransaction.setModified(transaction.isModified());
                 newTransaction.setWhatsappEnabled(transaction.isWhatsappEnabled());
                 newTransaction.setSyncStatus(transaction.getSyncStatus());
+                newTransaction.setCashboxId(transaction.getCashboxId());
                 transactionsToSend.add(newTransaction);
             }
             return transactionsToSend;
