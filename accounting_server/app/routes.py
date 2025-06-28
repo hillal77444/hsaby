@@ -329,10 +329,10 @@ def sync_data():
                         logger.error(f"Error in transaction notification: {str(e)}")
                     
                     # أضف المعاملة إلى transaction_mappings حتى عند التعديل
-                    transaction_mappings.append({
-                        'local_id': trans_data.get('id'),
-                        'server_id': transaction.server_id
-                    })
+                transaction_mappings.append({
+                    'local_id': trans_data.get('id'),
+                    'server_id': transaction.server_id
+                 })
             except Exception as e:
                 logger.error(f"Error processing transaction: {str(e)}")
                 return json_response({'error': f'خطأ في معالجة بيانات المعاملة: {str(e)}'}, 400)
@@ -1203,3 +1203,52 @@ def delete_user_account(current_user, phone):
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": f"Error deleting account: {str(e)}"}), 500
+
+@main.route('/api/cashboxes', methods=['GET'])
+@jwt_required()
+def get_cashboxes():
+    user_id = get_jwt_identity()
+    cashboxes = Cashbox.query.filter_by(user_id=user_id).all()
+    return jsonify([
+        {
+            'id': c.id,
+            'name': c.name,
+            'created_at': c.created_at.isoformat() if c.created_at else None
+        } for c in cashboxes
+    ])
+
+@main.route('/api/cashboxes', methods=['POST'])
+@jwt_required()
+def add_cashbox():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+    name = data.get('name')
+    if not name:
+        return jsonify({'error': 'اسم الصندوق مطلوب'}), 400
+    cashbox = Cashbox(name=name, user_id=user_id)
+    db.session.add(cashbox)
+    db.session.commit()
+    return jsonify({'id': cashbox.id, 'name': cashbox.name, 'created_at': cashbox.created_at.isoformat()})
+
+@main.route('/api/cashboxes/<int:cashbox_id>', methods=['PUT'])
+@jwt_required()
+def update_cashbox(cashbox_id):
+    user_id = get_jwt_identity()
+    cashbox = Cashbox.query.filter_by(id=cashbox_id, user_id=user_id).first_or_404()
+    data = request.get_json()
+    name = data.get('name')
+    if not name:
+        return jsonify({'error': 'اسم الصندوق مطلوب'}), 400
+    cashbox.name = name
+    db.session.commit()
+    return jsonify({'id': cashbox.id, 'name': cashbox.name})
+
+@main.route('/api/cashboxes/<int:cashbox_id>', methods=['DELETE'])
+@jwt_required()
+def delete_cashbox(cashbox_id):
+    user_id = get_jwt_identity()
+    cashbox = Cashbox.query.filter_by(id=cashbox_id, user_id=user_id).first_or_404()
+    # تحقق من عدم وجود معاملات مرتبطة أو انقلها لصندوق آخر إذا لزم
+    db.session.delete(cashbox)
+    db.session.commit()
+    return jsonify({'success': True})
