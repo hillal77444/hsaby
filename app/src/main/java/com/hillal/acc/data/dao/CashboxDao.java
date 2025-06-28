@@ -12,7 +12,7 @@ import java.util.List;
 
 @Dao
 public interface CashboxDao {
-    @Query("SELECT * FROM Cashbox")
+    @Query("SELECT * FROM cashboxes")
     List<Cashbox> getAll();
 
     @Insert
@@ -24,6 +24,6 @@ public interface CashboxDao {
     @Delete
     void delete(Cashbox cashbox);
 
-    @Query("DELETE FROM Cashbox")
+    @Query("DELETE FROM cashboxes")
     void deleteAll();
 } 
