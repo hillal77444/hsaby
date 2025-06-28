@@ -57,9 +57,14 @@ public abstract class AppDatabase extends RoomDatabase {
                         @Override
                         public void onCreate(@NonNull SupportSQLiteDatabase db) {
                             super.onCreate(db);
-                            Log.d(TAG, "Database created - starting sync from server");
-                            // جلب البيانات من الخادم بعد إعادة الإنشاء
+                            Log.d(TAG, "Database created - starting sync from server after delay");
+                            // جلب البيانات من الخادم بعد إعادة الإنشاء مع تأخير 2 ثانية
                             new Thread(() -> {
+                                try {
+                                    Thread.sleep(2000); // تأخير 2 ثانية
+                                } catch (InterruptedException e) {
+                                    Log.e(TAG, "Sync delay interrupted", e);
+                                }
                                 Context appContext = context.getApplicationContext();
                                 AppDatabase database = AppDatabase.getInstance(appContext);
                                 com.hillal.acc.data.remote.DataManager dataManager = new com.hillal.acc.data.remote.DataManager(
