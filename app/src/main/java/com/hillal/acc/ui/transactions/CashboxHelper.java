@@ -3,6 +3,8 @@ package com.hillal.acc.ui.transactions;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -15,6 +17,7 @@ import com.hillal.acc.viewmodel.CashboxViewModel;
  */
 public class CashboxHelper {
     private static final String TAG = "CashboxHelper";
+    private static final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     /**
      * Check if network is available
@@ -77,13 +80,13 @@ public class CashboxHelper {
                 @Override
                 public void onSuccess(Cashbox cashbox) {
                     Log.d(TAG, "Cashbox added successfully: id=" + cashbox.id + ", name=" + cashbox.name);
-                    callback.onSuccess(cashbox);
+                    mainHandler.post(() -> callback.onSuccess(cashbox));
                 }
 
                 @Override
                 public void onError(String error) {
                     Log.e(TAG, "Error adding cashbox: " + error);
-                    callback.onError(error);
+                    mainHandler.post(() -> callback.onError(error));
                 }
             });
     }
@@ -93,7 +96,7 @@ public class CashboxHelper {
      */
     public static void showSuccessMessage(Context context, String message) {
         if (context != null) {
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            mainHandler.post(() -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show());
         }
     }
 
@@ -102,7 +105,7 @@ public class CashboxHelper {
      */
     public static void showErrorMessage(Context context, String error) {
         if (context != null) {
-            Toast.makeText(context, "خطأ في إضافة الصندوق: " + error, Toast.LENGTH_LONG).show();
+            mainHandler.post(() -> Toast.makeText(context, "خطأ في إضافة الصندوق: " + error, Toast.LENGTH_LONG).show());
         }
     }
 
