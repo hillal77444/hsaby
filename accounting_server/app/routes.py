@@ -294,9 +294,11 @@ def sync_data():
                     
                     # منطق اختيار الصندوق
                     cashbox_id = trans_data.get('cashbox_id')
-                    if not cashbox_id:
+                    if not cashbox_id or cashbox_id == -1:
+                        # إذا لم يتم تحديد صندوق أو كان -1، استخدم الصندوق الرئيسي
                         main_cashbox = Cashbox.query.filter_by(user_id=current_user_id, name='الصندوق الرئيسي').first()
                         if not main_cashbox:
+                            # إنشاء صندوق رئيسي إذا لم يكن موجوداً
                             main_cashbox = Cashbox(name='الصندوق الرئيسي', user_id=current_user_id)
                             db.session.add(main_cashbox)
                             db.session.commit()
@@ -452,7 +454,8 @@ def debug_data():
             'user_id': trans.user_id,
             'type': trans.type,
             'currency': trans.currency,
-            'notes': trans.notes
+            'notes': trans.notes,
+            'cashbox_id': trans.cashbox_id
         } for trans in transactions]
         
         return jsonify({
@@ -499,6 +502,7 @@ def debug_public():
             'user_id': trans.user_id,
             'notes': trans.notes,
             'whatsapp_enabled': trans.whatsapp_enabled,
+            'cashbox_id': trans.cashbox_id,
             'created_at': str(trans.created_at) if hasattr(trans, 'created_at') and trans.created_at else None,
             'updated_at': str(trans.updated_at) if hasattr(trans, 'updated_at') and trans.updated_at else None
         } for trans in transactions]
@@ -664,9 +668,11 @@ def sync_changes():
                         
                         # منطق اختيار الصندوق
                         cashbox_id = transaction_data.get('cashbox_id')
-                        if not cashbox_id:
+                        if not cashbox_id or cashbox_id == -1:
+                            # إذا لم يتم تحديد صندوق أو كان -1، استخدم الصندوق الرئيسي
                             main_cashbox = Cashbox.query.filter_by(user_id=current_user_id, name='الصندوق الرئيسي').first()
                             if not main_cashbox:
+                                # إنشاء صندوق رئيسي إذا لم يكن موجوداً
                                 main_cashbox = Cashbox(name='الصندوق الرئيسي', user_id=current_user_id)
                                 db.session.add(main_cashbox)
                                 db.session.commit()
@@ -754,6 +760,10 @@ def sync_changes():
                             transaction.whatsapp_enabled = transaction_data['whatsapp_enabled']
                         transaction.account_id = transaction_data['account_id']
                         
+                        # تحديث الصندوق إذا تم إرساله
+                        if 'cashbox_id' in transaction_data:
+                            transaction.cashbox_id = transaction_data['cashbox_id']
+                        
                         # إرسال إشعار فقط إذا تم تغيير المبلغ
                         if old_amount != transaction.amount:
                             try:
@@ -813,6 +823,7 @@ def sync_changes():
                     'notes': transaction.notes,
                     'whatsapp_enabled': transaction.whatsapp_enabled,
                     'user_id': transaction.user_id,
+                    'cashbox_id': transaction.cashbox_id,
                     'updated_at': transaction.updated_at.timestamp() * 1000
                 })
             
@@ -1210,6 +1221,8 @@ def delete_user_account(current_user, phone):
 def get_cashboxes():
     user_id = get_jwt_identity()
     cashboxes = Cashbox.query.filter_by(user_id=user_id).all()
+    print(f"[API] /api/cashboxes requested by user_id={user_id}, found {len(cashboxes)} cashboxes.")
+    print("Cashboxes:", [{"id": c.id, "name": c.name} for c in cashboxes])
     return jsonify([
         {
             'id': c.id,
@@ -1224,12 +1237,24 @@ def add_cashbox():
     user_id = get_jwt_identity()
     data = request.get_json()
     name = data.get('name')
+    print(f"[API] /api/cashboxes POST requested by user_id={user_id}, name={name}")
+    print(f"[API] Request data: {data}")
+    print(f"[API] Request headers: {dict(request.headers)}")
+    
     if not name:
+        print(f"[API] Error: name is required but received: {name}")
         return jsonify({'error': 'اسم الصندوق مطلوب'}), 400
-    cashbox = Cashbox(name=name, user_id=user_id)
-    db.session.add(cashbox)
-    db.session.commit()
-    return jsonify({'id': cashbox.id, 'name': cashbox.name, 'created_at': cashbox.created_at.isoformat()})
+    
+    try:
+        cashbox = Cashbox(name=name, user_id=user_id)
+        db.session.add(cashbox)
+        db.session.commit()
+        print(f"[API] Successfully added cashbox: id={cashbox.id}, name={cashbox.name}, user_id={user_id}")
+        return jsonify({'id': cashbox.id, 'name': cashbox.name, 'created_at': cashbox.created_at.isoformat()})
+    except Exception as e:
+        print(f"[API] Error adding cashbox: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': f'خطأ في إضافة الصندوق: {str(e)}'}), 500
 
 @main.route('/api/cashboxes/<int:cashbox_id>', methods=['PUT'])
 @jwt_required()
