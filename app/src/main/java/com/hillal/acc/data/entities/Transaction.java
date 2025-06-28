@@ -22,13 +22,15 @@ public class Transaction {
     private String description;
     private Date date;
     private boolean whatsappEnabled = true;
+    private long cashboxId = -1;
 
-    public Transaction(long accountId, String type, double amount, String description, Date date) {
+    public Transaction(long accountId, String type, double amount, String description, Date date, long cashboxId) {
         this.accountId = accountId;
         this.type = type;
         this.amount = amount;
         this.description = description;
         this.date = date;
+        this.cashboxId = cashboxId;
         this.whatsappEnabled = true;
     }
 
@@ -86,5 +88,13 @@ public class Transaction {
 
     public void setWhatsappEnabled(boolean whatsappEnabled) {
         this.whatsappEnabled = whatsappEnabled;
+    }
+
+    public long getCashboxId() {
+        return cashboxId;
+    }
+
+    public void setCashboxId(long cashboxId) {
+        this.cashboxId = cashboxId;
     }
 } 
