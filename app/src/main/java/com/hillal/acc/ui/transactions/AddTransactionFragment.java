@@ -279,7 +279,10 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
                 binding.cashboxAutoComplete.setText(allCashboxes.get(0).name, false);
                 selectedCashboxId = mainCashboxId;
             }
-            names.add("➕ إضافة صندوق جديد...");
+            // أضف خيار إضافة صندوق جديد إذا لم يكن موجودًا بالفعل
+            if (!names.contains("➕ إضافة صندوق جديد...")) {
+                names.add("➕ إضافة صندوق جديد...");
+            }
             ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, names);
             binding.cashboxAutoComplete.setAdapter(adapter);
             binding.cashboxAutoComplete.setOnItemClickListener((parent, v, position, id) -> {
