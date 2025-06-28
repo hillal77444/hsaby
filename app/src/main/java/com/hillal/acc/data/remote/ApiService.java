@@ -217,9 +217,11 @@ public interface ApiService {
 
         public AddCashboxRequest(String name) {
             this.name = name;
+            android.util.Log.d("ApiService", "AddCashboxRequest created with name: " + name);
         }
 
         public String getName() {
+            android.util.Log.d("ApiService", "AddCashboxRequest.getName() called, returning: " + name);
             return name;
         }
     }
