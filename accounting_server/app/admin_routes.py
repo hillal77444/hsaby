@@ -15,6 +15,8 @@ import random
 import string
 from werkzeug.utils import secure_filename
 from functools import wraps
+import threading
+import queue
 
 admin = Blueprint('admin', __name__)
 
@@ -36,6 +38,29 @@ short_links = {}
 
 # تعريف توقيت اليمن (UTC+3) - يجب أن يكون متطابقاً مع models.py و routes.py
 YEMEN_TIMEZONE = timezone(timedelta(hours=3))
+
+# طابور مركزي لرسائل واتساب
+whatsapp_queue = queue.Queue()
+
+def whatsapp_worker():
+    while True:
+        send_args = whatsapp_queue.get()
+        try:
+            response = requests.post(
+                send_args['url'],
+                json=send_args['json'],
+                timeout=5
+            )
+            # يمكن إضافة منطق تسجيل أو معالجة الرد هنا إذا لزم
+        except Exception as e:
+            logger.error(f"WhatsApp send error: {e}")
+        time.sleep(1)  # انتظر ثانية بين كل رسالة
+        whatsapp_queue.task_done()
+
+# شغّل الـ worker في Thread منفصل عند بدء التطبيق (مرة واحدة فقط)
+if not hasattr(globals(), '_whatsapp_worker_started'):
+    threading.Thread(target=whatsapp_worker, daemon=True).start()
+    globals()['_whatsapp_worker_started'] = True
 
 def get_yemen_time():
     """الحصول على التوقيت الحالي بتوقيت اليمن"""
@@ -708,24 +733,20 @@ def calculate_and_notify_transaction(transaction_id):
                 return  # لا ترسل الرسالة ولا ترجع رد
         # --- نهاية المنطق ---
 
-        # إرسال الرسالة
-        response = requests.post(
-            f"{WHATSAPP_API}/send/{session_name}",
-            json={
+        # إرسال الرسالة عبر الطابور
+        whatsapp_queue.put({
+            'url': f"{WHATSAPP_API}/send/{session_name}",
+            'json': {
                 'number': phone,
                 'message': message
-            },
-            timeout=5
-        )
-
-        if response.status_code == 200:
-            return {'status': 'success', 'message': 'تم إرسال الإشعار بنجاح'}
-        else:
-            return {'status': 'error', 'message': 'فشل في إرسال الإشعار'}
+            }
+        })
+        return {'status': 'success', 'message': 'تمت إضافة الرسالة للطابور وسيتم إرسالها خلال ثوانٍ'}
 
     except Exception as e:
         logger.error(f"Error in calculate_and_notify_transaction: {str(e)}")
         return {'status': 'error', 'message': str(e)}
+
 @admin.route('/api/admin/account/<int:account_id>/statement')
 def account_statement(account_id):
     # جلب معلومات الحساب
@@ -928,20 +949,15 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
                 return  # لا ترسل الرسالة ولا ترجع رد
         # --- نهاية المنطق ---
 
-        # إرسال الرسالة
-        response = requests.post(
-            f"{WHATSAPP_API}/send/{session_name}",
-            json={
+        # إرسال الرسالة عبر الطابور
+        whatsapp_queue.put({
+            'url': f"{WHATSAPP_API}/send/{session_name}",
+            'json': {
                 'number': phone,
                 'message': message
-            },
-            timeout=5
-        )
-
-        if response.status_code == 200:
-            return {'status': 'success', 'message': 'تم إرسال إشعار التحديث بنجاح'}
-        else:
-            return {'status': 'error', 'message': 'فشل في إرسال إشعار التحديث'}
+            }
+        })
+        return {'status': 'success', 'message': 'تمت إضافة الرسالة للطابور وسيتم إرسالها خلال ثوانٍ'}
 
     except Exception as e:
         logger.error(f"Error in send_transaction_update_notification: {str(e)}")
@@ -1004,20 +1020,15 @@ def send_transaction_delete_notification(transaction, final_balance):
                 return  # لا ترسل الرسالة ولا ترجع رد
         # --- نهاية المنطق ---
 
-        # إرسال الرسالة
-        response = requests.post(
-            f"{WHATSAPP_API}/send/{session_name}",
-            json={
+        # إرسال الرسالة عبر الطابور
+        whatsapp_queue.put({
+            'url': f"{WHATSAPP_API}/send/{session_name}",
+            'json': {
                 'number': phone,
                 'message': message
-            },
-            timeout=5
-        )
-
-        if response.status_code == 200:
-            return {'status': 'success', 'message': 'تم إرسال إشعار الحذف بنجاح'}
-        else:
-            return {'status': 'error', 'message': 'فشل في إرسال إشعار الحذف'}
+            }
+        })
+        return {'status': 'success', 'message': 'تمت إضافة الرسالة للطابور وسيتم إرسالها خلال ثوانٍ'}
 
     except Exception as e:
         logger.error(f"Error in send_transaction_delete_notification: {str(e)}")
