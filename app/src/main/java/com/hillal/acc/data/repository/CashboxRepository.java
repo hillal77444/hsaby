@@ -81,7 +81,7 @@ public class CashboxRepository {
     }
 
     public void addCashboxToServer(String baseUrl, String token, String name, CashboxCallback callback) {
-        android.util.Log.d("CashboxRepository", "Adding cashbox to server: name=" + name + ", baseUrl=" + baseUrl);
+        android.util.Log.d("CashboxRepository", "addCashboxToServer called - name: " + name + ", baseUrl: " + baseUrl);
         
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)
@@ -89,11 +89,14 @@ public class CashboxRepository {
                 .build();
         ApiService api = retrofit.create(ApiService.class);
         ApiService.AddCashboxRequest request = new ApiService.AddCashboxRequest(name);
+        android.util.Log.d("CashboxRepository", "AddCashboxRequest created with name: " + name);
+        android.util.Log.d("CashboxRepository", "Making API call to add cashbox");
         Call<Cashbox> call = api.addCashbox(token, request);
         call.enqueue(new Callback<Cashbox>() {
             @Override
             public void onResponse(Call<Cashbox> call, Response<Cashbox> response) {
                 android.util.Log.d("CashboxRepository", "Server response: code=" + response.code() + ", success=" + response.isSuccessful());
+                android.util.Log.d("CashboxRepository", "Response headers: " + response.headers());
                 
                 if (response.isSuccessful() && response.body() != null) {
                     Cashbox serverCashbox = response.body();
@@ -114,12 +117,15 @@ public class CashboxRepository {
                         errorBody = "Error reading response body";
                     }
                     android.util.Log.e("CashboxRepository", "Server error: code=" + response.code() + ", body=" + errorBody);
+                    android.util.Log.e("CashboxRepository", "Response headers: " + response.headers());
                     callback.onError("فشل في إضافة الصندوق إلى الخادم: " + response.code());
                 }
             }
             @Override
             public void onFailure(Call<Cashbox> call, Throwable t) {
                 android.util.Log.e("CashboxRepository", "Network error: " + t.getMessage(), t);
+                android.util.Log.e("CashboxRepository", "Call details: " + call.request().url());
+                android.util.Log.e("CashboxRepository", "Request headers: " + call.request().headers());
                 callback.onError("خطأ في الاتصال: " + t.getMessage());
             }
         });
