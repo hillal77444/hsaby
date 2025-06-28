@@ -43,6 +43,9 @@ import com.hillal.acc.ui.common.AccountPickerBottomSheet;
 import com.hillal.acc.ui.transactions.NotificationUtils;
 import com.hillal.acc.data.repository.TransactionRepository;
 import com.hillal.acc.App;
+import com.hillal.acc.data.entities.Cashbox;
+import com.hillal.acc.viewmodel.CashboxViewModel;
+import com.hillal.acc.ui.cashbox.AddCashboxDialog;
 
 public class AddTransactionFragment extends Fragment {
     private FragmentAddTransactionBinding binding;
@@ -60,6 +63,10 @@ public class AddTransactionFragment extends Fragment {
     private double lastSavedBalance = 0.0;
     private TransactionRepository transactionRepository;
     private boolean isDialogShown = false;
+    private long selectedCashboxId = -1;
+    private long mainCashboxId = -1;
+    private List<Cashbox> allCashboxes = new ArrayList<>();
+    private CashboxViewModel cashboxViewModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,6 +76,7 @@ public class AddTransactionFragment extends Fragment {
         userPreferences = new UserPreferences(requireContext());
         App app = (App) requireActivity().getApplication();
         transactionRepository = new TransactionRepository(app.getDatabase());
+        cashboxViewModel = new ViewModelProvider(this).get(CashboxViewModel.class);
     }
 
     @Nullable
@@ -86,6 +94,7 @@ public class AddTransactionFragment extends Fragment {
         loadAccounts();
         loadAllTransactions();
         setupAccountPicker();
+        setupCashboxDropdown();
         transactionsViewModel.getAccountBalancesMap().observe(getViewLifecycleOwner(), balancesMap -> {
             accountBalancesMap = balancesMap != null ? balancesMap : new HashMap<>();
         });
@@ -196,6 +205,9 @@ public class AddTransactionFragment extends Fragment {
                     transaction.setServerId(-1);
                     transaction.setWhatsappEnabled(account.isWhatsappEnabled());
 
+                    long cashboxIdToSave = (selectedCashboxId != -1) ? selectedCashboxId : mainCashboxId;
+                    transaction.setCashboxId(cashboxIdToSave);
+
                     transactionsViewModel.insertTransaction(transaction);
                     lastSavedTransaction = transaction;
                     lastSavedAccount = account;
@@ -251,6 +263,66 @@ public class AddTransactionFragment extends Fragment {
             if (txs != null) allTransactions = txs;
         });
         txViewModel.loadAllTransactions();
+    }
+
+    private void setupCashboxDropdown() {
+        cashboxViewModel.getAllCashboxes().observe(getViewLifecycleOwner(), cashboxes -> {
+            allCashboxes = cashboxes != null ? cashboxes : new ArrayList<>();
+            List<String> names = new ArrayList<>();
+            mainCashboxId = -1;
+            for (Cashbox c : allCashboxes) {
+                names.add(c.name);
+                if (mainCashboxId == -1 && (c.name.equals("الرئيسي") || c.name.equalsIgnoreCase("main"))) {
+                    mainCashboxId = c.id;
+                }
+            }
+            if (mainCashboxId == -1 && !allCashboxes.isEmpty()) mainCashboxId = allCashboxes.get(0).id;
+            names.add("➕ إضافة صندوق جديد...");
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, names);
+            binding.cashboxAutoComplete.setAdapter(adapter);
+            // اختيار الصندوق الرئيسي تلقائياً
+            if (mainCashboxId != -1) {
+                int idx = 0;
+                for (int i = 0; i < allCashboxes.size(); i++) {
+                    if (allCashboxes.get(i).id == mainCashboxId) { idx = i; break; }
+                }
+                binding.cashboxAutoComplete.setText(allCashboxes.get(idx).name, false);
+                selectedCashboxId = mainCashboxId;
+            }
+            binding.cashboxAutoComplete.setOnItemClickListener((parent, v, position, id) -> {
+                if (position == allCashboxes.size()) {
+                    // خيار إضافة صندوق جديد
+                    openAddCashboxDialog();
+                } else {
+                    selectedCashboxId = allCashboxes.get(position).id;
+                }
+            });
+        });
+    }
+
+    private void openAddCashboxDialog() {
+        AddCashboxDialog dialog = new AddCashboxDialog();
+        dialog.setTargetFragment(this, 0);
+        dialog.show(getParentFragmentManager(), "AddCashboxDialog");
+    }
+
+    @Override
+    public void onCashboxAdded(String name) {
+        // أضف الصندوق الجديد عبر ViewModel
+        Cashbox newCashbox = new Cashbox();
+        newCashbox.name = name;
+        newCashbox.createdAt = String.valueOf(System.currentTimeMillis());
+        cashboxViewModel.insert(newCashbox);
+        // سيتم تحديث القائمة تلقائياً عبر LiveData
+        // حدد الصندوق الجديد تلقائياً بعد إضافته
+        binding.cashboxAutoComplete.setText(name, false);
+        // ابحث عن id الصندوق الجديد
+        for (Cashbox c : allCashboxes) {
+            if (c.name.equals(name)) {
+                selectedCashboxId = c.id;
+                break;
+            }
+        }
     }
 
     private void showSuccessDialog() {
