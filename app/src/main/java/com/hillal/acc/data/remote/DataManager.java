@@ -522,6 +522,7 @@ public class DataManager {
                             cashboxDao.deleteAll();
                             for (Cashbox cashbox : cashboxes) {
                                 cashboxDao.insert(cashbox);
+                                Log.d("SYNC_CASHBOX", "Saved cashbox: id=" + cashbox.id + ", name=" + cashbox.name);
                             }
                             Log.d(TAG, "All cashboxes processed successfully");
                             handler.post(callback::onSuccess);
