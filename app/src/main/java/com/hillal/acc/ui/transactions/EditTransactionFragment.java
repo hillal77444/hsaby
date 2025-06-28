@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ArrayList;
 
-public class EditTransactionFragment extends Fragment {
+public class EditTransactionFragment extends Fragment implements com.hillal.acc.ui.cashbox.AddCashboxDialog.OnCashboxAddedListener {
     private FragmentEditTransactionBinding binding;
     private TransactionsViewModel transactionsViewModel;
     private AccountViewModel accountViewModel;
