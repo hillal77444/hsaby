@@ -51,7 +51,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase db) {
-            db.execSQL("CREATE TABLE IF NOT EXISTS `Cashbox` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `createdAt` TEXT)");
+            db.execSQL("CREATE TABLE IF NOT EXISTS `cashboxes` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `createdAt` TEXT)");
             db.execSQL("ALTER TABLE `transactions` ADD COLUMN `cashbox_id` INTEGER DEFAULT -1");
         }
     };
