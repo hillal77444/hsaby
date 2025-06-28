@@ -115,7 +115,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:hint="اختر الصندوق"
-                        app:startIconDrawable="@drawable/ic_wallet"
+                        app:startIconDrawable="@android:drawable/ic_menu_save"
                         app:startIconTint="@color/primary"
                         app:hintTextColor="#666666"
                         app:boxStrokeColor="#1976D2">
