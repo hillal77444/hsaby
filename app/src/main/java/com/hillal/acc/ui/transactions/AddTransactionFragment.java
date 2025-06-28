@@ -51,6 +51,7 @@ import com.hillal.acc.data.entities.Cashbox;
 import com.hillal.acc.viewmodel.CashboxViewModel;
 import com.hillal.acc.ui.cashbox.AddCashboxDialog;
 import com.hillal.acc.data.repository.CashboxRepository;
+import com.hillal.acc.ui.cashbox.CashboxHelper;
 
 public class AddTransactionFragment extends Fragment implements com.hillal.acc.ui.cashbox.AddCashboxDialog.OnCashboxAddedListener {
     private FragmentAddTransactionBinding binding;
@@ -318,38 +319,16 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
     public void onCashboxAdded(String name) {
         android.util.Log.d("AddTransactionFragment", "=== onCashboxAdded called ===");
         android.util.Log.d("AddTransactionFragment", "Name received: " + name);
-        android.util.Log.d("AddTransactionFragment", "Context: " + (getContext() != null));
-        android.util.Log.d("AddTransactionFragment", "isAdded: " + isAdded());
         
-        // التحقق من الاتصال بالإنترنت
-        if (!isNetworkAvailable()) {
-            android.util.Log.w("AddTransactionFragment", "No network connection available");
-            Toast.makeText(requireContext(), "لا يوجد اتصال بالإنترنت. يرجى التحقق من الاتصال والمحاولة مرة أخرى", Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        // الحصول على التوكن و baseUrl
-        String token = requireContext().getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                .getString("token", null);
-        
-        if (token == null) {
-            android.util.Log.w("AddTransactionFragment", "No authentication token found");
-            Toast.makeText(requireContext(), "يرجى تسجيل الدخول أولاً", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        android.util.Log.d("AddTransactionFragment", "Token found, proceeding with cashbox addition");
-
         // إظهار dialog تحميل
         ProgressDialog loadingDialog = new ProgressDialog(requireContext());
         loadingDialog.setMessage("جاري إضافة الصندوق...");
         loadingDialog.setCancelable(false);
         loadingDialog.show();
 
-        // إرسال الصندوق إلى الخادم
-        android.util.Log.d("AddTransactionFragment", "Calling addCashboxToServer");
-        cashboxViewModel.addCashboxToServer("https://malyp.com/", "Bearer " + token, name, 
-            new CashboxRepository.CashboxCallback() {
+        // استخدام CashboxHelper لإضافة الصندوق
+        CashboxHelper.addCashboxToServer(requireContext(), cashboxViewModel, name, 
+            new CashboxHelper.CashboxCallback() {
                 @Override
                 public void onSuccess(Cashbox cashbox) {
                     android.util.Log.d("AddTransactionFragment", "Cashbox added successfully: id=" + cashbox.id + ", name=" + cashbox.name);
@@ -358,22 +337,20 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
                     // حدد الصندوق الجديد تلقائياً بعد إضافته
                     binding.cashboxAutoComplete.setText(cashbox.name, false);
                     selectedCashboxId = cashbox.id;
-                    Toast.makeText(requireContext(), "تم إضافة الصندوق بنجاح", Toast.LENGTH_SHORT).show();
+                    CashboxHelper.showSuccessMessage(requireContext(), "تم إضافة الصندوق بنجاح");
                 }
 
                 @Override
                 public void onError(String error) {
                     android.util.Log.e("AddTransactionFragment", "Error adding cashbox: " + error);
                     loadingDialog.dismiss();
-                    Toast.makeText(requireContext(), "خطأ في إضافة الصندوق: " + error, Toast.LENGTH_LONG).show();
+                    CashboxHelper.showErrorMessage(requireContext(), error);
                 }
             });
     }
 
     private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        return CashboxHelper.isNetworkAvailable(requireContext());
     }
 
     private void showSuccessDialog() {
