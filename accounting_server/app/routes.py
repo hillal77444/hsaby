@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from app import db
-from app.models import User, Account, Transaction, AppUpdate
+from app.models import User, Account, Transaction, AppUpdate, Cashbox
 from app.utils import hash_password, verify_password, generate_sync_token
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 from datetime import datetime, timezone, timedelta
@@ -292,6 +292,16 @@ def sync_data():
                     last_transaction = Transaction.query.order_by(Transaction.server_id.desc()).first()
                     new_server_id = (last_transaction.server_id + 1) if last_transaction else 1
                     
+                    # منطق اختيار الصندوق
+                    cashbox_id = trans_data.get('cashbox_id')
+                    if not cashbox_id:
+                        main_cashbox = Cashbox.query.filter_by(user_id=current_user_id, name='الصندوق الرئيسي').first()
+                        if not main_cashbox:
+                            main_cashbox = Cashbox(name='الصندوق الرئيسي', user_id=current_user_id)
+                            db.session.add(main_cashbox)
+                            db.session.commit()
+                        cashbox_id = main_cashbox.id
+
                     # إنشاء معاملة جديدة
                     transaction = Transaction(
                         amount=trans_data.get('amount'),
@@ -303,7 +313,8 @@ def sync_data():
                         whatsapp_enabled=trans_data.get('whatsapp_enabled', False),
                         account_id=trans_data.get('account_id'),
                         user_id=current_user_id,
-                        server_id=new_server_id
+                        server_id=new_server_id,
+                        cashbox_id=cashbox_id
                     )
                     db.session.add(transaction)
                     db.session.flush()
@@ -312,18 +323,16 @@ def sync_data():
                     # حساب الرصيد وإرسال الإشعار
                     try:
                         result = calculate_and_notify_transaction(transaction.id)
-                        if result.get('status') == 'success':
-                            logger.info(f"Transaction processed successfully: {transaction.id}")
-                        else:
+                        if result.get('status') != 'success':
                             logger.error(f"Error processing transaction: {result.get('message')}")
                     except Exception as e:
-                        logger.error(f"Error in transaction processing: {str(e)}")
-                        # لا نوقف العملية إذا فشل الإرسال
-                
-                transaction_mappings.append({
-                    'local_id': trans_data.get('id'),
-                    'server_id': transaction.server_id
-                })
+                        logger.error(f"Error in transaction notification: {str(e)}")
+                    
+                    # أضف المعاملة إلى transaction_mappings حتى عند التعديل
+                    transaction_mappings.append({
+                        'local_id': trans_data.get('id'),
+                        'server_id': transaction.server_id
+                    })
             except Exception as e:
                 logger.error(f"Error processing transaction: {str(e)}")
                 return json_response({'error': f'خطأ في معالجة بيانات المعاملة: {str(e)}'}, 400)
@@ -652,6 +661,16 @@ def sync_changes():
                         except (ValueError, TypeError) as e:
                             return json_response({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}, 400)
                         
+                        # منطق اختيار الصندوق
+                        cashbox_id = transaction_data.get('cashbox_id')
+                        if not cashbox_id:
+                            main_cashbox = Cashbox.query.filter_by(user_id=current_user_id, name='الصندوق الرئيسي').first()
+                            if not main_cashbox:
+                                main_cashbox = Cashbox(name='الصندوق الرئيسي', user_id=current_user_id)
+                                db.session.add(main_cashbox)
+                                db.session.commit()
+                            cashbox_id = main_cashbox.id
+
                         # إنشاء معاملة جديدة
                         transaction = Transaction(
                             date=date,
@@ -662,10 +681,18 @@ def sync_changes():
                             notes=transaction_data.get('notes', ''),
                             whatsapp_enabled=transaction_data.get('whatsapp_enabled', True),
                             user_id=current_user_id,
-                            account_id=transaction_data['account_id']
+                            account_id=transaction_data['account_id'],
+                            cashbox_id=cashbox_id
                         )
                         db.session.add(transaction)
                         db.session.flush()  # للحصول على المعرف الجديد
+                        # إرسال إشعار بعد إضافة المعاملة الجديدة
+                        try:
+                            result = calculate_and_notify_transaction(transaction.id)
+                            if result.get('status') != 'success':
+                                logger.error(f"Error processing transaction: {result.get('message')}")
+                        except Exception as e:
+                            logger.error(f"Error in transaction notification: {str(e)}")
                         transaction_id_map.append({
                             'localId': transaction_data.get('id'),
                             'serverId': transaction.server_id
