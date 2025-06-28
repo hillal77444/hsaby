@@ -62,7 +62,7 @@
                 android:layout_marginTop="2dp"
                 android:layout_marginBottom="16dp" />
 
-            <!-- بطاقة الحساب -->
+            <!-- بطاقة الحساب: اختيار الحساب + اختيار الصندوق في صف واحد -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -76,22 +76,17 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
                     android:padding="16dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="اختر الحساب"
-                        android:textSize="16sp"
-                        android:textColor="#1976D2"
-                        android:layout_marginBottom="4dp"/>
-
+                    <!-- اختيار الحساب -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/accountLayout"
                         style="@style/CustomTextInputLayout"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:hint="اختر الحساب"
                         app:startIconDrawable="@android:drawable/ic_menu_myplaces"
                         app:startIconTint="@color/primary"
@@ -100,6 +95,33 @@
 
                         <AutoCompleteTextView
                             android:id="@+id/accountAutoComplete"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:background="@null"
+                            android:padding="12dp"
+                            android:textSize="16sp"
+                            android:textColor="#000000"
+                            android:textColorHint="#666666"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- اختيار الصندوق -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/cashboxLayout"
+                        style="@style/CustomTextInputLayout"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="اختر الصندوق"
+                        app:startIconDrawable="@drawable/ic_wallet"
+                        app:startIconTint="@color/primary"
+                        app:hintTextColor="#666666"
+                        app:boxStrokeColor="#1976D2">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/cashboxAutoComplete"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="none"
