@@ -30,6 +30,9 @@ import org.json.JSONObject;
 import com.hillal.acc.data.model.ServerAppUpdateInfo;
 import java.util.HashSet;
 import java.util.Set;
+import com.hillal.acc.data.entities.Cashbox;
+import com.hillal.acc.data.dao.CashboxDao;
+import com.hillal.acc.data.room.AppDatabase;
 
 public class DataManager {
     private static final String TAG = "DataManager";
@@ -312,7 +315,6 @@ public class DataManager {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Account> accounts = response.body();
                     Log.d(TAG, "Received " + accounts.size() + " accounts from server");
-                    
                     executor.execute(() -> {
                         try {
                             // تحديث وإضافة الحسابات
@@ -320,10 +322,9 @@ public class DataManager {
                                 try {
                                     account.setLastSyncTime(System.currentTimeMillis());
                                     account.setSyncStatus(2); // SYNCED
-                                    Log.d(TAG, "Processing account: " + account.getName() + 
-                                          " (ID: " + account.getServerId() + 
+                                    Log.d(TAG, "Processing account: " + account.getName() +
+                                          " (ID: " + account.getServerId() +
                                           ", Phone: " + account.getPhoneNumber() + ")");
-                                    
                                     Account existingAccount = accountDao.getAccountByServerIdSync(account.getServerId());
                                     if (existingAccount != null) {
                                         account.setId(existingAccount.getId());
@@ -340,7 +341,18 @@ public class DataManager {
                                 }
                             }
                             Log.d(TAG, "All accounts processed successfully");
-                            fetchTransactionsPaged(token, retryCount, callback);
+                            fetchTransactionsPaged(token, retryCount, new DataCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    // بعد جلب المعاملات، جلب الصناديق
+                                    fetchCashboxesFromServer(token, 0, callback);
+                                }
+                                @Override
+                                public void onError(String error) {
+                                    // حتى لو فشل جلب المعاملات، حاول جلب الصناديق
+                                    fetchCashboxesFromServer(token, 0, callback);
+                                }
+                            });
                         } catch (Exception e) {
                             Log.e(TAG, "Error saving accounts", e);
                             handler.post(() -> callback.onError("خطأ في حفظ البيانات المحلية"));
@@ -359,7 +371,6 @@ public class DataManager {
                     retryFetchAccounts(token, retryCount, callback);
                 }
             }
-
             @Override
             public void onFailure(Call<List<Account>> call, Throwable t) {
                 Log.e(TAG, "Network error while fetching accounts", t);
@@ -493,5 +504,67 @@ public class DataManager {
 
     public void shutdown() {
         executor.shutdown();
+    }
+
+    private void fetchCashboxesFromServer(String token, int retryCount, DataCallback callback) {
+        Log.d(TAG, "Fetching cashboxes from server... Attempt: " + (retryCount + 1));
+        ApiService api = RetrofitClient.getApiService();
+        AppDatabase db = AppDatabase.getInstance(context);
+        CashboxDao cashboxDao = db.cashboxDao();
+        api.getCashboxes("Bearer " + token).enqueue(new Callback<List<Cashbox>>() {
+            @Override
+            public void onResponse(Call<List<Cashbox>> call, Response<List<Cashbox>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Cashbox> cashboxes = response.body();
+                    Log.d(TAG, "Received " + cashboxes.size() + " cashboxes from server");
+                    executor.execute(() -> {
+                        try {
+                            cashboxDao.deleteAll();
+                            for (Cashbox cashbox : cashboxes) {
+                                cashboxDao.insert(cashbox);
+                            }
+                            Log.d(TAG, "All cashboxes processed successfully");
+                            handler.post(callback::onSuccess);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error saving cashboxes", e);
+                            handler.post(() -> callback.onError("خطأ في حفظ بيانات الصناديق المحلية"));
+                        }
+                    });
+                } else {
+                    String errorMessage = "خطأ في الاتصال بالخادم: " + response.code();
+                    try {
+                        if (response.errorBody() != null) {
+                            errorMessage += "\n" + response.errorBody().string();
+                        }
+                    } catch (IOException e) {
+                        Log.e(TAG, "Error reading error body", e);
+                    }
+                    Log.e(TAG, errorMessage);
+                    handler.post(() -> callback.onError(errorMessage));
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Cashbox>> call, Throwable t) {
+                Log.e(TAG, "Network error while fetching cashboxes", t);
+                handler.post(() -> callback.onError("فشل الاتصال بالخادم أثناء جلب الصناديق: " + t.getMessage()));
+            }
+        });
+    }
+
+    public void performInitialSyncIfNeeded() {
+        SharedPreferences prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        boolean initialSyncDone = prefs.getBoolean("initial_sync_done", false);
+        if (!initialSyncDone) {
+            fetchDataFromServer(new DataCallback() {
+                @Override
+                public void onSuccess() {
+                    prefs.edit().putBoolean("initial_sync_done", true).apply();
+                }
+                @Override
+                public void onError(String error) {
+                    // يمكنك إعادة المحاولة أو إعلام المستخدم
+                }
+            });
+        }
     }
 } 
