@@ -79,7 +79,7 @@ public class EditTransactionFragment extends Fragment implements com.hillal.acc.
         setupListeners();
         loadAccounts();
         loadTransaction();
-        setupCashboxDropdown();
+        // setupCashboxDropdown سيتم استدعاؤها من loadTransaction بعد تحميل المعاملة
     }
 
     private void setupViews() {
@@ -133,6 +133,9 @@ public class EditTransactionFragment extends Fragment implements com.hillal.acc.
     }
 
     private void populateTransactionData(Transaction transaction) {
+        android.util.Log.d("EditTransaction", "Populating transaction data for ID: " + transaction.getId());
+        android.util.Log.d("EditTransaction", "Transaction cashbox ID: " + transaction.getCashboxId());
+        
         selectedAccountId = transaction.getAccountId();
         
         // Load account name
@@ -175,6 +178,8 @@ public class EditTransactionFragment extends Fragment implements com.hillal.acc.
         // Set date
         calendar.setTimeInMillis(transaction.getTransactionDate());
         updateDateField();
+
+        setupCashboxDropdown();
     }
 
     private void showDatePicker() {
@@ -232,8 +237,8 @@ public class EditTransactionFragment extends Fragment implements com.hillal.acc.
                     binding.cashboxAutoComplete.setText(transactionCashbox.name, false);
                     selectedCashboxId = transactionCashbox.id;
                     android.util.Log.d("EditTransaction", "Set to old transaction cashbox: " + transactionCashbox.name + " (ID: " + transactionCashbox.id + ")");
-                } else if (mainCashboxId != -1) {
-                    // إذا لم يتم العثور على الصندوق المرتبط، استخدم الرئيسي
+                } else if (mainCashboxId != -1 && selectedCashboxId == -1) {
+                    // إذا لم يتم العثور على الصندوق المرتبط، استخدم الرئيسي فقط إذا لم يتم اختيار صندوق بعد
                     for (Cashbox cashbox : allCashboxes) {
                         if (cashbox.id == mainCashboxId) {
                             binding.cashboxAutoComplete.setText(cashbox.name, false);
@@ -243,13 +248,24 @@ public class EditTransactionFragment extends Fragment implements com.hillal.acc.
                         }
                     }
                 }
-            } else if (mainCashboxId != -1) {
-                // إذا لم تكن هناك معاملة قديمة، استخدم الصندوق الرئيسي
+            } else if (mainCashboxId != -1 && selectedCashboxId == -1) {
+                // إذا لم تكن هناك معاملة قديمة، استخدم الصندوق الرئيسي فقط إذا لم يتم اختيار صندوق بعد
                 for (Cashbox cashbox : allCashboxes) {
                     if (cashbox.id == mainCashboxId) {
                         binding.cashboxAutoComplete.setText(cashbox.name, false);
                         selectedCashboxId = mainCashboxId;
                         android.util.Log.d("EditTransaction", "Set to main cashbox (no old transaction): " + cashbox.name + " (ID: " + cashbox.id + ")");
+                        break;
+                    }
+                }
+            }
+            
+            // إذا كان المستخدم قد اختار صندوقاً بالفعل، احتفظ باختياره
+            if (selectedCashboxId != -1) {
+                for (Cashbox cashbox : allCashboxes) {
+                    if (cashbox.id == selectedCashboxId) {
+                        binding.cashboxAutoComplete.setText(cashbox.name, false);
+                        android.util.Log.d("EditTransaction", "Keeping user selection: " + cashbox.name + " (ID: " + cashbox.id + ")");
                         break;
                     }
                 }
