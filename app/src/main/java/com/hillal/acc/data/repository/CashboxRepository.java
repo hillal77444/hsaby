@@ -79,4 +79,54 @@ public class CashboxRepository {
             }
         });
     }
+
+    public void addCashboxToServer(String baseUrl, String token, String name, CashboxCallback callback) {
+        android.util.Log.d("CashboxRepository", "Adding cashbox to server: name=" + name + ", baseUrl=" + baseUrl);
+        
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        ApiService api = retrofit.create(ApiService.class);
+        ApiService.AddCashboxRequest request = new ApiService.AddCashboxRequest(name);
+        Call<Cashbox> call = api.addCashbox(token, request);
+        call.enqueue(new Callback<Cashbox>() {
+            @Override
+            public void onResponse(Call<Cashbox> call, Response<Cashbox> response) {
+                android.util.Log.d("CashboxRepository", "Server response: code=" + response.code() + ", success=" + response.isSuccessful());
+                
+                if (response.isSuccessful() && response.body() != null) {
+                    Cashbox serverCashbox = response.body();
+                    android.util.Log.d("CashboxRepository", "Received cashbox from server: id=" + serverCashbox.id + ", name=" + serverCashbox.name);
+                    
+                    executorService.execute(() -> {
+                        cashboxDao.insert(serverCashbox);
+                        android.util.Log.d("CashboxRepository", "Saved cashbox to local database: id=" + serverCashbox.id + ", name=" + serverCashbox.name);
+                        callback.onSuccess(serverCashbox);
+                    });
+                } else {
+                    String errorBody = "";
+                    try {
+                        if (response.errorBody() != null) {
+                            errorBody = response.errorBody().string();
+                        }
+                    } catch (Exception e) {
+                        errorBody = "Error reading response body";
+                    }
+                    android.util.Log.e("CashboxRepository", "Server error: code=" + response.code() + ", body=" + errorBody);
+                    callback.onError("فشل في إضافة الصندوق إلى الخادم: " + response.code());
+                }
+            }
+            @Override
+            public void onFailure(Call<Cashbox> call, Throwable t) {
+                android.util.Log.e("CashboxRepository", "Network error: " + t.getMessage(), t);
+                callback.onError("خطأ في الاتصال: " + t.getMessage());
+            }
+        });
+    }
+
+    public interface CashboxCallback {
+        void onSuccess(Cashbox cashbox);
+        void onError(String error);
+    }
 } 
