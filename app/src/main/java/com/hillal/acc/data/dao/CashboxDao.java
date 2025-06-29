@@ -16,6 +16,9 @@ public interface CashboxDao {
     @Query("SELECT * FROM cashboxes")
     LiveData<List<Cashbox>> getAll();
 
+    @Query("SELECT * FROM cashboxes")
+    List<Cashbox> getAllSync();
+
     @Insert
     void insert(Cashbox cashbox);
 
