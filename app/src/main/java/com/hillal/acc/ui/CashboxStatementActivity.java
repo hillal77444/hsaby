@@ -210,6 +210,9 @@ public class CashboxStatementActivity extends AppCompatActivity {
             for (Cashbox c : allCashboxes) {
                 names.add(c.name);
             }
+            if (!names.contains("➕ إضافة صندوق جديد...")) {
+                names.add("➕ إضافة صندوق جديد...");
+            }
             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, names);
             cashboxDropdown.setAdapter(adapter);
             cashboxDropdown.setText("", false);
@@ -218,9 +221,13 @@ public class CashboxStatementActivity extends AppCompatActivity {
         });
 
         cashboxDropdown.setOnItemClickListener((parent, view, position, id) -> {
-            lastSelectedCashbox = allCashboxes.get(position);
-            selectedCashboxId = lastSelectedCashbox.id;
-            onCashboxSelected(lastSelectedCashbox);
+            if (position == allCashboxes.size()) {
+                Toast.makeText(this, "ميزة إضافة صندوق جديد غير متوفرة هنا بعد", Toast.LENGTH_SHORT).show();
+            } else {
+                lastSelectedCashbox = allCashboxes.get(position);
+                selectedCashboxId = lastSelectedCashbox.id;
+                onCashboxSelected(lastSelectedCashbox);
+            }
         });
 
         transactionRepository.getAllTransactions().observe(CashboxStatementActivity.this, transactions -> {
