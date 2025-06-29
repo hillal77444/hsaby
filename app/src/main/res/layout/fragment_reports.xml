@@ -122,6 +122,25 @@
                         android:autoSizeMinTextSize="10sp"
                         android:autoSizeMaxTextSize="18sp"
                         android:autoSizeStepGranularity="2sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCashboxStatement"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:text="كشف الصندوق"
+                        android:textAllCaps="false"
+                        android:textColor="@color/white"
+                        android:backgroundTint="#1976d2"
+                        android:icon="@drawable/ic_wallet"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp"
+                        android:textSize="16sp"
+                        android:layout_marginStart="8dp"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="10sp"
+                        android:autoSizeMaxTextSize="18sp"
+                        android:autoSizeStepGranularity="2sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
              <com.google.android.material.card.MaterialCardView
