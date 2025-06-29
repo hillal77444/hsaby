@@ -74,7 +74,7 @@ public class App extends Application {
             
             // Initialize database
             Log.d(TAG, "Initializing database...");
-            database = AppDatabase.getInstance(this);
+            database = AppDatabase.getInstance(getApplicationContext());
             Log.d(TAG, "Database initialized successfully");
             
             // Initialize repositories
