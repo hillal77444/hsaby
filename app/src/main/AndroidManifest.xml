@@ -44,6 +44,11 @@
             android:exported="false"
             android:documentLaunchMode="never"
             android:excludeFromRecents="false" />
+        <activity 
+            android:name=".ui.CashboxStatementActivity"
+            android:exported="false"
+            android:documentLaunchMode="never"
+            android:excludeFromRecents="false" />
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
