@@ -61,6 +61,8 @@ public class CashboxStatementFragment extends Fragment {
     private Map<Long, Account> accountMap = new HashMap<>();
     private long selectedCashboxId = -1;
     private long mainCashboxId = -1;
+    private boolean isSummaryMode = true;
+    private List<String> allCurrencies = new ArrayList<>();
 
     @Nullable
     @Override
@@ -73,13 +75,13 @@ public class CashboxStatementFragment extends Fragment {
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
         transactionRepository = new TransactionRepository(((App) requireActivity().getApplication()).getDatabase());
         setupDatePickers();
-        loadCashboxes();
         setDefaultDates();
         loadAccountsMap();
         // تفعيل التكبير والتصغير في WebView
         webView.getSettings().setBuiltInZoomControls(true);
         webView.getSettings().setDisplayZoomControls(false);
         webView.getSettings().setSupportZoom(true);
+        loadCashboxes();
         return view;
     }
 
@@ -156,6 +158,9 @@ public class CashboxStatementFragment extends Fragment {
             cashboxDropdown.setText("", false);
             selectedCashboxId = -1;
             lastSelectedCashbox = null;
+            if (isSummaryMode) {
+                showSummaryWithCurrencies();
+            }
         });
 
         cashboxDropdown.setOnItemClickListener((parent, view, position, id) -> {
@@ -164,6 +169,8 @@ public class CashboxStatementFragment extends Fragment {
             } else {
                 lastSelectedCashbox = allCashboxes.get(position);
                 selectedCashboxId = lastSelectedCashbox.id;
+                isSummaryMode = false;
+                currencyButtonsLayout.setVisibility(View.GONE);
                 onCashboxSelected(lastSelectedCashbox);
             }
         });
@@ -171,6 +178,9 @@ public class CashboxStatementFragment extends Fragment {
         transactionRepository.getAllTransactions().observe(getViewLifecycleOwner(), transactions -> {
             if (transactions != null) {
                 allTransactions = transactions;
+                if (isSummaryMode) {
+                    showSummaryWithCurrencies();
+                }
             }
         });
     }
@@ -186,6 +196,7 @@ public class CashboxStatementFragment extends Fragment {
     }
 
     private void onCashboxSelected(Cashbox cashbox) {
+        isSummaryMode = false;
         List<Transaction> cashboxTransactions = new ArrayList<>();
         for (Transaction t : allTransactions) {
             if (t.getCashboxId() == cashbox.id) {
@@ -390,5 +401,96 @@ public class CashboxStatementFragment extends Fragment {
             }
         }
         return balance;
+    }
+
+    private String generateCashboxesSummaryHtml(List<Cashbox> cashboxes, List<Transaction> transactions, String currency) {
+        StringBuilder html = new StringBuilder();
+        html.append("<!DOCTYPE html>");
+        html.append("<html dir='rtl' lang='ar'><head><meta charset='UTF-8'>");
+        html.append("<style>");
+        html.append("body { font-family: 'Cairo', Arial, sans-serif; background: #f5f7fa; }");
+        html.append("table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.08); }");
+        html.append("th, td { border: 1px solid #e8eaed; padding: 6px 4px; text-align: right; font-size: 0.9em; }");
+        html.append("th { background: #e9ecef; color: #495057; font-weight: 600; }");
+        html.append("tr:nth-child(even) { background: #f8f9fa; }");
+        html.append("</style></head><body>");
+        html.append("<h3 style='text-align:center'>ملخص الصناديق للعملة: ").append(currency).append("</h3>");
+        html.append("<table>");
+        html.append("<tr><th>اسم الصندوق</th><th>إجمالي الدائن (له)</th><th>إجمالي المدين (عليه)</th><th>الرصيد التراكمي</th></tr>");
+        for (Cashbox c : cashboxes) {
+            double totalCredit = 0, totalDebit = 0;
+            for (Transaction t : transactions) {
+                if (t.getCashboxId() == c.id && t.getCurrency().trim().equals(currency.trim())) {
+                    if (t.getType().equalsIgnoreCase("credit") || t.getType().equals("له")) {
+                        totalCredit += t.getAmount();
+                    } else {
+                        totalDebit += t.getAmount();
+                    }
+                }
+            }
+            double balance = totalCredit - totalDebit;
+            html.append("<tr>");
+            html.append("<td>").append(c.name).append("</td>");
+            html.append("<td>").append(formatAmount(totalCredit)).append("</td>");
+            html.append("<td>").append(formatAmount(totalDebit)).append("</td>");
+            html.append("<td>").append(formatAmount(balance)).append("</td>");
+            html.append("</tr>");
+        }
+        html.append("</table></body></html>");
+        return html.toString();
+    }
+
+    private void showSummaryWithCurrencies() {
+        LinkedHashSet<String> currenciesSet = new LinkedHashSet<>();
+        for (Transaction t : allTransactions) {
+            if (t.getCurrency() != null && !t.getCurrency().trim().isEmpty()) {
+                currenciesSet.add(t.getCurrency().trim());
+            }
+        }
+        allCurrencies = new ArrayList<>(currenciesSet);
+        if (allCurrencies.isEmpty()) {
+            webView.loadDataWithBaseURL(null, "<p>لا توجد بيانات</p>", "text/html", "UTF-8", null);
+            currencyButtonsLayout.setVisibility(View.GONE);
+            return;
+        }
+        if (selectedCurrency == null || !allCurrencies.contains(selectedCurrency)) {
+            selectedCurrency = allCurrencies.get(0);
+        }
+        currencyButtonsLayout.removeAllViews();
+        for (String currency : allCurrencies) {
+            MaterialButton btn = new MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+            btn.setText(currency);
+            btn.setCheckable(true);
+            boolean isSelected = currency.equals(selectedCurrency);
+            btn.setChecked(isSelected);
+            btn.setTextColor(isSelected ? Color.WHITE : Color.parseColor("#1976d2"));
+            btn.setBackgroundColor(isSelected ? Color.parseColor("#1976d2") : Color.parseColor("#e3f0ff"));
+            btn.setCornerRadius(40);
+            btn.setTextSize(16);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.setMarginEnd(16);
+            btn.setLayoutParams(params);
+            btn.setOnClickListener(v -> {
+                setSummarySelectedCurrency(currency);
+            });
+            currencyButtonsLayout.addView(btn);
+        }
+        currencyButtonsLayout.setVisibility(View.VISIBLE);
+        String html = generateCashboxesSummaryHtml(allCashboxes, allTransactions, selectedCurrency);
+        webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
+    }
+
+    private void setSummarySelectedCurrency(String currency) {
+        selectedCurrency = currency;
+        for (int i = 0; i < currencyButtonsLayout.getChildCount(); i++) {
+            MaterialButton btn = (MaterialButton) currencyButtonsLayout.getChildAt(i);
+            boolean isSelected = btn.getText().toString().equals(currency);
+            btn.setChecked(isSelected);
+            btn.setBackgroundColor(isSelected ? Color.parseColor("#1976d2") : Color.parseColor("#e3f0ff"));
+            btn.setTextColor(isSelected ? Color.WHITE : Color.parseColor("#1976d2"));
+        }
+        String html = generateCashboxesSummaryHtml(allCashboxes, allTransactions, selectedCurrency);
+        webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
     }
 } 
