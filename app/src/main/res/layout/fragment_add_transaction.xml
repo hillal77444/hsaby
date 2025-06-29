@@ -340,7 +340,6 @@
                             android:background="@drawable/bg_edittext"
                             android:padding="8dp"
                             android:hint="اكتب البيان أو اختر من المقترحات"
-                            android:dropDownBackground="@drawable/bg_dropdown_suggestions"
                             android:dropDownVerticalOffset="8dp"
                             android:dropDownHorizontalOffset="0dp"
                             android:popupElevation="8dp"/>
