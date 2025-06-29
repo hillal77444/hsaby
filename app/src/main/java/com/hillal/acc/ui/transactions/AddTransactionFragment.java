@@ -108,6 +108,7 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
         Set<String> suggestions = prefs.getStringSet("descriptions", new HashSet<>());
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, new ArrayList<>(suggestions));
         ((AutoCompleteTextView) binding.descriptionEditText).setAdapter(adapter);
+        ((AutoCompleteTextView) binding.descriptionEditText).setDropDownBackgroundResource(R.drawable.bg_dropdown_suggestions);
         binding.descriptionEditText.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
                 ((AutoCompleteTextView) binding.descriptionEditText).showDropDown();
