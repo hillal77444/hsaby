@@ -201,16 +201,24 @@ public class CashboxStatementActivity extends AppCompatActivity {
             mainCashboxId = -1;
             for (Cashbox c : allCashboxes) {
                 names.add(c.name);
+                if (mainCashboxId == -1 && (c.name.equals("الرئيسي") || c.name.equalsIgnoreCase("main"))) {
+                    mainCashboxId = c.id;
+                }
             }
-            if (!allCashboxes.isEmpty()) {
+            if (mainCashboxId == -1 && !allCashboxes.isEmpty()) {
                 mainCashboxId = allCashboxes.get(0).id;
-                cashboxDropdown.setText(allCashboxes.get(0).name, false);
-                selectedCashboxId = mainCashboxId;
-                lastSelectedCashbox = allCashboxes.get(0);
-                onCashboxSelected(lastSelectedCashbox);
             }
             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, names);
             cashboxDropdown.setAdapter(adapter);
+
+            // حدد الصندوق الرئيسي أو أول صندوق تلقائياً عند أول تحميل
+            if (!allCashboxes.isEmpty()) {
+                cashboxDropdown.setText(allCashboxes.get(0).name, false);
+                selectedCashboxId = allCashboxes.get(0).id;
+                lastSelectedCashbox = allCashboxes.get(0);
+                onCashboxSelected(lastSelectedCashbox);
+            }
+
             cashboxDropdown.setOnItemClickListener((parent, view, position, id) -> {
                 Cashbox selected = allCashboxes.get(position);
                 cashboxDropdown.setText(selected.name, false);
