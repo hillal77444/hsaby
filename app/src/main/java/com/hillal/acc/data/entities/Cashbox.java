@@ -10,7 +10,7 @@ public class Cashbox {
     @PrimaryKey
     @NonNull
     @SerializedName("id")
-    public int id;
+    public long id;
     @SerializedName("name")
     public String name;
     @SerializedName("created_at")
