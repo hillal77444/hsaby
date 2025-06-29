@@ -76,6 +76,10 @@ public class CashboxStatementFragment extends Fragment {
         loadCashboxes();
         setDefaultDates();
         loadAccountsMap();
+        // تفعيل التكبير والتصغير في WebView
+        webView.getSettings().setBuiltInZoomControls(true);
+        webView.getSettings().setDisplayZoomControls(false);
+        webView.getSettings().setSupportZoom(true);
         return view;
     }
 
@@ -314,11 +318,13 @@ public class CashboxStatementFragment extends Fragment {
         double totalDebit = 0;
         double totalCredit = 0;
         html.append("<table>");
-        html.append("<tr><th>التاريخ</th><th>الوصف</th><th>دائن</th><th>مدين</th><th>الرصيد</th></tr>");
+        html.append("<tr><th>التاريخ</th><th>الحساب</th><th>الوصف</th><th>دائن</th><th>مدين</th><th>الرصيد</th></tr>");
         double balance = previousBalance;
         for (Transaction t : transactions) {
             html.append("<tr>");
             html.append("<td>").append(dateFormat.format(new Date(t.getTransactionDate()))).append("</td>");
+            String accountName = accountMap.containsKey(t.getAccountId()) ? accountMap.get(t.getAccountId()).getName() : "";
+            html.append("<td>").append(accountName).append("</td>");
             html.append("<td>").append(t.getDescription() != null ? t.getDescription() : "").append("</td>");
             if (t.getType().equalsIgnoreCase("credit") || t.getType().equals("له")) {
                 html.append("<td>").append(formatAmount(t.getAmount())).append("</td><td></td>");
@@ -332,7 +338,7 @@ public class CashboxStatementFragment extends Fragment {
             html.append("<td>").append(formatAmount(balance)).append("</td>");
             html.append("</tr>");
         }
-        html.append("<tr class='total-row'><td colspan='2'>الإجمالي</td><td>").append(formatAmount(totalCredit)).append("</td><td>").append(formatAmount(totalDebit)).append("</td><td>").append(formatAmount(balance)).append("</td></tr>");
+        html.append("<tr class='total-row'><td colspan='3'>الإجمالي</td><td>").append(formatAmount(totalCredit)).append("</td><td>").append(formatAmount(totalDebit)).append("</td><td>").append(formatAmount(balance)).append("</td></tr>");
         html.append("</table>");
         html.append("</body></html>");
         return html.toString();
@@ -364,7 +370,10 @@ public class CashboxStatementFragment extends Fragment {
     }
 
     private String formatAmount(double amount) {
-        // Implementation of formatAmount method
-        return ""; // Placeholder return, actual implementation needed
+        if (Math.abs(amount - Math.round(amount)) < 0.01) {
+            return String.format(Locale.US, "%,.0f", amount);
+        } else {
+            return String.format(Locale.US, "%,.2f", amount);
+        }
     }
 } 
