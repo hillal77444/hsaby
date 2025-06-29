@@ -181,4 +181,10 @@
         android:name="com.hillal.acc.ui.about.AboutFragment"
         android:label="@string/about_app" />
 
+    <fragment
+        android:id="@+id/cashboxStatementFragment"
+        android:name="com.hillal.acc.ui.reports.CashboxStatementFragment"
+        android:label="كشف الصندوق التفصيلي"
+        tools:layout="@layout/fragment_cashbox_statement" />
+
 </navigation>
