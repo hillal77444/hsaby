@@ -58,6 +58,8 @@ import com.hillal.acc.ui.transactions.CashboxHelper;
 import java.util.HashSet;
 import java.util.Set;
 import android.util.TypedValue;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 public class AddTransactionFragment extends Fragment implements com.hillal.acc.ui.cashbox.AddCashboxDialog.OnCashboxAddedListener {
     private FragmentAddTransactionBinding binding;
@@ -116,6 +118,10 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
             if (hasFocus) {
                 ((AutoCompleteTextView) binding.descriptionEditText).showDropDown();
             }
+        });
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
+            v.setPadding(0, insets.getInsets(WindowInsetsCompat.Type.systemBars()).top, 0, insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom);
+            return insets;
         });
         return view;
     }
