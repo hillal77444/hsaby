@@ -51,6 +51,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
+import android.util.Log;
 
 public class CashboxStatementActivity extends AppCompatActivity {
     private CashboxViewModel cashboxViewModel;
@@ -75,6 +76,7 @@ public class CashboxStatementActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("CashboxStatement", "onCreate started");
         setContentView(R.layout.activity_cashbox_statement);
 
         if (getSupportActionBar() != null) {
@@ -195,7 +197,9 @@ public class CashboxStatementActivity extends AppCompatActivity {
     }
 
     private void loadCashboxes() {
-        cashboxViewModel.getAllCashboxes().observe(this, cashboxes -> {
+        Log.d("CashboxStatement", "loadCashboxes called");
+        cashboxViewModel.getAllCashboxes().observe(CashboxStatementActivity.this, cashboxes -> {
+            Log.d("CashboxStatement", "LiveData observed, cashboxes: " + (cashboxes != null ? cashboxes.size() : "null"));
             allCashboxes = cashboxes != null ? cashboxes : new ArrayList<>();
             List<String> names = new ArrayList<>();
             mainCashboxId = -1;
@@ -221,7 +225,7 @@ public class CashboxStatementActivity extends AppCompatActivity {
             cashboxDropdown.setFocusable(false);
             cashboxDropdown.setOnClickListener(v -> cashboxDropdown.showDropDown());
         });
-        transactionRepository.getAllTransactions().observe(this, transactions -> {
+        transactionRepository.getAllTransactions().observe(CashboxStatementActivity.this, transactions -> {
             if (transactions != null) {
                 allTransactions = transactions;
             }
