@@ -82,65 +82,81 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center"
+                    android:orientation="vertical"
                     android:padding="16dp">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnAccountsSummaryReport"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_weight="1"
-                        android:text="ملخص الحسابات"
-                        android:textAllCaps="false"
-                        android:textColor="@color/white"
-                        android:backgroundTint="@color/teal_700"
-                        android:icon="@drawable/ic_summary"
-                        app:iconGravity="textStart"
-                        app:iconPadding="8dp"
-                        android:textSize="16sp"
-                        android:layout_marginEnd="8dp"
-                        android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="10sp"
-                        android:autoSizeMaxTextSize="18sp"
-                        android:autoSizeStepGranularity="2sp" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:layout_marginBottom="8dp">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/viewAccountStatementButton"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_weight="1"
-                        android:text="كشف الحساب"
-                        android:textAllCaps="false"
-                        android:textColor="@color/white"
-                        android:backgroundTint="#3F51B5"
-                        android:icon="@drawable/ic_statement"
-                        app:iconGravity="textStart"
-                        app:iconPadding="8dp"
-                        android:textSize="16sp"
-                        android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="10sp"
-                        android:autoSizeMaxTextSize="18sp"
-                        android:autoSizeStepGranularity="2sp" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnAccountsSummaryReport"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:text="تقرير ارصدة الحسابات"
+                            android:textAllCaps="false"
+                            android:textColor="@color/white"
+                            android:backgroundTint="@color/teal_700"
+                            android:icon="@drawable/ic_summary"
+                            app:iconGravity="textStart"
+                            app:iconPadding="8dp"
+                            android:textSize="16sp"
+                            android:layout_marginEnd="8dp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="10sp"
+                            android:autoSizeMaxTextSize="18sp"
+                            android:autoSizeStepGranularity="2sp" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnCashboxStatement"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_weight="1"
-                        android:text="كشف الصندوق"
-                        android:textAllCaps="false"
-                        android:textColor="@color/white"
-                        android:backgroundTint="#1976d2"
-                        android:icon="@drawable/ic_wallet"
-                        app:iconGravity="textStart"
-                        app:iconPadding="8dp"
-                        android:textSize="16sp"
-                        android:layout_marginStart="8dp"
-                        android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="10sp"
-                        android:autoSizeMaxTextSize="18sp"
-                        android:autoSizeStepGranularity="2sp" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/viewAccountStatementButton"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:text="كشف الحساب"
+                            android:textAllCaps="false"
+                            android:textColor="@color/white"
+                            android:backgroundTint="#3F51B5"
+                            android:icon="@drawable/ic_statement"
+                            app:iconGravity="textStart"
+                            app:iconPadding="8dp"
+                            android:textSize="16sp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="10sp"
+                            android:autoSizeMaxTextSize="18sp"
+                            android:autoSizeStepGranularity="2sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnCashboxStatement"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:text="تقرير ارصدة الصناديق "
+                            android:textAllCaps="false"
+                            android:textColor="@color/white"
+                            android:backgroundTint="#1976d2"
+                            android:icon="@drawable/ic_wallet"
+                            app:iconGravity="textStart"
+                            app:iconPadding="8dp"
+                            android:textSize="16sp"
+                            android:layout_marginEnd="8dp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="10sp"
+                            android:autoSizeMaxTextSize="18sp"
+                            android:autoSizeStepGranularity="2sp" />
+
+                        <!-- إذا كان هناك زر رابع أضفه هنا بنفس النمط -->
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
              <com.google.android.material.card.MaterialCardView
