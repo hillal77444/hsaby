@@ -88,6 +88,7 @@ public class CashboxStatementFragment extends Fragment {
         currencyButtonsLayout.setVisibility(View.GONE);
         btnPrint.setOnClickListener(v -> printReport());
         cashboxDropdown.setFocusable(false);
+        cashboxDropdown.setOnClickListener(v -> cashboxDropdown.showDropDown());
         startDateInput.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
@@ -294,7 +295,12 @@ public class CashboxStatementFragment extends Fragment {
     }
 
     private void printReport() {
-        // منطق الطباعة كما في الـ Activity
+        if (webView != null) {
+            android.print.PrintManager printManager = (android.print.PrintManager) requireContext().getSystemService(android.content.Context.PRINT_SERVICE);
+            android.print.PrintDocumentAdapter printAdapter = webView.createPrintDocumentAdapter("كشف الصندوق");
+            String jobName = "كشف الصندوق";
+            printManager.print(jobName, printAdapter, new android.print.PrintAttributes.Builder().build());
+        }
     }
 
     private String toEnglishDigits(String value) {
