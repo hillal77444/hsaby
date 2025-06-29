@@ -207,29 +207,22 @@ public class CashboxStatementActivity extends AppCompatActivity {
             Log.d("CashboxStatement", "LiveData observed, cashboxes: " + (cashboxes != null ? cashboxes.size() : "null"));
             allCashboxes = cashboxes != null ? cashboxes : new ArrayList<>();
             List<String> names = new ArrayList<>();
-            mainCashboxId = -1;
             for (Cashbox c : allCashboxes) {
                 names.add(c.name);
             }
-            if (!allCashboxes.isEmpty()) {
-                mainCashboxId = allCashboxes.get(0).id;
-                cashboxDropdown.setText(allCashboxes.get(0).name, false);
-                selectedCashboxId = mainCashboxId;
-                lastSelectedCashbox = allCashboxes.get(0);
-                onCashboxSelected(lastSelectedCashbox);
-            }
             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, names);
             cashboxDropdown.setAdapter(adapter);
-            cashboxDropdown.setOnItemClickListener((parent, view, position, id) -> {
-                Cashbox selected = allCashboxes.get(position);
-                cashboxDropdown.setText(selected.name, false);
-                selectedCashboxId = selected.id;
-                lastSelectedCashbox = selected;
-                onCashboxSelected(selected);
-            });
-            cashboxDropdown.setFocusable(false);
-            cashboxDropdown.setOnClickListener(v -> cashboxDropdown.showDropDown());
+            cashboxDropdown.setText("", false);
+            selectedCashboxId = -1;
+            lastSelectedCashbox = null;
         });
+
+        cashboxDropdown.setOnItemClickListener((parent, view, position, id) -> {
+            lastSelectedCashbox = allCashboxes.get(position);
+            selectedCashboxId = lastSelectedCashbox.id;
+            onCashboxSelected(lastSelectedCashbox);
+        });
+
         transactionRepository.getAllTransactions().observe(CashboxStatementActivity.this, transactions -> {
             if (transactions != null) {
                 allTransactions = transactions;
