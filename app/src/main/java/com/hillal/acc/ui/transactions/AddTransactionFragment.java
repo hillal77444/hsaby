@@ -60,6 +60,7 @@ import java.util.Set;
 import android.util.TypedValue;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import android.os.Build;
 
 public class AddTransactionFragment extends Fragment implements com.hillal.acc.ui.cashbox.AddCashboxDialog.OnCashboxAddedListener {
     private FragmentAddTransactionBinding binding;
@@ -129,6 +130,9 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            requireActivity().getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
+        }
         setupViews();
         setupListeners();
         loadAccounts();
