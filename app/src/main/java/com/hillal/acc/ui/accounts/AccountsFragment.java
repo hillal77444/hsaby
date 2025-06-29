@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Collections;
 import java.util.HashMap;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 public class AccountsFragment extends Fragment {
     private AccountViewModel accountViewModel;
@@ -213,6 +215,15 @@ public class AccountsFragment extends Fragment {
         // Setup add account button
         addAccountButton.setOnClickListener(v -> {
             Navigation.findNavController(root).navigate(R.id.addAccountFragment);
+        });
+
+        int originalMargin = ((ViewGroup.MarginLayoutParams) addAccountButton.getLayoutParams()).bottomMargin;
+        ViewCompat.setOnApplyWindowInsetsListener(addAccountButton, (v, insets) -> {
+            int bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            params.bottomMargin = originalMargin + bottom;
+            v.setLayoutParams(params);
+            return insets;
         });
 
         return root;
