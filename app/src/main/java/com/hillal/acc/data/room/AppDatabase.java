@@ -38,10 +38,10 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract com.hillal.acc.data.room.AccountDao accountDao();
     public abstract com.hillal.acc.data.room.TransactionDao transactionDao();
-    public abstract SettingsDao settingsDao();
-    public abstract PendingOperationDao pendingOperationDao();
-    public abstract UserDao userDao();
-    public abstract CashboxDao cashboxDao();
+    public abstract com.hillal.acc.data.room.SettingsDao settingsDao();
+    public abstract com.hillal.acc.data.room.PendingOperationDao pendingOperationDao();
+    public abstract com.hillal.acc.data.room.UserDao userDao();
+    public abstract com.hillal.acc.data.dao.CashboxDao cashboxDao();
 
     public static AppDatabase getInstance(Context context) {
         if (INSTANCE == null) {
