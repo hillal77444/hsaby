@@ -13,16 +13,14 @@ import java.util.List;
 
 public class CashboxViewModel extends AndroidViewModel {
     private CashboxRepository repository;
-    private LiveData<List<Cashbox>> allCashboxes;
 
     public CashboxViewModel(@NonNull Application application) {
         super(application);
         repository = new CashboxRepository(application);
-        allCashboxes = repository.getAllCashboxes();
     }
 
     public LiveData<List<Cashbox>> getAllCashboxes() {
-        return allCashboxes;
+        return repository.getAllCashboxes();
     }
 
     public void insert(Cashbox cashbox) {
