@@ -60,6 +60,13 @@ public class ReportsFragment extends Fragment {
             androidx.navigation.Navigation.findNavController(v)
                 .navigate(R.id.action_reports_to_accountsSummaryReport);
         });
+
+        // زر كشف الصندوق
+        MaterialButton btnCashboxStatement = view.findViewById(R.id.btnCashboxStatement);
+        btnCashboxStatement.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), com.hillal.acc.ui.CashboxStatementActivity.class);
+            startActivity(intent);
+        });
         
         // Observe data
         observeTransactions();
