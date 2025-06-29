@@ -120,10 +120,7 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
                 ((AutoCompleteTextView) binding.descriptionEditText).showDropDown();
             }
         });
-        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
-            v.setPadding(0, insets.getInsets(WindowInsetsCompat.Type.systemBars()).top, 0, insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom);
-            return insets;
-        });
+        // أزل أو علّق كود insets البرمجي هنا
         return view;
     }
 
