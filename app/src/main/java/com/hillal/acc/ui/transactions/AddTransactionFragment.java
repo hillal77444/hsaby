@@ -16,6 +16,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.content.SharedPreferences;
+import android.widget.AutoCompleteTextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -53,6 +55,9 @@ import com.hillal.acc.ui.cashbox.AddCashboxDialog;
 import com.hillal.acc.data.repository.CashboxRepository;
 import com.hillal.acc.ui.transactions.CashboxHelper;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class AddTransactionFragment extends Fragment implements com.hillal.acc.ui.cashbox.AddCashboxDialog.OnCashboxAddedListener {
     private FragmentAddTransactionBinding binding;
     private TransactionsViewModel transactionsViewModel;
@@ -89,7 +94,26 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentAddTransactionBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+        View view = binding.getRoot();
+        setupViews();
+        setupListeners();
+        loadAccounts();
+        loadAllTransactions();
+        setupAccountPicker();
+        setupCashboxDropdown();
+        transactionsViewModel.getAccountBalancesMap().observe(getViewLifecycleOwner(), balancesMap -> {
+            accountBalancesMap = balancesMap != null ? balancesMap : new HashMap<>();
+        });
+        SharedPreferences prefs = requireContext().getSharedPreferences("suggestions", Context.MODE_PRIVATE);
+        Set<String> suggestions = prefs.getStringSet("descriptions", new HashSet<>());
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, new ArrayList<>(suggestions));
+        ((AutoCompleteTextView) binding.descriptionEditText).setAdapter(adapter);
+        binding.descriptionEditText.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                ((AutoCompleteTextView) binding.descriptionEditText).showDropDown();
+            }
+        });
+        return view;
     }
 
     @Override
@@ -239,6 +263,16 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
                             lastSavedBalance = (balance != null) ? balance : 0.0;
                             showSuccessDialog();
                         });
+
+                    // عند حفظ المعاملة (بعد التأكد أن البيان غير فارغ)
+                    String desc = binding.descriptionEditText.getText().toString().trim();
+                    if (!desc.isEmpty()) {
+                        SharedPreferences prefs = requireContext().getSharedPreferences("suggestions", Context.MODE_PRIVATE);
+                        Set<String> suggestions = prefs.getStringSet("descriptions", new HashSet<>());
+                        suggestions = new HashSet<>(suggestions); // حتى لا تكون read-only
+                        suggestions.add(desc);
+                        prefs.edit().putStringSet("descriptions", suggestions).apply();
+                    }
                 }
             });
         } catch (NumberFormatException e) {
