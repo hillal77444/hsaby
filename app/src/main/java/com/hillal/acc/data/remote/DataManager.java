@@ -508,7 +508,7 @@ public class DataManager {
 
     private void fetchCashboxesFromServer(String token, int retryCount, DataCallback callback) {
         Log.d(TAG, "Fetching cashboxes from server... Attempt: " + (retryCount + 1));
-        AppDatabase db = AppDatabase.getInstance(context);
+        AppDatabase db = AppDatabase.getInstance(context.getApplicationContext());
         CashboxDao cashboxDao = db.cashboxDao();
         
         apiService.getCashboxes("Bearer " + token).enqueue(new Callback<List<Cashbox>>() {
