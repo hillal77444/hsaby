@@ -89,10 +89,7 @@ public class CashboxStatementActivity extends AppCompatActivity {
         calendar = Calendar.getInstance();
         dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
 
-        cashboxViewModel = new ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())
-        ).get(CashboxViewModel.class);
+        cashboxViewModel = new ViewModelProvider(this).get(CashboxViewModel.class);
         Log.d("CashboxStatement", "cashboxViewModel = " + (cashboxViewModel != null));
 
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
@@ -229,7 +226,7 @@ public class CashboxStatementActivity extends AppCompatActivity {
 
         cashboxDropdown.setOnItemClickListener((parent, view, position, id) -> {
             if (position == allCashboxes.size()) {
-                Toast.makeText(this, "ميزة إضافة صندوق جديد غير متوفرة هنا بعد", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "ميزة إضافة صندوق جديد غير متوفرة بعد", Toast.LENGTH_SHORT).show();
             } else {
                 lastSelectedCashbox = allCashboxes.get(position);
                 selectedCashboxId = lastSelectedCashbox.id;
