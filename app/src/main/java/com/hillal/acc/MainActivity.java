@@ -47,6 +47,8 @@ import com.hillal.acc.ui.transactions.TransactionsFragment;
 import com.hillal.acc.ui.accounts.AddAccountFragment;
 import com.hillal.acc.ui.reports.AccountStatementFragment;
 import androidx.core.view.WindowCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -68,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
             // Initialize view binding
             binding = ActivityMainBinding.inflate(getLayoutInflater());
             setContentView(binding.getRoot());
-            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+            WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
             Log.d(TAG, "Layout inflated successfully");
 
             // Setup toolbar
@@ -128,6 +130,14 @@ public class MainActivity extends AppCompatActivity {
                 db.transactionDao(),
                 db.pendingOperationDao()
             );
+
+            // بعد إعداد BottomNavigationView
+            BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+            ViewCompat.setOnApplyWindowInsetsListener(bottomNavigationView, (v, insets) -> {
+                int bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+                v.setPadding(0, 0, 0, bottom);
+                return insets;
+            });
 
         } catch (IllegalStateException e) {
             String errorMessage = "=== خطأ في تهيئة التطبيق ===\n\n" +
