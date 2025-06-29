@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
             // Setup bottom navigation
             binding.bottomNavigation.setOnNavigationItemSelectedListener(navListener);
 
-            db = AppDatabase.getInstance(this);
+            db = AppDatabase.getInstance(getApplicationContext());
             setupUI();
 
             // تهيئة مدير التحديثات
