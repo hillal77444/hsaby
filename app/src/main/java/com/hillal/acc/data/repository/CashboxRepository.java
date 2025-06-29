@@ -34,9 +34,7 @@ public class CashboxRepository {
     }
 
     public LiveData<List<Cashbox>> getAllCashboxes() {
-        MutableLiveData<List<Cashbox>> data = new MutableLiveData<>();
-        executorService.execute(() -> data.postValue(cashboxDao.getAll()));
-        return data;
+        return cashboxDao.getAll();
     }
 
     public void insert(Cashbox cashbox) {
