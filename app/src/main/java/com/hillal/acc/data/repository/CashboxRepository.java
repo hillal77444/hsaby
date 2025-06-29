@@ -34,10 +34,12 @@ public class CashboxRepository {
     }
 
     public LiveData<List<Cashbox>> getAllCashboxes() {
-        Log.d("CashboxRepository", "cashboxDao = " + cashboxDao);
-        LiveData<List<Cashbox>> data = cashboxDao != null ? cashboxDao.getAll() : null;
-        Log.d("CashboxRepository", "getAllCashboxes() returns: " + data);
-        return data;
+        if (cashboxDao != null) {
+            return cashboxDao.getAll();
+        } else {
+            // إرجاع LiveData فارغ بدلًا من null
+            return new MutableLiveData<>(new java.util.ArrayList<>());
+        }
     }
 
     public void insert(Cashbox cashbox) {
