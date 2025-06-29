@@ -332,7 +332,7 @@ public class DashboardFragment extends Fragment {
         // تحقق إذا كانت القاعدة فارغة (لا يوجد حسابات ولا صناديق)
         new Thread(() -> {
             boolean noAccounts = db.accountDao().getAllAccountsSync().isEmpty();
-            boolean noCashboxes = db.cashboxDao().getAll().isEmpty();
+            boolean noCashboxes = db.cashboxDao().getAllSync().isEmpty();
             if (noAccounts && noCashboxes) {
                 requireActivity().runOnUiThread(() -> {
                     showLoadingDialog("جاري المزامنة التلقائية...");
