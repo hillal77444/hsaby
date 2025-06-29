@@ -314,12 +314,13 @@ public class CashboxStatementFragment extends Fragment {
         html.append("<p class='period'>من <b>").append(dateFormat.format(startDate)).append("</b> إلى <b>").append(dateFormat.format(endDate)).append("</b></p>");
         html.append("</div>");
         sortTransactionsByDate(transactions);
-        double previousBalance = previousBalances != null && previousBalances.containsKey(selectedCurrency) ? previousBalances.get(selectedCurrency) : 0;
+        double previousBalance = calculatePreviousBalance(cashbox.id, selectedCurrency, startDate.getTime());
         double totalDebit = 0;
         double totalCredit = 0;
         html.append("<table>");
         html.append("<tr><th>التاريخ</th><th>الحساب</th><th>الوصف</th><th>دائن</th><th>مدين</th><th>الرصيد</th></tr>");
         double balance = previousBalance;
+        html.append("<tr class='balance-row'><td colspan='5'>الرصيد السابق حتى ").append(dateFormat.format(startDate)).append(":</td><td>").append(formatAmount(previousBalance)).append("</td></tr>");
         for (Transaction t : transactions) {
             html.append("<tr>");
             html.append("<td>").append(dateFormat.format(new Date(t.getTransactionDate()))).append("</td>");
@@ -347,7 +348,7 @@ public class CashboxStatementFragment extends Fragment {
     private void setDefaultDates() {
         Calendar cal = Calendar.getInstance();
         endDateInput.setText(dateFormat.format(cal.getTime()));
-        cal.set(Calendar.DAY_OF_MONTH, 1);
+        cal.add(Calendar.DAY_OF_MONTH, -6);
         startDateInput.setText(dateFormat.format(cal.getTime()));
     }
 
@@ -366,7 +367,7 @@ public class CashboxStatementFragment extends Fragment {
     }
 
     private void sortTransactionsByDate(List<Transaction> transactions) {
-        // Implementation of sortTransactionsByDate method
+        transactions.sort((t1, t2) -> Long.compare(t1.getTransactionDate(), t2.getTransactionDate()));
     }
 
     private String formatAmount(double amount) {
@@ -375,5 +376,19 @@ public class CashboxStatementFragment extends Fragment {
         } else {
             return String.format(Locale.US, "%,.2f", amount);
         }
+    }
+
+    private double calculatePreviousBalance(long cashboxId, String currency, long beforeTime) {
+        double balance = 0;
+        for (Transaction t : allTransactions) {
+            if (t.getCashboxId() == cashboxId && t.getCurrency().trim().equals(currency.trim()) && t.getTransactionDate() < beforeTime) {
+                if (t.getType().equalsIgnoreCase("credit") || t.getType().equals("له")) {
+                    balance += t.getAmount();
+                } else {
+                    balance -= t.getAmount();
+                }
+            }
+        }
+        return balance;
     }
 } 
