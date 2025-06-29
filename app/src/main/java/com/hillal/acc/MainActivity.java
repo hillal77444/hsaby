@@ -46,6 +46,7 @@ import com.hillal.acc.ui.settings.SettingsFragment;
 import com.hillal.acc.ui.transactions.TransactionsFragment;
 import com.hillal.acc.ui.accounts.AddAccountFragment;
 import com.hillal.acc.ui.reports.AccountStatementFragment;
+import androidx.core.view.WindowCompat;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -67,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
             // Initialize view binding
             binding = ActivityMainBinding.inflate(getLayoutInflater());
             setContentView(binding.getRoot());
+            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
             Log.d(TAG, "Layout inflated successfully");
 
             // Setup toolbar
