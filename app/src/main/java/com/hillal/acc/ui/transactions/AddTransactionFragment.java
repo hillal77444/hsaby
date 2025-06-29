@@ -57,6 +57,7 @@ import com.hillal.acc.ui.transactions.CashboxHelper;
 
 import java.util.HashSet;
 import java.util.Set;
+import android.util.TypedValue;
 
 public class AddTransactionFragment extends Fragment implements com.hillal.acc.ui.cashbox.AddCashboxDialog.OnCashboxAddedListener {
     private FragmentAddTransactionBinding binding;
@@ -106,7 +107,9 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
         });
         SharedPreferences prefs = requireContext().getSharedPreferences("suggestions", Context.MODE_PRIVATE);
         Set<String> suggestions = prefs.getStringSet("descriptions", new HashSet<>());
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, new ArrayList<>(suggestions));
+        int itemHeightPx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48, getResources().getDisplayMetrics());
+        binding.descriptionEditText.setDropDownHeight(itemHeightPx * 4);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.dropdown_item_suggestion, new ArrayList<>(suggestions));
         ((AutoCompleteTextView) binding.descriptionEditText).setAdapter(adapter);
         ((AutoCompleteTextView) binding.descriptionEditText).setDropDownBackgroundResource(R.drawable.bg_dropdown_suggestions);
         binding.descriptionEditText.setOnFocusChangeListener((v, hasFocus) -> {
