@@ -5,7 +5,8 @@
     android:background="#FFFFFF"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="20dp">
+    android:paddingBottom="20dp"
+    android:fitsSystemWindows="true">
 
     <!-- الشريط العلوي -->
     <LinearLayout
@@ -68,19 +69,16 @@
                 <AutoCompleteTextView
                     android:id="@+id/cashboxDropdown"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
                     android:hint="اختر الصندوق"
                     android:background="@drawable/bg_edittext"
-                    android:paddingStart="4dp"
-                    android:paddingEnd="4dp"
-                    android:layout_marginEnd="2dp"
-                    android:layout_marginStart="2dp"
-                    android:textSize="15sp"
-                    android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="10sp"
-                    android:autoSizeMaxTextSize="18sp"
-                    android:autoSizeStepGranularity="2sp"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp"
+                    android:layout_marginEnd="0dp"
+                    android:layout_marginStart="0dp"
+                    android:textSize="13sp"
+                    android:autoSizeTextType="none"
                     android:inputType="none"
                     android:focusable="false"
                     android:gravity="end|center_vertical"
@@ -125,26 +123,23 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/startDateInput"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_edittext"
                     android:focusable="false"
                     android:gravity="center"
                     android:drawableStart="@drawable/ic_calendar"
-                    android:textSize="15sp"
-                    android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="10sp"
-                    android:autoSizeMaxTextSize="18sp"
-                    android:autoSizeStepGranularity="2sp"
+                    android:textSize="13sp"
+                    android:autoSizeTextType="none"
                     style="@style/CustomTextInputEditText"
                     android:textColor="#000000"
                     android:textColorHint="#666666"
                     android:maxLines="1"
                     android:ellipsize="end"
-                    android:layout_marginEnd="2dp"
-                    android:layout_marginStart="2dp"
-                    android:paddingStart="4dp"
-                    android:paddingEnd="4dp"/>
+                    android:layout_marginEnd="0dp"
+                    android:layout_marginStart="0dp"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -162,26 +157,23 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/endDateInput"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_edittext"
                     android:focusable="false"
                     android:gravity="center"
                     android:drawableStart="@drawable/ic_calendar"
-                    android:textSize="15sp"
-                    android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="10sp"
-                    android:autoSizeMaxTextSize="18sp"
-                    android:autoSizeStepGranularity="2sp"
+                    android:textSize="13sp"
+                    android:autoSizeTextType="none"
                     style="@style/CustomTextInputEditText"
                     android:textColor="#000000"
                     android:textColorHint="#666666"
                     android:maxLines="1"
                     android:ellipsize="end"
-                    android:layout_marginEnd="2dp"
-                    android:layout_marginStart="2dp"
-                    android:paddingStart="4dp"
-                    android:paddingEnd="4dp"/>
+                    android:layout_marginEnd="0dp"
+                    android:layout_marginStart="0dp"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp"/>
             </LinearLayout>
 
             <!-- أزرار العملات -->
@@ -203,5 +195,6 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:background="#FFFFFF"
-        android:layout_margin="4dp"/>
+        android:layout_margin="4dp"
+        android:paddingBottom="24dp"/>
 </LinearLayout> 
