@@ -41,16 +41,17 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp"
-        android:layout_margin="12dp"
-        app:cardBackgroundColor="#FFFFFF">
+        app:cardCornerRadius="10dp"
+        app:cardElevation="2dp"
+        android:layout_margin="6dp"
+        app:cardBackgroundColor="#FFFFFF"
+        android:minHeight="60dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:padding="6dp">
 
             <!-- اختيار الحساب وزر الطباعة -->
             <LinearLayout
@@ -62,26 +63,27 @@
                 <AutoCompleteTextView
                     android:id="@+id/accountDropdown"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
                     android:hint="اختر الحساب"
                     android:background="@drawable/bg_edittext"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:textSize="15sp"
+                    android:padding="0dp"
+                    android:textSize="13sp"
                     android:inputType="none"
                     android:focusable="false"
-                    android:gravity="end|center_vertical"
+                    android:gravity="center"
+                    android:textAlignment="center"
                     style="@style/CustomTextInputEditText"
                     android:textColor="#000000"
                     android:textColorHint="#666666"
                     android:maxLines="1"
-                    android:ellipsize="end"/>
+                    android:ellipsize="end"
+                    android:text="اختبار الحساب"/>
 
                 <ImageButton
                     android:id="@+id/btnPrintInCard"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:background="@drawable/bg_print_button"
                     android:src="@drawable/ic_print"
                     android:tint="#1976d2"
@@ -95,7 +97,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical|end"
-                android:layout_marginTop="6dp">
+                android:layout_marginTop="2dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -109,18 +111,20 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/startDateInput"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_edittext"
                     android:focusable="false"
                     android:gravity="center"
                     android:drawableStart="@drawable/ic_calendar"
-                    android:textSize="15sp"
+                    android:textSize="13sp"
                     style="@style/CustomTextInputEditText"
                     android:textColor="#000000"
                     android:textColorHint="#666666"
                     android:maxLines="1"
-                    android:ellipsize="end"/>
+                    android:ellipsize="end"
+                    android:padding="0dp"
+                    android:text="2024-06-01"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -134,18 +138,20 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/endDateInput"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_edittext"
                     android:focusable="false"
                     android:gravity="center"
                     android:drawableStart="@drawable/ic_calendar"
-                    android:textSize="15sp"
+                    android:textSize="13sp"
                     style="@style/CustomTextInputEditText"
                     android:textColor="#000000"
                     android:textColorHint="#666666"
                     android:maxLines="1"
-                    android:ellipsize="end"/>
+                    android:ellipsize="end"
+                    android:padding="0dp"
+                    android:text="2024-06-30"/>
             </LinearLayout>
 
             <!-- أزرار العملات -->
@@ -155,7 +161,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="4dp"
                 android:visibility="gone"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
