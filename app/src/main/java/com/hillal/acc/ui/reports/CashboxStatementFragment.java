@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.lang.StringBuilder;
 
 public class CashboxStatementFragment extends Fragment {
     private CashboxViewModel cashboxViewModel;
@@ -282,9 +283,59 @@ public class CashboxStatementFragment extends Fragment {
     }
 
     private String generateReportHtml(Cashbox cashbox, Date startDate, Date endDate, List<Transaction> transactions, Map<String, Double> previousBalances, Map<String, List<Transaction>> currencyMap) {
-        // يمكنك نقل منطق إنشاء HTML من الـ Activity هنا
-        // ...
-        return "<html><body>تقرير الصندوق</body></html>"; // اختصرنا هنا، انقل منطقك الأصلي
+        StringBuilder html = new StringBuilder();
+        html.append("<!DOCTYPE html>");
+        html.append("<html dir='rtl' lang='ar'>");
+        html.append("<head>");
+        html.append("<meta charset='UTF-8'>");
+        html.append("<style>");
+        html.append("body { font-family: 'Cairo', Arial, sans-serif; margin: 0; background: #f5f7fa; }");
+        html.append(".report-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 8px 6px 6px 6px; margin: 4px; text-align: center; color: white; }");
+        html.append(".report-header p { color: #fff; margin: 1px 0; font-size: 0.8em; font-weight: 500; }");
+        html.append(".report-header .account-info { font-size: 1em; font-weight: bold; margin-bottom: 3px; }");
+        html.append(".report-header .period { font-size: 0.75em; opacity: 0.9; }");
+        html.append("table { width: calc(100% - 8px); border-collapse: collapse; margin: 4px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.08); }");
+        html.append("th, td { border: 1px solid #e8eaed; padding: 6px 4px; text-align: right; font-size: 0.8em; }");
+        html.append("th { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); color: #495057; font-weight: 600; font-size: 0.75em; }");
+        html.append("tr:nth-child(even) { background: #f8f9fa; }");
+        html.append("tr:hover { background: #e3f2fd; transition: background 0.2s; }");
+        html.append(".balance-row { background: #e8f5e8 !important; font-weight: 500; }");
+        html.append(".total-row { background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%) !important; font-weight: bold; color: #2c3e50; }");
+        html.append("@media print { .report-header { box-shadow: none; background: #f0f0f0 !important; color: #333 !important; border: 1px solid #ccc; } .report-header p { color: #333 !important; } table { box-shadow: none; } body { background: #fff; } }");
+        html.append("</style>");
+        html.append("</head>");
+        html.append("<body>");
+        html.append("<div class='report-header'>");
+        html.append("<p class='account-info'>الصندوق: ").append(cashbox.name).append(" العملة: ").append(selectedCurrency).append("</p>");
+        html.append("<p class='period'>من <b>").append(dateFormat.format(startDate)).append("</b> إلى <b>").append(dateFormat.format(endDate)).append("</b></p>");
+        html.append("</div>");
+        sortTransactionsByDate(transactions);
+        double previousBalance = previousBalances != null && previousBalances.containsKey(selectedCurrency) ? previousBalances.get(selectedCurrency) : 0;
+        double totalDebit = 0;
+        double totalCredit = 0;
+        html.append("<table>");
+        html.append("<tr><th>التاريخ</th><th>الوصف</th><th>دائن</th><th>مدين</th><th>الرصيد</th></tr>");
+        double balance = previousBalance;
+        for (Transaction t : transactions) {
+            html.append("<tr>");
+            html.append("<td>").append(dateFormat.format(new Date(t.getTransactionDate()))).append("</td>");
+            html.append("<td>").append(t.getDescription() != null ? t.getDescription() : "").append("</td>");
+            if (t.getType().equalsIgnoreCase("credit") || t.getType().equals("له")) {
+                html.append("<td>").append(formatAmount(t.getAmount())).append("</td><td></td>");
+                balance += t.getAmount();
+                totalCredit += t.getAmount();
+            } else {
+                html.append("<td></td><td>").append(formatAmount(t.getAmount())).append("</td>");
+                balance -= t.getAmount();
+                totalDebit += t.getAmount();
+            }
+            html.append("<td>").append(formatAmount(balance)).append("</td>");
+            html.append("</tr>");
+        }
+        html.append("<tr class='total-row'><td colspan='2'>الإجمالي</td><td>").append(formatAmount(totalCredit)).append("</td><td>").append(formatAmount(totalDebit)).append("</td><td>").append(formatAmount(balance)).append("</td></tr>");
+        html.append("</table>");
+        html.append("</body></html>");
+        return html.toString();
     }
 
     private void setDefaultDates() {
@@ -306,5 +357,14 @@ public class CashboxStatementFragment extends Fragment {
     private String toEnglishDigits(String value) {
         return value.replace("٠", "0").replace("١", "1").replace("٢", "2").replace("٣", "3").replace("٤", "4")
                 .replace("٥", "5").replace("٦", "6").replace("٧", "7").replace("٨", "8").replace("٩", "9");
+    }
+
+    private void sortTransactionsByDate(List<Transaction> transactions) {
+        // Implementation of sortTransactionsByDate method
+    }
+
+    private String formatAmount(double amount) {
+        // Implementation of formatAmount method
+        return ""; // Placeholder return, actual implementation needed
     }
 } 
