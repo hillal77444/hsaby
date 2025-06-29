@@ -69,6 +69,8 @@ public class CashboxStatementActivity extends AppCompatActivity {
     private Cashbox lastSelectedCashbox = null;
     private ImageButton btnPrint;
     private Map<Long, Account> accountMap = new HashMap<>();
+    private long selectedCashboxId = -1;
+    private long mainCashboxId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,18 +196,29 @@ public class CashboxStatementActivity extends AppCompatActivity {
 
     private void loadCashboxes() {
         cashboxViewModel.getAllCashboxes().observe(this, cashboxes -> {
-            if (cashboxes == null) return;
-            allCashboxes = cashboxes;
+            allCashboxes = cashboxes != null ? cashboxes : new ArrayList<>();
             List<String> names = new ArrayList<>();
-            for (Cashbox c : allCashboxes) names.add(c.name);
+            mainCashboxId = -1;
+            for (Cashbox c : allCashboxes) {
+                names.add(c.name);
+            }
+            if (!allCashboxes.isEmpty()) {
+                mainCashboxId = allCashboxes.get(0).id;
+                cashboxDropdown.setText(allCashboxes.get(0).name, false);
+                selectedCashboxId = mainCashboxId;
+                lastSelectedCashbox = allCashboxes.get(0);
+                onCashboxSelected(lastSelectedCashbox);
+            }
             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, names);
             cashboxDropdown.setAdapter(adapter);
             cashboxDropdown.setOnItemClickListener((parent, view, position, id) -> {
                 Cashbox selected = allCashboxes.get(position);
                 cashboxDropdown.setText(selected.name, false);
+                selectedCashboxId = selected.id;
                 lastSelectedCashbox = selected;
                 onCashboxSelected(selected);
             });
+            cashboxDropdown.setFocusable(false);
             cashboxDropdown.setOnClickListener(v -> cashboxDropdown.showDropDown());
         });
         transactionRepository.getAllTransactions().observe(this, transactions -> {
