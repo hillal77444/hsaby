@@ -31,7 +31,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.acc.R;
 import com.hillal.acc.data.entities.Cashbox;
-import com.hillal.acc.data.model.Account;
+import com.hillal.acc.data.entities.Account;
 import com.hillal.acc.data.model.Transaction;
 import com.hillal.acc.viewmodel.CashboxViewModel;
 import com.hillal.acc.viewmodel.AccountViewModel;
