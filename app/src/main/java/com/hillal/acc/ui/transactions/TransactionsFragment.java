@@ -24,6 +24,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.hillal.acc.R;
 import com.hillal.acc.data.model.Transaction;
@@ -505,6 +507,15 @@ public class TransactionsFragment extends Fragment {
         binding.fabAddTransaction.setOnClickListener(v -> {
             Navigation.findNavController(requireView())
                     .navigate(R.id.action_transactions_to_addTransaction);
+        });
+
+        int originalMargin = ((ViewGroup.MarginLayoutParams) binding.fabAddTransaction.getLayoutParams()).bottomMargin;
+        ViewCompat.setOnApplyWindowInsetsListener(binding.fabAddTransaction, (v, insets) -> {
+            int bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            params.bottomMargin = originalMargin + bottom;
+            v.setLayoutParams(params);
+            return insets;
         });
     }
 
