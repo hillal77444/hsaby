@@ -26,7 +26,7 @@ public class CashboxRepository {
     private final ApiService apiService;
 
     public CashboxRepository(Application application) {
-        AppDatabase db = AppDatabase.getInstance(application);
+        AppDatabase db = AppDatabase.getInstance(application.getApplicationContext());
         cashboxDao = db.cashboxDao();
         executorService = Executors.newSingleThreadExecutor();
         // استخدام RetrofitClient الموحد
