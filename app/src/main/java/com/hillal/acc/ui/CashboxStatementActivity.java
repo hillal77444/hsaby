@@ -203,7 +203,6 @@ public class CashboxStatementActivity extends AppCompatActivity {
                 names.add(c.name);
             }
             if (!allCashboxes.isEmpty()) {
-                // اختر أول صندوق كافتراضي
                 mainCashboxId = allCashboxes.get(0).id;
                 cashboxDropdown.setText(allCashboxes.get(0).name, false);
                 selectedCashboxId = mainCashboxId;
