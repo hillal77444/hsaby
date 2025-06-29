@@ -31,7 +31,6 @@
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:windowSoftInputMode="adjustResize"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
             android:documentLaunchMode="never"
             android:excludeFromRecents="false">
             <intent-filter>
