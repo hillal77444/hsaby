@@ -87,7 +87,12 @@ public class CashboxStatementActivity extends AppCompatActivity {
         calendar = Calendar.getInstance();
         dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
 
-        cashboxViewModel = new ViewModelProvider(this).get(CashboxViewModel.class);
+        cashboxViewModel = new ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())
+        ).get(CashboxViewModel.class);
+        Log.d("CashboxStatement", "cashboxViewModel = " + (cashboxViewModel != null));
+
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
         initializeViews();
         setupDatePickers();
