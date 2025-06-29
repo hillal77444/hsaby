@@ -205,7 +205,12 @@ public class CashboxStatementActivity extends AppCompatActivity {
 
     private void loadCashboxes() {
         Log.d("CashboxStatement", "loadCashboxes called");
-        cashboxViewModel.getAllCashboxes().observe(CashboxStatementActivity.this, cashboxes -> {
+        LiveData<List<Cashbox>> cashboxesLiveData = cashboxViewModel.getAllCashboxes();
+        if (cashboxesLiveData == null) {
+            Toast.makeText(this, "حدث خطأ في تحميل الصناديق. الرجاء إعادة تشغيل التطبيق.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        cashboxesLiveData.observe(CashboxStatementActivity.this, cashboxes -> {
             Log.d("CashboxStatement", "LiveData observed, cashboxes: " + (cashboxes != null ? cashboxes.size() : "null"));
             allCashboxes = cashboxes != null ? cashboxes : new ArrayList<>();
             List<String> names = new ArrayList<>();
