@@ -909,9 +909,35 @@ app.get('/sessions_info', async (req, res) => {
             const hasCreds = sessionFiles.includes('creds.json');
             const hasStore = sessionFiles.includes('store.json');
             
-            // الحصول على آخر تعديل للمجلد
-            const stats = fs.statSync(sessionDir);
-            const lastModified = stats.mtime;
+            // الحصول على آخر تعديل مع معالجة الأخطاء
+            let lastModified = new Date();
+            try {
+                const stats = fs.statSync(sessionDir);
+                lastModified = stats.mtime;
+            } catch (statError) {
+                console.error(`Error getting stats for session ${sessionId}:`, statError);
+            }
+            // تنسيق التاريخ بالإنجليزي، ميلادي، توقيت اليمن
+            function formatYemenDate(date) {
+                try {
+                    // إذا كان السيرفر يدعم Asia/Aden
+                    return date.toLocaleString('en-GB', {
+                        timeZone: 'Asia/Aden',
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false
+                    }).replace(',', '');
+                } catch (e) {
+                    // fallback: YYYY-MM-DD HH:mm:ss +03:00
+                    const pad = n => n.toString().padStart(2, '0');
+                    return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())} +03:00`;
+                }
+            }
+            const lastModifiedStr = formatYemenDate(lastModified);
             
             // التحقق من حالة الاتصال
             const isConnected = sock && sock.user ? true : false;
@@ -927,7 +953,7 @@ app.get('/sessions_info', async (req, res) => {
                 hasStore,
                 sessionSizeBytes: sessionSize,
                 sessionSizeMB: (sessionSize / (1024 * 1024)).toFixed(2),
-                lastModified: lastModified.toISOString(),
+                lastModified: lastModifiedStr,
                 lastModifiedFormatted: lastModified.toLocaleString('ar-SA'),
                 reconnectAttempts: reconnectAttempts.get(sessionId) || 0,
                 hasTimeout: sessionTimeouts.has(sessionId),
@@ -992,9 +1018,35 @@ app.get('/session_info/:sessionId', async (req, res) => {
             };
         });
         
-        // الحصول على آخر تعديل للمجلد
-        const stats = fs.statSync(sessionDir);
-        const lastModified = stats.mtime;
+        // الحصول على آخر تعديل مع معالجة الأخطاء
+        let lastModified = new Date();
+        try {
+            const stats = fs.statSync(sessionDir);
+            lastModified = stats.mtime;
+        } catch (statError) {
+            console.error(`Error getting stats for session ${sessionId}:`, statError);
+        }
+        // تنسيق التاريخ بالإنجليزي، ميلادي، توقيت اليمن
+        function formatYemenDate(date) {
+            try {
+                // إذا كان السيرفر يدعم Asia/Aden
+                return date.toLocaleString('en-GB', {
+                    timeZone: 'Asia/Aden',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                }).replace(',', '');
+            } catch (e) {
+                // fallback: YYYY-MM-DD HH:mm:ss +03:00
+                const pad = n => n.toString().padStart(2, '0');
+                return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())} +03:00`;
+            }
+        }
+        const lastModifiedStr = formatYemenDate(lastModified);
         
         // معلومات الجلسة
         const sessionInfo = {
@@ -1004,7 +1056,7 @@ app.get('/session_info/:sessionId', async (req, res) => {
             hasQR: !!lastQRCodes[sessionId],
             sessionSizeBytes: sessionSize,
             sessionSizeMB: (sessionSize / (1024 * 1024)).toFixed(2),
-            lastModified: lastModified.toISOString(),
+            lastModified: lastModifiedStr,
             lastModifiedFormatted: lastModified.toLocaleString('ar-SA'),
             reconnectAttempts: reconnectAttempts.get(sessionId) || 0,
             hasTimeout: sessionTimeouts.has(sessionId),
@@ -1065,6 +1117,27 @@ app.get('/sessions_dashboard', async (req, res) => {
                     } catch (statError) {
                         console.error(`Error getting stats for session ${sessionId}:`, statError);
                     }
+                    // تنسيق التاريخ بالإنجليزي، ميلادي، توقيت اليمن
+                    function formatYemenDate(date) {
+                        try {
+                            // إذا كان السيرفر يدعم Asia/Aden
+                            return date.toLocaleString('en-GB', {
+                                timeZone: 'Asia/Aden',
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit',
+                                hour12: false
+                            }).replace(',', '');
+                        } catch (e) {
+                            // fallback: YYYY-MM-DD HH:mm:ss +03:00
+                            const pad = n => n.toString().padStart(2, '0');
+                            return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())} +03:00`;
+                        }
+                    }
+                    const lastModifiedStr = formatYemenDate(lastModified);
                     
                     sessionsInfo.push({
                         sessionId,
@@ -1072,7 +1145,7 @@ app.get('/sessions_dashboard', async (req, res) => {
                         isConnected: sock && sock.user ? true : false,
                         hasQR: !!lastQRCodes[sessionId],
                         sessionSizeMB: (sessionSize / (1024 * 1024)).toFixed(2),
-                        lastModified: lastModified.toLocaleString('ar-SA'),
+                        lastModified: lastModifiedStr,
                         reconnectAttempts: reconnectAttempts.get(sessionId) || 0,
                         pendingMessages: (pendingMessages.get(sessionId) || []).length
                     });
