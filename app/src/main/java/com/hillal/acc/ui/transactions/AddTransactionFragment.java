@@ -108,19 +108,6 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
         transactionsViewModel.getAccountBalancesMap().observe(getViewLifecycleOwner(), balancesMap -> {
             accountBalancesMap = balancesMap != null ? balancesMap : new HashMap<>();
         });
-        SharedPreferences prefs = requireContext().getSharedPreferences("suggestions", Context.MODE_PRIVATE);
-        Set<String> suggestions = prefs.getStringSet("descriptions", new HashSet<>());
-        int itemHeightPx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48, getResources().getDisplayMetrics());
-        binding.descriptionEditText.setDropDownHeight(itemHeightPx * 4);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.dropdown_item_suggestion, new ArrayList<>(suggestions));
-        ((AutoCompleteTextView) binding.descriptionEditText).setAdapter(adapter);
-        ((AutoCompleteTextView) binding.descriptionEditText).setDropDownBackgroundResource(R.drawable.bg_dropdown_suggestions);
-        binding.descriptionEditText.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) {
-                ((AutoCompleteTextView) binding.descriptionEditText).showDropDown();
-            }
-        });
-        // أزل أو علّق كود insets البرمجي هنا
         return view;
     }
 
@@ -279,10 +266,12 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
                     String desc = binding.descriptionEditText.getText().toString().trim();
                     if (!desc.isEmpty()) {
                         SharedPreferences prefs = requireContext().getSharedPreferences("suggestions", Context.MODE_PRIVATE);
-                        Set<String> suggestions = prefs.getStringSet("descriptions", new HashSet<>());
+                        String key = "descriptions_" + selectedAccountId;
+                        Set<String> suggestions = prefs.getStringSet(key, new HashSet<>());
                         suggestions = new HashSet<>(suggestions); // حتى لا تكون read-only
                         suggestions.add(desc);
-                        prefs.edit().putStringSet("descriptions", suggestions).apply();
+                        prefs.edit().putStringSet(key, suggestions).apply();
+                        loadAccountSuggestions(selectedAccountId); // لتحديث الاقتراحات فورًا
                     }
                 }
             });
@@ -319,6 +308,7 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
             account -> {
                 binding.accountAutoComplete.setText(account.getName());
                 selectedAccountId = account.getId();
+                loadAccountSuggestions(selectedAccountId); // تحميل اقتراحات الحساب المختار
             }
         );
         bottomSheet.show(getParentFragmentManager(), "AccountPicker");
@@ -499,6 +489,21 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
         // لا تفرغ الملاحظات
         calendar.setTimeInMillis(System.currentTimeMillis());
         updateDateField();
+    }
+
+    private void loadAccountSuggestions(long accountId) {
+        SharedPreferences prefs = requireContext().getSharedPreferences("suggestions", Context.MODE_PRIVATE);
+        Set<String> suggestions = prefs.getStringSet("descriptions_" + accountId, new HashSet<>());
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.dropdown_item_suggestion, new ArrayList<>(suggestions));
+        ((AutoCompleteTextView) binding.descriptionEditText).setAdapter(adapter);
+        int itemHeightPx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48, getResources().getDisplayMetrics());
+        binding.descriptionEditText.setDropDownHeight(itemHeightPx * 4);
+        ((AutoCompleteTextView) binding.descriptionEditText).setDropDownBackgroundResource(R.drawable.bg_dropdown_suggestions);
+        binding.descriptionEditText.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                ((AutoCompleteTextView) binding.descriptionEditText).showDropDown();
+            }
+        });
     }
 
     @Override
