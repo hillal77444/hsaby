@@ -215,7 +215,6 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
                         android:hint="@string/notes"
-                        android:visibility="gone"
                         app:startIconDrawable="@drawable/ic_note"
                         app:startIconTint="@color/primary"
                         app:boxBackgroundMode="outline"
