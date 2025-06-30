@@ -68,7 +68,7 @@
         <!-- ملاحظات الحساب (تظهر في الطرف الآخر من البطاقة) -->
         <TextView
             android:id="@+id/accountNotesTextView"
-            android:layout_width="120dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center|end"
             android:text=""
@@ -79,6 +79,7 @@
             android:layout_marginStart="12dp"
             android:visibility="gone"
             android:maxLines="1"
-            android:ellipsize="end"/>
+            android:ellipsize="end"
+            android:maxWidth="120dp"/>
     </LinearLayout>
 </androidx.cardview.widget.CardView> 
