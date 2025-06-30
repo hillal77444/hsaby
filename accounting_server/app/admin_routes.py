@@ -694,10 +694,11 @@ def calculate_and_notify_transaction(transaction_id):
         # تنسيق الرسالة مع الرابط المؤقت
         transaction_type = "قيدنا الى حسابكم" if transaction.type == 'credit' else "قيدنا على حسابكم"
         balance_text = f"الرصيد لكم: {balance:g} {transaction.currency or 'ريال'}" if balance >= 0 else f"الرصيد عليكم: {abs(balance):g} {transaction.currency or 'ريال'}"
+        account_name_clean = account.account_name.strip() if account.account_name else ''
         message = f"""
 🏦 إشعار قيد جديد
 
-🏛️ الاخ/: *{account.account_name}*
+🏛️ الاخ/: *{account_name_clean}*
 🔢 رقم الحساب: *{account.server_id}*
 
 💰 تفاصيل القيد :
