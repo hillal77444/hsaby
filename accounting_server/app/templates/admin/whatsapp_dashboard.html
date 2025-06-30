@@ -73,6 +73,38 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
+                    <h5>إرسال رسالة جماعية (لكل المستخدمين أو حسب إصدار التطبيق)</h5>
+                </div>
+                <div class="card-body">
+                    <form id="sendToUsersForm">
+                        <div class="mb-3">
+                            <label for="broadcastMessage" class="form-label">الرسالة</label>
+                            <textarea class="form-control" id="broadcastMessage" name="message" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="broadcastVersion" class="form-label">إصدار التطبيق (اختياري، اتركه فارغًا للإرسال للجميع)</label>
+                            <div class="input-group">
+                                <select class="form-select" id="broadcastVersionOperator" name="version_operator" style="max-width: 100px;">
+                                    <option value="<">أصغر من</option>
+                                    <option value="<=">أصغر أو يساوي</option>
+                                    <option value="==">يساوي</option>
+                                    <option value=">=">أكبر أو يساوي</option>
+                                    <option value=">">أكبر من</option>
+                                </select>
+                                <input type="text" class="form-control" id="broadcastVersion" name="android_version" placeholder="مثال: 1.5">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-danger">إرسال جماعي</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
                     <h5>المحادثات الأخيرة</h5>
                 </div>
                 <div class="card-body">
@@ -214,6 +246,41 @@ document.getElementById('sendBulkForm').addEventListener('submit', async (e) => 
         alert('حدث خطأ أثناء إرسال الرسائل');
     }
 });
+
+// إرسال رسالة جماعية لكل المستخدمين أو حسب إصدار التطبيق
+const sendToUsersForm = document.getElementById('sendToUsersForm');
+if (sendToUsersForm) {
+    sendToUsersForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const message = document.getElementById('broadcastMessage').value.trim();
+        const android_version = document.getElementById('broadcastVersion').value.trim();
+        const version_operator = document.getElementById('broadcastVersionOperator').value;
+        if (!message) {
+            alert('الرسالة مطلوبة');
+            return;
+        }
+        const payload = { message };
+        if (android_version) {
+            payload.android_version = android_version;
+            payload.version_operator = version_operator;
+        }
+        try {
+            const response = await fetch('/api/admin/whatsapp/send_to_users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert(`تمت إضافة الرسائل للطابور (${data.count} مستخدم)`);
+            } else {
+                alert('فشل الإرسال: ' + (data.error || 'خطأ غير معروف'));
+            }
+        } catch (error) {
+            alert('حدث خطأ أثناء الإرسال');
+        }
+    });
+}
 
 // تحميل المحادثات
 async function loadChats() {
