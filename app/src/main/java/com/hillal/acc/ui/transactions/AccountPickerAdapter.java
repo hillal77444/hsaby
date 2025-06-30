@@ -69,6 +69,14 @@ public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdap
         holder.accountNameTextView.setTextColor(0xFF222222);
         String icon = account.getName() != null && !account.getName().isEmpty() ? account.getName().substring(0, 1) : "?";
         holder.accountIconTextView.setText(icon);
+        String notes = account.getNotes();
+        if (notes != null && !notes.trim().isEmpty()) {
+            holder.accountNotesTextView.setText(notes);
+            holder.accountNotesTextView.setVisibility(View.VISIBLE);
+        } else {
+            holder.accountNotesTextView.setText("");
+            holder.accountNotesTextView.setVisibility(View.GONE);
+        }
         holder.balancesContainer.removeAllViews();
         Map<String, Double> currencyBalances = balancesMap.get(account.getId());
         if (currencyBalances != null && !currencyBalances.isEmpty()) {
@@ -118,11 +126,13 @@ public class AccountPickerAdapter extends RecyclerView.Adapter<AccountPickerAdap
         TextView accountNameTextView;
         LinearLayout balancesContainer;
         TextView accountIconTextView;
+        TextView accountNotesTextView;
         public AccountViewHolder(@NonNull View itemView) {
             super(itemView);
             accountNameTextView = itemView.findViewById(R.id.accountNameTextView);
             balancesContainer = itemView.findViewById(R.id.balancesContainer);
             accountIconTextView = itemView.findViewById(R.id.accountIconTextView);
+            accountNotesTextView = itemView.findViewById(R.id.accountNotesTextView);
         }
     }
 } 
