@@ -605,8 +605,7 @@ def get_whatsapp_session_status(session_id):
             return jsonify(response.json())
         return jsonify({'error': 'فشل جلب حالة الجلسة'})
     except Exception as e:
-        return jsonify({'error': str(e)}) 
-    
+        return jsonify({'error': str(e)})
 
 @admin.route('/api/admin/transaction/notify', methods=['POST'])
 @admin_required
@@ -1445,3 +1444,84 @@ def accounts_data():
         'recordsFiltered': records_filtered,
         'data': data
     })
+
+def version_compare_simple(v1, v2, op):
+    def normalize(v):
+        return [int(x) for x in str(v).split('.') if x.isdigit()]
+    a = normalize(v1)
+    b = normalize(v2)
+    # اجعل الطول متساوي
+    maxlen = max(len(a), len(b))
+    a += [0] * (maxlen - len(a))
+    b += [0] * (maxlen - len(b))
+    if op == '<':
+        return a < b
+    elif op == '<=':
+        return a <= b
+    elif op == '==':
+        return a == b
+    elif op == '>=':
+        return a >= b
+    elif op == '>':
+        return a > b
+    else:
+        return False
+
+@admin.route('/api/admin/whatsapp/send_to_users', methods=['POST'])
+@admin_required
+def send_whatsapp_to_users():
+    try:
+        data = request.json
+        message = data.get('message')
+        android_version = data.get('android_version')  # يمكن أن يكون None
+        version_operator = data.get('version_operator')  # مثل '<' أو '<=' أو '=='
+        if not message:
+            return jsonify({'success': False, 'error': 'الرسالة مطلوبة'}), 400
+
+        # جلب المستخدمين المستهدفين
+        query = User.query
+        if android_version and version_operator:
+            users = query.all()
+            filtered_users = []
+            for user in users:
+                user_ver = user.android_version or ''
+                try:
+                    if user_ver and version_compare_simple(user_ver, android_version, version_operator):
+                        filtered_users.append(user)
+                except Exception:
+                    continue
+            users = filtered_users
+        elif android_version:
+            query = query.filter(User.android_version == android_version)
+            users = query.all()
+        else:
+            users = query.all()
+        if not users:
+            return jsonify({'success': False, 'error': 'لا يوجد مستخدمين مطابقين'}), 404
+
+        count = 0
+        for user in users:
+            # جلب رقم الهاتف من الحسابات المرتبطة
+            account = Account.query.filter_by(user_id=user.id).filter(Account.phone_number != None).first()
+            if not account or not account.phone_number:
+                continue
+            phone = ''.join(filter(str.isdigit, account.phone_number))
+            if phone.startswith('966'):
+                pass
+            elif phone.startswith('0'):
+                phone = '967' + phone[1:]
+            elif not phone.startswith('967'):
+                phone = '967' + phone
+            whatsapp_queue.put({
+                'url': f"{WHATSAPP_API}/send/admin_main",
+                'json': {
+                    'number': phone,
+                    'message': message
+                }
+            })
+            count += 1
+        return jsonify({'success': True, 'count': count})
+    except Exception as e:
+        logger.error(f"Error in send_whatsapp_to_users: {str(e)}")
+        print(f"Error in send_whatsapp_to_users: {str(e)}")  # طباعة الخطأ مباشرة للسجل
+        return jsonify({'success': False, 'error': str(e)})
