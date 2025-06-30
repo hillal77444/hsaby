@@ -18,43 +18,67 @@
         android:background="#FFFFFF"
         android:gravity="center_vertical">
 
-        <!-- دائرة أيقونة الحساب -->
-        <TextView
-            android:id="@+id/accountIconTextView"
-            android:layout_width="54dp"
-            android:layout_height="54dp"
-            android:gravity="center"
-            android:text="م"
-            android:textSize="22sp"
-            android:textColor="#fff"
-            android:background="@drawable/bg_account_icon_circle"
-            android:elevation="2dp"
-            android:layout_marginEnd="14dp"/>
-
+        <!-- المحتوى الرئيسي: الدائرة واسم الحساب والرصيد -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_weight="1">
+            android:orientation="horizontal"
+            android:layout_weight="1"
+            android:gravity="center_vertical">
 
+            <!-- دائرة أيقونة الحساب -->
             <TextView
-                android:id="@+id/accountNameTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="اسم الحساب"
-                android:textSize="19sp"
-                android:textColor="#222"
-                android:textStyle="bold"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:layout_marginBottom="4dp"/>
+                android:id="@+id/accountIconTextView"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:gravity="center"
+                android:text="م"
+                android:textSize="22sp"
+                android:textColor="#fff"
+                android:background="@drawable/bg_account_icon_circle"
+                android:elevation="2dp"
+                android:layout_marginEnd="14dp"/>
 
             <LinearLayout
-                android:id="@+id/balancesContainer"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="2dp"/>
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/accountNameTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="اسم الحساب"
+                    android:textSize="19sp"
+                    android:textColor="#222"
+                    android:textStyle="bold"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:layout_marginBottom="4dp"/>
+
+                <LinearLayout
+                    android:id="@+id/balancesContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="2dp"/>
+            </LinearLayout>
         </LinearLayout>
+
+        <!-- ملاحظات الحساب (تظهر في الطرف الآخر من البطاقة) -->
+        <TextView
+            android:id="@+id/accountNotesTextView"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:gravity="center|end"
+            android:text=""
+            android:textSize="13sp"
+            android:textColor="#D32F2F"
+            android:background="@android:color/transparent"
+            android:elevation="2dp"
+            android:layout_marginStart="12dp"
+            android:visibility="gone"
+            android:maxLines="1"
+            android:ellipsize="end"/>
     </LinearLayout>
 </androidx.cardview.widget.CardView> 
