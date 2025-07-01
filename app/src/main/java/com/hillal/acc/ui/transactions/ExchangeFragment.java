@@ -13,8 +13,11 @@ import androidx.lifecycle.ViewModelProvider;
 import com.hillal.acc.R;
 import com.hillal.acc.data.model.Account;
 import com.hillal.acc.data.model.Transaction;
-import com.hillal.acc.ui.accounts.AccountViewModel;
+import com.hillal.acc.viewmodel.AccountViewModel;
 import com.hillal.acc.ui.transactions.TransactionViewModel;
+import com.hillal.acc.ui.transactions.TransactionViewModelFactory;
+import com.hillal.acc.data.repository.AccountRepository;
+import com.hillal.acc.App;
 import java.util.List;
 
 public class ExchangeFragment extends Fragment {
@@ -42,7 +45,9 @@ public class ExchangeFragment extends Fragment {
         exchangeButton = view.findViewById(R.id.exchangeButton);
 
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
-        transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
+        AccountRepository accountRepository = ((App) requireActivity().getApplication()).getAccountRepository();
+        TransactionViewModelFactory transactionFactory = new TransactionViewModelFactory(accountRepository);
+        transactionViewModel = new ViewModelProvider(this, transactionFactory).get(TransactionViewModel.class);
 
         currencies = getResources().getStringArray(R.array.currencies_array);
         currencyAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, currencies);
