@@ -34,6 +34,7 @@ import com.hillal.acc.data.repository.TransactionRepository;
 import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.acc.ui.transactions.TransactionsViewModel;
 import androidx.core.view.ViewCompat;
+import com.hillal.acc.databinding.FragmentExchangeBinding;
 
 public class ExchangeFragment extends Fragment {
     private Spinner fromCurrencySpinner, toCurrencySpinner, operationTypeSpinner, cashboxSpinner;
@@ -54,21 +55,22 @@ public class ExchangeFragment extends Fragment {
     private TransactionViewModel transactionViewModel;
     private TransactionRepository transactionRepository;
     private TransactionsViewModel transactionsViewModel;
+    private FragmentExchangeBinding binding;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_exchange, container, false);
-        fromCurrencySpinner = view.findViewById(R.id.fromCurrencySpinner);
-        toCurrencySpinner = view.findViewById(R.id.toCurrencySpinner);
-        operationTypeSpinner = view.findViewById(R.id.operationTypeSpinner);
-        cashboxSpinner = view.findViewById(R.id.cashboxSpinner);
-        accountBalanceText = view.findViewById(R.id.accountBalanceText);
-        exchangeAmountText = view.findViewById(R.id.exchangeAmountText);
-        amountEditText = view.findViewById(R.id.amountEditText);
-        rateEditText = view.findViewById(R.id.rateEditText);
-        notesEditText = view.findViewById(R.id.notesEditText);
-        accountAutoComplete = view.findViewById(R.id.accountAutoComplete);
+        binding = FragmentExchangeBinding.inflate(inflater, container, false);
+        fromCurrencySpinner = binding.fromCurrencySpinner;
+        toCurrencySpinner = binding.toCurrencySpinner;
+        operationTypeSpinner = binding.operationTypeSpinner;
+        cashboxSpinner = binding.cashboxSpinner;
+        accountBalanceText = binding.accountBalanceText;
+        exchangeAmountText = binding.exchangeAmountText;
+        amountEditText = binding.amountEditText;
+        rateEditText = binding.rateEditText;
+        notesEditText = binding.notesEditText;
+        accountAutoComplete = binding.accountAutoComplete;
         accountAutoComplete.setFocusable(false);
         accountAutoComplete.setOnClickListener(v -> openAccountPicker());
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
@@ -138,9 +140,9 @@ public class ExchangeFragment extends Fragment {
         transactionsViewModel.getAccountBalancesMap().observe(getViewLifecycleOwner(), balancesMap -> {
             accountBalancesMap = balancesMap != null ? balancesMap : new HashMap<>();
         });
-        Button exchangeButton = view.findViewById(R.id.exchangeButton);
+        Button exchangeButton = binding.exchangeButton;
         exchangeButton.setOnClickListener(v -> performExchange());
-        return view;
+        return binding.getRoot();
     }
 
     @Override
