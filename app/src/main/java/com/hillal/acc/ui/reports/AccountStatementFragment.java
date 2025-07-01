@@ -10,6 +10,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -84,6 +86,17 @@ public class AccountStatementFragment extends Fragment {
 
         loadAccountData();
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // ضبط insets للجذر لرفع المحتوى فوق أزرار النظام أو الشريط السفلي
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+            int bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), bottom);
+            return insets;
+        });
     }
 
     private void loadAccountData() {
