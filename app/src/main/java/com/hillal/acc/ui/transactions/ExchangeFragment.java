@@ -19,6 +19,12 @@ import com.hillal.acc.ui.transactions.TransactionViewModelFactory;
 import com.hillal.acc.data.repository.AccountRepository;
 import com.hillal.acc.App;
 import java.util.List;
+import com.hillal.acc.ui.common.AccountPickerBottomSheet;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class ExchangeFragment extends Fragment {
     private Spinner accountSpinner, fromCurrencySpinner, toCurrencySpinner, operationTypeSpinner;
@@ -30,6 +36,10 @@ public class ExchangeFragment extends Fragment {
     private ArrayAdapter<Account> accountAdapter;
     private ArrayAdapter<String> currencyAdapter;
     private String[] currencies;
+    private TextView selectedAccountNameText, balanceText, exchangeAmountText;
+    private MaterialButton selectAccountButton;
+    private Account selectedAccount;
+    private Map<Long, Map<String, Double>> accountBalancesMap = new HashMap<>();
 
     @Nullable
     @Override
@@ -43,6 +53,10 @@ public class ExchangeFragment extends Fragment {
         rateEditText = view.findViewById(R.id.rateEditText);
         notesEditText = view.findViewById(R.id.notesEditText);
         exchangeButton = view.findViewById(R.id.exchangeButton);
+        selectAccountButton = view.findViewById(R.id.selectAccountButton);
+        selectedAccountNameText = view.findViewById(R.id.selectedAccountNameText);
+        balanceText = view.findViewById(R.id.balanceText);
+        exchangeAmountText = view.findViewById(R.id.exchangeAmountText);
 
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
         AccountRepository accountRepository = ((App) requireActivity().getApplication()).getAccountRepository();
@@ -66,24 +80,69 @@ public class ExchangeFragment extends Fragment {
             accountSpinner.setAdapter(accountAdapter);
         });
 
+        selectAccountButton.setOnClickListener(v -> openAccountPicker());
         exchangeButton.setOnClickListener(v -> performExchange());
+        fromCurrencySpinner.setOnItemClickListener((parent, view1, position, id) -> updateBalanceText());
+        amountEditText.addTextChangedListener(new SimpleTextWatcher(this::updateExchangeAmount));
+        rateEditText.addTextChangedListener(new SimpleTextWatcher(this::updateExchangeAmount));
+        operationTypeSpinner.setOnItemClickListener((parent, view12, position, id) -> updateExchangeAmount());
         return view;
     }
 
+    private void openAccountPicker() {
+        AccountPickerBottomSheet picker = new AccountPickerBottomSheet(accounts, /*transactions*/ new ArrayList<>(), accountBalancesMap, account -> {
+            selectedAccount = account;
+            selectedAccountNameText.setText(account.getName());
+            updateBalanceText();
+        });
+        picker.show(getParentFragmentManager(), "account_picker");
+    }
+
+    private void updateBalanceText() {
+        if (selectedAccount == null) {
+            balanceText.setText("الرصيد: -");
+            return;
+        }
+        String currency = fromCurrencySpinner.getText().toString();
+        Map<String, Double> balances = accountBalancesMap.get(selectedAccount.getId());
+        double balance = 0.0;
+        if (balances != null && balances.containsKey(currency)) {
+            balance = balances.get(currency);
+        }
+        balanceText.setText("الرصيد: " + balance + " " + currency);
+        updateExchangeAmount();
+    }
+
+    private void updateExchangeAmount() {
+        String amountStr = amountEditText.getText().toString().trim();
+        String rateStr = rateEditText.getText().toString().trim();
+        String opType = operationTypeSpinner.getText().toString();
+        if (amountStr.isEmpty() || rateStr.isEmpty()) {
+            exchangeAmountText.setText("المبلغ بعد الصرف: -");
+            return;
+        }
+        try {
+            double amount = Double.parseDouble(amountStr);
+            double rate = Double.parseDouble(rateStr);
+            double toAmount = opType.equals("بيع") ? amount * rate : amount / rate;
+            BigDecimal rounded = new BigDecimal(toAmount).setScale(2, RoundingMode.HALF_UP);
+            exchangeAmountText.setText("المبلغ بعد الصرف: " + rounded.toPlainString());
+        } catch (Exception e) {
+            exchangeAmountText.setText("المبلغ بعد الصرف: -");
+        }
+    }
+
     private void performExchange() {
-        int accountPos = accountSpinner.getSelectedItemPosition();
-        if (accountPos == AdapterView.INVALID_POSITION) {
+        if (selectedAccount == null) {
             Toast.makeText(getContext(), "يرجى اختيار الحساب", Toast.LENGTH_SHORT).show();
             return;
         }
-        Account account = accounts.get(accountPos);
-        String fromCurrency = (String) fromCurrencySpinner.getSelectedItem();
-        String toCurrency = (String) toCurrencySpinner.getSelectedItem();
-        String opType = (String) operationTypeSpinner.getSelectedItem();
+        String fromCurrency = fromCurrencySpinner.getText().toString();
+        String toCurrency = toCurrencySpinner.getText().toString();
+        String opType = operationTypeSpinner.getText().toString();
         String amountStr = amountEditText.getText().toString().trim();
         String rateStr = rateEditText.getText().toString().trim();
         String notes = notesEditText.getText().toString().trim();
-
         if (TextUtils.isEmpty(amountStr) || TextUtils.isEmpty(rateStr)) {
             Toast.makeText(getContext(), "يرجى إدخال المبلغ وسعر الصرف", Toast.LENGTH_SHORT).show();
             return;
@@ -95,29 +154,41 @@ public class ExchangeFragment extends Fragment {
         double amount = Double.parseDouble(amountStr);
         double rate = Double.parseDouble(rateStr);
         double toAmount = opType.equals("بيع") ? amount * rate : amount / rate;
-        // الوصف التلقائي
+        BigDecimal rounded = new BigDecimal(toAmount).setScale(2, RoundingMode.HALF_UP);
         String desc = opType + " عملة من " + fromCurrency + " إلى " + toCurrency + " بسعر صرف " + rate;
         if (!TextUtils.isEmpty(notes)) desc += " - " + notes;
+        boolean whatsappEnabled = selectedAccount != null && selectedAccount.isWhatsappEnabled();
         // معاملة الخصم
         Transaction debitTx = new Transaction();
-        debitTx.setAccountId(account.getId());
+        debitTx.setAccountId(selectedAccount.getId());
         debitTx.setAmount(amount);
         debitTx.setCurrency(fromCurrency);
         debitTx.setType("debit");
         debitTx.setDescription(desc);
+        debitTx.setWhatsappEnabled(whatsappEnabled);
         // معاملة الإضافة
         Transaction creditTx = new Transaction();
-        creditTx.setAccountId(account.getId());
-        creditTx.setAmount(toAmount);
+        creditTx.setAccountId(selectedAccount.getId());
+        creditTx.setAmount(rounded.doubleValue());
         creditTx.setCurrency(toCurrency);
         creditTx.setType("credit");
         creditTx.setDescription(desc);
-        // الحفظ
+        creditTx.setWhatsappEnabled(whatsappEnabled);
         transactionViewModel.insertTransaction(debitTx);
         transactionViewModel.insertTransaction(creditTx);
         Toast.makeText(getContext(), "تمت عملية الصرف بنجاح", Toast.LENGTH_LONG).show();
         amountEditText.setText("");
         rateEditText.setText("");
         notesEditText.setText("");
+        exchangeAmountText.setText("المبلغ بعد الصرف: -");
+    }
+
+    // أداة مساعدة لمراقبة النصوص
+    private static class SimpleTextWatcher implements android.text.TextWatcher {
+        private final Runnable callback;
+        SimpleTextWatcher(Runnable callback) { this.callback = callback; }
+        public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
+        public void onTextChanged(CharSequence s, int st, int b, int c) { callback.run(); }
+        public void afterTextChanged(android.text.Editable s) {}
     }
 } 
