@@ -29,6 +29,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import com.google.android.material.textfield.TextInputEditText;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 public class TransferFragment extends Fragment {
     private TextInputEditText fromAccountAutoComplete, toAccountAutoComplete;
@@ -118,9 +119,9 @@ public class TransferFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ViewCompat.setOnApplyWindowInsetsListener(view.getRootView(), (v, insets) -> {
-            int bottom = insets.getInsets(ViewCompat.Type.ime()).bottom;
+            int bottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
             if (bottom == 0) {
-                bottom = insets.getInsets(ViewCompat.Type.systemBars()).bottom;
+                bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
             }
             v.setPadding(0, 0, 0, bottom);
             return insets;
