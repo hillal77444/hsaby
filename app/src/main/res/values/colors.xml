@@ -109,4 +109,8 @@
 
     <!-- جديدة من التعديل -->
     <color name="hint_gray">#666666</color>
+
+    <!-- جديدة من التعديل -->
+    <color name="cardBackground">#FFFFFF</color>
+    <color name="textSecondary">#757575</color>
 </resources>
