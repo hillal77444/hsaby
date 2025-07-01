@@ -205,6 +205,26 @@
                         </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
                 </LinearLayout>
+                <!-- نوع العملية -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="نوع العملية" android:textStyle="bold"/>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:startIconDrawable="@drawable/ic_sync_alt"
+                        app:startIconTint="@color/primary">
+                        <AutoCompleteTextView
+                            android:id="@+id/operationTypeSpinner"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:focusable="false"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <!-- بطاقة المبلغ وسعر الصرف -->
@@ -263,6 +283,31 @@
                                 android:inputType="numberDecimal"/>
                         </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
+                </LinearLayout>
+                <!-- الرصيد والمبلغ بعد الصرف -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+                    <TextView
+                        android:id="@+id/balanceText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="الرصيد: -"
+                        android:textColor="@color/teal_700"
+                        android:textStyle="bold"
+                        android:gravity="center_vertical"
+                        android:paddingBottom="8dp"/>
+                    <TextView
+                        android:id="@+id/exchangeAmountText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="المبلغ بعد الصرف: -"
+                        android:textColor="@color/purple_700"
+                        android:textStyle="bold"
+                        android:gravity="center_vertical"
+                        android:paddingBottom="8dp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
