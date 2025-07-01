@@ -10,8 +10,7 @@
         android:layout_height="match_parent"
         android:fillViewport="true"
         android:clipToPadding="false"
-        android:paddingBottom="80dp"
-        android:fitsSystemWindows="true">
+        android:paddingBottom="80dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -25,7 +24,8 @@
                 android:layout_height="140dp"
                 android:background="@color/info"
                 android:scaleX="2.2"
-                android:scaleY="1.2" />
+                android:scaleY="1.2"
+                android:layout_marginTop="0dp"/>
 
             <androidx.cardview.widget.CardView
                 android:layout_width="72dp"
