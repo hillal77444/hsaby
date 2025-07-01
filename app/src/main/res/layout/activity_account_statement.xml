@@ -4,7 +4,8 @@
     android:orientation="vertical"
     android:background="#FFFFFF"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:paddingBottom="32dp">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
@@ -150,6 +151,5 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:background="#FFFFFF"
-        android:layout_margin="8dp"
-        android:layout_marginBottom="16dp"/>
+        android:layout_margin="8dp"/>
 </LinearLayout>
