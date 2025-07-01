@@ -71,162 +71,7 @@
                 android:autoSizeMaxTextSize="18sp"
                 android:autoSizeStepGranularity="2sp" />
 
-            <!-- بطاقة الحساب: اختيار الحساب + اختيار الصندوق في صف واحد -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="#FFFFFF">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="16dp">
-
-                    <!-- اختيار الحساب -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/accountLayout"
-                        style="@style/CustomTextInputLayout"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="اختر الحساب"
-                        app:startIconDrawable="@android:drawable/ic_menu_myplaces"
-                        app:startIconTint="@color/primary"
-                        app:hintTextColor="#666666"
-                        app:boxStrokeColor="#1976D2">
-
-                        <AutoCompleteTextView
-                            android:id="@+id/accountAutoComplete"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:focusable="false"
-                            android:clickable="true"
-                            android:background="@null"
-                            android:padding="10dp"
-                            android:textSize="13sp"
-                            android:textColor="#000000"
-                            android:textColorHint="#666666"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="18sp"
-                            android:autoSizeStepGranularity="2sp"/>
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <!-- اختيار الصندوق -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/cashboxLayout"
-                        style="@style/CustomTextInputLayout"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="اختر الصندوق"
-                        app:startIconDrawable="@android:drawable/ic_menu_save"
-                        app:startIconTint="@color/primary"
-                        app:hintTextColor="#666666"
-                        app:boxStrokeColor="#1976D2">
-
-                        <AutoCompleteTextView
-                            android:id="@+id/cashboxAutoComplete"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:focusable="false"
-                            android:clickable="true"
-                            android:background="@null"
-                            android:padding="10dp"
-                            android:textSize="13sp"
-                            android:textColor="#000000"
-                            android:textColorHint="#666666"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="18sp"
-                            android:autoSizeStepGranularity="2sp"/>
-                    </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- بطاقة المبلغ والتاريخ -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="#FFFFFF">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:weightSum="2"
-                    android:padding="8dp">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/amountLayout"
-                        style="@style/CustomTextInputLayout"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="8dp"
-                        android:hint="@string/transaction_amount"
-                        app:hintTextColor="#666666"
-                        app:boxStrokeColor="#1976D2">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/amountEditText"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="numberDecimal"
-                            android:drawableStart="@drawable/ic_money"
-                            android:drawablePadding="4dp"
-                            android:textColor="#000000"
-                            android:textColorHint="#666666"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="18sp"
-                            android:autoSizeStepGranularity="2sp"/>
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/dateLayout"
-                        style="@style/CustomTextInputLayout"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="8dp"
-                        android:hint="@string/transaction_date"
-                        app:hintTextColor="#666666"
-                        app:boxStrokeColor="#1976D2">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/dateEditText"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:focusable="false"
-                            android:inputType="none"
-                            android:drawableStart="@drawable/ic_calendar"
-                            android:drawablePadding="4dp"
-                            android:textColor="#000000"
-                            android:textColorHint="#666666"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="18sp"
-                            android:autoSizeStepGranularity="2sp"/>
-                    </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- بطاقة العملة -->
+            <!-- بطاقة موحدة لكل الحقول -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -241,147 +86,207 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="8dp">
+                    android:padding="12dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="العملة"
-                        android:textSize="16sp"
-                        android:textColor="#1976D2"
-                        android:layout_marginBottom="4dp"
-                        android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="10sp"
-                        android:autoSizeMaxTextSize="18sp"
-                        android:autoSizeStepGranularity="2sp" />
-
-                    <RadioGroup
-                        android:id="@+id/currencyRadioGroup"
+                    <!-- اختيار الحساب والصندوق -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <RadioButton
-                            android:id="@+id/radioYer"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingBottom="8dp">
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/accountLayout"
+                            style="@style/CustomTextInputLayout"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="ريال يمني"
-                            android:textColor="#1976D2"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="18sp"
-                            android:autoSizeStepGranularity="2sp" />
-
-                        <RadioButton
-                            android:id="@+id/radioSar"
+                            android:hint="اختر الحساب"
+                            app:startIconDrawable="@android:drawable/ic_menu_myplaces"
+                            app:startIconTint="@color/primary"
+                            app:hintTextColor="#666666"
+                            app:boxStrokeColor="#1976D2">
+                            <AutoCompleteTextView
+                                android:id="@+id/accountAutoComplete"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="none"
+                                android:focusable="false"
+                                android:clickable="true"
+                                android:background="@null"
+                                android:padding="10dp"
+                                android:textSize="13sp"
+                                android:textColor="#000000"
+                                android:textColorHint="#666666"
+                                android:autoSizeTextType="uniform"
+                                android:autoSizeMinTextSize="10sp"
+                                android:autoSizeMaxTextSize="18sp"
+                                android:autoSizeStepGranularity="2sp"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/cashboxLayout"
+                            style="@style/CustomTextInputLayout"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="ريال سعودي"
-                            android:textColor="#1976D2"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="18sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:hint="اختر الصندوق"
+                            app:startIconDrawable="@android:drawable/ic_menu_save"
+                            app:startIconTint="@color/primary"
+                            app:hintTextColor="#666666"
+                            app:boxStrokeColor="#1976D2">
+                            <AutoCompleteTextView
+                                android:id="@+id/cashboxAutoComplete"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="none"
+                                android:focusable="false"
+                                android:clickable="true"
+                                android:background="@null"
+                                android:padding="10dp"
+                                android:textSize="13sp"
+                                android:textColor="#000000"
+                                android:textColorHint="#666666"
+                                android:autoSizeTextType="uniform"
+                                android:autoSizeMinTextSize="10sp"
+                                android:autoSizeMaxTextSize="18sp"
+                                android:autoSizeStepGranularity="2sp"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
 
-                        <RadioButton
-                            android:id="@+id/radioUsd"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="دولار أمريكي"
-                            android:textColor="#1976D2"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="18sp"
-                            android:autoSizeStepGranularity="2sp" />
-                    </RadioGroup>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- بطاقة الوصف -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="#FFFFFF">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="8dp">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/descriptionLayout"
-                        style="@style/CustomTextInputLayout"
+                    <!-- المبلغ والتاريخ -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/description"
-                        app:hintTextColor="#666666"
-                        app:boxStrokeColor="#1976D2">
+                        android:orientation="horizontal"
+                        android:weightSum="2"
+                        android:paddingBottom="8dp">
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/amountLayout"
+                            style="@style/CustomTextInputLayout"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
+                            android:hint="@string/transaction_amount"
+                            app:hintTextColor="#666666"
+                            app:boxStrokeColor="#1976D2">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/amountEditText"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberDecimal"
+                                android:drawableStart="@drawable/ic_money"
+                                android:drawablePadding="4dp"
+                                android:textColor="#000000"
+                                android:textColorHint="#666666"
+                                android:autoSizeTextType="uniform"
+                                android:autoSizeMinTextSize="10sp"
+                                android:autoSizeMaxTextSize="18sp"
+                                android:autoSizeStepGranularity="2sp"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/dateLayout"
+                            style="@style/CustomTextInputLayout"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:hint="@string/transaction_date"
+                            app:hintTextColor="#666666"
+                            app:boxStrokeColor="#1976D2">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/dateEditText"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:focusable="false"
+                                android:inputType="none"
+                                android:drawableStart="@drawable/ic_calendar"
+                                android:drawablePadding="4dp"
+                                android:textColor="#000000"
+                                android:textColorHint="#666666"
+                                android:autoSizeTextType="uniform"
+                                android:autoSizeMinTextSize="10sp"
+                                android:autoSizeMaxTextSize="18sp"
+                                android:autoSizeStepGranularity="2sp"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
 
-                        <AutoCompleteTextView
-                            android:id="@+id/descriptionEditText"
+                    <!-- العملة -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingBottom="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="العملة"
+                            android:textSize="16sp"
+                            android:textColor="#1976D2"
+                            android:layout_marginBottom="4dp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="10sp"
+                            android:autoSizeMaxTextSize="18sp"
+                            android:autoSizeStepGranularity="2sp" />
+
+                        <RadioGroup
+                            android:id="@+id/currencyRadioGroup"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textMultiLine"
-                            android:minLines="2"
-                            android:textColor="#000000"
-                            android:textColorHint="#666666"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="18sp"
-                            android:autoSizeStepGranularity="2sp"
-                            android:background="@drawable/bg_edittext"
-                            android:padding="8dp"
-                            android:hint="اكتب البيان أو اختر من المقترحات"
-                            android:dropDownVerticalOffset="8dp"
-                            android:dropDownHorizontalOffset="0dp"
-                            android:popupElevation="8dp"
-                            android:dropDownHeight="wrap_content"/>
-                    </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                            android:orientation="horizontal">
 
-            <!-- بطاقة الملاحظات (مخفاة فقط) -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="#FFFFFF"
-                android:visibility="gone">
+                            <RadioButton
+                                android:id="@+id/radioYer"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="ريال يمني"
+                                android:textColor="#1976D2"
+                                android:autoSizeTextType="uniform"
+                                android:autoSizeMinTextSize="10sp"
+                                android:autoSizeMaxTextSize="18sp"
+                                android:autoSizeStepGranularity="2sp" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="8dp">
+                            <RadioButton
+                                android:id="@+id/radioSar"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="ريال سعودي"
+                                android:textColor="#1976D2"
+                                android:autoSizeTextType="uniform"
+                                android:autoSizeMinTextSize="10sp"
+                                android:autoSizeMaxTextSize="18sp"
+                                android:autoSizeStepGranularity="2sp" />
 
+                            <RadioButton
+                                android:id="@+id/radioUsd"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="دولار أمريكي"
+                                android:textColor="#1976D2"
+                                android:autoSizeTextType="uniform"
+                                android:autoSizeMinTextSize="10sp"
+                                android:autoSizeMaxTextSize="18sp"
+                                android:autoSizeStepGranularity="2sp" />
+                        </RadioGroup>
+                    </LinearLayout>
+
+                    <!-- الملاحظات -->
                     <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/notesLayout"
+                        android:id="@+id/noteLayout"
                         style="@style/CustomTextInputLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/transaction_notes"
+                        android:hint="ملاحظات (اختياري)"
                         app:hintTextColor="#666666"
                         app:boxStrokeColor="#1976D2">
-
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/notesEditText"
+                            android:id="@+id/noteEditText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textMultiLine"
-                            android:minLines="2"
                             android:textColor="#000000"
                             android:textColorHint="#666666"
                             android:autoSizeTextType="uniform"
@@ -389,6 +294,7 @@
                             android:autoSizeMaxTextSize="18sp"
                             android:autoSizeStepGranularity="2sp"/>
                     </com.google.android.material.textfield.TextInputLayout>
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
