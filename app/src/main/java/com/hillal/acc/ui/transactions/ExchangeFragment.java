@@ -25,6 +25,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import com.hillal.acc.data.entities.Cashbox;
+import com.hillal.acc.viewmodel.CashboxViewModel;
+import android.widget.AutoCompleteTextView;
+import android.widget.ArrayAdapter;
 
 public class ExchangeFragment extends Fragment {
     private Spinner accountSpinner, fromCurrencySpinner, toCurrencySpinner, operationTypeSpinner;
@@ -40,6 +44,10 @@ public class ExchangeFragment extends Fragment {
     private MaterialButton selectAccountButton;
     private Account selectedAccount;
     private Map<Long, Map<String, Double>> accountBalancesMap = new HashMap<>();
+    private AutoCompleteTextView cashboxAutoComplete;
+    private long selectedCashboxId = -1;
+    private List<Cashbox> cashboxes = new ArrayList<>();
+    private CashboxViewModel cashboxViewModel;
 
     @Nullable
     @Override
@@ -57,11 +65,13 @@ public class ExchangeFragment extends Fragment {
         selectedAccountNameText = view.findViewById(R.id.selectedAccountNameText);
         balanceText = view.findViewById(R.id.balanceText);
         exchangeAmountText = view.findViewById(R.id.exchangeAmountText);
+        cashboxAutoComplete = view.findViewById(R.id.cashboxAutoComplete);
 
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
         AccountRepository accountRepository = ((App) requireActivity().getApplication()).getAccountRepository();
         TransactionViewModelFactory transactionFactory = new TransactionViewModelFactory(accountRepository);
         transactionViewModel = new ViewModelProvider(this, transactionFactory).get(TransactionViewModel.class);
+        cashboxViewModel = new ViewModelProvider(this).get(CashboxViewModel.class);
 
         currencies = getResources().getStringArray(R.array.currencies_array);
         currencyAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, currencies);
@@ -86,6 +96,11 @@ public class ExchangeFragment extends Fragment {
         amountEditText.addTextChangedListener(new SimpleTextWatcher(this::updateExchangeAmount));
         rateEditText.addTextChangedListener(new SimpleTextWatcher(this::updateExchangeAmount));
         operationTypeSpinner.setOnItemClickListener((parent, view12, position, id) -> updateExchangeAmount());
+        cashboxAutoComplete.setOnItemClickListener((parent, v, position, id) -> {
+            if (position >= 0 && position < cashboxes.size()) {
+                selectedCashboxId = cashboxes.get(position).getId();
+            }
+        });
         return view;
     }
 
@@ -94,8 +109,26 @@ public class ExchangeFragment extends Fragment {
             selectedAccount = account;
             selectedAccountNameText.setText(account.getName());
             updateBalanceText();
+            loadCashboxesForAccount(account.getId());
         });
         picker.show(getParentFragmentManager(), "account_picker");
+    }
+
+    private void loadCashboxesForAccount(long accountId) {
+        cashboxViewModel.getCashboxesByUserId(/*userId if needed*/).observe(getViewLifecycleOwner(), cbList -> {
+            cashboxes = cbList != null ? cbList : new ArrayList<>();
+            List<String> names = new ArrayList<>();
+            for (Cashbox cb : cashboxes) names.add(cb.getName());
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, names);
+            cashboxAutoComplete.setAdapter(adapter);
+            if (!cashboxes.isEmpty()) {
+                cashboxAutoComplete.setText(cashboxes.get(0).getName(), false);
+                selectedCashboxId = cashboxes.get(0).getId();
+            } else {
+                cashboxAutoComplete.setText("", false);
+                selectedCashboxId = -1;
+            }
+        });
     }
 
     private void updateBalanceText() {
@@ -137,6 +170,10 @@ public class ExchangeFragment extends Fragment {
             Toast.makeText(getContext(), "يرجى اختيار الحساب", Toast.LENGTH_SHORT).show();
             return;
         }
+        if (selectedCashboxId == -1) {
+            Toast.makeText(getContext(), "يرجى اختيار الصندوق", Toast.LENGTH_SHORT).show();
+            return;
+        }
         String fromCurrency = fromCurrencySpinner.getText().toString();
         String toCurrency = toCurrencySpinner.getText().toString();
         String opType = operationTypeSpinner.getText().toString();
@@ -166,6 +203,7 @@ public class ExchangeFragment extends Fragment {
         debitTx.setType("debit");
         debitTx.setDescription(desc);
         debitTx.setWhatsappEnabled(whatsappEnabled);
+        debitTx.setCashboxId(selectedCashboxId);
         // معاملة الإضافة
         Transaction creditTx = new Transaction();
         creditTx.setAccountId(selectedAccount.getId());
@@ -174,6 +212,7 @@ public class ExchangeFragment extends Fragment {
         creditTx.setType("credit");
         creditTx.setDescription(desc);
         creditTx.setWhatsappEnabled(whatsappEnabled);
+        creditTx.setCashboxId(selectedCashboxId);
         transactionViewModel.insertTransaction(debitTx);
         transactionViewModel.insertTransaction(creditTx);
         Toast.makeText(getContext(), "تمت عملية الصرف بنجاح", Toast.LENGTH_LONG).show();
