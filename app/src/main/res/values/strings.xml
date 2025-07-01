@@ -248,8 +248,8 @@
     <string name="auto_update_feature_description">يستخدم التطبيق ميزة التحديث التلقائي لتثبيت التحديثات الجديدة مباشرة من Google Play Store، مما يضمن حصولك دائماً على أحدث الميزات والتحسينات الأمنية.</string>
 
     <string-array name="currencies_array">
-        <item>يمني</item>
         <item>سعودي</item>
+        <item>يمني</item>
         <item>دولار</item>
     </string-array>
     <string-array name="exchange_operation_types">
