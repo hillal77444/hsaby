@@ -173,7 +173,7 @@
                     app:startIconTint="@color/primary"
                     app:hintTextColor="#666666"
                     app:boxStrokeColor="#1976D2">
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/amountEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -190,7 +190,7 @@
                     app:hintTextColor="#666666"
                     app:boxStrokeColor="#1976D2"
                     android:layout_marginStart="8dp">
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/rateEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
