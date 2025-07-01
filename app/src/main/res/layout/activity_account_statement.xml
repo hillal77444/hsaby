@@ -6,36 +6,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- الشريط العلوي -->
-    <LinearLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:orientation="horizontal"
-        android:background="#3f51b5"
-        android:gravity="center_vertical"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:visibility="gone">
-
-        <ImageButton
-            android:id="@+id/menuButton"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_menu"
-            android:tint="#fff"
-            android:contentDescription="Menu" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="الحساب"
-            android:textColor="#fff"
-            android:textSize="18sp"
-            android:gravity="end"
-            android:fontFamily="sans-serif-medium"/>
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
     <!-- البطاقة العلوية المصغرة -->
     <com.google.android.material.card.MaterialCardView
@@ -51,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="10dp">
+            android:padding="12dp">
 
             <!-- اختيار الحساب وزر الطباعة -->
             <LinearLayout
