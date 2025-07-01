@@ -57,4 +57,6 @@
     <color name="accent_green_dark">#388E3C</color>
     <color name="primary_ripple">#33BB86FC</color>
     <color name="secondary_ripple">#3303DAC6</color>
+    <color name="cardBackground">#2D2D2D</color>
+    <color name="textSecondary">#B3FFFFFF</color>
 </resources> 
