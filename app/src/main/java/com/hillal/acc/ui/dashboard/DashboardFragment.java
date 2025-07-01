@@ -200,10 +200,6 @@ public class DashboardFragment extends Fragment {
             startActivity(intent);
         });
 
-        // زر صرف العملات
-        binding.exchangeButton.setOnClickListener(v ->
-            Navigation.findNavController(requireView()).navigate(R.id.action_dashboard_to_exchange));
-
         // بطاقات شبكة الروابط المختصرة
         binding.accountsCard.setOnClickListener(v ->
             Navigation.findNavController(requireView()).navigate(R.id.navigation_accounts));
@@ -219,6 +215,9 @@ public class DashboardFragment extends Fragment {
 
         binding.transferCard.setOnClickListener(v ->
             Navigation.findNavController(requireView()).navigate(R.id.action_dashboard_to_transfer));
+
+        binding.exchangeCard.setOnClickListener(v ->
+            Navigation.findNavController(requireView()).navigate(R.id.action_dashboard_to_exchange));
     }
 
     private void observeData() {
