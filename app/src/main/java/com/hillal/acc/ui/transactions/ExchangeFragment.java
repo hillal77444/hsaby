@@ -30,6 +30,7 @@ import com.hillal.acc.viewmodel.CashboxViewModel;
 import android.widget.AutoCompleteTextView;
 import android.widget.ArrayAdapter;
 import com.google.android.material.button.MaterialButton;
+import com.hillal.acc.data.repository.TransactionRepository;
 
 public class ExchangeFragment extends Fragment {
     private Spinner fromCurrencySpinner, toCurrencySpinner, operationTypeSpinner, cashboxSpinner;
@@ -48,6 +49,7 @@ public class ExchangeFragment extends Fragment {
     private CashboxViewModel cashboxViewModel;
     private AccountViewModel accountViewModel;
     private TransactionViewModel transactionViewModel;
+    private TransactionRepository transactionRepository;
 
     @Nullable
     @Override
@@ -70,6 +72,7 @@ public class ExchangeFragment extends Fragment {
         AccountRepository accountRepository = ((App) requireActivity().getApplication()).getAccountRepository();
         TransactionViewModelFactory transactionFactory = new TransactionViewModelFactory(accountRepository);
         transactionViewModel = new ViewModelProvider(this, transactionFactory).get(TransactionViewModel.class);
+        transactionRepository = ((App) requireActivity().getApplication()).getTransactionRepository();
         currencies = getResources().getStringArray(R.array.currencies_array);
         currencyAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, currencies);
         currencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -171,12 +174,13 @@ public class ExchangeFragment extends Fragment {
             return;
         }
         String currency = getSelectedFromCurrency();
-        Map<String, Double> balances = accountBalancesMap.get(selectedAccount.getId());
-        double balance = 0.0;
-        if (balances != null && balances.containsKey(currency)) {
-            balance = balances.get(currency);
-        }
-        accountBalanceText.setText("الرصيد: " + balance + " " + currency);
+        long accountId = selectedAccount.getId();
+        long now = System.currentTimeMillis();
+        transactionRepository.getBalanceUntilDate(accountId, now, currency)
+            .observe(getViewLifecycleOwner(), balance -> {
+                double bal = (balance != null) ? balance : 0.0;
+                accountBalanceText.setText("الرصيد: " + bal + " " + currency);
+            });
     }
 
     private void updateExchangeAmount() {
