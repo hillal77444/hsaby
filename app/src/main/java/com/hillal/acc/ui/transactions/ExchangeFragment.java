@@ -83,30 +83,29 @@ public class ExchangeFragment extends Fragment {
         opTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         operationTypeSpinner.setAdapter(opTypeAdapter);
 
-        accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accs -> {
-            accounts = accs;
-            accountAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, accounts);
-            accountAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            fromCurrencySpinner.setAdapter(accountAdapter);
-            toCurrencySpinner.setAdapter(accountAdapter);
-        });
-
         selectAccountButton.setOnClickListener(v -> openAccountPicker());
-        exchangeButton.setOnClickListener(v -> performExchange());
-        fromCurrencySpinner.setOnItemClickListener((parent, view1, position, id) -> updateBalanceText());
+        fromCurrencySpinner.setOnItemClickListener((parent, view1, position, id) -> {
+            updateBalanceText();
+            updateExchangeAmount();
+        });
+        toCurrencySpinner.setOnItemClickListener((parent, view1, position, id) -> updateExchangeAmount());
+        operationTypeSpinner.setOnItemClickListener((parent, view1, position, id) -> updateExchangeAmount());
         amountEditText.addTextChangedListener(new SimpleTextWatcher(this::updateExchangeAmount));
         rateEditText.addTextChangedListener(new SimpleTextWatcher(this::updateExchangeAmount));
-        operationTypeSpinner.setOnItemClickListener((parent, view12, position, id) -> updateExchangeAmount());
+        exchangeButton.setOnClickListener(v -> performExchange());
         cashboxAutoComplete.setOnItemClickListener((parent, v, position, id) -> {
             if (position >= 0 && position < cashboxes.size()) {
                 selectedCashboxId = cashboxes.get(position).getId();
             }
         });
+        accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accs -> {
+            accounts = accs;
+        });
         return view;
     }
 
     private void openAccountPicker() {
-        AccountPickerBottomSheet picker = new AccountPickerBottomSheet(accounts, /*transactions*/ new ArrayList<>(), accountBalancesMap, account -> {
+        AccountPickerBottomSheet picker = new AccountPickerBottomSheet(accounts, new ArrayList<>(), accountBalancesMap, account -> {
             selectedAccount = account;
             selectedAccountNameText.setText(account.getName());
             updateBalanceText();
@@ -151,7 +150,9 @@ public class ExchangeFragment extends Fragment {
         String amountStr = amountEditText.getText().toString().trim();
         String rateStr = rateEditText.getText().toString().trim();
         String opType = operationTypeSpinner.getText().toString();
-        if (amountStr.isEmpty() || rateStr.isEmpty()) {
+        String fromCurrency = fromCurrencySpinner.getText().toString();
+        String toCurrency = toCurrencySpinner.getText().toString();
+        if (amountStr.isEmpty() || rateStr.isEmpty() || fromCurrency.equals(toCurrency)) {
             exchangeAmountText.setText("المبلغ بعد الصرف: -");
             return;
         }
@@ -160,7 +161,7 @@ public class ExchangeFragment extends Fragment {
             double rate = Double.parseDouble(rateStr);
             double toAmount = opType.equals("بيع") ? amount * rate : amount / rate;
             BigDecimal rounded = new BigDecimal(toAmount).setScale(2, RoundingMode.HALF_UP);
-            exchangeAmountText.setText("المبلغ بعد الصرف: " + rounded.toPlainString());
+            exchangeAmountText.setText("المبلغ بعد الصرف: " + rounded.toPlainString() + " " + toCurrency);
         } catch (Exception e) {
             exchangeAmountText.setText("المبلغ بعد الصرف: -");
         }
