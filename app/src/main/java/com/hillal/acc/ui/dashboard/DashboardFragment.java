@@ -216,6 +216,9 @@ public class DashboardFragment extends Fragment {
 
         binding.debtsCard.setOnClickListener(v ->
             Navigation.findNavController(requireView()).navigate(R.id.nav_summary));
+
+        binding.transferCard.setOnClickListener(v ->
+            Navigation.findNavController(requireView()).navigate(R.id.action_dashboard_to_transfer));
     }
 
     private void observeData() {
