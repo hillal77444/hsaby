@@ -1,26 +1,149 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الحساب" android:textStyle="bold"/>
-        <Spinner android:id="@+id/accountSpinner" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp"/>
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="العملة المخصومة" android:textStyle="bold"/>
-        <Spinner android:id="@+id/fromCurrencySpinner" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp"/>
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="العملة المضافة" android:textStyle="bold"/>
-        <Spinner android:id="@+id/toCurrencySpinner" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp"/>
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="نوع العملية" android:textStyle="bold"/>
-        <Spinner android:id="@+id/operationTypeSpinner" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp"/>
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="المبلغ" android:textStyle="bold"/>
-        <EditText android:id="@+id/amountEditText" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="numberDecimal" android:layout_marginBottom="12dp"/>
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="سعر الصرف" android:textStyle="bold"/>
-        <EditText android:id="@+id/rateEditText" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="numberDecimal" android:layout_marginBottom="12dp"/>
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ملاحظات (اختياري)" android:textStyle="bold"/>
-        <EditText android:id="@+id/notesEditText" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp"/>
-        <Button android:id="@+id/exchangeButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="تنفيذ الصرف"/>
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            android:layout_marginBottom="16dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الحساب" android:textStyle="bold" android:textSize="16sp"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/selectAccountButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="اختر الحساب"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:icon="@drawable/ic_account_circle"
+                    android:iconPadding="8dp"
+                    android:layout_marginBottom="8dp"/>
+                <TextView
+                    android:id="@+id/selectedAccountNameText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="لم يتم اختيار حساب بعد"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="8dp"/>
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="العملة المخصومة" android:textStyle="bold"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp">
+                    <AutoCompleteTextView
+                        android:id="@+id/fromCurrencySpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:focusable="false"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="العملة المضافة" android:textStyle="bold"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp">
+                    <AutoCompleteTextView
+                        android:id="@+id/toCurrencySpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:focusable="false"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="نوع العملية" android:textStyle="bold"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp">
+                    <AutoCompleteTextView
+                        android:id="@+id/operationTypeSpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:focusable="false"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="المبلغ" android:textStyle="bold"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp">
+                    <EditText
+                        android:id="@+id/amountEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="سعر الصرف" android:textStyle="bold"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp">
+                    <EditText
+                        android:id="@+id/rateEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/balanceText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="الرصيد: -"
+                    android:textColor="@color/teal_700"
+                    android:textStyle="bold"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="8dp"/>
+
+                <TextView
+                    android:id="@+id/exchangeAmountText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="المبلغ بعد الصرف: -"
+                    android:textColor="@color/purple_700"
+                    android:textStyle="bold"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="8dp"/>
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ملاحظات (اختياري)" android:textStyle="bold"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp">
+                    <EditText
+                        android:id="@+id/notesEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/exchangeButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="تنفيذ الصرف"
+                    android:textStyle="bold"
+                    android:backgroundTint="@color/info"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 </ScrollView> 
