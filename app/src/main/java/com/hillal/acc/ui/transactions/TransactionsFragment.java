@@ -207,10 +207,13 @@ public class TransactionsFragment extends Fragment {
             // منع إغلاق SearchView عند فقدان التركيز (إغلاق الكيبورد)
             searchView.setOnQueryTextFocusChangeListener((v, hasFocus) -> {
                 if (!hasFocus) {
-                    // عند فقدان التركيز، نحافظ على حالة البحث النشطة
-                    // ولا نسمح بإغلاق SearchView تلقائياً
+                    // لا تغلق البحث ولا تعيد collapse أبداً
                     searchView.setIconified(false);
                     searchView.setQuery(currentSearchText, false);
+                    // أعِد التركيز للبحث تلقائياً إذا كان البحث نشطاً
+                    if (isSearchActive) {
+                        searchView.requestFocus();
+                    }
                 }
             });
         }
