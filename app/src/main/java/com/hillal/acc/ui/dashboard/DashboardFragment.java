@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.activity.OnBackPressedCallback;
+import androidx.core.view.ViewCompat;
 
 import com.hillal.acc.R;
 import com.hillal.acc.data.repository.AccountRepository;
@@ -137,6 +138,16 @@ public class DashboardFragment extends Fragment {
                     }
                 }
             );
+
+            // ضبط insets للجذر لرفع المحتوى مع الكيبورد وأزرار النظام
+            ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+                int bottom = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime()).bottom;
+                if (bottom == 0) {
+                    bottom = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars()).bottom;
+                }
+                v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), bottom);
+                return insets;
+            });
 
         } catch (Exception e) {
             Log.e(TAG, "Error in onViewCreated: " + e.getMessage(), e);
