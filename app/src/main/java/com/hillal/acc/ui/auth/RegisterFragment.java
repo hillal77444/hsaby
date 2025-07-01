@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.core.view.ViewCompat;
 
 import com.hillal.acc.R;
 import com.hillal.acc.databinding.FragmentRegisterBinding;
@@ -36,6 +37,15 @@ public class RegisterFragment extends Fragment {
         // إخفاء شريط التنقل السفلي
        
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
+            int bottom = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime()).bottom;
+            if (bottom == 0) {
+                bottom = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars()).bottom;
+            }
+            v.setPadding(0, 0, 0, bottom);
+            return insets;
+        });
 
         binding.buttonRegister.setOnClickListener(v -> {
             String displayName = binding.editTextDisplayName.getText().toString().trim();
