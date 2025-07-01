@@ -31,12 +31,14 @@ import android.widget.AutoCompleteTextView;
 import android.widget.ArrayAdapter;
 import com.google.android.material.button.MaterialButton;
 import com.hillal.acc.data.repository.TransactionRepository;
+import com.google.android.material.textfield.TextInputEditText;
+import com.hillal.acc.ui.transactions.TransactionsViewModel;
 
 public class ExchangeFragment extends Fragment {
     private Spinner fromCurrencySpinner, toCurrencySpinner, operationTypeSpinner, cashboxSpinner;
-    private TextView selectedAccountNameText, accountBalanceText, exchangeAmountText;
-    private Button selectAccountButton, exchangeButton;
+    private TextView accountBalanceText, exchangeAmountText;
     private EditText amountEditText, rateEditText, notesEditText;
+    private com.google.android.material.textfield.TextInputEditText accountAutoComplete;
     private List<Account> accounts;
     private List<Cashbox> cashboxes = new ArrayList<>();
     private Account selectedAccount;
@@ -50,6 +52,7 @@ public class ExchangeFragment extends Fragment {
     private AccountViewModel accountViewModel;
     private TransactionViewModel transactionViewModel;
     private TransactionRepository transactionRepository;
+    private TransactionsViewModel transactionsViewModel;
 
     @Nullable
     @Override
@@ -59,14 +62,14 @@ public class ExchangeFragment extends Fragment {
         toCurrencySpinner = view.findViewById(R.id.toCurrencySpinner);
         operationTypeSpinner = view.findViewById(R.id.operationTypeSpinner);
         cashboxSpinner = view.findViewById(R.id.cashboxSpinner);
-        selectedAccountNameText = view.findViewById(R.id.selectedAccountNameText);
         accountBalanceText = view.findViewById(R.id.accountBalanceText);
         exchangeAmountText = view.findViewById(R.id.exchangeAmountText);
-        selectAccountButton = view.findViewById(R.id.selectAccountButton);
-        exchangeButton = view.findViewById(R.id.exchangeButton);
         amountEditText = view.findViewById(R.id.amountEditText);
         rateEditText = view.findViewById(R.id.rateEditText);
         notesEditText = view.findViewById(R.id.notesEditText);
+        accountAutoComplete = view.findViewById(R.id.accountAutoComplete);
+        accountAutoComplete.setFocusable(false);
+        accountAutoComplete.setOnClickListener(v -> openAccountPicker());
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
         cashboxViewModel = new ViewModelProvider(this).get(CashboxViewModel.class);
         AccountRepository accountRepository = ((App) requireActivity().getApplication()).getAccountRepository();
@@ -105,7 +108,6 @@ public class ExchangeFragment extends Fragment {
             }
             @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
-        selectAccountButton.setOnClickListener(v -> openAccountPicker());
         fromCurrencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view1, int position, long id) {
@@ -131,14 +133,17 @@ public class ExchangeFragment extends Fragment {
         });
         amountEditText.addTextChangedListener(new SimpleTextWatcher(this::updateExchangeAmount));
         rateEditText.addTextChangedListener(new SimpleTextWatcher(this::updateExchangeAmount));
-        exchangeButton.setOnClickListener(v -> performExchange());
+        transactionsViewModel = new ViewModelProvider(this).get(TransactionsViewModel.class);
+        transactionsViewModel.getAccountBalancesMap().observe(getViewLifecycleOwner(), balancesMap -> {
+            accountBalancesMap = balancesMap != null ? balancesMap : new HashMap<>();
+        });
         return view;
     }
 
     private void openAccountPicker() {
         AccountPickerBottomSheet picker = new AccountPickerBottomSheet(accounts, new ArrayList<>(), accountBalancesMap, account -> {
             selectedAccount = account;
-            selectedAccountNameText.setText(account.getName());
+            accountAutoComplete.setText(account.getName());
             updateBalanceText();
         });
         picker.show(getParentFragmentManager(), "account_picker");
