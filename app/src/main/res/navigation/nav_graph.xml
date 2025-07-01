@@ -187,4 +187,14 @@
         android:label="كشف الصندوق التفصيلي"
         tools:layout="@layout/fragment_cashbox_statement" />
 
+    <fragment
+        android:id="@+id/exchangeFragment"
+        android:name="com.hillal.acc.ui.transactions.ExchangeFragment"
+        android:label="صرف العملات" >
+    </fragment>
+
+    <action
+        android:id="@+id/action_dashboard_to_exchange"
+        app:destination="@id/exchangeFragment" />
+
 </navigation>
