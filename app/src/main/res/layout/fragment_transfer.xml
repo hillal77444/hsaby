@@ -170,7 +170,6 @@
                         android:hint="العملة"
                         app:boxStrokeColor="@color/primary"
                         app:hintTextColor="@color/textSecondary"
-                        app:startIconDrawable="@drawable/ic_money"
                         app:startIconTint="@color/primary">
 
                         <Spinner
