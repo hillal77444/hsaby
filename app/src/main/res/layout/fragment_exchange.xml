@@ -102,7 +102,7 @@
                             android:text="اختر الحساب"
                             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                             android:icon="@drawable/ic_account_circle"
-                            android:iconPadding="8dp"
+                            app:iconPadding="8dp"
                             android:layout_marginBottom="8dp"/>
                         <TextView
                             android:id="@+id/selectedAccountNameText"
