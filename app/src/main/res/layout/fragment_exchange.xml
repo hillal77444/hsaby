@@ -49,7 +49,7 @@
                         android:clickable="true"
                         android:inputType="none"
                         android:hint="اختر الحساب"
-                        android:drawableEnd="@drawable/ic_arrow_drop_down"
+                        android:drawableEnd="@drawable/ic_arrow_downward"
                         android:padding="10dp"/>
                     <TextView
                         android:id="@+id/accountBalanceText"
