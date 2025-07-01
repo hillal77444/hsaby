@@ -211,6 +211,11 @@ public class DashboardFragment extends Fragment {
 
         binding.debtsCard.setOnClickListener(v ->
             Navigation.findNavController(requireView()).navigate(R.id.nav_summary));
+
+        Button exchangeButton = requireView().findViewById(R.id.exchangeButton);
+        exchangeButton.setOnClickListener(v -> {
+            Navigation.findNavController(requireView()).navigate(R.id.action_dashboard_to_exchange);
+        });
     }
 
     private void observeData() {
