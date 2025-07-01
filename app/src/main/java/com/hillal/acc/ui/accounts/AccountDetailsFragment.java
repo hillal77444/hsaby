@@ -35,6 +35,7 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import androidx.core.view.ViewCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,6 +85,15 @@ public class AccountDetailsFragment extends Fragment {
         loadAccountDetails();
         setupDateRangePicker();
         updateStatistics();
+        // ضبط insets للجذر لرفع المحتوى مع الكيبورد وأزرار النظام
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+            int bottom = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime()).bottom;
+            if (bottom == 0) {
+                bottom = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars()).bottom;
+            }
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), bottom);
+            return insets;
+        });
     }
 
     private void setupViews() {
