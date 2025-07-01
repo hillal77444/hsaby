@@ -15,4 +15,7 @@ public class Cashbox {
     public String name;
     @SerializedName("created_at")
     public String createdAt;
+
+    public long getId() { return id; }
+    public String getName() { return name; }
 } 
