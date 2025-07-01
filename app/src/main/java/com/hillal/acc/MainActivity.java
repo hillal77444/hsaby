@@ -70,14 +70,7 @@ public class MainActivity extends AppCompatActivity {
             // Initialize view binding
             binding = ActivityMainBinding.inflate(getLayoutInflater());
             setContentView(binding.getRoot());
-            // دعم insets للـ Toolbar ليظهر أسفل شريط الحالة بشكل متناسق
-            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-            View toolbar = findViewById(R.id.toolbar);
-            ViewCompat.setOnApplyWindowInsetsListener(toolbar, (v, insets) -> {
-                int top = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top;
-                v.setPadding(0, top, 0, 0);
-                return insets;
-            });
+            WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
             Log.d(TAG, "Layout inflated successfully");
 
             // Setup toolbar
