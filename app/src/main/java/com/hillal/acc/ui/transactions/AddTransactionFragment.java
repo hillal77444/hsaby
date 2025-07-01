@@ -117,6 +117,15 @@ public class AddTransactionFragment extends Fragment implements com.hillal.acc.u
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             requireActivity().getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
         }
+        // ضبط insets للجذر عند ظهور الكيبورد أو أزرار النظام
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
+            int bottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+            if (bottom == 0) {
+                bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+            }
+            v.setPadding(0, 0, 0, bottom);
+            return insets;
+        });
         setupViews();
         setupListeners();
         loadAccounts();
