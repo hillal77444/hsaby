@@ -30,7 +30,6 @@ import com.hillal.acc.viewmodel.CashboxViewModel;
 import android.widget.AutoCompleteTextView;
 import android.widget.ArrayAdapter;
 import com.google.android.material.button.MaterialButton;
-import com.hillal.acc.data.model.Cashbox;
 
 public class ExchangeFragment extends Fragment {
     private AutoCompleteTextView fromCurrencySpinner, toCurrencySpinner, operationTypeSpinner;
