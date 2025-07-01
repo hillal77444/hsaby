@@ -520,6 +520,15 @@
             </com.google.android.material.card.MaterialCardView>
         </GridLayout>
 
+        <Button
+            android:id="@+id/exchangeButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="صرف العملات"
+            android:layout_margin="16dp"
+            android:textStyle="bold"
+            android:backgroundTint="@color/info"/>
+
     </LinearLayout>
 
 </androidx.core.widget.NestedScrollView>
