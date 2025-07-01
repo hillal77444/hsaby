@@ -137,6 +137,8 @@ public class ExchangeFragment extends Fragment {
         transactionsViewModel.getAccountBalancesMap().observe(getViewLifecycleOwner(), balancesMap -> {
             accountBalancesMap = balancesMap != null ? balancesMap : new HashMap<>();
         });
+        Button exchangeButton = view.findViewById(R.id.exchangeButton);
+        exchangeButton.setOnClickListener(v -> performExchange());
         return view;
     }
 
