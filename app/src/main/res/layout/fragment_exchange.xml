@@ -56,31 +56,32 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="الرصيد: -"
-                        android:textColor="#388E3C"
-                        android:textSize="14sp"
-                        android:paddingStart="8dp"
-                        android:paddingBottom="4dp"/>
+                        android:textColor="@color/secondary_variant"
+                        android:textSize="@dimen/text_size_body2"
+                        android:paddingStart="@dimen/spacing_sm"
+                        android:paddingBottom="@dimen/spacing_xs"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- اختيار الصندوق -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/cashboxLayout"
-                    style="@style/CustomTextInputLayout"
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="اختر الصندوق"
-                    app:startIconDrawable="@android:drawable/ic_menu_save"
-                    app:startIconTint="@color/primary"
-                    app:hintTextColor="#666666"
-                    app:boxStrokeColor="#1976D2">
-
+                    android:orientation="vertical"
+                    android:paddingStart="8dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="اختر الصندوق"
+                        android:textAppearance="?attr/textAppearanceCaption"
+                        android:textColor="@color/textSecondary"
+                        android:textSize="@dimen/text_size_caption"/>
                     <Spinner
                         android:id="@+id/cashboxSpinner"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="10dp"/>
-                </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -105,7 +106,7 @@
                     android:layout_weight="1"
                     android:orientation="vertical"
                     android:paddingEnd="8dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="اختر العملة التي سيتم خصمها" android:textAppearance="?attr/textAppearanceCaption" android:textColor="@color/textSecondary"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="اختر العملة التي سيتم خصمها" android:textAppearance="?attr/textAppearanceCaption" android:textColor="@color/textSecondary" android:textSize="@dimen/text_size_caption"/>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
@@ -129,7 +130,7 @@
                     android:layout_weight="1"
                     android:orientation="vertical"
                     android:paddingStart="8dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="اختر العملة التي سيتم إضافتها" android:textAppearance="?attr/textAppearanceCaption" android:textColor="@color/textSecondary"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="اختر العملة التي سيتم إضافتها" android:textAppearance="?attr/textAppearanceCaption" android:textColor="@color/textSecondary" android:textSize="@dimen/text_size_caption"/>
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -157,7 +158,7 @@
             android:layout_marginBottom="8dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="@color/cardBackground">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -208,7 +209,7 @@
             android:layout_marginBottom="8dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="@color/cardBackground">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -240,7 +241,7 @@
             android:layout_marginBottom="8dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="@color/cardBackground">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
