@@ -150,5 +150,6 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:background="#FFFFFF"
-        android:layout_margin="8dp"/>
+        android:layout_margin="8dp"
+        android:layout_marginBottom="16dp"/>
 </LinearLayout>
