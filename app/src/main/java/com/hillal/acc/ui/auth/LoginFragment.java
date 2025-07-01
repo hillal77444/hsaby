@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.activity.OnBackPressedCallback;
+import androidx.core.view.ViewCompat;
 
 import com.hillal.acc.R;
 import com.hillal.acc.databinding.FragmentLoginBinding;
@@ -200,6 +201,15 @@ public class LoginFragment extends Fragment {
                 }
             }
         );
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
+            int bottom = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime()).bottom;
+            if (bottom == 0) {
+                bottom = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars()).bottom;
+            }
+            v.setPadding(0, 0, 0, bottom);
+            return insets;
+        });
     }
 
     @Override
