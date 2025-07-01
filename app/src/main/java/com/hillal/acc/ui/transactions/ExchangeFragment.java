@@ -32,23 +32,22 @@ import android.widget.ArrayAdapter;
 import com.google.android.material.button.MaterialButton;
 
 public class ExchangeFragment extends Fragment {
-    private AutoCompleteTextView fromCurrencySpinner, toCurrencySpinner, operationTypeSpinner;
+    private Spinner fromCurrencySpinner, toCurrencySpinner, operationTypeSpinner, cashboxSpinner;
+    private TextView selectedAccountNameText, accountBalanceText, exchangeAmountText;
+    private Button selectAccountButton, exchangeButton;
     private EditText amountEditText, rateEditText, notesEditText;
-    private Button exchangeButton;
+    private List<Account> accounts;
+    private List<Cashbox> cashboxes = new ArrayList<>();
+    private Account selectedAccount;
+    private long selectedCashboxId = -1;
+    private String[] currencies;
+    private ArrayAdapter<String> currencyAdapter;
+    private ArrayAdapter<String> cashboxAdapter;
+    private ArrayAdapter<CharSequence> opTypeAdapter;
+    private Map<Long, Map<String, Double>> accountBalancesMap = new HashMap<>();
+    private CashboxViewModel cashboxViewModel;
     private AccountViewModel accountViewModel;
     private TransactionViewModel transactionViewModel;
-    private List<Account> accounts;
-    private ArrayAdapter<Account> accountAdapter;
-    private ArrayAdapter<String> currencyAdapter;
-    private String[] currencies;
-    private TextView selectedAccountNameText, balanceText, exchangeAmountText;
-    private MaterialButton selectAccountButton;
-    private Account selectedAccount;
-    private Map<Long, Map<String, Double>> accountBalancesMap = new HashMap<>();
-    private AutoCompleteTextView cashboxAutoComplete;
-    private long selectedCashboxId = -1;
-    private List<Cashbox> cashboxes = new ArrayList<>();
-    private CashboxViewModel cashboxViewModel;
 
     @Nullable
     @Override
@@ -57,50 +56,79 @@ public class ExchangeFragment extends Fragment {
         fromCurrencySpinner = view.findViewById(R.id.fromCurrencySpinner);
         toCurrencySpinner = view.findViewById(R.id.toCurrencySpinner);
         operationTypeSpinner = view.findViewById(R.id.operationTypeSpinner);
+        cashboxSpinner = view.findViewById(R.id.cashboxSpinner);
+        selectedAccountNameText = view.findViewById(R.id.selectedAccountNameText);
+        accountBalanceText = view.findViewById(R.id.accountBalanceText);
+        exchangeAmountText = view.findViewById(R.id.exchangeAmountText);
+        selectAccountButton = view.findViewById(R.id.selectAccountButton);
+        exchangeButton = view.findViewById(R.id.exchangeButton);
         amountEditText = view.findViewById(R.id.amountEditText);
         rateEditText = view.findViewById(R.id.rateEditText);
         notesEditText = view.findViewById(R.id.notesEditText);
-        exchangeButton = view.findViewById(R.id.exchangeButton);
-        selectAccountButton = view.findViewById(R.id.selectAccountButton);
-        selectedAccountNameText = view.findViewById(R.id.selectedAccountNameText);
-        balanceText = view.findViewById(R.id.balanceText);
-        exchangeAmountText = view.findViewById(R.id.exchangeAmountText);
-        cashboxAutoComplete = view.findViewById(R.id.cashboxAutoComplete);
-
         accountViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
+        cashboxViewModel = new ViewModelProvider(this).get(CashboxViewModel.class);
         AccountRepository accountRepository = ((App) requireActivity().getApplication()).getAccountRepository();
         TransactionViewModelFactory transactionFactory = new TransactionViewModelFactory(accountRepository);
         transactionViewModel = new ViewModelProvider(this, transactionFactory).get(TransactionViewModel.class);
-        cashboxViewModel = new ViewModelProvider(this).get(CashboxViewModel.class);
-
         currencies = getResources().getStringArray(R.array.currencies_array);
         currencyAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, currencies);
         currencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         fromCurrencySpinner.setAdapter(currencyAdapter);
         toCurrencySpinner.setAdapter(currencyAdapter);
-
-        ArrayAdapter<CharSequence> opTypeAdapter = ArrayAdapter.createFromResource(requireContext(), R.array.exchange_operation_types, android.R.layout.simple_spinner_item);
+        opTypeAdapter = ArrayAdapter.createFromResource(requireContext(), R.array.exchange_operation_types, android.R.layout.simple_spinner_item);
         opTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         operationTypeSpinner.setAdapter(opTypeAdapter);
-
-        selectAccountButton.setOnClickListener(v -> openAccountPicker());
-        fromCurrencySpinner.setOnItemClickListener((parent, view1, position, id) -> {
-            updateBalanceText();
-            updateExchangeAmount();
-        });
-        toCurrencySpinner.setOnItemClickListener((parent, view1, position, id) -> updateExchangeAmount());
-        operationTypeSpinner.setOnItemClickListener((parent, view1, position, id) -> updateExchangeAmount());
-        amountEditText.addTextChangedListener(new SimpleTextWatcher(this::updateExchangeAmount));
-        rateEditText.addTextChangedListener(new SimpleTextWatcher(this::updateExchangeAmount));
-        exchangeButton.setOnClickListener(v -> performExchange());
-        cashboxAutoComplete.setOnItemClickListener((parent, v, position, id) -> {
-            if (position >= 0 && position < cashboxes.size()) {
-                selectedCashboxId = cashboxes.get(position).getId();
-            }
-        });
         accountViewModel.getAllAccounts().observe(getViewLifecycleOwner(), accs -> {
             accounts = accs;
         });
+        cashboxViewModel.getAllCashboxes().observe(getViewLifecycleOwner(), cbList -> {
+            cashboxes = cbList != null ? cbList : new ArrayList<>();
+            List<String> names = new ArrayList<>();
+            for (Cashbox cb : cashboxes) names.add(cb.getName());
+            cashboxAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, names);
+            cashboxAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            cashboxSpinner.setAdapter(cashboxAdapter);
+            if (!cashboxes.isEmpty()) {
+                cashboxSpinner.setSelection(0);
+                selectedCashboxId = cashboxes.get(0).getId();
+            }
+        });
+        cashboxSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view1, int position, long id) {
+                if (position >= 0 && position < cashboxes.size()) {
+                    selectedCashboxId = cashboxes.get(position).getId();
+                }
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        selectAccountButton.setOnClickListener(v -> openAccountPicker());
+        fromCurrencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view1, int position, long id) {
+                updateToCurrencyOptions();
+                updateBalanceText();
+                updateExchangeAmount();
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        toCurrencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view1, int position, long id) {
+                updateExchangeAmount();
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        operationTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view1, int position, long id) {
+                updateExchangeAmount();
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        amountEditText.addTextChangedListener(new SimpleTextWatcher(this::updateExchangeAmount));
+        rateEditText.addTextChangedListener(new SimpleTextWatcher(this::updateExchangeAmount));
+        exchangeButton.setOnClickListener(v -> performExchange());
         return view;
     }
 
@@ -109,49 +137,54 @@ public class ExchangeFragment extends Fragment {
             selectedAccount = account;
             selectedAccountNameText.setText(account.getName());
             updateBalanceText();
-            loadCashboxesForAccount();
         });
         picker.show(getParentFragmentManager(), "account_picker");
     }
 
-    private void loadCashboxesForAccount() {
-        cashboxViewModel.getAllCashboxes().observe(getViewLifecycleOwner(), cbList -> {
-            cashboxes = cbList != null ? cbList : new ArrayList<>();
-            List<String> names = new ArrayList<>();
-            for (Cashbox cb : cashboxes) names.add(cb.getName());
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, names);
-            cashboxAutoComplete.setAdapter(adapter);
-            if (!cashboxes.isEmpty()) {
-                cashboxAutoComplete.setText(cashboxes.get(0).getName(), false);
-                selectedCashboxId = cashboxes.get(0).getId();
-            } else {
-                cashboxAutoComplete.setText("", false);
-                selectedCashboxId = -1;
-            }
-        });
+    private void updateToCurrencyOptions() {
+        String fromCurrency = fromCurrencySpinner.getSelectedItem() != null ? fromCurrencySpinner.getSelectedItem().toString() : "";
+        List<String> toList = new ArrayList<>();
+        for (String c : currencies) {
+            if (!c.equals(fromCurrency)) toList.add(c);
+        }
+        ArrayAdapter<String> toAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, toList);
+        toAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        toCurrencySpinner.setAdapter(toAdapter);
+        if (!toList.isEmpty()) toCurrencySpinner.setSelection(0);
+    }
+
+    private String getSelectedFromCurrency() {
+        return fromCurrencySpinner.getSelectedItem() != null ? fromCurrencySpinner.getSelectedItem().toString() : "";
+    }
+
+    private String getSelectedToCurrency() {
+        return toCurrencySpinner.getSelectedItem() != null ? toCurrencySpinner.getSelectedItem().toString() : "";
+    }
+
+    private String getSelectedOperationType() {
+        return operationTypeSpinner.getSelectedItem() != null ? operationTypeSpinner.getSelectedItem().toString() : "";
     }
 
     private void updateBalanceText() {
         if (selectedAccount == null) {
-            balanceText.setText("الرصيد: -");
+            accountBalanceText.setText("الرصيد: -");
             return;
         }
-        String currency = fromCurrencySpinner.getText().toString();
+        String currency = getSelectedFromCurrency();
         Map<String, Double> balances = accountBalancesMap.get(selectedAccount.getId());
         double balance = 0.0;
         if (balances != null && balances.containsKey(currency)) {
             balance = balances.get(currency);
         }
-        balanceText.setText("الرصيد: " + balance + " " + currency);
-        updateExchangeAmount();
+        accountBalanceText.setText("الرصيد: " + balance + " " + currency);
     }
 
     private void updateExchangeAmount() {
         String amountStr = amountEditText.getText().toString().trim();
         String rateStr = rateEditText.getText().toString().trim();
-        String opType = operationTypeSpinner.getText().toString();
-        String fromCurrency = fromCurrencySpinner.getText().toString();
-        String toCurrency = toCurrencySpinner.getText().toString();
+        String opType = getSelectedOperationType();
+        String fromCurrency = getSelectedFromCurrency();
+        String toCurrency = getSelectedToCurrency();
         if (amountStr.isEmpty() || rateStr.isEmpty() || fromCurrency.equals(toCurrency)) {
             exchangeAmountText.setText("المبلغ بعد الصرف: -");
             return;
@@ -176,9 +209,9 @@ public class ExchangeFragment extends Fragment {
             Toast.makeText(getContext(), "يرجى اختيار الصندوق", Toast.LENGTH_SHORT).show();
             return;
         }
-        String fromCurrency = fromCurrencySpinner.getText().toString();
-        String toCurrency = toCurrencySpinner.getText().toString();
-        String opType = operationTypeSpinner.getText().toString();
+        String fromCurrency = getSelectedFromCurrency();
+        String toCurrency = getSelectedToCurrency();
+        String opType = getSelectedOperationType();
         String amountStr = amountEditText.getText().toString().trim();
         String rateStr = rateEditText.getText().toString().trim();
         String notes = notesEditText.getText().toString().trim();
