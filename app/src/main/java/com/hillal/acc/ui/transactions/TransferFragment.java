@@ -28,6 +28,7 @@ import com.hillal.acc.ui.transactions.TransactionsViewModel;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import com.google.android.material.textfield.TextInputEditText;
+import androidx.core.view.ViewCompat;
 
 public class TransferFragment extends Fragment {
     private TextInputEditText fromAccountAutoComplete, toAccountAutoComplete;
@@ -111,6 +112,20 @@ public class TransferFragment extends Fragment {
         Button transferButton = view.findViewById(R.id.transferButton);
         transferButton.setOnClickListener(v -> performTransfer());
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ViewCompat.setOnApplyWindowInsetsListener(view.getRootView(), (v, insets) -> {
+            int bottom = insets.getInsets(ViewCompat.Type.ime()).bottom;
+            if (bottom == 0) {
+                bottom = insets.getInsets(ViewCompat.Type.systemBars()).bottom;
+            }
+            v.setPadding(0, 0, 0, bottom);
+            return insets;
+        });
+        // ... باقي الكود ...
     }
 
     private void openAccountPicker(boolean isFrom) {
