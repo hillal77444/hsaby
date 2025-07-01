@@ -27,6 +27,7 @@ import com.hillal.acc.data.repository.TransactionRepository;
 import com.hillal.acc.ui.transactions.TransactionsViewModel;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import com.google.android.material.textfield.TextInputEditText;
 
 public class TransferFragment extends Fragment {
     private TextInputEditText fromAccountAutoComplete, toAccountAutoComplete;
@@ -190,8 +191,8 @@ public class TransferFragment extends Fragment {
         creditTx.setDescription(desc);
         creditTx.setWhatsappEnabled(toAccount.isWhatsappEnabled());
         creditTx.setCashboxId(selectedCashboxId);
-        transactionRepository.insertTransaction(debitTx);
-        transactionRepository.insertTransaction(creditTx);
+        transactionRepository.insert(debitTx);
+        transactionRepository.insert(creditTx);
         Toast.makeText(getContext(), "تمت عملية التحويل بنجاح", Toast.LENGTH_LONG).show();
         amountEditText.setText("");
         notesEditText.setText("");
