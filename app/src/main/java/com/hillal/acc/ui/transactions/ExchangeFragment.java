@@ -33,6 +33,7 @@ import com.google.android.material.button.MaterialButton;
 import com.hillal.acc.data.repository.TransactionRepository;
 import com.google.android.material.textfield.TextInputEditText;
 import com.hillal.acc.ui.transactions.TransactionsViewModel;
+import androidx.core.view.ViewCompat;
 
 public class ExchangeFragment extends Fragment {
     private Spinner fromCurrencySpinner, toCurrencySpinner, operationTypeSpinner, cashboxSpinner;
@@ -140,6 +141,19 @@ public class ExchangeFragment extends Fragment {
         Button exchangeButton = view.findViewById(R.id.exchangeButton);
         exchangeButton.setOnClickListener(v -> performExchange());
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
+            int bottom = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime()).bottom;
+            if (bottom == 0) {
+                bottom = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars()).bottom;
+            }
+            v.setPadding(0, 0, 0, bottom);
+            return insets;
+        });
     }
 
     private void openAccountPicker() {
