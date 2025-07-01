@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.core.view.ViewCompat;
 
 import com.hillal.acc.R;
 import com.hillal.acc.data.entities.Cashbox;
@@ -40,6 +41,15 @@ public class CashboxListFragment extends Fragment {
         cashboxViewModel = new ViewModelProvider(this).get(CashboxViewModel.class);
         cashboxViewModel.getAllCashboxes().observe(getViewLifecycleOwner(), this::updateList);
         // لا داعي لاستدعاء fetchCashboxesFromApi هنا، المزامنة تتم تلقائياً
+        // ضبط insets للجذر لرفع المحتوى مع الكيبورد وأزرار النظام
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+            int bottom = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime()).bottom;
+            if (bottom == 0) {
+                bottom = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars()).bottom;
+            }
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), bottom);
+            return insets;
+        });
     }
 
     private void updateList(List<Cashbox> cashboxes) {
