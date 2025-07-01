@@ -29,9 +29,11 @@ import com.hillal.acc.data.entities.Cashbox;
 import com.hillal.acc.viewmodel.CashboxViewModel;
 import android.widget.AutoCompleteTextView;
 import android.widget.ArrayAdapter;
+import com.google.android.material.button.MaterialButton;
+import com.hillal.acc.data.model.Cashbox;
 
 public class ExchangeFragment extends Fragment {
-    private Spinner accountSpinner, fromCurrencySpinner, toCurrencySpinner, operationTypeSpinner;
+    private AutoCompleteTextView fromCurrencySpinner, toCurrencySpinner, operationTypeSpinner;
     private EditText amountEditText, rateEditText, notesEditText;
     private Button exchangeButton;
     private AccountViewModel accountViewModel;
@@ -53,7 +55,6 @@ public class ExchangeFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_exchange, container, false);
-        accountSpinner = view.findViewById(R.id.accountSpinner);
         fromCurrencySpinner = view.findViewById(R.id.fromCurrencySpinner);
         toCurrencySpinner = view.findViewById(R.id.toCurrencySpinner);
         operationTypeSpinner = view.findViewById(R.id.operationTypeSpinner);
@@ -87,7 +88,8 @@ public class ExchangeFragment extends Fragment {
             accounts = accs;
             accountAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, accounts);
             accountAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            accountSpinner.setAdapter(accountAdapter);
+            fromCurrencySpinner.setAdapter(accountAdapter);
+            toCurrencySpinner.setAdapter(accountAdapter);
         });
 
         selectAccountButton.setOnClickListener(v -> openAccountPicker());
@@ -109,13 +111,13 @@ public class ExchangeFragment extends Fragment {
             selectedAccount = account;
             selectedAccountNameText.setText(account.getName());
             updateBalanceText();
-            loadCashboxesForAccount(account.getId());
+            loadCashboxesForAccount();
         });
         picker.show(getParentFragmentManager(), "account_picker");
     }
 
-    private void loadCashboxesForAccount(long accountId) {
-        cashboxViewModel.getCashboxesByUserId(/*userId if needed*/).observe(getViewLifecycleOwner(), cbList -> {
+    private void loadCashboxesForAccount() {
+        cashboxViewModel.getAllCashboxes().observe(getViewLifecycleOwner(), cbList -> {
             cashboxes = cbList != null ? cbList : new ArrayList<>();
             List<String> names = new ArrayList<>();
             for (Cashbox cb : cashboxes) names.add(cb.getName());
