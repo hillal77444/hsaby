@@ -112,6 +112,36 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
+function formatDate(data) {
+    if (!data) return '';
+    // إذا كانت سترينج رقمية (timestamp)
+    if (typeof data === 'string') {
+        data = data.trim();
+        // إذا كانت رقمية فقط
+        if (/^\d+$/.test(data)) {
+            data = parseInt(data, 10);
+            return formatDateFromDateObj(new Date(data));
+        }
+        // إذا كانت بصيغة 'YYYY-MM-DD HH:mm:ss'
+        if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(data)) {
+            // حولها إلى صيغة ISO
+            data = data.replace(' ', 'T');
+            return formatDateFromDateObj(new Date(data));
+        }
+    }
+    // إذا كانت Date أو رقم timestamp
+    return formatDateFromDateObj(new Date(data));
+}
+function formatDateFromDateObj(d) {
+    if (isNaN(d)) return '';
+    var day = String(d.getDate()).padStart(2, '0');
+    var month = String(d.getMonth() + 1).padStart(2, '0');
+    var year = d.getFullYear();
+    var hours = String(d.getHours()).padStart(2, '0');
+    var minutes = String(d.getMinutes()).padStart(2, '0');
+    // تنسيق جديد: DD/MM/YYYY, HH:mm
+    return `${day}/${month}/${year}, ${hours}:${minutes}`;
+}
 $(document).ready(function() {
     $('.select2').select2({
         width: '100%',
@@ -142,7 +172,7 @@ $(document).ready(function() {
         "pageLength": 30,
         "lengthMenu": [[30, 50, 100, -1], [30, 50, 100, "الكل"]],
         "columns": [
-            { "data": "date" },
+            { "data": "date", "render": function(data, type, row) { return formatDate(data); } },
             { "data": "account_name" },
             { "data": "type", "render": function(data, type, row) {
                 if(data === 'credit') return '<span class="badge bg-success">دائن</span>';
