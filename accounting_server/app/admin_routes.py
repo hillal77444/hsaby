@@ -17,6 +17,7 @@ from werkzeug.utils import secure_filename
 from functools import wraps
 import threading
 import queue
+from dateutil.parser import parse as date_parse
 
 admin = Blueprint('admin', __name__)
 
@@ -635,6 +636,7 @@ def send_transaction_notification():
 
 def calculate_and_notify_transaction(transaction_id):
     try:
+        from dateutil.parser import parse as date_parse
         # جلب المعاملة والحساب
         transaction = Transaction.query.get(transaction_id)
         if not transaction:
@@ -653,37 +655,31 @@ def calculate_and_notify_transaction(transaction_id):
         if not user:
             return {'status': 'error', 'message': 'المستخدم غير موجود'}
 
-        # التأكد من أن transaction.date هو datetime وليس string
-        transaction_date = transaction.date
-        if isinstance(transaction_date, str):
-            try:
-                transaction_date = datetime.fromisoformat(transaction_date)
-            except Exception:
-                transaction_date = datetime.strptime(transaction_date, "%Y-%m-%d %H:%M:%S.%f")
+        # تحويل التاريخ للعرض فقط
+        def to_dt(val):
+            if isinstance(val, str):
+                try:
+                    return date_parse(val)
+                except Exception:
+                    return None
+            return val
+        transaction_dt = to_dt(transaction.date)
+        if not transaction_dt:
+            return {'status': 'error', 'message': 'صيغة تاريخ المعاملة غير مدعومة'}
 
-        # شرط حتى المعاملة المطلوبة
-        date_id_filter = or_(
-            Transaction.date < transaction_date,
-            and_(
-                Transaction.date == transaction_date,
-                Transaction.id <= transaction.id
-            )
-        )
-
-        # مجموع الإيداعات
+        # حساب الرصيد حتى (بما فيها) المعاملة الحالية باستخدام id فقط
         total_credits = db.session.query(func.coalesce(func.sum(Transaction.amount), 0)).filter(
             Transaction.account_id == account.id,
             Transaction.currency == transaction.currency,
             Transaction.type == 'credit',
-            date_id_filter
+            Transaction.id <= transaction.id
         ).scalar()
 
-        # مجموع السحوبات
         total_debits = db.session.query(func.coalesce(func.sum(Transaction.amount), 0)).filter(
             Transaction.account_id == account.id,
             Transaction.currency == transaction.currency,
             Transaction.type == 'debit',
-            date_id_filter
+            Transaction.id <= transaction.id
         ).scalar()
 
         balance = total_credits - total_debits
@@ -705,7 +701,7 @@ def calculate_and_notify_transaction(transaction_id):
 •  {transaction_type}
 • المبلغ: {transaction.amount:g} {transaction.currency or 'ريال'}
 • الوصف: {transaction.description or 'لا يوجد وصف'}
-• التاريخ: {transaction_date.strftime('%Y-%m-%d')}
+• التاريخ: {transaction_dt.strftime('%Y-%m-%d')}
 
 💳 {balance_text}
 
@@ -854,6 +850,7 @@ def account_statement(account_id):
 
 def send_transaction_update_notification(transaction_id, old_amount, old_date):
     try:
+        from dateutil.parser import parse as date_parse
         # جلب المعاملة والحساب
         transaction = Transaction.query.get(transaction_id)
         if not transaction:
@@ -863,7 +860,6 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
         account = Account.query.get(transaction.account_id)
         if not account:
             return {'status': 'error', 'message': 'الحساب غير موجود'}
-        
         if not account.whatsapp_enabled:
             return {'status': 'success', 'message': 'تم تخطي الإشعار - الواتساب غير مفعل لهذا الحساب'}
 
@@ -872,13 +868,18 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
         if not user:
             return {'status': 'error', 'message': 'المستخدم غير موجود'}
 
-        # معالجة التاريخ
-        transaction_date = transaction.date
-        if isinstance(transaction_date, str):
-            try:
-                transaction_date = datetime.fromisoformat(transaction_date)
-            except Exception:
-                transaction_date = datetime.strptime(transaction_date, "%Y-%m-%d %H:%M:%S.%f")
+        # توحيد التواريخ
+        def to_dt(val):
+            if isinstance(val, str):
+                try:
+                    return date_parse(val)
+                except Exception:
+                    return None
+            return val
+        transaction_dt = to_dt(transaction.date)
+        old_date_dt = to_dt(old_date)
+        if not transaction_dt or not old_date_dt:
+            return {'status': 'error', 'message': 'صيغة تاريخ المعاملة غير مدعومة'}
 
         # حساب الرصيد النهائي الكامل لنفس الحساب ونفس العملة (مباشرة في قاعدة البيانات)
         total_credits = db.session.query(func.coalesce(func.sum(Transaction.amount), 0)).filter(
@@ -898,14 +899,14 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
         balance_text = f"الرصيد لكم: {balance} {transaction.currency or 'ريال'}" if balance >= 0 else f"الرصيد عليكم: {abs(balance)} {transaction.currency or 'ريال'}"
         
         # تنسيق التاريخ القديم والجديد
-        old_date_str = old_date.strftime('%Y-%m-%d')
-        new_date_str = transaction_date.strftime('%Y-%m-%d')
+        old_date_str = old_date_dt.strftime('%Y-%m-%d')
+        new_date_str = transaction_dt.strftime('%Y-%m-%d')
         
         # تحديد نوع التغيير
         changes = []
         if old_amount != transaction.amount:
             changes.append(f"• المبلغ: من {old_amount} الى {transaction.amount} {transaction.currency or 'ريال'}")
-        if old_date != transaction_date:
+        if old_date_dt != transaction_dt:
             changes.append(f"• التاريخ: من {old_date_str} الى {new_date_str}")
         
         # إذا لم يكن هناك تغييرات، نرجع رسالة
@@ -933,7 +934,6 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
         phone = account.phone_number
         if not phone:
             return {'status': 'error', 'message': 'رقم الهاتف غير متوفر'}
-            
         phone = ''.join(filter(str.isdigit, phone))
         if phone.startswith('966'):
             pass  # يظل كما هو
@@ -965,11 +965,11 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
     
 def send_transaction_delete_notification(transaction, final_balance):
     try:
+        from dateutil.parser import parse as date_parse
         # التحقق من تفعيل الواتساب للحساب
         account = Account.query.get(transaction.account_id)
         if not account:
             return {'status': 'error', 'message': 'الحساب غير موجود'}
-        
         if not account.whatsapp_enabled:
             return {'status': 'success', 'message': 'تم تخطي الإشعار - الواتساب غير مفعل لهذا الحساب'}
 
@@ -977,6 +977,18 @@ def send_transaction_delete_notification(transaction, final_balance):
         user = User.query.get(account.user_id)
         if not user:
             return {'status': 'error', 'message': 'المستخدم غير موجود'}
+
+        # توحيد التاريخ
+        def to_dt(val):
+            if isinstance(val, str):
+                try:
+                    return date_parse(val)
+                except Exception:
+                    return None
+            return val
+        transaction_dt = to_dt(transaction.date)
+        if not transaction_dt:
+            return {'status': 'error', 'message': 'صيغة تاريخ المعاملة غير مدعومة'}
 
         # تنسيق الرسالة
         transaction_type = "قيدنا الى حسابكم" if transaction.type == 'credit' else "قيدنا على حسابكم"
@@ -993,7 +1005,7 @@ def send_transaction_delete_notification(transaction, final_balance):
 • نوع القيد: {transaction_type}
 • المبلغ: {transaction.amount} {transaction.currency or 'ريال'}
 • الوصف: {transaction.description or 'لا يوجد وصف'}
-• التاريخ: {transaction.date.strftime('%Y-%m-%d')}
+• التاريخ: {transaction_dt.strftime('%Y-%m-%d')}
 
 💳 {balance_text}
 
@@ -1004,7 +1016,6 @@ def send_transaction_delete_notification(transaction, final_balance):
         phone = account.phone_number
         if not phone:
             return {'status': 'error', 'message': 'رقم الهاتف غير متوفر'}
-            
         phone = ''.join(filter(str.isdigit, phone))
         if phone.startswith('966'):
             pass  # يظل كما هو
@@ -1232,7 +1243,7 @@ def transactions_data():
     data = []
     for t, a, u in results:
         data.append({
-            'date': t.date.strftime('%Y-%m-%d %H:%M'),
+            'date': t.date,
             'account_name': a.account_name,
             'type': t.type,
             'amount': t.amount,
@@ -1526,3 +1537,32 @@ def send_whatsapp_to_users():
         logger.error(f"Error in send_whatsapp_to_users: {str(e)}")
         print(f"Error in send_whatsapp_to_users: {str(e)}")  # طباعة الخطأ مباشرة للسجل
         return jsonify({'success': False, 'error': str(e)})
+
+# فلتر Jinja2 لتحويل التاريخ (تايم ستامب أو نص) إلى تاريخ مقروء
+@admin.app_template_filter('datetimeformat')
+def datetimeformat(value, format='%Y-%m-%d'):
+    from datetime import datetime
+    try:
+        # إذا كان value رقم (تايم ستامب بالمللي ثانية)
+        if str(value).isdigit():
+            return datetime.fromtimestamp(int(value) / 1000).strftime(format)
+        # جرب مكتبة dateutil إذا كانت متوفرة
+        try:
+            from dateutil.parser import parse as date_parse
+            return date_parse(value).strftime(format)
+        except Exception:
+            pass
+        # جرب عدة صيغ شائعة
+        for fmt in ('%Y-%m-%dT%H:%M:%S.%f', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d'):
+            try:
+                return datetime.strptime(value, fmt).strftime(format)
+            except Exception:
+                continue
+        # جرب fromisoformat (يدعم بعض الصيغ)
+        try:
+            return datetime.fromisoformat(value).strftime(format)
+        except Exception:
+            pass
+        return value
+    except Exception:
+        return value
