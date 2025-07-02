@@ -98,7 +98,7 @@ def generate_short_statement_link(account_id, expires_sec=3600):
     code = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
     short_links[code] = {
         'account_id': account_id,
-        'expires_at': datetime.now() + timedelta(seconds=expires_sec)
+        'expires_at': datetime.now(YEMEN_TIMEZONE) + timedelta(seconds=expires_sec)
     }
     url = f"https://malyp.com/api/{code}"
     return url
@@ -110,7 +110,7 @@ def short_statement(code):
     if not data:
         # عرض صفحة مخصصة عند الرابط غير صالح
         return render_template('admin/invalid_or_expired_link.html', reason="invalid")
-    if datetime.now() > data['expires_at']:
+    if datetime.now(YEMEN_TIMEZONE) > data['expires_at']:
         # عرض صفحة مخصصة عند انتهاء الصلاحية
         return render_template('admin/invalid_or_expired_link.html', reason="expired")
     return account_statement(data['account_id'])
@@ -180,7 +180,7 @@ def dashboard():
     total_transactions = Transaction.query.count()
     
     # إحصائيات اليوم
-    today = datetime.now().date()
+    today = datetime.now(YEMEN_TIMEZONE).date()
     today_transactions = Transaction.query.filter(
         func.date(Transaction.date) == today
     ).count()
@@ -718,7 +718,7 @@ def calculate_and_notify_transaction(transaction_id):
         # --- منطق الجلسة وتاريخ الانتهاء ---
         session_name = user.session_name or 'admin_main'
         if session_name != 'admin_main':
-            if not user.session_expiry or user.session_expiry < datetime.now():
+            if not user.session_expiry or user.session_expiry < datetime.now(YEMEN_TIMEZONE):
                 return  # لا ترسل الرسالة ولا ترجع رد
         # --- نهاية المنطق ---
 
@@ -982,7 +982,7 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
         # --- منطق الجلسة وتاريخ الانتهاء ---
         session_name = user.session_name or 'admin_main'
         if session_name != 'admin_main':
-            if not user.session_expiry or user.session_expiry < datetime.now():
+            if not user.session_expiry or user.session_expiry < datetime.now(YEMEN_TIMEZONE):
                 return  # لا ترسل الرسالة ولا ترجع رد
         # --- نهاية المنطق ---
 
@@ -1057,7 +1057,7 @@ def send_transaction_delete_notification(transaction, final_balance):
         # --- منطق الجلسة وتاريخ الانتهاء ---
         session_name = user.session_name or 'admin_main'
         if session_name != 'admin_main':
-            if not user.session_expiry or user.session_expiry < datetime.now():
+            if not user.session_expiry or user.session_expiry < datetime.now(YEMEN_TIMEZONE):
                 return  # لا ترسل الرسالة ولا ترجع رد
         # --- نهاية المنطق ---
 
@@ -1189,7 +1189,7 @@ def confirm_import_accounts():
             phone_number=acc['phone_number'],
             account_number=str(uuid.uuid4())[:8],  # رقم حساب عشوائي قصير
             server_id=new_server_id,
-            created_at=datetime.now()
+            created_at=datetime.now(YEMEN_TIMEZONE)
         )
         db.session.add(account)
         count += 1
@@ -1258,14 +1258,7 @@ def transactions_data():
     records_filtered = query.count()
     # ترتيب
     if order_column == 'date':
-        # ترتيب موحد للتواريخ: إذا كان int استخدم كما هو، إذا نص استخدم strftime
-        order_expr = func.coalesce(
-            case(
-                (func.typeof(Transaction.date) == 'integer', Transaction.date),
-                else_=func.strftime('%s', Transaction.date) * 1000
-            )
-        )
-        order_by = order_expr.desc() if order_dir == 'desc' else order_expr.asc()
+        order_by = Transaction.id.desc() if order_dir == 'desc' else Transaction.id.asc()
     elif order_column == 'account_name':
         order_by = Account.account_name.desc() if order_dir == 'desc' else Account.account_name.asc()
     elif order_column == 'username':
@@ -1273,14 +1266,14 @@ def transactions_data():
     elif order_column == 'amount':
         order_by = Transaction.amount.desc() if order_dir == 'desc' else Transaction.amount.asc()
     else:
-        order_by = Transaction.date.desc()
+        order_by = Transaction.id.desc()
     query = query.order_by(order_by)
     # pagination
     results = query.offset(start).limit(length).all()
     data = []
     for t, a, u in results:
         data.append({
-            'date': t.date,
+            'date': t.date,  # عرض التاريخ كما هو في قاعدة البيانات
             'account_name': a.account_name,
             'type': t.type,
             'amount': t.amount,
@@ -1582,22 +1575,30 @@ def datetimeformat(value, format='%Y-%m-%d'):
     try:
         # إذا كان value رقم (تايم ستامب بالمللي ثانية)
         if str(value).isdigit():
-            return datetime.fromtimestamp(int(value) / 1000).strftime(format)
+            return datetime.fromtimestamp(int(value) / 1000, YEMEN_TIMEZONE).strftime(format)
         # جرب مكتبة dateutil إذا كانت متوفرة
         try:
             from dateutil.parser import parse as date_parse
-            return date_parse(value).strftime(format)
+            d = date_parse(value)
+            if d.tzinfo is None:
+                d = d.replace(tzinfo=YEMEN_TIMEZONE)
+            return d.astimezone(YEMEN_TIMEZONE).strftime(format)
         except Exception:
             pass
         # جرب عدة صيغ شائعة
         for fmt in ('%Y-%m-%dT%H:%M:%S.%f', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d'):
             try:
-                return datetime.strptime(value, fmt).strftime(format)
+                d = datetime.strptime(value, fmt)
+                d = d.replace(tzinfo=YEMEN_TIMEZONE)
+                return d.strftime(format)
             except Exception:
                 continue
         # جرب fromisoformat (يدعم بعض الصيغ)
         try:
-            return datetime.fromisoformat(value).strftime(format)
+            d = datetime.fromisoformat(value)
+            if d.tzinfo is None:
+                d = d.replace(tzinfo=YEMEN_TIMEZONE)
+            return d.astimezone(YEMEN_TIMEZONE).strftime(format)
         except Exception:
             pass
         return value
@@ -1628,20 +1629,35 @@ def to_millis(dt):
     return int(dt_utc.timestamp() * 1000)
 
 def to_datetime(dt):
-    """تحويل أي قيمة (timestamp بالميلي ثانية أو سترينج أو datetime) إلى كائن datetime (UTC)"""
+    """تحويل أي قيمة إلى datetime بتوقيت اليمن (timezone-aware)"""
     if dt is None:
         return None
     if isinstance(dt, datetime):
-        return dt
+        # إذا كان بدون timezone، أضف توقيت اليمن
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=YEMEN_TIMEZONE)
+        return dt.astimezone(YEMEN_TIMEZONE)
     if isinstance(dt, (int, float)):
-        # إذا كان timestamp بالميلي ثانية
-        return datetime.fromtimestamp(dt / 1000, timezone.utc)
+        # timestamp بالميلي ثانية
+        return datetime.fromtimestamp(dt / 1000, YEMEN_TIMEZONE)
     if isinstance(dt, str):
         try:
             if 'T' in dt:
-                return datetime.fromisoformat(dt.replace('Z', '+00:00'))
+                d = datetime.fromisoformat(dt.replace('Z', '+00:00'))
             else:
-                return datetime.fromisoformat(dt)
+                d = datetime.fromisoformat(dt)
+            # إذا كان بدون timezone، أضف توقيت اليمن
+            if d.tzinfo is None:
+                d = d.replace(tzinfo=YEMEN_TIMEZONE)
+            return d.astimezone(YEMEN_TIMEZONE)
         except Exception:
             return None
     return None
+
+# دالة تحويل datetime إلى millis بتوقيت اليمن
+
+def to_millis(dt):
+    dt = to_datetime(dt)
+    if dt is None:
+        return None
+    return int(dt.timestamp() * 1000)
