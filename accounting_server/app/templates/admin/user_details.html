@@ -180,7 +180,7 @@
                                     {% for transaction in transactions %}
                                     <tr>
                                         <td>{{ transaction.id }}</td>
-                                        <td>{{ transaction.date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                        <td>{{ transaction.date | datetimeformat('%Y-%m-%d %H:%M:%S') }}</td>
                                         <td>{{ transaction.amount }}</td>
                                         <td>{{ transaction.type }}</td>
                                         <td>{{ transaction.description }}</td>
