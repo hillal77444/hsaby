@@ -209,7 +209,7 @@ def dashboard():
 @admin.route('/api/admin/users')
 @admin_required
 def users():
-    users = User.query.all()
+    users = User.query.order_by(User.id.desc()).all()
     user_stats = []
     
     for user in users:
