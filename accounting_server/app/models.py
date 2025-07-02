@@ -11,7 +11,7 @@ class User(db.Model):
     phone = db.Column(db.String(20), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(128), nullable=False)
     last_seen = db.Column(db.DateTime, default=get_yemen_time, onupdate=get_yemen_time)
-    android_version = db.Column(db.String(50), default='Unknown')
+    android_version = db.Column(db.String(50), default='0')
     device_name = db.Column(db.String(100), default='Unknown Device')
     session_name = db.Column(db.String(100), default='admin_main')  # اسم جلسة الواتساب
     session_expiry = db.Column(db.DateTime, nullable=True)  # تاريخ انتهاء الجلسة
