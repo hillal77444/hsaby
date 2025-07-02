@@ -115,7 +115,7 @@
                                 <span class="badge bg-secondary">غير نشط</span>
                                 {% endif %}
                             </td>
-                            <td>{{ update.release_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>{{ update.release_date | datetimeformat('%Y-%m-%d %H:%M') }}</td>
                             <td>
                                 <a href="{{ url_for('admin.edit_update', update_id=update.id) }}" class="btn btn-sm btn-primary">
                                     <i class="fas fa-edit"></i>
