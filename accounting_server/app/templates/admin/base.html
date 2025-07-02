@@ -171,4 +171,21 @@
     </script>
     {% block extra_js %}{% endblock %}
 </body>
-</html> 
+</html>
+
+{% macro datetimeformat(value, format='%Y-%m-%d %H:%M:%S') %}
+    {%- if value is none -%}
+        —
+    {%- else -%}
+        {%- set dt = value %}
+        {%- if dt is string -%}
+            {%- set dt = dt.replace('T', ' ').replace('Z', '') %}
+            {%- set dt = dt[:19] %}
+            {{ dt }}
+        {%- elif dt is number -%}
+            {{ dt | int | datetime.fromtimestamp | datetimeformat(format) }}
+        {%- else -%}
+            {{ dt.strftime(format) }}
+        {%- endif -%}
+    {%- endif -%}
+{% endmacro %} 
