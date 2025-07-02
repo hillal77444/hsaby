@@ -43,11 +43,11 @@ def register():
         
         # التحقق من وجود المستخدم
         if User.query.filter_by(username=data['username']).first():
-            return jsonify({'error': 'اسم المستخدم موجود مسبقاً'}), 400
+            return jsonify({'error': 'اسم المستخدم موجود مسبقاً'}), 409
         
         # التحقق من وجود رقم الهاتف
         if User.query.filter_by(phone=data['phone']).first():
-            return jsonify({'error': 'رقم الهاتف مسجل مسبقاً'}), 400
+            return jsonify({'error': 'رقم الهاتف مسجل مسبقاً'}), 409
             
         # إنشاء مستخدم جديد
         user = User(
