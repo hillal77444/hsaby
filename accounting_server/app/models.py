@@ -44,7 +44,7 @@ class Cashbox(db.Model):
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     server_id = db.Column(db.Integer, unique=True, autoincrement=True)
-    date = db.Column(db.DateTime, nullable=False, index=True)
+    date = db.Column(db.String(50), nullable=False, index=True)
     amount = db.Column(db.Float, nullable=False)
     description = db.Column(db.String(255), nullable=False)
     type = db.Column(db.String(50), default='debit', index=True)
