@@ -618,7 +618,7 @@
                             </tr>
                             {% for transaction in transactions %}
                             <tr class="transaction-row" data-currency="{{ transaction.currency }}">
-                                <td>{{ transaction.date | datetimeformat }}</td>
+                                <td>{{ transaction.date|datetimeformat('%Y-%m-%d %H:%M:%S') }}</td>
                                 <td>{{ transaction.currency }}</td>
                                 <td class="amount-cell {% if transaction.type == 'credit' %}credit-amount{% endif %}">
                                     {% if transaction.type == 'credit' %}
@@ -684,6 +684,37 @@
         window.addEventListener('beforeprint', function() {
             updatePrintDate();
         });
+
+        function formatDate(data) {
+            if (!data) return '';
+            // إذا كانت سترينج رقمية (timestamp)
+            if (typeof data === 'string') {
+                data = data.trim();
+                // إذا كانت رقمية فقط
+                if (/^\d+$/.test(data)) {
+                    data = parseInt(data, 10);
+                    return formatDateFromDateObj(new Date(data));
+                }
+                // إذا كانت بصيغة 'YYYY-MM-DD HH:mm:ss'
+                if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(data)) {
+                    // حولها إلى صيغة ISO
+                    data = data.replace(' ', 'T');
+                    return formatDateFromDateObj(new Date(data));
+                }
+            }
+            // إذا كانت Date أو رقم timestamp
+            return formatDateFromDateObj(new Date(data));
+        }
+        function formatDateFromDateObj(d) {
+            if (isNaN(d)) return '';
+            var year = d.getFullYear();
+            var month = String(d.getMonth() + 1).padStart(2, '0');
+            var day = String(d.getDate()).padStart(2, '0');
+            var hours = String(d.getHours()).padStart(2, '0');
+            var minutes = String(d.getMinutes()).padStart(2, '0');
+            var seconds = String(d.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
     </script>
 </body>
 </html>
