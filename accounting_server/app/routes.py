@@ -1166,7 +1166,7 @@ def update_user_details():
             print(f"DEBUG: Processing last_seen. Value: {data['last_seen']}, Type: {type(data['last_seen'])}")
             if data['last_seen'] is not None:
                 try:
-                    # تحويل الطابع الزمني (timestamp) إلى كائن datetime مع توقيت اليمن
+                    # تحويل الطابع الزمني (timestamp) إلى كائن datetime مع توقيت اليمن فقط
                     user.last_seen = datetime.fromtimestamp(data['last_seen'] / 1000, YEMEN_TIMEZONE)
                     print(f"DEBUG: last_seen converted successfully to: {user.last_seen}")
                 except Exception as convert_e:
