@@ -53,6 +53,36 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
+function formatDate(data) {
+    if (!data) return '';
+    // إذا كانت سترينج رقمية (timestamp)
+    if (typeof data === 'string') {
+        data = data.trim();
+        // إذا كانت رقمية فقط
+        if (/^\d+$/.test(data)) {
+            data = parseInt(data, 10);
+            return formatDateFromDateObj(new Date(data));
+        }
+        // إذا كانت بصيغة 'YYYY-MM-DD HH:mm:ss'
+        if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(data)) {
+            // حولها إلى صيغة ISO
+            data = data.replace(' ', 'T');
+            return formatDateFromDateObj(new Date(data));
+        }
+    }
+    // إذا كانت Date أو رقم timestamp
+    return formatDateFromDateObj(new Date(data));
+}
+function formatDateFromDateObj(d) {
+    if (isNaN(d)) return '';
+    var year = d.getFullYear();
+    var month = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    var hours = String(d.getHours()).padStart(2, '0');
+    var minutes = String(d.getMinutes()).padStart(2, '0');
+    var seconds = String(d.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
 $(document).ready(function() {
     $('.select2').select2({
         width: '100%',
@@ -90,8 +120,8 @@ $(document).ready(function() {
             { "data": "balance", "render": function(data, type, row) {
                 return '<span class="' + (data >= 0 ? 'text-success' : 'text-danger') + '">' + data + '</span>';
             }},
-            { "data": "created_at" },
-            { "data": "updated_at" },
+            { "data": "created_at", "render": function(data, type, row) { return formatDate(data); } },
+            { "data": "updated_at", "render": function(data, type, row) { return formatDate(data); } },
             { "data": "notes" },
             { "data": "whatsapp_enabled" },
             { "data": null, "orderable": false, "searchable": false, "render": function(data, type, row) {
