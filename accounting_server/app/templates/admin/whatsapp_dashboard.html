@@ -294,7 +294,7 @@ async function loadChats() {
             <a href="#" class="list-group-item list-group-item-action" onclick="loadMessages('${chat.id}')">
                 <div class="d-flex w-100 justify-content-between">
                     <h6 class="mb-1">${chat.name || chat.id}</h6>
-                    <small>${chat.timestamp ? new Date(chat.timestamp).toLocaleString() : ''}</small>
+                    <small>${chat.timestamp ? formatDate(chat.timestamp) : ''}</small>
                 </div>
                 <p class="mb-1">${chat.lastMessage || ''}</p>
             </a>
@@ -337,5 +337,13 @@ setInterval(() => {
     loadChats();
     updateWAStatus();
 }, 60000);
+
+function formatDate(date) {
+    if (!date) return '';
+    let d = date;
+    if (typeof d === 'string' || typeof d === 'number') d = new Date(d);
+    if (isNaN(d)) return '';
+    return d.toLocaleString('ar-EG');
+}
 </script>
 {% endblock %} 
