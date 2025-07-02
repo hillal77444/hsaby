@@ -67,6 +67,7 @@ def get_yemen_time():
     """الحصول على التوقيت الحالي بتوقيت اليمن"""
     return datetime.now(YEMEN_TIMEZONE)
 
+
 def format_last_seen(last_seen_dt):
     if last_seen_dt is None:
         return "غير متاح", "text-muted"
@@ -92,7 +93,6 @@ def format_last_seen(last_seen_dt):
         return f"منذ {days} يوم", "last-seen-recent"
     else:
         return last_seen_dt.strftime('%Y-%m-%d %H:%M'), "last-seen-inactive"
-
 # دالة توليد رابط كشف حساب مؤقت بكود قصير (6 أحرف)
 def generate_short_statement_link(account_id, expires_sec=3600):
     code = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
