@@ -618,7 +618,7 @@
                             </tr>
                             {% for transaction in transactions %}
                             <tr class="transaction-row" data-currency="{{ transaction.currency }}">
-                                <td>{{ transaction.date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ transaction.date | datetimeformat }}</td>
                                 <td>{{ transaction.currency }}</td>
                                 <td class="amount-cell {% if transaction.type == 'credit' %}credit-amount{% endif %}">
                                     {% if transaction.type == 'credit' %}
