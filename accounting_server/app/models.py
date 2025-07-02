@@ -1,9 +1,10 @@
 from app import db
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from sqlalchemy import event
 
+YEMEN_TIMEZONE = timezone(timedelta(hours=3))
 def get_yemen_time():
-    return datetime.utcnow() + timedelta(hours=3)
+    return datetime.now(YEMEN_TIMEZONE)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
