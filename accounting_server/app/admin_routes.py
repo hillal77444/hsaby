@@ -656,14 +656,7 @@ def calculate_and_notify_transaction(transaction_id):
             return {'status': 'error', 'message': 'المستخدم غير موجود'}
 
         # تحويل التاريخ للعرض فقط
-        def to_dt(val):
-            if isinstance(val, str):
-                try:
-                    return date_parse(val)
-                except Exception:
-                    return None
-            return val
-        transaction_dt = to_dt(transaction.date)
+        transaction_dt = to_datetime(transaction.date)
         if not transaction_dt:
             return {'status': 'error', 'message': 'صيغة تاريخ المعاملة غير مدعومة'}
 
@@ -768,6 +761,25 @@ def account_statement(account_id):
     else:
         end_date = yemen_now
 
+    # --- دعم اختلاف تنسيق التاريخ ---
+    def to_timestamp_ms(dt):
+        if dt is None:
+            return None
+        if isinstance(dt, (int, float)):
+            return int(dt)
+        if isinstance(dt, str):
+            try:
+                from dateutil.parser import parse as date_parse
+                dt = date_parse(dt)
+            except Exception:
+                return None
+        if hasattr(dt, 'timestamp'):
+            return int(dt.timestamp() * 1000)
+        return None
+
+    start_date_ts = to_timestamp_ms(start_date)
+    end_date_ts = to_timestamp_ms(end_date)
+
     # جلب قائمة العملات الفريدة
     currencies = db.session.query(Transaction.currency)\
         .filter_by(account_id=account_id)\
@@ -779,43 +791,75 @@ def account_statement(account_id):
     if selected_currency == 'all' and currencies:
         selected_currency = currencies[0]
 
-    # جلب المعاملات حسب العملة والتاريخ
+    # فلتر العملة
+    currency_filter = []
+    if selected_currency != 'all':
+        currency_filter = [Transaction.currency == selected_currency]
+
+    # فلتر التاريخ يدعم النوعين (int أو نص)
+    from sqlalchemy import or_, and_
     base_query = Transaction.query.filter(
         Transaction.account_id == account_id,
-        Transaction.date >= start_date,
-        Transaction.date < end_date
+        or_(
+            # إذا كان التاريخ رقم (timestamp ms)
+            and_(func.typeof(Transaction.date) == 'integer',
+                 Transaction.date >= start_date_ts,
+                 Transaction.date < end_date_ts),
+            # إذا كان التاريخ نص
+            and_(func.typeof(Transaction.date) != 'integer',
+                 func.strftime('%s', Transaction.date) >= str(int(start_date.timestamp())),
+                 func.strftime('%s', Transaction.date) < str(int(end_date.timestamp())))
+        ),
+        *currency_filter
     )
-    if selected_currency != 'all':
-        base_query = base_query.filter(Transaction.currency == selected_currency)
 
-    transactions = base_query.order_by(Transaction.date, Transaction.id).all()
+    # ترتيب حسب التاريخ (مع تحويل النص إلى رقم عند الحاجة)
+    transactions = base_query.order_by(
+        # إذا كان int استخدم كما هو، إذا نص استخدم strftime
+        func.coalesce(
+            func.nullif(func.typeof(Transaction.date) == 'integer', False) * Transaction.date,
+            func.strftime('%s', Transaction.date) * 1000
+        ),
+        Transaction.id
+    ).all()
 
     # حساب الرصيد النهائي لكل عملة (لكل الفترة)
     currency_balances = {}
     for currency in currencies:
-        currency_balance = db.session.query(
+        currency_filter2 = [Transaction.currency == currency]
+        bal_query = db.session.query(
             func.sum(case((Transaction.type == 'credit', Transaction.amount), else_=-Transaction.amount))
         ).filter(
             Transaction.account_id == account_id,
-            Transaction.currency == currency,
-            Transaction.date >= start_date,
-            Transaction.date < end_date
-        ).scalar() or 0
+            or_(
+                and_(func.typeof(Transaction.date) == 'integer',
+                     Transaction.date >= start_date_ts,
+                     Transaction.date < end_date_ts),
+                and_(func.typeof(Transaction.date) != 'integer',
+                     func.strftime('%s', Transaction.date) >= str(int(start_date.timestamp())),
+                     func.strftime('%s', Transaction.date) < str(int(end_date.timestamp())))
+            ),
+            *currency_filter2
+        )
+        currency_balance = bal_query.scalar() or 0
         currency_balances[currency] = currency_balance
 
     # تحديد الرصيد النهائي حسب العملة المحددة
     final_balance = currency_balances.get(selected_currency, 0) if selected_currency != 'all' else None
 
     # حساب الرصيد السابق قبل الفترة
-    previous_balance = db.session.query(
+    prev_bal_query = db.session.query(
         func.sum(case((Transaction.type == 'credit', Transaction.amount), else_=-Transaction.amount))
     ).filter(
         Transaction.account_id == account_id,
-        Transaction.date < start_date
+        or_(
+            and_(func.typeof(Transaction.date) == 'integer', Transaction.date < start_date_ts),
+            and_(func.typeof(Transaction.date) != 'integer', func.strftime('%s', Transaction.date) < str(int(start_date.timestamp())))
+        )
     )
     if selected_currency != 'all':
-        previous_balance = previous_balance.filter(Transaction.currency == selected_currency)
-    previous_balance = previous_balance.scalar() or 0
+        prev_bal_query = prev_bal_query.filter(Transaction.currency == selected_currency)
+    previous_balance = prev_bal_query.scalar() or 0
 
     # تجهيز المعاملات مع الرصيد التراكمي الصحيح
     class TxnObj:
@@ -869,15 +913,8 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
             return {'status': 'error', 'message': 'المستخدم غير موجود'}
 
         # توحيد التواريخ
-        def to_dt(val):
-            if isinstance(val, str):
-                try:
-                    return date_parse(val)
-                except Exception:
-                    return None
-            return val
-        transaction_dt = to_dt(transaction.date)
-        old_date_dt = to_dt(old_date)
+        transaction_dt = to_datetime(transaction.date)
+        old_date_dt = to_datetime(old_date)
         if not transaction_dt or not old_date_dt:
             return {'status': 'error', 'message': 'صيغة تاريخ المعاملة غير مدعومة'}
 
@@ -979,14 +1016,7 @@ def send_transaction_delete_notification(transaction, final_balance):
             return {'status': 'error', 'message': 'المستخدم غير موجود'}
 
         # توحيد التاريخ
-        def to_dt(val):
-            if isinstance(val, str):
-                try:
-                    return date_parse(val)
-                except Exception:
-                    return None
-            return val
-        transaction_dt = to_dt(transaction.date)
+        transaction_dt = to_datetime(transaction.date)
         if not transaction_dt:
             return {'status': 'error', 'message': 'صيغة تاريخ المعاملة غير مدعومة'}
 
@@ -1228,7 +1258,14 @@ def transactions_data():
     records_filtered = query.count()
     # ترتيب
     if order_column == 'date':
-        order_by = Transaction.date.desc() if order_dir == 'desc' else Transaction.date.asc()
+        # ترتيب موحد للتواريخ: إذا كان int استخدم كما هو، إذا نص استخدم strftime
+        order_expr = func.coalesce(
+            case(
+                (func.typeof(Transaction.date) == 'integer', Transaction.date),
+                else_=func.strftime('%s', Transaction.date) * 1000
+            )
+        )
+        order_by = order_expr.desc() if order_dir == 'desc' else order_expr.asc()
     elif order_column == 'account_name':
         order_by = Account.account_name.desc() if order_dir == 'desc' else Account.account_name.asc()
     elif order_column == 'username':
@@ -1444,8 +1481,8 @@ def accounts_data():
             'total_debits': total_debits,
             'total_credits': total_credits,
             'balance': balance,
-            'created_at': a.created_at.strftime('%Y-%m-%d %H:%M') if a.created_at else f'#{a.server_id}',
-            'updated_at': a.updated_at.strftime('%Y-%m-%d %H:%M') if a.updated_at else f'#{a.server_id}',
+            'created_at': to_datetime(a.created_at).strftime('%Y-%m-%d %H:%M') if to_datetime(a.created_at) else '',
+            'updated_at': to_datetime(a.updated_at).strftime('%Y-%m-%d %H:%M') if to_datetime(a.updated_at) else '',
             'notes': a.notes or '',
             'whatsapp_enabled': 'نعم' if a.whatsapp_enabled else 'لا',
             'id': a.id
@@ -1566,3 +1603,45 @@ def datetimeformat(value, format='%Y-%m-%d'):
         return value
     except Exception:
         return value
+
+# أضف دالة توحيد التاريخ في الأعلى (إذا لم تكن موجودة)
+def to_millis(dt):
+    if dt is None:
+        return None
+    if isinstance(dt, (int, float)):
+        return int(dt)
+    if isinstance(dt, str):
+        try:
+            if 'T' in dt:
+                from datetime import datetime, timezone
+                dt = datetime.fromisoformat(dt.replace('Z', '+00:00'))
+            else:
+                from datetime import datetime
+                dt = datetime.fromisoformat(dt)
+        except Exception:
+            return None
+    if hasattr(dt, 'tzinfo') and dt.tzinfo:
+        dt_utc = dt.astimezone(timezone.utc)
+    else:
+        from datetime import timedelta
+        dt_utc = dt - timedelta(hours=3)
+    return int(dt_utc.timestamp() * 1000)
+
+def to_datetime(dt):
+    """تحويل أي قيمة (timestamp بالميلي ثانية أو سترينج أو datetime) إلى كائن datetime (UTC)"""
+    if dt is None:
+        return None
+    if isinstance(dt, datetime):
+        return dt
+    if isinstance(dt, (int, float)):
+        # إذا كان timestamp بالميلي ثانية
+        return datetime.fromtimestamp(dt / 1000, timezone.utc)
+    if isinstance(dt, str):
+        try:
+            if 'T' in dt:
+                return datetime.fromisoformat(dt.replace('Z', '+00:00'))
+            else:
+                return datetime.fromisoformat(dt)
+        except Exception:
+            return None
+    return None
