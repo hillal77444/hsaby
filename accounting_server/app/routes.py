@@ -16,7 +16,7 @@ main = Blueprint('main', __name__)
 logger = logging.getLogger(__name__)
 
 # تعريف توقيت اليمن (UTC+3)
-YEMEN_TIMEZONE = timezone(timedelta(hours=3))
+YEMEN_TIMEZONE = timezone(timedelta(hours=1))
 
 def get_yemen_time():
     """الحصول على التوقيت الحالي بتوقيت اليمن"""
@@ -49,7 +49,7 @@ def to_millis(dt):
     if dt.tzinfo:
         dt_utc = dt.astimezone(timezone.utc)
     else:
-        dt_utc = dt - timedelta(hours=3)
+        dt_utc = dt - timedelta(hours=1)
     return int(dt_utc.timestamp() * 1000)
 
 @main.route('/api/register', methods=['POST'])
@@ -240,19 +240,11 @@ def sync_data():
                 if missing_fields:
                     return json_response({'error': f'بيانات المعاملة غير مكتملة: {", ".join(missing_fields)}'}, 400)
                 
-                # معالجة التاريخ
-                try:
-                    if isinstance(trans_data.get('date'), (int, float)):
-                        # تحويل timestamp إلى datetime بتوقيت اليمن
-                        date = datetime.fromtimestamp(trans_data['date'] / 1000, YEMEN_TIMEZONE)
-                    else:
-                        # تحويل string إلى datetime بتوقيت اليمن
-                        date = datetime.fromisoformat(trans_data['date'].replace('Z', '+00:00')).astimezone(YEMEN_TIMEZONE)
-                except (ValueError, TypeError) as e:
-                    return json_response({'error': f'تنسيق التاريخ غير صحيح: {str(e)}'}, 400)
+                # توحيد التاريخ القادم من التطبيق
+                date = to_millis(trans_data.get('date'))
                 
                 # التحقق من صحة التاريخ
-                if date > get_yemen_time():
+                if date > int(get_yemen_time().timestamp() * 1000):
                     return json_response({'error': 'التاريخ غير صحيح'}, 400)
                 
                 # التحقق من صحة الحساب
@@ -272,17 +264,16 @@ def sync_data():
                         user_id=current_user_id
                     ).first()
                 
-                # التحقق من تكرار المعاملة
+                # التحقق من تكرار المعاملة بجميع الحقول مع توحيد التاريخ فقط
                 if not transaction:
                     existing_transaction = Transaction.query.filter_by(
                         amount=trans_data.get('amount'),
                         type=trans_data.get('type'),
                         description=trans_data.get('description'),
-                        date=date,
+                        date=to_millis(trans_data.get('date')),
                         account_id=trans_data.get('account_id'),
                         user_id=current_user_id
                     ).first()
-                    
                     if existing_transaction:
                         transaction = existing_transaction
                         logger.info(f"Found existing transaction: {transaction.id}")
@@ -291,19 +282,15 @@ def sync_data():
                     # حفظ المبلغ والتاريخ القديم قبل التحديث
                     old_amount = transaction.amount
                     old_date = transaction.date
-                    
                     # معالجة cashbox_id
                     new_cashbox_id = trans_data.get('cashbox_id')
                     print(f"Original cashbox_id from request: {new_cashbox_id}")
                     print(f"Current transaction cashbox_id: {transaction.cashbox_id}")
-                    
                     if not new_cashbox_id or new_cashbox_id == -1:
                         print(f"Cashbox_id is invalid ({new_cashbox_id}), using main cashbox")
-                        # إذا لم يتم تحديد صندوق أو كان -1، استخدم الصندوق الرئيسي
                         main_cashbox = Cashbox.query.filter_by(user_id=current_user_id, name='الصندوق الرئيسي').first()
                         if not main_cashbox:
                             print("Main cashbox not found, creating new one")
-                            # إنشاء صندوق رئيسي إذا لم يكن موجوداً
                             main_cashbox = Cashbox(name='الصندوق الرئيسي', user_id=current_user_id)
                             db.session.add(main_cashbox)
                             db.session.commit()
@@ -311,7 +298,6 @@ def sync_data():
                         print(f"Using main cashbox ID: {new_cashbox_id}")
                     else:
                         print(f"Using provided cashbox_id: {new_cashbox_id}")
-                    
                     # تحديث المعاملة الموجودة
                     transaction.amount = trans_data.get('amount', transaction.amount)
                     transaction.type = trans_data.get('type', transaction.type)
@@ -325,7 +311,6 @@ def sync_data():
                     transaction.user_id = current_user_id
                     print(f"Updated transaction cashbox_id to: {transaction.cashbox_id}")
                     logger.info(f"Updated transaction: {transaction.id}")
-                    
                     # إرسال إشعار فقط إذا تم تغيير المبلغ
                     if old_amount != transaction.amount:
                         try:
@@ -334,23 +319,18 @@ def sync_data():
                                 logger.error(f"خطأ في إرسال إشعار التحديث: {notification_result.get('message')}")
                         except Exception as e:
                             logger.error(f"Error sending transaction update notification: {str(e)}")
-                            # لا نوقف العملية إذا فشل الإرسال
                 else:
                     # الحصول على آخر server_id
                     last_transaction = Transaction.query.order_by(Transaction.server_id.desc()).first()
                     new_server_id = (last_transaction.server_id + 1) if last_transaction else 1
-                    
                     # منطق اختيار الصندوق
                     cashbox_id = trans_data.get('cashbox_id')
                     print(f"New transaction - Original cashbox_id from request: {cashbox_id}")
-                    
                     if not cashbox_id or cashbox_id == -1:
                         print(f"New transaction - Cashbox_id is invalid ({cashbox_id}), using main cashbox")
-                        # إذا لم يتم تحديد صندوق أو كان -1، استخدم الصندوق الرئيسي
                         main_cashbox = Cashbox.query.filter_by(user_id=current_user_id, name='الصندوق الرئيسي').first()
                         if not main_cashbox:
                             print("New transaction - Main cashbox not found, creating new one")
-                            # إنشاء صندوق رئيسي إذا لم يكن موجوداً
                             main_cashbox = Cashbox(name='الصندوق الرئيسي', user_id=current_user_id)
                             db.session.add(main_cashbox)
                             db.session.commit()
@@ -358,7 +338,6 @@ def sync_data():
                         print(f"New transaction - Using main cashbox ID: {cashbox_id}")
                     else:
                         print(f"New transaction - Using provided cashbox_id: {cashbox_id}")
-
                     # إنشاء معاملة جديدة
                     transaction = Transaction(
                         amount=trans_data.get('amount'),
@@ -377,7 +356,6 @@ def sync_data():
                     db.session.add(transaction)
                     db.session.flush()
                     logger.info(f"Added new transaction: {transaction.id}")
-                    
                     # حساب الرصيد وإرسال الإشعار
                     try:
                         result = calculate_and_notify_transaction(transaction.id)
@@ -385,8 +363,6 @@ def sync_data():
                             logger.error(f"Error processing transaction: {result.get('message')}")
                     except Exception as e:
                         logger.error(f"Error in transaction notification: {str(e)}")
-                    
-                    # أضف المعاملة إلى transaction_mappings حتى عند التعديل
                 transaction_mappings.append({
                     'local_id': trans_data.get('id'),
                     'server_id': transaction.server_id
