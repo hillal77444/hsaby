@@ -26,6 +26,32 @@ def json_response(data, status_code=200):
     response = json.dumps(data, ensure_ascii=False)
     return response, status_code, {'Content-Type': 'application/json; charset=utf-8'}
 
+def to_millis(dt):
+    """توحيد التاريخ ليكون timestamp بالميلي ثانية (UTC) بغض النظر عن نوعه في قاعدة البيانات"""
+    if dt is None:
+        return None
+    if isinstance(dt, (int, float)):
+        # إذا كان مخزنًا بالفعل كـ timestamp بالميلي ثانية
+        return int(dt)
+    if isinstance(dt, str):
+        try:
+            # جرب تحويله إلى datetime
+            if 'T' in dt:
+                # صيغة ISO
+                dt = datetime.fromisoformat(dt.replace('Z', '+00:00'))
+            else:
+                # صيغة datetime التقليدية
+                dt = datetime.fromisoformat(dt)
+        except Exception:
+            return None
+    # الآن dt هو datetime
+    # إذا كان بتوقيت اليمن، حوله إلى UTC
+    if dt.tzinfo:
+        dt_utc = dt.astimezone(timezone.utc)
+    else:
+        dt_utc = dt - timedelta(hours=3)
+    return int(dt_utc.timestamp() * 1000)
+
 @main.route('/api/register', methods=['POST'])
 def register():
     try:
@@ -407,8 +433,8 @@ def get_accounts():
             'notes': acc.notes,
             'whatsapp_enabled': acc.whatsapp_enabled,
             'user_id': acc.user_id,
-            'created_at': int(acc.created_at.timestamp() * 1000) if acc.created_at else None,
-            'updated_at': int(acc.updated_at.timestamp() * 1000) if acc.updated_at else None
+            'created_at': to_millis(acc.created_at) if acc.created_at else None,
+            'updated_at': to_millis(acc.updated_at) if acc.updated_at else None
         } for acc in accounts])
     except Exception as e:
         logger.error(f"Get accounts error: {str(e)}")
@@ -433,7 +459,7 @@ def get_transactions():
             transaction_data = {
                 'id': trans.id,
                 'server_id': trans.server_id,
-                'date': int((trans.date - timedelta(hours=3)).timestamp() * 1000),
+                'date': to_millis(trans.date),
                 'amount': trans.amount,
                 'description': trans.description,
                 'account_id': trans.account_id,
@@ -443,8 +469,8 @@ def get_transactions():
                 'whatsapp_enabled': trans.whatsapp_enabled,
                 'user_id': trans.user_id,
                 'cashbox_id': trans.cashbox_id,
-                'created_at': int(trans.created_at.timestamp() * 1000) if trans.created_at else None,
-                'updated_at': int(trans.updated_at.timestamp() * 1000) if trans.updated_at else None
+                'created_at': to_millis(trans.created_at),
+                'updated_at': to_millis(trans.updated_at)
             }
             transactions_json.append(transaction_data)
             logger.debug(f"Transaction data: {transaction_data}")
@@ -476,8 +502,7 @@ def debug_data():
         transactions = Transaction.query.filter_by(user_id=user_id).all()
         transactions_data = [{
             'id': trans.id,
-            'date': str(trans.date),  # التاريخ الخام من قاعدة البيانات
-            'date_timestamp': int(trans.date.timestamp() * 1000),  # التاريخ كـ timestamp
+            'date': to_millis(trans.date),
             'amount': trans.amount,
             'description': trans.description,
             'account_id': trans.account_id,
@@ -513,8 +538,8 @@ def debug_public():
             'is_debtor': acc.is_debtor,
             'notes': acc.notes,
             'whatsapp_enabled': acc.whatsapp_enabled,
-            'created_at': str(acc.created_at) if acc.created_at else None,
-            'updated_at': str(acc.updated_at) if acc.updated_at else None
+            'created_at': to_millis(acc.created_at) if acc.created_at else None,
+            'updated_at': to_millis(acc.updated_at) if acc.updated_at else None
         } for acc in accounts]
         
         # جلب جميع المعاملات
@@ -522,8 +547,7 @@ def debug_public():
         transactions_data = [{
             'id': trans.id,
             'server_id': trans.server_id,
-            'date': str(trans.date),
-            'date_timestamp': int(trans.date.timestamp() * 1000),
+            'date': to_millis(trans.date),
             'amount': trans.amount,
             'description': trans.description,
             'type': trans.type,
@@ -533,8 +557,8 @@ def debug_public():
             'notes': trans.notes,
             'whatsapp_enabled': trans.whatsapp_enabled,
             'cashbox_id': trans.cashbox_id,
-            'created_at': str(trans.created_at) if hasattr(trans, 'created_at') and trans.created_at else None,
-            'updated_at': str(trans.updated_at) if hasattr(trans, 'updated_at') and trans.updated_at else None
+            'created_at': to_millis(trans.created_at) if hasattr(trans, 'created_at') and trans.created_at else None,
+            'updated_at': to_millis(trans.updated_at) if hasattr(trans, 'updated_at') and trans.updated_at else None
         } for trans in transactions]
         
         return jsonify({
@@ -868,13 +892,13 @@ def sync_changes():
                     'amount': transaction.amount,
                     'type': transaction.type,
                     'description': transaction.description,
-                    'date': transaction.date.timestamp() * 1000,
+                    'date': to_millis(transaction.date),
                     'currency': transaction.currency,
                     'notes': transaction.notes,
                     'whatsapp_enabled': transaction.whatsapp_enabled,
                     'user_id': transaction.user_id,
                     'cashbox_id': transaction.cashbox_id,
-                    'updated_at': transaction.updated_at.timestamp() * 1000
+                    'updated_at': to_millis(transaction.updated_at)
                 })
             
             # جلب الحسابات المحدثة
@@ -897,7 +921,7 @@ def sync_changes():
                     'notes': account.notes,
                     'whatsapp_enabled': account.whatsapp_enabled,
                     'user_id': account.user_id,
-                    'updated_at': account.updated_at.timestamp() * 1000
+                    'updated_at': to_millis(account.updated_at)
                 })
             
             logger.info(f"Returning {len(changes['transactions'])} transactions and {len(changes['accounts'])} accounts")
@@ -1099,7 +1123,7 @@ def get_account_details(account_id):
                 'type': tx.type,
                 'amount': tx.amount,
                 'currency': tx.currency,
-                'date': tx.date.strftime('%Y-%m-%d %H:%M:%S'),
+                'date': to_millis(tx.date),
                 'description': tx.description or ''
             })
 
@@ -1277,7 +1301,7 @@ def get_cashboxes():
         {
             'id': c.id,
             'name': c.name,
-            'created_at': c.created_at.isoformat() if c.created_at else None
+            'created_at': to_millis(c.created_at) if c.created_at else None
         } for c in cashboxes
     ])
 
@@ -1300,7 +1324,7 @@ def add_cashbox():
         db.session.add(cashbox)
         db.session.commit()
         print(f"[API] Successfully added cashbox: id={cashbox.id}, name={cashbox.name}, user_id={user_id}")
-        return jsonify({'id': cashbox.id, 'name': cashbox.name, 'created_at': cashbox.created_at.isoformat()})
+        return jsonify({'id': cashbox.id, 'name': cashbox.name, 'created_at': to_millis(cashbox.created_at)})
     except Exception as e:
         print(f"[API] Error adding cashbox: {str(e)}")
         db.session.rollback()
