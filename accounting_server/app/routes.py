@@ -16,7 +16,7 @@ main = Blueprint('main', __name__)
 logger = logging.getLogger(__name__)
 
 # تعريف توقيت اليمن (UTC+3)
-YEMEN_TIMEZONE = timezone(timedelta(hours=1))
+YEMEN_TIMEZONE = timezone(timedelta(hours=0))
 
 def get_yemen_time():
     """الحصول على التوقيت الحالي بتوقيت اليمن"""
