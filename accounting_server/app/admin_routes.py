@@ -93,6 +93,7 @@ def format_last_seen(last_seen_dt):
         return f"منذ {days} يوم", "last-seen-recent"
     else:
         return last_seen_dt.strftime('%Y-%m-%d %H:%M'), "last-seen-inactive"
+
 # دالة توليد رابط كشف حساب مؤقت بكود قصير (6 أحرف)
 def generate_short_statement_link(account_id, expires_sec=3600):
     code = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
@@ -718,7 +719,7 @@ def calculate_and_notify_transaction(transaction_id):
         # --- منطق الجلسة وتاريخ الانتهاء ---
         session_name = user.session_name or 'admin_main'
         if session_name != 'admin_main':
-            if not user.session_expiry or user.session_expiry < datetime.now(YEMEN_TIMEZONE):
+            if not user.session_expiry or user.session_expiry < datetime.now():
                 return  # لا ترسل الرسالة ولا ترجع رد
         # --- نهاية المنطق ---
 
@@ -982,7 +983,7 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
         # --- منطق الجلسة وتاريخ الانتهاء ---
         session_name = user.session_name or 'admin_main'
         if session_name != 'admin_main':
-            if not user.session_expiry or user.session_expiry < datetime.now(YEMEN_TIMEZONE):
+            if not user.session_expiry or user.session_expiry < datetime.now():
                 return  # لا ترسل الرسالة ولا ترجع رد
         # --- نهاية المنطق ---
 
@@ -1057,7 +1058,7 @@ def send_transaction_delete_notification(transaction, final_balance):
         # --- منطق الجلسة وتاريخ الانتهاء ---
         session_name = user.session_name or 'admin_main'
         if session_name != 'admin_main':
-            if not user.session_expiry or user.session_expiry < datetime.now(YEMEN_TIMEZONE):
+            if not user.session_expiry or user.session_expiry < datetime.now():
                 return  # لا ترسل الرسالة ولا ترجع رد
         # --- نهاية المنطق ---
 
