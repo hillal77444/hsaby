@@ -110,7 +110,7 @@
                     <tbody>
                         {% for stat in transaction_stats %}
                         <tr>
-                            <td>{{ stat.date | datetimeformat('%Y-%m-%d') }}</td>
+                            <td>{{ stat.date.strftime('%Y-%m-%d') }}</td>
                             <td>{{ stat.count }}</td>
                             <td class="text-danger">{{ stat.debits }}</td>
                             <td class="text-success">{{ stat.credits }}</td>
@@ -142,7 +142,7 @@
                     <tbody>
                         {% for stat in account_stats %}
                         <tr>
-                            <td>{{ stat.date | datetimeformat('%Y-%m-%d') }}</td>
+                            <td>{{ stat.date.strftime('%Y-%m-%d') }}</td>
                             <td>{{ stat.count }}</td>
                         </tr>
                         {% endfor %}
