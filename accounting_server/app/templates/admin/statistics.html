@@ -90,45 +90,10 @@
         </div>
     </div>
 
-    <!-- إحصائيات المعاملات -->
+    <!-- إحصائيات الحسابات والمعاملات (آخر أسبوع) -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">إحصائيات المعاملات</h6>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>التاريخ</th>
-                            <th>عدد المعاملات</th>
-                            <th>إجمالي المدين</th>
-                            <th>إجمالي الدائن</th>
-                            <th>صافي المعاملات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for stat in transaction_stats %}
-                        <tr>
-                            <td>{{ stat.date.strftime('%Y-%m-%d') }}</td>
-                            <td>{{ stat.count }}</td>
-                            <td class="text-danger">{{ stat.debits }}</td>
-                            <td class="text-success">{{ stat.credits }}</td>
-                            <td class="{% if stat.credits - stat.debits >= 0 %}text-success{% else %}text-danger{% endif %}">
-                                {{ stat.credits - stat.debits }}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- إحصائيات الحسابات -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">إحصائيات الحسابات</h6>
+            <h6 class="m-0 font-weight-bold text-primary">إحصائيات الحسابات والمعاملات (آخر أسبوع)</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -137,13 +102,23 @@
                         <tr>
                             <th>التاريخ</th>
                             <th>عدد الحسابات</th>
+                            <th>عدد المعاملات</th>
+                            <th>إجمالي المدين</th>
+                            <th>إجمالي الدائن</th>
+                            <th>صافي المعاملات</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for stat in account_stats %}
+                        {% for stat in merged_stats %}
                         <tr>
-                            <td>{{ stat.date.strftime('%Y-%m-%d') }}</td>
-                            <td>{{ stat.count }}</td>
+                            <td>{{ stat.date|datetimeformat('%Y-%m-%d') }}</td>
+                            <td>{{ stat.accounts_count or 0 }}</td>
+                            <td>{{ stat.transactions_count or 0 }}</td>
+                            <td class="text-danger">{{ stat.debits or 0 }}</td>
+                            <td class="text-success">{{ stat.credits or 0 }}</td>
+                            <td class="{% if (stat.credits or 0) - (stat.debits or 0) >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ (stat.credits or 0) - (stat.debits or 0) }}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
