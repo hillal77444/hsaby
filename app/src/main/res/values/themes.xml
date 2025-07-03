@@ -55,7 +55,7 @@
     <!-- Text Button style -->
     <style name="TextButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textColor">@color/primary_blue</item>
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">@dimen/text_size_14</item>
         <item name="rippleColor">@color/ripple_light</item>
     </style>
 </resources>

@@ -48,19 +48,19 @@
     <style name="Widget.App.Button" parent="Widget.MaterialComponents.Button">
         <item name="android:textColor">@color/white</item>
         <item name="backgroundTint">@color/primary_blue</item>
-        <item name="android:padding">16dp</item>
-        <item name="android:textSize">16sp</item>
-        <item name="cornerRadius">12dp</item>
-        <item name="elevation">4dp</item>
+        <item name="android:padding">@dimen/padding_16</item>
+        <item name="android:textSize">@dimen/text_size_16</item>
+        <item name="cornerRadius">@dimen/corner_radius_12dp</item>
+        <item name="elevation">@dimen/elevation_medium</item>
         <item name="android:minHeight">@dimen/button_min_height</item>
         <item name="android:paddingStart">@dimen/button_padding_horizontal</item>
         <item name="android:paddingEnd">@dimen/button_padding_horizontal</item>
         <item name="android:paddingTop">@dimen/button_padding_vertical</item>
         <item name="android:paddingBottom">@dimen/button_padding_vertical</item>
         <item name="android:autoSizeTextType">uniform</item>
-        <item name="android:autoSizeMinTextSize">12sp</item>
-        <item name="android:autoSizeMaxTextSize">18sp</item>
-        <item name="android:autoSizeStepGranularity">2sp</item>
+        <item name="android:autoSizeMinTextSize">@dimen/text_size_12</item>
+        <item name="android:autoSizeMaxTextSize">@dimen/text_size_18</item>
+        <item name="android:autoSizeStepGranularity">@dimen/text_size_step</item>
     </style>
 
     <style name="ButtonStyle" parent="Widget.App.Button">
@@ -70,9 +70,9 @@
 
     <!-- أنماط البطاقات -->
     <style name="Widget.App.CardView" parent="Widget.MaterialComponents.CardView">
-        <item name="cardElevation">4dp</item>
-        <item name="cardCornerRadius">16dp</item>
-        <item name="contentPadding">16dp</item>
+        <item name="cardElevation">@dimen/card_elevation</item>
+        <item name="cardCornerRadius">@dimen/card_corner_radius</item>
+        <item name="contentPadding">@dimen/card_padding</item>
         <item name="cardBackgroundColor">@color/white</item>
         <item name="rippleColor">@color/ripple_light</item>
     </style>
@@ -81,10 +81,10 @@
     <style name="Widget.App.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="boxStrokeColor">@color/primary_blue</item>
         <item name="hintTextColor">@color/hint_gray</item>
-        <item name="boxCornerRadiusTopStart">12dp</item>
-        <item name="boxCornerRadiusTopEnd">12dp</item>
-        <item name="boxCornerRadiusBottomStart">12dp</item>
-        <item name="boxCornerRadiusBottomEnd">12dp</item>
+        <item name="boxCornerRadiusTopStart">@dimen/corner_radius_12dp</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/corner_radius_12dp</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/corner_radius_12dp</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/corner_radius_12dp</item>
     </style>
 
     <style name="TextInputLayoutStyle" parent="Widget.App.TextInputLayout">
@@ -95,8 +95,8 @@
     <style name="CustomTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="boxBackgroundMode">outline</item>
         <item name="boxStrokeColor">#000000</item>
-        <item name="boxStrokeWidth">2.5dp</item>
-        <item name="boxStrokeWidthFocused">2.5dp</item>
+        <item name="boxStrokeWidth">@dimen/_2sdp</item>
+        <item name="boxStrokeWidthFocused">@dimen/_2sdp</item>
         <item name="hintTextColor">@color/hint_gray</item>
         <item name="android:textColorHint">@color/hint_gray</item>
         <item name="android:textColor">#000000</item>
@@ -131,5 +131,11 @@
     <style name="DialogAnimation_SlideUp">
         <item name="android:windowEnterAnimation">@android:anim/slide_in_left</item>
         <item name="android:windowExitAnimation">@android:anim/slide_out_right</item>
+    </style>
+
+    <style name="TextButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/primary_blue</item>
+        <item name="android:textSize">@dimen/text_size_14</item>
+        <item name="rippleColor">@color/ripple_light</item>
     </style>
 </resources> 

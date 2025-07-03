@@ -5,24 +5,24 @@
     android:background="#FFFFFF"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="32dp"
+    android:paddingBottom="@dimen/padding_large"
     android:fitsSystemWindows="true">
 
     <!-- الشريط العلوي -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/height_small"
         android:orientation="horizontal"
         android:background="#3f51b5"
         android:gravity="center_vertical"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
+        android:paddingStart="@dimen/padding_xs"
+        android:paddingEnd="@dimen/padding_xs"
         android:visibility="gone">
 
         <ImageButton
             android:id="@+id/menuButton"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="@dimen/icon_size_sm"
+            android:layout_height="@dimen/icon_size_sm"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_menu"
             android:tint="#fff"
@@ -34,11 +34,11 @@
             android:layout_weight="1"
             android:text="الصندوق"
             android:textColor="#fff"
-            android:textSize="18sp"
+            android:textSize="@dimen/text_size_body1"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="12sp"
-            android:autoSizeMaxTextSize="22sp"
-            android:autoSizeStepGranularity="2sp"
+            android:autoSizeMinTextSize="@dimen/text_size_min"
+            android:autoSizeMaxTextSize="@dimen/text_size_headline2"
+            android:autoSizeStepGranularity="@dimen/text_size_step"
             android:gravity="end"
             android:fontFamily="sans-serif-medium"/>
     </LinearLayout>
@@ -47,17 +47,17 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="10dp"
-        app:cardElevation="2dp"
-        android:layout_margin="6dp"
+        app:cardCornerRadius="@dimen/corner_radius_small"
+        app:cardElevation="@dimen/elevation_small"
+        android:layout_margin="@dimen/margin_small"
         app:cardBackgroundColor="#FFFFFF"
-        android:minHeight="60dp">
+        android:minHeight="@dimen/min_height_small">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="6dp">
+            android:padding="@dimen/padding_xs">
 
             <!-- اختيار الصندوق وزر الطباعة -->
             <LinearLayout
@@ -69,14 +69,14 @@
                 <AutoCompleteTextView
                     android:id="@+id/cashboxDropdown"
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="@dimen/icon_size_sm"
                     android:layout_weight="1"
                     android:hint="اختر الصندوق"
                     android:background="@drawable/bg_edittext"
                     android:padding="0dp"
                     android:layout_marginEnd="0dp"
                     android:layout_marginStart="0dp"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/text_size_body2"
                     android:autoSizeTextType="none"
                     android:inputType="none"
                     android:focusable="false"
@@ -91,13 +91,13 @@
 
                 <ImageButton
                     android:id="@+id/btnPrintInCard"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="@dimen/icon_size_sm"
+                    android:layout_height="@dimen/icon_size_sm"
                     android:background="@drawable/bg_print_button"
                     android:src="@drawable/ic_print"
                     android:tint="#1976d2"
                     android:contentDescription="طباعة"
-                    android:layout_marginStart="8dp"/>
+                    android:layout_marginStart="@dimen/margin_xs"/>
             </LinearLayout>
 
             <!-- التواريخ بشكل أفقي ومضغوط -->
@@ -106,31 +106,31 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical|end"
-                android:layout_marginTop="2dp">
+                android:layout_marginTop="@dimen/margin_xs">
 
                 <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
+                    android:layout_height="@dimen/height_medium"
                     android:text="من"
                     android:gravity="center"
-                    android:textSize="15sp"
+                    android:textSize="@dimen/text_size_caption"
                     android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="10sp"
-                    android:autoSizeMaxTextSize="18sp"
-                    android:autoSizeStepGranularity="2sp"
+                    android:autoSizeMinTextSize="@dimen/text_size_min"
+                    android:autoSizeMaxTextSize="@dimen/text_size_body1"
+                    android:autoSizeStepGranularity="@dimen/text_size_step"
                     android:textColor="#666666"
-                    android:paddingHorizontal="4dp"/>
+                    android:paddingHorizontal="@dimen/padding_xs"/>
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/startDateInput"
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="@dimen/icon_size_sm"
                     android:layout_weight="1"
                     android:background="@drawable/bg_edittext"
                     android:focusable="false"
                     android:gravity="center"
                     android:drawableStart="@drawable/ic_calendar"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/text_size_body2"
                     android:autoSizeTextType="none"
                     style="@style/CustomTextInputEditText"
                     android:textColor="#000000"
@@ -144,27 +144,27 @@
 
                 <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
+                    android:layout_height="@dimen/height_medium"
                     android:text="الى"
                     android:gravity="center"
-                    android:textSize="15sp"
+                    android:textSize="@dimen/text_size_caption"
                     android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="10sp"
-                    android:autoSizeMaxTextSize="18sp"
-                    android:autoSizeStepGranularity="2sp"
+                    android:autoSizeMinTextSize="@dimen/text_size_min"
+                    android:autoSizeMaxTextSize="@dimen/text_size_body1"
+                    android:autoSizeStepGranularity="@dimen/text_size_step"
                     android:textColor="#666666"
-                    android:paddingHorizontal="4dp"/>
+                    android:paddingHorizontal="@dimen/padding_xs"/>
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/endDateInput"
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="@dimen/icon_size_sm"
                     android:layout_weight="1"
                     android:background="@drawable/bg_edittext"
                     android:focusable="false"
                     android:gravity="center"
                     android:drawableStart="@drawable/ic_calendar"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/text_size_body2"
                     android:autoSizeTextType="none"
                     style="@style/CustomTextInputEditText"
                     android:textColor="#000000"
@@ -196,5 +196,5 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:background="#FFFFFF"
-        android:layout_margin="4dp"/>
+        android:layout_margin="@dimen/margin_xs"/>
 </LinearLayout> 

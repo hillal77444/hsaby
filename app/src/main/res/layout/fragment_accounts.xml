@@ -18,19 +18,19 @@
             <!-- الدائرة العلوية والشعار والعنوان -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="160dp"
+                android:layout_height="@dimen/height_xl"
                 android:background="@color/info"
                 android:scaleX="2.2"
                 android:scaleY="1.2" />
 
             <androidx.cardview.widget.CardView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                app:cardCornerRadius="40dp"
-                app:cardElevation="8dp"
+                android:layout_width="@dimen/width_large"
+                android:layout_height="@dimen/height_large"
+                app:cardCornerRadius="@dimen/corner_radius_xl"
+                app:cardElevation="@dimen/elevation_large"
                 app:cardBackgroundColor="#FFFFFF"
                 android:layout_gravity="center"
-                android:layout_marginTop="-120dp">
+                android:layout_marginTop="@dimen/minus_120dp">
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -43,46 +43,46 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="إدارة الحسابات"
-                android:textSize="24sp"
+                android:textSize="@dimen/text_size_headline1"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
                 android:layout_gravity="center"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="@dimen/margin_large"
                 android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="8sp"
-                android:autoSizeMaxTextSize="24sp"
-                android:autoSizeStepGranularity="2sp" />
+                android:autoSizeMinTextSize="@dimen/text_size_min"
+                android:autoSizeMaxTextSize="@dimen/text_size_max"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="عرض وإدارة جميع الحسابات"
-                android:textSize="14sp"
+                android:textSize="@dimen/text_size_body2"
                 android:textColor="#666666"
                 android:layout_gravity="center"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginTop="@dimen/margin_xs"
+                android:layout_marginBottom="@dimen/margin_large"
                 android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="8sp"
-                android:autoSizeMaxTextSize="24sp"
-                android:autoSizeStepGranularity="2sp" />
+                android:autoSizeMinTextSize="@dimen/text_size_min"
+                android:autoSizeMaxTextSize="@dimen/text_size_max"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
             <!-- شريط البحث والتصفية -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="@dimen/corner_radius_large"
+                app:cardElevation="@dimen/elevation_medium"
+                android:layout_marginStart="@dimen/margin_medium"
+                android:layout_marginEnd="@dimen/margin_medium"
+                android:layout_marginBottom="@dimen/margin_large"
                 app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="@dimen/padding_medium">
 
                     <!-- شريط البحث -->
                     <com.google.android.material.textfield.TextInputLayout
@@ -92,11 +92,11 @@
                         app:startIconDrawable="@drawable/ic_search"
                         app:startIconTint="#152FD9"
                         app:boxBackgroundMode="outline"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp"
-                        android:layout_marginBottom="12dp"
+                        app:boxCornerRadiusTopStart="@dimen/corner_radius_medium"
+                        app:boxCornerRadiusTopEnd="@dimen/corner_radius_medium"
+                        app:boxCornerRadiusBottomStart="@dimen/corner_radius_medium"
+                        app:boxCornerRadiusBottomEnd="@dimen/corner_radius_medium"
+                        android:layout_marginBottom="@dimen/margin_small"
                         app:hintTextColor="#666666"
                         app:boxStrokeColor="#222222"
                         android:background="#FFFFFF"
@@ -111,9 +111,9 @@
                             android:textColor="#000000"
                             android:textColorHint="#666666"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_xs"
+                            android:autoSizeMaxTextSize="@dimen/text_size_xl"
+                            android:autoSizeStepGranularity="@dimen/text_size_caption" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -127,42 +127,40 @@
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/filterButton"
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="@dimen/height_medium"
                             android:layout_weight="1"
                             android:text="تصفية"
-                            android:textSize="12sp"
+                            android:textSize="@dimen/text_size_small"
                             android:icon="@drawable/ic_filter"
-                            app:iconSize="16dp"
+                            app:iconSize="@dimen/icon_size_sm"
                             app:iconGravity="textStart"
-                            app:iconPadding="4dp"
+                            app:iconPadding="@dimen/padding_xs"
                             android:backgroundTint="#F3F4F6"
                             android:textColor="#152FD9"
-                            app:cornerRadius="8dp"
-                            android:layout_marginEnd="8dp"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            app:cornerRadius="@dimen/corner_radius_small"
+                            android:layout_marginEnd="@dimen/margin_small"
+                            android:autoSizeMinTextSize="@dimen/text_size_xs"
+                            android:autoSizeMaxTextSize="@dimen/text_size_xl"
+                            android:autoSizeStepGranularity="@dimen/text_size_caption" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/sortButton"
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="@dimen/height_medium"
                             android:layout_weight="1"
                             android:text="ترتيب (الرصيد)"
-                            android:textSize="12sp"
+                            android:textSize="@dimen/text_size_small"
                             android:icon="@drawable/ic_sort"
-                            app:iconSize="16dp"
+                            app:iconSize="@dimen/icon_size_sm"
                             app:iconGravity="textStart"
-                            app:iconPadding="4dp"
+                            app:iconPadding="@dimen/padding_xs"
                             android:backgroundTint="#F3F4F6"
                             android:textColor="#152FD9"
-                            app:cornerRadius="8dp"
-                            android:layout_marginStart="8dp"
-                            android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            app:cornerRadius="@dimen/corner_radius_small"
+                            android:layout_marginStart="@dimen/margin_small"
+                            android:autoSizeMinTextSize="@dimen/text_size_xs"
+                            android:autoSizeMaxTextSize="@dimen/text_size_xl"
+                            android:autoSizeStepGranularity="@dimen/text_size_caption" />
 
                     </LinearLayout>
                 </LinearLayout>
@@ -174,16 +172,16 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="@dimen/margin_large">
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
-                    android:layout_height="60dp"
+                    android:layout_height="@dimen/height_large"
                     android:layout_weight="1"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="2dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="4dp"
+                    app:cardCornerRadius="@dimen/corner_radius_medium"
+                    app:cardElevation="@dimen/elevation_small"
+                    android:layout_marginStart="@dimen/margin_small"
+                    android:layout_marginEnd="@dimen/margin_xs"
                     app:cardBackgroundColor="#FFFFFF">
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -197,32 +195,32 @@
                             android:text="0"
                             android:textStyle="bold"
                             android:textColor="#1976D2"
-                            android:textSize="16sp"
+                            android:textSize="@dimen/text_size_body1"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_xs"
+                            android:autoSizeMaxTextSize="@dimen/text_size_xl"
+                            android:autoSizeStepGranularity="@dimen/text_size_caption" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="إجمالي الحسابات"
                             android:textColor="#666666"
-                            android:textSize="10sp"
+                            android:textSize="@dimen/text_size_caption"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_xs"
+                            android:autoSizeMaxTextSize="@dimen/text_size_xl"
+                            android:autoSizeStepGranularity="@dimen/text_size_caption" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
-                    android:layout_height="60dp"
+                    android:layout_height="@dimen/height_large"
                     android:layout_weight="1"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="2dp"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginEnd="8dp"
+                    app:cardCornerRadius="@dimen/corner_radius_medium"
+                    app:cardElevation="@dimen/elevation_small"
+                    android:layout_marginStart="@dimen/margin_xs"
+                    android:layout_marginEnd="@dimen/margin_small"
                     app:cardBackgroundColor="#FFFFFF">
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -236,21 +234,21 @@
                             android:text="0"
                             android:textStyle="bold"
                             android:textColor="#1976D2"
-                            android:textSize="16sp"
+                            android:textSize="@dimen/text_size_body1"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_xs"
+                            android:autoSizeMaxTextSize="@dimen/text_size_xl"
+                            android:autoSizeStepGranularity="@dimen/text_size_caption" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="الحسابات النشطة"
                             android:textColor="#666666"
-                            android:textSize="10sp"
+                            android:textSize="@dimen/text_size_caption"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_xs"
+                            android:autoSizeMaxTextSize="@dimen/text_size_xl"
+                            android:autoSizeStepGranularity="@dimen/text_size_caption" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
@@ -261,13 +259,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
-                android:padding="8dp"
+                android:padding="@dimen/padding_small"
                 android:nestedScrollingEnabled="false" />
 
             <!-- مساحة للزر العائم -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="140dp" />
+                android:layout_height="@dimen/height_xxl" />
 
         </LinearLayout>
 
@@ -279,8 +277,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="80dp"
+        android:layout_marginEnd="@dimen/margin_medium"
+        android:layout_marginBottom="@dimen/margin_xxxl"
         android:contentDescription="@string/add_account"
         app:srcCompat="@drawable/ic_add"
         app:backgroundTint="#152FD9"

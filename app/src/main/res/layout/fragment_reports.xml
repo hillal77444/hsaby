@@ -18,19 +18,19 @@
             <!-- رأس الصفحة -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="140dp"
+                android:layout_height="@dimen/height_xl"
                 android:background="@color/info"
                 android:scaleX="2.2"
                 android:scaleY="1.2" />
 
             <androidx.cardview.widget.CardView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                app:cardCornerRadius="40dp"
-                app:cardElevation="8dp"
+                android:layout_width="@dimen/icon_size"
+                android:layout_height="@dimen/icon_size"
+                app:cardCornerRadius="@dimen/button_corner_radius"
+                app:cardElevation="@dimen/card_elevation"
                 app:cardBackgroundColor="#FFFFFF"
                 android:layout_gravity="center"
-                android:layout_marginTop="-100dp">
+                android:layout_marginTop="@dimen/minus_100dp">
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -43,59 +43,59 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="التقارير المالية"
-                android:textSize="22sp"
+                android:textSize="@dimen/text_size_headline1"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
                 android:layout_gravity="center"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/spacing_sm"
                 android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="10sp"
-                android:autoSizeMaxTextSize="22sp"
-                android:autoSizeStepGranularity="2sp" />
+                android:autoSizeMinTextSize="@dimen/text_size_10"
+                android:autoSizeMaxTextSize="@dimen/text_size_22"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="ملخص الحسابات والمعاملات المالية"
-                android:textSize="13sp"
+                android:textSize="@dimen/text_size_body2"
                 android:textColor="#666"
                 android:layout_gravity="center"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="12dp"
+                android:layout_marginTop="@dimen/margin_xs"
+                android:layout_marginBottom="@dimen/margin_small"
                 android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="8sp"
-                android:autoSizeMaxTextSize="18sp"
-                android:autoSizeStepGranularity="2sp" />
+                android:autoSizeMinTextSize="@dimen/text_size_caption"
+                android:autoSizeMaxTextSize="@dimen/text_size_18"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
             <!-- بطاقة الأزرار العصرية -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="18dp"
-                app:cardElevation="6dp"
+                android:layout_marginStart="@dimen/margin_small"
+                android:layout_marginEnd="@dimen/margin_small"
+                android:layout_marginTop="@dimen/margin_small"
+                android:layout_marginBottom="@dimen/margin_medium"
+                app:cardCornerRadius="@dimen/corner_radius_large"
+                app:cardElevation="@dimen/elevation_medium"
                 app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="@dimen/spacing_standard">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="@dimen/padding_small">
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnAccountsSummaryReport"
                             android:layout_width="0dp"
-                            android:layout_height="48dp"
+                            android:layout_height="@dimen/height_small"
                             android:layout_weight="1"
                             android:text="تقرير ارصدة الحسابات"
                             android:textAllCaps="false"
@@ -103,18 +103,18 @@
                             android:backgroundTint="@color/teal_700"
                             android:icon="@drawable/ic_summary"
                             app:iconGravity="textStart"
-                            app:iconPadding="8dp"
-                            android:textSize="16sp"
-                            android:layout_marginEnd="8dp"
+                            app:iconPadding="@dimen/padding_small"
+                            android:textSize="@dimen/text_size_headline2"
+                            android:layout_marginEnd="@dimen/padding_small"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="18sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_10"
+                            android:autoSizeMaxTextSize="@dimen/text_size_18"
+                            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/viewAccountStatementButton"
                             android:layout_width="0dp"
-                            android:layout_height="48dp"
+                            android:layout_height="@dimen/height_small"
                             android:layout_weight="1"
                             android:text="كشف الحساب"
                             android:textAllCaps="false"
@@ -122,12 +122,12 @@
                             android:backgroundTint="#3F51B5"
                             android:icon="@drawable/ic_statement"
                             app:iconGravity="textStart"
-                            app:iconPadding="8dp"
-                            android:textSize="16sp"
+                            app:iconPadding="@dimen/padding_small"
+                            android:textSize="@dimen/text_size_headline2"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="18sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_10"
+                            android:autoSizeMaxTextSize="@dimen/text_size_18"
+                            android:autoSizeStepGranularity="@dimen/text_size_step" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -139,7 +139,7 @@
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnCashboxStatement"
                             android:layout_width="0dp"
-                            android:layout_height="48dp"
+                            android:layout_height="@dimen/height_small"
                             android:layout_weight="1"
                             android:text="تقرير ارصدة الصناديق "
                             android:textAllCaps="false"
@@ -147,13 +147,13 @@
                             android:backgroundTint="#1976d2"
                             android:icon="@drawable/ic_wallet"
                             app:iconGravity="textStart"
-                            app:iconPadding="8dp"
-                            android:textSize="16sp"
-                            android:layout_marginEnd="8dp"
+                            app:iconPadding="@dimen/padding_small"
+                            android:textSize="@dimen/text_size_headline2"
+                            android:layout_marginEnd="@dimen/padding_small"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="18sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_10"
+                            android:autoSizeMaxTextSize="@dimen/text_size_18"
+                            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                         <!-- إذا كان هناك زر رابع أضفه هنا بنفس النمط -->
                     </LinearLayout>
@@ -162,35 +162,35 @@
              <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="3dp"
+                android:layout_marginStart="@dimen/margin_small"
+                android:layout_marginEnd="@dimen/margin_small"
+                android:layout_marginBottom="@dimen/margin_medium"
+                app:cardCornerRadius="@dimen/corner_radius_medium"
+                app:cardElevation="@dimen/elevation_small"
                 app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/spacing_standard">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="اجمالي الارصده لجميع العملات "
-                        android:textSize="16sp"
+                        android:textSize="@dimen/text_size_headline2"
                         android:textStyle="bold"
                         android:textColor="#152FD9"
                         android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="8sp"
-                        android:autoSizeMaxTextSize="20sp"
-                        android:autoSizeStepGranularity="2sp" />
+                        android:autoSizeMinTextSize="@dimen/text_size_caption"
+                        android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                        android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="@dimen/margin_small"
                         android:orientation="horizontal">
 
                         <LinearLayout
@@ -203,25 +203,25 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="مدينون"
-                                android:textSize="13sp"
+                                android:textSize="@dimen/text_size_body2"
                                 android:textColor="#F44336"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="8sp"
-                                android:autoSizeMaxTextSize="18sp"
-                                android:autoSizeStepGranularity="2sp" />
+                                android:autoSizeMinTextSize="@dimen/text_size_caption"
+                                android:autoSizeMaxTextSize="@dimen/text_size_18"
+                                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                             <TextView
                                 android:id="@+id/total_debtors"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:textSize="18sp"
+                                android:layout_marginTop="@dimen/margin_xs"
+                                android:textSize="@dimen/text_size_18"
                                 android:textStyle="bold"
                                 android:textColor="#F44336"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="8sp"
-                                android:autoSizeMaxTextSize="20sp"
-                                android:autoSizeStepGranularity="2sp" />
+                                android:autoSizeMinTextSize="@dimen/text_size_caption"
+                                android:autoSizeMaxTextSize="@dimen/text_size_20"
+                                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                         </LinearLayout>
 
@@ -235,25 +235,25 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="دائنون"
-                                android:textSize="13sp"
+                                android:textSize="@dimen/text_size_body2"
                                 android:textColor="#4CAF50"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="8sp"
-                                android:autoSizeMaxTextSize="18sp"
-                                android:autoSizeStepGranularity="2sp" />
+                                android:autoSizeMinTextSize="@dimen/text_size_caption"
+                                android:autoSizeMaxTextSize="@dimen/text_size_18"
+                                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                             <TextView
                                 android:id="@+id/total_creditors"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:textSize="18sp"
+                                android:layout_marginTop="@dimen/margin_xs"
+                                android:textSize="@dimen/text_size_18"
                                 android:textStyle="bold"
                                 android:textColor="#4CAF50"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="8sp"
-                                android:autoSizeMaxTextSize="20sp"
-                                android:autoSizeStepGranularity="2sp" />
+                                android:autoSizeMinTextSize="@dimen/text_size_caption"
+                                android:autoSizeMaxTextSize="@dimen/text_size_20"
+                                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                         </LinearLayout>
 
@@ -261,33 +261,33 @@
 
                     <View
                         android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="12dp"
+                        android:layout_height="@dimen/margin_1"
+                        android:layout_marginVertical="@dimen/margin_small"
                         android:background="#E3E8FD" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="صافي الرصيد"
-                        android:textSize="13sp"
+                        android:textSize="@dimen/text_size_body2"
                         android:textColor="#152FD9"
                         android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="8sp"
-                        android:autoSizeMaxTextSize="18sp"
-                        android:autoSizeStepGranularity="2sp" />
+                        android:autoSizeMinTextSize="@dimen/text_size_caption"
+                        android:autoSizeMaxTextSize="@dimen/text_size_18"
+                        android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                     <TextView
                         android:id="@+id/net_balance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:textSize="20sp"
+                        android:layout_marginTop="@dimen/margin_xs"
+                        android:textSize="@dimen/text_size_20"
                         android:textStyle="bold"
                         android:textColor="#152FD9"
                         android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="8sp"
-                        android:autoSizeMaxTextSize="22sp"
-                        android:autoSizeStepGranularity="2sp" />
+                        android:autoSizeMinTextSize="@dimen/text_size_caption"
+                        android:autoSizeMaxTextSize="@dimen/text_size_22"
+                        android:autoSizeStepGranularity="@dimen/text_size_step" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -296,35 +296,35 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
+                android:layout_marginStart="@dimen/margin_small"
+                android:layout_marginEnd="@dimen/margin_small"
+                android:layout_marginBottom="@dimen/margin_medium"
+                app:cardCornerRadius="@dimen/corner_radius_medium"
+                app:cardElevation="@dimen/elevation_medium"
                 app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/spacing_standard">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="ملخص المعاملات"
-                        android:textSize="18sp"
+                        android:textSize="@dimen/text_size_headline2"
                         android:textStyle="bold"
                         android:textColor="#152FD9"
                         android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="8sp"
-                        android:autoSizeMaxTextSize="24sp"
-                        android:autoSizeStepGranularity="2sp" />
+                        android:autoSizeMinTextSize="@dimen/text_size_caption"
+                        android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                        android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="@dimen/margin_small"
                         android:orientation="horizontal">
 
                         <LinearLayout
@@ -337,25 +337,25 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="عدد العمليات"
-                                android:textSize="14sp"
+                                android:textSize="@dimen/text_size_body2"
                                 android:textColor="#666"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="8sp"
-                                android:autoSizeMaxTextSize="24sp"
-                                android:autoSizeStepGranularity="2sp" />
+                                android:autoSizeMinTextSize="@dimen/text_size_caption"
+                                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                             <TextView
                                 android:id="@+id/total_transactions"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:textSize="20sp"
+                                android:layout_marginTop="@dimen/margin_xs"
+                                android:textSize="@dimen/text_size_20"
                                 android:textStyle="bold"
                                 android:textColor="#152FD9"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="8sp"
-                                android:autoSizeMaxTextSize="24sp"
-                                android:autoSizeStepGranularity="2sp" />
+                                android:autoSizeMinTextSize="@dimen/text_size_caption"
+                                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                         </LinearLayout>
 
@@ -369,25 +369,25 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="متوسط العملية"
-                                android:textSize="14sp"
+                                android:textSize="@dimen/text_size_body2"
                                 android:textColor="#666"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="8sp"
-                                android:autoSizeMaxTextSize="24sp"
-                                android:autoSizeStepGranularity="2sp" />
+                                android:autoSizeMinTextSize="@dimen/text_size_caption"
+                                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                             <TextView
                                 android:id="@+id/average_transaction"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:textSize="20sp"
+                                android:layout_marginTop="@dimen/margin_xs"
+                                android:textSize="@dimen/text_size_20"
                                 android:textStyle="bold"
                                 android:textColor="#152FD9"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="8sp"
-                                android:autoSizeMaxTextSize="24sp"
-                                android:autoSizeStepGranularity="2sp" />
+                                android:autoSizeMinTextSize="@dimen/text_size_caption"
+                                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                         </LinearLayout>
 

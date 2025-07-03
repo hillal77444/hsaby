@@ -9,21 +9,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="@dimen/card_padding">
 
         <!-- Date Range Selection -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp">
+            aandroid:layout_marginBottom="@dimen/margin_large"
+            app:cardCornerRadius="@dimen/corner_radius_small"
+            app:cardElevation="@dimen/elevation_medium">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="@dimen/card_padding">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -31,21 +31,21 @@
                     android:text="@string/select_date_range"
                     android:textAppearance="?attr/textAppearanceHeadline6"
                     android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="8sp"
-                    android:autoSizeMaxTextSize="24sp"
-                    android:autoSizeStepGranularity="2sp" />
+                    android:autoSizeMinTextSize="@dimen/text_size_caption"
+                    android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                    android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="@dimen/margin_medium"
                     android:orientation="horizontal">
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginEnd="8dp"
+                        android:layout_marginEnd="@dimen/margin_small"
                         android:hint="@string/from_date"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
@@ -56,9 +56,9 @@
                             android:focusable="false"
                             android:inputType="none"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_caption"
+                            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -66,7 +66,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="8dp"
+                        android:layout_marginStart="@dimen/margin_xs"
                         android:hint="@string/to_date"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
@@ -77,9 +77,9 @@
                             android:focusable="false"
                             android:inputType="none"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_caption"
+                            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -89,13 +89,13 @@
                     android:id="@+id/generateStatementButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="@dimen/margin_medium"
                     android:text="@string/generate_statement"
                     app:icon="@drawable/ic_reports"
                     android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="8sp"
-                    android:autoSizeMaxTextSize="24sp"
-                    android:autoSizeStepGranularity="2sp" />
+                    android:autoSizeMinTextSize="@dimen/text_size_caption"
+                    android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                    android:autoSizeStepGranularity="@dimen/text_size_step" />
 
             </LinearLayout>
 
@@ -105,15 +105,15 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp">
+            aandroid:layout_marginBottom="@dimen/margin_large"
+            app:cardCornerRadius="@dimen/corner_radius_small"
+            app:cardElevation="@dimen/elevation_medium">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="@dimen/card_padding">
 
                 <TextView
                     android:id="@+id/accountNameText"
@@ -121,20 +121,20 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceHeadline6"
                     android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="8sp"
-                    android:autoSizeMaxTextSize="24sp"
-                    android:autoSizeStepGranularity="2sp" />
+                    android:autoSizeMinTextSize="@dimen/text_size_caption"
+                    android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                    android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                 <TextView
                     android:id="@+id/accountBalanceText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/spacing_sm"
                     android:textAppearance="?attr/textAppearanceSubtitle1"
                     android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="8sp"
-                    android:autoSizeMaxTextSize="24sp"
-                    android:autoSizeStepGranularity="2sp" />
+                    android:autoSizeMinTextSize="@dimen/text_size_caption"
+                    android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                    android:autoSizeStepGranularity="@dimen/text_size_step" />
 
             </LinearLayout>
 
@@ -152,35 +152,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="@dimen/margin_medium"
             android:text="@string/export_to_pdf"
             app:icon="@drawable/ic_pdf"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="8sp"
-            android:autoSizeMaxTextSize="24sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_caption"
+            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
         <TextView
             android:id="@+id/totalDebitText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"
+            android:textSize="@dimen/text_size_body2"
+            android:layout_marginBottom="@dimen/margin_small"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="8sp"
-            android:autoSizeMaxTextSize="24sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_caption"
+            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
         <TextView
             android:id="@+id/totalCreditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:layout_marginBottom="16dp"
+            android:textSize="@dimen/text_size_body2"
+            aandroid:layout_marginBottom="@dimen/margin_large"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="8sp"
-            android:autoSizeMaxTextSize="24sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_caption"
+            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
     </LinearLayout>
 

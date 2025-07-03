@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:fillViewport="true"
         android:clipToPadding="false"
-        android:paddingBottom="80dp">
+        android:paddingBottom="@dimen/padding_large">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -21,20 +21,20 @@
             <!-- رأس الصفحة -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="140dp"
+                android:layout_height="@dimen/height_xl"
                 android:background="@color/info"
                 android:scaleX="2.2"
                 android:scaleY="1.2"
-                android:layout_marginTop="0dp"/>
+                android:layout_marginTop="@dimen/margin_none"/>
 
             <androidx.cardview.widget.CardView
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                app:cardCornerRadius="36dp"
-                app:cardElevation="8dp"
+                android:layout_width="@dimen/width_large"
+                android:layout_height="@dimen/height_large"
+                app:cardCornerRadius="@dimen/corner_radius_large"
+                app:cardElevation="@dimen/card_elevation"
                 app:cardBackgroundColor="#FFFFFF"
                 android:layout_gravity="center"
-                android:layout_marginTop="-100dp">
+                android:layout_marginTop="@dimen/minus_100dp">
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -47,46 +47,46 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="إضافة معاملة جديدة"
-                android:textSize="22sp"
+                android:textSize="@dimen/text_size_headline1"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
                 android:layout_gravity="center"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/margin_small"
                 android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="10sp"
-                android:autoSizeMaxTextSize="18sp"
-                android:autoSizeStepGranularity="2sp" />
+                android:autoSizeMinTextSize="@dimen/text_size_min"
+                android:autoSizeMaxTextSize="@dimen/text_size_max"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="يرجى تعبئة بيانات المعاملة بدقة"
-                android:textSize="14sp"
+                android:textSize="@dimen/text_size_body2"
                 android:textColor="#666666"
                 android:layout_gravity="center"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginTop="@dimen/margin_xs"
+                android:layout_marginBottom="@dimen/margin_medium"
                 android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="10sp"
-                android:autoSizeMaxTextSize="18sp"
-                android:autoSizeStepGranularity="2sp" />
+                android:autoSizeMinTextSize="@dimen/text_size_min"
+                android:autoSizeMaxTextSize="@dimen/text_size_max"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
             <!-- بطاقة موحدة لكل الحقول -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
+                android:layout_marginStart="@dimen/margin_small"
+                android:layout_marginEnd="@dimen/margin_small"
+                android:layout_marginBottom="@dimen/margin_medium"
+                app:cardCornerRadius="@dimen/corner_radius_medium"
+                app:cardElevation="@dimen/elevation_medium"
                 app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="12dp">
+                    android:padding="@dimen/padding_medium">
 
                     <!-- اختيار الحساب والصندوق -->
                     <LinearLayout
@@ -94,7 +94,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingBottom="8dp">
+                        android:layout_marginBottom="@dimen/margin_small">
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/accountLayout"
                             style="@style/CustomTextInputLayout"
@@ -114,14 +114,14 @@
                                 android:focusable="false"
                                 android:clickable="true"
                                 android:background="@null"
-                                android:padding="10dp"
-                                android:textSize="13sp"
+                                android:padding="@dimen/padding_small"
+                                android:textSize="@dimen/text_size_small"
                                 android:textColor="#000000"
                                 android:textColorHint="#666666"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="10sp"
-                                android:autoSizeMaxTextSize="18sp"
-                                android:autoSizeStepGranularity="2sp"/>
+                                android:autoSizeMinTextSize="@dimen/text_size_min"
+                                android:autoSizeMaxTextSize="@dimen/text_size_max"
+                                android:autoSizeStepGranularity="@dimen/text_size_step"/>
                         </com.google.android.material.textfield.TextInputLayout>
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/cashboxLayout"
@@ -129,6 +129,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:layout_marginStart="@dimen/margin_xs"
                             android:hint="اختر الصندوق"
                             app:startIconDrawable="@android:drawable/ic_menu_save"
                             app:startIconTint="@color/primary"
@@ -142,14 +143,14 @@
                                 android:focusable="false"
                                 android:clickable="true"
                                 android:background="@null"
-                                android:padding="10dp"
-                                android:textSize="13sp"
+                                android:padding="@dimen/padding_small"
+                                android:textSize="@dimen/text_size_small"
                                 android:textColor="#000000"
                                 android:textColorHint="#666666"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="10sp"
-                                android:autoSizeMaxTextSize="18sp"
-                                android:autoSizeStepGranularity="2sp"/>
+                                android:autoSizeMinTextSize="@dimen/text_size_min"
+                                android:autoSizeMaxTextSize="@dimen/text_size_max"
+                                android:autoSizeStepGranularity="@dimen/text_size_step"/>
                         </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
 
@@ -159,14 +160,14 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:weightSum="2"
-                        android:paddingBottom="8dp">
+                        android:layout_marginBottom="@dimen/margin_small">
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/amountLayout"
                             style="@style/CustomTextInputLayout"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginEnd="8dp"
+                            android:layout_marginEnd="@dimen/margin_xs"
                             android:hint="@string/transaction_amount"
                             app:hintTextColor="#666666"
                             app:boxStrokeColor="#1976D2">
@@ -176,13 +177,13 @@
                                 android:layout_height="wrap_content"
                                 android:inputType="numberDecimal"
                                 android:drawableStart="@drawable/ic_money"
-                                android:drawablePadding="4dp"
+                                android:drawablePadding="@dimen/padding_xs"
                                 android:textColor="#000000"
                                 android:textColorHint="#666666"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="10sp"
-                                android:autoSizeMaxTextSize="18sp"
-                                android:autoSizeStepGranularity="2sp"/>
+                                android:autoSizeMinTextSize="@dimen/text_size_min"
+                                android:autoSizeMaxTextSize="@dimen/text_size_max"
+                                android:autoSizeStepGranularity="@dimen/text_size_step"/>
                         </com.google.android.material.textfield.TextInputLayout>
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/dateLayout"
@@ -190,7 +191,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="8dp"
+                            android:layout_marginStart="@dimen/margin_xs"
                             android:hint="@string/transaction_date"
                             app:hintTextColor="#666666"
                             app:boxStrokeColor="#1976D2">
@@ -201,13 +202,13 @@
                                 android:focusable="false"
                                 android:inputType="none"
                                 android:drawableStart="@drawable/ic_calendar"
-                                android:drawablePadding="4dp"
+                                android:drawablePadding="@dimen/padding_xs"
                                 android:textColor="#000000"
                                 android:textColorHint="#666666"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="10sp"
-                                android:autoSizeMaxTextSize="18sp"
-                                android:autoSizeStepGranularity="2sp"/>
+                                android:autoSizeMinTextSize="@dimen/text_size_min"
+                                android:autoSizeMaxTextSize="@dimen/text_size_max"
+                                android:autoSizeStepGranularity="@dimen/text_size_step"/>
                         </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
 
@@ -216,19 +217,19 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:paddingBottom="8dp">
+                        android:layout_marginBottom="@dimen/margin_small">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="العملة"
-                            android:textSize="16sp"
+                            android:textSize="@dimen/text_size_body1"
                             android:textColor="#1976D2"
-                            android:layout_marginBottom="4dp"
+                            android:layout_marginBottom="@dimen/margin_xs"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="18sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_min"
+                            android:autoSizeMaxTextSize="@dimen/text_size_max"
+                            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                         <RadioGroup
                             android:id="@+id/currencyRadioGroup"
@@ -244,9 +245,9 @@
                                 android:text="ريال يمني"
                                 android:textColor="#1976D2"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="10sp"
-                                android:autoSizeMaxTextSize="18sp"
-                                android:autoSizeStepGranularity="2sp" />
+                                android:autoSizeMinTextSize="@dimen/text_size_min"
+                                android:autoSizeMaxTextSize="@dimen/text_size_max"
+                                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                             <RadioButton
                                 android:id="@+id/radioSar"
@@ -256,9 +257,9 @@
                                 android:text="ريال سعودي"
                                 android:textColor="#1976D2"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="10sp"
-                                android:autoSizeMaxTextSize="18sp"
-                                android:autoSizeStepGranularity="2sp" />
+                                android:autoSizeMinTextSize="@dimen/text_size_min"
+                                android:autoSizeMaxTextSize="@dimen/text_size_max"
+                                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                             <RadioButton
                                 android:id="@+id/radioUsd"
@@ -268,18 +269,18 @@
                                 android:text="دولار أمريكي"
                                 android:textColor="#1976D2"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="10sp"
-                                android:autoSizeMaxTextSize="18sp"
-                                android:autoSizeStepGranularity="2sp" />
+                                android:autoSizeMinTextSize="@dimen/text_size_min"
+                                android:autoSizeMaxTextSize="@dimen/text_size_max"
+                                android:autoSizeStepGranularity="@dimen/text_size_step" />
                         </RadioGroup>
                     </LinearLayout>
 
-                    <!-- بعد العملة وقبل الملاحظات -->
+                    <!-- البيان -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:paddingBottom="8dp">
+                        android:layout_marginBottom="@dimen/margin_small">
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/descriptionLayout"
                             style="@style/CustomTextInputLayout"
@@ -297,20 +298,20 @@
                                 android:textColor="#000000"
                                 android:textColorHint="#666666"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="10sp"
-                                android:autoSizeMaxTextSize="18sp"
-                                android:autoSizeStepGranularity="2sp"
+                                android:autoSizeMinTextSize="@dimen/text_size_min"
+                                android:autoSizeMaxTextSize="@dimen/text_size_max"
+                                android:autoSizeStepGranularity="@dimen/text_size_step"
                                 android:background="@drawable/bg_edittext"
-                                android:padding="8dp"
+                                android:padding="@dimen/padding_small"
                                 android:hint="اكتب البيان أو اختر من المقترحات"
-                                android:dropDownVerticalOffset="8dp"
-                                android:dropDownHorizontalOffset="0dp"
-                                android:popupElevation="8dp"
+                                android:dropDownVerticalOffset="@dimen/margin_small"
+                                android:dropDownHorizontalOffset="@dimen/margin_none"
+                                android:popupElevation="@dimen/elevation_small"
                                 android:dropDownHeight="wrap_content"/>
                         </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
 
-                    <!-- بعد البيان وقبل نهاية البطاقة -->
+                    <!-- ملاحظات -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/notesLayout"
                         style="@style/CustomTextInputLayout"
@@ -326,9 +327,9 @@
                             android:textColor="#000000"
                             android:textColorHint="#666666"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="10sp"
-                            android:autoSizeMaxTextSize="18sp"
-                            android:autoSizeStepGranularity="2sp"
+                            android:autoSizeMinTextSize="@dimen/text_size_min"
+                            android:autoSizeMaxTextSize="@dimen/text_size_max"
+                            android:autoSizeStepGranularity="@dimen/text_size_step"
                             android:visibility="gone"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -341,53 +342,55 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="32dp">
+                android:layout_marginTop="@dimen/margin_medium"
+                android:layout_marginBottom="@dimen/margin_large"
+                android:layout_marginStart="@dimen/margin_small"
+                android:layout_marginEnd="@dimen/margin_small">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/creditButton"
                     style="@style/Widget.MaterialComponents.Button"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/height_medium"
                     android:layout_weight="1"
                     android:text="@string/credit"
                     android:textColor="#FFFFFF"
                     android:backgroundTint="#4CAF50"
                     android:icon="@drawable/ic_arrow_downward"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="@dimen/margin_xs"
                     android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="10sp"
-                    android:autoSizeMaxTextSize="18sp"
-                    android:autoSizeStepGranularity="2sp" />
+                    android:autoSizeMinTextSize="@dimen/text_size_min"
+                    android:autoSizeMaxTextSize="@dimen/text_size_max"
+                    android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/debitButton"
                     style="@style/Widget.MaterialComponents.Button"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/height_medium"
                     android:layout_weight="1"
                     android:text="@string/debit"
                     android:textColor="#FFFFFF"
                     android:backgroundTint="#F44336"
                     android:icon="@drawable/ic_arrow_upward"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="@dimen/margin_xs"
                     android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="10sp"
-                    android:autoSizeMaxTextSize="18sp"
-                    android:autoSizeStepGranularity="2sp" />
+                    android:autoSizeMinTextSize="@dimen/text_size_min"
+                    android:autoSizeMaxTextSize="@dimen/text_size_max"
+                    android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/cancelButton"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/height_medium"
                     android:layout_weight="1"
                     android:text="@string/cancel"
                     android:icon="@android:drawable/ic_menu_close_clear_cancel"
                     android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="10sp"
-                    android:autoSizeMaxTextSize="18sp"
-                    android:autoSizeStepGranularity="2sp" />
+                    android:autoSizeMinTextSize="@dimen/text_size_min"
+                    android:autoSizeMaxTextSize="@dimen/text_size_max"
+                    android:autoSizeStepGranularity="@dimen/text_size_step" />
             </LinearLayout>
 
         </LinearLayout>

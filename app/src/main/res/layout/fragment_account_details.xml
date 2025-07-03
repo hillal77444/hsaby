@@ -19,16 +19,16 @@
             <!-- رأس الصفحة -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
+                android:layout_height="@dimen/height_small"
                 android:background="@color/info"
                 android:scaleX="2.2"
                 android:scaleY="1.2" />
 
             <androidx.cardview.widget.CardView
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                app:cardCornerRadius="36dp"
-                app:cardElevation="8dp"
+                android:layout_width="@dimen/width_large"
+                android:layout_height="@dimen/height_large"
+                app:cardCornerRadius="@dimen/corner_radius_large"
+                app:cardElevation="@dimen/card_elevation"
                 app:cardBackgroundColor="#FFFFFF"
                 android:layout_gravity="center"
                 android:layout_marginTop="-80dp">
@@ -44,45 +44,45 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="تفاصيل الحساب"
-                android:textSize="22sp"
+                android:textSize="@dimen/text_size_headline1"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
                 android:layout_gravity="center"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="@dimen/spacing_sm" />
 
             <!-- بطاقة معلومات الحساب -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/accountInfoCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="12dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
+                android:layout_marginStart="@dimen/margin_medium"
+                android:layout_marginEnd="@dimen/margin_medium"
+                android:layout_marginTop="@dimen/margin_medium"
+                android:layout_marginBottom="@dimen/margin_small"
+                app:cardCornerRadius="@dimen/corner_radius_medium"
+                app:cardElevation="@dimen/elevation_medium"
                 app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/padding_large">
 
                     <TextView
                         android:id="@+id/accountName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="#1976D2"
-                        android:textSize="20sp"
+                        android:textSize="@dimen/text_size_headline2"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/accountBalance"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textSize="18sp"
+                        android:layout_marginTop="@dimen/margin_xs"
+                        android:textSize="@dimen/text_size_body1"
                         android:textStyle="bold"
                         android:textColor="#4CAF50" />
 
@@ -90,19 +90,22 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="8dp">
+                        android:layout_marginTop="@dimen/spacing_sm">
                         <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:layout_width="@dimen/icon_size"
+                            android:layout_height="@dimen/icon_size"
                             android:src="@drawable/ic_phone"
                             android:tint="#757575"
-                            android:layout_marginEnd="4dp" />
+                            android:layout_marginEnd="@dimen/margin_xs" />
                         <TextView
                             android:id="@+id/accountPhone"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="#757575"
-                            android:textSize="14sp" />
+                            android:autoSizeMinTextSize="@dimen/dashboard_text_size_8"
+                        android:autoSizeMaxTextSize="@dimen/dashboard_text_size_24"
+                        android:autoSizeStepGranularity="@dimen/text_size_step"
+                        android:textSize="@dimen/text_size_body1"/>
                     </LinearLayout>
 
                     <LinearLayout
@@ -111,17 +114,20 @@
                         android:orientation="horizontal"
                         android:layout_marginTop="4dp">
                         <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:layout_width="@dimen/icon_size"
+                            android:layout_height="@dimen/icon_size"
                             android:src="@drawable/ic_note"
                             android:tint="#757575"
-                            android:layout_marginEnd="4dp" />
+                            android:layout_marginEnd="@dimen/margin_xs" />
                         <TextView
                             android:id="@+id/accountNotes"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="#757575"
-                            android:textSize="14sp" />
+                            android:autoSizeMinTextSize="@dimen/dashboard_text_size_8"
+                        android:autoSizeMaxTextSize="@dimen/dashboard_text_size_24"
+                        android:autoSizeStepGranularity="@dimen/text_size_step"
+                        android:textSize="@dimen/text_size_body1"/>
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -131,48 +137,48 @@
                 android:id="@+id/dateRangeButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginStart="@dimen/margin_medium"
+                android:layout_marginEnd="@dimen/margin_medium"
+                android:layout_marginBottom="@dimen/margin_small"
                 android:text="الفترة الزمنية"
                 app:icon="@drawable/ic_calendar"
                 app:iconGravity="textStart"
                 app:backgroundTint="#E3F2FD"
                 android:textColor="#1976D2"
                 android:textStyle="bold"
-                android:textSize="15sp" />
+                android:textSize="@dimen/text_size_caption" />
 
             <!-- بطاقة الإحصائيات -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/statisticsCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginStart="@dimen/margin_medium"
+                android:layout_marginEnd="@dimen/margin_medium"
                 android:layout_marginBottom="12dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
+                app:cardCornerRadius="@dimen/corner_radius_medium"
+                app:cardElevation="@dimen/elevation_medium"
                 app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/padding_large">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="الإحصائيات"
                         android:textColor="#1976D2"
-                        android:textSize="16sp"
+                        android:textSize="@dimen/text_size_body2"
                         android:textStyle="bold" />
 
                     <com.github.mikephil.charting.charts.PieChart
                         android:id="@+id/pie_chart"
                         android:layout_width="match_parent"
-                        android:layout_height="200dp"
-                        android:layout_marginTop="8dp" />
+                        android:layout_height="@dimen/height_xl"
+                        android:layout_marginTop="@dimen/spacing_sm" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -181,9 +187,9 @@
                 android:id="@+id/actionButtons"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="32dp"
+                android:layout_marginStart="@dimen/margin_medium"
+                android:layout_marginEnd="@dimen/margin_medium"
+                android:layout_marginBottom="@dimen/margin_xl"
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton

@@ -12,54 +12,54 @@
         android:orientation="horizontal"
         android:gravity="center"
         android:background="#fff"
-        android:padding="8dp">
+        android:padding="@dimen/padding_small">
 
         <Button
             android:id="@+id/btnFilterYER"
             android:layout_width="0dp"
-            android:layout_height="40dp"
+            android:layout_height="@dimen/height_medium"
             android:layout_weight="1"
             android:text="يمني"
             android:backgroundTint="@color/teal_700"
             android:textColor="#fff"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="12sp"
-            android:autoSizeMaxTextSize="22sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_min"
+            android:autoSizeMaxTextSize="@dimen/text_size_max"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
         <Button
             android:id="@+id/btnFilterSAR"
             android:layout_width="0dp"
-            android:layout_height="40dp"
+            android:layout_height="@dimen/height_medium"
             android:layout_weight="1"
             android:text="سعودي"
             android:backgroundTint="#E3E8FD"
             android:textColor="#152FD9"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="12sp"
-            android:autoSizeMaxTextSize="22sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_min"
+            android:autoSizeMaxTextSize="@dimen/text_size_max"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
         <Button
             android:id="@+id/btnFilterUSD"
             android:layout_width="0dp"
-            android:layout_height="40dp"
+            android:layout_height="@dimen/height_medium"
             android:layout_weight="1"
             android:text="دولار"
             android:backgroundTint="#E3E8FD"
             android:textColor="#152FD9"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="12sp"
-            android:autoSizeMaxTextSize="22sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_min"
+            android:autoSizeMaxTextSize="@dimen/text_size_max"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
     </LinearLayout>
 
     <!-- ترويسة الأعمدة -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/height_large"
         android:orientation="horizontal"
         android:background="#E3E8FD"
-        android:paddingVertical="4dp"
-        android:paddingHorizontal="2dp">
+        android:paddingVertical="@dimen/padding_xs"
+        android:paddingHorizontal="@dimen/padding_xxs">
 
         <TextView
             android:layout_width="0dp"
@@ -69,12 +69,12 @@
             android:gravity="center|right"
             android:textStyle="bold"
             android:textColor="#152FD9"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_size_body1"
             android:background="@drawable/table_border"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="10sp"
-            android:autoSizeMaxTextSize="18sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_min"
+            android:autoSizeMaxTextSize="@dimen/text_size_max"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -83,12 +83,12 @@
             android:gravity="center"
             android:textStyle="bold"
             android:textColor="#F44336"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_size_body1"
             android:background="@drawable/table_border"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="10sp"
-            android:autoSizeMaxTextSize="18sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_min"
+            android:autoSizeMaxTextSize="@dimen/text_size_max"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -97,12 +97,12 @@
             android:gravity="center"
             android:textStyle="bold"
             android:textColor="#4CAF50"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_size_body1"
             android:background="@drawable/table_border"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="10sp"
-            android:autoSizeMaxTextSize="18sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_min"
+            android:autoSizeMaxTextSize="@dimen/text_size_max"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -111,12 +111,12 @@
             android:gravity="center"
             android:textStyle="bold"
             android:textColor="#152FD9"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_size_body1"
             android:background="@drawable/table_border"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="10sp"
-            android:autoSizeMaxTextSize="18sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_min"
+            android:autoSizeMaxTextSize="@dimen/text_size_max"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
     </LinearLayout>
 
     <!-- الجدول -->
@@ -125,8 +125,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="8dp"
-        android:paddingBottom="72dp"
+        android:padding="@dimen/padding_small"
+        android:paddingBottom="@dimen/padding_xxl"
         android:clipToPadding="false"
         android:background="#fff" />
 
@@ -136,9 +136,9 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:background="#fff"
-        android:padding="8dp"
+        android:padding="@dimen/padding_small"
         android:gravity="center"
-        android:layout_marginBottom="72dp">
+        android:layout_marginBottom="@dimen/margin_xxl">
         <TextView
             android:id="@+id/tvTotalBalance"
             android:layout_width="0dp"
@@ -147,11 +147,11 @@
             android:text="الرصيد: 0"
             android:textColor="#152FD9"
             android:textStyle="bold"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_size_body1"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="12sp"
-            android:autoSizeMaxTextSize="22sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_min"
+            android:autoSizeMaxTextSize="@dimen/text_size_max"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
         <TextView
             android:id="@+id/tvTotalCredit"
             android:layout_width="0dp"
@@ -160,11 +160,11 @@
             android:text="له: 0"
             android:textColor="#4CAF50"
             android:textStyle="bold"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_size_body1"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="12sp"
-            android:autoSizeMaxTextSize="22sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_min"
+            android:autoSizeMaxTextSize="@dimen/text_size_max"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
         <TextView
             android:id="@+id/tvTotalDebit"
             android:layout_width="0dp"
@@ -173,11 +173,11 @@
             android:text="عليه: 0"
             android:textColor="#F44336"
             android:textStyle="bold"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_size_body1"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="12sp"
-            android:autoSizeMaxTextSize="22sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_min"
+            android:autoSizeMaxTextSize="@dimen/text_size_max"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
     </LinearLayout>
 
 </LinearLayout> 

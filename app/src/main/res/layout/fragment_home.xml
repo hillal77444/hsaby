@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="@dimen/spacing_standard">
 
     <TextView
         android:id="@+id/text_home"
@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:text="@string/home_fragment_label"
         android:textAlignment="center"
-        android:textSize="20sp"
+        android:textSize="@dimen/text_size_large"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

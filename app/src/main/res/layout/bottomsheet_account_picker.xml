@@ -5,29 +5,29 @@
     android:layout_height="match_parent"
     android:fillViewport="true"
     android:background="@android:color/white"
-    android:paddingTop="12dp"
-    android:paddingBottom="12dp"
+    android:paddingTop="@dimen/padding_12"
+    android:paddingBottom="@dimen/padding_12"
     android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:minHeight="200dp"
+        android:minHeight="@dimen/margin_200"
         android:background="@android:color/white">
 
         <!-- شريط البحث -->
         <EditText
             android:id="@+id/searchEditText"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="@dimen/margin_48"
             android:hint="ابحث عن الحساب..."
             android:drawableStart="@android:drawable/ic_menu_search"
             android:background="@android:color/transparent"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"
+            android:paddingStart="@dimen/padding_16"
+            android:paddingEnd="@dimen/padding_16"
+            android:textSize="@dimen/text_size_16"
+            android:layout_marginBottom="@dimen/margin_8"
             android:inputType="text"
             android:textColor="#000000"
             android:textColorHint="#666666"/>
@@ -39,9 +39,9 @@
             android:layout_height="wrap_content"
             android:overScrollMode="ifContentScrolls"
             android:clipToPadding="false"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:layout_marginBottom="8dp"/>
+            android:paddingStart="@dimen/padding_8"
+            android:paddingEnd="@dimen/padding_8"
+            android:layout_marginBottom="@dimen/margin_8"/>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView> 

@@ -19,20 +19,20 @@
             <!-- رأس الصفحة -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="140dp"
+                android:layout_height="@dimen/height_xl"
                 android:background="@color/info"
                 android:scaleX="2.2"
                 android:scaleY="1.2"
-                android:layout_marginTop="0dp"/>
+                android:layout_marginTop="@dimen/margin_none"/>
 
             <androidx.cardview.widget.CardView
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                app:cardCornerRadius="36dp"
-                app:cardElevation="8dp"
+                android:layout_width="@dimen/width_large"
+                android:layout_height="@dimen/height_large"
+                app:cardCornerRadius="@dimen/corner_radius_large"
+                app:cardElevation="@dimen/elevation_medium"
                 app:cardBackgroundColor="#FFFFFF"
                 android:layout_gravity="center"
-                android:layout_marginTop="-100dp">
+                android:layout_marginTop="@dimen/minus_100dp">
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -45,60 +45,60 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="إضافة حساب جديد"
-                android:textSize="22sp"
+                android:textSize="@dimen/text_size_headline1"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
                 android:layout_gravity="center"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/margin_small"
                 android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="8sp"
-                android:autoSizeMaxTextSize="24sp"
-                android:autoSizeStepGranularity="2sp" />
+                android:autoSizeMinTextSize="@dimen/text_size_min"
+                android:autoSizeMaxTextSize="@dimen/text_size_max"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="يرجى تعبئة بيانات الحساب بدقة"
-                android:textSize="14sp"
+                android:textSize="@dimen/text_size_body2"
                 android:textColor="#666666"
                 android:layout_gravity="center"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginTop="@dimen/margin_xs"
+                android:layout_marginBottom="@dimen/margin_large"
                 android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="8sp"
-                android:autoSizeMaxTextSize="24sp"
-                android:autoSizeStepGranularity="2sp" />
+                android:autoSizeMinTextSize="@dimen/text_size_min"
+                android:autoSizeMaxTextSize="@dimen/text_size_max"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
             <!-- البطاقة -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="32dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
+                android:layout_marginStart="@dimen/margin_medium"
+                android:layout_marginEnd="@dimen/margin_medium"
+                android:layout_marginBottom="@dimen/margin_xl"
+                app:cardCornerRadius="@dimen/corner_radius_medium"
+                app:cardElevation="@dimen/elevation_small"
                 app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/spacing_standard">
 
                     <!-- الاسم -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginBottom="@dimen/margin_small"
                         android:hint="@string/name"
                         app:startIconDrawable="@drawable/ic_person"
                         app:startIconTint="@color/primary"
                         app:boxBackgroundMode="outline"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxCornerRadiusTopStart="@dimen/corner_radius_small"
+                        app:boxCornerRadiusTopEnd="@dimen/corner_radius_small"
+                        app:boxCornerRadiusBottomStart="@dimen/corner_radius_small"
+                        app:boxCornerRadiusBottomEnd="@dimen/corner_radius_small"
                         app:hintTextColor="#666666"
                         app:boxStrokeColor="#1976D2"
                         style="@style/CustomTextInputLayout">
@@ -112,16 +112,16 @@
                             android:textColor="#000000"
                             android:textColorHint="#666666"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_min"
+                            android:autoSizeMaxTextSize="@dimen/text_size_max"
+                            android:autoSizeStepGranularity="@dimen/text_size_step" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- الهاتف -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginBottom="@dimen/margin_small"
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
@@ -133,10 +133,10 @@
                             app:startIconDrawable="@drawable/ic_phone"
                             app:startIconTint="@color/primary"
                             app:boxBackgroundMode="outline"
-                            app:boxCornerRadiusTopStart="12dp"
-                            app:boxCornerRadiusTopEnd="12dp"
-                            app:boxCornerRadiusBottomStart="12dp"
-                            app:boxCornerRadiusBottomEnd="12dp"
+                            app:boxCornerRadiusTopStart="@dimen/corner_radius_small"
+                            app:boxCornerRadiusTopEnd="@dimen/corner_radius_small"
+                            app:boxCornerRadiusBottomStart="@dimen/corner_radius_small"
+                            app:boxCornerRadiusBottomEnd="@dimen/corner_radius_small"
                             app:hintTextColor="#666666"
                             app:boxStrokeColor="#1976D2"
                             style="@style/CustomTextInputLayout">
@@ -150,31 +150,31 @@
                                 android:textColor="#000000"
                                 android:textColorHint="#666666"
                                 android:autoSizeTextType="uniform"
-                                android:autoSizeMinTextSize="8sp"
-                                android:autoSizeMaxTextSize="24sp"
-                                android:autoSizeStepGranularity="2sp" />
+                                android:autoSizeMinTextSize="@dimen/text_size_min"
+                                android:autoSizeMaxTextSize="@dimen/text_size_max"
+                                android:autoSizeStepGranularity="@dimen/text_size_step" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/contacts_button"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:layout_marginStart="8dp"
-                            android:insetLeft="0dp"
-                            android:insetTop="0dp"
-                            android:insetRight="0dp"
-                            android:insetBottom="0dp"
-                            android:padding="12dp"
+                            android:layout_width="@dimen/icon_size_xl"
+                            android:layout_height="@dimen/icon_size_xl"
+                            android:layout_marginStart="@dimen/margin_small"
+                            android:insetLeft="@dimen/padding_none"
+                            android:insetTop="@dimen/padding_none"
+                            android:insetRight="@dimen/padding_none"
+                            android:insetBottom="@dimen/padding_none"
+                            android:padding="@dimen/padding_small"
                             app:icon="@drawable/ic_contacts"
                             app:iconTint="@color/primary"
                             app:iconGravity="textStart"
-                            app:iconPadding="0dp"
-                            app:cornerRadius="24dp"
+                            app:iconPadding="@dimen/padding_none"
+                            app:cornerRadius="@dimen/corner_radius_medium"
                             android:backgroundTint="#E3F2FD"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_min"
+                            android:autoSizeMaxTextSize="@dimen/text_size_max"
+                            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                     </LinearLayout>
 
@@ -182,16 +182,16 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginBottom="@dimen/margin_small"
                         android:hint="@string/opening_balance"
                         android:visibility="gone"
                         app:startIconDrawable="@drawable/ic_money"
                         app:startIconTint="@color/primary"
                         app:boxBackgroundMode="outline"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxCornerRadiusTopStart="@dimen/corner_radius_small"
+                        app:boxCornerRadiusTopEnd="@dimen/corner_radius_small"
+                        app:boxCornerRadiusBottomStart="@dimen/corner_radius_small"
+                        app:boxCornerRadiusBottomEnd="@dimen/corner_radius_small"
                         app:hintTextColor="#666666"
                         app:boxStrokeColor="#1976D2"
                         style="@style/CustomTextInputLayout">
@@ -204,24 +204,24 @@
                             android:textColor="#000000"
                             android:textColorHint="#666666"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_caption"
+                            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                            android:autoSizeStepGranularity="@dimen/text_size_step" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- الملاحظات (مخفاة فقط) -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginBottom="@dimen/margin_small"
                         android:hint="@string/notes"
                         app:startIconDrawable="@drawable/ic_note"
                         app:startIconTint="@color/primary"
                         app:boxBackgroundMode="outline"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxCornerRadiusTopStart="@dimen/corner_radius_small"
+                        app:boxCornerRadiusTopEnd="@dimen/corner_radius_small"
+                        app:boxCornerRadiusBottomStart="@dimen/corner_radius_small"
+                        app:boxCornerRadiusBottomEnd="@dimen/corner_radius_small"
                         app:hintTextColor="#666666"
                         app:boxStrokeColor="#1976D2"
                         style="@style/CustomTextInputLayout">
@@ -235,9 +235,9 @@
                             android:textColor="#000000"
                             android:textColorHint="#666666"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_caption"
+                            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                            android:autoSizeStepGranularity="@dimen/text_size_step" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- خيار واتساب -->
@@ -245,8 +245,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginTop="@dimen/margin_small"
+                        android:layout_marginBottom="@dimen/margin_small">
 
                         <androidx.appcompat.widget.SwitchCompat
                             android:id="@+id/whatsapp_switch"
@@ -256,26 +256,26 @@
                             android:textColor="@color/primary"
                             android:checked="true"
                             android:textAppearance="?attr/textAppearanceBody1"
-                            android:minHeight="48dp"
-                            android:paddingStart="0dp"
-                            android:paddingEnd="0dp"
+                            android:minHeight="@dimen/height_small"
+                            android:paddingStart="@dimen/padding_none"
+                            android:paddingEnd="@dimen/padding_none"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_min"
+                            android:autoSizeMaxTextSize="@dimen/text_size_max"
+                            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="48dp"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginStart="@dimen/margin_xl"
+                            android:layout_marginTop="@dimen/margin_xs"
                             android:text="سيتم إرسال إشعارات واتساب للعميل عند إضافة معاملات جديدة"
-                            android:textSize="12sp"
+                            android:textSize="@dimen/text_size_caption"
                             android:textColor="#666666"
                             android:autoSizeTextType="uniform"
-                            android:autoSizeMinTextSize="8sp"
-                            android:autoSizeMaxTextSize="24sp"
-                            android:autoSizeStepGranularity="2sp" />
+                            android:autoSizeMinTextSize="@dimen/text_size_min"
+                            android:autoSizeMaxTextSize="@dimen/text_size_max"
+                            android:autoSizeStepGranularity="@dimen/text_size_step" />
                     </LinearLayout>
 
                     <!-- أزرار -->
@@ -283,27 +283,27 @@
                         android:id="@+id/save_button"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="@dimen/margin_small"
                         android:backgroundTint="@color/primary"
                         android:textColor="@android:color/white"
                         android:text="@string/save"
                         android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="8sp"
-                        android:autoSizeMaxTextSize="24sp"
-                        android:autoSizeStepGranularity="2sp" />
+                        android:autoSizeMinTextSize="@dimen/text_size_min"
+                        android:autoSizeMaxTextSize="@dimen/text_size_max"
+                        android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/cancel_button"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="@dimen/spacing_sm"
                         android:text="@string/cancel"
                         android:backgroundTint="#F3F4F6"
                         android:textColor="#222"
                         android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="8sp"
-                        android:autoSizeMaxTextSize="24sp"
-                        android:autoSizeStepGranularity="2sp" />
+                        android:autoSizeMinTextSize="@dimen/text_size_min"
+                        android:autoSizeMaxTextSize="@dimen/text_size_max"
+                        android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

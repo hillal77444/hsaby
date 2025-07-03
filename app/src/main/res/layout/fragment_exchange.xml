@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:padding="@dimen/card_padding"
     android:fitsSystemWindows="true">
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,10 +14,10 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="12dp"
-            android:layout_marginBottom="8dp"
-            app:cardCornerRadius="16dp"
+            android:layout_marginStart="@dimen/margin_small"
+            android:layout_marginEnd="@dimen/margin_small"
+            android:layout_marginBottom="@dimen/padding_small"
+            app:cardCornerRadius="@dimen/corner_radius_medium"
             app:cardElevation="2dp"
             app:cardBackgroundColor="@color/cardBackground">
 
@@ -26,7 +26,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="8dp">
+                android:padding="@dimen/padding_small">
 
                 <!-- اختيار الحساب -->
                 <com.google.android.material.textfield.TextInputLayout
@@ -50,7 +50,7 @@
                         android:inputType="none"
                         android:hint="اختر الحساب"
                         android:drawableEnd="@drawable/ic_arrow_downward"
-                        android:padding="10dp"/>
+                        android:padding="@dimen/padding_medium"/>
                     <TextView
                         android:id="@+id/accountBalanceText"
                         android:layout_width="match_parent"
@@ -68,7 +68,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:paddingStart="8dp">
+                    android:paddingStart="@dimen/padding_small">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -80,7 +80,7 @@
                         android:id="@+id/cashboxSpinner"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="10dp"/>
+                        android:padding="@dimen/padding_medium"/>
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -89,23 +89,23 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="12dp"
-            android:layout_marginBottom="8dp"
-            app:cardCornerRadius="16dp"
+            android:layout_marginStart="@dimen/margin_small"
+            android:layout_marginEnd="@dimen/margin_small"
+            android:layout_marginBottom="@dimen/padding_small"
+            app:cardCornerRadius="@dimen/corner_radius_medium"
             app:cardElevation="2dp"
             app:cardBackgroundColor="@color/cardBackground">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="8dp">
+                android:padding="@dimen/padding_small">
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:paddingEnd="8dp">
+                    android:paddingEnd="@dimen/padding_small">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="اختر العملة التي سيتم خصمها" android:textAppearance="?attr/textAppearanceCaption" android:textColor="@color/textSecondary" android:textSize="@dimen/text_size_caption"/>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -121,7 +121,7 @@
                             android:id="@+id/fromCurrencySpinner"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:padding="10dp" />
+                            android:padding="@dimen/padding_medium" />
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
                 <LinearLayout
@@ -129,7 +129,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:paddingStart="8dp">
+                    android:paddingStart="@dimen/padding_small">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="اختر العملة التي سيتم إضافتها" android:textAppearance="?attr/textAppearanceCaption" android:textColor="@color/textSecondary" android:textSize="@dimen/text_size_caption"/>
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
@@ -143,7 +143,7 @@
                             android:id="@+id/toCurrencySpinner"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:padding="10dp"/>
+                            android:padding="@dimen/padding_medium"/>
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
             </LinearLayout>
@@ -153,17 +153,17 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="12dp"
-            android:layout_marginBottom="8dp"
-            app:cardCornerRadius="16dp"
+            android:layout_marginStart="@dimen/margin_small"
+            android:layout_marginEnd="@dimen/margin_small"
+            android:layout_marginBottom="@dimen/padding_small"
+            app:cardCornerRadius="@dimen/corner_radius_medium"
             app:cardElevation="2dp"
             app:cardBackgroundColor="@color/cardBackground">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="8dp">
+                android:padding="@dimen/padding_small">
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -178,7 +178,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="numberDecimal"
-                        android:padding="10dp"/>
+                        android:padding="@dimen/padding_medium"/>
                 </com.google.android.material.textfield.TextInputLayout>
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="0dp"
@@ -189,13 +189,13 @@
                     app:startIconTint="@color/primary"
                     app:hintTextColor="#666666"
                     app:boxStrokeColor="#1976D2"
-                    android:layout_marginStart="8dp">
+                    android:layout_marginStart="@dimen/margin_xs">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/rateEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="numberDecimal"
-                        android:padding="10dp"/>
+                        android:padding="@dimen/padding_medium"/>
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -204,17 +204,17 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="12dp"
-            android:layout_marginBottom="8dp"
-            app:cardCornerRadius="16dp"
+            android:layout_marginStart="@dimen/margin_small"
+            android:layout_marginEnd="@dimen/margin_small"
+            android:layout_marginBottom="@dimen/padding_small"
+            app:cardCornerRadius="@dimen/corner_radius_medium"
             app:cardElevation="2dp"
             app:cardBackgroundColor="@color/cardBackground">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="8dp">
+                android:padding="@dimen/padding_small">
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -227,7 +227,7 @@
                         android:id="@+id/operationTypeSpinner"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="10dp"/>
+                        android:padding="@dimen/padding_medium"/>
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -236,17 +236,17 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="12dp"
-            android:layout_marginBottom="8dp"
-            app:cardCornerRadius="16dp"
+            android:layout_marginStart="@dimen/margin_small"
+            android:layout_marginEnd="@dimen/margin_small"
+            android:layout_marginBottom="@dimen/padding_small"
+            app:cardCornerRadius="@dimen/corner_radius_medium"
             app:cardElevation="2dp"
             app:cardBackgroundColor="@color/cardBackground">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="8dp">
+                android:padding="@dimen/padding_small">
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -259,15 +259,15 @@
                         android:id="@+id/notesEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="10dp"/>
+                        android:padding="@dimen/padding_medium"/>
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <!-- عرض المبلغ بعد الصرف -->
-        <TextView android:id="@+id/exchangeAmountText" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="المبلغ بعد الصرف: -" android:textColor="#512DA8" android:textStyle="bold" android:layout_marginBottom="16dp"/>
+        <TextView android:id="@+id/exchangeAmountText" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="المبلغ بعد الصرف: -" android:textColor="#512DA8" android:textStyle="bold" aandroid:layout_marginBottom="@dimen/margin_large"/>
 
         <!-- زر تنفيذ الصرف -->
-        <Button android:id="@+id/exchangeButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="تنفيذ الصرف" android:layout_marginBottom="32dp" style="@style/Widget.MaterialComponents.Button"/>
+        <Button android:id="@+id/exchangeButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="تنفيذ الصرف" android:layout_marginBottom="@dimen/margin_xl" style="@style/Widget.MaterialComponents.Button"/>
     </LinearLayout>
 </ScrollView> 

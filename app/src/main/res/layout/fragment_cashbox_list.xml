@@ -3,13 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="@dimen/card_padding">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_cashboxes"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:paddingBottom="8dp"/>
+        android:paddingBottom="@dimen/padding_small"/>
 
 </LinearLayout> 

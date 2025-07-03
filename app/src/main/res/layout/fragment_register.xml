@@ -15,7 +15,7 @@
         <!-- الدائرة العلوية -->
         <View
             android:layout_width="match_parent"
-            android:layout_height="220dp"
+            android:layout_height="@dimen/height_xl"
             android:background="@color/info"
             android:scaleX="2.2"
             android:scaleY="1.2" />
@@ -26,21 +26,26 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="إنشاء حساب جديد"
-            android:textSize="24sp"
+            android:textSize="@dimen/text_size_headline1"
             android:textStyle="bold"
             android:textColor="#FFFFFF"
             android:layout_gravity="center"
-            android:layout_marginTop="-180dp" />
+            android:layout_marginTop="@dimen/negative_margin_title_login"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="@dimen/text_size_caption"
+            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
+        >
 
         <!-- الشعار الدائري -->
         <androidx.cardview.widget.CardView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            app:cardCornerRadius="50dp"
-            app:cardElevation="6dp"
+            android:layout_width="@dimen/icon_size_xl"
+            android:layout_height="@dimen/icon_size_xl"
+            app:cardCornerRadius="@dimen/corner_radius_large"
+            app:cardElevation="@dimen/elevation_medium"
             app:cardBackgroundColor="#FFFFFF"
             android:layout_gravity="center"
-            android:layout_marginTop="12dp">
+            android:layout_marginTop="@dimen/margin_small">
             <ImageView
                 android:id="@+id/logoImage"
                 android:layout_width="match_parent"
@@ -53,18 +58,18 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
+            app:cardCornerRadius="@dimen/corner_radius_medium"
+            app:cardElevation="@dimen/elevation_medium"
             app:cardBackgroundColor="#FFFFFF"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp">
+            android:layout_marginTop="@dimen/margin_small"
+            android:layout_marginStart="@dimen/margin_medium"
+            android:layout_marginEnd="@dimen/margin_medium">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="@dimen/spacing_standard">
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/textInputLayoutDisplayName"
@@ -89,7 +94,7 @@
                     app:startIconDrawable="@drawable/ic_phone"
                     app:hintTextColor="#3F51B5"
                     app:boxStrokeColor="#3F51B5"
-                    android:layout_marginTop="12dp">
+                    android:layout_marginTop="@dimen/margin_small">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextPhone"
                         android:layout_width="match_parent"
@@ -106,7 +111,7 @@
                     app:endIconMode="password_toggle"
                     app:hintTextColor="#3F51B5"
                     app:boxStrokeColor="#3F51B5"
-                    android:layout_marginTop="12dp">
+                    android:layout_marginTop="@dimen/margin_small">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextPassword"
                         android:layout_width="match_parent"
@@ -123,7 +128,7 @@
                     app:endIconMode="password_toggle"
                     app:hintTextColor="#3F51B5"
                     app:boxStrokeColor="#3F51B5"
-                    android:layout_marginTop="12dp">
+                    android:layout_marginTop="@dimen/margin_small">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextConfirmPassword"
                         android:layout_width="match_parent"
@@ -143,15 +148,15 @@
             android:backgroundTint="#152FD9"
             android:textColor="#FFFFFF"
             android:textStyle="bold"
-            app:iconPadding="8dp"
-            app:cornerRadius="12dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
+            app:iconPadding="@dimen/padding_small"
+            app:cornerRadius="@dimen/corner_radius_medium"
+            android:layout_marginTop="@dimen/margin_large"
+            android:layout_marginStart="@dimen/margin_large"
+            android:layout_marginEnd="@dimen/margin_large"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="8sp"
-            android:autoSizeMaxTextSize="24sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_caption"
+            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
         <!-- زر العودة لتسجيل الدخول -->
         <com.google.android.material.button.MaterialButton
@@ -162,7 +167,7 @@
             android:backgroundTint="#152FD9"
             android:textColor="#FFFFFF"
             android:layout_gravity="center"
-            android:layout_marginTop="12dp" />
+            android:layout_marginTop="@dimen/margin_small" />
 
         <!-- العناصر المخفية (مثال: ProgressBar) -->
         <ProgressBar
@@ -171,7 +176,7 @@
             android:layout_height="wrap_content"
             android:visibility="gone"
             android:layout_gravity="center"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="@dimen/margin_small" />
 
     </LinearLayout>
 

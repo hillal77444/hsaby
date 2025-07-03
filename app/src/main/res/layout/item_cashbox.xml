@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="12dp"
+    android:padding="@dimen/padding_medium"
     android:background="@drawable/bg_account_picker_item">
 
     <TextView
@@ -12,14 +12,14 @@
         android:layout_height="wrap_content"
         android:text="اسم الصندوق"
         android:textStyle="bold"
-        android:textSize="18sp"/>
+        android:textSize="@dimen/text_size_headline2"/>
 
     <TextView
         android:id="@+id/text_cashbox_created_at"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="تاريخ الإنشاء"
-        android:textSize="14sp"
+        android:textSize="@dimen/text_size_caption"
         android:textColor="#888888"/>
 
 </LinearLayout> 

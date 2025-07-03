@@ -1,0 +1,78 @@
+<resources>
+    <dimen name="margin_xs">14dp</dimen>
+    <dimen name="margin_small">18dp</dimen>
+    <dimen name="margin_medium">22dp</dimen>
+    <dimen name="margin_large">26dp</dimen>
+    <dimen name="margin_xl">36dp</dimen>
+    <dimen name="margin_xxl">44dp</dimen>
+    <dimen name="margin_xxxl">52dp</dimen>
+    <dimen name="margin_xxs">10dp</dimen>
+    <dimen name="margin_none">0dp</dimen>
+
+    <dimen name="padding_xs">14dp</dimen>
+    <dimen name="padding_small">18dp</dimen>
+    <dimen name="padding_medium">22dp</dimen>
+    <dimen name="padding_large">26dp</dimen>
+    <dimen name="padding_xl">36dp</dimen>
+    <dimen name="padding_xxl">44dp</dimen>
+    <dimen name="padding_xxs">10dp</dimen>
+    <dimen name="padding_none">0dp</dimen>
+
+    <dimen name="text_size_xs">19sp</dimen>
+    <dimen name="text_size_small">20sp</dimen>
+    <dimen name="text_size_medium">22sp</dimen>
+    <dimen name="text_size_large">24sp</dimen>
+    <dimen name="text_size_xl">26sp</dimen>
+    <dimen name="text_size_xxl">28sp</dimen>
+    <dimen name="text_size_xxxl">30sp</dimen>
+    <dimen name="text_size_body1">24sp</dimen>
+    <dimen name="text_size_body2">20sp</dimen>
+    <dimen name="text_size_min">8sp</dimen>
+    <dimen name="text_size_max">28sp</dimen>
+    <dimen name="text_size_step">1sp</dimen>
+
+    <dimen name="corner_radius_small">16dp</dimen>
+    <dimen name="corner_radius_medium">18dp</dimen>
+    <dimen name="corner_radius_large">22dp</dimen>
+    <dimen name="corner_radius_xl">26dp</dimen>
+    <dimen name="corner_radius_xxl">36dp</dimen>
+
+    <dimen name="elevation_small">6dp</dimen>
+    <dimen name="elevation_medium">10dp</dimen>
+    <dimen name="elevation_large">20dp</dimen>
+
+    <dimen name="height_small">56dp</dimen>
+    <dimen name="height_medium">70dp</dimen>
+    <dimen name="height_large">90dp</dimen>
+    <dimen name="height_xl">160dp</dimen>
+    <dimen name="height_xxl">220dp</dimen>
+
+    <dimen name="width_small">44dp</dimen>
+    <dimen name="width_medium">70dp</dimen>
+    <dimen name="width_large">90dp</dimen>
+    <dimen name="width_xl">160dp</dimen>
+    <dimen name="width_xxl">220dp</dimen>
+
+    <dimen name="nav_header_height">220dp</dimen>
+    <dimen name="nav_header_vertical_spacing">14dp</dimen>
+    <dimen name="nav_header_text_size">28sp</dimen>
+    <dimen name="activity_horizontal_margin">28dp</dimen>
+    <dimen name="activity_vertical_margin">28dp</dimen>
+    <dimen name="fab_margin">28dp</dimen>
+    <dimen name="screen_padding">44dp</dimen>
+    <dimen name="card_margin">28dp</dimen>
+    <dimen name="card_spacing">22dp</dimen>
+    <dimen name="card_padding">28dp</dimen>
+    <dimen name="card_corner_radius">32dp</dimen>
+    <dimen name="icon_size">100dp</dimen>
+    <dimen name="icon_size_xl">90dp</dimen>
+    <dimen name="button_min_height">90dp</dimen>
+    <dimen name="button_corner_radius">32dp</dimen>
+    <dimen name="minus_120dp">-160dp</dimen>
+    <!-- أبعاد قياسية لجميع الشاشات: استخدمها للمسافات والهوامش الموحدة -->
+    <dimen name="spacing_standard">24dp</dimen>
+    <dimen name="spacing_medium">28dp</dimen>
+    <dimen name="spacing_large">36dp</dimen>
+    <!-- هامش سالب خاص بعنوان شاشة تسجيل الدخول -->
+    <dimen name="negative_margin_title_login">-80dp</dimen>
+</resources> 

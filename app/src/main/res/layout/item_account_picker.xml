@@ -3,33 +3,33 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
+    android:layout_marginBottom="@dimen/margin_small"
+    android:layout_marginStart="@dimen/margin_xs"
+    android:layout_marginEnd="@dimen/margin_small"
     android:background="#FFFFFF"
-    android:elevation="4dp"
-    android:radius="18dp">
+    android:elevation="@dimen/elevation_small"
+    android:radius="@dimen/corner_radius_large">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="12dp"
+        android:padding="@dimen/padding_medium"
         android:background="#FFFFFF"
         android:gravity="center_vertical">
 
         <!-- دائرة أيقونة الحساب -->
         <TextView
             android:id="@+id/accountIconTextView"
-            android:layout_width="54dp"
-            android:layout_height="54dp"
+            android:layout_width="@dimen/icon_size_xl"
+            android:layout_height="@dimen/icon_size_xl"
             android:gravity="center"
             android:text="م"
-            android:textSize="22sp"
+            android:textSize="@dimen/text_size_body1"
             android:textColor="#fff"
             android:background="@drawable/bg_account_icon_circle"
-            android:elevation="2dp"
-            android:layout_marginEnd="14dp"/>
+            android:elevation="@dimen/elevation_small"
+            android:layout_marginEnd="@dimen/margin_small"/>
 
         <LinearLayout
             android:layout_width="0dp"
@@ -42,26 +42,26 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="اسم الحساب"
-                android:textSize="19sp"
+                android:textSize="@dimen/text_size_body1"
                 android:textColor="#222"
                 android:textStyle="bold"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:layout_marginBottom="4dp"/>
+                android:layout_marginBottom="@dimen/margin_xs"/>
 
             <!-- ملاحظات الحساب في الطرف الآخر -->
             <TextView
                 android:id="@+id/accountNotesTextView"
-                android:layout_width="200dp"
-                android:maxWidth="250dp"
+                android:layout_width="match_parent"
+                android:maxWidth="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="top|end"
                 android:text=""
-                android:textSize="13sp"
+                android:textSize="@dimen/text_size_small"
                 android:textColor="#D32F2F"
                 android:background="@android:color/transparent"
-                android:elevation="2dp"
-                android:layout_marginStart="12dp"
+                android:elevation="@dimen/elevation_small"
+                android:layout_marginStart="@dimen/margin_small"
                 android:visibility="gone"
                 android:maxLines="3"
                 android:ellipsize="end"/>
@@ -71,7 +71,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="2dp"/>
+                android:layout_marginTop="@dimen/margin_xs"/>
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView> 

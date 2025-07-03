@@ -8,20 +8,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="@dimen/card_padding">
 
         <!-- إعدادات أخرى -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="الإعدادات"
-            android:textSize="20sp"
+            android:textSize="@dimen/text_size_20"
             android:textStyle="bold"
-            android:layout_marginBottom="16dp"
+            aandroid:layout_marginBottom="@dimen/margin_large"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="8sp"
-            android:autoSizeMaxTextSize="24sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_caption"
+            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
         <!-- زر تسجيل الخروج في الأعلى -->
         <com.google.android.material.button.MaterialButton
@@ -31,11 +31,11 @@
             android:text="تسجيل الخروج"
             android:textColor="@android:color/white"
             app:backgroundTint="@android:color/holo_red_dark"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="@dimen/margin_xl"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="8sp"
-            android:autoSizeMaxTextSize="24sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_caption"
+            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
         <!-- الأمان -->
         <TextView
@@ -43,11 +43,11 @@
             android:layout_height="wrap_content"
             android:text="@string/settings_security"
             android:textAppearance="?attr/textAppearanceHeadline6"
-            android:layout_marginBottom="16dp"
+            aandroid:layout_marginBottom="@dimen/margin_large"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="8sp"
-            android:autoSizeMaxTextSize="24sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_caption"
+            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switchEncryption"
@@ -56,9 +56,9 @@
             android:text="@string/settings_encryption"
             android:layout_marginBottom="8dp"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="8sp"
-            android:autoSizeMaxTextSize="24sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_caption"
+            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
         <!-- سياسة الخصوصية -->
         <TextView
@@ -66,34 +66,34 @@
             android:layout_height="wrap_content"
             android:text="@string/settings_about"
             android:textAppearance="?attr/textAppearanceHeadline6"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginTop="@dimen/margin_xl"
+            aandroid:layout_marginBottom="@dimen/margin_large"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="8sp"
-            android:autoSizeMaxTextSize="24sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_caption"
+            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonPrivacyPolicy"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/privacy_policy"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="@dimen/margin_small"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="8sp"
-            android:autoSizeMaxTextSize="24sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_caption"
+            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonAbout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/about_app"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="@dimen/margin_small"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="8sp"
-            android:autoSizeMaxTextSize="24sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_caption"
+            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
         <TextView
             android:id="@+id/textViewVersion"
@@ -101,12 +101,12 @@
             android:layout_height="wrap_content"
             android:text="@string/app_version"
             android:gravity="center"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="@dimen/margin_large"
             android:layout_marginBottom="8dp"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="8sp"
-            android:autoSizeMaxTextSize="24sp"
-            android:autoSizeStepGranularity="2sp" />
+            android:autoSizeMinTextSize="@dimen/text_size_caption"
+            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+            android:autoSizeStepGranularity="@dimen/text_size_step" />
 
     </LinearLayout>
 </ScrollView> 

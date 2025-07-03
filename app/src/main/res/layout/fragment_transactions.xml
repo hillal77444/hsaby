@@ -18,19 +18,19 @@
             <!-- الدائرة العلوية والشعار والعنوان -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="160dp"
+                android:layout_height="@dimen/height_xl"
                 android:background="@color/info"
                 android:scaleX="2.2"
                 android:scaleY="1.2" />
 
             <androidx.cardview.widget.CardView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                app:cardCornerRadius="40dp"
-                app:cardElevation="8dp"
+                android:layout_width="@dimen/width_large"
+                android:layout_height="@dimen/height_large"
+                app:cardCornerRadius="@dimen/corner_radius_xl"
+                app:cardElevation="@dimen/elevation_large"
                 app:cardBackgroundColor="#FFFFFF"
                 android:layout_gravity="center"
-                android:layout_marginTop="-120dp">
+                android:layout_marginTop="@dimen/minus_120dp">
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -43,45 +43,45 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="عرض وإدارة جميع المعاملات المالية"
-                android:textSize="14sp"
+                android:textSize="@dimen/text_size_body2"
                 android:textColor="#FFFFFF"
                 android:layout_gravity="center"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginTop="@dimen/margin_xs"
+                android:layout_marginBottom="@dimen/margin_large" />
 
             <!-- قسم التصفية والفلترة -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="@dimen/corner_radius_large"
+                app:cardElevation="@dimen/elevation_medium"
+                android:layout_marginStart="@dimen/margin_medium"
+                android:layout_marginEnd="@dimen/margin_medium"
+                android:layout_marginBottom="@dimen/margin_large"
                 app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="@dimen/padding_medium">
 
                     <!-- تصفية حسب الحساب -->
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginBottom="@dimen/margin_small"
                         android:textColorHint="#666666"
                         android:hint="اختر الحساب"
                         app:startIconDrawable="@drawable/ic_accounts"
                         app:startIconTint="#152FD9"
                         app:boxStrokeColor="#152FD9"
                         app:hintTextColor="#152FD9"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp">
+                        app:boxCornerRadiusTopStart="@dimen/corner_radius_medium"
+                        app:boxCornerRadiusTopEnd="@dimen/corner_radius_medium"
+                        app:boxCornerRadiusBottomStart="@dimen/corner_radius_medium"
+                        app:boxCornerRadiusBottomEnd="@dimen/corner_radius_medium">
 
                         <AutoCompleteTextView
                             android:id="@+id/accountFilterDropdown"
@@ -91,7 +91,7 @@
                             android:inputType="text"
                             android:maxLines="1"
                             android:singleLine="true"
-                            android:textSize="14sp"
+                            android:textSize="@dimen/text_size_body2"
                             android:textColor="#152FD9" />
 
                     </com.google.android.material.textfield.TextInputLayout>
@@ -101,9 +101,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="الفترة الزمنية:"
-                        android:textSize="14sp"
+                        android:textSize="@dimen/text_size_body2"
                         android:textColor="#666"
-                        android:layout_marginBottom="8dp" />
+                        android:layout_marginBottom="@dimen/margin_small" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -116,17 +116,17 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginEnd="8dp"
+                            android:layout_marginEnd="@dimen/margin_small"
                             android:hint="@string/from_date"
                             android:textColorHint="#666666"
                             app:startIconDrawable="@drawable/ic_calendar"
                             app:startIconTint="#152FD9"
                             app:boxStrokeColor="#152FD9"
                             app:hintTextColor="#152FD9"
-                            app:boxCornerRadiusTopStart="12dp"
-                            app:boxCornerRadiusTopEnd="12dp"
-                            app:boxCornerRadiusBottomStart="12dp"
-                            app:boxCornerRadiusBottomEnd="12dp">
+                            app:boxCornerRadiusTopStart="@dimen/corner_radius_medium"
+                            app:boxCornerRadiusTopEnd="@dimen/corner_radius_medium"
+                            app:boxCornerRadiusBottomStart="@dimen/corner_radius_medium"
+                            app:boxCornerRadiusBottomEnd="@dimen/corner_radius_medium">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/startDateFilter"
@@ -144,17 +144,17 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="8dp"
+                            android:layout_marginStart="@dimen/margin_small"
                             android:hint="@string/to_date"
                             android:textColorHint="#666666"
                             app:startIconDrawable="@drawable/ic_calendar"
                             app:startIconTint="#152FD9"
                             app:boxStrokeColor="#152FD9"
                             app:hintTextColor="#152FD9"
-                            app:boxCornerRadiusTopStart="12dp"
-                            app:boxCornerRadiusTopEnd="12dp"
-                            app:boxCornerRadiusBottomStart="12dp"
-                            app:boxCornerRadiusBottomEnd="12dp">
+                            app:boxCornerRadiusTopStart="@dimen/corner_radius_medium"
+                            app:boxCornerRadiusTopEnd="@dimen/corner_radius_medium"
+                            app:boxCornerRadiusBottomStart="@dimen/corner_radius_medium"
+                            app:boxCornerRadiusBottomEnd="@dimen/corner_radius_medium">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/endDateFilter"
@@ -178,16 +178,16 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="@dimen/margin_large">
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
-                    android:layout_height="60dp"
+                    android:layout_height="@dimen/height_large"
                     android:layout_weight="1"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="2dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="4dp"
+                    app:cardCornerRadius="@dimen/corner_radius_medium"
+                    app:cardElevation="@dimen/elevation_small"
+                    android:layout_marginStart="@dimen/margin_small"
+                    android:layout_marginEnd="@dimen/margin_xs"
                     app:cardBackgroundColor="#E3F9F1">
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -201,24 +201,24 @@
                             android:text="0"
                             android:textStyle="bold"
                             android:textColor="#152FD9"
-                            android:textSize="16sp" />
+                            android:textSize="@dimen/text_size_body1" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="إجمالي القيود"
                             android:textColor="#666"
-                            android:textSize="10sp" />
+                            android:textSize="@dimen/text_size_caption" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
-                    android:layout_height="60dp"
+                    android:layout_height="@dimen/height_large"
                     android:layout_weight="1"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="2dp"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginEnd="8dp"
+                    app:cardCornerRadius="@dimen/corner_radius_medium"
+                    app:cardElevation="@dimen/elevation_small"
+                    android:layout_marginStart="@dimen/margin_xs"
+                    android:layout_marginEnd="@dimen/margin_small"
                     app:cardBackgroundColor="#E3E8FD">
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -232,13 +232,13 @@
                             android:text="0"
                             android:textStyle="bold"
                             android:textColor="#152FD9"
-                            android:textSize="16sp" />
+                            android:textSize="@dimen/text_size_body1" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="إجمالي المبالغ"
                             android:textColor="#666"
-                            android:textSize="10sp" />
+                            android:textSize="@dimen/text_size_caption" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
@@ -249,13 +249,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
-                android:padding="8dp"
+                android:padding="@dimen/padding_small"
                 android:nestedScrollingEnabled="false" />
 
             <!-- مساحة للزر العائم -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="140dp" />
+                android:layout_height="@dimen/height_xxl" />
 
         </LinearLayout>
 
@@ -267,8 +267,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="80dp"
+        android:layout_marginEnd="@dimen/margin_medium"
+        android:layout_marginBottom="@dimen/margin_xxxl"
         android:contentDescription="@string/add_transaction"
         app:srcCompat="@drawable/ic_add"
         app:backgroundTint="#152FD9"
@@ -289,30 +289,30 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         android:layout_gravity="center"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp"
+        app:cardCornerRadius="@dimen/corner_radius_large"
+        app:cardElevation="@dimen/elevation_medium"
         app:cardBackgroundColor="#FFFFFF"
-        android:layout_margin="32dp">
+        android:layout_margin="@dimen/margin_xl">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="24dp">
+            android:padding="@dimen/padding_large">
 
             <ImageView
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="@dimen/icon_size"
+                android:layout_height="@dimen/icon_size"
                 android:src="@drawable/ic_transactions"
                 android:tint="#CCCCCC"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="@dimen/margin_large" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/no_transactions"
-                android:textSize="16sp"
+                android:textSize="@dimen/text_size_body2"
                 android:textColor="#666"
                 android:textAlignment="center" />
 

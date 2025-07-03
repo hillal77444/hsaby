@@ -5,7 +5,7 @@
     android:background="#FFFFFF"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="32dp">
+    android:paddingBottom="@dimen/margin_xxl">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
@@ -19,17 +19,17 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="10dp"
-        app:cardElevation="2dp"
-        android:layout_margin="6dp"
+        app:cardCornerRadius="@dimen/corner_radius_medium"
+        app:cardElevation="@dimen/elevation_medium"
+        android:layout_margin="@dimen/margin_small"
         app:cardBackgroundColor="#FFFFFF"
-        android:minHeight="60dp">
+        android:minHeight="@dimen/height_medium">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:padding="@dimen/padding_medium">
 
             <!-- اختيار الحساب وزر الطباعة -->
             <LinearLayout
@@ -41,12 +41,12 @@
                 <AutoCompleteTextView
                     android:id="@+id/accountDropdown"
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="@dimen/height_small"
                     android:layout_weight="1"
                     android:hint="اختر الحساب"
                     android:background="@drawable/bg_edittext"
-                    android:padding="0dp"
-                    android:textSize="13sp"
+                    android:padding="@dimen/padding_none"
+                    android:textSize="@dimen/text_size_body2"
                     android:inputType="none"
                     android:focusable="false"
                     android:gravity="center"
@@ -60,13 +60,13 @@
 
                 <ImageButton
                     android:id="@+id/btnPrintInCard"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="@dimen/height_medium"
+                    android:layout_height="@dimen/height_medium"
                     android:background="@drawable/bg_print_button"
                     android:src="@drawable/ic_print"
                     android:tint="#1976d2"
                     android:contentDescription="طباعة"
-                    android:layout_marginStart="8dp"/>
+                    android:layout_marginStart="@dimen/margin_small"/>
             </LinearLayout>
 
             <!-- التواريخ بشكل أفقي ومضغوط -->
@@ -75,60 +75,60 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical|end"
-                android:layout_marginTop="2dp">
+                android:layout_marginTop="@dimen/margin_xxs">
 
                 <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
+                    android:layout_height="@dimen/height_medium"
                     android:text="من"
                     android:gravity="center"
-                    android:textSize="15sp"
+                    android:textSize="@dimen/text_size_body1"
                     android:textColor="#666666"
-                    android:paddingHorizontal="4dp"/>
+                    android:paddingHorizontal="@dimen/padding_small"/>
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/startDateInput"
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="@dimen/height_medium"
                     android:layout_weight="1"
                     android:background="@drawable/bg_edittext"
                     android:focusable="false"
                     android:gravity="center"
                     android:drawableStart="@drawable/ic_calendar"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/text_size_body2"
                     style="@style/CustomTextInputEditText"
                     android:textColor="#000000"
                     android:textColorHint="#666666"
                     android:maxLines="1"
                     android:ellipsize="end"
-                    android:padding="0dp"
+                    android:padding="@dimen/padding_none"
                     android:text="2024-06-01"/>
 
                 <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
+                    android:layout_height="@dimen/height_medium"
                     android:text="الى"
                     android:gravity="center"
-                    android:textSize="15sp"
+                    android:textSize="@dimen/text_size_body1"
                     android:textColor="#666666"
-                    android:paddingHorizontal="4dp"/>
+                    android:paddingHorizontal="@dimen/padding_small"/>
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/endDateInput"
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="@dimen/height_medium"
                     android:layout_weight="1"
                     android:background="@drawable/bg_edittext"
                     android:focusable="false"
                     android:gravity="center"
                     android:drawableStart="@drawable/ic_calendar"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/text_size_body2"
                     style="@style/CustomTextInputEditText"
                     android:textColor="#000000"
                     android:textColorHint="#666666"
                     android:maxLines="1"
                     android:ellipsize="end"
-                    android:padding="0dp"
+                    android:padding="@dimen/padding_none"
                     android:text="2024-06-30"/>
             </LinearLayout>
 
@@ -139,7 +139,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/margin_xs"
                 android:visibility="gone"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
@@ -151,5 +151,5 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:background="#FFFFFF"
-        android:layout_margin="8dp"/>
+        android:layout_margin="@dimen/margin_small"/>
 </LinearLayout>
