@@ -72,11 +72,11 @@ def format_last_seen(last_seen_dt):
     if last_seen_dt is None:
         return "غير متاح", "text-muted"
     
-    now = get_yemen_time()
+    now = datetime.now()  # بدون توقيت اليمن
 
     # Make last_seen_dt timezone-aware if it's naive
     if last_seen_dt.tzinfo is None or last_seen_dt.tzinfo.utcoffset(last_seen_dt) is None:
-        last_seen_dt = last_seen_dt.replace(tzinfo=YEMEN_TIMEZONE)
+        last_seen_dt = last_seen_dt.replace(tzinfo=None)  # لا تضف timezone
 
     diff = now - last_seen_dt
     
