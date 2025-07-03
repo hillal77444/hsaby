@@ -200,23 +200,33 @@ def logout():
 @admin.route('/api/admin/dashboard')
 @admin_required
 def dashboard():
-    # إحصائيات عامة
     total_users = User.query.count()
     total_accounts = Account.query.count()
     total_transactions = Transaction.query.count()
-    
-    # إحصائيات اليوم
+
     today = datetime.now(YEMEN_TIMEZONE).date()
-    today_transactions = Transaction.query.filter(
-        func.date(Transaction.date) == today
-    ).count()
-    
-    # إحصائيات الأسبوع
     week_ago = today - timedelta(days=7)
-    weekly_transactions = Transaction.query.filter(
-        func.date(Transaction.date) >= week_ago
-    ).count()
-    
+    today_str = str(today)
+    week_ago_str = str(week_ago)
+
+    from sqlalchemy import case
+    # منطق ذكي لدعم جميع أنواع التواريخ في SQL
+    date_group = case(
+        (func.typeof(Transaction.date) == 'integer', func.date(func.datetime(Transaction.date / 1000, 'unixepoch'))),
+        (func.typeof(Transaction.date) == 'text', func.date(Transaction.date)),
+        else_=func.date(Transaction.date)
+    )
+
+    # إحصائيات اليوم
+    today_transactions = db.session.query(func.count(Transaction.id)).filter(
+        date_group == today_str
+    ).scalar()
+
+    # إحصائيات الأسبوع
+    weekly_transactions = db.session.query(func.count(Transaction.id)).filter(
+        date_group >= week_ago_str
+    ).scalar()
+
     # إحصائيات العملات
     currency_stats = db.session.query(
         Transaction.currency,
@@ -224,7 +234,7 @@ def dashboard():
         func.sum(case((Transaction.type == 'credit', Transaction.amount), else_=0)).label('credits'),
         func.sum(case((Transaction.type == 'debit', Transaction.amount), else_=0)).label('debits')
     ).group_by(Transaction.currency).all()
-    
+
     return render_template('admin/dashboard.html',
                          total_users=total_users,
                          total_accounts=total_accounts,
@@ -353,44 +363,86 @@ def transactions():
 @admin.route('/api/admin/statistics')
 @admin_required
 def statistics():
-    # إحصائيات المستخدمين
     total_users = User.query.count()
-    
-    # إحصائيات الحسابات
     total_accounts = Account.query.count()
-    account_stats = db.session.query(
-        func.date(Account.created_at).label('date'),
-        func.count(Account.id).label('count')
-    ).group_by(func.date(Account.created_at)).all()
-    
-    # إحصائيات المعاملات
     total_transactions = Transaction.query.count()
-    transaction_stats = db.session.query(
-        func.date(Transaction.date).label('date'),
-        func.count(Transaction.id).label('count'),
+    from sqlalchemy import case, func
+    today = datetime.now(YEMEN_TIMEZONE).date()
+    week_ago = today - timedelta(days=6)
+    week_ago_str = str(week_ago)
+
+    # منطق ذكي لتجميع التواريخ في SQLite
+    account_date_group = case(
+        (func.typeof(Account.created_at) == 'integer', func.date(func.datetime(Account.created_at / 1000, 'unixepoch'))),
+        (func.typeof(Account.created_at) == 'text', func.date(Account.created_at)),
+        else_=func.date(Account.created_at)
+    )
+    txn_date_group = case(
+        (func.typeof(Transaction.date) == 'integer', func.date(func.datetime(Transaction.date / 1000, 'unixepoch'))),
+        (func.typeof(Transaction.date) == 'text', func.date(Transaction.date)),
+        else_=func.date(Transaction.date)
+    )
+
+    # استعلام فرعي لإحصائيات الحسابات
+    account_subq = db.session.query(
+        account_date_group.label('date'),
+        func.count(Account.id).label('accounts_count')
+    ).filter(account_date_group >= week_ago_str).group_by(account_date_group).subquery()
+
+    # استعلام فرعي لإحصائيات المعاملات
+    txn_subq = db.session.query(
+        txn_date_group.label('date'),
+        func.count(Transaction.id).label('transactions_count'),
         func.sum(case((Transaction.type == 'credit', Transaction.amount), else_=0)).label('credits'),
         func.sum(case((Transaction.type == 'debit', Transaction.amount), else_=0)).label('debits')
-    ).group_by(func.date(Transaction.date)).all()
-    
-    # إحصائيات العملات
+    ).filter(txn_date_group >= week_ago_str).group_by(txn_date_group).subquery()
+
+    # دمج النتائج في SQL (FULL OUTER JOIN محاكى)
+    merged_query = db.session.query(
+        func.coalesce(account_subq.c.date, txn_subq.c.date).label('date'),
+        account_subq.c.accounts_count,
+        txn_subq.c.transactions_count,
+        txn_subq.c.credits,
+        txn_subq.c.debits
+    ).outerjoin(
+        txn_subq, account_subq.c.date == txn_subq.c.date
+    ).union_all(
+        db.session.query(
+            func.coalesce(account_subq.c.date, txn_subq.c.date).label('date'),
+            account_subq.c.accounts_count,
+            txn_subq.c.transactions_count,
+            txn_subq.c.credits,
+            txn_subq.c.debits
+        ).outerjoin(
+            account_subq, txn_subq.c.date == account_subq.c.date
+        ).filter(account_subq.c.date == None)
+    ).order_by('date')
+
+    merged_stats = []
+    for row in merged_query:
+        merged_stats.append({
+            'date': datetime.strptime(str(row.date), '%Y-%m-%d'),
+            'accounts_count': row.accounts_count or 0,
+            'transactions_count': row.transactions_count or 0,
+            'credits': row.credits or 0,
+            'debits': row.debits or 0
+        })
+
+    # إحصائيات العملات كما هي
     currency_stats = db.session.query(
         Transaction.currency,
         func.count(Transaction.id).label('count'),
         func.sum(case((Transaction.type == 'credit', Transaction.amount), else_=0)).label('credits'),
         func.sum(case((Transaction.type == 'debit', Transaction.amount), else_=0)).label('debits')
     ).group_by(Transaction.currency).all()
-    
-    # تحويل التواريخ إلى كائنات datetime
-    account_stats = [{'date': datetime.strptime(str(stat.date), '%Y-%m-%d'), 'count': stat.count} for stat in account_stats]
-    transaction_stats = [{'date': datetime.strptime(str(stat.date), '%Y-%m-%d'), 'count': stat.count, 'credits': stat.credits or 0, 'debits': stat.debits or 0} for stat in transaction_stats]
-    
+
     return render_template('admin/statistics.html',
                          total_users=total_users,
                          total_accounts=total_accounts,
                          total_transactions=total_transactions,
-                         account_stats=account_stats,
-                         transaction_stats=transaction_stats,
+                         merged_stats=merged_stats,
                          currency_stats=currency_stats)
+
 
 # مسارات الواتساب
 @admin.route('/api/admin/whatsapp')
