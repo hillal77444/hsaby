@@ -1,0 +1,46 @@
+<resources>
+    <dimen name="margin_xs">48dp</dimen>
+    <dimen name="margin_small">80dp</dimen>
+    <dimen name="margin_medium">128dp</dimen>
+    <dimen name="margin_large">160dp</dimen>
+    <dimen name="margin_xl">200dp</dimen>
+    <dimen name="margin_xxl">240dp</dimen>
+    <dimen name="margin_xxxl">400dp</dimen>
+
+    <dimen name="padding_xs">48dp</dimen>
+    <dimen name="padding_small">80dp</dimen>
+    <dimen name="padding_medium">128dp</dimen>
+    <dimen name="padding_large">160dp</dimen>
+    <dimen name="padding_xl">200dp</dimen>
+    <dimen name="padding_xxl">240dp</dimen>
+
+    <dimen name="text_size_xs">64sp</dimen>
+    <dimen name="text_size_small">80sp</dimen>
+    <dimen name="text_size_medium">96sp</dimen>
+    <dimen name="text_size_large">112sp</dimen>
+    <dimen name="text_size_xl">128sp</dimen>
+    <dimen name="text_size_xxl">144sp</dimen>
+    <dimen name="text_size_xxxl">160sp</dimen>
+
+    <dimen name="corner_radius_small">96dp</dimen>
+    <dimen name="corner_radius_medium">128dp</dimen>
+    <dimen name="corner_radius_large">160dp</dimen>
+    <dimen name="corner_radius_xl">200dp</dimen>
+    <dimen name="corner_radius_xxl">240dp</dimen>
+
+    <dimen name="elevation_small">32dp</dimen>
+    <dimen name="elevation_medium">64dp</dimen>
+    <dimen name="elevation_large">128dp</dimen>
+
+    <dimen name="height_small">240dp</dimen>
+    <dimen name="height_medium">400dp</dimen>
+    <dimen name="height_large">600dp</dimen>
+    <dimen name="height_xl">800dp</dimen>
+    <dimen name="height_xxl">1000dp</dimen>
+
+    <dimen name="width_small">240dp</dimen>
+    <dimen name="width_medium">400dp</dimen>
+    <dimen name="width_large">600dp</dimen>
+    <dimen name="width_xl">800dp</dimen>
+    <dimen name="width_xxl">1000dp</dimen>
+</resources> 
