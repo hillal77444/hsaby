@@ -68,18 +68,39 @@ def get_yemen_time():
     return datetime.now(YEMEN_TIMEZONE)
 
 
+
 def format_last_seen(last_seen_dt):
     if last_seen_dt is None:
         return "غير متاح", "text-muted"
     
-    now = datetime.now()  # بدون توقيت اليمن
+    # استخدم UTC في now
+    now = datetime.utcnow().replace(tzinfo=timezone.utc)
 
-    # Make last_seen_dt timezone-aware if it's naive
+    # إذا كان last_seen_dt بدون timezone، اعتبره UTC
     if last_seen_dt.tzinfo is None or last_seen_dt.tzinfo.utcoffset(last_seen_dt) is None:
-        last_seen_dt = last_seen_dt.replace(tzinfo=None)  # لا تضف timezone
+        last_seen_dt = last_seen_dt.replace(tzinfo=timezone.utc)
 
     diff = now - last_seen_dt
-    
+
+    if diff.total_seconds() < 0:
+        # إذا كان في المستقبل، اعرض التاريخ والفارق
+        yemen_time = last_seen_dt.astimezone(YEMEN_TIMEZONE)
+        future_diff = abs(diff)
+        if future_diff < timedelta(minutes=1):
+            msg = "بعد أقل من دقيقة"
+        elif future_diff < timedelta(hours=1):
+            minutes = int(future_diff.total_seconds() / 60)
+            msg = f"بعد {minutes} دقيقة"
+        elif future_diff < timedelta(days=1):
+            hours = int(future_diff.total_seconds() / 3600)
+            msg = f"بعد {hours} ساعة"
+        elif future_diff < timedelta(days=30):
+            days = future_diff.days
+            msg = f"بعد {days} يوم"
+        else:
+            msg = "في المستقبل"
+        return f"{yemen_time.strftime('%Y-%m-%d %H:%M')} ({msg})", "text-warning"
+
     if diff < timedelta(minutes=1):
         return "متصل الآن", "last-seen-active"
     elif diff < timedelta(hours=1):
@@ -92,7 +113,11 @@ def format_last_seen(last_seen_dt):
         days = diff.days
         return f"منذ {days} يوم", "last-seen-recent"
     else:
-        return last_seen_dt.strftime('%Y-%m-%d %H:%M'), "last-seen-inactive"
+        # للعرض فقط، حول لتوقيت اليمن
+        yemen_time = last_seen_dt.astimezone(YEMEN_TIMEZONE)
+        return yemen_time.strftime('%Y-%m-%d %H:%M'), "last-seen-inactive"
+
+
 
 # دالة توليد رابط كشف حساب مؤقت بكود قصير (6 أحرف)
 def generate_short_statement_link(account_id, expires_sec=3600):
