@@ -11,10 +11,10 @@
     <dimen name="screen_padding">24dp</dimen>
     
     <!-- Card dimensions -->
-    <dimen name="card_margin">24dp</dimen>
+    <dimen name="card_margin">16dp</dimen>
     <dimen name="card_spacing">12dp</dimen>
     <dimen name="card_padding">24dp</dimen>
-    <dimen name="card_corner_radius">24dp</dimen>
+    <dimen name="card_corner_radius">16dp</dimen>
     
     <!-- Icon dimensions -->
     <dimen name="icon_size">64dp</dimen>
@@ -44,18 +44,18 @@
 
     <!-- أبعاد النصوص -->
     <dimen name="text_size_headline1">24sp</dimen>
-    <dimen name="text_size_headline2">20sp</dimen>
+    <dimen name="text_size_headline2">16sp</dimen>
     <dimen name="text_size_headline3">18sp</dimen>
     <dimen name="text_size_body1">16sp</dimen>
-    <dimen name="text_size_body2">14sp</dimen>
+    <dimen name="text_size_body2">13sp</dimen>
     <dimen name="text_size_caption">12sp</dimen>
 
     <!-- أبعاد المسافات -->
     <dimen name="spacing_xs">4dp</dimen>
     <dimen name="spacing_sm">8dp</dimen>
     <dimen name="spacing_md">16dp</dimen>
-    <dimen name="spacing_lg">24dp</dimen>
-    <dimen name="spacing_xl">32dp</dimen>
+    <dimen name="spacing_lg">16dp</dimen>
+    <dimen name="spacing_xl">80dp</dimen>
 
     <!-- أبعاد الأزرار -->
     <dimen name="button_padding_horizontal">24dp</dimen>
@@ -105,4 +105,139 @@
     <dimen name="_16ssp">16sp</dimen>
     <dimen name="_18ssp">18sp</dimen>
     <dimen name="_20ssp">20sp</dimen>
+
+    <dimen name="minus_60dp">-60dp</dimen>
+    <dimen name="minus_40dp">-40dp</dimen>
+    <dimen name="text_size_step">2sp</dimen>
+    <dimen name="corner_radius_12dp">12dp</dimen>
+    <dimen name="button_height">40dp</dimen>
+    <dimen name="icon_size_sm">16dp</dimen>
+    <dimen name="button_corner_radius_sm">8dp</dimen>
+    <dimen name="card_elevation_sm">2dp</dimen>
+    <dimen name="stat_card_height">60dp</dimen>
+    <dimen name="accounts_list_height">140dp</dimen>
+    <dimen name="card_corner_radius_lg">20dp</dimen>
+    <dimen name="card_padding_lg">20dp</dimen>
+    <dimen name="text_size_headline2">20sp</dimen>
+    <dimen name="text_size_button">15sp</dimen>
+    <dimen name="minus_100dp">-100dp</dimen>
+    <dimen name="icon_size_xl">80dp</dimen>
+    <dimen name="card_corner_radius_xl">40dp</dimen>
+    <dimen name="card_elevation_xl">8dp</dimen>
+    <dimen name="text_size_headline3">22sp</dimen>
+    <dimen name="stat_card_width">120dp</dimen>
+    <dimen name="recent_account_width">100dp</dimen>
+    <dimen name="transaction_item_width">match_parent</dimen>
+    <dimen name="stroke_width_none">0dp</dimen>
+    <dimen name="item_width">match_parent</dimen>
+    <dimen name="spacing_none">0dp</dimen>
+
+    <dimen name="dashboard_card_corner_radius_12">12dp</dimen>
+    <dimen name="dashboard_card_elevation_4">4dp</dimen>
+    <dimen name="dashboard_margin_start_3">3dp</dimen>
+    <dimen name="dashboard_margin_end_6">6dp</dimen>
+    <dimen name="dashboard_icon_size_20">20dp</dimen>
+    <dimen name="dashboard_text_size_11">11sp</dimen>
+    <dimen name="dashboard_text_size_8">8sp</dimen>
+    <dimen name="dashboard_text_size_14">14sp</dimen>
+    <dimen name="dashboard_text_size_16">16sp</dimen>
+    <dimen name="dashboard_text_size_24">24sp</dimen>
+    <dimen name="dashboard_text_size_8sp">8sp</dimen>
+    <dimen name="dashboard_text_size_16sp">16sp</dimen>
+    <dimen name="dashboard_text_size_14sp">14sp</dimen>
+    <dimen name="dashboard_icon_size_32">32dp</dimen>
+    <dimen name="dashboard_icon_size_36">36dp</dimen>
+    <dimen name="dashboard_margin_8">8dp</dimen>
+    <dimen name="dashboard_margin_16">16dp</dimen>
+    <dimen name="dashboard_height_48">48dp</dimen>
+    <dimen name="dashboard_height_100">100dp</dimen>
+    <dimen name="dashboard_corner_radius_12">12dp</dimen>
+    <dimen name="dashboard_corner_radius_16">16dp</dimen>
+    <dimen name="dashboard_icon_padding_8">8dp</dimen>
+    <dimen name="dashboard_margin_start_4">4dp</dimen>
+    <dimen name="dashboard_margin_end_4">4dp</dimen>
+    <dimen name="dashboard_margin_end_8">8dp</dimen>
+    <dimen name="dashboard_margin_start_8">8dp</dimen>
+
+    <dimen name="reports_header_height">140dp</dimen>
+    <dimen name="reports_button_height">48dp</dimen>
+    <dimen name="reports_margin_end_8">8dp</dimen>
+    <dimen name="reports_margin_start_16">16dp</dimen>
+    <dimen name="reports_margin_end_16">16dp</dimen>
+    <dimen name="reports_margin_bottom_16">16dp</dimen>
+    <dimen name="reports_card_corner_radius_16">16dp</dimen>
+    <dimen name="reports_card_elevation_3">3dp</dimen>
+    <dimen name="reports_padding_18">18dp</dimen>
+    <dimen name="reports_margin_top_12">12dp</dimen>
+    <dimen name="reports_margin_top_2">2dp</dimen>
+    <dimen name="reports_height_1">1dp</dimen>
+    <dimen name="reports_margin_vertical_12">12dp</dimen>
+    <dimen name="reports_card_corner_radius_20">20dp</dimen>
+    <dimen name="reports_card_elevation_4">4dp</dimen>
+    <dimen name="reports_padding_20">20dp</dimen>
+    <dimen name="reports_margin_top_16">16dp</dimen>
+    <dimen name="reports_margin_top_4">4dp</dimen>
+
+    <dimen name="settings_margin_bottom_24">24dp</dimen>
+    <dimen name="settings_margin_bottom_16">16dp</dimen>
+    <dimen name="settings_margin_bottom_8">8dp</dimen>
+    <dimen name="settings_margin_top_24">24dp</dimen>
+    <dimen name="settings_margin_top_16">16dp</dimen>
+
+    <!-- Margins & Paddings -->
+    <dimen name="margin_xs">4dp</dimen>
+    <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin_medium">16dp</dimen>
+    <dimen name="margin_large">24dp</dimen>
+    <dimen name="margin_xl">32dp</dimen>
+    <dimen name="margin_xxl">48dp</dimen>
+    <dimen name="margin_xxxl">80dp</dimen>
+
+    <dimen name="padding_xs">4dp</dimen>
+    <dimen name="padding_small">8dp</dimen>
+    <dimen name="padding_medium">16dp</dimen>
+    <dimen name="padding_large">24dp</dimen>
+    <dimen name="padding_xl">32dp</dimen>
+    <dimen name="padding_xxl">48dp</dimen>
+
+    <!-- Text Sizes -->
+    <dimen name="text_size_xs">10sp</dimen>
+    <dimen name="text_size_small">12sp</dimen>
+    <dimen name="text_size_medium">14sp</dimen>
+    <dimen name="text_size_xl">18sp</dimen>
+    <dimen name="text_size_xxl">24sp</dimen>
+    <dimen name="text_size_xxxl">32sp</dimen>
+
+    <!-- Corner Radius -->
+    <dimen name="corner_radius_small">8dp</dimen>
+    <dimen name="corner_radius_medium">12dp</dimen>
+    <dimen name="corner_radius_large">16dp</dimen>
+    <dimen name="corner_radius_xl">20dp</dimen>
+    <dimen name="corner_radius_xxl">40dp</dimen>
+
+    <!-- Elevation -->
+    <dimen name="elevation_small">2dp</dimen>
+    <dimen name="elevation_medium">4dp</dimen>
+    <dimen name="elevation_large">8dp</dimen>
+
+    <!-- Heights & Widths -->
+    <dimen name="height_small">24dp</dimen>
+    <dimen name="height_medium">48dp</dimen>
+    <dimen name="height_large">60dp</dimen>
+    <dimen name="height_xl">100dp</dimen>
+    <dimen name="height_xxl">140dp</dimen>
+
+    <dimen name="width_small">24dp</dimen>
+    <dimen name="width_medium">48dp</dimen>
+    <dimen name="width_large">60dp</dimen>
+    <dimen name="width_xl">100dp</dimen>
+    <dimen name="width_xxl">140dp</dimen>
+
+    <!-- Special values -->
+    <dimen name="minus_60dp">-60dp</dimen>
+    <dimen name="minus_80dp">-80dp</dimen>
+    <dimen name="minus_100dp">-100dp</dimen>
+    <dimen name="minus_120dp">-120dp</dimen>
+    <dimen name="minus_40dp">-40dp</dimen>
+    <dimen name="zero">0dp</dimen>
 </resources>
