@@ -326,7 +326,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <!-- عرض المبلغ بعد الصرف -->
-            <TextView android:id="@+id/exchangeAmountText" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="المبلغ بعد الصرف: -" android:textColor="#512DA8" android:textStyle="bold" aandroid:layout_marginBottom="@dimen/margin_large"/>
+            <TextView android:id="@+id/exchangeAmountText" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="المبلغ بعد الصرف: -" android:textColor="#512DA8" android:textStyle="bold" android:layout_marginBottom="@dimen/margin_large"/>
 
             <!-- زر تنفيذ الصرف -->
             <Button android:id="@+id/exchangeButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="تنفيذ الصرف" android:layout_marginBottom="@dimen/margin_xl" style="@style/Widget.MaterialComponents.Button"/>
