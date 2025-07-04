@@ -353,4 +353,7 @@
     <dimen name="negative_margin_logo">-24dp</dimen>
 
     <dimen name="margin_48">48dp</dimen>
+    <dimen name="margin_none">0dp</dimen>
+    <dimen name="minus_100dp">-100dp</dimen>
+    <dimen name="minus_40dp">-40dp</dimen>
 </resources>
