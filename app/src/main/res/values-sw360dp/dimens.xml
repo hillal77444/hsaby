@@ -187,7 +187,7 @@
     <dimen name="width_large">36dp</dimen>
     <dimen name="width_xl">54dp</dimen>
     <dimen name="width_xxl">72dp</dimen>
-    <dimen name="minus_60dp">-36dp</dimen>
+    <dimen name="minus_60dp">-60dp</dimen>
     <dimen name="minus_80dp">-48dp</dimen>
     <dimen name="minus_100dp">-60dp</dimen>
     <dimen name="minus_120dp">-72dp</dimen>
