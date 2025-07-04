@@ -118,7 +118,7 @@
     <dimen name="accounts_list_height">140dp</dimen>
     <dimen name="card_corner_radius_lg">20dp</dimen>
     <dimen name="card_padding_lg">20dp</dimen>
-    <dimen name="text_size_headline2">20sp</dimen>
+    <dimen name="text_size_headline2">16sp</dimen>
     <dimen name="text_size_button">15sp</dimen>
     <dimen name="minus_100dp">-100dp</dimen>
     <dimen name="icon_size_xl">80dp</dimen>
