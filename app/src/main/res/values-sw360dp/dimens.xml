@@ -91,9 +91,7 @@
     <dimen name="card_elevation_xl">8dp</dimen>
     <dimen name="stat_card_width">120dp</dimen>
     <dimen name="recent_account_width">100dp</dimen>
-    <dimen name="transaction_item_width">match_parent</dimen>
     <dimen name="stroke_width_none">0dp</dimen>
-    <dimen name="item_width">match_parent</dimen>
     <dimen name="spacing_none">0dp</dimen>
     <dimen name="dashboard_card_corner_radius_12">12dp</dimen>
     <dimen name="dashboard_card_elevation_4">4dp</dimen>
