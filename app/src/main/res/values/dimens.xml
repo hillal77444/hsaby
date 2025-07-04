@@ -351,4 +351,6 @@
     <dimen name="login_card_min_height">220dp</dimen>
     <dimen name="login_button_min_height">48dp</dimen>
     <dimen name="negative_margin_logo">-24dp</dimen>
+
+    <dimen name="margin_48">48dp</dimen>
 </resources>
