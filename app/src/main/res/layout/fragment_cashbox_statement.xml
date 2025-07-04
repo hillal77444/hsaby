@@ -62,7 +62,7 @@
             app:cardElevation="@dimen/card_elevation"
             android:layout_marginTop="@dimen/margin_medium"
             android:layout_marginBottom="@dimen/margin_small"
-            app:cardBackgroundColor="@color/white">
+            app:cardBackgroundColor="@android:color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
