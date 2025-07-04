@@ -75,7 +75,6 @@
     <dimen name="_16ssp">16sp</dimen>
     <dimen name="_18ssp">18sp</dimen>
     <dimen name="_20ssp">20sp</dimen>
-    <dimen name="minus_40dp">-40dp</dimen>
     <dimen name="text_size_step">1sp</dimen>
     <dimen name="corner_radius_12dp">12dp</dimen>
     <dimen name="button_height">40dp</dimen>
@@ -188,7 +187,6 @@
     <dimen name="minus_60dp">-60dp</dimen>
     <dimen name="minus_80dp">-48dp</dimen>
     <dimen name="minus_120dp">-72dp</dimen>
-    <dimen name="minus_40dp">-24dp</dimen>
     <dimen name="zero">0dp</dimen>
     <dimen name="margin_xxs">2dp</dimen>
     <dimen name="padding_xxs">3dp</dimen>
