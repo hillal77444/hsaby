@@ -292,6 +292,17 @@
                         android:autoSizeMaxTextSize="@dimen/text_size_headline1"
                         android:autoSizeStepGranularity="@dimen/text_size_step" />
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/cancelButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/button_height"
+                        android:text="إلغاء"
+                        android:backgroundTint="@color/error"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold"
+                        app:cornerRadius="@dimen/card_corner_radius_lg"
+                        android:layout_marginTop="@dimen/margin_small"/>
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
