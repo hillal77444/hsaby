@@ -24,7 +24,7 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_gallery"
+                android:src="@drawable/ic_menu_gallery"
                 android:scaleType="centerInside"
                 app:tint="#152FD9" />
         </androidx.cardview.widget.CardView>
@@ -40,7 +40,7 @@
             <ImageView
                 android:layout_width="@dimen/icon_size"
                 android:layout_height="@dimen/icon_size"
-                android:src="@drawable/ic_gallery"
+                android:src="@drawable/ic_menu_gallery"
                 app:tint="#152FD9"
                 android:layout_marginEnd="@dimen/margin_small" />
             <TextView
