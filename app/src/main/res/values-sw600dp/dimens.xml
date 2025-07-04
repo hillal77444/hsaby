@@ -125,7 +125,6 @@
     <dimen name="card_corner_radius">72dp</dimen>
     <dimen name="icon_size">96dp</dimen>
     <dimen name="icon_size_xl">160dp</dimen>
-    <dimen name="button_min_height">180dp</dimen>
     <dimen name="button_corner_radius">72dp</dimen>
     <dimen name="minus_120dp">-240dp</dimen>
     <!-- أبعاد قياسية لجميع الشاشات: استخدمها للمسافات والهوامش الموحدة -->
