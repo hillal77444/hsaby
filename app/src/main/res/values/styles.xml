@@ -132,10 +132,4 @@
         <item name="android:windowEnterAnimation">@android:anim/slide_in_left</item>
         <item name="android:windowExitAnimation">@android:anim/slide_out_right</item>
     </style>
-
-    <style name="TextButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
-        <item name="android:textColor">@color/primary_blue</item>
-        <item name="android:textSize">@dimen/text_size_14</item>
-        <item name="rippleColor">@color/ripple_light</item>
-    </style>
 </resources> 
