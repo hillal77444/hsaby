@@ -33,7 +33,7 @@
                 android:layout_height="@dimen/icon_size_xl"
                 app:cardCornerRadius="@dimen/card_corner_radius_xl"
                 app:cardElevation="@dimen/card_elevation_xl"
-                app:cardBackgroundColor="@color:white"
+                app:cardBackgroundColor="@android:color/white"
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/minus_100dp">
                 <ImageView
@@ -82,7 +82,7 @@
                 android:layout_marginBottom="@dimen/margin_medium"
                 app:cardCornerRadius="@dimen/card_corner_radius_lg"
                 app:cardElevation="@dimen/card_elevation"
-                app:cardBackgroundColor="@color:white">
+                app:cardBackgroundColor="@android:color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
