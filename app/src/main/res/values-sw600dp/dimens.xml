@@ -123,7 +123,6 @@
     <dimen name="screen_padding">64dp</dimen>
     <dimen name="card_margin">44dp</dimen>
     <dimen name="card_spacing">36dp</dimen>
-    <dimen name="card_padding">44dp</dimen>
     <dimen name="card_corner_radius">72dp</dimen>
     <dimen name="icon_size">96dp</dimen>
     <dimen name="icon_size_xl">160dp</dimen>
