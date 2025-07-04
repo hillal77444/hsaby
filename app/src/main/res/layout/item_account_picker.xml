@@ -53,7 +53,7 @@
             <TextView
                 android:id="@+id/accountNotesTextView"
                 android:layout_width="match_parent"
-                android:maxWidth="match_parent"
+                android:maxWidth="300dp"
                 android:layout_height="wrap_content"
                 android:gravity="top|end"
                 android:text=""
