@@ -17,22 +17,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#FFFFFF">
+            android:background="@color/card_background">
 
-            <!-- رأس الصفحة -->
+            <!-- رأس منحني علوي -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/height_xl"
-                android:background="@color/info"
+                android:layout_height="@dimen/spacing_xl"
+                android:background="@color/primary"
                 android:scaleX="2.2"
-                android:scaleY="1.2" />
+                android:scaleY="1.2"
+                android:layout_marginTop="@dimen/spacing_none" />
 
+            <!-- أيقونة دائرية -->
             <androidx.cardview.widget.CardView
-                android:layout_width="@dimen/width_large"
-                android:layout_height="@dimen/height_large"
-                app:cardCornerRadius="@dimen/corner_radius_large"
-                app:cardElevation="@dimen/card_elevation"
-                app:cardBackgroundColor="#FFFFFF"
+                android:layout_width="@dimen/icon_size_xl"
+                android:layout_height="@dimen/icon_size_xl"
+                app:cardCornerRadius="@dimen/card_corner_radius_xl"
+                app:cardElevation="@dimen/card_elevation_xl"
+                app:cardBackgroundColor="@color/white"
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/minus_100dp">
                 <ImageView
@@ -40,16 +42,17 @@
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_edit"
                     android:scaleType="centerInside"
-                    android:tint="#1976D2" />
+                    android:tint="@color/primary_variant" />
             </androidx.cardview.widget.CardView>
 
+            <!-- العنوان -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="تعديل القيد المحاسبي"
                 android:textSize="@dimen/text_size_headline1"
                 android:textStyle="bold"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/primary_variant"
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/spacing_sm" />
 
@@ -58,10 +61,10 @@
                 android:layout_height="wrap_content"
                 android:text="قم بتعديل تفاصيل القيد المحاسبي"
                 android:textSize="@dimen/text_size_body2"
-                android:textColor="#666666"
+                android:textColor="@color/textSecondary"
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/margin_xs"
-                aandroid:layout_marginBottom="@dimen/margin_large" />
+                android:layout_marginBottom="@dimen/margin_large" />
 
             <!-- بطاقة الحساب: اختيار الحساب + اختيار الصندوق في صف واحد -->
             <com.google.android.material.card.MaterialCardView
@@ -397,8 +400,8 @@
                     android:layout_weight="1"
                     android:text="حفظ"
                     android:icon="@android:drawable/ic_menu_save"
-                    android:backgroundTint="#1976D2"
-                    android:textColor="#fff"
+                    android:backgroundTint="@color/primary_variant"
+                    android:textColor="@color/white"
                     android:layout_marginEnd="@dimen/margin_small"/>
 
                 <com.google.android.material.button.MaterialButton
@@ -409,9 +412,14 @@
                     android:layout_weight="1"
                     android:text="إلغاء"
                     android:icon="@android:drawable/ic_menu_close_clear_cancel"
-                    android:backgroundTint="#F3F4F6"
-                    android:textColor="#222"/>
+                    android:backgroundTint="@color/cardBackground"
+                    android:textColor="@color/primary_text"/>
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

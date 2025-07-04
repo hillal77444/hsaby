@@ -1,93 +1,159 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/background_gradient">
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="@dimen/spacing_standard">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingBottom="@dimen/margin_large">
 
-        <ImageView
-            android:id="@+id/imageViewAppIcon"
-            android:layout_width="@dimen/icon_size_xl"
-            android:layout_height="@dimen/icon_size_xl"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/margin_xl"
-            android:layout_marginBottom="@dimen/margin_large"
-            android:src="@mipmap/ic_launcher"
-            android:contentDescription="@string/app_name"/>
-
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            android:textSize="@dimen/text_size_headline1"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:layout_marginBottom="@dimen/margin_small"
-            android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="@dimen/text_size_caption"
-            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-            android:autoSizeStepGranularity="@dimen/text_size_step" />
+            android:orientation="vertical"
+            android:background="@color/card_background">
 
-        <TextView
-            android:id="@+id/textViewVersion"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/app_version"
-            android:gravity="center"
-            android:layout_marginBottom="@dimen/margin_large"
-            android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="@dimen/text_size_caption"
-            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-            android:autoSizeStepGranularity="@dimen/text_size_step" />
+            <!-- رأس منحني علوي -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/spacing_xl"
+                android:background="@color/primary"
+                android:scaleX="2.2"
+                android:scaleY="1.2"
+                android:layout_marginTop="@dimen/spacing_none" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/app_description"
-            android:gravity="center"
-            android:layout_marginBottom="@dimen/margin_large"
-            android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="@dimen/text_size_caption"
-            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-            android:autoSizeStepGranularity="@dimen/text_size_step" />
+            <!-- أيقونة دائرية/شعار -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="@dimen/icon_size_xl"
+                android:layout_height="@dimen/icon_size_xl"
+                app:cardCornerRadius="@dimen/card_corner_radius_xl"
+                app:cardElevation="@dimen/card_elevation_xl"
+                app:cardBackgroundColor="@color/white"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/minus_100dp">
+                <ImageView
+                    android:id="@+id/imageViewAppIcon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@mipmap/ic_launcher"
+                    android:scaleType="centerInside"
+                    android:contentDescription="@string/app_name" />
+            </androidx.cardview.widget.CardView>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/developer_info"
-            android:gravity="center"
-            android:layout_marginBottom="@dimen/margin_small"
-            android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="@dimen/text_size_caption"
-            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-            android:autoSizeStepGranularity="@dimen/text_size_step" />
+            <!-- العنوان مع أيقونة -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/margin_small">
+                <ImageView
+                    android:layout_width="@dimen/icon_size"
+                    android:layout_height="@dimen/icon_size"
+                    android:src="@mipmap/ic_launcher"
+                    android:tint="@color/primary_variant"
+                    android:layout_marginEnd="@dimen/margin_small" />
+                <TextView
+                    android:id="@+id/textAppName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary_variant"
+                    android:textSize="@dimen/text_size_headline1"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="@dimen/text_size_caption"
+                    android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                    android:autoSizeStepGranularity="@dimen/text_size_step" />
+            </LinearLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/contact_email"
-            android:gravity="center"
-            android:layout_marginBottom="@dimen/margin_xl"
-            android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="@dimen/text_size_caption"
-            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-            android:autoSizeStepGranularity="@dimen/text_size_step" />
+            <!-- رقم الإصدار -->
+            <TextView
+                android:id="@+id/textViewVersion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_version"
+                android:textAlignment="center"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/margin_small"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="@dimen/text_size_caption"
+                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonPrivacyPolicy"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/privacy_policy"
-            android:layout_marginBottom="@dimen/margin_small"
-            android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="@dimen/text_size_caption"
-            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-            android:autoSizeStepGranularity="@dimen/text_size_step" />
+            <!-- وصف التطبيق -->
+            <TextView
+                android:id="@+id/textViewDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_description"
+                android:textAlignment="center"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/margin_small"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="@dimen/text_size_caption"
+                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
-    </LinearLayout>
-</ScrollView> 
+            <!-- معلومات المطور -->
+            <TextView
+                android:id="@+id/textViewDeveloper"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/developer_info"
+                android:textAlignment="center"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/margin_small"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="@dimen/text_size_caption"
+                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
+
+            <!-- البريد الإلكتروني -->
+            <TextView
+                android:id="@+id/textViewEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/contact_email"
+                android:textAlignment="center"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/margin_small"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="@dimen/text_size_caption"
+                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
+
+            <!-- زر سياسة الخصوصية -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonPrivacyPolicy"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:text="@string/privacy_policy"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/margin_large"
+                android:layout_marginBottom="@dimen/margin_large"
+                android:textColor="@color/on_primary"
+                android:backgroundTint="@color/primary_variant"
+                app:icon="@drawable/ic_privacy"
+                app:iconGravity="textStart"
+                app:iconPadding="@dimen/padding_small"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="@dimen/text_size_caption"
+                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</FrameLayout> 

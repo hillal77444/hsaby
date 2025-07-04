@@ -13,4 +13,22 @@
     <dimen name="dashboard_button_text_size">21sp</dimen>
     <dimen name="dashboard_fab_margin">20dp</dimen>
     <dimen name="dashboard_fab_bottom">110dp</dimen>
+    <dimen name="text_size_headline1">26sp</dimen>
+    <dimen name="text_size_headline2">22sp</dimen>
+    <dimen name="text_size_headline3">20sp</dimen>
+    <dimen name="text_size_body1">20sp</dimen>
+    <dimen name="text_size_body2">18sp</dimen>
+    <dimen name="text_size_caption">16sp</dimen>
+    <dimen name="card_padding">26dp</dimen>
+    <dimen name="button_min_height">58dp</dimen>
+    <dimen name="margin_large">26dp</dimen>
+    <dimen name="margin_medium">18dp</dimen>
+    <dimen name="margin_small">12dp</dimen>
+    <dimen name="padding_medium">24dp</dimen>
+    <dimen name="padding_small">12dp</dimen>
+    <dimen name="corner_radius_medium">20dp</dimen>
+    <dimen name="corner_radius_large">28dp</dimen>
+    <dimen name="height_medium">58dp</dimen>
+    <dimen name="icon_size">60dp</dimen>
+    <dimen name="negative_margin_logo">-28dp</dimen>
 </resources> 

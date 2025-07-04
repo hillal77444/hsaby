@@ -4,21 +4,54 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:background="#F8F8F8">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="#F8F8F8">
+        android:layout_height="wrap_content">
 
-        <!-- الدائرة البنفسجية العلوية -->
+        <!-- خلفية منحنية علوية (ShapeDrawable) -->
         <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/height_xl"
-            android:background="@color/info"
-            android:scaleX="2.2"
-            android:scaleY="1.2" />
+            android:id="@+id/topCurveBg"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/bg_login_top_curve"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.32"
+            app:layout_constraintWidth_percent="1.0" />
+
+        <!-- Guideline لتحديد منتصف المنحنى -->
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineLogoCenter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintGuide_percent="0.16"
+            android:orientation="horizontal" />
+
+        <!-- الشعار الدائري -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/logoCard"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:cardCornerRadius="@dimen/card_corner_radius"
+            app:cardElevation="@dimen/card_elevation"
+            app:cardBackgroundColor="#FFFFFF"
+            app:layout_constraintTop_toTopOf="@id/guidelineLogoCenter"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.22"
+            app:layout_constraintDimensionRatio="1:1"
+            android:layout_marginTop="@dimen/margin_xl">
+            <ImageView
+                android:id="@+id/logoImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@mipmap/ic_launcher"
+                android:scaleType="centerInside" />
+        </androidx.cardview.widget.CardView>
 
         <!-- نص تسجيل الدخول -->
         <TextView
@@ -28,47 +61,34 @@
             android:text="تسجيل الدخول"
             android:textSize="@dimen/text_size_headline1"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/negative_margin_title_login"
+            android:textColor="#152FD9"
+            app:layout_constraintTop_toBottomOf="@id/logoCard"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="@dimen/margin_large"
             android:autoSizeTextType="uniform"
             android:autoSizeMinTextSize="@dimen/text_size_caption"
             android:autoSizeMaxTextSize="@dimen/text_size_headline1"
             android:autoSizeStepGranularity="@dimen/text_size_step" />
 
-        <!-- الشعار الدائري -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="@dimen/icon_size_xl"
-            android:layout_height="@dimen/icon_size_xl"
-            app:cardCornerRadius="@dimen/corner_radius_large"
-            app:cardElevation="@dimen/elevation_medium"
-            app:cardBackgroundColor="#FFFFFF"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/margin_small">
-            <ImageView
-                android:id="@+id/logoImage"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@mipmap/ic_launcher"
-                android:scaleType="centerInside" />
-        </androidx.cardview.widget.CardView>
-
         <!-- الحاوية البيضاء للحقول -->
         <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
+            android:id="@+id/fieldsCard"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="@dimen/corner_radius_medium"
-            app:cardElevation="@dimen/elevation_medium"
+            app:cardCornerRadius="@dimen/card_corner_radius"
+            app:cardElevation="@dimen/card_elevation"
             app:cardBackgroundColor="#FFFFFF"
-            android:layout_marginTop="@dimen/margin_small"
-            android:layout_marginStart="@dimen/margin_medium"
-            android:layout_marginEnd="@dimen/margin_medium">
-
+            app:layout_constraintTop_toBottomOf="@id/loginTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.99"
+            android:layout_marginTop="@dimen/margin_large">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="@dimen/spacing_standard">
+                android:padding="@dimen/card_padding">
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/textInputLayoutPhone"
@@ -77,13 +97,19 @@
                     android:hint="رقم التلفون "
                     app:endIconDrawable="@drawable/ic_check"
                     app:endIconMode="custom"
-                    app:hintTextColor="#3F51B5"
-                    app:boxStrokeColor="#3F51B5">
+                    app:hintTextColor="#666666"
+                    app:boxStrokeColor="#152FD9"
+                    android:layout_marginBottom="@dimen/margin_small">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextPhone"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="text" />
+                        android:layout_height="@dimen/button_min_height"
+                        android:inputType="text"
+                        android:textSize="@dimen/text_size_body1"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="@dimen/text_size_caption"
+                        android:autoSizeMaxTextSize="@dimen/text_size_body1"
+                        android:autoSizeStepGranularity="@dimen/text_size_step" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -92,14 +118,19 @@
                     android:layout_height="wrap_content"
                     android:hint="كلمة السر"
                     app:endIconMode="password_toggle"
-                    app:hintTextColor="#3F51B5"
-                    app:boxStrokeColor="#3F51B5"
-                    android:layout_marginTop="12dp">
+                    app:hintTextColor="#666666"
+                    app:boxStrokeColor="#152FD9"
+                    android:layout_marginBottom="@dimen/margin_small">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextPassword"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="textPassword" />
+                        android:layout_height="@dimen/button_min_height"
+                        android:inputType="textPassword"
+                        android:textSize="@dimen/text_size_body1"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="@dimen/text_size_caption"
+                        android:autoSizeMaxTextSize="@dimen/text_size_body1"
+                        android:autoSizeStepGranularity="@dimen/text_size_step" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
@@ -107,47 +138,51 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="نسيت كلمة السر؟"
-                    android:textColor="#3F51B5"
+                    android:textColor="#152FD9"
                     android:textSize="@dimen/text_size_body2"
                     android:layout_gravity="end"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
+                    android:paddingTop="@dimen/padding_xs"
+                    android:paddingBottom="@dimen/padding_xs"
                     android:autoSizeTextType="uniform"
                     android:autoSizeMinTextSize="@dimen/text_size_caption"
-                    android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                    android:autoSizeMaxTextSize="@dimen/text_size_body2"
                     android:autoSizeStepGranularity="@dimen/text_size_step" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonLogin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="@dimen/button_min_height"
                     android:text="دخول"
                     android:backgroundTint="#152FD9"
                     android:textColor="#FFFFFF"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="@dimen/margin_medium"
                     app:iconGravity="textStart"
                     app:iconPadding="@dimen/padding_small"
+                    android:textSize="@dimen/text_size_body1"
                     android:autoSizeTextType="uniform"
                     android:autoSizeMinTextSize="@dimen/text_size_caption"
-                    android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                    android:autoSizeMaxTextSize="@dimen/text_size_body1"
                     android:autoSizeStepGranularity="@dimen/text_size_step" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- زر إنشاء حساب جديد المميز -->
+        <!-- زر إنشاء حساب جديد -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonRegister"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="إنشاء حساب جديد"
             android:backgroundTint="#152FD9"
             android:textColor="#FFFFFF"
             android:textStyle="bold"
             app:iconPadding="@dimen/padding_small"
-            app:cornerRadius="@dimen/corner_radius_medium"
+            app:cornerRadius="@dimen/card_corner_radius"
+            app:layout_constraintTop_toBottomOf="@id/fieldsCard"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.7"
             android:layout_marginTop="@dimen/margin_small"
-            android:layout_marginStart="@dimen/margin_large"
-            android:layout_marginEnd="@dimen/margin_large"
             android:autoSizeTextType="uniform"
             android:autoSizeMinTextSize="@dimen/text_size_caption"
             android:autoSizeMaxTextSize="@dimen/text_size_headline1"
@@ -155,24 +190,26 @@
 
         <!-- الأزرار السفلية -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/bottomButtons"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center"
-            android:layout_marginTop="@dimen/margin_medium"
-            android:layout_marginBottom="@dimen/margin_xl"
-            android:layout_marginStart="@dimen/margin_xs"
-            android:layout_marginEnd="8dp">
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.95"
+            android:layout_marginBottom="@dimen/margin_medium">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonPrivacy"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="سياسة الخصوصية"
                 android:backgroundTint="#152FD9"
                 android:textColor="#FFFFFF"
-                android:layout_marginEnd="@dimen/margin_small"
+                android:layout_marginEnd="@dimen/margin_xs"
                 android:autoSizeTextType="uniform"
                 android:autoSizeMinTextSize="@dimen/text_size_caption"
                 android:autoSizeMaxTextSize="@dimen/text_size_headline1"
@@ -180,11 +217,11 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonContact"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_small"
-                android:layout_marginEnd="@dimen/margin_small"
                 android:layout_weight="1"
+                android:layout_marginStart="@dimen/margin_xs"
+                android:layout_marginEnd="@dimen/margin_xs"
                 android:backgroundTint="#152FD9"
                 android:text="ارقام التواصل"
                 android:textColor="#FFFFFF"
@@ -195,19 +232,18 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonAbout"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="عن التطبيق"
                 android:backgroundTint="#152FD9"
+                android:text="عن التطبيق"
                 android:textColor="#FFFFFF"
-                android:layout_marginStart="@dimen/margin_small"
                 android:autoSizeTextType="uniform"
                 android:autoSizeMinTextSize="@dimen/text_size_caption"
                 android:autoSizeMaxTextSize="@dimen/text_size_headline1"
                 android:autoSizeStepGranularity="@dimen/text_size_step" />
         </LinearLayout>
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.core.widget.NestedScrollView> 

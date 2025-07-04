@@ -1,273 +1,341 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/card_padding"
-    android:fitsSystemWindows="true">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+    android:background="@color/background_gradient">
 
-        <!-- بطاقة اختيار الحساب والصندوق بشكل مطابق لإضافة معاملة -->
-        <com.google.android.material.card.MaterialCardView
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingBottom="@dimen/margin_large">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_small"
-            android:layout_marginEnd="@dimen/margin_small"
-            android:layout_marginBottom="@dimen/padding_small"
-            app:cardCornerRadius="@dimen/corner_radius_medium"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/cardBackground">
+            android:orientation="vertical"
+            android:background="@color/card_background">
 
-            <LinearLayout
+            <!-- رأس منحني علوي -->
+            <View
                 android:layout_width="match_parent"
+                android:layout_height="@dimen/spacing_xl"
+                android:background="@color/primary"
+                android:scaleX="2.2"
+                android:scaleY="1.2"
+                android:layout_marginTop="@dimen/spacing_none" />
+
+            <!-- أيقونة دائرية -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="@dimen/icon_size_xl"
+                android:layout_height="@dimen/icon_size_xl"
+                app:cardCornerRadius="@dimen/card_corner_radius_xl"
+                app:cardElevation="@dimen/card_elevation_xl"
+                app:cardBackgroundColor="@color:white"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/minus_100dp">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_exchange"
+                    android:scaleType="centerInside"
+                    android:tint="@color/primary_variant" />
+            </androidx.cardview.widget.CardView>
+
+            <!-- العنوان مع أيقونة -->
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="@dimen/padding_small">
-
-                <!-- اختيار الحساب -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/accountLayout"
-                    style="@style/CustomTextInputLayout"
-                    android:layout_width="0dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/margin_small">
+                <ImageView
+                    android:layout_width="@dimen/icon_size"
+                    android:layout_height="@dimen/icon_size"
+                    android:src="@drawable/ic_exchange"
+                    android:tint="@color/primary_variant"
+                    android:layout_marginEnd="@dimen/margin_small" />
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="اختر الحساب"
-                    app:startIconDrawable="@android:drawable/ic_menu_myplaces"
-                    app:startIconTint="@color/primary"
-                    app:hintTextColor="#666666"
-                    app:boxStrokeColor="#1976D2">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/accountAutoComplete"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:focusable="false"
-                        android:clickable="true"
-                        android:inputType="none"
-                        android:hint="اختر الحساب"
-                        android:drawableEnd="@drawable/ic_arrow_downward"
-                        android:padding="@dimen/padding_medium"/>
-                    <TextView
-                        android:id="@+id/accountBalanceText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="الرصيد: -"
-                        android:textColor="@color/secondary_variant"
-                        android:textSize="@dimen/text_size_body2"
-                        android:paddingStart="@dimen/spacing_sm"
-                        android:paddingBottom="@dimen/spacing_xs"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- اختيار الصندوق -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:paddingStart="@dimen/padding_small">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="اختر الصندوق"
-                        android:textAppearance="?attr/textAppearanceCaption"
-                        android:textColor="@color/textSecondary"
-                        android:textSize="@dimen/text_size_caption"/>
-                    <Spinner
-                        android:id="@+id/cashboxSpinner"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="@dimen/padding_medium"/>
-                </LinearLayout>
+                    android:text="التحويلات"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary_variant"
+                    android:textSize="@dimen/text_size_headline1"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="@dimen/text_size_caption"
+                    android:autoSizeMaxTextSize="@dimen/text_size_headline1"
+                    android:autoSizeStepGranularity="@dimen/text_size_step" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
-        <!-- بطاقة اختيار العملات من/إلى -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_small"
-            android:layout_marginEnd="@dimen/margin_small"
-            android:layout_marginBottom="@dimen/padding_small"
-            app:cardCornerRadius="@dimen/corner_radius_medium"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/cardBackground">
-            <LinearLayout
+            <!-- بطاقة اختيار الحساب والصندوق -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="@dimen/padding_small">
+                android:layout_marginStart="@dimen/margin_small"
+                android:layout_marginEnd="@dimen/margin_small"
+                android:layout_marginBottom="@dimen/padding_small"
+                app:cardCornerRadius="@dimen/card_corner_radius_lg"
+                app:cardElevation="@dimen/card_elevation"
+                app:cardBackgroundColor="@color:white">
+
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:paddingEnd="@dimen/padding_small">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="اختر العملة التي سيتم خصمها" android:textAppearance="?attr/textAppearanceCaption" android:textColor="@color/textSecondary" android:textSize="@dimen/text_size_caption"/>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="@dimen/padding_medium">
 
+                    <!-- اختيار الحساب -->
                     <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
+                        android:id="@+id/accountLayout"
+                        style="@style/CustomTextInputLayout"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:hint="العملة من"
-                        app:boxStrokeColor="@color/primary"
-                        app:hintTextColor="@color/textSecondary"
-                        app:startIconDrawable="@drawable/ic_money"
-                        app:startIconTint="@color/primary">
+                        android:layout_weight="1"
+                        android:hint="اختر الحساب"
+                        app:startIconDrawable="@android:drawable/ic_menu_myplaces"
+                        app:startIconTint="@color/primary"
+                        app:hintTextColor="@color/hint_gray"
+                        app:boxStrokeColor="@color/primary_variant">
 
-                        <Spinner
-                            android:id="@+id/fromCurrencySpinner"
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/accountAutoComplete"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:padding="@dimen/padding_medium" />
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:inputType="none"
+                            android:hint="اختر الحساب"
+                            android:drawableEnd="@drawable/ic_arrow_downward"
+                            android:padding="@dimen/padding_small"/>
+                        <TextView
+                            android:id="@+id/accountBalanceText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="الرصيد: -"
+                            android:textColor="@color/secondary_variant"
+                            android:textSize="@dimen/text_size_body2"
+                            android:paddingStart="@dimen/padding_small"
+                            android:paddingBottom="@dimen/padding_xs"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- اختيار الصندوق -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:paddingStart="@dimen/padding_small">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="اختر الصندوق"
+                            android:textAppearance="?attr/textAppearanceCaption"
+                            android:textColor="@color/textSecondary"
+                            android:textSize="@dimen/text_size_caption"/>
+                        <Spinner
+                            android:id="@+id/cashboxSpinner"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="@dimen/padding_small"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- بطاقة اختيار العملات من/إلى -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_small"
+                android:layout_marginEnd="@dimen/margin_small"
+                android:layout_marginBottom="@dimen/padding_small"
+                app:cardCornerRadius="@dimen/corner_radius_medium"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/cardBackground">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/padding_small">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:paddingEnd="@dimen/padding_small">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="اختر العملة التي سيتم خصمها" android:textAppearance="?attr/textAppearanceCaption" android:textColor="@color/textSecondary" android:textSize="@dimen/text_size_caption"/>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="العملة من"
+                            app:boxStrokeColor="@color/primary"
+                            app:hintTextColor="@color/textSecondary"
+                            app:startIconDrawable="@drawable/ic_money"
+                            app:startIconTint="@color/primary">
+
+                            <Spinner
+                                android:id="@+id/fromCurrencySpinner"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="@dimen/padding_medium" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:paddingStart="@dimen/padding_small">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="اختر العملة التي سيتم إضافتها" android:textAppearance="?attr/textAppearanceCaption" android:textColor="@color/textSecondary" android:textSize="@dimen/text_size_caption"/>
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="العملة إلى"
+                            app:startIconDrawable="@drawable/ic_money"
+                            app:startIconTint="@color/primary"
+                            app:hintTextColor="@color/textSecondary"
+                            app:boxStrokeColor="@color/primary">
+                            <Spinner
+                                android:id="@+id/toCurrencySpinner"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="@dimen/padding_medium"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- بطاقة المبلغ وسعر الصرف -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_small"
+                android:layout_marginEnd="@dimen/margin_small"
+                android:layout_marginBottom="@dimen/padding_small"
+                app:cardCornerRadius="@dimen/corner_radius_medium"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/cardBackground">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/padding_small">
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="المبلغ"
+                        app:startIconDrawable="@drawable/ic_money"
+                        app:startIconTint="@color/primary"
+                        app:hintTextColor="#666666"
+                        app:boxStrokeColor="#1976D2">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/amountEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:padding="@dimen/padding_medium"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="سعر الصرف"
+                        app:startIconDrawable="@drawable/ic_sync_alt"
+                        app:startIconTint="@color/primary"
+                        app:hintTextColor="#666666"
+                        app:boxStrokeColor="#1976D2"
+                        android:layout_marginStart="@dimen/margin_xs">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/rateEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:padding="@dimen/padding_medium"/>
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- بطاقة نوع العملية -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_small"
+                android:layout_marginEnd="@dimen/margin_small"
+                android:layout_marginBottom="@dimen/padding_small"
+                app:cardCornerRadius="@dimen/corner_radius_medium"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/cardBackground">
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:orientation="vertical"
-                    android:paddingStart="@dimen/padding_small">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="اختر العملة التي سيتم إضافتها" android:textAppearance="?attr/textAppearanceCaption" android:textColor="@color/textSecondary" android:textSize="@dimen/text_size_caption"/>
+                    android:padding="@dimen/padding_small">
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="العملة إلى"
-                        app:startIconDrawable="@drawable/ic_money"
+                        android:hint="نوع العملية"
+                        app:startIconDrawable="@drawable/ic_sync_alt"
                         app:startIconTint="@color/primary"
-                        app:hintTextColor="@color/textSecondary"
-                        app:boxStrokeColor="@color/primary">
+                        app:hintTextColor="#666666"
+                        app:boxStrokeColor="#1976D2">
                         <Spinner
-                            android:id="@+id/toCurrencySpinner"
+                            android:id="@+id/operationTypeSpinner"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:padding="@dimen/padding_medium"/>
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            </com.google.android.material.card.MaterialCardView>
 
-        <!-- بطاقة المبلغ وسعر الصرف -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_small"
-            android:layout_marginEnd="@dimen/margin_small"
-            android:layout_marginBottom="@dimen/padding_small"
-            app:cardCornerRadius="@dimen/corner_radius_medium"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/cardBackground">
-            <LinearLayout
+            <!-- بطاقة الملاحظات -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="@dimen/padding_small">
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="المبلغ"
-                    app:startIconDrawable="@drawable/ic_money"
-                    app:startIconTint="@color/primary"
-                    app:hintTextColor="#666666"
-                    app:boxStrokeColor="#1976D2">
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/amountEditText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="numberDecimal"
-                        android:padding="@dimen/padding_medium"/>
-                </com.google.android.material.textfield.TextInputLayout>
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="سعر الصرف"
-                    app:startIconDrawable="@drawable/ic_sync_alt"
-                    app:startIconTint="@color/primary"
-                    app:hintTextColor="#666666"
-                    app:boxStrokeColor="#1976D2"
-                    android:layout_marginStart="@dimen/margin_xs">
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/rateEditText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="numberDecimal"
-                        android:padding="@dimen/padding_medium"/>
-                </com.google.android.material.textfield.TextInputLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- بطاقة نوع العملية -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_small"
-            android:layout_marginEnd="@dimen/margin_small"
-            android:layout_marginBottom="@dimen/padding_small"
-            app:cardCornerRadius="@dimen/corner_radius_medium"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/cardBackground">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="@dimen/padding_small">
-                <com.google.android.material.textfield.TextInputLayout
+                android:layout_marginStart="@dimen/margin_small"
+                android:layout_marginEnd="@dimen/margin_small"
+                android:layout_marginBottom="@dimen/padding_small"
+                app:cardCornerRadius="@dimen/corner_radius_medium"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/cardBackground">
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="نوع العملية"
-                    app:startIconDrawable="@drawable/ic_sync_alt"
-                    app:startIconTint="@color/primary"
-                    app:hintTextColor="#666666"
-                    app:boxStrokeColor="#1976D2">
-                    <Spinner
-                        android:id="@+id/operationTypeSpinner"
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_small">
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="@dimen/padding_medium"/>
-                </com.google.android.material.textfield.TextInputLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+                        android:hint="ملاحظات (اختياري)"
+                        app:startIconDrawable="@drawable/ic_notes"
+                        app:startIconTint="@color/primary"
+                        app:hintTextColor="#666666"
+                        app:boxStrokeColor="#1976D2">
+                        <EditText
+                            android:id="@+id/notesEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="@dimen/padding_medium"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-        <!-- بطاقة الملاحظات -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_small"
-            android:layout_marginEnd="@dimen/margin_small"
-            android:layout_marginBottom="@dimen/padding_small"
-            app:cardCornerRadius="@dimen/corner_radius_medium"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/cardBackground">
-            <LinearLayout
+            <!-- عرض المبلغ بعد الصرف -->
+            <TextView android:id="@+id/exchangeAmountText" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="المبلغ بعد الصرف: -" android:textColor="#512DA8" android:textStyle="bold" aandroid:layout_marginBottom="@dimen/margin_large"/>
+
+            <!-- زر تنفيذ الصرف -->
+            <Button android:id="@+id/exchangeButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="تنفيذ الصرف" android:layout_marginBottom="@dimen/margin_xl" style="@style/Widget.MaterialComponents.Button"/>
+
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="@dimen/padding_small">
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="ملاحظات (اختياري)"
-                    app:startIconDrawable="@drawable/ic_notes"
-                    app:startIconTint="@color/primary"
-                    app:hintTextColor="#666666"
-                    app:boxStrokeColor="#1976D2">
-                    <EditText
-                        android:id="@+id/notesEditText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="@dimen/padding_medium"/>
-                </com.google.android.material.textfield.TextInputLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
-        <!-- عرض المبلغ بعد الصرف -->
-        <TextView android:id="@+id/exchangeAmountText" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="المبلغ بعد الصرف: -" android:textColor="#512DA8" android:textStyle="bold" aandroid:layout_marginBottom="@dimen/margin_large"/>
-
-        <!-- زر تنفيذ الصرف -->
-        <Button android:id="@+id/exchangeButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="تنفيذ الصرف" android:layout_marginBottom="@dimen/margin_xl" style="@style/Widget.MaterialComponents.Button"/>
-    </LinearLayout>
-</ScrollView> 
+</FrameLayout> 
