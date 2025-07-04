@@ -123,7 +123,7 @@
     <dimen name="icon_size_xl">80dp</dimen>
     <dimen name="card_corner_radius_xl">40dp</dimen>
     <dimen name="card_elevation_xl">8dp</dimen>
-    <dimen name="text_size_headline3">22sp</dimen>
+    <dimen name="text_size_headline3">18sp</dimen>
     <dimen name="stat_card_width">120dp</dimen>
     <dimen name="recent_account_width">100dp</dimen>
     <dimen name="transaction_item_width">match_parent</dimen>
