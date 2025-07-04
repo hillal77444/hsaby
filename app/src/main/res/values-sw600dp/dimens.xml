@@ -88,7 +88,7 @@
     <dimen name="text_size_xl">44sp</dimen>
     <dimen name="text_size_xxl">48sp</dimen>
     <dimen name="text_size_xxxl">56sp</dimen>
-    <dimen name="text_size_body2">36sp</dimen>
+    <dimen name="text_size_body2">20sp</dimen>
     <dimen name="text_size_min">8sp</dimen>
     <dimen name="text_size_max">28sp</dimen>
     <dimen name="text_size_step">1sp</dimen>
