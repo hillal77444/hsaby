@@ -88,7 +88,6 @@
     <dimen name="card_corner_radius_lg">20dp</dimen>
     <dimen name="card_padding_lg">20dp</dimen>
     <dimen name="text_size_button">15sp</dimen>
-    <dimen name="minus_100dp">-100dp</dimen>
     <dimen name="icon_size_xl">80dp</dimen>
     <dimen name="card_corner_radius_xl">40dp</dimen>
     <dimen name="card_elevation_xl">8dp</dimen>
@@ -191,7 +190,6 @@
     <dimen name="width_xxl">64dp</dimen>
     <dimen name="minus_60dp">-30dp</dimen>
     <dimen name="minus_80dp">-40dp</dimen>
-    <dimen name="minus_100dp">-50dp</dimen>
     <dimen name="minus_120dp">-60dp</dimen>
     <dimen name="minus_40dp">-20dp</dimen>
     <dimen name="zero">0dp</dimen>
