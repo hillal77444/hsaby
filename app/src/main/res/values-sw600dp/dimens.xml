@@ -38,7 +38,6 @@
 
     <!-- أبعاد البطاقات -->
     <dimen name="card_elevation">8dp</dimen>
-    <dimen name="card_corner_radius">12dp</dimen>
     <dimen name="card_padding">48dp</dimen>
 
     <!-- أبعاد حقول الإدخال -->
