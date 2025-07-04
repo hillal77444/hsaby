@@ -33,13 +33,13 @@
                 android:layout_height="@dimen/icon_size_xl"
                 app:cardCornerRadius="@dimen/card_corner_radius_xl"
                 app:cardElevation="@dimen/card_elevation_xl"
-                app:cardBackgroundColor="@color/white"
+                app:cardBackgroundColor="@android:color/white"
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/minus_100dp">
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:src="@drawable/ic_profile"
+                    android:src="@drawable/ic_person"
                     android:scaleType="centerInside"
                     android:tint="@color/primary_variant" />
             </androidx.cardview.widget.CardView>
@@ -55,7 +55,7 @@
                 <ImageView
                     android:layout_width="@dimen/icon_size"
                     android:layout_height="@dimen/icon_size"
-                    android:src="@drawable/ic_profile"
+                    android:src="@drawable/ic_person"
                     android:tint="@color/primary_variant"
                     android:layout_marginEnd="@dimen/margin_small" />
                 <TextView
@@ -77,7 +77,7 @@
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="@dimen/card_corner_radius_lg"
                 app:cardElevation="@dimen/card_elevation"
-                app:cardBackgroundColor="@color/white"
+                app:cardBackgroundColor="@android:color/white"
                 android:layout_marginTop="@dimen/margin_large">
 
                 <LinearLayout
