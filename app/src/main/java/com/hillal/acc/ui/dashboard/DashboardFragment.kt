@@ -29,6 +29,7 @@ import com.hillal.acc.ui.AccountStatementActivity
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.Locale
+import kotlin.math.roundToInt
 
 class DashboardFragment : Fragment() {
     private var _binding: FragmentDashboardBinding? = null
@@ -196,13 +197,13 @@ class DashboardFragment : Fragment() {
         }
         dashboardViewModel.netBalance.observe(viewLifecycleOwner) { balance ->
             balance?.let {
-                binding.totalBalance.text = String.format(Locale.US, "%d يمني", it.roundToInt())
+                binding.totalBalance.text = String.format(Locale.US, "%d يمني", balance.roundToInt())
             }
         }
     }
 
     private fun updateUserName() {
-        val userName = userPreferences.userName
+        val userName = userPreferences.getUserName()
         if (userName.isNotEmpty()) {
             binding.userNameText.text = userName
         }
