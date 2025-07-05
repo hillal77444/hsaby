@@ -52,9 +52,8 @@
     <!-- إضافة حساب جديد -->
     <fragment
         android:id="@+id/addAccountFragment"
-        android:name="com.hillal.acc.ui.accounts.AddAccountFragment"
-        android:label="@string/menu_add_account"
-        tools:layout="@layout/fragment_add_account" />
+        android:name="com.hillal.acc.ui.accounts.AddAccountComposeFragment"
+        android:label="@string/menu_add_account" />
 
     <!-- تعديل حساب -->
     <fragment
