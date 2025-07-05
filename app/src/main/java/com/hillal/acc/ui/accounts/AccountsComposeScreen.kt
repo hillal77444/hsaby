@@ -26,6 +26,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import com.hillal.acc.R
 import com.hillal.acc.data.model.Account
 import java.util.*
@@ -51,7 +56,7 @@ fun AccountsComposeScreen(
         
         // حساب الإحصائيات
         val totalAccounts = accounts.size
-        val activeAccounts = accounts.count { it.isWhatsappEnabled }
+        val activeAccounts = accounts.count { account -> account.whatsappEnabled }
         
         // البحث في الحسابات
         val filteredAccounts = remember(accounts, searchQuery) {
@@ -70,30 +75,30 @@ fun AccountsComposeScreen(
             when (currentSortType) {
                 "balance" -> {
                     if (isAscendingSort) {
-                        filteredAccounts.sortedBy { accountBalances[it.id] ?: 0.0 }
+                        filteredAccounts.sortedBy { account -> accountBalances[account.id] ?: 0.0 }
                     } else {
-                        filteredAccounts.sortedByDescending { accountBalances[it.id] ?: 0.0 }
+                        filteredAccounts.sortedByDescending { account -> accountBalances[account.id] ?: 0.0 }
                     }
                 }
                 "name" -> {
                     if (isAscendingSort) {
-                        filteredAccounts.sortedBy { it.name }
+                        filteredAccounts.sortedBy { account -> account.name }
                     } else {
-                        filteredAccounts.sortedByDescending { it.name }
+                        filteredAccounts.sortedByDescending { account -> account.name }
                     }
                 }
                 "number" -> {
                     if (isAscendingSort) {
-                        filteredAccounts.sortedBy { it.serverId }
+                        filteredAccounts.sortedBy { account -> account.serverId }
                     } else {
-                        filteredAccounts.sortedByDescending { it.serverId }
+                        filteredAccounts.sortedByDescending { account -> account.serverId }
                     }
                 }
                 "date" -> {
                     if (isAscendingSort) {
-                        filteredAccounts.sortedBy { it.createdAt }
+                        filteredAccounts.sortedBy { account -> account.createdAt }
                     } else {
-                        filteredAccounts.sortedByDescending { it.createdAt }
+                        filteredAccounts.sortedByDescending { account -> account.createdAt }
                     }
                 }
                 else -> filteredAccounts
@@ -157,7 +162,7 @@ fun AccountsComposeScreen(
                         account = account,
                         balance = accountBalances[account.id] ?: 0.0,
                         onWhatsAppToggle = { isEnabled ->
-                            account.isWhatsappEnabled = isEnabled
+                            account.whatsappEnabled = isEnabled
                             account.updatedAt = System.currentTimeMillis()
                             viewModel.updateAccount(account)
                         },
@@ -541,11 +546,11 @@ private fun AccountItem(
                     )
                     Spacer(modifier = Modifier.width(spacing.small))
                     Switch(
-                        checked = account.isWhatsappEnabled,
+                        checked = account.whatsappEnabled,
                         onCheckedChange = onWhatsAppToggle,
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = if (account.isWhatsappEnabled) Color(0xFF22C55E) else Color(0xFF666666),
-                            checkedTrackColor = if (account.isWhatsappEnabled) Color(0xFF22C55E) else Color(0xFFE0E0E0),
+                            checkedThumbColor = if (account.whatsappEnabled) Color(0xFF22C55E) else Color(0xFF666666),
+                            checkedTrackColor = if (account.whatsappEnabled) Color(0xFF22C55E) else Color(0xFFE0E0E0),
                             uncheckedThumbColor = Color(0xFF666666),
                             uncheckedTrackColor = Color(0xFFE0E0E0)
                         )
