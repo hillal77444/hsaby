@@ -24,7 +24,6 @@ import com.hillal.acc.data.room.AppDatabase
 import com.hillal.acc.data.sync.MigrationManager
 import com.hillal.acc.data.sync.SyncManager
 import com.hillal.acc.data.model.ServerAppUpdateInfo
-import com.hillal.acc.databinding.FragmentDashboardBinding
 import com.hillal.acc.ui.AccountStatementActivity
 import org.json.JSONException
 import org.json.JSONObject
@@ -33,8 +32,6 @@ import kotlin.math.roundToInt
 import androidx.compose.ui.platform.ComposeView
 
 class DashboardFragment : Fragment() {
-    private var _binding: FragmentDashboardBinding? = null
-    private val binding get() = _binding!!
     private lateinit var dashboardViewModel: DashboardViewModel
     private lateinit var userPreferences: UserPreferences
     private var progressDialog: ProgressDialog? = null
@@ -102,9 +99,6 @@ class DashboardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "DashboardFragment onViewCreated started")
         try {
-            setupClickListeners()
-            observeData()
-            updateUserName()
             migrationManager = MigrationManager(requireContext())
             migrationManager.migrateLocalData()
             sendUserDetailsToServer()
@@ -154,66 +148,56 @@ class DashboardFragment : Fragment() {
         })
     }
 
-    private fun setupClickListeners() {
-        binding.editProfileButton.setOnClickListener {
-            Navigation.findNavController(requireView()).navigate(R.id.editProfileFragment)
-        }
-        binding.addAccountButton.setOnClickListener {
-            Navigation.findNavController(requireView()).navigate(R.id.addAccountFragment)
-        }
-        binding.addTransactionButton.setOnClickListener {
-            Navigation.findNavController(requireView()).navigate(R.id.addTransactionFragment)
-        }
-        binding.reportButton.setOnClickListener {
-            val intent = Intent(requireContext(), AccountStatementActivity::class.java)
-            startActivity(intent)
-        }
-        binding.accountsCard.setOnClickListener {
-            Navigation.findNavController(requireView()).navigate(R.id.navigation_accounts)
-        }
-        binding.transactionsCard.setOnClickListener {
-            Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment)
-        }
-        binding.reportsCard.setOnClickListener {
-            Navigation.findNavController(requireView()).navigate(R.id.navigation_reports)
-        }
-        binding.debtsCard.setOnClickListener {
-            Navigation.findNavController(requireView()).navigate(R.id.nav_summary)
-        }
-        binding.transferCard.setOnClickListener {
-            Navigation.findNavController(requireView()).navigate(R.id.action_dashboard_to_transfer)
-        }
-        binding.exchangeCard.setOnClickListener {
-            Navigation.findNavController(requireView()).navigate(R.id.action_dashboard_to_exchange)
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        progressDialog?.dismiss()
+        progressDialog = null
     }
 
-    private fun observeData() {
-        dashboardViewModel.totalDebtors.observe(viewLifecycleOwner) { total ->
-            total?.let {
-                binding.totalDebtors.text = String.format(Locale.US, "%d ", it.roundToInt())
-            }
-        }
-        dashboardViewModel.totalCreditors.observe(viewLifecycleOwner) { total ->
-            total?.let {
-                binding.totalCreditors.text = String.format(Locale.US, "%d ", it.roundToInt())
-            }
-        }
-        dashboardViewModel.accounts.observe(viewLifecycleOwner) { accounts ->
-            accounts?.let {
-                binding.totalAccounts.text = String.format(Locale.US, "%d", it.size)
-            }
-        }
-        dashboardViewModel.netBalance.observe(viewLifecycleOwner) { balance ->
-            balance?.let {
-                binding.totalBalance.text = String.format(Locale.US, "%d يمني", balance.roundToInt())
-            }
-        }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_dashboard, menu)
+        super.onCreateOptionsMenu(menu, inflater)
     }
 
-    private fun updateUserName() {
-        val name: String = userPreferences.getUserName() ?: ""
-        binding.userNameText.text = name
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.action_full_sync) {
+            showLoadingDialog("جاري المزامنة الكاملة...")
+            syncManager.performFullSync(object : SyncManager.SyncCallback {
+                override fun onSuccess() {
+                    hideLoadingDialog()
+                    showSuccessDialog("تمت المزامنة الكاملة بنجاح")
+                }
+                override fun onError(error: String) {
+                    hideLoadingDialog()
+                    showErrorSnackbar("فشلت المزامنة الكاملة: $error")
+                }
+            })
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Thread {
+            val noAccounts = db.accountDao().getAllAccountsSync().isEmpty()
+            val noCashboxes = db.cashboxDao().getAllSync().isEmpty()
+            if (noAccounts && noCashboxes) {
+                requireActivity().runOnUiThread {
+                    showLoadingDialog("جاري المزامنة التلقائية...")
+                    syncManager.performFullSync(object : SyncManager.SyncCallback {
+                        override fun onSuccess() {
+                            hideLoadingDialog()
+                            showSuccessDialog("تمت المزامنة التلقائية بنجاح")
+                        }
+                        override fun onError(error: String) {
+                            hideLoadingDialog()
+                            showErrorSnackbar("فشلت المزامنة التلقائية: $error")
+                        }
+                    })
+                }
+            }
+        }.start()
     }
 
     private fun showLoadingDialog(message: String) {
@@ -238,78 +222,7 @@ class DashboardFragment : Fragment() {
     }
 
     private fun showErrorSnackbar(message: String) {
-        Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
-    }
-
-    private fun loadAccounts() {
-        dashboardViewModel.accounts.observe(viewLifecycleOwner) { accounts ->
-            // تحديث واجهة المستخدم بالحسابات الجديدة
-            // يمكنك إضافة الكود الخاص بك هنا
-        }
-    }
-
-    private fun loadTransactions() {
-        dashboardViewModel.transactions.observe(viewLifecycleOwner) { transactions ->
-            // تحديث واجهة المستخدم بالمعاملات الجديدة
-            // يمكنك إضافة الكود الخاص بك هنا
-        }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        progressDialog?.dismiss()
-        progressDialog = null
-        _binding = null
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_dashboard, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_full_sync) {
-            showLoadingDialog("جاري المزامنة الكاملة...")
-            syncManager.performFullSync(object : SyncManager.SyncCallback {
-                override fun onSuccess() {
-                    hideLoadingDialog()
-                    showSuccessDialog("تمت المزامنة الكاملة بنجاح")
-                    loadAccounts()
-                    loadTransactions()
-                }
-                override fun onError(error: String) {
-                    hideLoadingDialog()
-                    showErrorSnackbar("فشلت المزامنة الكاملة: $error")
-                }
-            })
-            return true
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Thread {
-            val noAccounts = db.accountDao().getAllAccountsSync().isEmpty()
-            val noCashboxes = db.cashboxDao().getAllSync().isEmpty()
-            if (noAccounts && noCashboxes) {
-                requireActivity().runOnUiThread {
-                    showLoadingDialog("جاري المزامنة التلقائية...")
-                    syncManager.performFullSync(object : SyncManager.SyncCallback {
-                        override fun onSuccess() {
-                            hideLoadingDialog()
-                            showSuccessDialog("تمت المزامنة التلقائية بنجاح")
-                            loadAccounts()
-                            loadTransactions()
-                        }
-                        override fun onError(error: String) {
-                            hideLoadingDialog()
-                            showErrorSnackbar("فشلت المزامنة التلقائية: $error")
-                        }
-                    })
-                }
-            }
-        }.start()
+        Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG).show()
     }
 
     companion object {
