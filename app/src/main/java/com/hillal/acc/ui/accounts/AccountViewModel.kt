@@ -10,7 +10,7 @@ class AccountViewModel(private val accountRepository: AccountRepository) : ViewM
     val allAccounts: LiveData<List<Account>>
         get() = accountRepository.allAccounts
 
-    fun getAccountById(accountId: Int): LiveData<Account> {
+    fun getAccountById(accountId: Long): LiveData<Account> {
         return accountRepository.getAccountById(accountId)
     }
 
