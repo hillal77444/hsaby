@@ -30,6 +30,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.util.Locale
 import kotlin.math.roundToInt
+import androidx.compose.ui.platform.ComposeView
 
 class DashboardFragment : Fragment() {
     private var _binding: FragmentDashboardBinding? = null
@@ -74,19 +75,27 @@ class DashboardFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        _binding = FragmentDashboardBinding.inflate(inflater, container, false)
-        db = AppDatabase.getInstance(requireContext())
-        setupUI()
-        return binding.root
-    }
-
-    private fun setupUI() {
-        setupOtherSettings()
-    }
-
-    private fun setupOtherSettings() {
-        // إعدادات أخرى
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View? {
+        return ComposeView(requireContext()).apply {
+            setContent {
+                DashboardScreen(
+                    viewModel = dashboardViewModel,
+                    userName = userPreferences.getUserName() ?: "",
+                    onEditProfile = { Navigation.findNavController(requireView()).navigate(R.id.editProfileFragment) },
+                    onAddAccount = { Navigation.findNavController(requireView()).navigate(R.id.addAccountFragment) },
+                    onAddTransaction = { Navigation.findNavController(requireView()).navigate(R.id.addTransactionFragment) },
+                    onReport = { startActivity(Intent(requireContext(), AccountStatementActivity::class.java)) },
+                    onAccounts = { Navigation.findNavController(requireView()).navigate(R.id.navigation_accounts) },
+                    onTransactions = { Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment) },
+                    onReports = { Navigation.findNavController(requireView()).navigate(R.id.navigation_reports) },
+                    onDebts = { Navigation.findNavController(requireView()).navigate(R.id.nav_summary) },
+                    onTransfer = { Navigation.findNavController(requireView()).navigate(R.id.action_dashboard_to_transfer) },
+                    onExchange = { Navigation.findNavController(requireView()).navigate(R.id.action_dashboard_to_exchange) }
+                )
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
