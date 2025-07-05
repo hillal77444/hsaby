@@ -203,9 +203,8 @@ class DashboardFragment : Fragment() {
     }
 
     private fun updateUserName() {
-        val userName = userPreferences.getUserName()!!
-        if (userName.isNotEmpty()) {
-            binding.userNameText.text = userName
+        if ((userPreferences.getUserName() ?: "").isNotEmpty()) {
+            binding.userNameText.text = userPreferences.getUserName() ?: ""
         }
     }
 
