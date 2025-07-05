@@ -25,12 +25,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.lifecycle.Observer
 import com.hillal.acc.R
 import com.hillal.acc.data.model.Account
 import java.util.*
@@ -48,7 +49,7 @@ fun AccountsComposeScreen(
         val spacing = ResponsiveSpacing()
         val padding = ResponsivePadding()
         
-        val accounts by viewModel.allAccounts.collectAsStateWithLifecycle(initialValue = emptyList())
+        val accounts by viewModel.allAccounts.collectAsState(initial = emptyList())
         val accountBalances = remember { mutableStateMapOf<Long, Double>() }
         var searchQuery by remember { mutableStateOf("") }
         var isAscendingSort by remember { mutableStateOf(true) }
@@ -56,7 +57,7 @@ fun AccountsComposeScreen(
         
         // حساب الإحصائيات
         val totalAccounts = accounts.size
-        val activeAccounts = accounts.count { account -> account.whatsappEnabled }
+        val activeAccounts = accounts.count { account -> account.isWhatsappEnabled() }
         
         // البحث في الحسابات
         val filteredAccounts = remember(accounts, searchQuery) {
@@ -108,9 +109,9 @@ fun AccountsComposeScreen(
         // الحصول على الأرصدة
         LaunchedEffect(accounts) {
             accounts.forEach { account ->
-                viewModel.getAccountBalanceYemeni(account.id).collect { balance ->
+                viewModel.getAccountBalanceYemeni(account.id).observe(this@LaunchedEffect, Observer { balance ->
                     accountBalances[account.id] = balance ?: 0.0
-                }
+                })
             }
         }
         
@@ -162,8 +163,8 @@ fun AccountsComposeScreen(
                         account = account,
                         balance = accountBalances[account.id] ?: 0.0,
                         onWhatsAppToggle = { isEnabled ->
-                            account.whatsappEnabled = isEnabled
-                            account.updatedAt = System.currentTimeMillis()
+                            account.setWhatsappEnabled(isEnabled)
+                            account.setUpdatedAt(System.currentTimeMillis())
                             viewModel.updateAccount(account)
                         },
                         onEditClick = { onNavigateToEditAccount(account.id) },
@@ -546,11 +547,11 @@ private fun AccountItem(
                     )
                     Spacer(modifier = Modifier.width(spacing.small))
                     Switch(
-                        checked = account.whatsappEnabled,
+                        checked = account.isWhatsappEnabled(),
                         onCheckedChange = onWhatsAppToggle,
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = if (account.whatsappEnabled) Color(0xFF22C55E) else Color(0xFF666666),
-                            checkedTrackColor = if (account.whatsappEnabled) Color(0xFF22C55E) else Color(0xFFE0E0E0),
+                            checkedThumbColor = if (account.isWhatsappEnabled()) Color(0xFF22C55E) else Color(0xFF666666),
+                            checkedTrackColor = if (account.isWhatsappEnabled()) Color(0xFF22C55E) else Color(0xFFE0E0E0),
                             uncheckedThumbColor = Color(0xFF666666),
                             uncheckedTrackColor = Color(0xFFE0E0E0)
                         )
