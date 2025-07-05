@@ -199,7 +199,7 @@ class DashboardFragment : Fragment() {
                 }
                 override fun onError(error: String?) {
                     hideLoadingDialog()
-                    showErrorSnackbar("فشلت المزامنة الكاملة: [1m${error ?: "خطأ غير معروف"}[0m")
+                    showErrorSnackbar("فشلت المزامنة الكاملة: ${error ?: "خطأ غير معروف"}")
                 }
             })
             true
@@ -223,7 +223,7 @@ class DashboardFragment : Fragment() {
                         }
                         override fun onError(error: String?) {
                             hideLoadingDialog()
-                            showErrorSnackbar("فشلت المزامنة التلقائية: [1m${error ?: "خطأ غير معروف"}[0m")
+                            showErrorSnackbar("فشلت المزامنة التلقائية: ${error ?: "خطأ غير معروف"}")
                         }
                     })
                 }
