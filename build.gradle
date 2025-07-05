@@ -31,7 +31,7 @@ task clean(type: Delete) {
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {
         jvmTarget = "17"
-        freeCompilerArgs += ["-Xjsr305=strict"]
+        freeCompilerArgs += ["-Xjsr305=warn"]
     }
 }
 
