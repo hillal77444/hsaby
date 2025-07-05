@@ -1,6 +1,37 @@
 package com.hillal.acc.ui.dashboard
 
+import android.app.AlertDialog
+import android.app.ProgressDialog
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
 import com.hillal.acc.R
+import com.hillal.acc.App
+import com.hillal.acc.data.preferences.UserPreferences
+import com.hillal.acc.data.remote.DataManager
+import com.hillal.acc.data.repository.AccountRepository
+import com.hillal.acc.data.repository.TransactionRepository
+import com.hillal.acc.data.room.AppDatabase
+import com.hillal.acc.data.sync.MigrationManager
+import com.hillal.acc.data.sync.SyncManager
+import com.hillal.acc.data.sync.SyncManager.SyncCallback
+import com.hillal.acc.ui.AccountStatementActivity
+import com.hillal.acc.data.model.ServerAppUpdateInfo
+import com.google.android.material.snackbar.Snackbar
+import org.json.JSONException
+import org.json.JSONObject
 
 class DashboardFragment : androidx.fragment.app.Fragment() {
     private var binding: FragmentDashboardBinding? = null
@@ -15,7 +46,7 @@ class DashboardFragment : androidx.fragment.app.Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        android.util.Log.d(DashboardFragment.Companion.TAG, "DashboardFragment onCreate started")
+        Log.d(DashboardFragment.Companion.TAG, "DashboardFragment onCreate started")
 
         try {
             // Initialize ViewModel
@@ -49,12 +80,12 @@ class DashboardFragment : androidx.fragment.app.Fragment() {
                 db.pendingOperationDao()
             )
 
-            android.util.Log.d(
+            Log.d(
                 DashboardFragment.Companion.TAG,
                 "DashboardViewModel initialized successfully"
             )
         } catch (e: java.lang.Exception) {
-            android.util.Log.e(
+            Log.e(
                 DashboardFragment.Companion.TAG,
                 "Error initializing DashboardFragment: " + e.message,
                 e
@@ -85,7 +116,7 @@ class DashboardFragment : androidx.fragment.app.Fragment() {
 
     override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        android.util.Log.d(
+        Log.d(
             DashboardFragment.Companion.TAG,
             "DashboardFragment onViewCreated started"
         )
@@ -131,7 +162,7 @@ class DashboardFragment : androidx.fragment.app.Fragment() {
                     insets
                 })
         } catch (e: java.lang.Exception) {
-            android.util.Log.e(
+            Log.e(
                 DashboardFragment.Companion.TAG,
                 "Error in onViewCreated: " + e.message,
                 e
@@ -146,7 +177,7 @@ class DashboardFragment : androidx.fragment.app.Fragment() {
             appVersion = requireContext().getPackageManager()
                 .getPackageInfo(requireContext().getPackageName(), 0).versionName
         } catch (e: PackageManager.NameNotFoundException) {
-            android.util.Log.e(
+            Log.e(
                 DashboardFragment.Companion.TAG,
                 "Error getting app version: " + e.message
             )
@@ -160,7 +191,7 @@ class DashboardFragment : androidx.fragment.app.Fragment() {
             requestBody.put("android_version", appVersion)
             requestBody.put("device_name", deviceName)
         } catch (e: JSONException) {
-            android.util.Log.e(
+            Log.e(
                 DashboardFragment.Companion.TAG,
                 "Error creating JSON for user details: " + e.message
             )
@@ -170,21 +201,21 @@ class DashboardFragment : androidx.fragment.app.Fragment() {
         if (dataManager != null) {
             dataManager.updateUserDetails(requestBody, object : ApiCallback {
                 override fun onSuccess(updateInfo: ServerAppUpdateInfo?) {
-                    android.util.Log.d(
+                    Log.d(
                         DashboardFragment.Companion.TAG,
                         "User details updated successfully on server."
                     )
                 }
 
                 override fun onError(error: kotlin.String?) {
-                    android.util.Log.e(
+                    Log.e(
                         DashboardFragment.Companion.TAG,
                         "Failed to update user details on server: " + error
                     )
                 }
             })
         } else {
-            android.util.Log.e(DashboardFragment.Companion.TAG, "DataManager is not initialized.")
+            Log.e(DashboardFragment.Companion.TAG, "DataManager is not initialized.")
         }
     }
 
