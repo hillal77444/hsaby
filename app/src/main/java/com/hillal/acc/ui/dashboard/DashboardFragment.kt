@@ -139,7 +139,7 @@ class DashboardFragment : Fragment() {
             override fun onSuccess(updateInfo: ServerAppUpdateInfo?) {
                 Log.d(TAG, "User details updated successfully on server.")
             }
-            override fun onError(error: String?) {
+            override fun onError(error: String) {
                 Log.e(TAG, "Failed to update user details on server: $error")
             }
         })
