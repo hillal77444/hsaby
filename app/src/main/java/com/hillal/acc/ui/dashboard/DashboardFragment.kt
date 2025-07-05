@@ -203,7 +203,7 @@ class DashboardFragment : Fragment() {
     }
 
     private fun updateUserName() {
-        binding.userNameText.text = userPreferences.getUserName().orEmpty()
+        binding.userNameText.text = (userPreferences.getUserName() ?: "") as CharSequence
     }
 
     private fun showLoadingDialog(message: String) {
