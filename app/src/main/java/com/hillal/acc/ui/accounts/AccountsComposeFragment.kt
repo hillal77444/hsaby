@@ -27,21 +27,21 @@ class AccountsComposeFragment : Fragment() {
                 AccountsComposeScreen(
                     viewModel = viewModel,
                     onNavigateToAddAccount = {
-                        Navigation.findNavController(this@AccountsComposeFragment)
+                        Navigation.findNavController(requireView())
                             .navigate(R.id.addAccountFragment)
                     },
                     onNavigateToEditAccount = { accountId ->
                         val args = Bundle().apply {
                             putLong("accountId", accountId)
                         }
-                        Navigation.findNavController(this@AccountsComposeFragment)
+                        Navigation.findNavController(requireView())
                             .navigate(R.id.editAccountFragment, args)
                     },
                     onNavigateToAccountDetails = { accountId ->
                         val args = Bundle().apply {
                             putLong("accountId", accountId)
                         }
-                        Navigation.findNavController(this@AccountsComposeFragment)
+                        Navigation.findNavController(requireView())
                             .navigate(R.id.accountDetailsFragment, args)
                     }
                 )
