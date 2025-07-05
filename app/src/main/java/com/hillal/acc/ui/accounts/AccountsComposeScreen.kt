@@ -25,12 +25,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.Observer
 import com.hillal.acc.R
 import com.hillal.acc.data.model.Account
@@ -49,22 +44,28 @@ fun AccountsComposeScreen(
         val spacing = ResponsiveSpacing()
         val padding = ResponsivePadding()
         
-        val accounts by viewModel.allAccounts.collectAsState(initial = emptyList())
-        val accountBalances = remember { mutableStateMapOf<Long, Double>() }
+        val accounts by viewModel.allAccounts.observeAsState(initial = emptyList())
+        val accountBalances = remember(accounts) {
+            val balances = mutableStateMapOf<Long, Double>()
+            accounts.forEach { account: Account ->
+                balances[account.id] = account.balance
+            }
+            balances
+        }
         var searchQuery by remember { mutableStateOf("") }
         var isAscendingSort by remember { mutableStateOf(true) }
         var currentSortType by remember { mutableStateOf("balance") }
         
         // حساب الإحصائيات
         val totalAccounts = accounts.size
-        val activeAccounts = accounts.count { account -> account.isWhatsappEnabled() }
+        val activeAccounts = accounts.count { account: Account -> account.isWhatsappEnabled() }
         
         // البحث في الحسابات
         val filteredAccounts = remember(accounts, searchQuery) {
             if (searchQuery.isEmpty()) {
                 accounts
             } else {
-                accounts.filter { account ->
+                accounts.filter { account: Account ->
                     account.name.contains(searchQuery, ignoreCase = true) ||
                     account.phoneNumber.contains(searchQuery, ignoreCase = true)
                 }
@@ -76,44 +77,38 @@ fun AccountsComposeScreen(
             when (currentSortType) {
                 "balance" -> {
                     if (isAscendingSort) {
-                        filteredAccounts.sortedBy { account -> accountBalances[account.id] ?: 0.0 }
+                        filteredAccounts.sortedBy { account: Account -> accountBalances[account.id] ?: 0.0 }
                     } else {
-                        filteredAccounts.sortedByDescending { account -> accountBalances[account.id] ?: 0.0 }
+                        filteredAccounts.sortedByDescending { account: Account -> accountBalances[account.id] ?: 0.0 }
                     }
                 }
                 "name" -> {
                     if (isAscendingSort) {
-                        filteredAccounts.sortedBy { account -> account.name }
+                        filteredAccounts.sortedBy { account: Account -> account.name }
                     } else {
-                        filteredAccounts.sortedByDescending { account -> account.name }
+                        filteredAccounts.sortedByDescending { account: Account -> account.name }
                     }
                 }
                 "number" -> {
                     if (isAscendingSort) {
-                        filteredAccounts.sortedBy { account -> account.serverId }
+                        filteredAccounts.sortedBy { account: Account -> account.serverId }
                     } else {
-                        filteredAccounts.sortedByDescending { account -> account.serverId }
+                        filteredAccounts.sortedByDescending { account: Account -> account.serverId }
                     }
                 }
                 "date" -> {
                     if (isAscendingSort) {
-                        filteredAccounts.sortedBy { account -> account.createdAt }
+                        filteredAccounts.sortedBy { account: Account -> account.createdAt }
                     } else {
-                        filteredAccounts.sortedByDescending { account -> account.createdAt }
+                        filteredAccounts.sortedByDescending { account: Account -> account.createdAt }
                     }
                 }
                 else -> filteredAccounts
             }
         }
         
-        // الحصول على الأرصدة
-        LaunchedEffect(accounts) {
-            accounts.forEach { account ->
-                viewModel.getAccountBalanceYemeni(account.id).observe(this@LaunchedEffect, Observer { balance ->
-                    accountBalances[account.id] = balance ?: 0.0
-                })
-            }
-        }
+        // الحصول على الأرصدة - سيتم تحديثها تلقائياً عند تغيير الحسابات
+        // accountBalances سيتم تحديثها من خلال observeAsState
         
         Box(
             modifier = modifier
@@ -158,7 +153,10 @@ fun AccountsComposeScreen(
                 }
                 
                 // Accounts List
-                items(sortedAccounts) { account ->
+                items(
+                    items = sortedAccounts,
+                    key = { account -> account.id }
+                ) { account ->
                     AccountItem(
                         account = account,
                         balance = accountBalances[account.id] ?: 0.0,
