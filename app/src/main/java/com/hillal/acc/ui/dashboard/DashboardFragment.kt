@@ -72,7 +72,7 @@ class DashboardFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                val userName = userPreferences.getUserName()!!
+                val userName = userPreferences.getUserName()
                 val totalAccounts = dashboardViewModel.getAccounts().value?.size?.toString() ?: "0"
                 val totalCreditors = dashboardViewModel.getTotalCreditors().value?.let { it.roundToInt().toString() } ?: "0"
                 val totalDebtors = dashboardViewModel.getTotalDebtors().value?.let { it.roundToInt().toString() } ?: "0"
