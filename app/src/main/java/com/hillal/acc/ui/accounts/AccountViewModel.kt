@@ -8,7 +8,7 @@ import com.hillal.acc.data.repository.AccountRepository
 class AccountViewModel(private val accountRepository: AccountRepository) : ViewModel() {
 
     val allAccounts: LiveData<List<Account>>
-        get() = accountRepository.allAccounts
+        get() = accountRepository.getAllAccounts()
 
     fun getAccountById(accountId: Long): LiveData<Account> {
         return accountRepository.getAccountById(accountId)
