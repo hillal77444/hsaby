@@ -429,10 +429,7 @@ fun GridCardOld(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clickable(
-                    onClick = onClick,
-                    indication = rememberRipple(bounded = true)
-                ),
+                .clickable(onClick = onClick),
         ) {
             Column(
                 modifier = Modifier.fillMaxSize().padding(8.dp),
