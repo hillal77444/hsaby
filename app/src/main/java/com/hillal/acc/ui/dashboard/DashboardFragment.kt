@@ -121,7 +121,7 @@ class DashboardFragment : Fragment() {
         val lastSeenTimestamp = System.currentTimeMillis()
         var appVersion = "Unknown"
         try {
-            appVersion = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0).versionName
+            appVersion = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0).versionName ?: "Unknown"
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e(TAG, "Error getting app version: ${e.message}")
         }
