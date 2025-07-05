@@ -51,7 +51,11 @@
                 android:textStyle="bold"
                 android:textColor="#152FD9"
                 android:maxLines="1"
-                android:ellipsize="end" />
+                android:ellipsize="end"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="@dimen/text_size_caption"
+                android:autoSizeMaxTextSize="@dimen/text_size_headline2"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
             <!-- رقم الهاتف -->
             <LinearLayout
@@ -73,7 +77,11 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/margin_xs"
                     android:textSize="@dimen/text_size_caption"
-                    android:textColor="#666" />
+                    android:textColor="#666"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="@dimen/text_size_xs"
+                    android:autoSizeMaxTextSize="@dimen/text_size_caption"
+                    android:autoSizeStepGranularity="@dimen/text_size_step" />
             </LinearLayout>
 
             <!-- رقم الحساب -->
@@ -97,7 +105,11 @@
                     android:layout_marginStart="@dimen/margin_xs"
                     android:textSize="@dimen/text_size_xs"
                     android:textColor="#999"
-                    android:textStyle="italic" />
+                    android:textStyle="italic"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="@dimen/text_size_xs"
+                    android:autoSizeMaxTextSize="@dimen/text_size_caption"
+                    android:autoSizeStepGranularity="@dimen/text_size_step" />
             </LinearLayout>
 
             <!-- الرصيد -->
@@ -108,7 +120,11 @@
                 android:layout_marginTop="@dimen/margin_xs"
                 android:textSize="@dimen/text_size_body1"
                 android:textStyle="bold"
-                android:textColor="#22C55E" />
+                android:textColor="#22C55E"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="@dimen/text_size_caption"
+                android:autoSizeMaxTextSize="@dimen/text_size_body1"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
         </LinearLayout>
 
         <!-- أزرار الإجراءات -->
@@ -134,7 +150,11 @@
                 app:trackTint="#E0E0E0"
                 app:thumbTintMode="src_atop"
                 app:trackTintMode="src_atop"
-                android:checked="true" />
+                android:checked="true"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="@dimen/text_size_xs"
+                android:autoSizeMaxTextSize="@dimen/text_size_caption"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
             <!-- زر التعديل -->
             <com.google.android.material.button.MaterialButton
@@ -150,7 +170,11 @@
                 app:iconPadding="@dimen/padding_xxs"
                 android:backgroundTint="#152FD9"
                 app:cornerRadius="@dimen/corner_radius_large"
-                android:contentDescription="تعديل الحساب" />
+                android:contentDescription="تعديل الحساب"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="@dimen/text_size_xs"
+                android:autoSizeMaxTextSize="@dimen/text_size_caption"
+                android:autoSizeStepGranularity="@dimen/text_size_step" />
 
         </LinearLayout>
     </LinearLayout>
