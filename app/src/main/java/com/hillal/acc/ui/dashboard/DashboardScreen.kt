@@ -161,7 +161,8 @@ fun DashboardScreen(
                     valueFontSize = statFontSize,
                     labelFontSize = statLabelFontSize,
                     cardHeight = cardHeight,
-                    onClick = onAccounts
+                    onClick = onAccounts,
+                    modifier = Modifier.weight(1f)
                 )
                 StatCard(
                     icon = R.drawable.ic_arrow_upward,
@@ -172,7 +173,8 @@ fun DashboardScreen(
                     valueFontSize = statFontSize,
                     labelFontSize = statLabelFontSize,
                     cardHeight = cardHeight,
-                    onClick = onTransactions
+                    onClick = onTransactions,
+                    modifier = Modifier.weight(1f)
                 )
                 StatCard(
                     icon = R.drawable.ic_arrow_downward,
@@ -183,7 +185,8 @@ fun DashboardScreen(
                     valueFontSize = statFontSize,
                     labelFontSize = statLabelFontSize,
                     cardHeight = cardHeight,
-                    onClick = onTransactions
+                    onClick = onTransactions,
+                    modifier = Modifier.weight(1f)
                 )
             }
 
@@ -242,13 +245,15 @@ fun DashboardScreen(
                     text = "إضافة حساب",
                     icon = R.drawable.ic_add_account,
                     height = actionButtonHeight,
-                    onClick = onAddAccount
+                    onClick = onAddAccount,
+                    modifier = Modifier.weight(1f)
                 )
                 ActionButton(
                     text = "إضافة معاملة",
                     icon = R.drawable.ic_add,
                     height = actionButtonHeight,
-                    onClick = onAddTransaction
+                    onClick = onAddTransaction,
+                    modifier = Modifier.weight(1f)
                 )
             }
 
@@ -267,72 +272,64 @@ fun StatCard(
     valueFontSize: TextUnit,
     labelFontSize: TextUnit,
     cardHeight: Dp,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = Modifier
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier
             .padding(horizontal = 4.dp)
             .height(cardHeight)
-            .weight(1f)
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f))
     ) {
-        Card(
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable { onClick() },
-            colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f))
+        Column(
+            modifier = Modifier.fillMaxSize().padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = icon),
-                    contentDescription = null,
-                    tint = color,
-                    modifier = Modifier.size(iconSize)
-                )
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = color,
-                    fontSize = valueFontSize,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = labelFontSize,
-                    textAlign = TextAlign.Center
-                )
-            }
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(iconSize)
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = color,
+                fontSize = valueFontSize,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = labelFontSize,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
 
 @Composable
-fun ActionButton(text: String, icon: Int, height: Dp, onClick: () -> Unit) {
-    Box(modifier = Modifier.weight(1f)) {
-        Button(
-            onClick = onClick,
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp)
-                .height(height),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-        ) {
-            Icon(
-                painter = painterResource(id = icon),
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = text, color = Color.White, fontSize = 16.sp)
-        }
+fun ActionButton(text: String, icon: Int, height: Dp, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(
+        onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier
+            .padding(horizontal = 4.dp)
+            .height(height),
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+    ) {
+        Icon(
+            painter = painterResource(id = icon),
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = text, color = Color.White, fontSize = 16.sp)
     }
 }
 
@@ -366,7 +363,8 @@ fun DashboardGridCards(
                 cardHeight = cardHeight,
                 iconSize = iconSize,
                 fontSize = fontSize,
-                onClick = onAccounts
+                onClick = onAccounts,
+                modifier = Modifier.weight(1f)
             )
             GridCard(
                 icon = R.drawable.ic_transactions,
@@ -376,7 +374,8 @@ fun DashboardGridCards(
                 cardHeight = cardHeight,
                 iconSize = iconSize,
                 fontSize = fontSize,
-                onClick = onTransactions
+                onClick = onTransactions,
+                modifier = Modifier.weight(1f)
             )
         }
 
@@ -395,7 +394,8 @@ fun DashboardGridCards(
                 cardHeight = cardHeight,
                 iconSize = iconSize,
                 fontSize = fontSize,
-                onClick = onReports
+                onClick = onReports,
+                modifier = Modifier.weight(1f)
             )
             GridCard(
                 icon = R.drawable.ic_summary,
@@ -405,7 +405,8 @@ fun DashboardGridCards(
                 cardHeight = cardHeight,
                 iconSize = iconSize,
                 fontSize = fontSize,
-                onClick = onDebts
+                onClick = onDebts,
+                modifier = Modifier.weight(1f)
             )
         }
 
@@ -424,7 +425,8 @@ fun DashboardGridCards(
                 cardHeight = cardHeight,
                 iconSize = iconSize,
                 fontSize = fontSize,
-                onClick = onTransfer
+                onClick = onTransfer,
+                modifier = Modifier.weight(1f)
             )
             GridCard(
                 icon = R.drawable.ic_currency_exchange,
@@ -434,7 +436,8 @@ fun DashboardGridCards(
                 cardHeight = cardHeight,
                 iconSize = iconSize,
                 fontSize = fontSize,
-                onClick = onExchange
+                onClick = onExchange,
+                modifier = Modifier.weight(1f)
             )
         }
     }
@@ -449,48 +452,43 @@ fun GridCard(
     cardHeight: Dp,
     iconSize: Dp,
     fontSize: TextUnit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = Modifier
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier
             .padding(horizontal = 4.dp)
             .height(cardHeight)
-            .weight(1f)
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f))
     ) {
-        Card(
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable { onClick() },
-            colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f))
+        Column(
+            modifier = Modifier.fillMaxSize().padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = icon),
-                    contentDescription = null,
-                    tint = color,
-                    modifier = Modifier.size(iconSize)
-                )
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = color,
-                    fontSize = fontSize,
-                    modifier = Modifier.padding(top = 8.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = fontSize * 0.8f,
-                    textAlign = TextAlign.Center
-                )
-            }
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(iconSize)
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = color,
+                fontSize = fontSize,
+                modifier = Modifier.padding(top = 8.dp),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = fontSize * 0.8f,
+                textAlign = TextAlign.Center
+            )
         }
     }
 } 
