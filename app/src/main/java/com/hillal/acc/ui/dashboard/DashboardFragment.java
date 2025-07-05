@@ -22,11 +22,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.activity.OnBackPressedCallback;
 import androidx.core.view.ViewCompat;
+import androidx.compose.ui.platform.ComposeView;
 
 import com.hillal.acc.R;
 import com.hillal.acc.data.repository.AccountRepository;
 import com.hillal.acc.data.repository.TransactionRepository;
-import com.hillal.acc.databinding.FragmentDashboardBinding;
 import com.hillal.acc.App;
 import com.hillal.acc.data.preferences.UserPreferences;
 import com.hillal.acc.data.room.AppDatabase;
@@ -35,6 +35,7 @@ import com.hillal.acc.data.remote.DataManager;
 import com.hillal.acc.data.sync.MigrationManager;
 import com.hillal.acc.data.model.ServerAppUpdateInfo;
 import com.hillal.acc.ui.AccountStatementActivity;
+import com.hillal.acc.ui.dashboard.DashboardScreen;
 
 import org.json.JSONObject;
 import org.json.JSONException;
@@ -45,7 +46,6 @@ import com.google.android.material.snackbar.Snackbar;
 
 public class DashboardFragment extends Fragment {
     private static final String TAG = "DashboardFragment";
-    private FragmentDashboardBinding binding;
     private DashboardViewModel dashboardViewModel;
     private UserPreferences userPreferences;
     private ProgressDialog progressDialog;
@@ -96,19 +96,34 @@ public class DashboardFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        binding = FragmentDashboardBinding.inflate(inflater, container, false);
-        db = AppDatabase.getInstance(requireContext());
-        setupUI();
-        return binding.getRoot();
-    }
-
-    private void setupUI() {
-        // إعدادات أخرى
-        setupOtherSettings();
-    }
-
-    private void setupOtherSettings() {
-        // هنا يمكن إضافة إعدادات أخرى
+        // استبدال الواجهة بـ ComposeView
+        ComposeView composeView = new ComposeView(requireContext());
+        composeView.setContent(() -> {
+            // جلب البيانات من ViewModel وUserPreferences
+            String userName = userPreferences.getUserName();
+            String totalAccounts = String.valueOf(dashboardViewModel.getAccounts().getValue() != null ? dashboardViewModel.getAccounts().getValue().size() : 0);
+            String totalCreditors = String.valueOf(dashboardViewModel.getTotalCreditors().getValue() != null ? (int)Math.round(dashboardViewModel.getTotalCreditors().getValue()) : 0);
+            String totalDebtors = String.valueOf(dashboardViewModel.getTotalDebtors().getValue() != null ? (int)Math.round(dashboardViewModel.getTotalDebtors().getValue()) : 0);
+            String totalBalance = String.valueOf(dashboardViewModel.getNetBalance().getValue() != null ? (int)Math.round(dashboardViewModel.getNetBalance().getValue()) : 0) + " يمني";
+            return DashboardScreen(
+                userName,
+                () -> Navigation.findNavController(requireView()).navigate(R.id.editProfileFragment),
+                totalAccounts,
+                totalCreditors,
+                totalDebtors,
+                totalBalance,
+                () -> Navigation.findNavController(requireView()).navigate(R.id.addTransactionFragment),
+                () -> Navigation.findNavController(requireView()).navigate(R.id.addAccountFragment),
+                () -> { Intent intent = new Intent(requireContext(), AccountStatementActivity.class); startActivity(intent); },
+                () -> Navigation.findNavController(requireView()).navigate(R.id.navigation_accounts),
+                () -> Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment),
+                () -> Navigation.findNavController(requireView()).navigate(R.id.navigation_reports),
+                () -> Navigation.findNavController(requireView()).navigate(R.id.nav_summary),
+                () -> Navigation.findNavController(requireView()).navigate(R.id.action_dashboard_to_exchange),
+                () -> Navigation.findNavController(requireView()).navigate(R.id.action_dashboard_to_transfer)
+            );
+        });
+        return composeView;
     }
 
     @Override
@@ -117,9 +132,6 @@ public class DashboardFragment extends Fragment {
         Log.d(TAG, "DashboardFragment onViewCreated started");
 
         try {
-            setupClickListeners();
-            observeData();
-            updateUserName();
             migrationManager = new MigrationManager(requireContext());
 
             // تشغيل الترحيل تلقائياً عند فتح الصفحة
@@ -192,78 +204,6 @@ public class DashboardFragment extends Fragment {
         }
     }
 
-    private void setupClickListeners() {
-        // زر تعديل الملف الشخصي
-        binding.editProfileButton.setOnClickListener(v -> 
-            Navigation.findNavController(requireView()).navigate(R.id.editProfileFragment));
-
-        // زر إضافة حساب جديد
-        binding.addAccountButton.setOnClickListener(v ->
-            Navigation.findNavController(requireView()).navigate(R.id.addAccountFragment));
-
-        // زر إضافة معاملة جديدة
-        binding.addTransactionButton.setOnClickListener(v ->
-            Navigation.findNavController(requireView()).navigate(R.id.addTransactionFragment));
-
-        // زر كشف الحساب (التقارير)
-        binding.reportButton.setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), AccountStatementActivity.class);
-            startActivity(intent);
-        });
-
-        // بطاقات شبكة الروابط المختصرة
-        binding.accountsCard.setOnClickListener(v ->
-            Navigation.findNavController(requireView()).navigate(R.id.navigation_accounts));
-
-        binding.transactionsCard.setOnClickListener(v ->
-            Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment));
-
-        binding.reportsCard.setOnClickListener(v ->
-            Navigation.findNavController(requireView()).navigate(R.id.navigation_reports));
-
-        binding.debtsCard.setOnClickListener(v ->
-            Navigation.findNavController(requireView()).navigate(R.id.nav_summary));
-
-        binding.transferCard.setOnClickListener(v ->
-            Navigation.findNavController(requireView()).navigate(R.id.action_dashboard_to_transfer));
-
-        binding.exchangeCard.setOnClickListener(v ->
-            Navigation.findNavController(requireView()).navigate(R.id.action_dashboard_to_exchange));
-    }
-
-    private void observeData() {
-        dashboardViewModel.getTotalDebtors().observe(getViewLifecycleOwner(), total -> {
-            if (total != null) {
-                binding.totalDebtors.setText(String.format(Locale.US, "%d ", (int) Math.round(total)));
-            }
-        });
-
-        dashboardViewModel.getTotalCreditors().observe(getViewLifecycleOwner(), total -> {
-            if (total != null) {
-                binding.totalCreditors.setText(String.format(Locale.US, "%d ", (int) Math.round(total)));
-            }
-        });
-
-        dashboardViewModel.getAccounts().observe(getViewLifecycleOwner(), accounts -> {
-            if (accounts != null) {
-                binding.totalAccounts.setText(String.format(Locale.US, "%d", accounts.size()));
-            }
-        });
-
-        dashboardViewModel.getNetBalance().observe(getViewLifecycleOwner(), balance -> {
-            if (balance != null) {
-                binding.totalBalance.setText(String.format(Locale.US, "%d يمني", (int) Math.round(balance)));
-            }
-        });
-    }
-
-    private void updateUserName() {
-        String userName = userPreferences.getUserName();
-        if (!userName.isEmpty()) {
-            binding.userNameText.setText(userName);
-        }
-    }
-
     private void showLoadingDialog(String message) {
         if (progressDialog == null) {
             progressDialog = new ProgressDialog(requireContext());
@@ -288,21 +228,7 @@ public class DashboardFragment extends Fragment {
     }
 
     private void showErrorSnackbar(String message) {
-        Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_LONG).show();
-    }
-
-    private void loadAccounts() {
-        dashboardViewModel.getAccounts().observe(getViewLifecycleOwner(), accounts -> {
-            // تحديث واجهة المستخدم بالحسابات الجديدة
-            // يمكنك إضافة الكود الخاص بك هنا
-        });
-    }
-
-    private void loadTransactions() {
-        dashboardViewModel.getTransactions().observe(getViewLifecycleOwner(), transactions -> {
-            // تحديث واجهة المستخدم بالمعاملات الجديدة
-            // يمكنك إضافة الكود الخاص بك هنا
-        });
+        Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG).show();
     }
 
     @Override
@@ -312,7 +238,6 @@ public class DashboardFragment extends Fragment {
             progressDialog.dismiss();
             progressDialog = null;
         }
-        binding = null;
     }
 
     @Override
@@ -330,8 +255,6 @@ public class DashboardFragment extends Fragment {
                 public void onSuccess() {
                     hideLoadingDialog();
                     showSuccessDialog("تمت المزامنة الكاملة بنجاح");
-                    loadAccounts();
-                    loadTransactions();
                 }
                 @Override
                 public void onError(String error) {
@@ -359,8 +282,6 @@ public class DashboardFragment extends Fragment {
                         public void onSuccess() {
                             hideLoadingDialog();
                             showSuccessDialog("تمت المزامنة التلقائية بنجاح");
-                            loadAccounts();
-                            loadTransactions();
                         }
                         @Override
                         public void onError(String error) {
