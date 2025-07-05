@@ -21,7 +21,8 @@ public class UserPreferences {
 
     @NonNull
     public String getUserName() {
-        return preferences.getString(KEY_USER_NAME, "") != null ? preferences.getString(KEY_USER_NAME, "") : "";
+        String name = preferences.getString(KEY_USER_NAME, "");
+        return name == null ? "" : name;
     }
 
     public void savePhoneNumber(String phone) {
