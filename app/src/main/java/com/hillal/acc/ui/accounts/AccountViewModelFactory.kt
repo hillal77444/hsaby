@@ -4,13 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.hillal.acc.data.repository.AccountRepository
 
-class AccountViewModelFactory(private val repository: AccountRepository) : ViewModelProvider.Factory {
+class AccountViewModelFactory(private val accountRepository: AccountRepository) : ViewModelProvider.Factory {
     
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return if (modelClass.isAssignableFrom(AccountViewModel::class.java)) {
-            AccountViewModel(repository) as T
-        } else {
-            throw IllegalArgumentException("Unknown ViewModel class")
+        if (modelClass.isAssignableFrom(AccountViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return AccountViewModel(accountRepository) as T
         }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 } 
