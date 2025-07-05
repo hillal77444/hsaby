@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material.icons.filled.CurrencyExchange
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.foundation.clickable
 
 @Composable
 fun DashboardHeader(
@@ -239,12 +240,12 @@ fun ShortcutsGrid(
     modifier: Modifier = Modifier
 ) {
     val shortcuts = listOf(
-        Triple("الحسابات", { Icon(Icons.Default.AccountCircle, contentDescription = null, tint = Color(0xFF152FD9)) }, Color(0xFF152FD9)),
-        Triple("المعاملات", { Icon(Icons.Default.ListAlt, contentDescription = null, tint = Color(0xFFF59E42)) }, Color(0xFFF59E42)),
-        Triple("التقارير", { Icon(Icons.Default.Assessment, contentDescription = null, tint = Color(0xFF22C55E)) }, Color(0xFF22C55E)),
-        Triple("متابعة الديون", { Icon(Icons.Default.ArrowDownward, contentDescription = null, tint = Color(0xFFF44336)) }, Color(0xFFF44336)),
-        Triple("صرف العملات", { Icon(Icons.Default.CurrencyExchange, contentDescription = null, tint = Color(0xFF1976D2)) }, Color(0xFF1976D2)),
-        Triple("تحويل بين الحسابات", { Icon(Icons.Default.SyncAlt, contentDescription = null, tint = Color(0xFF1976D2)) }, Color(0xFF1976D2))
+        Triple("الحسابات", Color(0xFF152FD9), Icons.Default.AccountCircle),
+        Triple("المعاملات", Color(0xFFF59E42), Icons.Default.ListAlt),
+        Triple("التقارير", Color(0xFF22C55E), Icons.Default.Assessment),
+        Triple("متابعة الديون", Color(0xFFF44336), Icons.Default.ArrowDownward),
+        Triple("صرف العملات", Color(0xFF1976D2), Icons.Default.CurrencyExchange),
+        Triple("تحويل بين الحسابات", Color(0xFF1976D2), Icons.Default.SyncAlt)
     )
     val actions = listOf(onAccounts, onTransactions, onReports, onDebts, onExchange, onTransfer)
     Column(modifier = modifier) {
@@ -256,10 +257,10 @@ fun ShortcutsGrid(
                 for (col in 0 until 3) {
                     val index = row * 3 + col
                     if (index < shortcuts.size) {
-                        val (label, icon, color) = shortcuts[index]
+                        val (label, color, icon) = shortcuts[index]
                         ShortcutCard(
                             label = label,
-                            icon = icon,
+                            icon = { Icon(icon, contentDescription = null, tint = color) },
                             color = color,
                             onClick = actions[index],
                             modifier = Modifier
