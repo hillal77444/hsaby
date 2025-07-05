@@ -82,62 +82,26 @@ fun DashboardScreen(
                 .fillMaxSize()
                 .verticalScroll(scrollState)
         ) {
-            // رأس الشاشة
+            Spacer(modifier = Modifier.height(logoOffset * 0.7f))
+            // شعار التطبيق فقط
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(headerHeight)
-                    .background(Color(0xFF2196F3)),
-                contentAlignment = Alignment.TopCenter
+                    .size(logoSize)
+                    .align(Alignment.CenterHorizontally),
+                contentAlignment = Alignment.Center
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = padding, start = padding, end = padding),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_menu),
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(statIconSize)
-                    )
-                    Text(
-                        text = "مالي برو",
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        fontSize = welcomeFontSize.sp
-                    )
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_sync),
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(statIconSize)
-                    )
-                }
-                // شعار التطبيق
-                Box(
-                    modifier = Modifier
-                        .size(logoSize)
-                        .align(Alignment.BottomCenter)
-                        .offset(y = logoOffset),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.mipmap.ic_launcher),
-                        contentDescription = "Logo",
-                        modifier = Modifier.size(logoSize * 0.7f)
-                    )
-                }
+                Image(
+                    painter = painterResource(id = R.mipmap.ic_launcher),
+                    contentDescription = "Logo",
+                    modifier = Modifier.size(logoSize * 0.7f)
+                )
             }
-            Spacer(modifier = Modifier.height(logoOffset * 0.7f))
             // عبارة ترحيبية
             Text(
                 text = "مرحباً، اسم المستخدم!",
                 color = Color(0xFF2196F3),
                 style = MaterialTheme.typography.titleMedium,
-                fontSize = welcomeFontSize.sp,
+                fontSize = (welcomeFontSize * 0.85f).sp,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
             // بطاقة المستخدم مع زر التعديل
@@ -186,8 +150,8 @@ fun DashboardScreen(
                     iconTint = Color(0xFF009688),
                     valueColor = Color(0xFF009688),
                     iconSize = statIconSize,
-                    valueFontSize = statFontSize.sp,
-                    labelFontSize = statLabelFontSize.sp,
+                    valueFontSize = (statFontSize * 0.7f).sp,
+                    labelFontSize = (statLabelFontSize * 0.7f).sp,
                     modifier = Modifier.weight(1f).height(cardHeight)
                 )
                 StatCardOld(
@@ -199,8 +163,8 @@ fun DashboardScreen(
                     iconTint = Color(0xFFFF9800),
                     valueColor = Color(0xFFFF9800),
                     iconSize = statIconSize,
-                    valueFontSize = statFontSize.sp,
-                    labelFontSize = statLabelFontSize.sp,
+                    valueFontSize = (statFontSize * 0.7f).sp,
+                    labelFontSize = (statLabelFontSize * 0.7f).sp,
                     modifier = Modifier.weight(1f).height(cardHeight)
                 )
                 StatCardOld(
@@ -212,8 +176,8 @@ fun DashboardScreen(
                     iconTint = Color(0xFF4CAF50),
                     valueColor = Color(0xFF4CAF50),
                     iconSize = statIconSize,
-                    valueFontSize = statFontSize.sp,
-                    labelFontSize = statLabelFontSize.sp,
+                    valueFontSize = (statFontSize * 0.7f).sp,
+                    labelFontSize = (statLabelFontSize * 0.7f).sp,
                     modifier = Modifier.weight(1f).height(cardHeight)
                 )
                 StatCardOld(
@@ -225,8 +189,8 @@ fun DashboardScreen(
                     iconTint = Color(0xFF1976D2),
                     valueColor = Color(0xFF1976D2),
                     iconSize = statIconSize,
-                    valueFontSize = statFontSize.sp,
-                    labelFontSize = statLabelFontSize.sp,
+                    valueFontSize = (statFontSize * 0.7f).sp,
+                    labelFontSize = (statLabelFontSize * 0.7f).sp,
                     modifier = Modifier.weight(1f).height(cardHeight)
                 )
             }
@@ -243,7 +207,7 @@ fun DashboardScreen(
                     icon = R.drawable.ic_add,
                     height = actionButtonHeight,
                     backgroundColor = Color(0xFF1976D2),
-                    fontSize = gridFontSize.sp,
+                    fontSize = (gridFontSize * 0.8f).sp,
                     iconSize = gridIconSize,
                     onClick = onAddTransaction,
                     modifier = Modifier.weight(1f)
@@ -253,7 +217,7 @@ fun DashboardScreen(
                     icon = R.drawable.ic_add_account,
                     height = actionButtonHeight,
                     backgroundColor = Color(0xFF388E3C),
-                    fontSize = gridFontSize.sp,
+                    fontSize = (gridFontSize * 0.8f).sp,
                     iconSize = gridIconSize,
                     onClick = onAddAccount,
                     modifier = Modifier.weight(1f)
@@ -263,7 +227,7 @@ fun DashboardScreen(
                     icon = R.drawable.ic_statement,
                     height = actionButtonHeight,
                     backgroundColor = Color(0xFFFF9800),
-                    fontSize = gridFontSize.sp,
+                    fontSize = (gridFontSize * 0.8f).sp,
                     iconSize = gridIconSize,
                     onClick = onReport,
                     modifier = Modifier.weight(1f)
@@ -287,8 +251,8 @@ fun DashboardScreen(
                         subtitle = "عرض التقارير",
                         backgroundColor = Color(0xFFE8F5E9),
                         iconTint = Color(0xFF388E3C),
-                        fontSize = gridFontSize.sp,
-                        subFontSize = gridSubFontSize.sp,
+                        fontSize = (gridFontSize * 0.9f).sp,
+                        subFontSize = (gridSubFontSize * 0.9f).sp,
                         iconSize = gridIconSize,
                         onClick = onReports,
                         modifier = Modifier.weight(1f).height(gridCardHeight)
@@ -299,8 +263,8 @@ fun DashboardScreen(
                         subtitle = "سجل المعاملات",
                         backgroundColor = Color(0xFFE3F2FD),
                         iconTint = Color(0xFF1976D2),
-                        fontSize = gridFontSize.sp,
-                        subFontSize = gridSubFontSize.sp,
+                        fontSize = (gridFontSize * 0.9f).sp,
+                        subFontSize = (gridSubFontSize * 0.9f).sp,
                         iconSize = gridIconSize,
                         onClick = onTransactions,
                         modifier = Modifier.weight(1f).height(gridCardHeight)
@@ -311,8 +275,8 @@ fun DashboardScreen(
                         subtitle = "إدارة الحسابات",
                         backgroundColor = Color(0xFFF3E5F5),
                         iconTint = Color(0xFF8E24AA),
-                        fontSize = gridFontSize.sp,
-                        subFontSize = gridSubFontSize.sp,
+                        fontSize = (gridFontSize * 0.9f).sp,
+                        subFontSize = (gridSubFontSize * 0.9f).sp,
                         iconSize = gridIconSize,
                         onClick = onAccounts,
                         modifier = Modifier.weight(1f).height(gridCardHeight)
@@ -328,8 +292,8 @@ fun DashboardScreen(
                         subtitle = "تحويل الأموال",
                         backgroundColor = Color(0xFFFFF3E0),
                         iconTint = Color(0xFFFF9800),
-                        fontSize = gridFontSize.sp,
-                        subFontSize = gridSubFontSize.sp,
+                        fontSize = (gridFontSize * 0.9f).sp,
+                        subFontSize = (gridSubFontSize * 0.9f).sp,
                         iconSize = gridIconSize,
                         onClick = onTransfer,
                         modifier = Modifier.weight(1f).height(gridCardHeight)
@@ -340,8 +304,8 @@ fun DashboardScreen(
                         subtitle = "صرف العملات",
                         backgroundColor = Color(0xFFE1F5FE),
                         iconTint = Color(0xFF0288D1),
-                        fontSize = gridFontSize.sp,
-                        subFontSize = gridSubFontSize.sp,
+                        fontSize = (gridFontSize * 0.9f).sp,
+                        subFontSize = (gridSubFontSize * 0.9f).sp,
                         iconSize = gridIconSize,
                         onClick = onExchange,
                         modifier = Modifier.weight(1f).height(gridCardHeight)
@@ -352,8 +316,8 @@ fun DashboardScreen(
                         subtitle = "متابعة الديون",
                         backgroundColor = Color(0xFFFFEBEE),
                         iconTint = Color(0xFFD32F2F),
-                        fontSize = gridFontSize.sp,
-                        subFontSize = gridSubFontSize.sp,
+                        fontSize = (gridFontSize * 0.9f).sp,
+                        subFontSize = (gridSubFontSize * 0.9f).sp,
                         iconSize = gridIconSize,
                         onClick = onDebts,
                         modifier = Modifier.weight(1f).height(gridCardHeight)
@@ -459,32 +423,42 @@ fun GridCardOld(
     Card(
         shape = RoundedCornerShape(14.dp),
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = backgroundColor)
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(
+                    onClick = onClick,
+                    indication = rememberRipple(bounded = true)
+                ),
         ) {
-            Icon(
-                painter = painterResource(id = icon),
-                contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(iconSize)
-            )
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                color = iconTint,
-                fontSize = fontSize,
-                modifier = Modifier.padding(top = 2.dp)
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = iconTint.copy(alpha = 0.7f),
-                fontSize = subFontSize
-            )
+            Column(
+                modifier = Modifier.fillMaxSize().padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = icon),
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(iconSize)
+                )
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = iconTint,
+                    fontSize = fontSize,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = iconTint.copy(alpha = 0.7f),
+                    fontSize = subFontSize
+                )
+            }
         }
     }
 } 
