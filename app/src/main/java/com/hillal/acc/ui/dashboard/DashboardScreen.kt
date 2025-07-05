@@ -279,7 +279,7 @@ fun ShortcutsGrid(
 
 @Composable
 fun DashboardScreen(
-    userName: String = "اسم المستخدم",
+    userName: String? = "اسم المستخدم",
     onEditProfile: () -> Unit = {},
     totalAccounts: String = "0",
     totalCreditors: String = "0",
@@ -302,7 +302,7 @@ fun DashboardScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        DashboardHeader(userName = userName, onEditProfile = onEditProfile)
+        DashboardHeader(userName = userName ?: "اسم المستخدم", onEditProfile = onEditProfile)
         Spacer(modifier = Modifier.height(16.dp))
         StatisticsRow(
             totalAccounts = totalAccounts,
