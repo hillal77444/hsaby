@@ -203,10 +203,7 @@ class DashboardFragment : Fragment() {
     }
 
     private fun updateUserName() {
-        val userName = userPreferences.getUserName()
-        if (!userName.isNullOrEmpty()) {
-            binding.userNameText.text = requireNotNull(userName)
-        }
+        binding.userNameText.text = userPreferences.getUserName().orEmpty()
     }
 
     private fun showLoadingDialog(message: String) {
