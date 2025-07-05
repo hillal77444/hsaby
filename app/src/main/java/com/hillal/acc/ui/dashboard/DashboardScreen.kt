@@ -244,7 +244,7 @@ fun DashboardScreen(
                 )
                 ActionButton(
                     text = "إضافة معاملة",
-                    icon = R.drawable.ic_add_transaction,
+                    icon = R.drawable.ic_add,
                     height = actionButtonHeight,
                     onClick = onAddTransaction
                 )
@@ -304,8 +304,6 @@ fun StatCard(
         }
     }
 }
-
-
 
 @Composable
 fun ActionButton(text: String, icon: Int, height: Dp, onClick: () -> Unit) {
@@ -381,7 +379,7 @@ fun DashboardGridCards(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             GridCard(
-                icon = R.drawable.ic_report,
+                icon = R.drawable.ic_reports,
                 title = "التقارير",
                 subtitle = "تقارير مالية",
                 color = Color(0xFF9C27B0),
@@ -391,7 +389,7 @@ fun DashboardGridCards(
                 onClick = onReports
             )
             GridCard(
-                icon = R.drawable.ic_debts,
+                icon = R.drawable.ic_summary,
                 title = "الديون",
                 subtitle = "متابعة الديون",
                 color = Color(0xFFFF9800),
@@ -410,7 +408,7 @@ fun DashboardGridCards(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             GridCard(
-                icon = R.drawable.ic_transfer,
+                icon = R.drawable.ic_money,
                 title = "تحويل",
                 subtitle = "تحويل الأموال",
                 color = Color(0xFF4CAF50),
@@ -420,7 +418,7 @@ fun DashboardGridCards(
                 onClick = onTransfer
             )
             GridCard(
-                icon = R.drawable.ic_exchange,
+                icon = R.drawable.ic_currency_exchange,
                 title = "صرف",
                 subtitle = "صرف العملات",
                 color = Color(0xFF607D8B),
