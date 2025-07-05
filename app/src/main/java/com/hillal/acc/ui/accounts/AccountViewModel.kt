@@ -33,4 +33,12 @@ class AccountViewModel(private val accountRepository: AccountRepository) : ViewM
     fun getAccountBalanceYemeni(accountId: Long): LiveData<Double?> {
         return accountRepository.getAccountBalanceYemeni(accountId)
     }
+
+    fun getAccountByPhoneNumber(phoneNumber: String): Account? {
+        return accountRepository.getAccountByPhoneNumber(phoneNumber)
+    }
+
+    fun generateUniqueAccountNumber(): String {
+        return accountRepository.generateUniqueAccountNumber()
+    }
 } 
