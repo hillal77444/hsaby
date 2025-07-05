@@ -2,6 +2,7 @@ package com.hillal.acc.data.preferences;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import androidx.annotation.NonNull;
 
 public class UserPreferences {
     private static final String PREF_NAME = "user_preferences";
@@ -18,6 +19,7 @@ public class UserPreferences {
         preferences.edit().putString(KEY_USER_NAME, name).apply();
     }
 
+    @NonNull
     public String getUserName() {
         return preferences.getString(KEY_USER_NAME, "") != null ? preferences.getString(KEY_USER_NAME, "") : "";
     }
