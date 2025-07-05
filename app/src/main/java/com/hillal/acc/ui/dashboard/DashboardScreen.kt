@@ -27,6 +27,8 @@ import com.hillal.acc.R
 import com.hillal.acc.data.model.ServerAppUpdateInfo
 import com.hillal.acc.ui.dashboard.DashboardViewModel
 import kotlin.math.roundToInt
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 
 @Composable
 fun DashboardScreen(
@@ -267,63 +269,70 @@ fun StatCard(
     cardHeight: Dp,
     onClick: () -> Unit
 ) {
-    Card(
-        shape = RoundedCornerShape(12.dp),
+    Box(
         modifier = Modifier
-            .weight(1f)
             .padding(horizontal = 4.dp)
             .height(cardHeight)
-            .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f))
+            .weight(1f)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        Card(
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable { onClick() },
+            colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f))
         ) {
-            Icon(
-                painter = painterResource(id = icon),
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(iconSize)
-            )
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = color,
-                fontSize = valueFontSize,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = labelFontSize,
-                textAlign = TextAlign.Center
-            )
+            Column(
+                modifier = Modifier.fillMaxSize().padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = icon),
+                    contentDescription = null,
+                    tint = color,
+                    modifier = Modifier.size(iconSize)
+                )
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = color,
+                    fontSize = valueFontSize,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = labelFontSize,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
 
 @Composable
 fun ActionButton(text: String, icon: Int, height: Dp, onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        shape = RoundedCornerShape(12.dp),
-        modifier = Modifier
-            .weight(1f)
-            .padding(horizontal = 4.dp)
-            .height(height),
-        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-    ) {
-        Icon(
-            painter = painterResource(id = icon),
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text = text, color = Color.White, fontSize = 16.sp)
+    Box(modifier = Modifier.weight(1f)) {
+        Button(
+            onClick = onClick,
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp)
+                .height(height),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        ) {
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = text, color = Color.White, fontSize = 16.sp)
+        }
     }
 }
 
@@ -442,41 +451,46 @@ fun GridCard(
     fontSize: TextUnit,
     onClick: () -> Unit
 ) {
-    Card(
-        shape = RoundedCornerShape(12.dp),
+    Box(
         modifier = Modifier
-            .weight(1f)
             .padding(horizontal = 4.dp)
             .height(cardHeight)
-            .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f))
+            .weight(1f)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        Card(
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable { onClick() },
+            colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f))
         ) {
-            Icon(
-                painter = painterResource(id = icon),
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(iconSize)
-            )
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = color,
-                fontSize = fontSize,
-                modifier = Modifier.padding(top = 8.dp),
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = fontSize * 0.8f,
-                textAlign = TextAlign.Center
-            )
+            Column(
+                modifier = Modifier.fillMaxSize().padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = icon),
+                    contentDescription = null,
+                    tint = color,
+                    modifier = Modifier.size(iconSize)
+                )
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = color,
+                    fontSize = fontSize,
+                    modifier = Modifier.padding(top = 8.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = fontSize * 0.8f,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 } 
