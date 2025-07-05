@@ -157,7 +157,7 @@ fun AddAccountComposeScreen(
             false // isDebtor
         )
         account.notes = notes
-        account.whatsappEnabled = whatsappEnabled
+        account.setWhatsappEnabled(whatsappEnabled)
         account.serverId = -1
         
         viewModel.insertAccount(account)
@@ -204,6 +204,7 @@ fun AddAccountComposeScreen(
                 ButtonsSection(
                     onSave = saveAccount,
                     onCancel = onNavigateBack,
+                    isSaving = isSaving,
                     spacing = spacing,
                     padding = padding
                 )
@@ -432,6 +433,7 @@ private fun FormSection(
 private fun ButtonsSection(
     onSave: () -> Unit,
     onCancel: () -> Unit,
+    isSaving: Boolean,
     spacing: ResponsiveSpacingValues,
     padding: ResponsivePaddingValues
 ) {
