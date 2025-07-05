@@ -131,9 +131,8 @@
     <!-- الحسابات -->
     <fragment
         android:id="@+id/navigation_accounts"
-        android:name="com.hillal.acc.ui.accounts.AccountsFragment"
-        android:label="@string/title_accounts"
-        tools:layout="@layout/fragment_accounts" />
+        android:name="com.hillal.acc.ui.accounts.AccountsComposeFragment"
+        android:label="@string/title_accounts" />
 
     <fragment
         android:id="@+id/transactionsFragment"
