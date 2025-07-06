@@ -39,6 +39,7 @@ import com.hillal.acc.R
 import com.hillal.acc.data.model.Account
 import java.util.*
 import android.app.Activity
+import androidx.compose.material.icons.filled.PersonAddAlt1
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -386,9 +387,9 @@ private fun FormSection(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.PersonSearch,
+                        imageVector = Icons.Filled.PersonAddAlt1,
                         contentDescription = "اختيار من جهات الاتصال",
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
