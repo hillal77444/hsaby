@@ -44,7 +44,6 @@ import androidx.fragment.app.Fragment;
 import com.hillal.acc.ui.dashboard.DashboardFragment;
 import com.hillal.acc.ui.settings.SettingsFragment;
 import com.hillal.acc.ui.transactions.TransactionsFragment;
-import com.hillal.acc.ui.accounts.AddAccountFragment;
 import com.hillal.acc.ui.reports.AccountStatementFragment;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.ViewCompat;
