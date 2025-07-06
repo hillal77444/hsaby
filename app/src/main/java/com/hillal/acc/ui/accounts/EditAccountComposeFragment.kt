@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.hillal.acc.data.repository.AccountRepository
 import com.hillal.acc.data.room.AppDatabase
+import androidx.compose.runtime.livedata.observeAsState
 
 class EditAccountComposeFragment : Fragment() {
     private lateinit var viewModel: AccountViewModel
@@ -41,6 +42,8 @@ class EditAccountComposeFragment : Fragment() {
                         onNavigateBack = { findNavController().navigateUp() },
                         initialAccount = account,
                         onSave = { updatedAccount ->
+                            updatedAccount.updatedAt = System.currentTimeMillis()
+                            updatedAccount.syncStatus = 0
                             viewModel.updateAccount(updatedAccount)
                         }
                     )
