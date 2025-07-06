@@ -13,7 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.OnBackPressedDispatcher.addCallback
+import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
@@ -57,13 +57,13 @@ class LoginFragment : Fragment() {
         authViewModel = ViewModelProvider(this).get<AuthViewModel>(AuthViewModel::class.java)
 
         // إضافة مستمع لرابط سياسة الخصوصية
-        binding!!.buttonPrivacy.setOnClickListener(View.OnClickListener { v: View? ->
+        binding!!.buttonPrivacy.setOnClickListener { v: View? ->
             val url = "https://malyp.com/api/privacy-policy"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
             startActivity(intent)
-        })
+        }
 
-        binding!!.buttonLogin.setOnClickListener(View.OnClickListener { v: View? ->
+        binding!!.buttonLogin.setOnClickListener { v: View? ->
             val phone = binding!!.editTextPhone.getText().toString().trim { it <= ' ' }
             val password = binding!!.editTextPassword.getText().toString()
 
@@ -177,21 +177,20 @@ class LoginFragment : Fragment() {
                     Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show()
                 }
             })
-        })
+        }
 
-        binding!!.buttonRegister.setOnClickListener(View.OnClickListener { v: View? ->
+        binding!!.buttonRegister.setOnClickListener { v: View? ->
             NavHostFragment.findNavController(this@LoginFragment)
                 .navigate(R.id.action_loginFragment_to_registerFragment)
         }
-        )
 
         // زر أرقام التواصل
-        binding!!.buttonContact.setOnClickListener(View.OnClickListener { v: View? ->
+        binding!!.buttonContact.setOnClickListener { v: View? ->
             Toast.makeText(getContext(), "رقم التواصل: 774447251", Toast.LENGTH_LONG).show()
-        })
+        }
 
         // زر عن التطبيق
-        binding!!.buttonAbout.setOnClickListener(View.OnClickListener { v: View? ->
+        binding!!.buttonAbout.setOnClickListener { v: View? ->
             val about =
                 "تطبيق مالي برو هو رفيقك الذكي لإدارة الحسابات والمعاملات المالية بسهولة واحترافية.\n\n" +
                         "أهم المميزات:\n" +
@@ -204,10 +203,10 @@ class LoginFragment : Fragment() {
                 .setMessage(about)
                 .setPositiveButton("حسناً", null)
                 .show()
-        })
+        }
 
         // إغلاق التطبيق عند الضغط على زر الرجوع في صفحة تسجيل الدخول
-        requireActivity().getOnBackPressedDispatcher().addCallback(
+        requireActivity().onBackPressedDispatcher.addCallback(
             getViewLifecycleOwner(),
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
