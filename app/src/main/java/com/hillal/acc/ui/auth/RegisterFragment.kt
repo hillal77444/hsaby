@@ -47,7 +47,7 @@ class RegisterFragment : Fragment() {
                 insets
             })
 
-        binding!!.buttonRegister.setOnClickListener(View.OnClickListener { v: View? ->
+        binding!!.buttonRegister.setOnClickListener { v: View? ->
             val displayName = binding!!.editTextDisplayName.getText().toString().trim { it <= ' ' }
             val phone = binding!!.editTextPhone.getText().toString().trim { it <= ' ' }
             val password = binding!!.editTextPassword.getText().toString()
@@ -122,13 +122,12 @@ class RegisterFragment : Fragment() {
                         Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show()
                     }
                 })
-        })
+        }
 
-        binding!!.buttonBackToLogin.setOnClickListener(View.OnClickListener { v: View? ->
+        binding!!.buttonBackToLogin.setOnClickListener { v: View? ->
             NavHostFragment.findNavController(this@RegisterFragment)
                 .navigate(R.id.action_registerFragment_to_loginFragment)
         }
-        )
     }
 
     override fun onDestroyView() {
