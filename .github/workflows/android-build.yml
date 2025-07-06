@@ -167,8 +167,8 @@ jobs:
     if: github.event.inputs.action == 'clean-artifacts'
     runs-on: ubuntu-latest
     steps:
-      - name: Delete old artifacts (older than 7 days)
-        uses: konradpabjan/delete-artifacts@v2
+      - name: Delete artifacts older than 7 days
+        uses: kolpav/purge-artifacts-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          age: '7 days'
+          expire-in: 7days
