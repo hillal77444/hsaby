@@ -12,6 +12,9 @@ import androidx.navigation.fragment.findNavController
 import com.hillal.acc.data.repository.AccountRepository
 import com.hillal.acc.data.room.AppDatabase
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.CircularProgressIndicator
 
 class EditAccountComposeFragment : Fragment() {
     private lateinit var viewModel: AccountViewModel
@@ -35,22 +38,33 @@ class EditAccountComposeFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                val account = viewModel.getAccountById(accountId).observeAsState(null).value
-                if (account != null) {
-                    AddAccountComposeScreen(
-                        viewModel = viewModel,
-                        onNavigateBack = { findNavController().navigateUp() },
-                        initialAccount = account,
-                        onSave = { updatedAccount ->
-                            updatedAccount.updatedAt = System.currentTimeMillis()
-                            updatedAccount.syncStatus = 0
-                            viewModel.updateAccount(updatedAccount)
+                val accountState = viewModel.getAccountById(accountId).observeAsState()
+                val account = accountState.value
+
+                when {
+                    account == null && accountState.value == null -> {
+                        // عرض مؤشر تحميل أثناء انتظار البيانات
+                        Box(modifier = androidx.compose.ui.Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                            CircularProgressIndicator()
                         }
-                    )
-                } else {
-                    // عرض رسالة خطأ أو الرجوع للخلف إذا لم يوجد الحساب
-                    Toast.makeText(context, "تعذر تحميل بيانات الحساب", Toast.LENGTH_SHORT).show()
-                    findNavController().navigateUp()
+                    }
+                    account != null -> {
+                        AddAccountComposeScreen(
+                            viewModel = viewModel,
+                            onNavigateBack = { findNavController().navigateUp() },
+                            initialAccount = account,
+                            onSave = { updatedAccount ->
+                                updatedAccount.updatedAt = System.currentTimeMillis()
+                                updatedAccount.syncStatus = 0
+                                viewModel.updateAccount(updatedAccount)
+                            }
+                        )
+                    }
+                    else -> {
+                        // عرض رسالة خطأ فقط إذا تأكدنا أن الحساب غير موجود بعد الانتظار
+                        Toast.makeText(context, "تعذر تحميل بيانات الحساب", Toast.LENGTH_SHORT).show()
+                        findNavController().navigateUp()
+                    }
                 }
             }
         }
