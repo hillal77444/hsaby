@@ -154,12 +154,11 @@ fun AddAccountComposeScreen(
         
         val account = if (initialAccount != null) {
             // تحديث حساب موجود
-            initialAccount.copy(
-                name = name,
-                phoneNumber = phone,
-                notes = notes,
-                isWhatsappEnabled = whatsappEnabled
-            )
+            initialAccount.name = name
+            initialAccount.phoneNumber = phone
+            initialAccount.notes = notes
+            initialAccount.isWhatsappEnabled = whatsappEnabled
+            initialAccount
         } else {
             // إنشاء حساب جديد
             Account(
