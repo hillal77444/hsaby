@@ -122,7 +122,7 @@ fun AddAccountComposeScreen(
     }
     
     // Function to save account
-    val saveAccount = {
+    val saveAccount = fun() {
         // Reset errors
         nameError = null
         phoneError = null
