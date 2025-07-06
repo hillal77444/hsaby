@@ -38,6 +38,7 @@ import android.widget.Toast
 import com.hillal.acc.R
 import com.hillal.acc.data.model.Account
 import java.util.*
+import android.app.Activity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,39 +62,38 @@ fun AddAccountComposeScreen(
     var phoneError by remember { mutableStateOf<String?>(null) }
     var isSaving by remember { mutableStateOf(false) }
     
-    // Contact picker launcher
+    // Contact picker launcher (دقيق)
     val contactPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickContact()
-    ) { uri: Uri? ->
-        uri?.let {
-            try {
-                val cursor: Cursor? = context.contentResolver.query(
-                    it,
-                    arrayOf(
-                        ContactsContract.CommonDataKinds.Phone.NUMBER,
-                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
-                    ),
-                    null,
-                    null,
-                    null
-                )
-                
-                cursor?.use { cursor ->
-                    if (cursor.moveToFirst()) {
-                        val phoneNumber = cursor.getString(0)
-                        val contactName = cursor.getString(1)
-                        
-                        // تنظيف رقم الهاتف
-                        val cleanPhone = phoneNumber.replace(Regex("[^0-9+]"), "")
-                        
-                        name = contactName
-                        phone = cleanPhone
-                        nameError = null
-                        phoneError = null
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uri = result.data?.data
+            uri?.let {
+                try {
+                    val cursor: Cursor? = context.contentResolver.query(
+                        it,
+                        arrayOf(
+                            ContactsContract.CommonDataKinds.Phone.NUMBER,
+                            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+                        ),
+                        null,
+                        null,
+                        null
+                    )
+                    cursor?.use { cursor ->
+                        if (cursor.moveToFirst()) {
+                            val phoneNumber = cursor.getString(0)
+                            val contactName = cursor.getString(1)
+                            val cleanPhone = phoneNumber.replace(Regex("[^0-9+]"), "")
+                            name = contactName
+                            phone = cleanPhone
+                            nameError = null
+                            phoneError = null
+                        }
                     }
+                } catch (e: Exception) {
+                    Toast.makeText(context, "حدث خطأ أثناء اختيار جهة الاتصال", Toast.LENGTH_SHORT).show()
                 }
-            } catch (e: Exception) {
-                Toast.makeText(context, "حدث خطأ أثناء اختيار جهة الاتصال", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -103,7 +103,8 @@ fun AddAccountComposeScreen(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            contactPickerLauncher.launch(null)
+            val intent = Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI)
+            contactPickerLauncher.launch(intent)
         } else {
             Toast.makeText(context, "يجب السماح بالوصول إلى جهات الاتصال لاختيار جهة اتصال", Toast.LENGTH_LONG).show()
         }
@@ -113,7 +114,8 @@ fun AddAccountComposeScreen(
     val pickContact = {
         when {
             ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED -> {
-                contactPickerLauncher.launch(null)
+                val intent = Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI)
+                contactPickerLauncher.launch(intent)
             }
             else -> {
                 permissionLauncher.launch(Manifest.permission.READ_CONTACTS)
