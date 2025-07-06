@@ -1,194 +1,178 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_gradient">
+    android:fillViewport="true">
 
-    <androidx.core.widget.NestedScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true"
-        android:clipToPadding="false"
-        android:paddingBottom="@dimen/margin_large">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#F8F8F8">
 
-        <LinearLayout
+        <!-- الدائرة العلوية -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:background="@color/info"
+            android:scaleX="2.2"
+            android:scaleY="1.2" />
+
+        <!-- عنوان الصفحة -->
+        <TextView
+            android:id="@+id/registerTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="إنشاء حساب جديد"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:layout_gravity="center"
+            android:layout_marginTop="-180dp" />
+
+        <!-- الشعار الدائري -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:cardCornerRadius="50dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="#FFFFFF"
+            android:layout_gravity="center"
+            android:layout_marginTop="12dp">
+            <ImageView
+                android:id="@+id/logoImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@mipmap/ic_launcher"
+                android:scaleType="centerInside" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- الحاوية البيضاء للحقول -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@color/card_background">
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#FFFFFF"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp">
 
-            <!-- رأس منحني علوي -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/spacing_xl"
-                android:background="@color/primary"
-                android:scaleX="2.2"
-                android:scaleY="1.2"
-                android:layout_marginTop="@dimen/spacing_none" />
-
-            <!-- أيقونة دائرية/شعار -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="@dimen/icon_size_xl"
-                android:layout_height="@dimen/icon_size_xl"
-                app:cardCornerRadius="@dimen/card_corner_radius_xl"
-                app:cardElevation="@dimen/card_elevation_xl"
-                app:cardBackgroundColor="@android:color/white"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/minus_100dp">
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@mipmap/ic_launcher"
-                    android:scaleType="centerInside" />
-            </androidx.cardview.widget.CardView>
-
-            <!-- العنوان -->
-            <TextView
-                android:id="@+id/registerTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="إنشاء حساب جديد"
-                android:textSize="@dimen/text_size_headline1"
-                android:textStyle="bold"
-                android:textColor="@color/primary_variant"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/margin_small"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_caption"
-                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
-
-            <!-- الحاوية البيضاء للحقول -->
-            <androidx.cardview.widget.CardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="@dimen/card_corner_radius_lg"
-                app:cardElevation="@dimen/card_elevation"
-                app:cardBackgroundColor="@android:color/white"
-                android:layout_marginTop="@dimen/margin_large"
-                android:layout_marginStart="@dimen/margin_small"
-                android:layout_marginEnd="@dimen/margin_small">
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <LinearLayout
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayoutDisplayName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/padding_medium">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/textInputLayoutDisplayName"
+                    android:hint="الاسم"
+                    app:startIconDrawable="@drawable/ic_person"
+                    app:hintTextColor="#3F51B5"
+                    app:boxStrokeColor="#3F51B5">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextDisplayName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="اسم المستخدم"
-                        app:startIconDrawable="@drawable/ic_person"
-                        app:hintTextColor="@color/primary_variant"
-                        app:boxStrokeColor="@color/primary_variant">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editTextDisplayName"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="text" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/textInputLayoutPhone"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayoutPhone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="رقم الهاتف"
+                    app:startIconDrawable="@drawable/ic_phone"
+                    app:hintTextColor="#3F51B5"
+                    app:boxStrokeColor="#3F51B5"
+                    android:layout_marginTop="12dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextPhone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="رقم الهاتف"
-                        app:startIconDrawable="@drawable/ic_phone"
-                        app:hintTextColor="@color/primary_variant"
-                        app:boxStrokeColor="@color/primary_variant"
-                        android:layout_marginTop="@dimen/margin_small">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editTextPhone"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="phone" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                        android:inputType="phone" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/textInputLayoutPassword"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayoutPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="كلمة السر"
+                    app:startIconDrawable="@drawable/ic_lock"
+                    app:endIconMode="password_toggle"
+                    app:hintTextColor="#3F51B5"
+                    app:boxStrokeColor="#3F51B5"
+                    android:layout_marginTop="12dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="كلمة السر"
-                        app:startIconDrawable="@drawable/ic_lock"
-                        app:endIconMode="password_toggle"
-                        app:hintTextColor="@color/primary_variant"
-                        app:boxStrokeColor="@color/primary_variant"
-                        android:layout_marginTop="@dimen/margin_small">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editTextPassword"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textPassword" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                        android:inputType="textPassword" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/textInputLayoutConfirmPassword"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayoutConfirmPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="تأكيد كلمة السر"
+                    app:startIconDrawable="@drawable/ic_lock"
+                    app:endIconMode="password_toggle"
+                    app:hintTextColor="#3F51B5"
+                    app:boxStrokeColor="#3F51B5"
+                    android:layout_marginTop="12dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextConfirmPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="تأكيد كلمة السر"
-                        app:startIconDrawable="@drawable/ic_lock"
-                        app:endIconMode="password_toggle"
-                        app:hintTextColor="@color/primary_variant"
-                        app:boxStrokeColor="@color/primary_variant"
-                        android:layout_marginTop="@dimen/margin_small">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editTextConfirmPassword"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textPassword" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                        android:inputType="textPassword" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-            <!-- زر إنشاء حساب جديد -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonRegister"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/button_height"
-                android:text="إنشاء حساب جديد"
-                android:backgroundTint="@color/primary_variant"
-                android:textColor="@color/on_primary"
-                android:textStyle="bold"
-                app:iconPadding="@dimen/padding_small"
-                app:cornerRadius="@dimen/card_corner_radius_lg"
-                android:layout_marginTop="@dimen/margin_large"
-                android:layout_marginStart="@dimen/margin_large"
-                android:layout_marginEnd="@dimen/margin_large"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_caption"
-                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
+        <!-- زر إنشاء حساب جديد -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonRegister"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="إنشاء حساب جديد"
+            android:backgroundTint="#152FD9"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            app:iconPadding="8dp"
+            app:cornerRadius="12dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeMaxTextSize="24sp"
+            android:autoSizeStepGranularity="2sp" />
 
-            <!-- زر العودة لتسجيل الدخول -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonBackToLogin"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/button_height"
-                android:text="العودة لتسجيل الدخول"
-                android:backgroundTint="@color/primary_variant"
-                android:textColor="@color/on_primary"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/margin_small" />
+        <!-- زر العودة لتسجيل الدخول -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonBackToLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="العودة لتسجيل الدخول"
+            android:backgroundTint="#152FD9"
+            android:textColor="#FFFFFF"
+            android:layout_gravity="center"
+            android:layout_marginTop="12dp" />
 
-            <!-- العناصر المخفية (مثال: ProgressBar) -->
-            <ProgressBar
-                android:id="@+id/progressBar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/margin_small" />
+        <!-- العناصر المخفية (مثال: ProgressBar) -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
+    </LinearLayout>
 
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-
-</FrameLayout> 
+</androidx.core.widget.NestedScrollView>
