@@ -17,6 +17,7 @@ on:
           - download
           - clean
           - upload
+          - clean-artifacts
 
 jobs:
   build:
@@ -161,3 +162,13 @@ jobs:
         with:
           name: app-release-upload
           path: app/build/outputs/bundle/release/app-release.aab
+
+  delete-old-artifacts:
+    if: github.event.inputs.action == 'clean-artifacts'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete old artifacts (older than 7 days)
+        uses: konradpabjan/delete-artifacts@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          age: '7 days'
