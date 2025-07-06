@@ -77,6 +77,10 @@ jobs:
         with:
           name: app-release
           path: app/build/outputs/apk/release/app-release.apk
+      - name: Delete old artifacts (older than 1 day)
+        uses: c-hive/gha-remove-artifacts@v1
+        with:
+          age: '1 day'
 
   download:
     if: github.event.inputs.action == 'download'
@@ -162,6 +166,10 @@ jobs:
         with:
           name: app-release-upload
           path: app/build/outputs/bundle/release/app-release.aab
+      - name: Delete old artifacts (older than 1 day)
+        uses: c-hive/gha-remove-artifacts@v1
+        with:
+          age: '1 day'
 
   delete-old-artifacts:
     if: github.event.inputs.action == 'clean-artifacts'
