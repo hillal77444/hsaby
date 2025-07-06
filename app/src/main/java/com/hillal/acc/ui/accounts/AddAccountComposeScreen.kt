@@ -63,7 +63,7 @@ fun AddAccountComposeScreen(
     
     // Contact picker launcher
     val contactPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.PickContact()
     ) { uri: Uri? ->
         uri?.let {
             try {
@@ -103,8 +103,7 @@ fun AddAccountComposeScreen(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            val intent = Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI)
-            contactPickerLauncher.launch("*/*")
+            contactPickerLauncher.launch(null)
         } else {
             Toast.makeText(context, "يجب السماح بالوصول إلى جهات الاتصال لاختيار جهة اتصال", Toast.LENGTH_LONG).show()
         }
@@ -114,8 +113,7 @@ fun AddAccountComposeScreen(
     val pickContact = {
         when {
             ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED -> {
-                val intent = Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI)
-                contactPickerLauncher.launch("*/*")
+                contactPickerLauncher.launch(null)
             }
             else -> {
                 permissionLauncher.launch(Manifest.permission.READ_CONTACTS)
@@ -386,7 +384,7 @@ private fun FormSection(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Contacts,
+                        imageVector = Icons.Default.PersonSearch,
                         contentDescription = "اختيار من جهات الاتصال",
                         modifier = Modifier.size(20.dp)
                     )
