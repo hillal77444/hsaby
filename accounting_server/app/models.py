@@ -32,6 +32,9 @@ class Account(db.Model):
     transactions = db.relationship('Transaction', backref='account', lazy=True)
     created_at = db.Column(db.DateTime, default=get_yemen_time)
     updated_at = db.Column(db.DateTime, default=get_yemen_time, onupdate=get_yemen_time)
+    __table_args__ = (
+        db.UniqueConstraint('account_number', 'user_id', name='unique_account_per_user'),
+    )
 
 class Cashbox(db.Model):
     id = db.Column(db.Integer, primary_key=True)
