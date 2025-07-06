@@ -130,19 +130,19 @@ fun AddAccountComposeScreen(
         // Validation
         if (name.isEmpty()) {
             nameError = "الرجاء إدخال اسم الحساب"
-            return@saveAccount
+            return
         }
         
         if (phone.isEmpty()) {
             phoneError = "الرجاء إدخال رقم الهاتف"
-            return@saveAccount
+            return
         }
         
         // Check if phone number already exists
         val existingAccount = viewModel.getAccountByPhoneNumber(phone)
         if (existingAccount != null) {
             phoneError = "رقم الهاتف موجود مسبقاً"
-            return@saveAccount
+            return
         }
         
         // Set saving state
