@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#2196F3</color>
+    <color name="primary_dark">#1976D2</color>
+    <color name="primary_light">#BBDEFB</color>
+    <color name="accent">#03DAC6</color>
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#757575</color>
+    <color name="icons">#FFFFFF</color>
+    <color name="divider">#BDBDBD</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="error">#B00020</color>
+    <color name="success">#4CAF50</color>
+    <color name="warning">#FFC107</color>
+    
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    
+    <color name="transparent">#00000000</color>
+    
+    <color name="background">#F5F5F5</color>
+    <color name="surface">#FFFFFF</color>
+    
+    <!-- Transaction Colors -->
+    <color name="transaction_to">#4CAF50</color>
+    <color name="transaction_from">#F44336</color>
+    
+    <color name="colorPrimary">#2196F3</color>
+    <color name="colorPrimaryDark">#1976D2</color>
+    <color name="colorAccent">#FF4081</color>
+    
+    <color name="colorYemeni">#F44336</color>
+    <color name="colorSaudi">#4CAF50</color>
+    <color name="colorDollar">#2196F3</color>
+    
+    <color name="gray">#757575</color>
+    <color name="lightGray">#EEEEEE</color>
+</resources> 

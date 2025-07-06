@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">حسابي</string>
+    <string name="dashboard">لوحة التحكم</string>
+    <string name="quick_stats">إحصائيات سريعة</string>
+    <string name="total_balance">إجمالي الرصيد</string>
+    <string name="total_debtors">إجمالي المدينين</string>
+    <string name="recent_transactions">آخر المعاملات</string>
+    <string name="active_accounts">الحسابات النشطة</string>
+    <string name="add_transaction">إضافة معاملة</string>
+    
+    <!-- Login Screen -->
+    <string name="login_title">تسجيل الدخول</string>
+    <string name="login_phone_hint">رقم الهاتف</string>
+    <string name="login_password_hint">كلمة المرور</string>
+    <string name="login_button">دخول</string>
+    <string name="login_register">إنشاء حساب جديد</string>
+    <string name="login_remember_me">تذكرني</string>
+    
+    <!-- Register Screen -->
+    <string name="register_title">إنشاء حساب جديد</string>
+    <string name="register_username_hint">اسم المستخدم</string>
+    <string name="register_phone_hint">رقم الهاتف</string>
+    <string name="register_password_hint">كلمة المرور</string>
+    <string name="register_confirm_password_hint">تأكيد كلمة المرور</string>
+    <string name="register_button">إنشاء حساب</string>
+    <string name="register_login">لديك حساب؟ تسجيل الدخول</string>
+    <string name="register_success">تم إنشاء الحساب بنجاح</string>
+    
+    <!-- Validation Messages -->
+    <string name="error_name_required">يرجى إدخال اسم المستخدم</string>
+    <string name="error_phone_required">يرجى إدخال رقم الهاتف</string>
+    <string name="error_invalid_phone">يرجى إدخال رقم هاتف صحيح</string>
+    <string name="error_password_required">يرجى إدخال كلمة المرور</string>
+    <string name="error_password_too_short">كلمة المرور يجب أن تكون 6 أحرف على الأقل</string>
+    <string name="error_passwords_dont_match">كلمات المرور غير متطابقة</string>
+    
+    <!-- Main Screen -->
+    <string name="main_dashboard">الرئيسية</string>
+    <string name="main_accounts">الحسابات</string>
+    <string name="main_transactions">المعاملات</string>
+    <string name="main_reports">التقارير</string>
+    <string name="main_settings">الإعدادات</string>
+    
+    <!-- Accounts Screen -->
+    <string name="accounts_title">الحسابات</string>
+    <string name="accounts_add">إضافة حساب</string>
+    <string name="accounts_balance">الرصيد</string>
+    <string name="accounts_currency">العملة</string>
+    
+    <!-- Transactions Screen -->
+    <string name="transactions_title">المعاملات</string>
+    <string name="transactions_add">إضافة معاملة</string>
+    <string name="transactions_amount">المبلغ</string>
+    <string name="transactions_type">نوع المعاملة</string>
+    <string name="transactions_type_to">له</string>
+    <string name="transactions_type_from">عليه</string>
+    <string name="transactions_description">الوصف</string>
+    <string name="transactions_date">التاريخ</string>
+    
+    <!-- Reports Screen -->
+    <string name="reports_title">التقارير</string>
+    <string name="reports_balance">الرصيد</string>
+    <string name="reports_transactions">المعاملات</string>
+    <string name="reports_currency">العملة</string>
+    <string name="reports_period">الفترة</string>
+    <string name="reports_export">تصدير</string>
+    <string name="reports_share">مشاركة</string>
+    
+    <!-- Settings Screen -->
+    <string name="settings_title">الإعدادات</string>
+    <string name="settings_language">اللغة</string>
+    <string name="settings_currency">العملة الافتراضية</string>
+    <string name="settings_notifications">الإشعارات</string>
+    <string name="settings_sync">المزامنة</string>
+    <string name="settings_logout">تسجيل الخروج</string>
+    
+    <!-- Common -->
+    <string name="save">حفظ</string>
+    <string name="cancel">إلغاء</string>
+    <string name="delete">حذف</string>
+    <string name="edit">تعديل</string>
+    <string name="refresh">تحديث</string>
+    <string name="search">بحث</string>
+    <string name="error_network">خطأ في الاتصال</string>
+    <string name="error_unknown">حدث خطأ غير متوقع</string>
+</resources> 
