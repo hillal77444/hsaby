@@ -44,17 +44,19 @@ import java.util.*
 fun AddAccountComposeScreen(
     viewModel: AccountViewModel,
     onNavigateBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    initialAccount: Account? = null,
+    onSave: ((Account) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val spacing = ResponsiveSpacing()
     val padding = ResponsivePadding()
     
     // State variables
-    var name by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
-    var whatsappEnabled by remember { mutableStateOf(true) }
+    var name by remember { mutableStateOf(initialAccount?.name ?: "") }
+    var phone by remember { mutableStateOf(initialAccount?.phoneNumber ?: "") }
+    var notes by remember { mutableStateOf(initialAccount?.notes ?: "") }
+    var whatsappEnabled by remember { mutableStateOf(initialAccount?.isWhatsappEnabled ?: true) }
     var nameError by remember { mutableStateOf<String?>(null) }
     var phoneError by remember { mutableStateOf<String?>(null) }
     var isSaving by remember { mutableStateOf(false) }
@@ -121,7 +123,7 @@ fun AddAccountComposeScreen(
         }
     }
     
-    // Function to save account
+    // Function to save or update account
     val saveAccount = fun() {
         // Reset errors
         nameError = null
@@ -138,30 +140,48 @@ fun AddAccountComposeScreen(
             return
         }
         
-        // Check if phone number already exists
-        val existingAccount = viewModel.getAccountByPhoneNumber(phone)
-        if (existingAccount != null) {
-            phoneError = "رقم الهاتف موجود مسبقاً"
-            return
+        // Check if phone number already exists (فقط عند الإضافة)
+        if (initialAccount == null) {
+            val existingAccount = viewModel.getAccountByPhoneNumber(phone)
+            if (existingAccount != null) {
+                phoneError = "رقم الهاتف موجود مسبقاً"
+                return
+            }
         }
         
         // Set saving state
         isSaving = true
         
-        // Create new account
-        val account = Account(
-            viewModel.generateUniqueAccountNumber(),
-            name,
-            100.0, // Opening balance
-            phone,
-            false // isDebtor
-        )
-        account.notes = notes
-        account.setWhatsappEnabled(whatsappEnabled)
-        account.serverId = -1
+        val account = if (initialAccount != null) {
+            // تحديث حساب موجود
+            initialAccount.copy(
+                name = name,
+                phoneNumber = phone,
+                notes = notes,
+                isWhatsappEnabled = whatsappEnabled
+            )
+        } else {
+            // إنشاء حساب جديد
+            Account(
+                viewModel.generateUniqueAccountNumber(),
+                name,
+                100.0, // Opening balance
+                phone,
+                false // isDebtor
+            ).apply {
+                this.notes = notes
+                this.setWhatsappEnabled(whatsappEnabled)
+                this.serverId = -1
+            }
+        }
         
-        viewModel.insertAccount(account)
-        Toast.makeText(context, "حساب جديد إضاف بنجاح", Toast.LENGTH_SHORT).show()
+        if (onSave != null) {
+            onSave(account)
+            Toast.makeText(context, "تم تحديث الحساب بنجاح", Toast.LENGTH_SHORT).show()
+        } else {
+            viewModel.insertAccount(account)
+            Toast.makeText(context, "حساب جديد إضاف بنجاح", Toast.LENGTH_SHORT).show()
+        }
         isSaving = false
         onNavigateBack()
     }
