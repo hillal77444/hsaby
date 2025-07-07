@@ -76,6 +76,7 @@ fun LoginScreen(
         val marginMedium = relW(0.018f, 4f, 14f)
         val marginLarge = relW(0.035f, 10f, 24f)
         val fieldInnerPadding = PaddingValues(horizontal = relW(0.03f, 8f, 20f), vertical = relH(0.01f, 4f, 12f))
+        val minButtonWidth = relW(0.18f, 60f, 100f)
 
         Column(
             modifier = Modifier
@@ -158,7 +159,8 @@ fun LoginScreen(
                             fieldInnerPadding = fieldInnerPadding,
                             marginSmall = marginSmall,
                             marginMedium = marginMedium,
-                            marginLarge = marginLarge
+                            marginLarge = marginLarge,
+                            minButtonWidth = minButtonWidth
                         )
                     }
                 }
@@ -211,7 +213,8 @@ fun LoginScreen(
                     fieldInnerPadding = fieldInnerPadding,
                     marginSmall = marginSmall,
                     marginMedium = marginMedium,
-                    marginLarge = marginLarge
+                    marginLarge = marginLarge,
+                    minButtonWidth = minButtonWidth
                 )
             }
         }
@@ -244,7 +247,8 @@ private fun LoginFields(
     fieldInnerPadding: PaddingValues,
     marginSmall: Dp,
     marginMedium: Dp,
-    marginLarge: Dp
+    marginLarge: Dp,
+    minButtonWidth: Dp
 ) {
     Card(
         shape = RoundedCornerShape(cardCorner),
@@ -356,7 +360,7 @@ private fun LoginFields(
             modifier = Modifier
                 .weight(1f)
                 .height(buttonHeight)
-                .widthIn(min = relW(0.18f, 60f, 100f)),
+                .widthIn(min = minButtonWidth),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
             shape = RoundedCornerShape(cardCorner),
             contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
@@ -368,7 +372,7 @@ private fun LoginFields(
             modifier = Modifier
                 .weight(1f)
                 .height(buttonHeight)
-                .widthIn(min = relW(0.18f, 60f, 100f)),
+                .widthIn(min = minButtonWidth),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
             shape = RoundedCornerShape(cardCorner),
             contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
@@ -380,7 +384,7 @@ private fun LoginFields(
             modifier = Modifier
                 .weight(1f)
                 .height(buttonHeight)
-                .widthIn(min = relW(0.18f, 60f, 100f)),
+                .widthIn(min = minButtonWidth),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
             shape = RoundedCornerShape(cardCorner),
             contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
