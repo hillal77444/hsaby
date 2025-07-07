@@ -62,6 +62,8 @@ fun LoginScreen(
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Box(
         modifier = Modifier
@@ -172,8 +174,32 @@ fun LoginScreen(
                             fontSize = fontSmall
                         )
                     }
+                    // Dialog تحميل
+                    if (isLoading) {
+                        AlertDialog(
+                            onDismissRequest = {},
+                            title = { Text("جاري تسجيل الدخول...") },
+                            text = { Row(verticalAlignment = Alignment.CenterVertically) { CircularProgressIndicator(); Spacer(Modifier.width(12.dp)); Text("يرجى الانتظار...") } },
+                            confirmButton = {}
+                        )
+                    }
+                    // عرض رسالة الخطأ
+                    if (errorMessage != null) {
+                        Text(
+                            text = errorMessage!!,
+                            color = Color.Red,
+                            fontSize = fontSmall,
+                            modifier = Modifier.padding(top = marginSmall)
+                        )
+                    }
                     Button(
-                        onClick = { onLoginClick(phone, password) },
+                        onClick = {
+                            isLoading = true
+                            errorMessage = null
+                            // استدعاء التحقق الخارجي
+                            onLoginClick(phone, password)
+                        },
+                        enabled = !isLoading,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = marginSmall)
@@ -181,7 +207,11 @@ fun LoginScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
                         shape = RoundedCornerShape(cardCorner)
                     ) {
-                        Text("دخول", color = Color.White, fontSize = fontButton)
+                        if (isLoading) {
+                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(fontButton.value.dp))
+                        } else {
+                            Text("دخول", color = Color.White, fontSize = fontButton)
+                        }
                     }
                 }
             }
