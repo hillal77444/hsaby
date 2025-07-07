@@ -59,26 +59,26 @@ fun LoginScreen(
         var password by remember { mutableStateOf("") }
         var passwordVisible by remember { mutableStateOf(false) }
 
-        // أحجام ديناميكية مع حدود دنيا/قصوى (كل شيء نسبي)
-        fun relW(f: Float, min: Float, max: Float) = max(min, min((screenWidth * f).value, max)).dp
-        fun relH(f: Float, min: Float, max: Float) = max(min, min((screenHeight * f).value, max)).dp
-        val cardCorner = relW(0.07f, 18f, 40f)
-        val cardPadding = relW(0.028f, 8f, 22f)
-        val logoSize = relW(0.22f, 72f, 140f)
-        val fieldHeight = (relH(0.065f, 44f, 64f) * 1.2f)
-        val buttonHeight = relH(0.055f, 40f, 56f)
-        val fontTitle = max(18f, min((screenWidth.value / 15), 32f)).sp
-        val fontField = max(14f, min((screenWidth.value / 22), 20f)).sp
-        val fontButton = max(14f, min((screenWidth.value / 22), 20f)).sp
-        val fontSmall = max(8f, min((screenWidth.value / 38), 13f)).sp
-        val iconSize = relW(0.07f, 20f, 32f)
-        val marginSmall = relW(0.007f, 1f, 8f)
-        val marginMedium = relW(0.018f, 4f, 14f)
-        val marginLarge = relW(0.035f, 10f, 24f)
-        val fieldInnerPadding = PaddingValues(horizontal = relW(0.03f, 8f, 20f), vertical = relH(0.01f, 4f, 12f))
-        val minButtonWidth = relW(0.18f, 60f, 100f)
+        // أحجام ديناميكية بنسب فقط (بدون حدود دنيا/قصوى)
+        fun relW(f: Float) = (screenWidth * f)
+        fun relH(f: Float) = (screenHeight * f)
+        val cardCorner = relW(0.07f)
+        val cardPadding = relW(0.028f)
+        val logoSize = relW(0.22f)
+        val fieldHeight = relH(0.078f) // 0.065 * 1.2 تقريبًا
+        val buttonHeight = relH(0.055f)
+        val fontTitle = (screenWidth.value / 15).sp
+        val fontField = (screenWidth.value / 22).sp
+        val fontButton = (screenWidth.value / 22).sp
+        val fontSmall = (screenWidth.value / 38).sp
+        val iconSize = relW(0.07f)
+        val marginSmall = relW(0.007f)
+        val marginMedium = relW(0.018f)
+        val marginLarge = relW(0.035f)
+        val fieldInnerPadding = PaddingValues(horizontal = relW(0.03f), vertical = relH(0.01f))
+        val minButtonWidth = relW(0.18f)
 
-        val blueHeight = relH(0.32f, 120f, 260f)
+        val blueHeight = relH(0.32f)
 
         Column(
             modifier = Modifier
