@@ -85,22 +85,6 @@ fun LoginScreen(
                 .imePadding()
                 .background(Color(0xFFFFFFFF))
         ) {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "تسجيل الدخول",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = fontTitle
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFF3F51B5)),
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFF3F51B5)
-                )
-            )
             Spacer(modifier = Modifier.height(marginMedium))
             if (isLandscape) {
                 Row(
@@ -155,7 +139,9 @@ fun LoginScreen(
                             fontField = fontField,
                             fontButton = fontButton,
                             fontSmall = fontSmall,
+                            fontTitle = fontTitle,
                             iconSize = iconSize,
+                            logoSize = logoSize,
                             fieldInnerPadding = fieldInnerPadding,
                             marginSmall = marginSmall,
                             marginMedium = marginMedium,
@@ -209,7 +195,9 @@ fun LoginScreen(
                     fontField = fontField,
                     fontButton = fontButton,
                     fontSmall = fontSmall,
+                    fontTitle = fontTitle,
                     iconSize = iconSize,
+                    logoSize = logoSize,
                     fieldInnerPadding = fieldInnerPadding,
                     marginSmall = marginSmall,
                     marginMedium = marginMedium,
@@ -243,7 +231,9 @@ private fun LoginFields(
     fontField: androidx.compose.ui.unit.TextUnit,
     fontButton: androidx.compose.ui.unit.TextUnit,
     fontSmall: androidx.compose.ui.unit.TextUnit,
+    fontTitle: androidx.compose.ui.unit.TextUnit,
     iconSize: Dp,
+    logoSize: Dp,
     fieldInnerPadding: PaddingValues,
     marginSmall: Dp,
     marginMedium: Dp,
@@ -261,8 +251,30 @@ private fun LoginFields(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(all = cardPadding)
+                .padding(all = cardPadding),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Text(
+                text = "تسجيل الدخول",
+                color = Color(0xFF3F51B5),
+                fontWeight = FontWeight.Bold,
+                fontSize = fontTitle,
+                modifier = Modifier.padding(bottom = marginSmall)
+            )
+            Card(
+                shape = CircleShape,
+                elevation = CardDefaults.cardElevation(12.dp),
+                modifier = Modifier
+                    .size(logoSize)
+                    .padding(bottom = marginMedium)
+            ) {
+                Image(
+                    painter = painterResource(id = R.mipmap.ic_launcher),
+                    contentDescription = "Logo",
+                    contentScale = ContentScale.Inside,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
             OutlinedTextField(
                 value = phone,
                 onValueChange = onPhoneChange,
