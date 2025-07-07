@@ -548,19 +548,21 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
             R.layout.dropdown_item_suggestion,
             ArrayList<String?>(suggestions)
         )
-        binding.descriptionEditText.setAdapter<ArrayAdapter<String?>?>(adapter)
-        val itemHeightPx = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            48f,
-            getResources().getDisplayMetrics()
-        ).toInt()
-        binding!!.descriptionEditText.setDropDownHeight(itemHeightPx * 4)
-        binding.descriptionEditText.setDropDownBackgroundResource(R.drawable.bg_dropdown_suggestions)
-        binding!!.descriptionEditText.setOnFocusChangeListener(OnFocusChangeListener { v: View?, hasFocus: Boolean ->
-            if (hasFocus) {
-                binding.descriptionEditText.showDropDown()
-            }
-        })
+        binding?.let { b ->
+            b.descriptionEditText.setAdapter<ArrayAdapter<String?>?>(adapter)
+            val itemHeightPx = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                48f,
+                getResources().getDisplayMetrics()
+            ).toInt()
+            b.descriptionEditText.setDropDownHeight(itemHeightPx * 4)
+            b.descriptionEditText.setDropDownBackgroundResource(R.drawable.bg_dropdown_suggestions)
+            b.descriptionEditText.setOnFocusChangeListener(OnFocusChangeListener { v: View?, hasFocus: Boolean ->
+                if (hasFocus) {
+                    b.descriptionEditText.showDropDown()
+                }
+            })
+        }
     }
 
     override fun onDestroyView() {
