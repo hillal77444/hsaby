@@ -183,7 +183,7 @@ class ExchangeFragment : Fragment() {
         rateEditText!!.addTextChangedListener(SimpleTextWatcher(Runnable { this.updateExchangeAmount() }))
         transactionsViewModel =
             ViewModelProvider(this).get(TransactionsViewModel::class.java)
-        transactionsViewModel!!.getAccountBalancesMap().observe(
+        transactionsViewModel!!.accountBalancesMap.observe(
             getViewLifecycleOwner(),
             Observer { balancesMap: MutableMap<Long?, MutableMap<String?, Double?>?>? ->
                 accountBalancesMap =

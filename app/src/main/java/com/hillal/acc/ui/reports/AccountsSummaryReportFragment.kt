@@ -150,8 +150,8 @@ class AccountsSummaryReportFragment : Fragment() {
                 updateReport()
             })
         transactionsViewModel.getTransactions()
-            .observe(getViewLifecycleOwner(), Observer { transactions: List<Transaction> ->
-                allTransactions = transactions.toMutableList()
+            .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
+                allTransactions = transactions?.toMutableList() ?: mutableListOf()
                 updateReport()
             })
         transactionsViewModel.loadAllTransactions()

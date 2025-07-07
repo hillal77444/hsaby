@@ -28,7 +28,7 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
     fun loadAllTransactions() {
         repository.getAllTransactions()
             .observeForever(Observer { value: MutableList<Transaction?>? ->
-                transactions.setValue(value)
+                transactions.setValue(value?.filterNotNull())
             })
     }
 
@@ -36,7 +36,7 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
         repository.getAllTransactions()
             .observeForever(Observer { transactionList: MutableList<Transaction>? ->
                 if (transactionList != null) {
-                    val filteredTransactions: MutableList<Transaction?> = ArrayList<Transaction?>()
+                    val filteredTransactions: MutableList<Transaction> = ArrayList<Transaction>()
                     for (t in transactionList) {
                         if (accountName == t.getAccountId().toString()) {
                             filteredTransactions.add(t)
@@ -52,7 +52,7 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
         this.endDate = endDate
         repository.getTransactionsByDateRange(startDate, endDate)
             .observeForever(Observer { value: MutableList<Transaction?>? ->
-                transactions.setValue(value)
+                transactions.setValue(value?.filterNotNull())
             })
     }
 
@@ -60,7 +60,7 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
         repository.getAllTransactions()
             .observeForever(Observer { transactionList: MutableList<Transaction>? ->
                 if (transactionList != null) {
-                    val filteredTransactions: MutableList<Transaction?> = ArrayList<Transaction?>()
+                    val filteredTransactions: MutableList<Transaction> = ArrayList<Transaction>()
                     for (t in transactionList) {
                         if (currency == t.getCurrency()) {
                             filteredTransactions.add(t)
@@ -120,28 +120,27 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
             getTransactions().observeForever(Observer { transactionsList: MutableList<Transaction>? ->
                 val balancesMap: MutableMap<Long?, MutableMap<String?, Double?>?> =
                     HashMap<Long?, MutableMap<String?, Double?>?>()
-                if (transactionsList != null) {
-                    for (t in transactionsList) {
-                        val accountId = t.getAccountId()
-                        val currency = t.getCurrency()
-                        val amount = t.getAmount()
-                        val type = t.getType()
-                        if (!balancesMap.containsKey(accountId)) {
-                            balancesMap.put(
-                                accountId,
-                                HashMap<String?, Double?>()
-                            )
-                        }
-                        val currencyMap =
-                            balancesMap.get(accountId)
-                        var prev: Double = currencyMap!!.getOrDefault(currency, 0.0)!!
-                        if (type == "عليه" || type.equals("debit", ignoreCase = true)) {
-                            prev -= amount
-                        } else {
-                            prev += amount
-                        }
-                        currencyMap.put(currency, prev)
+                val safeList = transactionsList?.filterNotNull() ?: emptyList()
+                for (t in safeList) {
+                    val accountId = t.getAccountId()
+                    val currency = t.getCurrency()
+                    val amount = t.getAmount()
+                    val type = t.getType()
+                    if (!balancesMap.containsKey(accountId)) {
+                        balancesMap.put(
+                            accountId,
+                            HashMap<String?, Double?>()
+                        )
                     }
+                    val currencyMap =
+                        balancesMap.get(accountId)
+                    var prev: Double = currencyMap!!.getOrDefault(currency, 0.0)!!
+                    if (type == "عليه" || type.equals("debit", ignoreCase = true)) {
+                        prev -= amount
+                    } else {
+                        prev += amount
+                    }
+                    currencyMap.put(currency, prev)
                 }
                 balancesLiveData.postValue(balancesMap)
             })

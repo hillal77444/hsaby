@@ -92,7 +92,7 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
         loadAllTransactions()
         setupAccountPicker()
         setupCashboxDropdown()
-        transactionsViewModel!!.getAccountBalancesMap().observe(
+        transactionsViewModel!!.accountBalancesMap.observe(
             getViewLifecycleOwner(),
             Observer { balancesMap: MutableMap<Long?, MutableMap<String?, Double?>?>? ->
                 accountBalancesMap =
@@ -123,7 +123,7 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
         loadAllTransactions()
         setupAccountPicker()
         setupCashboxDropdown()
-        transactionsViewModel!!.getAccountBalancesMap().observe(
+        transactionsViewModel!!.accountBalancesMap.observe(
             getViewLifecycleOwner(),
             Observer { balancesMap: MutableMap<Long?, MutableMap<String?, Double?>?>? ->
                 accountBalancesMap =
@@ -473,42 +473,46 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
             btnWhatsapp.setVisibility(View.VISIBLE)
         }
         btnWhatsapp.setOnClickListener(View.OnClickListener { v: View? ->
-            if (lastSavedAccount != null && lastSavedTransaction != null) {
-                val phone = lastSavedAccount!!.getPhoneNumber()
-                if (phone == null || phone.isEmpty()) {
-                    Toast.makeText(getContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
-                    return@OnClickListener
+            if (lastSavedAccount != null) {
+                lastSavedTransaction?.let { transaction ->
+                    val phone = lastSavedAccount!!.getPhoneNumber()
+                    if (phone == null || phone.isEmpty()) {
+                        Toast.makeText(requireContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                        return@OnClickListener
+                    }
+                    val msg = NotificationUtils.buildWhatsAppMessage(
+                        requireContext(),
+                        lastSavedAccount!!.getName(),
+                        transaction,
+                        lastSavedBalance,
+                        transaction.getType()
+                    )
+                    NotificationUtils.sendWhatsAppMessage(requireContext(), phone, msg)
                 }
-                val msg = NotificationUtils.buildWhatsAppMessage(
-                    getContext(),
-                    lastSavedAccount!!.getName(),
-                    lastSavedTransaction,
-                    lastSavedBalance,
-                    lastSavedTransaction!!.getType()
-                )
-                NotificationUtils.sendWhatsAppMessage(getContext(), phone, msg)
             }
         })
         // SMS
         btnSms.setOnClickListener(View.OnClickListener { v: View? ->
-            if (lastSavedAccount != null && lastSavedTransaction != null) {
-                val phone = lastSavedAccount!!.getPhoneNumber()
-                if (phone == null || phone.isEmpty()) {
-                    Toast.makeText(getContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
-                    return@OnClickListener
+            if (lastSavedAccount != null) {
+                lastSavedTransaction?.let { transaction ->
+                    val phone = lastSavedAccount!!.getPhoneNumber()
+                    if (phone == null || phone.isEmpty()) {
+                        Toast.makeText(requireContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                        return@OnClickListener
+                    }
+                    val type = transaction.getType()
+                    val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
+                    val balanceStr = String.format(Locale.US, "%.0f", abs(lastSavedBalance))
+                    val currency = transaction.getCurrency()
+                    val typeText =
+                        if (type.equals("credit", ignoreCase = true) || type == "له") "لكم" else "عليكم"
+                    val balanceText = if (lastSavedBalance >= 0) "الرصيد لكم " else "الرصيد عليكم "
+                    val message = ("حسابكم لدينا:\n"
+                            + typeText + " " + amountStr + " " + currency + "\n"
+                            + transaction.getDescription() + "\n"
+                            + balanceText + balanceStr + " " + currency)
+                    NotificationUtils.sendSmsMessage(requireContext(), phone, message)
                 }
-                val type = lastSavedTransaction!!.getType()
-                val amountStr = String.format(Locale.US, "%.0f", lastSavedTransaction!!.getAmount())
-                val balanceStr = String.format(Locale.US, "%.0f", abs(lastSavedBalance))
-                val currency = lastSavedTransaction!!.getCurrency()
-                val typeText =
-                    if (type.equals("credit", ignoreCase = true) || type == "له") "لكم" else "عليكم"
-                val balanceText = if (lastSavedBalance >= 0) "الرصيد لكم " else "الرصيد عليكم "
-                val message = ("حسابكم لدينا:\n"
-                        + typeText + " " + amountStr + " " + currency + "\n"
-                        + lastSavedTransaction!!.getDescription() + "\n"
-                        + balanceText + balanceStr + " " + currency)
-                NotificationUtils.sendSmsMessage(getContext(), phone, message)
             }
         })
         // رجوع (إضافة قيد جديد لنفس العميل)
