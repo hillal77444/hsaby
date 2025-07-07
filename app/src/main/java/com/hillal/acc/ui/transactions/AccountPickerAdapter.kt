@@ -126,7 +126,7 @@ class AccountPickerAdapter(
         return if (accounts != null) accounts!!.size else 0
     }
 
-    internal class AccountViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class AccountViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var accountNameTextView: TextView
         var balancesContainer: LinearLayout
         var accountIconTextView: TextView

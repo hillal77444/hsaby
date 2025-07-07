@@ -419,18 +419,18 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
 
         // استخدام CashboxHelper لإضافة الصندوق
         CashboxHelper.addCashboxToServer(
-            requireContext(), cashboxViewModel, name,
+            requireContext(), cashboxViewModel!!, name,
             object : CashboxHelper.CashboxCallback {
-                override fun onSuccess(cashbox: Cashbox) {
+                override fun onSuccess(cashbox: Cashbox?) {
                     Log.d(
                         "AddTransactionFragment",
-                        "Cashbox added successfully: id=" + cashbox.id + ", name=" + cashbox.name
+                        "Cashbox added successfully: id=" + cashbox?.id + ", name=" + cashbox?.name
                     )
                     loadingDialog.dismiss()
                     // سيتم تحديث القائمة تلقائياً عبر LiveData
                     // حدد الصندوق الجديد تلقائياً بعد إضافته
-                    binding!!.cashboxAutoComplete.setText(cashbox.name, false)
-                    selectedCashboxId = cashbox.id
+                    binding!!.cashboxAutoComplete.setText(cashbox?.name, false)
+                    selectedCashboxId = cashbox?.id ?: -1
                     CashboxHelper.showSuccessMessage(requireContext(), "تم إضافة الصندوق بنجاح")
                 }
 

@@ -110,7 +110,7 @@ class ExchangeFragment : Fragment() {
             })
         cashboxViewModel!!.getAllCashboxes()
             .observe(getViewLifecycleOwner(), Observer { cbList: MutableList<Cashbox?>? ->
-                cashboxes = if (cbList != null) cbList else ArrayList<Cashbox>()
+                cashboxes = if (cbList != null) cbList.filterNotNull().toMutableList() else ArrayList<Cashbox>()
                 val names: MutableList<String?> = ArrayList<String?>()
                 for (cb in cashboxes) names.add(cb.getName())
                 cashboxAdapter = ArrayAdapter<String?>(
@@ -182,7 +182,7 @@ class ExchangeFragment : Fragment() {
         amountEditText!!.addTextChangedListener(SimpleTextWatcher(Runnable { this.updateExchangeAmount() }))
         rateEditText!!.addTextChangedListener(SimpleTextWatcher(Runnable { this.updateExchangeAmount() }))
         transactionsViewModel =
-            ViewModelProvider(this).get<TransactionsViewModel?>(TransactionsViewModel::class.java)
+            ViewModelProvider(this).get(TransactionsViewModel::class.java)
         transactionsViewModel!!.getAccountBalancesMap().observe(
             getViewLifecycleOwner(),
             Observer { balancesMap: MutableMap<Long?, MutableMap<String?, Double?>?>? ->
