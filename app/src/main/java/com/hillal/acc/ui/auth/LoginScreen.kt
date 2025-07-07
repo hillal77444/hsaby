@@ -63,19 +63,18 @@ fun LoginScreen(
         fun relW(f: Float, min: Float, max: Float) = max(min, min((screenWidth * f).value, max)).dp
         fun relH(f: Float, min: Float, max: Float) = max(min, min((screenHeight * f).value, max)).dp
         val cardCorner = relW(0.04f, 12f, 32f)
-        val cardPadding = relW(0.04f, 12f, 32f)
+        val cardPadding = relW(0.028f, 8f, 22f)
         val logoSize = relW(0.22f, 72f, 140f)
-        val fieldHeight = relH(0.065f, 44f, 64f)
+        val fieldHeight = (relH(0.065f, 44f, 64f) * 1.2f)
         val buttonHeight = relH(0.055f, 40f, 56f)
         val fontTitle = max(18f, min((screenWidth.value / 15), 32f)).sp
         val fontField = max(14f, min((screenWidth.value / 22), 20f)).sp
         val fontButton = max(14f, min((screenWidth.value / 22), 20f)).sp
         val fontSmall = max(10f, min((screenWidth.value / 30), 16f)).sp
         val iconSize = relW(0.07f, 20f, 32f)
-        // الهوامش والمسافات كلها نسبية
-        val marginSmall = relW(0.015f, 4f, 16f)
-        val marginMedium = relW(0.03f, 8f, 24f)
-        val marginLarge = relW(0.06f, 16f, 40f)
+        val marginSmall = relW(0.010f, 2f, 10f)
+        val marginMedium = relW(0.021f, 5f, 16f)
+        val marginLarge = relW(0.042f, 12f, 28f)
         val fieldInnerPadding = PaddingValues(horizontal = relW(0.03f, 8f, 20f), vertical = relH(0.01f, 4f, 12f))
 
         Column(
@@ -184,7 +183,6 @@ fun LoginScreen(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(marginSmall))
                 LoginFields(
                     phone = phone,
                     onPhoneChange = { phone = it },
@@ -245,7 +243,8 @@ private fun LoginFields(
 ) {
     Card(
         shape = RoundedCornerShape(cardCorner),
-        elevation = CardDefaults.cardElevation(4.dp),
+        elevation = CardDefaults.cardElevation(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = cardPadding, vertical = 0.dp)
