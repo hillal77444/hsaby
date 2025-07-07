@@ -374,36 +374,36 @@ fun GridCardOld(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val configuration = LocalConfiguration.current
+    val screenWidth = with(LocalDensity.current) { configuration.screenWidthDp.dp }
+    val iconSize = screenWidth * 0.07f
     Card(
         shape = RoundedCornerShape(14.dp),
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .clickable(onClick = onClick),
+                .clickable { onClick() }
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = icon),
-                    contentDescription = null,
-                    tint = Color(0xFF1976D2),
-                    modifier = Modifier.size(iconSize)
-                )
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    color = Color(0xFF1976D2),
-                    fontSize = (iconSize * 0.9f).sp,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
-            }
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = null,
+                tint = Color(0xFF1976D2),
+                modifier = Modifier.size(iconSize)
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                color = Color(0xFF1976D2),
+                fontSize = (iconSize * 0.9f).value.sp,
+                modifier = Modifier.padding(top = 2.dp)
+            )
         }
     }
 } 
