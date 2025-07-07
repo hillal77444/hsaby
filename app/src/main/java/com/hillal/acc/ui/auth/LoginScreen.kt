@@ -38,7 +38,7 @@ fun LoginScreen(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F8F8))
+            .background(Color(0xFFFFFFFF))
     ) {
         val screenWidth = maxWidth
         val screenHeight = maxHeight
