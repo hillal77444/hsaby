@@ -3,10 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="@dimen/margin_small"
-    android:layout_marginVertical="@dimen/margin_xs"
-    app:cardCornerRadius="@dimen/corner_radius_large"
-    app:cardElevation="@dimen/elevation_small"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="6dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
     app:cardBackgroundColor="#FFFFFF"
     android:clickable="true"
     android:focusable="true"
@@ -16,20 +16,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="@dimen/padding_medium"
+        android:padding="16dp"
         android:gravity="center_vertical">
 
         <!-- أيقونة الحساب -->
         <androidx.cardview.widget.CardView
-            android:layout_width="@dimen/icon_size_xl"
-            android:layout_height="@dimen/icon_size_xl"
-            app:cardCornerRadius="@dimen/corner_radius_xl"
-            app:cardElevation="@dimen/elevation_small"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="2dp"
             app:cardBackgroundColor="#E3F2FD"
-            android:layout_marginEnd="@dimen/margin_small">
+            android:layout_marginEnd="12dp">
             <ImageView
-                android:layout_width="@dimen/icon_size_sm"
-                android:layout_height="@dimen/icon_size_sm"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_accounts"
                 app:tint="#152FD9" />
@@ -47,15 +47,11 @@
                 android:id="@+id/account_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/text_size_headline2"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="#152FD9"
                 android:maxLines="1"
-                android:ellipsize="end"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_caption"
-                android:autoSizeMaxTextSize="@dimen/text_size_headline2"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
+                android:ellipsize="end" />
 
             <!-- رقم الهاتف -->
             <LinearLayout
@@ -63,11 +59,11 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginTop="@dimen/margin_xs">
+                android:layout_marginTop="4dp">
 
                 <ImageView
-                    android:layout_width="@dimen/icon_size_sm"
-                    android:layout_height="@dimen/icon_size_sm"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
                     android:src="@drawable/ic_phone"
                     app:tint="#666" />
 
@@ -75,13 +71,9 @@
                     android:id="@+id/phone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/margin_xs"
-                    android:textSize="@dimen/text_size_caption"
-                    android:textColor="#666"
-                    android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="@dimen/text_size_xs"
-                    android:autoSizeMaxTextSize="@dimen/text_size_caption"
-                    android:autoSizeStepGranularity="@dimen/text_size_step" />
+                    android:layout_marginStart="6dp"
+                    android:textSize="14sp"
+                    android:textColor="#666" />
             </LinearLayout>
 
             <!-- رقم الحساب -->
@@ -90,11 +82,11 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginTop="@dimen/margin_xxs">
+                android:layout_marginTop="2dp">
 
                 <ImageView
-                    android:layout_width="@dimen/icon_size"
-                    android:layout_height="@dimen/icon_size"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
                     android:src="@drawable/ic_accounts"
                     app:tint="#666" />
 
@@ -102,14 +94,10 @@
                     android:id="@+id/account_number"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/margin_xs"
-                    android:textSize="@dimen/text_size_xs"
+                    android:layout_marginStart="6dp"
+                    android:textSize="12sp"
                     android:textColor="#999"
-                    android:textStyle="italic"
-                    android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="@dimen/text_size_xs"
-                    android:autoSizeMaxTextSize="@dimen/text_size_caption"
-                    android:autoSizeStepGranularity="@dimen/text_size_step" />
+                    android:textStyle="italic" />
             </LinearLayout>
 
             <!-- الرصيد -->
@@ -117,14 +105,10 @@
                 android:id="@+id/balance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_xs"
-                android:textSize="@dimen/text_size_body1"
+                android:layout_marginTop="6dp"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="#22C55E"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_caption"
-                android:autoSizeMaxTextSize="@dimen/text_size_body1"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
+                android:textColor="#22C55E" />
         </LinearLayout>
 
         <!-- أزرار الإجراءات -->
@@ -133,48 +117,40 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginStart="@dimen/margin_small"
+            android:layout_marginStart="12dp"
             android:background="@drawable/bg_buttons_container"
-            android:padding="@dimen/padding_xs">
+            android:padding="8dp">
 
             <!-- زر واتساب (Toggle Switch) -->
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/whatsapp_switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/margin_xs"
+                android:layout_marginBottom="8dp"
                 android:text="واتساب"
-                android:textSize="@dimen/text_size_xs"
+                android:textSize="11sp"
                 android:textColor="#666"
                 app:thumbTint="#25D366"
                 app:trackTint="#E0E0E0"
                 app:thumbTintMode="src_atop"
                 app:trackTintMode="src_atop"
-                android:checked="true"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_xs"
-                android:autoSizeMaxTextSize="@dimen/text_size_caption"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
+                android:checked="true" />
 
             <!-- زر التعديل -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/edit_button"
                 android:layout_width="wrap_content"
-                android:layout_height="@dimen/height_small"
+                android:layout_height="32dp"
                 android:text="تعديل"
-                android:textSize="@dimen/text_size_caption"
+                android:textSize="10sp"
                 android:textColor="#FFFFFF"
                 android:icon="@drawable/ic_edit"
-                app:iconSize="@dimen/icon_size_sm"
+                app:iconSize="12dp"
                 app:iconGravity="textStart"
-                app:iconPadding="@dimen/padding_xxs"
+                app:iconPadding="3dp"
                 android:backgroundTint="#152FD9"
-                app:cornerRadius="@dimen/corner_radius_large"
-                android:contentDescription="تعديل الحساب"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_xs"
-                android:autoSizeMaxTextSize="@dimen/text_size_caption"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
+                app:cornerRadius="16dp"
+                android:contentDescription="تعديل الحساب" />
 
         </LinearLayout>
     </LinearLayout>
