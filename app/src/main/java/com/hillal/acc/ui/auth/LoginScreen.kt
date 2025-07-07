@@ -68,40 +68,36 @@ fun LoginScreen(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // المستطيل الأزرق أعلى الشاشة
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(blueHeight)
-                .background(Color(0xFF2196F3))
-                .align(Alignment.TopCenter)
-        )
-        // الشعار في منتصف المستطيل الأزرق
-        Box(
-            modifier = Modifier
-                .size(logoSize)
-                .background(Color.White, shape = CircleShape)
-                .align(Alignment.TopCenter)
-                .offset(y = blueHeight - (logoSize / 2)),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = R.mipmap.ic_launcher),
-                contentDescription = "Logo",
-                contentScale = ContentScale.Inside,
-                modifier = Modifier.size(logoSize * 0.8f)
-            )
-        }
-        // البطاقة البيضاء مرتفعة للأعلى تحت الشعار مباشرة
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter)
-                .offset(y = blueHeight + (logoSize / 2.5f))
+                .fillMaxSize()
                 .verticalScroll(scrollState)
                 .imePadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // المستطيل الأزرق أعلى الشاشة
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(blueHeight)
+                    .background(Color(0xFF2196F3))
+            )
+            // الشعار متداخل مع البطاقة
+            Box(
+                modifier = Modifier
+                    .size(logoSize)
+                    .offset(y = -logoSize / 2)
+                    .background(Color.White, shape = CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.mipmap.ic_launcher),
+                    contentDescription = "Logo",
+                    contentScale = ContentScale.Inside,
+                    modifier = Modifier.size(logoSize * 0.8f)
+                )
+            }
+            // البطاقة البيضاء
             Card(
                 shape = RoundedCornerShape(cardCorner),
                 elevation = CardDefaults.cardElevation(12.dp),
