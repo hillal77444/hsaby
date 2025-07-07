@@ -75,11 +75,11 @@ class CashboxStatementFragment : Fragment() {
     private var lastCashboxTransactions: MutableList<Transaction> = ArrayList<Transaction>()
     private var lastSelectedCashbox: Cashbox? = null
     private var btnPrint: ImageButton? = null
-    private val accountMap: MutableMap<Long, Account> = HashMap()
-    private var selectedCashboxId: Long = -1L
-    private val mainCashboxId: Long = -1L
+    private val accountMap: MutableMap<Long?, Account?> = HashMap<Long?, Account?>()
+    private var selectedCashboxId: Long = -1
+    private val mainCashboxId: Long = -1
     private var isSummaryMode = true
-    private var allCurrencies: MutableList<String> = ArrayList()
+    private var allCurrencies: MutableList<String> = ArrayList<String>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -209,29 +209,29 @@ class CashboxStatementFragment : Fragment() {
         cashboxesLiveData.observe(
             getViewLifecycleOwner(),
             Observer { cashboxes: MutableList<Cashbox?>? ->
-                allCashboxes = if (cashboxes != null) cashboxes.filterNotNull().toMutableList() else ArrayList()
-                val names: MutableList<String> = ArrayList()
+                allCashboxes = if (cashboxes != null) cashboxes else ArrayList<Cashbox>()
+                val names: MutableList<String?> = ArrayList<String?>()
                 for (c in allCashboxes) {
                     names.add(c.name)
                 }
                 if (!names.contains("➕ إضافة صندوق جديد...")) {
                     names.add("➕ إضافة صندوق جديد...")
                 }
-                val adapter = ArrayAdapter<String>(
+                val adapter = ArrayAdapter<String?>(
                     requireContext(),
                     android.R.layout.simple_dropdown_item_1line,
                     names
                 )
-                cashboxDropdown!!.setAdapter<ArrayAdapter<String>>(adapter)
+                cashboxDropdown!!.setAdapter<ArrayAdapter<String?>?>(adapter)
                 cashboxDropdown!!.setText("", false)
-                selectedCashboxId = -1L
+                selectedCashboxId = -1
                 lastSelectedCashbox = null
                 if (isSummaryMode) {
                     showSummaryWithCurrencies()
                 }
             })
 
-        cashboxDropdown!!.setOnItemClickListener { parent, view, position, id ->
+        cashboxDropdown!!.setOnItemClickListener(AdapterView.OnItemClickListener { parent: AdapterView<*>?, view: View?, position: Int, id: Long ->
             if (position == allCashboxes.size) {
                 Toast.makeText(
                     requireContext(),
@@ -239,13 +239,13 @@ class CashboxStatementFragment : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
-                lastSelectedCashbox = allCashboxes[position]
-                selectedCashboxId = allCashboxes[position]!!.id
+                lastSelectedCashbox = allCashboxes.get(position)
+                selectedCashboxId = lastSelectedCashbox!!.id
                 isSummaryMode = false
                 currencyButtonsLayout!!.setVisibility(View.GONE)
-                onCashboxSelected(allCashboxes[position]!!)
+                onCashboxSelected(lastSelectedCashbox!!)
             }
-        }
+        })
 
         transactionRepository!!.getAllTransactions()
             .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
@@ -263,7 +263,7 @@ class CashboxStatementFragment : Fragment() {
             .observe(getViewLifecycleOwner(), Observer { accounts: MutableList<Account>? ->
                 if (accounts != null) {
                     for (acc in accounts) {
-                        accountMap[acc.getId()] = acc
+                        accountMap.put(acc.getId(), acc)
                     }
                 }
             })
@@ -387,10 +387,11 @@ class CashboxStatementFragment : Fragment() {
             return
         }
         // الرصيد السابق غير مهم هنا للصندوق غالباً، يمكن تعديله لاحقاً إذا لزم
-        val previousBalances: MutableMap<String, Double> = HashMap<String, Double>()
-        previousBalances[selectedCurrency!!] = 0.0
-        val currencyMap: MutableMap<String, MutableList<Transaction>> = HashMap()
-        currencyMap[selectedCurrency!!] = filtered
+        val previousBalances: MutableMap<String?, Double?> = HashMap<String?, Double?>()
+        previousBalances.put(selectedCurrency, 0.0)
+        val currencyMap: MutableMap<String?, MutableList<Transaction?>?> =
+            HashMap<String?, MutableList<Transaction?>?>()
+        currencyMap.put(selectedCurrency, filtered)
         val htmlContent = generateReportHtml(
             lastSelectedCashbox!!,
             finalStartDate,
@@ -407,8 +408,8 @@ class CashboxStatementFragment : Fragment() {
         startDate: Date,
         endDate: Date,
         transactions: MutableList<Transaction>,
-        previousBalances: MutableMap<String, Double>?,
-        currencyMap: MutableMap<String, MutableList<Transaction>>?
+        previousBalances: MutableMap<String?, Double?>?,
+        currencyMap: MutableMap<String?, MutableList<Transaction?>?>?
     ): String {
         val html = StringBuilder()
         html.append("<!DOCTYPE html>")
@@ -442,7 +443,7 @@ class CashboxStatementFragment : Fragment() {
         html.append("</div>")
         sortTransactionsByDate(transactions)
         val previousBalance =
-            calculatePreviousBalance(cashbox.id, selectedCurrency!!, startDate.time)
+            calculatePreviousBalance(cashbox.id, selectedCurrency!!, startDate.getTime())
         var totalDebit = 0.0
         var totalCredit = 0.0
         html.append("<table>")
@@ -456,7 +457,8 @@ class CashboxStatementFragment : Fragment() {
             html.append("<td>").append(dateFormat!!.format(Date(t.getTransactionDate())))
                 .append("</td>")
             val accountName =
-                if (accountMap.containsKey(t.getAccountId())) accountMap[t.getAccountId()]!!.getName() else ""
+                if (accountMap.containsKey(t.getAccountId())) accountMap.get(t.getAccountId())!!
+                    .getName() else ""
             html.append("<td>").append(accountName).append("</td>")
             html.append("<td>").append(if (t.getDescription() != null) t.getDescription() else "")
                 .append("</td>")
@@ -505,10 +507,10 @@ class CashboxStatementFragment : Fragment() {
     }
 
     private fun sortTransactionsByDate(transactions: MutableList<Transaction>) {
-        transactions.sortWith(Comparator<Transaction> { t1, t2 ->
-            java.lang.Long.compare(
-                t1.getTransactionDate(),
-                t2.getTransactionDate()
+        transactions.sort(Comparator { t1: Transaction?, t2: Transaction? ->
+            Long.compare(
+                t1!!.getTransactionDate(),
+                t2!!.getTransactionDate()
             )
         })
     }
@@ -522,14 +524,14 @@ class CashboxStatementFragment : Fragment() {
     }
 
     private fun calculatePreviousBalance(
-        cashboxId: Long?,
+        cashboxId: kotlin.Long,
         currency: String,
-        beforeTime: Long?
+        beforeTime: kotlin.Long
     ): Double {
         var balance = 0.0
         for (t in allTransactions) {
-            if ((t.getCashboxId() ?: -1L) == (cashboxId ?: -1L) && t.getCurrency()
-                    .trim { it <= ' ' } == currency.trim { it <= ' ' } && (t.getTransactionDate() < (beforeTime ?: Long.MAX_VALUE))
+            if (t.getCashboxId() == cashboxId && t.getCurrency()
+                    .trim { it <= ' ' } == currency.trim { it <= ' ' } && t.getTransactionDate() < beforeTime
             ) {
                 if (t.getType().equals("credit", ignoreCase = true) || t.getType() == "له") {
                     balance += t.getAmount()
@@ -564,7 +566,7 @@ class CashboxStatementFragment : Fragment() {
             var totalCredit = 0.0
             var totalDebit = 0.0
             for (t in transactions) {
-                if ((t.getCashboxId() ?: java.lang.Long.valueOf(-1L)) == java.lang.Long.valueOf(c.id ?: -1L) && t.getCurrency()
+                if (t.getCashboxId() == c.id && t.getCurrency()
                         .trim { it <= ' ' } == currency.trim { it <= ' ' }
                 ) {
                     if (t.getType().equals("credit", ignoreCase = true) || t.getType() == "له") {
@@ -587,20 +589,20 @@ class CashboxStatementFragment : Fragment() {
     }
 
     private fun showSummaryWithCurrencies() {
-        val currenciesSet = LinkedHashSet<String>()
+        val currenciesSet = LinkedHashSet<String?>()
         for (t in allTransactions) {
-            if (t.getCurrency() != null && t.getCurrency().trim { it <= ' ' }.isNotEmpty()) {
+            if (t.getCurrency() != null && !t.getCurrency().trim { it <= ' ' }.isEmpty()) {
                 currenciesSet.add(t.getCurrency().trim { it <= ' ' })
             }
         }
-        allCurrencies = ArrayList(currenciesSet)
+        allCurrencies = ArrayList<String>(currenciesSet)
         if (allCurrencies.isEmpty()) {
             webView!!.loadDataWithBaseURL(null, "<p>لا توجد بيانات</p>", "text/html", "UTF-8", null)
             currencyButtonsLayout!!.setVisibility(View.GONE)
             return
         }
         if (selectedCurrency == null || !allCurrencies.contains(selectedCurrency)) {
-            selectedCurrency = allCurrencies[0]
+            selectedCurrency = allCurrencies.get(0)
         }
         currencyButtonsLayout!!.removeAllViews()
         for (currency in allCurrencies) {
