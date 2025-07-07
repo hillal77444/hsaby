@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -51,95 +52,101 @@ fun DashboardScreen(
     val netBalance by viewModel.netBalance.observeAsState()
     val scrollState = rememberScrollState()
 
-    BoxWithConstraints(
+    // نسب ديناميكية موحدة مع شاشات الدخول/التسجيل
+    val configuration = LocalConfiguration.current
+    val screenWidth = with(LocalDensity.current) { configuration.screenWidthDp.dp }
+    val screenHeight = with(LocalDensity.current) { configuration.screenHeightDp.dp }
+    val blueHeight = screenHeight * 0.12f
+    val logoSize = screenWidth * 0.18f
+    val cardCorner = screenWidth * 0.07f
+    val cardPadding = screenWidth * 0.028f
+    val fontTitle = (screenWidth.value / 15).sp
+    val fontField = (screenWidth.value / 22).sp
+    val fontSmall = (screenWidth.value / 38).sp
+    val iconSize = screenWidth * 0.07f
+    val marginSmall = screenWidth * 0.007f
+    val marginMedium = screenWidth * 0.018f
+    val marginLarge = screenWidth * 0.035f
+    val statCardHeight = screenHeight * 0.11f
+    val actionButtonHeight = screenHeight * 0.07f
+    val gridCardHeight = screenHeight * 0.13f
+    val verticalSpace = screenHeight * 0.015f
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF7F7F7))
     ) {
-        val maxW = maxWidth
-        val maxH = maxHeight
-        // نسب ديناميكية
-        val padding = maxW * 0.03f
-        val cardHeight = maxH * 0.09f
-        val statIconSize = maxW * 0.07f
-        val statFontSize = maxW.value * 0.045f
-        val statLabelFontSize = maxW.value * 0.032f
-        val headerHeight = maxH * 0.19f
-        val logoSize = maxW * 0.18f
-        val logoOffset = logoSize * 0.45f
-        val welcomeFontSize = maxW.value * 0.045f
-        val userCardFontSize = maxW.value * 0.04f
-        val userCardPadding = maxW * 0.05f
-        val actionButtonHeight = maxH * 0.07f
-        val gridCardHeight = maxH * 0.13f
-        val gridIconSize = maxW * 0.07f
-        val gridFontSize = maxW.value * 0.038f
-        val gridSubFontSize = maxW.value * 0.03f
-        val verticalSpace = maxH * 0.015f
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState)
+                .verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(logoOffset * 0.7f))
-            // شعار التطبيق فقط
+            // المستطيل الأزرق العلوي
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(blueHeight)
+                    .background(Color(0xFF2196F3))
+            )
+            // الشعار متداخل مع البطاقة
             Box(
                 modifier = Modifier
                     .size(logoSize)
-                    .align(Alignment.CenterHorizontally),
+                    .offset(y = -logoSize / 2)
+                    .background(Color.White, shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
                     painter = painterResource(id = R.mipmap.ic_launcher),
                     contentDescription = "Logo",
-                    modifier = Modifier.size(logoSize * 0.7f)
+                    modifier = Modifier.size(logoSize * 0.8f)
                 )
             }
-            // عبارة ترحيبية
+            // عبارة ترحيب
             Text(
-                text = "مرحباً، اسم المستخدم!",
+                text = "مرحباً، $userName!",
                 color = Color(0xFF2196F3),
-                style = MaterialTheme.typography.titleMedium,
-                fontSize = (welcomeFontSize * 0.85f).sp,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                fontWeight = FontWeight.Bold,
+                fontSize = fontTitle,
+                modifier = Modifier.padding(top = marginSmall, bottom = marginMedium)
             )
             // بطاقة المستخدم مع زر التعديل
             Card(
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(cardCorner),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = padding, vertical = verticalSpace),
+                    .fillMaxWidth(0.92f)
+                    .wrapContentHeight(),
                 colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(horizontal = userCardPadding, vertical = userCardPadding * 0.5f)
+                    modifier = Modifier.padding(cardPadding)
                 ) {
                     Text(
                         text = userName,
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = Color(0xFF2196F3),
-                        fontSize = userCardFontSize.sp,
+                        color = Color(0xFF152FD9),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = fontField,
                         modifier = Modifier.weight(1f)
                     )
                     IconButton(onClick = onEditProfile) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_edit),
                             contentDescription = "تعديل الملف",
-                            tint = Color(0xFF2196F3),
-                            modifier = Modifier.size(statIconSize)
+                            tint = Color(0xFF152FD9),
+                            modifier = Modifier.size(iconSize * 1.2f)
                         )
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(verticalSpace))
+            Spacer(modifier = Modifier.height(marginLarge))
             // بطاقات الإحصائيات الأربع
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = padding),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    .fillMaxWidth(0.92f),
+                horizontalArrangement = Arrangement.spacedBy(marginSmall)
             ) {
                 StatCardOld(
                     icon = R.drawable.ic_money,
@@ -149,10 +156,10 @@ fun DashboardScreen(
                     color = Color(0xFFB2F2E5),
                     iconTint = Color(0xFF009688),
                     valueColor = Color(0xFF009688),
-                    iconSize = statIconSize,
-                    valueFontSize = (statFontSize * 0.7f).sp,
-                    labelFontSize = (statLabelFontSize * 0.7f).sp,
-                    modifier = Modifier.weight(1f).height(cardHeight)
+                    iconSize = iconSize,
+                    valueFontSize = fontField,
+                    labelFontSize = fontSmall,
+                    modifier = Modifier.weight(1f).height(statCardHeight)
                 )
                 StatCardOld(
                     icon = R.drawable.ic_arrow_downward,
@@ -162,10 +169,10 @@ fun DashboardScreen(
                     color = Color(0xFFFFF3E0),
                     iconTint = Color(0xFFFF9800),
                     valueColor = Color(0xFFFF9800),
-                    iconSize = statIconSize,
-                    valueFontSize = (statFontSize * 0.7f).sp,
-                    labelFontSize = (statLabelFontSize * 0.7f).sp,
-                    modifier = Modifier.weight(1f).height(cardHeight)
+                    iconSize = iconSize,
+                    valueFontSize = fontField,
+                    labelFontSize = fontSmall,
+                    modifier = Modifier.weight(1f).height(statCardHeight)
                 )
                 StatCardOld(
                     icon = R.drawable.ic_arrow_upward,
@@ -175,10 +182,10 @@ fun DashboardScreen(
                     color = Color(0xFFE8F5E9),
                     iconTint = Color(0xFF4CAF50),
                     valueColor = Color(0xFF4CAF50),
-                    iconSize = statIconSize,
-                    valueFontSize = (statFontSize * 0.7f).sp,
-                    labelFontSize = (statLabelFontSize * 0.7f).sp,
-                    modifier = Modifier.weight(1f).height(cardHeight)
+                    iconSize = iconSize,
+                    valueFontSize = fontField,
+                    labelFontSize = fontSmall,
+                    modifier = Modifier.weight(1f).height(statCardHeight)
                 )
                 StatCardOld(
                     icon = R.drawable.ic_accounts,
@@ -188,27 +195,26 @@ fun DashboardScreen(
                     color = Color(0xFFE3F2FD),
                     iconTint = Color(0xFF1976D2),
                     valueColor = Color(0xFF1976D2),
-                    iconSize = statIconSize,
-                    valueFontSize = (statFontSize * 0.7f).sp,
-                    labelFontSize = (statLabelFontSize * 0.7f).sp,
-                    modifier = Modifier.weight(1f).height(cardHeight)
+                    iconSize = iconSize,
+                    valueFontSize = fontField,
+                    labelFontSize = fontSmall,
+                    modifier = Modifier.weight(1f).height(statCardHeight)
                 )
             }
-            Spacer(modifier = Modifier.height(verticalSpace * 1.5f))
+            Spacer(modifier = Modifier.height(marginLarge))
             // أزرار الإجراءات الثلاثة
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = padding),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .fillMaxWidth(0.92f),
+                horizontalArrangement = Arrangement.spacedBy(marginMedium)
             ) {
                 ActionButton(
                     text = "إضافة قيد",
                     icon = R.drawable.ic_add,
                     height = actionButtonHeight,
                     backgroundColor = Color(0xFF1976D2),
-                    fontSize = (gridFontSize * 0.8f).sp,
-                    iconSize = gridIconSize,
+                    fontSize = fontField,
+                    iconSize = iconSize,
                     onClick = onAddTransaction,
                     modifier = Modifier.weight(1f)
                 )
@@ -217,8 +223,8 @@ fun DashboardScreen(
                     icon = R.drawable.ic_add_account,
                     height = actionButtonHeight,
                     backgroundColor = Color(0xFF388E3C),
-                    fontSize = (gridFontSize * 0.8f).sp,
-                    iconSize = gridIconSize,
+                    fontSize = fontField,
+                    iconSize = iconSize,
                     onClick = onAddAccount,
                     modifier = Modifier.weight(1f)
                 )
@@ -227,104 +233,67 @@ fun DashboardScreen(
                     icon = R.drawable.ic_statement,
                     height = actionButtonHeight,
                     backgroundColor = Color(0xFFFF9800),
-                    fontSize = (gridFontSize * 0.8f).sp,
-                    iconSize = gridIconSize,
+                    fontSize = fontField,
+                    iconSize = iconSize,
                     onClick = onReport,
                     modifier = Modifier.weight(1f)
                 )
             }
-            Spacer(modifier = Modifier.height(verticalSpace * 2))
-            // شبكة البطاقات السفلية
+            Spacer(modifier = Modifier.height(marginLarge))
+            // شبكة البطاقات الشبكية (Grid) 3 أعمدة × صفين
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = padding),
-                verticalArrangement = Arrangement.spacedBy(verticalSpace)
+                    .fillMaxWidth(0.92f),
+                verticalArrangement = Arrangement.spacedBy(marginMedium)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(verticalSpace)
+                    horizontalArrangement = Arrangement.spacedBy(marginMedium)
                 ) {
                     GridCardOld(
-                        icon = R.drawable.ic_reports,
-                        title = "التقارير",
-                        subtitle = "عرض التقارير",
-                        backgroundColor = Color(0xFFE8F5E9),
-                        iconTint = Color(0xFF388E3C),
-                        fontSize = (gridFontSize * 0.9f).sp,
-                        subFontSize = (gridSubFontSize * 0.9f).sp,
-                        iconSize = gridIconSize,
-                        onClick = onReports,
+                        icon = R.drawable.ic_accounts,
+                        title = "الحسابات",
+                        onClick = onAccounts,
                         modifier = Modifier.weight(1f).height(gridCardHeight)
                     )
                     GridCardOld(
                         icon = R.drawable.ic_transactions,
                         title = "المعاملات",
-                        subtitle = "سجل المعاملات",
-                        backgroundColor = Color(0xFFE3F2FD),
-                        iconTint = Color(0xFF1976D2),
-                        fontSize = (gridFontSize * 0.9f).sp,
-                        subFontSize = (gridSubFontSize * 0.9f).sp,
-                        iconSize = gridIconSize,
                         onClick = onTransactions,
                         modifier = Modifier.weight(1f).height(gridCardHeight)
                     )
                     GridCardOld(
-                        icon = R.drawable.ic_accounts,
-                        title = "الحسابات",
-                        subtitle = "إدارة الحسابات",
-                        backgroundColor = Color(0xFFF3E5F5),
-                        iconTint = Color(0xFF8E24AA),
-                        fontSize = (gridFontSize * 0.9f).sp,
-                        subFontSize = (gridSubFontSize * 0.9f).sp,
-                        iconSize = gridIconSize,
-                        onClick = onAccounts,
+                        icon = R.drawable.ic_reports,
+                        title = "التقارير",
+                        onClick = onReports,
                         modifier = Modifier.weight(1f).height(gridCardHeight)
                     )
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(verticalSpace)
+                    horizontalArrangement = Arrangement.spacedBy(marginMedium)
                 ) {
                     GridCardOld(
-                        icon = R.drawable.ic_sync_alt,
-                        title = "تحويل بين الحسابات",
-                        subtitle = "تحويل الأموال",
-                        backgroundColor = Color(0xFFFFF3E0),
-                        iconTint = Color(0xFFFF9800),
-                        fontSize = (gridFontSize * 0.9f).sp,
-                        subFontSize = (gridSubFontSize * 0.9f).sp,
-                        iconSize = gridIconSize,
-                        onClick = onTransfer,
+                        icon = R.drawable.ic_arrow_downward,
+                        title = "متابعة الديون",
+                        onClick = onDebts,
                         modifier = Modifier.weight(1f).height(gridCardHeight)
                     )
                     GridCardOld(
                         icon = R.drawable.ic_currency_exchange,
                         title = "صرف العملات",
-                        subtitle = "صرف العملات",
-                        backgroundColor = Color(0xFFE1F5FE),
-                        iconTint = Color(0xFF0288D1),
-                        fontSize = (gridFontSize * 0.9f).sp,
-                        subFontSize = (gridSubFontSize * 0.9f).sp,
-                        iconSize = gridIconSize,
                         onClick = onExchange,
                         modifier = Modifier.weight(1f).height(gridCardHeight)
                     )
                     GridCardOld(
-                        icon = R.drawable.ic_summary,
-                        title = "متابعة الديون",
-                        subtitle = "متابعة الديون",
-                        backgroundColor = Color(0xFFFFEBEE),
-                        iconTint = Color(0xFFD32F2F),
-                        fontSize = (gridFontSize * 0.9f).sp,
-                        subFontSize = (gridSubFontSize * 0.9f).sp,
-                        iconSize = gridIconSize,
-                        onClick = onDebts,
+                        icon = R.drawable.ic_sync_alt,
+                        title = "تحويل بين الحسابات",
+                        onClick = onTransfer,
                         modifier = Modifier.weight(1f).height(gridCardHeight)
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(verticalSpace * 2))
+            Spacer(modifier = Modifier.height(marginLarge))
         }
     }
 }
@@ -411,19 +380,13 @@ fun ActionButton(
 fun GridCardOld(
     icon: Int,
     title: String,
-    subtitle: String,
-    backgroundColor: Color,
-    iconTint: Color,
-    fontSize: TextUnit,
-    subFontSize: TextUnit,
-    iconSize: Dp,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         shape = RoundedCornerShape(14.dp),
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Box(
@@ -439,21 +402,15 @@ fun GridCardOld(
                 Icon(
                     painter = painterResource(id = icon),
                     contentDescription = null,
-                    tint = iconTint,
+                    tint = Color(0xFF1976D2),
                     modifier = Modifier.size(iconSize)
                 )
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    color = iconTint,
-                    fontSize = fontSize,
+                    color = Color(0xFF1976D2),
+                    fontSize = (iconSize * 0.9f).sp,
                     modifier = Modifier.padding(top = 2.dp)
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = iconTint.copy(alpha = 0.7f),
-                    fontSize = subFontSize
                 )
             }
         }
