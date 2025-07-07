@@ -70,7 +70,7 @@ fun LoginScreen(
         val fontTitle = max(18f, min((screenWidth.value / 15), 32f)).sp
         val fontField = max(14f, min((screenWidth.value / 22), 20f)).sp
         val fontButton = max(14f, min((screenWidth.value / 22), 20f)).sp
-        val fontSmall = max(10f, min((screenWidth.value / 30), 16f)).sp
+        val fontSmall = max(8f, min((screenWidth.value / 38), 13f)).sp
         val iconSize = relW(0.07f, 20f, 32f)
         val marginSmall = relW(0.007f, 1f, 8f)
         val marginMedium = relW(0.018f, 4f, 14f)
@@ -355,9 +355,11 @@ private fun LoginFields(
             onClick = onPrivacyClick,
             modifier = Modifier
                 .weight(1f)
-                .height(buttonHeight),
+                .height(buttonHeight)
+                .widthIn(min = relW(0.18f, 60f, 100f)),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
-            shape = RoundedCornerShape(cardCorner)
+            shape = RoundedCornerShape(cardCorner),
+            contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
         ) {
             Text("سياسة الخصوصية", color = Color.White, fontSize = fontSmall)
         }
@@ -365,9 +367,11 @@ private fun LoginFields(
             onClick = onContactClick,
             modifier = Modifier
                 .weight(1f)
-                .height(buttonHeight),
+                .height(buttonHeight)
+                .widthIn(min = relW(0.18f, 60f, 100f)),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
-            shape = RoundedCornerShape(cardCorner)
+            shape = RoundedCornerShape(cardCorner),
+            contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
         ) {
             Text("ارقام التواصل", color = Color.White, fontSize = fontSmall)
         }
@@ -375,9 +379,11 @@ private fun LoginFields(
             onClick = onAboutClick,
             modifier = Modifier
                 .weight(1f)
-                .height(buttonHeight),
+                .height(buttonHeight)
+                .widthIn(min = relW(0.18f, 60f, 100f)),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
-            shape = RoundedCornerShape(cardCorner)
+            shape = RoundedCornerShape(cardCorner),
+            contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
         ) {
             Text("حول التطبيق", color = Color.White, fontSize = fontSmall)
         }
