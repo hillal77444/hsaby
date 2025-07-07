@@ -246,6 +246,7 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
                             description,
                             currency
                         )
+                        transaction.id = System.currentTimeMillis()
                         transaction.setNotes(notes)
                         transaction.setTransactionDate(calendar.getTimeInMillis())
                         transaction.setUpdatedAt(System.currentTimeMillis())

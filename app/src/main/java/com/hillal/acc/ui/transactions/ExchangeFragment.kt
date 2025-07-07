@@ -302,6 +302,7 @@ class ExchangeFragment : Fragment() {
         val whatsappEnabled = selectedAccount != null && selectedAccount!!.isWhatsappEnabled()
         // معاملة الخصم
         val debitTx = Transaction()
+        debitTx.id = System.currentTimeMillis() * 1000000 + System.nanoTime() % 1000000
         debitTx.setAccountId(selectedAccount!!.getId())
         debitTx.setAmount(amount)
         debitTx.setCurrency(fromCurrency)
@@ -311,6 +312,7 @@ class ExchangeFragment : Fragment() {
         debitTx.setCashboxId(selectedCashboxId)
         // معاملة الإضافة
         val creditTx = Transaction()
+        creditTx.id = System.currentTimeMillis() * 1000000 + (System.nanoTime() + 1) % 1000000
         creditTx.setAccountId(selectedAccount!!.getId())
         creditTx.setAmount(rounded.toDouble())
         creditTx.setCurrency(toCurrency)
