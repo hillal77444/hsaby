@@ -53,16 +53,16 @@ fun LoginScreen(
         var passwordVisible by remember { mutableStateOf(false) }
 
         // أحجام ديناميكية مع حدود دنيا/قصوى (باستخدام min/max)
-        val cardCorner = Dp(max(12f, min((screenWidth * 0.04f).value, 32f)))
-        val cardPadding = Dp(max(12f, min((screenWidth * 0.04f).value, 32f)))
-        val logoSize = Dp(max(72f, min((screenWidth * 0.22f).value, 140f)))
-        val fieldHeight = Dp(max(44f, min((screenHeight * 0.065f).value, 64f)))
-        val buttonHeight = Dp(max(40f, min((screenHeight * 0.055f).value, 56f)))
+        val cardCorner = max(12f, min((screenWidth * 0.04f).value, 32f)).dp
+        val cardPadding = max(12f, min((screenWidth * 0.04f).value, 32f)).dp
+        val logoSize = max(72f, min((screenWidth * 0.22f).value, 140f)).dp
+        val fieldHeight = max(44f, min((screenHeight * 0.065f).value, 64f)).dp
+        val buttonHeight = max(40f, min((screenHeight * 0.055f).value, 56f)).dp
         val fontTitle = max(18f, min((screenWidth.value / 15), 32f)).sp
         val fontField = max(14f, min((screenWidth.value / 22), 20f)).sp
         val fontButton = max(14f, min((screenWidth.value / 22), 20f)).sp
         val fontSmall = max(10f, min((screenWidth.value / 30), 16f)).sp
-        val iconSize = Dp(max(20f, min((screenWidth * 0.07f).value, 32f)))
+        val iconSize = max(20f, min((screenWidth * 0.07f).value, 32f)).dp
 
         Column(
             modifier = Modifier
@@ -90,7 +90,7 @@ fun LoginScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(Dp(max(60f, min((screenHeight * 0.18f).value, 120f))))
+                    .height(max(60f, min((screenHeight * 0.18f).value, 120f)).dp)
                     .background(Color(0xFF3F51B5))
             ) {
                 Card(
@@ -108,7 +108,7 @@ fun LoginScreen(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(Dp(max(4f, min((screenHeight * 0.01f).value, 16f)))))
+            Spacer(modifier = Modifier.height(max(4f, min((screenHeight * 0.01f).value, 16f)).dp))
             // الحاوية البيضاء للحقول
             Card(
                 shape = RoundedCornerShape(cardCorner),
@@ -138,7 +138,7 @@ fun LoginScreen(
                             .fillMaxWidth()
                             .height(fieldHeight)
                     )
-                    Spacer(modifier = Modifier.height(Dp(max(4f, min((screenHeight * 0.012f).value, 12f)))))
+                    Spacer(modifier = Modifier.height(max(4f, min((screenHeight * 0.012f).value, 12f)).dp))
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
@@ -177,7 +177,7 @@ fun LoginScreen(
                         onClick = { onLoginClick(phone, password) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = Dp(max(4f, min((screenHeight * 0.012f).value, 12f))))
+                            .padding(top = max(4f, min((screenHeight * 0.012f).value, 12f)).dp)
                             .height(buttonHeight),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
                         shape = RoundedCornerShape(cardCorner)
@@ -192,9 +192,9 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        top = Dp(max(6f, min((screenHeight * 0.018f).value, 18f))),
-                        start = Dp(max(16f, min((screenWidth * 0.08f).value, 40f))),
-                        end = Dp(max(16f, min((screenWidth * 0.08f).value, 40f)))
+                        top = max(6f, min((screenHeight * 0.018f).value, 18f)).dp,
+                        start = max(16f, min((screenWidth * 0.08f).value, 40f)).dp,
+                        end = max(16f, min((screenWidth * 0.08f).value, 40f)).dp
                     )
                     .height(buttonHeight),
                 shape = RoundedCornerShape(cardCorner),
@@ -207,12 +207,12 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        top = Dp(max(6f, min((screenHeight * 0.02f).value, 20f))),
-                        bottom = Dp(max(8f, min((screenHeight * 0.03f).value, 28f))),
-                        start = Dp(max(4f, min((screenWidth * 0.02f).value, 16f))),
-                        end = Dp(max(4f, min((screenWidth * 0.02f).value, 16f)))
+                        top = max(6f, min((screenHeight * 0.02f).value, 20f)).dp,
+                        bottom = max(8f, min((screenHeight * 0.03f).value, 28f)).dp,
+                        start = max(4f, min((screenWidth * 0.02f).value, 16f)).dp,
+                        end = max(4f, min((screenWidth * 0.02f).value, 16f)).dp
                     ),
-                horizontalArrangement = Arrangement.spacedBy(Dp(max(2f, min((screenWidth * 0.01f).value, 8f))), Alignment.CenterHorizontally)
+                horizontalArrangement = Arrangement.spacedBy(max(2f, min((screenWidth * 0.01f).value, 8f)).dp, Alignment.CenterHorizontally)
             ) {
                 Button(
                     onClick = onPrivacyClick,
