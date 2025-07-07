@@ -187,11 +187,7 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
 
 
                     // ترتيب الحسابات حسب عدد المعاملات (تنازلياً)
-                    accounts.sort(Comparator { a1: Account?, a2: Account? ->
-                        val count1: Int = accountTransactionCount.getOrDefault(a1!!.getId(), 0)!!
-                        val count2: Int = accountTransactionCount.getOrDefault(a2!!.getId(), 0)!!
-                        Integer.compare(count2, count1) // ترتيب تنازلي
-                    })
+                    accounts.sortWith(compareByDescending { account -> accountTransactionCount.getOrDefault(account!!.getId(), 0) })
 
                     allAccounts = accounts
                     setupAccountDropdown(accounts)
@@ -364,7 +360,7 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
     private fun setupCashboxDropdown() {
         cashboxViewModel!!.getAllCashboxes()
             .observe(getViewLifecycleOwner(), Observer { cashboxes: MutableList<Cashbox?>? ->
-                allCashboxes = if (cashboxes != null) cashboxes else ArrayList<Cashbox>()
+                allCashboxes = if (cashboxes != null) cashboxes.filterNotNull().toMutableList() else ArrayList<Cashbox>()
                 val names: MutableList<String?> = ArrayList<String?>()
                 mainCashboxId = -1
                 for (c in allCashboxes) {
@@ -481,7 +477,7 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
                 val phone = lastSavedAccount!!.getPhoneNumber()
                 if (phone == null || phone.isEmpty()) {
                     Toast.makeText(getContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
+                    return@OnClickListener
                 }
                 val msg = NotificationUtils.buildWhatsAppMessage(
                     getContext(),
@@ -499,7 +495,7 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
                 val phone = lastSavedAccount!!.getPhoneNumber()
                 if (phone == null || phone.isEmpty()) {
                     Toast.makeText(getContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
+                    return@OnClickListener
                 }
                 val type = lastSavedTransaction!!.getType()
                 val amountStr = String.format(Locale.US, "%.0f", lastSavedTransaction!!.getAmount())
@@ -535,13 +531,12 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
     }
 
     private fun clearFieldsForAnother() {
-        binding!!.amountEditText.setText("")
-        binding!!.descriptionEditText.setText("")
-        // لا تفرغ الحساب المختار
-        // لا تفرغ العملة
-        // لا تفرغ الملاحظات
-        calendar.setTimeInMillis(System.currentTimeMillis())
-        updateDateField()
+        binding?.let {
+            it.amountEditText.setText("")
+            it.descriptionEditText.setText("")
+            calendar.setTimeInMillis(System.currentTimeMillis())
+            updateDateField()
+        }
     }
 
     private fun loadAccountSuggestions(accountId: Long) {
