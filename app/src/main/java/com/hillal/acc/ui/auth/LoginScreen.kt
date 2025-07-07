@@ -163,10 +163,11 @@ fun LoginScreen(
                     }
                 }
             } else {
+                // Box متداخل: البنفسجي + الدائرة + البطاقة البيضاء (تداخل أنيق)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(relH(0.13f, 40f, 90f) + (logoSize * 0.65f))
+                        .height(relH(0.18f, 60f, 120f) + (logoSize * 0.33f)) // يكفي ليظهر الشعار بالكامل
                         .background(Color(0xFF3F51B5))
                 ) {
                     Card(
@@ -175,7 +176,7 @@ fun LoginScreen(
                         modifier = Modifier
                             .size(logoSize)
                             .align(Alignment.BottomCenter)
-                            .offset(y = logoSize * 0.65f)
+                            .offset(y = logoSize * 0.33f) // تداخل أنيق (ثلث الدائرة)
                     ) {
                         Image(
                             painter = painterResource(id = R.mipmap.ic_launcher),
@@ -185,7 +186,7 @@ fun LoginScreen(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(-(logoSize * 0.65f)))
+                Spacer(modifier = Modifier.height(-(logoSize * 0.33f)))
                 LoginFields(
                     phone = phone,
                     onPhoneChange = { phone = it },
