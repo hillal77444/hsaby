@@ -1,99 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_gradient">
+    android:background="#F5F7FA"
+    tools:context=".ui.profile.EditProfileFragment">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true"
-        android:clipToPadding="false"
-        android:paddingBottom="@dimen/margin_large">
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@color/card_background">
+            android:padding="16dp">
 
-            <!-- رأس منحني علوي -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/spacing_xl"
-                android:background="@color/primary"
-                android:scaleX="2.2"
-                android:scaleY="1.2"
-                android:layout_marginTop="@dimen/spacing_none" />
-
-            <!-- أيقونة دائرية -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="@dimen/icon_size_xl"
-                android:layout_height="@dimen/icon_size_xl"
-                app:cardCornerRadius="@dimen/card_corner_radius_xl"
-                app:cardElevation="@dimen/card_elevation_xl"
-                app:cardBackgroundColor="@android:color/white"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/minus_100dp">
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/ic_person"
-                    android:scaleType="centerInside"
-                    android:tint="@color/primary_variant" />
-            </androidx.cardview.widget.CardView>
-
-            <!-- العنوان مع أيقونة -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/margin_small">
-                <ImageView
-                    android:layout_width="@dimen/icon_size"
-                    android:layout_height="@dimen/icon_size"
-                    android:src="@drawable/ic_person"
-                    android:tint="@color/primary_variant"
-                    android:layout_marginEnd="@dimen/margin_small" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="تعديل الملف الشخصي"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_variant"
-                    android:textSize="@dimen/text_size_headline1"
-                    android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="@dimen/text_size_caption"
-                    android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-                    android:autoSizeStepGranularity="@dimen/text_size_step" />
-            </LinearLayout>
-
-            <!-- بطاقة التعديل -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="@dimen/card_corner_radius_lg"
-                app:cardElevation="@dimen/card_elevation"
-                app:cardBackgroundColor="@android:color/white"
-                android:layout_marginTop="@dimen/margin_large">
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="@dimen/padding_medium">
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="تعديل الملف الشخصي"
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        android:textColor="#212121"/>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/margin_medium"
+                        android:layout_marginTop="16dp"
                         android:hint="اسم المستخدم"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        app:boxStrokeColor="@color/primary_variant"
-                        app:hintTextColor="@color/primary_variant">
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/userNameInput"
@@ -106,28 +56,22 @@
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/saveButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/button_height"
-                        android:layout_marginTop="@dimen/margin_medium"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
                         android:text="حفظ"
-                        android:textSize="@dimen/text_size_body2"
-                        app:cornerRadius="@dimen/card_corner_radius_lg"
+                        android:textSize="14sp"
+                        app:cornerRadius="20dp"
                         app:icon="@drawable/ic_save"
                         app:iconGravity="textStart"
-                        app:iconPadding="@dimen/padding_small"
-                        android:textColor="@color/on_primary"
-                        android:backgroundTint="@color/primary_variant"/>
+                        app:iconPadding="8dp"/>
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
-
         </LinearLayout>
+
     </androidx.core.widget.NestedScrollView>
 
-</FrameLayout> 
+</androidx.coordinatorlayout.widget.CoordinatorLayout> 

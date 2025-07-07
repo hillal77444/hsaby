@@ -1,169 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/background_gradient">
+    android:layout_height="match_parent">
 
-    <androidx.core.widget.NestedScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true"
-        android:clipToPadding="false"
-        android:paddingBottom="@dimen/margin_large">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <LinearLayout
+        <!-- إعدادات أخرى -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="الإعدادات"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeMaxTextSize="24sp"
+            android:autoSizeStepGranularity="2sp" />
+
+        <!-- زر تسجيل الخروج في الأعلى -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonLogout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@color/card_background">
+            android:text="تسجيل الخروج"
+            android:textColor="@android:color/white"
+            app:backgroundTint="@android:color/holo_red_dark"
+            android:layout_marginBottom="24dp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeMaxTextSize="24sp"
+            android:autoSizeStepGranularity="2sp" />
 
-            <!-- رأس منحني علوي -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/spacing_xl"
-                android:background="@color/primary"
-                android:scaleX="2.2"
-                android:scaleY="1.2"
-                android:layout_marginTop="@dimen/spacing_none" />
+        <!-- الأمان -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_security"
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            android:layout_marginBottom="16dp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeMaxTextSize="24sp"
+            android:autoSizeStepGranularity="2sp" />
 
-            <!-- أيقونة دائرية -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="@dimen/icon_size_xl"
-                android:layout_height="@dimen/icon_size_xl"
-                app:cardCornerRadius="@dimen/card_corner_radius_xl"
-                app:cardElevation="@dimen/card_elevation_xl"
-                app:cardBackgroundColor="@android:color/white"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/minus_100dp">
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/ic_settings"
-                    android:scaleType="centerInside"
-                    android:tint="@color/primary_variant" />
-            </androidx.cardview.widget.CardView>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchEncryption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_encryption"
+            android:layout_marginBottom="8dp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeMaxTextSize="24sp"
+            android:autoSizeStepGranularity="2sp" />
 
-            <!-- العنوان مع أيقونة -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/margin_small">
-                <ImageView
-                    android:layout_width="@dimen/icon_size"
-                    android:layout_height="@dimen/icon_size"
-                    android:src="@drawable/ic_settings"
-                    android:tint="@color/primary_variant"
-                    android:layout_marginEnd="@dimen/margin_small" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="الإعدادات"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_variant"
-                    android:textSize="@dimen/text_size_headline1"
-                    android:autoSizeTextType="uniform"
-                    android:autoSizeMinTextSize="@dimen/text_size_caption"
-                    android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-                    android:autoSizeStepGranularity="@dimen/text_size_step" />
-            </LinearLayout>
+        <!-- سياسة الخصوصية -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_about"
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeMaxTextSize="24sp"
+            android:autoSizeStepGranularity="2sp" />
 
-            <!-- زر تسجيل الخروج -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonLogout"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/button_height"
-                android:text="تسجيل الخروج"
-                android:textColor="@color/on_primary"
-                app:backgroundTint="@color/red_700"
-                android:layout_marginTop="@dimen/margin_large"
-                android:layout_marginBottom="@dimen/margin_large"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_caption"
-                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonPrivacyPolicy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/privacy_policy"
+            android:layout_marginBottom="8dp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeMaxTextSize="24sp"
+            android:autoSizeStepGranularity="2sp" />
 
-            <!-- الأمان -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="الأمان"
-                android:textStyle="bold"
-                android:textColor="@color/primary_variant"
-                android:textSize="@dimen/text_size_body1"
-                android:layout_marginTop="@dimen/margin_large"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_caption"
-                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonAbout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/about_app"
+            android:layout_marginBottom="8dp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeMaxTextSize="24sp"
+            android:autoSizeStepGranularity="2sp" />
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/switchEncryption"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="تفعيل التشفير"
-                android:layout_marginBottom="@dimen/margin_large"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_caption"
-                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
+        <TextView
+            android:id="@+id/textViewVersion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_version"
+            android:gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeMaxTextSize="24sp"
+            android:autoSizeStepGranularity="2sp" />
 
-            <!-- سياسة الخصوصية -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonPrivacyPolicy"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/button_height"
-                android:text="سياسة الخصوصية"
-                android:layout_marginTop="@dimen/margin_large"
-                android:textColor="@color/on_primary"
-                app:backgroundTint="@color/primary_variant"
-                app:icon="@drawable/ic_privacy"
-                app:iconGravity="textStart"
-                app:iconPadding="@dimen/padding_small"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_caption"
-                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
-
-            <!-- حول التطبيق -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonAbout"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/button_height"
-                android:text="عن التطبيق"
-                android:layout_marginTop="@dimen/margin_small"
-                android:textColor="@color/primary_variant"
-                app:backgroundTint="@color/white"
-                app:icon="@drawable/ic_info"
-                app:iconGravity="textStart"
-                app:iconPadding="@dimen/padding_small"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_caption"
-                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
-
-            <!-- رقم الإصدار -->
-            <TextView
-                android:id="@+id/textViewVersion"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="الإصدار 1.0"
-                android:gravity="center"
-                android:layout_marginTop="@dimen/margin_large"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_caption"
-                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
-
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-
-</FrameLayout> 
+    </LinearLayout>
+</ScrollView> 

@@ -1,293 +1,289 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@color/info">
+    android:layout_height="match_parent">
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="@dimen/spacing_standard">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <!-- الشعار الدائري -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="@dimen/icon_size"
-            android:layout_height="@dimen/icon_size"
-            app:cardCornerRadius="@dimen/card_corner_radius"
-            app:cardElevation="@dimen/card_elevation"
-            app:cardBackgroundColor="#FFFFFF"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/margin_xl">
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/ic_accounts"
-                android:scaleType="centerInside"
-                app:tint="#152FD9" />
-        </androidx.cardview.widget.CardView>
-
-        <!-- العنوان مع أيقونة -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/margin_large">
-            <ImageView
-                android:layout_width="@dimen/icon_size"
-                android:layout_height="@dimen/icon_size"
-                android:src="@drawable/ic_accounts"
-                app:tint="#152FD9"
-                android:layout_marginEnd="@dimen/margin_small"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_caption"
-                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
+            android:orientation="vertical"
+            android:background="#FFFFFF">
+
+            <!-- الدائرة العلوية والشعار والعنوان -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:background="@color/info"
+                android:scaleX="2.2"
+                android:scaleY="1.2" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                app:cardCornerRadius="40dp"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="#FFFFFF"
+                android:layout_gravity="center"
+                android:layout_marginTop="-120dp">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_accounts"
+                    android:scaleType="centerInside"
+                    android:tint="#152FD9" />
+            </androidx.cardview.widget.CardView>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="إدارة الحسابات"
+                android:textSize="24sp"
                 android:textStyle="bold"
-                android:textColor="#152FD9"
-                android:textSize="@dimen/text_size_headline1"
+                android:textColor="#FFFFFF"
+                android:layout_gravity="center"
+                android:layout_marginTop="12dp"
                 android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_caption"
-                android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
-        </LinearLayout>
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeStepGranularity="2sp" />
 
-        <!-- الوصف -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="عرض وإدارة جميع الحسابات"
-            android:textSize="@dimen/text_size_body2"
-            android:textColor="#666666"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/margin_xs"
-            android:layout_marginBottom="@dimen/margin_large"
-            android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="@dimen/text_size_caption"
-            android:autoSizeMaxTextSize="@dimen/text_size_body2"
-            android:autoSizeStepGranularity="@dimen/text_size_step" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="عرض وإدارة جميع الحسابات"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:layout_gravity="center"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="16dp"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="24sp"
+                android:autoSizeStepGranularity="2sp" />
 
-        <!-- شريط البحث والتصفية -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="@dimen/card_corner_radius"
-            app:cardElevation="@dimen/card_elevation"
-            android:layout_marginStart="@dimen/margin_medium"
-            android:layout_marginEnd="@dimen/margin_medium"
-            android:layout_marginBottom="@dimen/margin_large"
-            app:cardBackgroundColor="#FFFFFF">
+            <!-- شريط البحث والتصفية -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#FFFFFF">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- شريط البحث -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="البحث في الحسابات..."
+                        app:startIconDrawable="@drawable/ic_search"
+                        app:startIconTint="#152FD9"
+                        app:boxBackgroundMode="outline"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        android:layout_marginBottom="12dp"
+                        app:hintTextColor="#666666"
+                        app:boxStrokeColor="#222222"
+                        android:background="#FFFFFF"
+                        style="@style/SearchTextInputLayout">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/search_edit_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"
+                            android:maxLines="1"
+                            android:textColor="#000000"
+                            android:textColorHint="#666666"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- خيارات التصفية -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/filterButton"
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:text="تصفية"
+                            android:textSize="12sp"
+                            android:icon="@drawable/ic_filter"
+                            app:iconSize="16dp"
+                            app:iconGravity="textStart"
+                            app:iconPadding="4dp"
+                            android:backgroundTint="#F3F4F6"
+                            android:textColor="#152FD9"
+                            app:cornerRadius="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/sortButton"
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:text="ترتيب (الرصيد)"
+                            android:textSize="12sp"
+                            android:icon="@drawable/ic_sort"
+                            app:iconSize="16dp"
+                            app:iconGravity="textStart"
+                            app:iconPadding="4dp"
+                            android:backgroundTint="#F3F4F6"
+                            android:textColor="#152FD9"
+                            app:cornerRadius="8dp"
+                            android:layout_marginStart="8dp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
+
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- إحصائيات سريعة -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="@dimen/card_padding">
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="16dp">
 
-                <!-- شريط البحث -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="البحث في الحسابات..."
-                    app:startIconDrawable="@drawable/ic_search"
-                    app:startIconTint="#152FD9"
-                    app:boxBackgroundMode="outline"
-                    app:boxCornerRadiusTopStart="@dimen/card_corner_radius"
-                    app:boxCornerRadiusTopEnd="@dimen/card_corner_radius"
-                    app:boxCornerRadiusBottomStart="@dimen/card_corner_radius"
-                    app:boxCornerRadiusBottomEnd="@dimen/card_corner_radius"
-                    android:layout_marginBottom="@dimen/margin_small"
-                    app:hintTextColor="#666666"
-                    app:boxStrokeColor="#222222"
-                    android:background="#FFFFFF">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/search_edit_text"
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="4dp"
+                    app:cardBackgroundColor="#FFFFFF">
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:autoSizeMaxTextSize="@dimen/text_size_body2"
-                        android:autoSizeMinTextSize="@dimen/text_size_caption"
-                        android:autoSizeStepGranularity="@dimen/text_size_step"
-                        android:autoSizeTextType="uniform"
-                        android:inputType="text"
-                        android:maxLines="1"
-                        android:textColor="#000000"
-                        android:textColorHint="#666666" />
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:id="@+id/totalAccountsText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textStyle="bold"
+                            android:textColor="#1976D2"
+                            android:textSize="16sp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="إجمالي الحسابات"
+                            android:textColor="#666666"
+                            android:textSize="10sp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- خيارات التصفية -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/filterButton"
-                        android:layout_width="0dp"
-                        android:layout_height="@dimen/button_min_height"
-                        android:layout_weight="1"
-                        android:text="تصفية"
-                        android:textSize="@dimen/text_size_body2"
-                        app:icon="@drawable/ic_filter"
-                        app:iconGravity="textStart"
-                        app:iconPadding="@dimen/padding_small"
-                        android:backgroundTint="#F3F4F6"
-                        android:textColor="#152FD9"
-                        app:cornerRadius="@dimen/card_corner_radius"
-                        android:layout_marginEnd="@dimen/margin_small"
-                        android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="@dimen/text_size_caption"
-                        android:autoSizeMaxTextSize="@dimen/text_size_body2"
-                        android:autoSizeStepGranularity="@dimen/text_size_step" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/sortButton"
-                        android:layout_width="0dp"
-                        android:layout_height="@dimen/button_min_height"
-                        android:layout_weight="1"
-                        android:text="ترتيب (الرصيد)"
-                        android:textSize="@dimen/text_size_body2"
-                        app:icon="@drawable/ic_sort"
-                        app:iconGravity="textStart"
-                        app:iconPadding="@dimen/padding_small"
-                        android:backgroundTint="#F3F4F6"
-                        android:textColor="#152FD9"
-                        app:cornerRadius="@dimen/card_corner_radius"
-                        android:layout_marginStart="@dimen/margin_small"
-                        android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="@dimen/text_size_caption"
-                        android:autoSizeMaxTextSize="@dimen/text_size_body2"
-                        android:autoSizeStepGranularity="@dimen/text_size_step" />
-
-                </LinearLayout>
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="8dp"
+                    app:cardBackgroundColor="#FFFFFF">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:id="@+id/activeAccountsText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textStyle="bold"
+                            android:textColor="#1976D2"
+                            android:textSize="16sp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="الحسابات النشطة"
+                            android:textColor="#666666"
+                            android:textSize="10sp"
+                            android:autoSizeTextType="uniform"
+                            android:autoSizeMinTextSize="8sp"
+                            android:autoSizeMaxTextSize="24sp"
+                            android:autoSizeStepGranularity="2sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
-        <!-- إحصائيات سريعة -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginBottom="@dimen/margin_large">
+            <!-- قائمة الحسابات -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/accounts_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:padding="8dp"
+                android:nestedScrollingEnabled="false" />
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
-                android:layout_height="@dimen/button_min_height"
-                android:layout_weight="1"
-                app:cardCornerRadius="@dimen/card_corner_radius"
-                app:cardElevation="@dimen/card_elevation"
-                android:layout_marginStart="@dimen/margin_small"
-                android:layout_marginEnd="@dimen/margin_xs"
-                app:cardBackgroundColor="#FFFFFF">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <TextView
-                        android:id="@+id/totalAccountsText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textStyle="bold"
-                        android:textColor="#1976D2"
-                        android:textSize="@dimen/text_size_body1"
-                        android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="@dimen/text_size_caption"
-                        android:autoSizeMaxTextSize="@dimen/text_size_body1"
-                        android:autoSizeStepGranularity="@dimen/text_size_step" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="إجمالي الحسابات"
-                        android:textColor="#666666"
-                        android:textSize="@dimen/text_size_caption"
-                        android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="@dimen/text_size_caption"
-                        android:autoSizeMaxTextSize="@dimen/text_size_body2"
-                        android:autoSizeStepGranularity="@dimen/text_size_step" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            <!-- مساحة للزر العائم -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="140dp" />
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
-                android:layout_height="@dimen/button_min_height"
-                android:layout_weight="1"
-                app:cardCornerRadius="@dimen/card_corner_radius"
-                app:cardElevation="@dimen/card_elevation"
-                android:layout_marginStart="@dimen/margin_xs"
-                android:layout_marginEnd="@dimen/margin_small"
-                app:cardBackgroundColor="#FFFFFF">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <TextView
-                        android:id="@+id/activeAccountsText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textStyle="bold"
-                        android:textColor="#1976D2"
-                        android:textSize="@dimen/text_size_body1"
-                        android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="@dimen/text_size_caption"
-                        android:autoSizeMaxTextSize="@dimen/text_size_body1"
-                        android:autoSizeStepGranularity="@dimen/text_size_step" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="الحسابات النشطة"
-                        android:textColor="#666666"
-                        android:textSize="@dimen/text_size_caption"
-                        android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="@dimen/text_size_caption"
-                        android:autoSizeMaxTextSize="@dimen/text_size_body2"
-                        android:autoSizeStepGranularity="@dimen/text_size_step" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
-        <!-- قائمة الحسابات -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/accounts_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clipToPadding="false"
-            android:padding="@dimen/padding_small"
-            android:nestedScrollingEnabled="false" />
+    </androidx.core.widget.NestedScrollView>
 
-        <!-- مساحة للزر العائم -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+    <!-- الزر العائم -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_account"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="80dp"
+        android:contentDescription="@string/add_account"
+        app:srcCompat="@drawable/ic_add"
+        app:backgroundTint="#152FD9"
+        app:tint="#FFFFFF" />
 
-        <!-- الزر العائم -->
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_add_account"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginEnd="@dimen/margin_medium"
-            android:layout_marginBottom="@dimen/margin_xxxl"
-            android:contentDescription="@string/add_account"
-            app:srcCompat="@drawable/ic_add"
-            app:backgroundTint="#152FD9"
-            app:tint="#FFFFFF" />
-
-    </LinearLayout>
-
-</androidx.core.widget.NestedScrollView> 
+</FrameLayout> 

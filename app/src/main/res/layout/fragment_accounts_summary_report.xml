@@ -1,238 +1,183 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
+    android:orientation="vertical"
     android:background="#F8F8F8">
 
+    <!-- أزرار تصفية العملة -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/card_background"
-        android:padding="@dimen/spacing_standard">
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="#fff"
+        android:padding="8dp">
 
-        <!-- رأس منحني علوي -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/spacing_xl"
-            android:background="@color/primary"
-            android:scaleX="2.2"
-            android:scaleY="1.2"
-            android:layout_marginTop="@dimen/spacing_none" />
-
-        <!-- أيقونة دائرية -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="@dimen/icon_size_xl"
-            android:layout_height="@dimen/icon_size_xl"
-            app:cardCornerRadius="@dimen/card_corner_radius_xl"
-            app:cardElevation="@dimen/card_elevation_xl"
-            app:cardBackgroundColor="@color/white"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/minus_100dp">
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/ic_summary"
-                android:scaleType="centerInside"
-                android:tint="@color/primary_variant" />
-        </androidx.cardview.widget.CardView>
-
-        <!-- العنوان -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="تقرير ملخص الحسابات"
-            android:textSize="@dimen/text_size_headline1"
-            android:textStyle="bold"
-            android:textColor="@color/primary_variant"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/margin_small"
-            android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="@dimen/text_size_caption"
-            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-            android:autoSizeStepGranularity="@dimen/text_size_step" />
-
-        <!-- أزرار تصفية العملة -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:background="@color/white"
-            android:padding="@dimen/padding_small">
-
-            <Button
-                android:id="@+id/btnFilterYER"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/height_medium"
-                android:layout_weight="1"
-                android:text="يمني"
-                android:backgroundTint="@color/teal_700"
-                android:textColor="@color/white"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_min"
-                android:autoSizeMaxTextSize="@dimen/text_size_max"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
-            <Button
-                android:id="@+id/btnFilterSAR"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/height_medium"
-                android:layout_weight="1"
-                android:text="سعودي"
-                android:backgroundTint="@color/cardBackground"
-                android:textColor="@color/primary_variant"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_min"
-                android:autoSizeMaxTextSize="@dimen/text_size_max"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
-            <Button
-                android:id="@+id/btnFilterUSD"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/height_medium"
-                android:layout_weight="1"
-                android:text="دولار"
-                android:backgroundTint="@color/cardBackground"
-                android:textColor="@color/primary_variant"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_min"
-                android:autoSizeMaxTextSize="@dimen/text_size_max"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
-        </LinearLayout>
-
-        <!-- ترويسة الأعمدة -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/height_large"
-            android:orientation="horizontal"
-            android:background="@color/info"
-            android:paddingVertical="@dimen/padding_xs"
-            android:paddingHorizontal="@dimen/padding_xxs">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="2"
-                android:text="الحساب"
-                android:gravity="center|right"
-                android:textStyle="bold"
-                android:textColor="@color/primary_variant"
-                android:textSize="@dimen/text_size_body1"
-                android:background="@drawable/table_border"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_min"
-                android:autoSizeMaxTextSize="@dimen/text_size_max"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1.2"
-                android:text="عليه"
-                android:gravity="center"
-                android:textStyle="bold"
-                android:textColor="@color/debit_red"
-                android:textSize="@dimen/text_size_body1"
-                android:background="@drawable/table_border"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_min"
-                android:autoSizeMaxTextSize="@dimen/text_size_max"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1.2"
-                android:text="له"
-                android:gravity="center"
-                android:textStyle="bold"
-                android:textColor="@color/credit_green"
-                android:textSize="@dimen/text_size_body1"
-                android:background="@drawable/table_border"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_min"
-                android:autoSizeMaxTextSize="@dimen/text_size_max"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1.2"
-                android:text="الرصيد"
-                android:gravity="center"
-                android:textStyle="bold"
-                android:textColor="@color/primary_variant"
-                android:textSize="@dimen/text_size_body1"
-                android:background="@drawable/table_border"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_min"
-                android:autoSizeMaxTextSize="@dimen/text_size_max"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
-        </LinearLayout>
-
-        <!-- الجدول -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/accountsSummaryRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
+        <Button
+            android:id="@+id/btnFilterYER"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
             android:layout_weight="1"
-            android:padding="@dimen/padding_small"
-            android:paddingBottom="@dimen/padding_xxl"
-            android:clipToPadding="false"
-            android:background="@color/white" />
-
-        <!-- شريط الإجماليات -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="@color/white"
-            android:padding="@dimen/padding_small"
-            android:gravity="center"
-            android:layout_marginBottom="@dimen/margin_xxl">
-            <TextView
-                android:id="@+id/tvTotalBalance"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="الرصيد: 0"
-                android:textColor="@color/primary_variant"
-                android:textStyle="bold"
-                android:textSize="@dimen/text_size_body1"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_min"
-                android:autoSizeMaxTextSize="@dimen/text_size_max"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
-            <TextView
-                android:id="@+id/tvTotalCredit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="له: 0"
-                android:textColor="@color/credit_green"
-                android:textStyle="bold"
-                android:textSize="@dimen/text_size_body1"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_min"
-                android:autoSizeMaxTextSize="@dimen/text_size_max"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
-            <TextView
-                android:id="@+id/tvTotalDebit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="عليه: 0"
-                android:textColor="@color/debit_red"
-                android:textStyle="bold"
-                android:textSize="@dimen/text_size_body1"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="@dimen/text_size_min"
-                android:autoSizeMaxTextSize="@dimen/text_size_max"
-                android:autoSizeStepGranularity="@dimen/text_size_step" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
+            android:text="يمني"
+            android:backgroundTint="@color/teal_700"
+            android:textColor="#fff"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="22sp"
+            android:autoSizeStepGranularity="2sp" />
+        <Button
+            android:id="@+id/btnFilterSAR"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="سعودي"
+            android:backgroundTint="#E3E8FD"
+            android:textColor="#152FD9"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="22sp"
+            android:autoSizeStepGranularity="2sp" />
+        <Button
+            android:id="@+id/btnFilterUSD"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="دولار"
+            android:backgroundTint="#E3E8FD"
+            android:textColor="#152FD9"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="22sp"
+            android:autoSizeStepGranularity="2sp" />
     </LinearLayout>
-</androidx.core.widget.NestedScrollView> 
+
+    <!-- ترويسة الأعمدة -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:background="#E3E8FD"
+        android:paddingVertical="4dp"
+        android:paddingHorizontal="2dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:text="الحساب"
+            android:gravity="center|right"
+            android:textStyle="bold"
+            android:textColor="#152FD9"
+            android:textSize="16sp"
+            android:background="@drawable/table_border"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeStepGranularity="2sp" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.2"
+            android:text="عليه"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="#F44336"
+            android:textSize="16sp"
+            android:background="@drawable/table_border"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeStepGranularity="2sp" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.2"
+            android:text="له"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="#4CAF50"
+            android:textSize="16sp"
+            android:background="@drawable/table_border"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeStepGranularity="2sp" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.2"
+            android:text="الرصيد"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="#152FD9"
+            android:textSize="16sp"
+            android:background="@drawable/table_border"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeStepGranularity="2sp" />
+    </LinearLayout>
+
+    <!-- الجدول -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/accountsSummaryRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="8dp"
+        android:paddingBottom="72dp"
+        android:clipToPadding="false"
+        android:background="#fff" />
+
+    <!-- شريط الإجماليات -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#fff"
+        android:padding="8dp"
+        android:gravity="center"
+        android:layout_marginBottom="72dp">
+        <TextView
+            android:id="@+id/tvTotalBalance"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="الرصيد: 0"
+            android:textColor="#152FD9"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="22sp"
+            android:autoSizeStepGranularity="2sp" />
+        <TextView
+            android:id="@+id/tvTotalCredit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="له: 0"
+            android:textColor="#4CAF50"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="22sp"
+            android:autoSizeStepGranularity="2sp" />
+        <TextView
+            android:id="@+id/tvTotalDebit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="عليه: 0"
+            android:textColor="#F44336"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="22sp"
+            android:autoSizeStepGranularity="2sp" />
+    </LinearLayout>
+
+</LinearLayout> 

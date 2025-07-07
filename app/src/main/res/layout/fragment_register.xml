@@ -70,7 +70,7 @@
                     android:id="@+id/textInputLayoutDisplayName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="الاسم"
+                    android:hint="اسم المستخدم"
                     app:startIconDrawable="@drawable/ic_person"
                     app:hintTextColor="#3F51B5"
                     app:boxStrokeColor="#3F51B5">
@@ -175,4 +175,4 @@
 
     </LinearLayout>
 
-</androidx.core.widget.NestedScrollView>
+</androidx.core.widget.NestedScrollView> 

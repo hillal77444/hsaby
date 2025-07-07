@@ -10,79 +10,76 @@
         android:layout_height="match_parent"
         android:fillViewport="true"
         android:clipToPadding="false"
-        android:paddingBottom="@dimen/padding_xxl"
+        android:paddingBottom="80dp"
         android:fitsSystemWindows="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@color/card_background">
+            android:background="#FFFFFF">
 
-            <!-- رأس منحني علوي -->
+            <!-- رأس الصفحة -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/spacing_xl"
-                android:background="@color/primary"
+                android:layout_height="140dp"
+                android:background="@color/info"
                 android:scaleX="2.2"
-                android:scaleY="1.2"
-                android:layout_marginTop="@dimen/spacing_none" />
+                android:scaleY="1.2" />
 
-            <!-- أيقونة دائرية -->
             <androidx.cardview.widget.CardView
-                android:layout_width="@dimen/icon_size_xl"
-                android:layout_height="@dimen/icon_size_xl"
-                app:cardCornerRadius="@dimen/card_corner_radius_xl"
-                app:cardElevation="@dimen/card_elevation_xl"
-                app:cardBackgroundColor="@color/white"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                app:cardCornerRadius="36dp"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="#FFFFFF"
                 android:layout_gravity="center"
-                android:layout_marginTop="@dimen/minus_100dp">
+                android:layout_marginTop="-100dp">
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_edit"
                     android:scaleType="centerInside"
-                    android:tint="@color/primary_variant" />
+                    android:tint="#1976D2" />
             </androidx.cardview.widget.CardView>
 
-            <!-- العنوان -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="تعديل القيد المحاسبي"
-                android:textSize="@dimen/text_size_headline1"
+                android:textSize="22sp"
                 android:textStyle="bold"
-                android:textColor="@color/primary_variant"
+                android:textColor="#FFFFFF"
                 android:layout_gravity="center"
-                android:layout_marginTop="@dimen/spacing_sm" />
+                android:layout_marginTop="8dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="قم بتعديل تفاصيل القيد المحاسبي"
-                android:textSize="@dimen/text_size_body2"
-                android:textColor="@color/textSecondary"
+                android:textSize="14sp"
+                android:textColor="#666666"
                 android:layout_gravity="center"
-                android:layout_marginTop="@dimen/margin_xs"
-                android:layout_marginBottom="@dimen/margin_large" />
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="16dp" />
 
             <!-- بطاقة الحساب: اختيار الحساب + اختيار الصندوق في صف واحد -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_medium"
-                android:layout_marginEnd="@dimen/margin_medium"
-                android:layout_marginBottom="@dimen/margin_large"
-                app:cardCornerRadius="@dimen/corner_radius_medium"
-                app:cardElevation="@dimen/elevation_medium"
-                app:cardBackgroundColor="@android:color/white">
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:padding="@dimen/card_padding">
+                    android:padding="16dp">
 
                     <!-- اختيار الحساب -->
                     <com.google.android.material.textfield.TextInputLayout
@@ -105,8 +102,8 @@
                             android:focusable="false"
                             android:clickable="true"
                             android:background="@null"
-                            android:padding="@dimen/padding_medium"
-                            android:textSize="@dimen/text_size_body1"
+                            android:padding="12dp"
+                            android:textSize="16sp"
                             android:textColor="#000000"
                             android:textColorHint="#666666"/>
                     </com.google.android.material.textfield.TextInputLayout>
@@ -132,8 +129,8 @@
                             android:focusable="false"
                             android:clickable="true"
                             android:background="@null"
-                            android:padding="@dimen/padding_medium"
-                            android:textSize="@dimen/text_size_body1"
+                            android:padding="12dp"
+                            android:textSize="16sp"
                             android:textColor="#000000"
                             android:textColorHint="#666666"/>
                     </com.google.android.material.textfield.TextInputLayout>
@@ -144,19 +141,19 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_medium"
-                android:layout_marginEnd="@dimen/margin_medium"
-                android:layout_marginBottom="@dimen/margin_large"
-                app:cardCornerRadius="@dimen/corner_radius_medium"
-                app:cardElevation="@dimen/elevation_medium"
-                app:cardBackgroundColor="@android:color/white">
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:weightSum="2"
-                    android:padding="@dimen/padding_small">
+                    android:padding="8dp">
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/amountLayout"
@@ -164,7 +161,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginEnd="@dimen/padding_small"
+                        android:layout_marginEnd="8dp"
                         android:hint="المبلغ">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -173,7 +170,7 @@
                             android:layout_height="wrap_content"
                             android:inputType="numberDecimal"
                             android:drawableStart="@drawable/ic_money"
-                            android:drawablePadding="@dimen/padding_xs"
+                            android:drawablePadding="4dp"
                             android:textColor="#000000"
                             android:textColorHint="#666666"/>
                     </com.google.android.material.textfield.TextInputLayout>
@@ -184,7 +181,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="@dimen/margin_xs"
+                        android:layout_marginStart="8dp"
                         android:hint="التاريخ">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -194,7 +191,7 @@
                             android:focusable="false"
                             android:inputType="none"
                             android:drawableStart="@drawable/ic_calendar"
-                            android:drawablePadding="@dimen/padding_xs"
+                            android:drawablePadding="4dp"
                             android:textColor="#000000"
                             android:textColorHint="#666666" />
                     </com.google.android.material.textfield.TextInputLayout>
@@ -205,27 +202,27 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_medium"
-                android:layout_marginEnd="@dimen/margin_medium"
-                android:layout_marginBottom="@dimen/margin_large"
-                app:cardCornerRadius="@dimen/corner_radius_medium"
-                app:cardElevation="@dimen/elevation_medium"
-                app:cardBackgroundColor="@android:color/white"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFFFF"
                 android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="@dimen/padding_small">
+                    android:padding="8dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="نوع العملية"
-                        android:textSize="@dimen/text_size_body1"
+                        android:textSize="16sp"
                         android:textColor="#1976D2"
-                        android:layout_marginBottom="@dimen/margin_xs" />
+                        android:layout_marginBottom="4dp" />
 
                     <RadioGroup
                         android:id="@+id/typeRadioGroup"
@@ -244,7 +241,7 @@
                             android:id="@+id/radioCredit"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/margin_medium"
+                            android:layout_marginStart="16dp"
                             android:text="له"
                             android:textColor="#1976D2" />
 
@@ -256,27 +253,27 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_medium"
-                android:layout_marginEnd="@dimen/margin_medium"
-                android:layout_marginBottom="@dimen/margin_large"
-                app:cardCornerRadius="@dimen/corner_radius_medium"
-                app:cardElevation="@dimen/elevation_medium"
-                app:cardBackgroundColor="@android:color/white"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFFFF"
                 android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="@dimen/padding_small">
+                    android:padding="8dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="العملة"
-                        android:textSize="@dimen/text_size_body1"
+                        android:textSize="16sp"
                         android:textColor="#1976D2"
-                        android:layout_marginBottom="@dimen/margin_xs" />
+                        android:layout_marginBottom="4dp" />
 
                     <RadioGroup
                         android:id="@+id/currencyRadioGroup"
@@ -295,7 +292,7 @@
                             android:id="@+id/radioSar"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/margin_medium"
+                            android:layout_marginStart="16dp"
                             android:text="سعودي"
                             android:textColor="#1976D2" />
 
@@ -303,7 +300,7 @@
                             android:id="@+id/radioUsd"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/margin_medium"
+                            android:layout_marginStart="16dp"
                             android:text="دولار"
                             android:textColor="#1976D2" />
 
@@ -315,18 +312,18 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_medium"
-                android:layout_marginEnd="@dimen/margin_medium"
-                android:layout_marginBottom="@dimen/margin_large"
-                app:cardCornerRadius="@dimen/corner_radius_medium"
-                app:cardElevation="@dimen/elevation_medium"
-                app:cardBackgroundColor="@android:color/white">
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="@dimen/padding_small">
+                    android:padding="8dp">
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/descriptionLayout"
@@ -351,19 +348,19 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_medium"
-                android:layout_marginEnd="@dimen/margin_medium"
-                android:layout_marginBottom="@dimen/margin_large"
-                app:cardCornerRadius="@dimen/corner_radius_medium"
-                app:cardElevation="@dimen/elevation_medium"
-                app:cardBackgroundColor="@android:color/white"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFFFF"
                 android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="@dimen/padding_small">
+                    android:padding="8dp">
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/notesLayout"
@@ -389,8 +386,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginTop="@dimen/margin_large"
-                android:layout_marginBottom="@dimen/margin_xl">
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="32dp">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/saveButton"
@@ -400,9 +397,9 @@
                     android:layout_weight="1"
                     android:text="حفظ"
                     android:icon="@android:drawable/ic_menu_save"
-                    android:backgroundTint="@color/primary_variant"
-                    android:textColor="@color/white"
-                    android:layout_marginEnd="@dimen/margin_small"/>
+                    android:backgroundTint="#1976D2"
+                    android:textColor="#fff"
+                    android:layout_marginEnd="8dp"/>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/cancelButton"
@@ -412,14 +409,9 @@
                     android:layout_weight="1"
                     android:text="إلغاء"
                     android:icon="@android:drawable/ic_menu_close_clear_cancel"
-                    android:backgroundTint="@color/cardBackground"
-                    android:textColor="@color/primary_text"/>
+                    android:backgroundTint="#F3F4F6"
+                    android:textColor="#222"/>
             </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

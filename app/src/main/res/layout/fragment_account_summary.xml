@@ -8,58 +8,15 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/card_background"
-        android:padding="@dimen/spacing_standard">
-
-        <!-- رأس منحني علوي -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/spacing_xl"
-            android:background="@color/primary"
-            android:scaleX="2.2"
-            android:scaleY="1.2"
-            android:layout_marginTop="@dimen/spacing_none" />
-
-        <!-- أيقونة دائرية -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="@dimen/icon_size_xl"
-            android:layout_height="@dimen/icon_size_xl"
-            app:cardCornerRadius="@dimen/card_corner_radius_xl"
-            app:cardElevation="@dimen/card_elevation_xl"
-            app:cardBackgroundColor="@android:color/white"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/minus_100dp">
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/ic_summary"
-                android:scaleType="centerInside"
-                android:tint="@color/primary_variant" />
-        </androidx.cardview.widget.CardView>
-
-        <!-- العنوان -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ملخص الحساب"
-            android:textSize="@dimen/text_size_headline1"
-            android:textStyle="bold"
-            android:textColor="@color/primary_variant"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/margin_small"
-            android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="@dimen/text_size_caption"
-            android:autoSizeMaxTextSize="@dimen/text_size_headline1"
-            android:autoSizeStepGranularity="@dimen/text_size_step" />
+        android:orientation="vertical">
 
         <!-- البطاقة الأولى: ملخص الحسابات -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/margin_small"
-            app:cardCornerRadius="@dimen/card_corner_radius"
-            app:cardElevation="@dimen/elevation_small">
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -74,7 +31,7 @@
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold"
                     android:gravity="center"
-                    android:layout_marginBottom="@dimen/margin_small"
+                    android:layout_marginBottom="8dp"
                     android:maxLines="2"
                     android:ellipsize="end"/>
 
@@ -82,7 +39,7 @@
                     android:id="@+id/summaryWebView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="@dimen/height_xl"/>
+                    android:minHeight="200dp"/>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -91,8 +48,8 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="@dimen/card_corner_radius"
-            app:cardElevation="@dimen/elevation_small">
+            app:cardCornerRadius="0dp"
+            app:cardElevation="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -106,7 +63,7 @@
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold"
                     android:gravity="center"
-                    android:layout_marginBottom="@dimen/margin_small"
+                    android:layout_marginBottom="8dp"
                     android:maxLines="2"
                     android:ellipsize="end"/>
 
@@ -114,7 +71,7 @@
                     android:id="@+id/detailsWebView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="@dimen/height_xl"/>
+                    android:minHeight="200dp"/>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -124,13 +81,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="@dimen/spacing_sm"
+            android:layout_marginTop="8dp"
             android:visibility="gone"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView> 
