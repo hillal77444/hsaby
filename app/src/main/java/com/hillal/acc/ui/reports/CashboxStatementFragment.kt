@@ -76,8 +76,8 @@ class CashboxStatementFragment : Fragment() {
     private var lastSelectedCashbox: Cashbox? = null
     private var btnPrint: ImageButton? = null
     private val accountMap: MutableMap<Long, Account> = HashMap()
-    private var selectedCashboxId: Long? = -1L
-    private val mainCashboxId: Long? = -1L
+    private var selectedCashboxId: Long = -1L
+    private val mainCashboxId: Long = -1L
     private var isSummaryMode = true
     private var allCurrencies: MutableList<String> = ArrayList()
 
@@ -240,7 +240,7 @@ class CashboxStatementFragment : Fragment() {
                 ).show()
             } else {
                 lastSelectedCashbox = allCashboxes[position]
-                selectedCashboxId = lastSelectedCashbox!!.id as Long?
+                selectedCashboxId = lastSelectedCashbox!!.id
                 isSummaryMode = false
                 currencyButtonsLayout!!.setVisibility(View.GONE)
                 onCashboxSelected(lastSelectedCashbox!!)
@@ -505,7 +505,7 @@ class CashboxStatementFragment : Fragment() {
     }
 
     private fun sortTransactionsByDate(transactions: MutableList<Transaction>) {
-        transactions.sortWith(Comparator { t1, t2 ->
+        transactions.sortWith(Comparator<Transaction> { t1, t2 ->
             java.lang.Long.compare(
                 t1.getTransactionDate(),
                 t2.getTransactionDate()
@@ -528,8 +528,8 @@ class CashboxStatementFragment : Fragment() {
     ): Double {
         var balance = 0.0
         for (t in allTransactions) {
-            if ((t.getCashboxId() ?: -1L) == (cashboxId ?: -1L) && t.getCurrency()
-                    .trim { it <= ' ' } == currency.trim { it <= ' ' } && (t.getTransactionDate() ?: 0L) < (beforeTime ?: Long.MAX_VALUE)
+            if ((t.getCashboxId() == (cashboxId ?: -1L)) && t.getCurrency()
+                    .trim { it <= ' ' } == currency.trim { it <= ' ' } && (t.getTransactionDate() < (beforeTime ?: Long.MAX_VALUE))
             ) {
                 if (t.getType().equals("credit", ignoreCase = true) || t.getType() == "له") {
                     balance += t.getAmount()
