@@ -44,7 +44,7 @@ fun LoginScreen(
     val scrollState = rememberScrollState()
 
     // نسب التصميم
-    val blueHeight = screenHeight * 0.32f
+    val blueHeight = screenHeight * 0.15f
     val logoSize = screenWidth * 0.22f
     val cardCorner = screenWidth * 0.07f
     val cardPadding = screenWidth * 0.028f
