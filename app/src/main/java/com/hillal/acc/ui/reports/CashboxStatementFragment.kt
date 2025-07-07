@@ -240,7 +240,7 @@ class CashboxStatementFragment : Fragment() {
                 ).show()
             } else {
                 lastSelectedCashbox = allCashboxes[position]
-                selectedCashboxId = lastSelectedCashbox!!.id.let { it }
+                selectedCashboxId = lastSelectedCashbox!!.id.toLong()
                 isSummaryMode = false
                 currencyButtonsLayout!!.setVisibility(View.GONE)
                 onCashboxSelected(lastSelectedCashbox!!)
@@ -263,7 +263,7 @@ class CashboxStatementFragment : Fragment() {
             .observe(getViewLifecycleOwner(), Observer { accounts: MutableList<Account>? ->
                 if (accounts != null) {
                     for (acc in accounts) {
-                        accountMap.put(acc.getId().let { it }, acc)
+                        accountMap.put(acc.getId().toLong(), acc)
                     }
                 }
             })
@@ -273,7 +273,7 @@ class CashboxStatementFragment : Fragment() {
         isSummaryMode = false
         val cashboxTransactions: MutableList<Transaction> = ArrayList<Transaction>()
         for (t in allTransactions) {
-            if (t.getCashboxId() == cashbox.id) {
+            if (t.getCashboxId().toLong() == cashbox.id.toLong()) {
                 cashboxTransactions.add(t)
             }
         }
@@ -391,7 +391,7 @@ class CashboxStatementFragment : Fragment() {
         previousBalances.put(selectedCurrency, 0.0)
         val currencyMap: MutableMap<String?, MutableList<Transaction?>?> =
             HashMap<String?, MutableList<Transaction?>?>()
-        currencyMap.put(selectedCurrency, filtered)
+        currencyMap.put(selectedCurrency, filtered as MutableList<Transaction?>?)
         val htmlContent = generateReportHtml(
             lastSelectedCashbox!!,
             finalStartDate,
@@ -443,7 +443,7 @@ class CashboxStatementFragment : Fragment() {
         html.append("</div>")
         sortTransactionsByDate(transactions)
         val previousBalance =
-            calculatePreviousBalance(cashbox.id, selectedCurrency!!, startDate.getTime())
+            calculatePreviousBalance(cashbox.id.toLong(), selectedCurrency!!, startDate.getTime())
         var totalDebit = 0.0
         var totalCredit = 0.0
         html.append("<table>")
@@ -457,7 +457,7 @@ class CashboxStatementFragment : Fragment() {
             html.append("<td>").append(dateFormat!!.format(Date(t.getTransactionDate())))
                 .append("</td>")
             val accountName =
-                if (accountMap.containsKey(t.getAccountId())) accountMap.get(t.getAccountId())!!
+                if (accountMap.containsKey(t.getAccountId().toLong())) accountMap.get(t.getAccountId().toLong())!!
                     .getName() else ""
             html.append("<td>").append(accountName).append("</td>")
             html.append("<td>").append(if (t.getDescription() != null) t.getDescription() else "")
@@ -527,7 +527,7 @@ class CashboxStatementFragment : Fragment() {
     ): Double {
         var balance = 0.0
         for (t in allTransactions) {
-            if (t.getCashboxId() == cashboxId && t.getCurrency()
+            if (t.getCashboxId().toLong() == cashboxId && t.getCurrency()
                     .trim { it <= ' ' } == currency.trim { it <= ' ' } && t.getTransactionDate() < beforeTime
             ) {
                 if (t.getType().equals("credit", ignoreCase = true) || t.getType() == "له") {
@@ -563,7 +563,7 @@ class CashboxStatementFragment : Fragment() {
             var totalCredit = 0.0
             var totalDebit = 0.0
             for (t in transactions) {
-                if (t.getCashboxId() == c.id && t.getCurrency()
+                if (t.getCashboxId().toLong() == c.id.toLong() && t.getCurrency()
                         .trim { it <= ' ' } == currency.trim { it <= ' ' }
                 ) {
                     if (t.getType().equals("credit", ignoreCase = true) || t.getType() == "له") {
@@ -592,7 +592,7 @@ class CashboxStatementFragment : Fragment() {
                 currenciesSet.add(t.getCurrency().trim { it <= ' ' })
             }
         }
-        allCurrencies = ArrayList<String>(currenciesSet)
+        allCurrencies = ArrayList<String>(currenciesSet.filterNotNull())
         if (allCurrencies.isEmpty()) {
             webView!!.loadDataWithBaseURL(null, "<p>لا توجد بيانات</p>", "text/html", "UTF-8", null)
             currencyButtonsLayout!!.setVisibility(View.GONE)
