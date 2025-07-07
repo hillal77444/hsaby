@@ -77,7 +77,7 @@ class CashboxStatementFragment : Fragment() {
     private var btnPrint: ImageButton? = null
     private val accountMap: MutableMap<Long?, Account?> = HashMap<Long?, Account?>()
     private var selectedCashboxId: Long = -1
-    private val mainCashboxId: Long = -1
+    private val mainCashboxId: Long = -1L
     private var isSummaryMode = true
     private var allCurrencies: MutableList<String> = ArrayList<String>()
 
