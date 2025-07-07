@@ -76,7 +76,7 @@ class CashboxStatementFragment : Fragment() {
     private var lastSelectedCashbox: Cashbox? = null
     private var btnPrint: ImageButton? = null
     private val accountMap: MutableMap<Long?, Account?> = HashMap<Long?, Account?>()
-    private var selectedCashboxId: Long = -1
+    private var selectedCashboxId: Long = -1L
     private val mainCashboxId: Long = -1L
     private var isSummaryMode = true
     private var allCurrencies: MutableList<String> = ArrayList<String>()
@@ -209,7 +209,7 @@ class CashboxStatementFragment : Fragment() {
         cashboxesLiveData.observe(
             getViewLifecycleOwner(),
             Observer { cashboxes: MutableList<Cashbox?>? ->
-                allCashboxes = if (cashboxes != null) cashboxes else ArrayList<Cashbox>()
+                allCashboxes = if (cashboxes != null) cashboxes.filterNotNull().toMutableList() else ArrayList<Cashbox>()
                 val names: MutableList<String?> = ArrayList<String?>()
                 for (c in allCashboxes) {
                     names.add(c.name)
@@ -231,7 +231,7 @@ class CashboxStatementFragment : Fragment() {
                 }
             })
 
-        cashboxDropdown!!.setOnItemClickListener(AdapterView.OnItemClickListener { parent: AdapterView<*>?, view: View?, position: Int, id: Long ->
+        cashboxDropdown!!.setOnItemClickListener(AdapterView.OnItemClickListener { parent: AdapterView<*>, view: View?, position: Int, id: Long ->
             if (position == allCashboxes.size) {
                 Toast.makeText(
                     requireContext(),
@@ -240,7 +240,7 @@ class CashboxStatementFragment : Fragment() {
                 ).show()
             } else {
                 lastSelectedCashbox = allCashboxes.get(position)
-                selectedCashboxId = lastSelectedCashbox!!.id
+                selectedCashboxId = lastSelectedCashbox!!.id ?: -1L
                 isSummaryMode = false
                 currencyButtonsLayout!!.setVisibility(View.GONE)
                 onCashboxSelected(lastSelectedCashbox!!)
@@ -250,7 +250,7 @@ class CashboxStatementFragment : Fragment() {
         transactionRepository!!.getAllTransactions()
             .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
                 if (transactions != null) {
-                    allTransactions = transactions
+                    allTransactions = transactions.filterNotNull().toMutableList()
                     if (isSummaryMode) {
                         showSummaryWithCurrencies()
                     }
@@ -391,7 +391,7 @@ class CashboxStatementFragment : Fragment() {
         previousBalances.put(selectedCurrency, 0.0)
         val currencyMap: MutableMap<String?, MutableList<Transaction?>?> =
             HashMap<String?, MutableList<Transaction?>?>()
-        currencyMap.put(selectedCurrency, filtered)
+        currencyMap.put(selectedCurrency, filtered.map { it as Transaction? }.toMutableList())
         val htmlContent = generateReportHtml(
             lastSelectedCashbox!!,
             finalStartDate,
@@ -507,12 +507,7 @@ class CashboxStatementFragment : Fragment() {
     }
 
     private fun sortTransactionsByDate(transactions: MutableList<Transaction>) {
-        transactions.sort(Comparator { t1: Transaction?, t2: Transaction? ->
-            Long.compare(
-                t1!!.getTransactionDate(),
-                t2!!.getTransactionDate()
-            )
-        })
+        transactions.sortWith(compareBy { it.getTransactionDate() })
     }
 
     private fun formatAmount(amount: Double): String {
@@ -589,7 +584,7 @@ class CashboxStatementFragment : Fragment() {
     }
 
     private fun showSummaryWithCurrencies() {
-        val currenciesSet = LinkedHashSet<String?>()
+        val currenciesSet = LinkedHashSet<String>()
         for (t in allTransactions) {
             if (t.getCurrency() != null && !t.getCurrency().trim { it <= ' ' }.isEmpty()) {
                 currenciesSet.add(t.getCurrency().trim { it <= ' ' })
@@ -640,7 +635,7 @@ class CashboxStatementFragment : Fragment() {
 
     private fun setSummarySelectedCurrency(currency: String?) {
         selectedCurrency = currency
-        for (i in 0..<currencyButtonsLayout!!.getChildCount()) {
+        for (i in 0 until currencyButtonsLayout!!.getChildCount()) {
             val btn = currencyButtonsLayout!!.getChildAt(i) as MaterialButton
             val isSelected = btn.getText().toString() == currency
             btn.setChecked(isSelected)
