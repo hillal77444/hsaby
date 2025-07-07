@@ -75,9 +75,9 @@ class CashboxStatementFragment : Fragment() {
     private var lastCashboxTransactions: MutableList<Transaction> = ArrayList()
     private var lastSelectedCashbox: Cashbox? = null
     private var btnPrint: ImageButton? = null
-    private val accountMap: MutableMap<java.lang.Long, Account?> = HashMap<java.lang.Long, Account?>()
-    private var selectedCashboxId: java.lang.Long = -1L
-    private val mainCashboxId: java.lang.Long = -1L
+    private val accountMap: MutableMap<Long, Account?> = HashMap<Long, Account?>()
+    private var selectedCashboxId: Long = -1L
+    private val mainCashboxId: Long = -1L
     private var isSummaryMode = true
     private var allCurrencies: MutableList<String> = ArrayList<String>()
 
@@ -240,7 +240,7 @@ class CashboxStatementFragment : Fragment() {
                 ).show()
             } else {
                 lastSelectedCashbox = allCashboxes[position]
-                selectedCashboxId = lastSelectedCashbox!!.id.toLong()
+                selectedCashboxId = lastSelectedCashbox!!.id
                 isSummaryMode = false
                 currencyButtonsLayout!!.setVisibility(View.GONE)
                 onCashboxSelected(lastSelectedCashbox!!)
@@ -263,7 +263,7 @@ class CashboxStatementFragment : Fragment() {
             .observe(getViewLifecycleOwner(), Observer { accounts: MutableList<Account>? ->
                 if (accounts != null) {
                     for (acc in accounts) {
-                        accountMap.put(acc.getId().toLong(), acc)
+                        accountMap.put(acc.getId(), acc)
                     }
                 }
             })
@@ -273,7 +273,7 @@ class CashboxStatementFragment : Fragment() {
         isSummaryMode = false
         val cashboxTransactions: MutableList<Transaction> = ArrayList<Transaction>()
         for (t in allTransactions) {
-            if (t.getCashboxId().toLong() == cashbox.id.toLong()) {
+            if (t.getCashboxId() == cashbox.id) {
                 cashboxTransactions.add(t)
             }
         }
@@ -443,7 +443,7 @@ class CashboxStatementFragment : Fragment() {
         html.append("</div>")
         sortTransactionsByDate(transactions)
         val previousBalance =
-            calculatePreviousBalance(cashbox.id.toLong(), selectedCurrency!!, startDate.getTime())
+            calculatePreviousBalance(cashbox.id, selectedCurrency!!, startDate.getTime())
         var totalDebit = 0.0
         var totalCredit = 0.0
         html.append("<table>")
@@ -457,7 +457,7 @@ class CashboxStatementFragment : Fragment() {
             html.append("<td>").append(dateFormat!!.format(Date(t.getTransactionDate())))
                 .append("</td>")
             val accountName =
-                if (accountMap.containsKey(t.getAccountId().toLong())) accountMap.get(t.getAccountId().toLong())!!
+                if (accountMap.containsKey(t.getAccountId())) accountMap.get(t.getAccountId())!!
                     .getName() else ""
             html.append("<td>").append(accountName).append("</td>")
             html.append("<td>").append(if (t.getDescription() != null) t.getDescription() else "")
@@ -521,13 +521,13 @@ class CashboxStatementFragment : Fragment() {
     }
 
     private fun calculatePreviousBalance(
-        cashboxId: java.lang.Long,
+        cashboxId: Long,
         currency: String,
-        beforeTime: java.lang.Long
+        beforeTime: Long
     ): Double {
         var balance = 0.0
         for (t in allTransactions) {
-            if (t.getCashboxId().toLong() == cashboxId && t.getCurrency()
+            if (t.getCashboxId() == cashboxId && t.getCurrency()
                     .trim { it <= ' ' } == currency.trim { it <= ' ' } && t.getTransactionDate() < beforeTime
             ) {
                 if (t.getType().equals("credit", ignoreCase = true) || t.getType() == "له") {
@@ -563,7 +563,7 @@ class CashboxStatementFragment : Fragment() {
             var totalCredit = 0.0
             var totalDebit = 0.0
             for (t in transactions) {
-                if (t.getCashboxId().toLong() == c.id.toLong() && t.getCurrency()
+                if (t.getCashboxId() == c.id && t.getCurrency()
                         .trim { it <= ' ' } == currency.trim { it <= ' ' }
                 ) {
                     if (t.getType().equals("credit", ignoreCase = true) || t.getType() == "له") {
