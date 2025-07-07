@@ -75,8 +75,8 @@ class CashboxStatementFragment : Fragment() {
     private var lastCashboxTransactions: MutableList<Transaction> = ArrayList<Transaction>()
     private var lastSelectedCashbox: Cashbox? = null
     private var btnPrint: ImageButton? = null
-    private val accountMap: MutableMap<java.lang.Long, Account> = HashMap()
-    private var selectedCashboxId: java.lang.Long = java.lang.Long.valueOf(-1L)
+    private val accountMap: MutableMap<Long, Account> = HashMap()
+    private var selectedCashboxId: Long = -1L
     private val mainCashboxId: Long = -1L
     private var isSummaryMode = true
     private var allCurrencies: MutableList<String> = ArrayList()
@@ -224,7 +224,7 @@ class CashboxStatementFragment : Fragment() {
                 )
                 cashboxDropdown!!.setAdapter<ArrayAdapter<String>>(adapter)
                 cashboxDropdown!!.setText("", false)
-                selectedCashboxId = java.lang.Long.valueOf(-1L)
+                selectedCashboxId = -1L
                 lastSelectedCashbox = null
                 if (isSummaryMode) {
                     showSummaryWithCurrencies()
@@ -240,7 +240,7 @@ class CashboxStatementFragment : Fragment() {
                 ).show()
             } else {
                 lastSelectedCashbox = allCashboxes[position]
-                selectedCashboxId = java.lang.Long.valueOf(allCashboxes[position]!!.id)
+                selectedCashboxId = allCashboxes[position]!!.id
                 isSummaryMode = false
                 currencyButtonsLayout!!.setVisibility(View.GONE)
                 onCashboxSelected(allCashboxes[position]!!)
@@ -263,7 +263,7 @@ class CashboxStatementFragment : Fragment() {
             .observe(getViewLifecycleOwner(), Observer { accounts: MutableList<Account>? ->
                 if (accounts != null) {
                     for (acc in accounts) {
-                        accountMap[acc.getId() as java.lang.Long] = acc
+                        accountMap[acc.getId()] = acc
                     }
                 }
             })
@@ -273,7 +273,7 @@ class CashboxStatementFragment : Fragment() {
         isSummaryMode = false
         val cashboxTransactions: MutableList<Transaction> = ArrayList<Transaction>()
         for (t in allTransactions) {
-            if (t.getCashboxId() == java.lang.Long.valueOf(cashbox.id)) {
+            if (t.getCashboxId() == cashbox.id) {
                 cashboxTransactions.add(t)
             }
         }
@@ -442,7 +442,7 @@ class CashboxStatementFragment : Fragment() {
         html.append("</div>")
         sortTransactionsByDate(transactions)
         val previousBalance =
-            calculatePreviousBalance(java.lang.Long.valueOf(cashbox.id), selectedCurrency!!, startDate.time as Long?)
+            calculatePreviousBalance(cashbox.id, selectedCurrency!!, startDate.time)
         var totalDebit = 0.0
         var totalCredit = 0.0
         html.append("<table>")
@@ -456,7 +456,7 @@ class CashboxStatementFragment : Fragment() {
             html.append("<td>").append(dateFormat!!.format(Date(t.getTransactionDate())))
                 .append("</td>")
             val accountName =
-                if (accountMap.containsKey(t.getAccountId() as java.lang.Long)) accountMap[t.getAccountId() as java.lang.Long]!!.getName() else ""
+                if (accountMap.containsKey(t.getAccountId())) accountMap[t.getAccountId()]!!.getName() else ""
             html.append("<td>").append(accountName).append("</td>")
             html.append("<td>").append(if (t.getDescription() != null) t.getDescription() else "")
                 .append("</td>")
@@ -522,13 +522,13 @@ class CashboxStatementFragment : Fragment() {
     }
 
     private fun calculatePreviousBalance(
-        cashboxId: java.lang.Long,
+        cashboxId: Long?,
         currency: String,
         beforeTime: Long?
     ): Double {
         var balance = 0.0
         for (t in allTransactions) {
-            if ((t.getCashboxId() == java.lang.Long.valueOf(cashboxId)) && t.getCurrency()
+            if ((t.getCashboxId() ?: -1L) == (cashboxId ?: -1L) && t.getCurrency()
                     .trim { it <= ' ' } == currency.trim { it <= ' ' } && (t.getTransactionDate() < (beforeTime ?: Long.MAX_VALUE))
             ) {
                 if (t.getType().equals("credit", ignoreCase = true) || t.getType() == "له") {
