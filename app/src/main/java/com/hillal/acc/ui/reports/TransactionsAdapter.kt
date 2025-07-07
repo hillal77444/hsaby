@@ -36,7 +36,7 @@ class TransactionsAdapter :
         holder.bind(transaction)
     }
 
-    internal class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    public class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val dateTextView: TextView
         private val amountTextView: TextView
         private val descriptionTextView: TextView

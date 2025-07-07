@@ -40,7 +40,7 @@ class ReportsFragment : Fragment() {
 
         // Initialize ViewModels
         accountViewModel =
-            ViewModelProvider(this).get<AccountViewModel?>(AccountViewModel::class.java)
+            ViewModelProvider(this).get(AccountViewModel::class.java)
         transactionViewModel = ViewModelProvider(this).get<TransactionViewModel>(
             TransactionViewModel::class.java
         )

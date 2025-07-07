@@ -34,7 +34,7 @@ class ReportAdapter : RecyclerView.Adapter<ReportAdapter.ViewHolder?>() {
         notifyDataSetChanged()
     }
 
-    internal class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    public class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val dateTextView: TextView
         private val amountTextView: TextView
         private val descriptionTextView: TextView

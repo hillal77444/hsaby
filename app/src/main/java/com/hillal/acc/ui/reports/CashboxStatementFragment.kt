@@ -75,9 +75,9 @@ class CashboxStatementFragment : Fragment() {
     private var lastCashboxTransactions: MutableList<Transaction> = ArrayList()
     private var lastSelectedCashbox: Cashbox? = null
     private var btnPrint: ImageButton? = null
-    private val accountMap: MutableMap<Long, Account?> = HashMap()
-    private var selectedCashboxId: Long = -1L
-    private val mainCashboxId: Long = -1L
+    private val accountMap: MutableMap<java.lang.Long, Account?> = HashMap<java.lang.Long, Account?>()
+    private var selectedCashboxId: java.lang.Long = -1L
+    private val mainCashboxId: java.lang.Long = -1L
     private var isSummaryMode = true
     private var allCurrencies: MutableList<String> = ArrayList<String>()
 
@@ -209,7 +209,7 @@ class CashboxStatementFragment : Fragment() {
         cashboxesLiveData.observe(
             getViewLifecycleOwner(),
             Observer { cashboxes: MutableList<Cashbox?>? ->
-                allCashboxes = cashboxes?.filterNotNull() ?: ArrayList()
+                allCashboxes = cashboxes?.filterNotNull()?.toMutableList() ?: mutableListOf()
                 val names: MutableList<String?> = ArrayList()
                 for (c in allCashboxes) {
                     names.add(c.name)
@@ -240,7 +240,7 @@ class CashboxStatementFragment : Fragment() {
                 ).show()
             } else {
                 lastSelectedCashbox = allCashboxes[position]
-                selectedCashboxId = lastSelectedCashbox!!.id
+                selectedCashboxId = lastSelectedCashbox!!.id.let { it }
                 isSummaryMode = false
                 currencyButtonsLayout!!.setVisibility(View.GONE)
                 onCashboxSelected(lastSelectedCashbox!!)
@@ -263,7 +263,7 @@ class CashboxStatementFragment : Fragment() {
             .observe(getViewLifecycleOwner(), Observer { accounts: MutableList<Account>? ->
                 if (accounts != null) {
                     for (acc in accounts) {
-                        accountMap.put(acc.getId(), acc)
+                        accountMap.put(acc.getId().let { it }, acc)
                     }
                 }
             })
@@ -507,11 +507,8 @@ class CashboxStatementFragment : Fragment() {
     }
 
     private fun sortTransactionsByDate(transactions: MutableList<Transaction>) {
-        transactions.sortWith(Comparator { t1: Transaction?, t2: Transaction? ->
-            Long.compare(
-                t1!!.getTransactionDate(),
-                t2!!.getTransactionDate()
-            )
+        transactions.sortWith(Comparator { t1, t2 ->
+            java.lang.Long.compare(t1!!.getTransactionDate(), t2!!.getTransactionDate())
         })
     }
 
@@ -524,9 +521,9 @@ class CashboxStatementFragment : Fragment() {
     }
 
     private fun calculatePreviousBalance(
-        cashboxId: kotlin.Long,
+        cashboxId: java.lang.Long,
         currency: String,
-        beforeTime: kotlin.Long
+        beforeTime: java.lang.Long
     ): Double {
         var balance = 0.0
         for (t in allTransactions) {

@@ -126,15 +126,15 @@ class AccountStatementFragment : Fragment() {
             )
                 .observe(
                     getViewLifecycleOwner(),
-                    Observer { transactions: MutableList<Transaction?>? ->
-                        this.updateTransactions(transactions?.filterNotNull() ?: mutableListOf())
+                    Observer { transactions: List<Transaction>? ->
+                        this.updateTransactions(transactions?.toMutableList() ?: mutableListOf())
                     })
         } else {
             transactionViewModel!!.getTransactionsByAccount(accountId)
                 .observe(
                     getViewLifecycleOwner(),
-                    Observer { transactions: MutableList<Transaction?>? ->
-                        this.updateTransactions(transactions?.filterNotNull() ?: mutableListOf())
+                    Observer { transactions: List<Transaction>? ->
+                        this.updateTransactions(transactions?.toMutableList() ?: mutableListOf())
                     })
         }
     }
@@ -172,9 +172,9 @@ class AccountStatementFragment : Fragment() {
             transactionViewModel!!.getTransactionsByDateRange(fromDate.getTime(), toDate.getTime())
                 .observe(
                     getViewLifecycleOwner(),
-                    Observer { transactions: MutableList<Transaction>? ->
-                        transactionsAdapter!!.submitList(transactions)
-                        updateSummary(transactions!!)
+                    Observer { transactions: List<Transaction>? ->
+                        transactionsAdapter!!.submitList(transactions?.toMutableList())
+                        updateSummary(transactions?.toMutableList() ?: mutableListOf())
                     })
         }
     }
