@@ -174,6 +174,23 @@ class LoginFragment : Fragment() {
         })
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle("تأكيد الخروج")
+                    .setMessage("هل تريد الخروج من التطبيق؟")
+                    .setPositiveButton("نعم") { _, _ ->
+                        requireActivity().finish()
+                    }
+                    .setNegativeButton("لا", null)
+                    .show()
+            }
+        })
+    }
+
     companion object {
         private const val TAG = "LoginFragment"
     }
