@@ -76,7 +76,7 @@ class CashboxStatementFragment : Fragment() {
     private var lastSelectedCashbox: Cashbox? = null
     private var btnPrint: ImageButton? = null
     private val accountMap: MutableMap<java.lang.Long, Account> = HashMap()
-    private var selectedCashboxId: Long = -1L
+    private var selectedCashboxId: java.lang.Long = java.lang.Long.valueOf(-1L)
     private val mainCashboxId: Long = -1L
     private var isSummaryMode = true
     private var allCurrencies: MutableList<String> = ArrayList()
@@ -224,7 +224,7 @@ class CashboxStatementFragment : Fragment() {
                 )
                 cashboxDropdown!!.setAdapter<ArrayAdapter<String>>(adapter)
                 cashboxDropdown!!.setText("", false)
-                selectedCashboxId = -1L
+                selectedCashboxId = java.lang.Long.valueOf(-1L)
                 lastSelectedCashbox = null
                 if (isSummaryMode) {
                     showSummaryWithCurrencies()
@@ -240,10 +240,10 @@ class CashboxStatementFragment : Fragment() {
                 ).show()
             } else {
                 lastSelectedCashbox = allCashboxes[position]
-                selectedCashboxId = lastSelectedCashbox!!.id
+                selectedCashboxId = java.lang.Long.valueOf(allCashboxes[position]!!.id)
                 isSummaryMode = false
                 currencyButtonsLayout!!.setVisibility(View.GONE)
-                onCashboxSelected(lastSelectedCashbox!!)
+                onCashboxSelected(allCashboxes[position]!!)
             }
         }
 
@@ -273,7 +273,7 @@ class CashboxStatementFragment : Fragment() {
         isSummaryMode = false
         val cashboxTransactions: MutableList<Transaction> = ArrayList<Transaction>()
         for (t in allTransactions) {
-            if (t.getCashboxId() == cashbox.id) {
+            if (t.getCashboxId() == java.lang.Long.valueOf(cashbox.id)) {
                 cashboxTransactions.add(t)
             }
         }
@@ -442,7 +442,7 @@ class CashboxStatementFragment : Fragment() {
         html.append("</div>")
         sortTransactionsByDate(transactions)
         val previousBalance =
-            calculatePreviousBalance(cashbox.id as Long?, selectedCurrency!!, startDate.time as Long?)
+            calculatePreviousBalance(java.lang.Long.valueOf(cashbox.id), selectedCurrency!!, startDate.time as Long?)
         var totalDebit = 0.0
         var totalCredit = 0.0
         html.append("<table>")
@@ -522,13 +522,13 @@ class CashboxStatementFragment : Fragment() {
     }
 
     private fun calculatePreviousBalance(
-        cashboxId: Long?,
+        cashboxId: java.lang.Long,
         currency: String,
         beforeTime: Long?
     ): Double {
         var balance = 0.0
         for (t in allTransactions) {
-            if ((t.getCashboxId() == (cashboxId ?: -1L)) && t.getCurrency()
+            if ((t.getCashboxId() == java.lang.Long.valueOf(cashboxId)) && t.getCurrency()
                     .trim { it <= ' ' } == currency.trim { it <= ' ' } && (t.getTransactionDate() < (beforeTime ?: Long.MAX_VALUE))
             ) {
                 if (t.getType().equals("credit", ignoreCase = true) || t.getType() == "له") {
@@ -564,7 +564,7 @@ class CashboxStatementFragment : Fragment() {
             var totalCredit = 0.0
             var totalDebit = 0.0
             for (t in transactions) {
-                if ((t.getCashboxId() ?: -1L) == (c.id ?: -1L) && t.getCurrency()
+                if ((t.getCashboxId() ?: java.lang.Long.valueOf(-1L)) == java.lang.Long.valueOf(c.id ?: -1L) && t.getCurrency()
                         .trim { it <= ' ' } == currency.trim { it <= ' ' }
                 ) {
                     if (t.getType().equals("credit", ignoreCase = true) || t.getType() == "له") {
