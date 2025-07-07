@@ -269,8 +269,7 @@ private fun LoginFields(
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(fieldHeight),
-                contentPadding = fieldInnerPadding
+                    .height(fieldHeight)
             )
             Spacer(modifier = Modifier.height(marginSmall))
             OutlinedTextField(
@@ -295,8 +294,7 @@ private fun LoginFields(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(fieldHeight),
-                contentPadding = fieldInnerPadding
+                    .height(fieldHeight)
             )
             TextButton(
                 onClick = onForgotPasswordClick,
