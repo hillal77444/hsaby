@@ -99,7 +99,7 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
                                 .equals(currency.trim { it <= ' ' }, ignoreCase = true)
                 }
                 .collect(Collectors.toList())
-            transactions.setValue(ArrayList(filteredList))
+            transactions.setValue(filteredList?.let { ArrayList(it) } ?: mutableListOf())
         }
     }
 
@@ -109,7 +109,7 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
             val filteredList = currentList.stream()
                 .filter { t: Transaction? -> t!!.getAccountId() == accountId }
                 .collect(Collectors.toList())
-            transactions.setValue(ArrayList(filteredList))
+            transactions.setValue(filteredList?.let { ArrayList(it) } ?: mutableListOf())
         }
     }
 
