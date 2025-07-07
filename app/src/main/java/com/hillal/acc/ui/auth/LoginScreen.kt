@@ -46,7 +46,7 @@ fun LoginScreen(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF2196F3))
+            .background(Color.White)
     ) {
         val configuration = LocalConfiguration.current
         val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
@@ -78,18 +78,27 @@ fun LoginScreen(
         val fieldInnerPadding = PaddingValues(horizontal = relW(0.03f, 8f, 20f), vertical = relH(0.01f, 4f, 12f))
         val minButtonWidth = relW(0.18f, 60f, 100f)
 
+        val blueHeight = relH(0.32f, 120f, 260f)
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .imePadding()
-                .background(Color.Transparent),
+                .imePadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(relH(0.07f, 24f, 40f)))
             Box(
                 modifier = Modifier
-                    .size(logoSize + 16.dp)
+                    .fillMaxWidth()
+                    .height(blueHeight)
+                    .background(Color(0xFF2196F3))
+            ) {
+                // يمكن وضع أي محتوى أعلى الأزرق هنا إذا أردت
+            }
+            Box(
+                modifier = Modifier
+                    .offset(y = -logoSize / 2)
+                    .size(logoSize)
                     .background(Color.White, shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
@@ -97,10 +106,10 @@ fun LoginScreen(
                     painter = painterResource(id = R.mipmap.ic_launcher),
                     contentDescription = "Logo",
                     contentScale = ContentScale.Inside,
-                    modifier = Modifier.size(logoSize)
+                    modifier = Modifier.size(logoSize * 0.8f)
                 )
             }
-            Spacer(modifier = Modifier.height(relH(0.03f, 8f, 20f)))
+            Spacer(modifier = Modifier.height(marginMedium))
             Card(
                 shape = RoundedCornerShape(cardCorner),
                 elevation = CardDefaults.cardElevation(12.dp),
