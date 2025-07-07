@@ -156,7 +156,6 @@ fun DashboardScreen(
                     color = Color(0xFFB2F2E5),
                     iconTint = Color(0xFF009688),
                     valueColor = Color(0xFF009688),
-                    iconSize = iconSize,
                     valueFontSize = fontField,
                     labelFontSize = fontSmall,
                     modifier = Modifier.weight(1f).height(statCardHeight)
@@ -169,7 +168,6 @@ fun DashboardScreen(
                     color = Color(0xFFFFF3E0),
                     iconTint = Color(0xFFFF9800),
                     valueColor = Color(0xFFFF9800),
-                    iconSize = iconSize,
                     valueFontSize = fontField,
                     labelFontSize = fontSmall,
                     modifier = Modifier.weight(1f).height(statCardHeight)
@@ -182,7 +180,6 @@ fun DashboardScreen(
                     color = Color(0xFFE8F5E9),
                     iconTint = Color(0xFF4CAF50),
                     valueColor = Color(0xFF4CAF50),
-                    iconSize = iconSize,
                     valueFontSize = fontField,
                     labelFontSize = fontSmall,
                     modifier = Modifier.weight(1f).height(statCardHeight)
@@ -195,7 +192,6 @@ fun DashboardScreen(
                     color = Color(0xFFE3F2FD),
                     iconTint = Color(0xFF1976D2),
                     valueColor = Color(0xFF1976D2),
-                    iconSize = iconSize,
                     valueFontSize = fontField,
                     labelFontSize = fontSmall,
                     modifier = Modifier.weight(1f).height(statCardHeight)
@@ -214,7 +210,6 @@ fun DashboardScreen(
                     height = actionButtonHeight,
                     backgroundColor = Color(0xFF1976D2),
                     fontSize = fontField,
-                    iconSize = iconSize,
                     onClick = onAddTransaction,
                     modifier = Modifier.weight(1f)
                 )
@@ -224,7 +219,6 @@ fun DashboardScreen(
                     height = actionButtonHeight,
                     backgroundColor = Color(0xFF388E3C),
                     fontSize = fontField,
-                    iconSize = iconSize,
                     onClick = onAddAccount,
                     modifier = Modifier.weight(1f)
                 )
@@ -234,7 +228,6 @@ fun DashboardScreen(
                     height = actionButtonHeight,
                     backgroundColor = Color(0xFFFF9800),
                     fontSize = fontField,
-                    iconSize = iconSize,
                     onClick = onReport,
                     modifier = Modifier.weight(1f)
                 )
@@ -307,7 +300,6 @@ fun StatCardOld(
     color: Color,
     iconTint: Color,
     valueColor: Color,
-    iconSize: Dp,
     valueFontSize: TextUnit,
     labelFontSize: TextUnit,
     modifier: Modifier = Modifier
@@ -355,7 +347,6 @@ fun ActionButton(
     height: Dp,
     backgroundColor: Color,
     fontSize: TextUnit,
-    iconSize: Dp,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
