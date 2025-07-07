@@ -76,8 +76,8 @@ class CashboxStatementFragment : Fragment() {
     private var lastSelectedCashbox: Cashbox? = null
     private var btnPrint: ImageButton? = null
     private val accountMap: MutableMap<Long, Account> = HashMap()
-    private var selectedCashboxId: java.lang.Long = -1L
-    private val mainCashboxId: java.lang.Long = -1L
+    private var selectedCashboxId: Long = -1L
+    private val mainCashboxId: Long = -1L
     private var isSummaryMode = true
     private var allCurrencies: MutableList<String> = ArrayList()
 
@@ -240,7 +240,7 @@ class CashboxStatementFragment : Fragment() {
                 ).show()
             } else {
                 lastSelectedCashbox = allCashboxes[position]
-                selectedCashboxId = lastSelectedCashbox!!.id as java.lang.Long
+                selectedCashboxId = lastSelectedCashbox!!.id
                 isSummaryMode = false
                 currencyButtonsLayout!!.setVisibility(View.GONE)
                 onCashboxSelected(lastSelectedCashbox!!)
@@ -522,9 +522,9 @@ class CashboxStatementFragment : Fragment() {
     }
 
     private fun calculatePreviousBalance(
-        cashboxId: java.lang.Long,
+        cashboxId: Long,
         currency: String,
-        beforeTime: java.lang.Long
+        beforeTime: Long
     ): Double {
         var balance = 0.0
         for (t in allTransactions) {
