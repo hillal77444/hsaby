@@ -62,7 +62,7 @@ fun LoginScreen(
         // أحجام ديناميكية مع حدود دنيا/قصوى (كل شيء نسبي)
         fun relW(f: Float, min: Float, max: Float) = max(min, min((screenWidth * f).value, max)).dp
         fun relH(f: Float, min: Float, max: Float) = max(min, min((screenHeight * f).value, max)).dp
-        val cardCorner = relW(0.04f, 12f, 32f)
+        val cardCorner = relW(0.07f, 18f, 40f)
         val cardPadding = relW(0.028f, 8f, 22f)
         val logoSize = relW(0.22f, 72f, 140f)
         val fieldHeight = (relH(0.065f, 44f, 64f) * 1.2f)
@@ -72,9 +72,9 @@ fun LoginScreen(
         val fontButton = max(14f, min((screenWidth.value / 22), 20f)).sp
         val fontSmall = max(10f, min((screenWidth.value / 30), 16f)).sp
         val iconSize = relW(0.07f, 20f, 32f)
-        val marginSmall = relW(0.010f, 2f, 10f)
-        val marginMedium = relW(0.021f, 5f, 16f)
-        val marginLarge = relW(0.042f, 12f, 28f)
+        val marginSmall = relW(0.007f, 1f, 8f)
+        val marginMedium = relW(0.018f, 4f, 14f)
+        val marginLarge = relW(0.035f, 10f, 24f)
         val fieldInnerPadding = PaddingValues(horizontal = relW(0.03f, 8f, 20f), vertical = relH(0.01f, 4f, 12f))
 
         Column(
@@ -163,20 +163,19 @@ fun LoginScreen(
                     }
                 }
             } else {
-                // Box متداخل: البنفسجي + الدائرة + البطاقة البيضاء
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(relH(0.18f, 60f, 120f) + (logoSize / 2)) // اجعل البنفسجي أعلى من نصف الدائرة
+                        .height(relH(0.13f, 40f, 90f) + (logoSize * 0.65f))
                         .background(Color(0xFF3F51B5))
                 ) {
                     Card(
                         shape = CircleShape,
-                        elevation = CardDefaults.cardElevation(8.dp),
+                        elevation = CardDefaults.cardElevation(12.dp),
                         modifier = Modifier
                             .size(logoSize)
                             .align(Alignment.BottomCenter)
-                            .offset(y = logoSize / 2) // أنزل الدائرة للأسفل
+                            .offset(y = logoSize * 0.65f)
                     ) {
                         Image(
                             painter = painterResource(id = R.mipmap.ic_launcher),
@@ -186,8 +185,7 @@ fun LoginScreen(
                         )
                     }
                 }
-                // ارفع البطاقة البيضاء للأعلى لتتداخل مع الدائرة
-                Spacer(modifier = Modifier.height(-(logoSize / 2)))
+                Spacer(modifier = Modifier.height(-(logoSize * 0.65f)))
                 LoginFields(
                     phone = phone,
                     onPhoneChange = { phone = it },
@@ -248,7 +246,7 @@ private fun LoginFields(
 ) {
     Card(
         shape = RoundedCornerShape(cardCorner),
-        elevation = CardDefaults.cardElevation(8.dp),
+        elevation = CardDefaults.cardElevation(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         modifier = Modifier
             .fillMaxWidth()
@@ -273,7 +271,8 @@ private fun LoginFields(
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(fieldHeight)
+                    .height(fieldHeight),
+                colors = TextFieldDefaults.outlinedTextFieldColors(containerColor = Color.White),
             )
             Spacer(modifier = Modifier.height(marginSmall))
             OutlinedTextField(
@@ -298,7 +297,8 @@ private fun LoginFields(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(fieldHeight)
+                    .height(fieldHeight),
+                colors = TextFieldDefaults.outlinedTextFieldColors(containerColor = Color.White),
             )
             TextButton(
                 onClick = onForgotPasswordClick,
@@ -347,7 +347,7 @@ private fun LoginFields(
                 start = marginMedium,
                 end = marginMedium
             ),
-        horizontalArrangement = Arrangement.spacedBy(marginSmall, Alignment.CenterHorizontally)
+        horizontalArrangement = Arrangement.spacedBy(marginSmall / 2, Alignment.CenterHorizontally)
     ) {
         Button(
             onClick = onPrivacyClick,
