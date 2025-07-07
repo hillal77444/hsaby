@@ -274,7 +274,7 @@ class TransactionsFragment : Fragment() {
                                 "يرجى الاتصال بالإنترنت لحذف القيد",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            return@setPositiveButton
+                            return@OnClickListener
                         }
                         // عرض مؤشر تحميل
                         val progressDialog = ProgressDialog(requireContext())
@@ -297,7 +297,7 @@ class TransactionsFragment : Fragment() {
                                 "يرجى تسجيل الدخول أولاً",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            return@setPositiveButton
+                            return@OnClickListener
                         }
 
 
@@ -361,7 +361,7 @@ class TransactionsFragment : Fragment() {
         adapter!!.setOnWhatsAppClickListener(OnWhatsAppClickListener { transaction: Transaction?, phoneNumber: String? ->
             if (phoneNumber == null || phoneNumber.isEmpty()) {
                 Toast.makeText(requireContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
-                return@setOnWhatsAppClickListener
+                return@OnWhatsAppClickListener
             }
             // الحصول على معلومات الحساب
             accountViewModel!!.getAccountById(transaction!!.getAccountId())
@@ -393,7 +393,7 @@ class TransactionsFragment : Fragment() {
         adapter!!.setOnSmsClickListener(OnSmsClickListener { transaction: Transaction?, phoneNumber: String? ->
             if (phoneNumber == null || phoneNumber.isEmpty()) {
                 Toast.makeText(requireContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
-                return@setOnSmsClickListener
+                return@OnSmsClickListener
             }
             accountViewModel!!.getAccountById(transaction!!.getAccountId())
                 .observe(getViewLifecycleOwner(), Observer { account: Account? ->
