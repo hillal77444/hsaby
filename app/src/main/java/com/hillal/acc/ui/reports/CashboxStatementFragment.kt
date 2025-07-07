@@ -67,16 +67,16 @@ class CashboxStatementFragment : Fragment() {
     private var webView: WebView? = null
     private var calendar: Calendar? = null
     private var dateFormat: SimpleDateFormat? = null
-    private var allCashboxes: MutableList<Cashbox> = ArrayList<Cashbox>()
-    private var allTransactions: MutableList<Transaction> = ArrayList<Transaction>()
+    private var allCashboxes: MutableList<Cashbox> = ArrayList()
+    private var allTransactions: MutableList<Transaction> = ArrayList()
     private var transactionRepository: TransactionRepository? = null
     private var currencyButtonsLayout: LinearLayout? = null
     private var selectedCurrency: String? = null
-    private var lastCashboxTransactions: MutableList<Transaction> = ArrayList<Transaction>()
+    private var lastCashboxTransactions: MutableList<Transaction> = ArrayList()
     private var lastSelectedCashbox: Cashbox? = null
     private var btnPrint: ImageButton? = null
-    private val accountMap: MutableMap<Long?, Account?> = HashMap<Long?, Account?>()
-    private var selectedCashboxId: Long = -1
+    private val accountMap: MutableMap<Long, Account?> = HashMap()
+    private var selectedCashboxId: Long = -1L
     private val mainCashboxId: Long = -1L
     private var isSummaryMode = true
     private var allCurrencies: MutableList<String> = ArrayList<String>()
@@ -209,8 +209,8 @@ class CashboxStatementFragment : Fragment() {
         cashboxesLiveData.observe(
             getViewLifecycleOwner(),
             Observer { cashboxes: MutableList<Cashbox?>? ->
-                allCashboxes = if (cashboxes != null) cashboxes else ArrayList<Cashbox>()
-                val names: MutableList<String?> = ArrayList<String?>()
+                allCashboxes = cashboxes?.filterNotNull() ?: ArrayList()
+                val names: MutableList<String?> = ArrayList()
                 for (c in allCashboxes) {
                     names.add(c.name)
                 }
@@ -222,16 +222,16 @@ class CashboxStatementFragment : Fragment() {
                     android.R.layout.simple_dropdown_item_1line,
                     names
                 )
-                cashboxDropdown!!.setAdapter<ArrayAdapter<String?>?>(adapter)
+                cashboxDropdown!!.setAdapter(adapter)
                 cashboxDropdown!!.setText("", false)
-                selectedCashboxId = -1
+                selectedCashboxId = -1L
                 lastSelectedCashbox = null
                 if (isSummaryMode) {
                     showSummaryWithCurrencies()
                 }
             })
 
-        cashboxDropdown!!.setOnItemClickListener(AdapterView.OnItemClickListener { parent: AdapterView<*>?, view: View?, position: Int, id: Long ->
+        cashboxDropdown!!.setOnItemClickListener(AdapterView.OnItemClickListener { parent, view, position, id ->
             if (position == allCashboxes.size) {
                 Toast.makeText(
                     requireContext(),
@@ -239,7 +239,7 @@ class CashboxStatementFragment : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
-                lastSelectedCashbox = allCashboxes.get(position)
+                lastSelectedCashbox = allCashboxes[position]
                 selectedCashboxId = lastSelectedCashbox!!.id
                 isSummaryMode = false
                 currencyButtonsLayout!!.setVisibility(View.GONE)
@@ -507,7 +507,7 @@ class CashboxStatementFragment : Fragment() {
     }
 
     private fun sortTransactionsByDate(transactions: MutableList<Transaction>) {
-        transactions.sort(Comparator { t1: Transaction?, t2: Transaction? ->
+        transactions.sortWith(Comparator { t1: Transaction?, t2: Transaction? ->
             Long.compare(
                 t1!!.getTransactionDate(),
                 t2!!.getTransactionDate()

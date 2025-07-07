@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hillal.acc.R
 import java.util.Locale
 
-class AccountsSummaryAdapter(private var data: MutableList<AccountSummary>?) :
+class AccountsSummaryAdapter(private var data: MutableList<AccountSummary>) :
     RecyclerView.Adapter<AccountsSummaryAdapter.ViewHolder?>() {
     class AccountSummary(
         val accountName: String?,
@@ -20,7 +20,7 @@ class AccountsSummaryAdapter(private var data: MutableList<AccountSummary>?) :
         val balance: Double
     )
 
-    fun setData(data: MutableList<AccountSummary>?) {
+    fun setData(data: MutableList<AccountSummary>) {
         this.data = data
         notifyDataSetChanged()
     }
@@ -60,7 +60,7 @@ class AccountsSummaryAdapter(private var data: MutableList<AccountSummary>?) :
         return if (data != null) data!!.size else 0
     }
 
-    internal class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    public class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var tvAccountName: TextView
         var tvCredit: TextView
         var tvDebit: TextView

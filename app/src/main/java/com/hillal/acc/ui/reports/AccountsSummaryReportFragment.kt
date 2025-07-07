@@ -50,7 +50,7 @@ class AccountsSummaryReportFragment : Fragment() {
         tvTotalCredit = view.findViewById<TextView>(R.id.tvTotalCredit)
         tvTotalDebit = view.findViewById<TextView>(R.id.tvTotalDebit)
         recyclerView!!.setLayoutManager(LinearLayoutManager(getContext()))
-        adapter = AccountsSummaryAdapter(ArrayList<AccountsSummaryAdapter.AccountSummary?>())
+        adapter = AccountsSummaryAdapter(ArrayList<AccountsSummaryAdapter.AccountSummary>())
         recyclerView!!.setAdapter(adapter)
         setupFilterButtons()
         loadData()
@@ -145,25 +145,21 @@ class AccountsSummaryReportFragment : Fragment() {
             ViewModelProvider(requireActivity()).get<TransactionsViewModel>(TransactionsViewModel::class.java)
         accountViewModel.allAccounts.observe(
             getViewLifecycleOwner(),
-            Observer { accounts: MutableList<Account>? ->
-                if (accounts != null) {
-                    allAccounts = accounts
-                    updateReport()
-                }
+            Observer { accounts: List<Account> ->
+                allAccounts = accounts.toMutableList()
+                updateReport()
             })
         transactionsViewModel.getTransactions()
-            .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
-                if (transactions != null) {
-                    allTransactions = transactions
-                    updateReport()
-                }
+            .observe(getViewLifecycleOwner(), Observer { transactions: List<Transaction> ->
+                allTransactions = transactions.toMutableList()
+                updateReport()
             })
         transactionsViewModel.loadAllTransactions()
     }
 
     private fun updateReport() {
-        val summaryList: MutableList<AccountsSummaryAdapter.AccountSummary?> =
-            ArrayList<AccountsSummaryAdapter.AccountSummary?>()
+        val summaryList: MutableList<AccountsSummaryAdapter.AccountSummary> =
+            ArrayList<AccountsSummaryAdapter.AccountSummary>()
         var totalCredit = 0.0
         var totalDebit = 0.0
         var totalBalance = 0.0

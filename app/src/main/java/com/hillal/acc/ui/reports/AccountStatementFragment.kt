@@ -127,14 +127,14 @@ class AccountStatementFragment : Fragment() {
                 .observe(
                     getViewLifecycleOwner(),
                     Observer { transactions: MutableList<Transaction?>? ->
-                        this.updateTransactions(transactions)
+                        this.updateTransactions(transactions?.filterNotNull() ?: mutableListOf())
                     })
         } else {
             transactionViewModel!!.getTransactionsByAccount(accountId)
                 .observe(
                     getViewLifecycleOwner(),
                     Observer { transactions: MutableList<Transaction?>? ->
-                        this.updateTransactions(transactions)
+                        this.updateTransactions(transactions?.filterNotNull() ?: mutableListOf())
                     })
         }
     }
