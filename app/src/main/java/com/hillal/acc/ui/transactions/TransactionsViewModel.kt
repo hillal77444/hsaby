@@ -28,7 +28,7 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
     fun loadAllTransactions() {
         repository.getAllTransactions()
             .observeForever(Observer { value: MutableList<Transaction?>? ->
-                transactions.setValue(value?.filterNotNull())
+                transactions.setValue(value?.filterNotNull()?.toMutableList())
             })
     }
 
@@ -52,7 +52,7 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
         this.endDate = endDate
         repository.getTransactionsByDateRange(startDate, endDate)
             .observeForever(Observer { value: MutableList<Transaction?>? ->
-                transactions.setValue(value?.filterNotNull())
+                transactions.setValue(value?.filterNotNull()?.toMutableList())
             })
     }
 
@@ -99,7 +99,7 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
                                 .equals(currency.trim { it <= ' ' }, ignoreCase = true)
                 }
                 .collect(Collectors.toList())
-            transactions.setValue(filteredList?.let { ArrayList(it) } ?: mutableListOf())
+            transactions.setValue(ArrayList(filteredList ?: emptyList()))
         }
     }
 
@@ -109,7 +109,7 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
             val filteredList = currentList.stream()
                 .filter { t: Transaction? -> t!!.getAccountId() == accountId }
                 .collect(Collectors.toList())
-            transactions.setValue(filteredList?.let { ArrayList(it) } ?: mutableListOf())
+            transactions.setValue(ArrayList(filteredList ?: emptyList()))
         }
     }
 
@@ -120,7 +120,7 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
             getTransactions().observeForever(Observer { transactionsList: MutableList<Transaction>? ->
                 val balancesMap: MutableMap<Long?, MutableMap<String?, Double?>?> =
                     HashMap<Long?, MutableMap<String?, Double?>?>()
-                val safeList = transactionsList?.filterNotNull() ?: emptyList()
+                val safeList = transactionsList?.filterNotNull()?.toMutableList() ?: mutableListOf()
                 for (t in safeList) {
                     val accountId = t.getAccountId()
                     val currency = t.getCurrency()
