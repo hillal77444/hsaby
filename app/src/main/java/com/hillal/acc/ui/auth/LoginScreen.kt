@@ -163,17 +163,20 @@ fun LoginScreen(
                     }
                 }
             } else {
+                // Box متداخل: البنفسجي + الدائرة + البطاقة البيضاء
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(relH(0.18f, 60f, 120f))
-                        .background(Color(0xFF3F51B5)),
-                    contentAlignment = Alignment.BottomCenter
+                        .height(relH(0.18f, 60f, 120f) + (logoSize / 2)) // اجعل البنفسجي أعلى من نصف الدائرة
+                        .background(Color(0xFF3F51B5))
                 ) {
                     Card(
                         shape = CircleShape,
                         elevation = CardDefaults.cardElevation(8.dp),
-                        modifier = Modifier.size(logoSize)
+                        modifier = Modifier
+                            .size(logoSize)
+                            .align(Alignment.BottomCenter)
+                            .offset(y = logoSize / 2) // أنزل الدائرة للأسفل
                     ) {
                         Image(
                             painter = painterResource(id = R.mipmap.ic_launcher),
@@ -183,6 +186,8 @@ fun LoginScreen(
                         )
                     }
                 }
+                // ارفع البطاقة البيضاء للأعلى لتتداخل مع الدائرة
+                Spacer(modifier = Modifier.height(-(logoSize / 2)))
                 LoginFields(
                     phone = phone,
                     onPhoneChange = { phone = it },
