@@ -26,11 +26,37 @@ import com.hillal.acc.R
 import com.hillal.acc.data.preferences.UserPreferences
 import com.hillal.acc.data.remote.DataManager
 import com.hillal.acc.data.repository.AuthRepository
-import com.hillal.acc.databinding.FragmentLoginBinding
 import com.hillal.acc.viewmodel.AuthViewModel
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.material3.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.KeyboardOptions
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.graphics.graphicsLayer
+import com.hillal.acc.ui.auth.LoginScreen
 
 class LoginFragment : Fragment() {
-    private var binding: FragmentLoginBinding? = null
     private var authViewModel: AuthViewModel? = null
     private var loadingDialog: ProgressDialog? = null
 
@@ -46,190 +72,107 @@ class LoginFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        binding = FragmentLoginBinding.inflate(inflater, container, false)
-        return binding!!.getRoot()
+    ): View {
+        return ComposeView(requireContext()).apply {
+            setContent {
+                LoginScreen(
+                    onLoginClick = { phone, password ->
+                        handleLogin(phone, password)
+                    },
+                    onRegisterClick = {
+                        NavHostFragment.findNavController(this@LoginFragment)
+                            .navigate(R.id.action_loginFragment_to_registerFragment)
+                    },
+                    onPrivacyClick = {
+                        val url = "https://malyp.com/api/privacy-policy"
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                        startActivity(intent)
+                    },
+                    onContactClick = {
+                        Toast.makeText(requireContext(), "رقم التواصل: 774447251", Toast.LENGTH_LONG).show()
+                    },
+                    onAboutClick = {
+                        val about = "تطبيق مالي برو هو رفيقك الذكي لإدارة الحسابات والمعاملات المالية بسهولة واحترافية.\n\n" +
+                                "أهم المميزات:\n" +
+                                "- العمل أونلاين أو أوفلاين بدون انقطاع.\n" +
+                                "- استرداد قاعدة البيانات في أي وقت.\n" +
+                                "- تقارير مالية دقيقة وشاملة.\n" +
+                                "- إرسال إشعارات واتساب تلقائيًا (اختياري عند التفعيل)."
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("حول التطبيق")
+                            .setMessage(about)
+                            .setPositiveButton("حسناً", null)
+                            .show()
+                    },
+                    onForgotPasswordClick = {
+                        Toast.makeText(requireContext(), "يرجى التواصل مع الدعم لاستعادة كلمة المرور", Toast.LENGTH_LONG).show()
+                    }
+                )
+            }
+        }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        authViewModel = ViewModelProvider(this).get<AuthViewModel>(AuthViewModel::class.java)
-
-        // إضافة مستمع لرابط سياسة الخصوصية
-        binding!!.buttonPrivacy.setOnClickListener { v: View? ->
-            val url = "https://malyp.com/api/privacy-policy"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            startActivity(intent)
+    private fun handleLogin(phone: String, password: String) {
+        if (phone.isEmpty()) {
+            Toast.makeText(requireContext(), "الرجاء إدخال رقم الهاتف", Toast.LENGTH_SHORT).show()
+            return
         }
-
-        binding!!.buttonLogin.setOnClickListener { v: View? ->
-            val phone = binding!!.editTextPhone.getText().toString().trim { it <= ' ' }
-            val password = binding!!.editTextPassword.getText().toString()
-
-            // التحقق من صحة المدخلات
-            if (phone.isEmpty()) {
-                binding!!.editTextPhone.setError("الرجاء إدخال رقم الهاتف")
-                return@setOnClickListener
+        if (password.isEmpty()) {
+            Toast.makeText(requireContext(), "الرجاء إدخال كلمة المرور", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (authViewModel == null) {
+            authViewModel = ViewModelProvider(this).get(AuthViewModel::class.java)
+        }
+        // تعطيل الزر أثناء عملية تسجيل الدخول (يمكنك تحسين ذلك بإضافة حالة loading)
+        Log.d(TAG, "Attempting to login with phone: $phone")
+        authViewModel!!.login(phone, password, object : AuthViewModel.AuthCallback {
+            override fun onSuccess() {
+                Log.d(TAG, "Login successful")
+                Toast.makeText(requireContext(), "تم تسجيل الدخول بنجاح", Toast.LENGTH_SHORT).show()
+                val authRepository = AuthRepository(requireActivity().application)
+                val userName = authRepository.getCurrentUser()?.getUsername() ?: ""
+                val userPreferences = UserPreferences(requireContext())
+                userPreferences.saveUserName(userName)
+                userPreferences.savePhoneNumber(phone)
+                loadingDialog = ProgressDialog(requireContext())
+                loadingDialog!!.setMessage("جاري تحميل البيانات...")
+                loadingDialog!!.setCancelable(false)
+                loadingDialog!!.show()
+                val mainActivity = requireActivity() as MainActivity
+                val dataManager = DataManager(
+                    requireContext(),
+                    mainActivity.getAccountDao(),
+                    mainActivity.getTransactionDao(),
+                    mainActivity.getPendingOperationDao()
+                )
+                dataManager.fetchDataFromServer(object : DataManager.DataCallback {
+                    override fun onSuccess() {
+                        loadingDialog?.dismiss()
+                        Log.d(TAG, "Data fetched successfully")
+                        NavHostFragment.findNavController(this@LoginFragment)
+                            .navigate(R.id.navigation_dashboard)
+                        (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
+                    }
+                    override fun onError(error: String) {
+                        loadingDialog?.dismiss()
+                        Log.e(TAG, "Failed to fetch data: $error")
+                        copyToClipboard("تفاصيل الخطأ:\n$error")
+                        Toast.makeText(
+                            requireContext(),
+                            "فشل في جلب البيانات: $error\nتم نسخ تفاصيل الخطأ إلى الحافظة",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        NavHostFragment.findNavController(this@LoginFragment)
+                            .navigate(R.id.navigation_dashboard)
+                    }
+                })
             }
-            if (password.isEmpty()) {
-                binding!!.editTextPassword.setError("الرجاء إدخال كلمة المرور")
-                return@setOnClickListener
+            override fun onError(error: String?) {
+                Log.e(TAG, "Login failed: $error")
+                Toast.makeText(requireContext(), error, Toast.LENGTH_LONG).show()
             }
-
-            // تعطيل الزر أثناء عملية تسجيل الدخول
-            binding!!.buttonLogin.setEnabled(false)
-
-            Log.d(TAG, "Attempting to login with phone: " + phone)
-            authViewModel!!.login(phone, password, object : AuthViewModel.AuthCallback {
-                override fun onSuccess() {
-                    Log.d(TAG, "Login successful")
-                    Toast.makeText(getContext(), "تم تسجيل الدخول بنجاح", Toast.LENGTH_SHORT).show()
-
-                    // حفظ اسم المستخدم في UserPreferences
-                    val authRepository = AuthRepository(requireActivity().getApplication())
-                    val userName =
-                        if (authRepository.getCurrentUser() != null) authRepository.getCurrentUser()
-                            .getUsername() else ""
-                    val userPreferences = UserPreferences(requireContext())
-                    userPreferences.saveUserName(userName)
-                    // حفظ رقم الهاتف من الحقل
-                    userPreferences.savePhoneNumber(phone)
-
-
-                    // إظهار Dialog التحميل أثناء جلب البيانات من السيرفر
-                    loadingDialog = ProgressDialog(getContext())
-                    loadingDialog!!.setMessage("جاري تحميل البيانات...")
-                    loadingDialog!!.setCancelable(false)
-                    loadingDialog!!.show()
-
-
-                    // جلب البيانات من السيرفر بعد تسجيل الدخول
-                    val mainActivity = requireActivity() as MainActivity
-                    val dataManager = DataManager(
-                        requireContext(),
-                        mainActivity.getAccountDao(),
-                        mainActivity.getTransactionDao(),
-                        mainActivity.getPendingOperationDao()
-                    )
-
-                    dataManager.fetchDataFromServer(object : DataManager.DataCallback {
-                        override fun onSuccess() {
-                            // إخفاء Dialog التحميل
-                            if (loadingDialog != null && loadingDialog!!.isShowing()) {
-                                loadingDialog!!.dismiss()
-                            }
-                            Log.d(TAG, "Data fetched successfully")
-                            // التنقل إلى لوحة التحكم بعد جلب البيانات
-                            NavHostFragment.findNavController(this@LoginFragment)
-                                .navigate(R.id.navigation_dashboard)
-                            (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
-                        }
-
-                        override fun onError(error: String) {
-                            // إخفاء Dialog التحميل
-                            if (loadingDialog != null && loadingDialog!!.isShowing()) {
-                                loadingDialog!!.dismiss()
-                            }
-                            Log.e(TAG, "Failed to fetch data: " + error)
-
-
-                            // تحضير رسالة الخطأ
-                            val errorMessage: String?
-                            if (error.contains("UNIQUE constraint failed")) {
-                                errorMessage =
-                                    "حدث خطأ في قاعدة البيانات المحلية. يرجى إعادة تشغيل التطبيق."
-                            } else if (error.contains("Network error")) {
-                                errorMessage =
-                                    "فشل الاتصال بالإنترنت. يرجى التحقق من اتصالك وإعادة المحاولة."
-                            } else if (error.contains("User not authenticated")) {
-                                errorMessage = "انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى."
-                            } else {
-                                errorMessage = "فشل في جلب البيانات: " + error
-                            }
-
-
-                            // نسخ تفاصيل الخطأ الكاملة إلى الحافظة
-                            copyToClipboard("تفاصيل الخطأ:\n" + error)
-
-
-                            // عرض رسالة الخطأ
-                            Toast.makeText(
-                                getContext(),
-                                errorMessage + "\nتم نسخ تفاصيل الخطأ إلى الحافظة",
-                                Toast.LENGTH_LONG
-                            ).show()
-
-
-                            // التنقل إلى لوحة التحكم حتى في حالة فشل جلب البيانات
-                            NavHostFragment.findNavController(this@LoginFragment)
-                                .navigate(R.id.navigation_dashboard)
-                        }
-                    })
-                }
-
-                override fun onError(error: String?) {
-                    Log.e(TAG, "Login failed: " + error)
-                    binding!!.buttonLogin.setEnabled(true)
-
-
-                    // عرض رسالة الخطأ مباشرة
-                    Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show()
-                }
-            })
-        }
-
-        binding!!.buttonRegister.setOnClickListener { v: View? ->
-            NavHostFragment.findNavController(this@LoginFragment)
-                .navigate(R.id.action_loginFragment_to_registerFragment)
-        }
-
-        // زر أرقام التواصل
-        binding!!.buttonContact.setOnClickListener { v: View? ->
-            Toast.makeText(getContext(), "رقم التواصل: 774447251", Toast.LENGTH_LONG).show()
-        }
-
-        // زر عن التطبيق
-        binding!!.buttonAbout.setOnClickListener { v: View? ->
-            val about =
-                "تطبيق مالي برو هو رفيقك الذكي لإدارة الحسابات والمعاملات المالية بسهولة واحترافية.\n\n" +
-                        "أهم المميزات:\n" +
-                        "- العمل أونلاين أو أوفلاين بدون انقطاع.\n" +
-                        "- استرداد قاعدة البيانات في أي وقت.\n" +
-                        "- تقارير مالية دقيقة وشاملة.\n" +
-                        "- إرسال إشعارات واتساب تلقائيًا (اختياري عند التفعيل)."
-            AlertDialog.Builder(requireContext())
-                .setTitle("عن تطبيق مالي برو")
-                .setMessage(about)
-                .setPositiveButton("حسناً", null)
-                .show()
-        }
-
-        // إغلاق التطبيق عند الضغط على زر الرجوع في صفحة تسجيل الدخول
-        requireActivity().onBackPressedDispatcher.addCallback(
-            getViewLifecycleOwner(),
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    requireActivity().finishAffinity()
-                }
-            }
-        )
-
-        ViewCompat.setOnApplyWindowInsetsListener(
-            binding!!.getRoot(),
-            OnApplyWindowInsetsListener { v: View?, insets: WindowInsetsCompat? ->
-                var bottom = insets!!.getInsets(WindowInsetsCompat.Type.ime()).bottom
-                if (bottom == 0) {
-                    bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
-                }
-                v!!.setPadding(0, 0, 0, bottom)
-                insets
-            })
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        binding = null
+        })
     }
 
     companion object {
