@@ -63,22 +63,27 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .verticalScroll(scrollState)
+            .imePadding(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         // المستطيل الأزرق أعلى الشاشة
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(blueHeight)
                 .background(Color(0xFF2196F3))
-                .align(Alignment.TopCenter)
         )
         // الشعار في منتصف المستطيل الأزرق
         Box(
             modifier = Modifier
                 .size(logoSize)
                 .background(Color.White, shape = CircleShape)
-                .align(Alignment.TopCenter)
-                .offset(y = blueHeight - (logoSize / 2)),
+                .offset(y = -logoSize / 2),
             contentAlignment = Alignment.Center
         ) {
             Image(
@@ -88,153 +93,143 @@ fun LoginScreen(
                 modifier = Modifier.size(logoSize * 0.8f)
             )
         }
-        // بطاقة تسجيل الدخول وباقي العناصر
-        Column(
+        Spacer(modifier = Modifier.height(marginMedium))
+        Card(
+            shape = RoundedCornerShape(cardCorner),
+            elevation = CardDefaults.cardElevation(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
             modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter)
-                .offset(y = blueHeight + (logoSize / 2.5f))
-                .verticalScroll(scrollState)
-                .imePadding(),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth(0.92f)
+                .wrapContentHeight()
         ) {
-            Card(
-                shape = RoundedCornerShape(cardCorner),
-                elevation = CardDefaults.cardElevation(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth(0.92f)
-                    .wrapContentHeight()
+                    .fillMaxWidth()
+                    .padding(all = cardPadding),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(marginMedium)
             ) {
-                Column(
+                Text(
+                    text = "تسجيل الدخول",
+                    color = Color(0xFF3F51B5),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = fontTitle,
+                    modifier = Modifier.padding(bottom = marginSmall)
+                )
+                OutlinedTextField(
+                    value = phone,
+                    onValueChange = { phone = it },
+                    label = { Text("رقم التلفون", fontSize = fontField) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Phone,
+                            contentDescription = null,
+                            modifier = Modifier.size(iconSize)
+                        )
+                    },
+                    singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(all = cardPadding),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(marginMedium)
+                        .height(fieldHeight),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(containerColor = Color.White),
+                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("كلمة السر", fontSize = fontField) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Lock,
+                            contentDescription = null,
+                            modifier = Modifier.size(iconSize)
+                        )
+                    },
+                    singleLine = true,
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                        val desc = if (passwordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر"
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSize))
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(fieldHeight),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(containerColor = Color.White),
+                )
+                TextButton(
+                    onClick = onForgotPasswordClick,
+                    modifier = Modifier.align(Alignment.End)
                 ) {
                     Text(
-                        text = "تسجيل الدخول",
+                        text = "نسيت كلمة السر؟",
                         color = Color(0xFF3F51B5),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = fontTitle,
-                        modifier = Modifier.padding(bottom = marginSmall)
+                        fontSize = fontSmall
                     )
-                    OutlinedTextField(
-                        value = phone,
-                        onValueChange = { phone = it },
-                        label = { Text("رقم التلفون", fontSize = fontField) },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Phone,
-                                contentDescription = null,
-                                modifier = Modifier.size(iconSize)
-                            )
-                        },
-                        singleLine = true,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(fieldHeight),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(containerColor = Color.White),
-                    )
-                    OutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = { Text("كلمة السر", fontSize = fontField) },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Lock,
-                                contentDescription = null,
-                                modifier = Modifier.size(iconSize)
-                            )
-                        },
-                        singleLine = true,
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                            val desc = if (passwordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر"
-                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSize))
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(fieldHeight),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(containerColor = Color.White),
-                    )
-                    TextButton(
-                        onClick = onForgotPasswordClick,
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        Text(
-                            text = "نسيت كلمة السر؟",
-                            color = Color(0xFF3F51B5),
-                            fontSize = fontSmall
-                        )
-                    }
-                    Button(
-                        onClick = { onLoginClick(phone, password) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = marginSmall)
-                            .height(buttonHeight),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
-                        shape = RoundedCornerShape(cardCorner)
-                    ) {
-                        Text("دخول", color = Color.White, fontSize = fontButton)
-                    }
                 }
+                Button(
+                    onClick = { onLoginClick(phone, password) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = marginSmall)
+                        .height(buttonHeight),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
+                    shape = RoundedCornerShape(cardCorner)
+                ) {
+                    Text("دخول", color = Color.White, fontSize = fontButton)
+                }
+            }
+        }
+        Button(
+            onClick = onRegisterClick,
+            modifier = Modifier
+                .fillMaxWidth(0.92f)
+                .padding(top = marginMedium)
+                .height(buttonHeight),
+            shape = RoundedCornerShape(cardCorner),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9))
+        ) {
+            Text("إنشاء حساب جديد", color = Color.White, fontWeight = FontWeight.Bold, fontSize = fontButton)
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(0.92f)
+                .padding(top = marginMedium, bottom = marginLarge),
+            horizontalArrangement = Arrangement.spacedBy(marginSmall, Alignment.CenterHorizontally)
+        ) {
+            Button(
+                onClick = onPrivacyClick,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(buttonHeight),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
+                shape = RoundedCornerShape(cardCorner),
+                contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
+            ) {
+                Text("سياسة الخصوصية", color = Color.White, fontSize = fontSmall)
             }
             Button(
-                onClick = onRegisterClick,
+                onClick = onContactClick,
                 modifier = Modifier
-                    .fillMaxWidth(0.92f)
-                    .padding(top = marginMedium)
+                    .weight(1f)
                     .height(buttonHeight),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
                 shape = RoundedCornerShape(cardCorner),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9))
+                contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
             ) {
-                Text("إنشاء حساب جديد", color = Color.White, fontWeight = FontWeight.Bold, fontSize = fontButton)
+                Text("أرقام التواصل", color = Color.White, fontSize = fontSmall)
             }
-            Row(
+            Button(
+                onClick = onAboutClick,
                 modifier = Modifier
-                    .fillMaxWidth(0.92f)
-                    .padding(top = marginMedium, bottom = marginLarge),
-                horizontalArrangement = Arrangement.spacedBy(marginSmall, Alignment.CenterHorizontally)
+                    .weight(1f)
+                    .height(buttonHeight),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
+                shape = RoundedCornerShape(cardCorner),
+                contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
             ) {
-                Button(
-                    onClick = onPrivacyClick,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(buttonHeight),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
-                    shape = RoundedCornerShape(cardCorner),
-                    contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
-                ) {
-                    Text("سياسة الخصوصية", color = Color.White, fontSize = fontSmall)
-                }
-                Button(
-                    onClick = onContactClick,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(buttonHeight),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
-                    shape = RoundedCornerShape(cardCorner),
-                    contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
-                ) {
-                    Text("أرقام التواصل", color = Color.White, fontSize = fontSmall)
-                }
-                Button(
-                    onClick = onAboutClick,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(buttonHeight),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
-                    shape = RoundedCornerShape(cardCorner),
-                    contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
-                ) {
-                    Text("عن التطبيق", color = Color.White, fontSize = fontSmall)
-                }
+                Text("عن التطبيق", color = Color.White, fontSize = fontSmall)
             }
         }
     }
