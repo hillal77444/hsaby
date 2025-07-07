@@ -240,7 +240,7 @@ class EditTransactionFragment : Fragment(), OnCashboxAddedListener {
                     "EditTransaction",
                     "Setting up cashbox dropdown with " + (if (cashboxes != null) cashboxes.size else 0) + " cashboxes"
                 )
-                allCashboxes = if (cashboxes != null) cashboxes else ArrayList<Cashbox>()
+                allCashboxes = if (cashboxes != null) cashboxes.filterNotNull().toMutableList() else ArrayList<Cashbox>()
                 val names: MutableList<String?> = ArrayList<String?>()
                 mainCashboxId = -1
                 for (c in allCashboxes) {
@@ -376,7 +376,6 @@ class EditTransactionFragment : Fragment(), OnCashboxAddedListener {
     override fun onCashboxAdded(name: String?) {
         Log.d("EditTransactionFragment", "onCashboxAdded called with name: " + name)
 
-
         // إظهار dialog تحميل
         val loadingDialog = ProgressDialog(requireContext())
         loadingDialog.setMessage("جاري إضافة الصندوق...")
@@ -387,18 +386,22 @@ class EditTransactionFragment : Fragment(), OnCashboxAddedListener {
         CashboxHelper.addCashboxToServer(
             requireContext(), cashboxViewModel!!, name,
             object : CashboxHelper.CashboxCallback {
-                override fun onSuccess(cashbox: Cashbox) {
+                override fun onSuccess(cashbox: Cashbox?) {
                     Log.d(
                         "EditTransactionFragment",
-                        "Cashbox added successfully: id=" + cashbox.id + ", name=" + cashbox.name
+                        "Cashbox added successfully: id=" + (cashbox?.id ?: "null") + ", name=" + (cashbox?.name ?: "null")
                     )
                     loadingDialog.dismiss()
                     // سيتم تحديث القائمة تلقائياً عبر LiveData
                     // حدد الصندوق الجديد تلقائياً بعد إضافته
-                    binding!!.cashboxAutoComplete.setText(cashbox.name, false)
-                    selectedCashboxId = cashbox.id
-                    Log.d("EditTransaction", "Updated selectedCashboxId to: " + selectedCashboxId)
-                    showSuccessMessage(requireContext(), "تم إضافة الصندوق بنجاح")
+                    if (cashbox != null) {
+                        binding!!.cashboxAutoComplete.setText(cashbox.name, false)
+                        selectedCashboxId = cashbox.id
+                        Log.d("EditTransaction", "Updated selectedCashboxId to: " + selectedCashboxId)
+                        showSuccessMessage(requireContext(), "تم إضافة الصندوق بنجاح")
+                    } else {
+                        showErrorMessage(requireContext(), "فشل في إضافة الصندوق")
+                    }
                 }
 
                 override fun onError(error: String?) {
