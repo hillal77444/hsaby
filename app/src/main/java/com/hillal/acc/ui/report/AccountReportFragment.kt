@@ -536,6 +536,7 @@ class AccountReportFragment : Fragment() {
     }
 
     companion object {
+        @JvmStatic
         fun newInstance(accountId: Int, currency: String?): AccountReportFragment {
             val fragment = AccountReportFragment()
             val args = Bundle()
