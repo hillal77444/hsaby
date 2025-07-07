@@ -75,7 +75,7 @@ class CashboxStatementFragment : Fragment() {
     private var lastCashboxTransactions: MutableList<Transaction> = ArrayList<Transaction>()
     private var lastSelectedCashbox: Cashbox? = null
     private var btnPrint: ImageButton? = null
-    private val accountMap: MutableMap<Long, Account> = HashMap()
+    private val accountMap: MutableMap<java.lang.Long, Account> = HashMap()
     private var selectedCashboxId: Long = -1L
     private val mainCashboxId: Long = -1L
     private var isSummaryMode = true
@@ -263,7 +263,7 @@ class CashboxStatementFragment : Fragment() {
             .observe(getViewLifecycleOwner(), Observer { accounts: MutableList<Account>? ->
                 if (accounts != null) {
                     for (acc in accounts) {
-                        accountMap[acc.getId()] = acc
+                        accountMap[acc.getId() as java.lang.Long] = acc
                     }
                 }
             })
@@ -456,7 +456,7 @@ class CashboxStatementFragment : Fragment() {
             html.append("<td>").append(dateFormat!!.format(Date(t.getTransactionDate())))
                 .append("</td>")
             val accountName =
-                if (accountMap.containsKey(t.getAccountId())) accountMap[t.getAccountId()]!!.getName() else ""
+                if (accountMap.containsKey(t.getAccountId() as java.lang.Long)) accountMap[t.getAccountId() as java.lang.Long]!!.getName() else ""
             html.append("<td>").append(accountName).append("</td>")
             html.append("<td>").append(if (t.getDescription() != null) t.getDescription() else "")
                 .append("</td>")
