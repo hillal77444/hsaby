@@ -138,7 +138,7 @@ class AccountReportFragment : Fragment() {
         try {
             // تجربة الـ endpoint الأول
             val call = apiService!!.getAccountDetails(accountId, currency)
-            val requestUrl = call.request().url().toString()
+            val requestUrl = call.request().url.toString()
             Log.d("AccountReport", "Making request to URL: " + requestUrl)
 
             call.enqueue(object : Callback<AccountReport?> {
@@ -238,7 +238,7 @@ class AccountReportFragment : Fragment() {
         Log.d("AccountReport", "Trying alternative endpoint")
         try {
             val call = apiService!!.getAccountReport(accountId, currency)
-            val requestUrl = call.request().url().toString()
+            val requestUrl = call.request().url.toString()
             Log.d("AccountReport", "Making request to alternative URL: " + requestUrl)
 
             call.enqueue(object : Callback<AccountReport?> {
