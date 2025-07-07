@@ -21,6 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hillal.acc.R
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 
 @Composable
 fun LoginScreen(
@@ -38,9 +42,11 @@ fun LoginScreen(
     ) {
         val screenWidth = maxWidth
         val screenHeight = maxHeight
+        val scrollState = rememberScrollState()
 
         var phone by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
+        var passwordVisible by remember { mutableStateOf(false) }
 
         // الدائرة البنفسجية العلوية
         Box(
@@ -58,6 +64,7 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(scrollState)
                 .padding(horizontal = screenWidth * 0.04f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -117,7 +124,14 @@ fun LoginScreen(
                         label = { Text("كلمة السر") },
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                         singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        trailingIcon = {
+                            val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                            val desc = if (passwordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر"
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Icon(imageVector = image, contentDescription = desc)
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth()
                     )
                     TextButton(
