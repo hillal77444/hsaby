@@ -76,8 +76,8 @@ class CashboxStatementFragment : Fragment() {
     private var lastSelectedCashbox: Cashbox? = null
     private var btnPrint: ImageButton? = null
     private val accountMap: MutableMap<Long, Account> = HashMap()
-    private var selectedCashboxId: Long = -1L
-    private val mainCashboxId: Long = -1L
+    private var selectedCashboxId: java.lang.Long = -1L
+    private val mainCashboxId: java.lang.Long = -1L
     private var isSummaryMode = true
     private var allCurrencies: MutableList<String> = ArrayList()
 
@@ -240,7 +240,7 @@ class CashboxStatementFragment : Fragment() {
                 ).show()
             } else {
                 lastSelectedCashbox = allCashboxes[position]
-                selectedCashboxId = lastSelectedCashbox!!.id
+                selectedCashboxId = lastSelectedCashbox!!.id as java.lang.Long
                 isSummaryMode = false
                 currencyButtonsLayout!!.setVisibility(View.GONE)
                 onCashboxSelected(lastSelectedCashbox!!)
@@ -387,7 +387,7 @@ class CashboxStatementFragment : Fragment() {
             return
         }
         // الرصيد السابق غير مهم هنا للصندوق غالباً، يمكن تعديله لاحقاً إذا لزم
-        val previousBalances: MutableMap<String, Double> = HashMap()
+        val previousBalances: MutableMap<String, Double> = HashMap<String, Double>()
         previousBalances[selectedCurrency!!] = 0.0
         val currencyMap: MutableMap<String, MutableList<Transaction>> = HashMap()
         currencyMap[selectedCurrency!!] = filtered
@@ -522,9 +522,9 @@ class CashboxStatementFragment : Fragment() {
     }
 
     private fun calculatePreviousBalance(
-        cashboxId: kotlin.Long,
+        cashboxId: java.lang.Long,
         currency: String,
-        beforeTime: kotlin.Long
+        beforeTime: java.lang.Long
     ): Double {
         var balance = 0.0
         for (t in allTransactions) {
