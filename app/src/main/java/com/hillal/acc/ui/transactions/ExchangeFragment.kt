@@ -45,7 +45,7 @@ class ExchangeFragment : Fragment() {
     private var cashboxes: MutableList<Cashbox> = ArrayList<Cashbox>()
     private var selectedAccount: Account? = null
     private var selectedCashboxId: Long = -1
-    private var currencies: Array<String>
+    private var currencies: Array<String> = arrayOf()
     private var currencyAdapter: ArrayAdapter<String?>? = null
     private var cashboxAdapter: ArrayAdapter<String?>? = null
     private var opTypeAdapter: ArrayAdapter<CharSequence?>? = null
