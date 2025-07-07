@@ -42,7 +42,7 @@ class TransferFragment : Fragment() {
     private var fromAccount: Account? = null
     private var toAccount: Account? = null
     private var selectedCashboxId: Long = -1
-    private var currencies: Array<String?>
+    private var currencies: Array<String?> = arrayOfNulls(0)
     private var currencyAdapter: ArrayAdapter<String?>? = null
     private var cashboxAdapter: ArrayAdapter<String?>? = null
     private var accountBalancesMap: MutableMap<Long?, MutableMap<String?, Double?>?> =
