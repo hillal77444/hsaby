@@ -76,8 +76,8 @@ class CashboxStatementFragment : Fragment() {
     private var lastSelectedCashbox: Cashbox? = null
     private var btnPrint: ImageButton? = null
     private val accountMap: MutableMap<Long, Account> = HashMap()
-    private var selectedCashboxId: Long = -1L
-    private val mainCashboxId: Long = -1L
+    private var selectedCashboxId: Long? = -1L
+    private val mainCashboxId: Long? = -1L
     private var isSummaryMode = true
     private var allCurrencies: MutableList<String> = ArrayList()
 
@@ -240,7 +240,7 @@ class CashboxStatementFragment : Fragment() {
                 ).show()
             } else {
                 lastSelectedCashbox = allCashboxes[position]
-                selectedCashboxId = lastSelectedCashbox!!.id
+                selectedCashboxId = lastSelectedCashbox!!.id as Long?
                 isSummaryMode = false
                 currencyButtonsLayout!!.setVisibility(View.GONE)
                 onCashboxSelected(lastSelectedCashbox!!)
@@ -442,7 +442,7 @@ class CashboxStatementFragment : Fragment() {
         html.append("</div>")
         sortTransactionsByDate(transactions)
         val previousBalance =
-            calculatePreviousBalance(cashbox.id, selectedCurrency!!, startDate.time)
+            calculatePreviousBalance(cashbox.id as Long?, selectedCurrency!!, startDate.time as Long?)
         var totalDebit = 0.0
         var totalCredit = 0.0
         html.append("<table>")
@@ -522,14 +522,14 @@ class CashboxStatementFragment : Fragment() {
     }
 
     private fun calculatePreviousBalance(
-        cashboxId: Long,
+        cashboxId: Long?,
         currency: String,
-        beforeTime: Long
+        beforeTime: Long?
     ): Double {
         var balance = 0.0
         for (t in allTransactions) {
-            if (t.getCashboxId() == cashboxId && t.getCurrency()
-                    .trim { it <= ' ' } == currency.trim { it <= ' ' } && t.getTransactionDate() < beforeTime
+            if ((t.getCashboxId() ?: -1L) == (cashboxId ?: -1L) && t.getCurrency()
+                    .trim { it <= ' ' } == currency.trim { it <= ' ' } && (t.getTransactionDate() ?: 0L) < (beforeTime ?: Long.MAX_VALUE)
             ) {
                 if (t.getType().equals("credit", ignoreCase = true) || t.getType() == "له") {
                     balance += t.getAmount()
@@ -564,7 +564,7 @@ class CashboxStatementFragment : Fragment() {
             var totalCredit = 0.0
             var totalDebit = 0.0
             for (t in transactions) {
-                if (t.getCashboxId() == c.id && t.getCurrency()
+                if ((t.getCashboxId() ?: -1L) == (c.id ?: -1L) && t.getCurrency()
                         .trim { it <= ' ' } == currency.trim { it <= ' ' }
                 ) {
                     if (t.getType().equals("credit", ignoreCase = true) || t.getType() == "له") {
