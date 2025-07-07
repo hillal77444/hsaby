@@ -304,6 +304,9 @@ fun StatCardOld(
     labelFontSize: TextUnit,
     modifier: Modifier = Modifier
 ) {
+    val configuration = LocalConfiguration.current
+    val screenWidth = with(LocalDensity.current) { configuration.screenWidthDp.dp }
+    val iconSize = screenWidth * 0.07f
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = modifier,
@@ -350,6 +353,9 @@ fun ActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val configuration = LocalConfiguration.current
+    val screenWidth = with(LocalDensity.current) { configuration.screenWidthDp.dp }
+    val iconSize = screenWidth * 0.07f
     Button(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
