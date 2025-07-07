@@ -46,7 +46,7 @@ fun LoginScreen(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFFFFFF))
+            .background(Color(0xFF2196F3))
     ) {
         val configuration = LocalConfiguration.current
         val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
@@ -83,326 +83,162 @@ fun LoginScreen(
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .imePadding()
-                .background(Color(0xFFFFFFFF))
+                .background(Color.Transparent),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(marginMedium))
-            if (isLandscape) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = marginLarge, vertical = marginMedium),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Card(
-                            shape = CircleShape,
-                            elevation = CardDefaults.cardElevation(8.dp),
-                            modifier = Modifier.size(logoSize)
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.mipmap.ic_launcher),
-                                contentDescription = "Logo",
-                                contentScale = ContentScale.Inside,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(marginLarge))
-                    Column(
-                        modifier = Modifier
-                            .weight(2f)
-                            .fillMaxHeight(),
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        LoginFields(
-                            phone = phone,
-                            onPhoneChange = { phone = it },
-                            password = password,
-                            onPasswordChange = { password = it },
-                            passwordVisible = passwordVisible,
-                            onPasswordVisibleChange = { passwordVisible = it },
-                            onForgotPasswordClick = onForgotPasswordClick,
-                            onLoginClick = { onLoginClick(phone, password) },
-                            onRegisterClick = onRegisterClick,
-                            onPrivacyClick = onPrivacyClick,
-                            onContactClick = onContactClick,
-                            onAboutClick = onAboutClick,
-                            cardCorner = cardCorner,
-                            cardPadding = cardPadding,
-                            fieldHeight = fieldHeight,
-                            buttonHeight = buttonHeight,
-                            fontField = fontField,
-                            fontButton = fontButton,
-                            fontSmall = fontSmall,
-                            fontTitle = fontTitle,
-                            iconSize = iconSize,
-                            logoSize = logoSize,
-                            fieldInnerPadding = fieldInnerPadding,
-                            marginSmall = marginSmall,
-                            marginMedium = marginMedium,
-                            marginLarge = marginLarge,
-                            minButtonWidth = minButtonWidth
-                        )
-                    }
-                }
-            } else {
-                // Box متداخل: البنفسجي + الدائرة + البطاقة البيضاء (تداخل أنيق)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(relH(0.18f, 60f, 120f) + (logoSize * 0.33f)) // يكفي ليظهر الشعار بالكامل
-                        .background(Color(0xFF3F51B5))
-                ) {
-                    Card(
-                        shape = CircleShape,
-                        elevation = CardDefaults.cardElevation(12.dp),
-                        modifier = Modifier
-                            .size(logoSize)
-                            .align(Alignment.BottomCenter)
-                            .offset(y = logoSize * 0.33f) // تداخل أنيق (ثلث الدائرة)
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.mipmap.ic_launcher),
-                            contentDescription = "Logo",
-                            contentScale = ContentScale.Inside,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(-(logoSize * 0.33f)))
-                LoginFields(
-                    phone = phone,
-                    onPhoneChange = { phone = it },
-                    password = password,
-                    onPasswordChange = { password = it },
-                    passwordVisible = passwordVisible,
-                    onPasswordVisibleChange = { passwordVisible = it },
-                    onForgotPasswordClick = onForgotPasswordClick,
-                    onLoginClick = { onLoginClick(phone, password) },
-                    onRegisterClick = onRegisterClick,
-                    onPrivacyClick = onPrivacyClick,
-                    onContactClick = onContactClick,
-                    onAboutClick = onAboutClick,
-                    cardCorner = cardCorner,
-                    cardPadding = cardPadding,
-                    fieldHeight = fieldHeight,
-                    buttonHeight = buttonHeight,
-                    fontField = fontField,
-                    fontButton = fontButton,
-                    fontSmall = fontSmall,
-                    fontTitle = fontTitle,
-                    iconSize = iconSize,
-                    logoSize = logoSize,
-                    fieldInnerPadding = fieldInnerPadding,
-                    marginSmall = marginSmall,
-                    marginMedium = marginMedium,
-                    marginLarge = marginLarge,
-                    minButtonWidth = minButtonWidth
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun LoginFields(
-    phone: String,
-    onPhoneChange: (String) -> Unit,
-    password: String,
-    onPasswordChange: (String) -> Unit,
-    passwordVisible: Boolean,
-    onPasswordVisibleChange: (Boolean) -> Unit,
-    onForgotPasswordClick: () -> Unit,
-    onLoginClick: () -> Unit,
-    onRegisterClick: () -> Unit,
-    onPrivacyClick: () -> Unit,
-    onContactClick: () -> Unit,
-    onAboutClick: () -> Unit,
-    cardCorner: Dp,
-    cardPadding: Dp,
-    fieldHeight: Dp,
-    buttonHeight: Dp,
-    fontField: androidx.compose.ui.unit.TextUnit,
-    fontButton: androidx.compose.ui.unit.TextUnit,
-    fontSmall: androidx.compose.ui.unit.TextUnit,
-    fontTitle: androidx.compose.ui.unit.TextUnit,
-    iconSize: Dp,
-    logoSize: Dp,
-    fieldInnerPadding: PaddingValues,
-    marginSmall: Dp,
-    marginMedium: Dp,
-    marginLarge: Dp,
-    minButtonWidth: Dp
-) {
-    Card(
-        shape = RoundedCornerShape(cardCorner),
-        elevation = CardDefaults.cardElevation(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = cardPadding, vertical = 0.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(all = cardPadding),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(marginMedium)
-        ) {
-            Text(
-                text = "تسجيل الدخول",
-                color = Color(0xFF3F51B5),
-                fontWeight = FontWeight.Bold,
-                fontSize = fontTitle,
-                modifier = Modifier.padding(bottom = marginSmall)
-            )
-            Card(
-                shape = CircleShape,
-                elevation = CardDefaults.cardElevation(12.dp),
+            Spacer(modifier = Modifier.height(relH(0.07f, 24f, 40f)))
+            Box(
                 modifier = Modifier
-                    .size(logoSize)
-                    .padding(bottom = marginMedium)
+                    .size(logoSize + 16.dp)
+                    .background(Color.White, shape = CircleShape),
+                contentAlignment = Alignment.Center
             ) {
                 Image(
                     painter = painterResource(id = R.mipmap.ic_launcher),
                     contentDescription = "Logo",
                     contentScale = ContentScale.Inside,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.size(logoSize)
                 )
             }
-            OutlinedTextField(
-                value = phone,
-                onValueChange = onPhoneChange,
-                label = { Text("رقم التلفون", fontSize = fontField) },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Phone,
-                        contentDescription = null,
-                        modifier = Modifier.size(iconSize)
-                    )
-                },
-                singleLine = true,
+            Spacer(modifier = Modifier.height(relH(0.03f, 8f, 20f)))
+            Card(
+                shape = RoundedCornerShape(cardCorner),
+                elevation = CardDefaults.cardElevation(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(fieldHeight),
-                colors = TextFieldDefaults.outlinedTextFieldColors(containerColor = Color.White),
-            )
-            Spacer(modifier = Modifier.height(marginSmall))
-            OutlinedTextField(
-                value = password,
-                onValueChange = onPasswordChange,
-                label = { Text("كلمة السر", fontSize = fontField) },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Lock,
-                        contentDescription = null,
-                        modifier = Modifier.size(iconSize)
-                    )
-                },
-                singleLine = true,
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                    val desc = if (passwordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر"
-                    IconButton(onClick = { onPasswordVisibleChange(!passwordVisible) }) {
-                        Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSize))
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(fieldHeight),
-                colors = TextFieldDefaults.outlinedTextFieldColors(containerColor = Color.White),
-            )
-            TextButton(
-                onClick = onForgotPasswordClick,
-                modifier = Modifier.align(Alignment.End)
+                    .fillMaxWidth(0.92f)
+                    .wrapContentHeight()
             ) {
-                Text(
-                    text = "نسيت كلمة السر؟",
-                    color = Color(0xFF3F51B5),
-                    fontSize = fontSmall
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(all = cardPadding),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(marginMedium)
+                ) {
+                    Text(
+                        text = "تسجيل الدخول",
+                        color = Color(0xFF3F51B5),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = fontTitle,
+                        modifier = Modifier.padding(bottom = marginSmall)
+                    )
+                    OutlinedTextField(
+                        value = phone,
+                        onValueChange = { phone = it },
+                        label = { Text("رقم التلفون", fontSize = fontField) },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Phone,
+                                contentDescription = null,
+                                modifier = Modifier.size(iconSize)
+                            )
+                        },
+                        singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(fieldHeight),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(containerColor = Color.White),
+                    )
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = { Text("كلمة السر", fontSize = fontField) },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Lock,
+                                contentDescription = null,
+                                modifier = Modifier.size(iconSize)
+                            )
+                        },
+                        singleLine = true,
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        trailingIcon = {
+                            val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                            val desc = if (passwordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر"
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSize))
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(fieldHeight),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(containerColor = Color.White),
+                    )
+                    TextButton(
+                        onClick = onForgotPasswordClick,
+                        modifier = Modifier.align(Alignment.End)
+                    ) {
+                        Text(
+                            text = "نسيت كلمة السر؟",
+                            color = Color(0xFF3F51B5),
+                            fontSize = fontSmall
+                        )
+                    }
+                    Button(
+                        onClick = { onLoginClick(phone, password) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = marginSmall)
+                            .height(buttonHeight),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
+                        shape = RoundedCornerShape(cardCorner)
+                    ) {
+                        Text("دخول", color = Color.White, fontSize = fontButton)
+                    }
+                }
             }
             Button(
-                onClick = onLoginClick,
+                onClick = onRegisterClick,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = marginSmall)
+                    .fillMaxWidth(0.92f)
+                    .padding(top = marginMedium)
                     .height(buttonHeight),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
-                shape = RoundedCornerShape(cardCorner)
+                shape = RoundedCornerShape(cardCorner),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9))
             ) {
-                Text("دخول", color = Color.White, fontSize = fontButton)
+                Text("إنشاء حساب جديد", color = Color.White, fontWeight = FontWeight.Bold, fontSize = fontButton)
             }
-        }
-    }
-    Button(
-        onClick = onRegisterClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                top = marginMedium,
-                start = marginLarge,
-                end = marginLarge
-            )
-            .height(buttonHeight),
-        shape = RoundedCornerShape(cardCorner),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9))
-    ) {
-        Text("إنشاء حساب جديد", color = Color.White, fontWeight = FontWeight.Bold, fontSize = fontButton)
-    }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                top = marginMedium,
-                bottom = marginLarge,
-                start = marginMedium,
-                end = marginMedium
-            ),
-        horizontalArrangement = Arrangement.spacedBy(marginSmall / 2, Alignment.CenterHorizontally)
-    ) {
-        Button(
-            onClick = onPrivacyClick,
-            modifier = Modifier
-                .weight(1f)
-                .height(buttonHeight)
-                .widthIn(min = minButtonWidth),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
-            shape = RoundedCornerShape(cardCorner),
-            contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
-        ) {
-            Text("سياسة الخصوصية", color = Color.White, fontSize = fontSmall)
-        }
-        Button(
-            onClick = onContactClick,
-            modifier = Modifier
-                .weight(1f)
-                .height(buttonHeight)
-                .widthIn(min = minButtonWidth),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
-            shape = RoundedCornerShape(cardCorner),
-            contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
-        ) {
-            Text("ارقام التواصل", color = Color.White, fontSize = fontSmall)
-        }
-        Button(
-            onClick = onAboutClick,
-            modifier = Modifier
-                .weight(1f)
-                .height(buttonHeight)
-                .widthIn(min = minButtonWidth),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
-            shape = RoundedCornerShape(cardCorner),
-            contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
-        ) {
-            Text("حول التطبيق", color = Color.White, fontSize = fontSmall)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(0.92f)
+                    .padding(top = marginMedium, bottom = marginLarge),
+                horizontalArrangement = Arrangement.spacedBy(marginSmall, Alignment.CenterHorizontally)
+            ) {
+                Button(
+                    onClick = onPrivacyClick,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(buttonHeight),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
+                    shape = RoundedCornerShape(cardCorner),
+                    contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
+                ) {
+                    Text("سياسة الخصوصية", color = Color.White, fontSize = fontSmall)
+                }
+                Button(
+                    onClick = onContactClick,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(buttonHeight),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
+                    shape = RoundedCornerShape(cardCorner),
+                    contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
+                ) {
+                    Text("أرقام التواصل", color = Color.White, fontSize = fontSmall)
+                }
+                Button(
+                    onClick = onAboutClick,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(buttonHeight),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF152FD9)),
+                    shape = RoundedCornerShape(cardCorner),
+                    contentPadding = PaddingValues(horizontal = marginSmall / 2, vertical = marginSmall / 3)
+                ) {
+                    Text("عن التطبيق", color = Color.White, fontSize = fontSmall)
+                }
+            }
         }
     }
 } 
