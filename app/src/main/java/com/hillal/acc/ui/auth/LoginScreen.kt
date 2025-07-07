@@ -20,6 +20,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hillal.acc.R
+import androidx.compose.ui.layout.ContentScale
 
 @Composable
 fun LoginScreen(
