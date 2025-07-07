@@ -251,8 +251,10 @@ private fun LoginFields(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(all = cardPadding),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(marginMedium)
         ) {
             Text(
                 text = "تسجيل الدخول",
