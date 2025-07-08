@@ -67,6 +67,8 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.text.input.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Check
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -520,35 +522,70 @@ fun AddTransactionScreen(
     if (isDialogShown) {
         AlertDialog(
             onDismissRequest = { isDialogShown = false },
-            title = { Text("تمت إضافة المعاملة بنجاح") },
+            title = null, // سنستخدم تصميم مخصص
             text = {
-                Column {
-                    Text("هل ترغب بإرسال إشعار؟")
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    // أيقونة نجاح
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .background(Color(0xFF4CAF50), shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "تمت إضافة المعاملة بنجاح!",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "هل ترغب بإرسال إشعار؟",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
+                    )
                 }
             },
             confirmButton = {
-                Row {
-                    Button(onClick = {
-                        // إرسال واتساب
-                        lastSavedAccount?.let { account ->
-                            lastSavedTransaction?.let { transaction ->
-                                val phone = account.getPhoneNumber()
-                                if (!phone.isNullOrEmpty()) {
-                                    val msg = NotificationUtils.buildWhatsAppMessage(
-                                        context,
-                                        account.getName(),
-                                        transaction,
-                                        lastSavedBalance,
-                                        transaction.getType()
-                                    )
-                                    NotificationUtils.sendWhatsAppMessage(context, phone, msg)
-                                } else {
-                                    Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (lastSavedAccount?.isWhatsappEnabled() == false) {
+                        Button(onClick = {
+                            // إرسال واتساب
+                            lastSavedAccount?.let { account ->
+                                lastSavedTransaction?.let { transaction ->
+                                    val phone = account.getPhoneNumber()
+                                    if (!phone.isNullOrEmpty()) {
+                                        val msg = NotificationUtils.buildWhatsAppMessage(
+                                            context,
+                                            account.getName(),
+                                            transaction,
+                                            lastSavedBalance,
+                                            transaction.getType()
+                                        )
+                                        NotificationUtils.sendWhatsAppMessage(context, phone, msg)
+                                    } else {
+                                        Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                                    }
                                 }
                             }
+                        }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366))) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_whatsapp),
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("واتساب", color = Color.White)
                         }
-                    }) { Text("واتساب") }
-                    Spacer(modifier = Modifier.width(8.dp))
+                    }
                     Button(onClick = {
                         // إرسال SMS
                         lastSavedAccount?.let { account ->
@@ -571,29 +608,39 @@ fun AddTransactionScreen(
                                 }
                             }
                         }
-                    }) { Text("SMS") }
+                    }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1976D2))) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_sms),
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("SMS", color = Color.White)
+                    }
                 }
             },
             dismissButton = {
-                Row {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = {
                         isDialogShown = false
                         // إعادة تعيين الحقول
                         amount = ""
                         description = ""
                         date = System.currentTimeMillis()
-                    }) {
-                        Text("إضافة قيد آخر")
+                    }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))) {
+                        Text("إضافة قيد آخر", color = Color.White)
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
                     Button(onClick = {
                         isDialogShown = false
                         navController.navigateUp()
-                    }) {
-                        Text("خروج")
+                    }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF44336))) {
+                        Text("خروج", color = Color.White)
                     }
                 }
-            }
+            },
+            shape = RoundedCornerShape(20.dp),
+            containerColor = Color.White
         )
     }
 }
