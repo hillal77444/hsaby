@@ -160,12 +160,12 @@ fun DashboardScreen(
                 StatCardOld(
                     icon = R.drawable.ic_money,
                     value = "${netBalance?.toInt() ?: 0} يمني",
-                    label = "الرصيد الأكبر",
-                    subLabel = "الرصيد الأكبر",
+                    label = "الرصيد",
+                    subLabel = "الرصيد",
                     color = Color(0xFFB2F2E5),
                     iconTint = Color(0xFF009688),
                     valueColor = Color(0xFF009688),
-                    valueFontSize = fontField,
+                    valueFontSize = fontSmall,
                     labelFontSize = fontSmall,
                     modifier = Modifier.weight(1f).height(statCardHeight)
                 )
@@ -177,7 +177,7 @@ fun DashboardScreen(
                     color = Color(0xFFFFF3E0),
                     iconTint = Color(0xFFFF9800),
                     valueColor = Color(0xFFFF9800),
-                    valueFontSize = fontField,
+                    valueFontSize = fontSmall,
                     labelFontSize = fontSmall,
                     modifier = Modifier.weight(1f).height(statCardHeight)
                 )
@@ -189,7 +189,7 @@ fun DashboardScreen(
                     color = Color(0xFFE8F5E9),
                     iconTint = Color(0xFF4CAF50),
                     valueColor = Color(0xFF4CAF50),
-                    valueFontSize = fontField,
+                    valueFontSize = fontSmall,
                     labelFontSize = fontSmall,
                     modifier = Modifier.weight(1f).height(statCardHeight)
                 )
@@ -201,7 +201,7 @@ fun DashboardScreen(
                     color = Color(0xFFE3F2FD),
                     iconTint = Color(0xFF1976D2),
                     valueColor = Color(0xFF1976D2),
-                    valueFontSize = fontField,
+                    valueFontSize = fontSmall,
                     labelFontSize = fontSmall,
                     modifier = Modifier.weight(1f).height(statCardHeight)
                 )
@@ -218,7 +218,7 @@ fun DashboardScreen(
                     icon = R.drawable.ic_add,
                     height = actionButtonHeight,
                     backgroundColor = Color(0xFF1976D2),
-                    fontSize = fontField,
+                    fontSize = fontSmall,
                     onClick = onAddTransaction,
                     modifier = Modifier.weight(1f)
                 )
@@ -227,7 +227,7 @@ fun DashboardScreen(
                     icon = R.drawable.ic_add_account,
                     height = actionButtonHeight,
                     backgroundColor = Color(0xFF388E3C),
-                    fontSize = fontField,
+                    fontSize = fontSmall,
                     onClick = onAddAccount,
                     modifier = Modifier.weight(1f)
                 )
@@ -236,7 +236,7 @@ fun DashboardScreen(
                     icon = R.drawable.ic_statement,
                     height = actionButtonHeight,
                     backgroundColor = Color(0xFFFF9800),
-                    fontSize = fontField,
+                    fontSize = fontSmall,
                     onClick = onReport,
                     modifier = Modifier.weight(1f)
                 )
@@ -369,7 +369,8 @@ fun ActionButton(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
         modifier = modifier.height(height),
-        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor)
+        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
+        contentPadding = PaddingValues(0.dp) // تصفير الهوامش الداخلية
     ) {
         Icon(
             painter = painterResource(id = icon),
@@ -377,7 +378,7 @@ fun ActionButton(
             tint = Color.White,
             modifier = Modifier.size(iconSize)
         )
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(4.dp)) // تصغير المسافة بين الأيقونة والنص
         Text(text = text, color = Color.White, fontSize = fontSize)
     }
 }
