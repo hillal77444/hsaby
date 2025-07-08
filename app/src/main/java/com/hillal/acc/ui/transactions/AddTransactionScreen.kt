@@ -252,7 +252,6 @@ fun AddTransactionScreen(
                     selectedCashboxId = cashbox.id
                 },
                 onAddCashbox = { name ->
-                    val context = LocalContext.current
                     CashboxHelper.addCashboxToServer(
                         context, cashboxViewModel, name,
                         object : CashboxHelper.CashboxCallback {
@@ -418,22 +417,16 @@ fun AddTransactionScreen(
     AddCashboxDialogCompose(
         show = showCashboxDialog,
         onCashboxAdded = { name ->
-            // منطق إضافة الصندوق كما في الكود القديم
-            val context = LocalContext.current
-            val loading = remember { mutableStateOf(false) }
-            loading.value = true
             CashboxHelper.addCashboxToServer(
                 context, cashboxViewModel, name,
                 object : CashboxHelper.CashboxCallback {
                     override fun onSuccess(cashbox: Cashbox?) {
-                        loading.value = false
                         selectedCashbox = cashbox
                         selectedCashboxId = cashbox?.id ?: -1L
                         CashboxHelper.showSuccessMessage(context, "تم إضافة الصندوق بنجاح")
                         showCashboxDialog = false
                     }
                     override fun onError(error: String?) {
-                        loading.value = false
                         CashboxHelper.showErrorMessage(context, error)
                     }
                 })
