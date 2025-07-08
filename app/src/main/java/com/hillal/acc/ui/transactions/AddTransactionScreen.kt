@@ -298,8 +298,8 @@ fun AddTransactionScreen(
                             onValueChange = {},
                             label = { Text("التاريخ", fontSize = labelFontSize) },
                             modifier = Modifier.weight(1f).clickable { showDatePicker = true },
-                            enabled = false,
-                            readOnly = true,
+                            enabled = true, // يجب أن يكون true ليعمل النقر
+                            readOnly = true, // فقط للقراءة
                             leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
                             textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
