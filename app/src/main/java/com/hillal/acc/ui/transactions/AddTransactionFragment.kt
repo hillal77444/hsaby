@@ -87,8 +87,6 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
         return androidx.compose.ui.platform.ComposeView(requireContext()).apply {
             setContent {
                 AddTransactionScreen(
-                    onCredit = { /* TODO: نفذ إضافة معاملة له */ },
-                    onDebit = { /* TODO: نفذ إضافة معاملة عليه */ },
                     onCancel = { requireActivity().onBackPressedDispatcher.onBackPressed() }
                 )
             }

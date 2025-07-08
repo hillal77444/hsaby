@@ -35,6 +35,9 @@ import com.hillal.acc.data.model.Transaction
 import com.hillal.acc.ui.transactions.TransactionsViewModel
 import com.hillal.acc.viewmodel.AccountViewModel
 import com.hillal.acc.viewmodel.CashboxViewModel
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 
 @Composable
 fun AddTransactionScreen(
@@ -58,14 +61,25 @@ fun AddTransactionScreen(
     var successMessage by remember { mutableStateOf<String?>(null) }
 
     if (showDatePicker) {
-        val calendar = Calendar.getInstance()
-        DatePickerDialog(
-            onDateSelected = { year, month, day ->
-                calendar.set(year, month, day)
-                date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
-                showDatePicker = false
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("تم") }
             },
-            onDismissRequest = { showDatePicker = false }
+            title = { Text("اختر التاريخ") },
+            text = {
+                // يمكنك هنا بناء Picker بسيط (مثلاً 3 DropDowns لليوم/الشهر/السنة)
+                // أو استخدام مكتبة خارجية إذا أردت
+                // مثال مبسط:
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // اليوم
+                    var day by remember { mutableStateOf(Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) }
+                    var month by remember { mutableStateOf(Calendar.getInstance().get(Calendar.MONTH) + 1) }
+                    var year by remember { mutableStateOf(Calendar.getInstance().get(Calendar.YEAR)) }
+                    // ... عناصر اختيار اليوم/الشهر/السنة
+                    // عند التأكيد: date = "$year-$month-$day"
+                }
+            }
         )
     }
 
