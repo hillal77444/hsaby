@@ -7,9 +7,7 @@ import androidx.navigation.fragment.findNavController
 import com.hillal.acc.data.preferences.UserPreferences
 import com.hillal.acc.data.repository.TransactionRepository
 import com.hillal.acc.ui.transactions.AddTransactionScreen
-import com.hillal.acc.viewmodel.AccountViewModel
-import com.hillal.acc.viewmodel.CashboxViewModel
-import com.hillal.acc.viewmodel.TransactionsViewModel
+import com.hillal.acc.ui.transactions.TransactionsViewModel
 import com.hillal.acc.App
 
 class AddTransactionFragment : Fragment() {
