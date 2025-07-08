@@ -70,7 +70,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.foundation.text.KeyboardOptions
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
