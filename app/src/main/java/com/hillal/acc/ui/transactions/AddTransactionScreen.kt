@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.TextRange
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -64,6 +65,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.ui.text.input.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -289,11 +292,12 @@ fun AddTransactionScreen(
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
                             value = amount,
-                            onValueChange = { amount = it },
+                            onValueChange = { amount = it.filter { c -> c.isDigit() } },
                             label = { Text("المبلغ", fontSize = labelFontSize) },
                             modifier = Modifier.weight(1f),
                             leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
-                            textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize)
+                            textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                         )
                         OutlinedTextField(
                             value = dateFormat.format(Date(date)),
@@ -317,7 +321,7 @@ fun AddTransactionScreen(
                     // Description with suggestions (ExposedDropdownMenuBox)
                     var expandedSuggestions by remember { mutableStateOf(false) }
                     var showAllSuggestions by remember { mutableStateOf(false) }
-                    var descriptionState by rememberSaveable { mutableStateOf("") }
+                    var descriptionState by rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("")) }
                     ExposedDropdownMenuBox(
                         expanded = expandedSuggestions,
                         onExpandedChange = { /* لا تفعل شيء هنا */ }
@@ -326,9 +330,9 @@ fun AddTransactionScreen(
                             value = descriptionState,
                             onValueChange = {
                                 descriptionState = it
-                                description = it
+                                description = it.text
                                 showAllSuggestions = false
-                                expandedSuggestions = it.isNotEmpty() && suggestions.any { s -> s.startsWith(it) && s != it }
+                                expandedSuggestions = it.text.isNotEmpty() && suggestions.any { s -> s.startsWith(it.text) && s != it.text }
                             },
                             label = { Text("البيان", fontSize = labelFontSize) },
                             modifier = Modifier
@@ -356,13 +360,18 @@ fun AddTransactionScreen(
                         ) {
                             val filtered = if (showAllSuggestions)
                                 suggestions.take(10)
+                            else if (descriptionState.text.isNotEmpty())
+                                suggestions.filter { it.startsWith(descriptionState.text) && it != descriptionState.text }.take(10)
                             else
-                                suggestions.filter { it.startsWith(descriptionState) && it != descriptionState }.take(10)
+                                emptyList()
                             filtered.forEach { suggestion ->
                                 DropdownMenuItem(
                                     text = { Text(suggestion, fontSize = fieldFontSize) },
                                     onClick = {
-                                        descriptionState = suggestion
+                                        descriptionState = TextFieldValue(
+                                            suggestion,
+                                            TextRange(suggestion.length)
+                                        )
                                         description = suggestion
                                         expandedSuggestions = false
                                         showAllSuggestions = false
