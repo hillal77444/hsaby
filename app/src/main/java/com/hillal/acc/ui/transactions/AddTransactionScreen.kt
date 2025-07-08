@@ -62,6 +62,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 
 @Composable
 fun AddTransactionScreen(
@@ -435,22 +437,28 @@ fun AddTransactionScreen(
                 horizontalArrangement = buttonArrangement
             ) {
                 Button(
-                    onClick = { saveTransaction(true) },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(buttonHeight),
-                    shape = buttonShape
-                ) {
-                    Text("مدين", fontSize = buttonFontSize)
-                }
-                Button(
                     onClick = { saveTransaction(false) },
                     modifier = Modifier
                         .weight(1f)
                         .height(buttonHeight),
-                    shape = buttonShape
+                    shape = buttonShape,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50), contentColor = Color.White)
                 ) {
-                    Text("دائن", fontSize = buttonFontSize)
+                    Icon(Icons.Default.ArrowDownward, contentDescription = null)
+                    Spacer(Modifier.width(4.dp))
+                    Text("له", fontSize = buttonFontSize)
+                }
+                Button(
+                    onClick = { saveTransaction(true) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(buttonHeight),
+                    shape = buttonShape,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF44336), contentColor = Color.White)
+                ) {
+                    Icon(Icons.Default.ArrowUpward, contentDescription = null)
+                    Spacer(Modifier.width(4.dp))
+                    Text("عليه", fontSize = buttonFontSize)
                 }
                 Button(
                     onClick = { navController.navigateUp() },

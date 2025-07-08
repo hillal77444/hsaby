@@ -159,7 +159,7 @@ fun CashboxPickerField(
                                                 Icons.Default.AccountBalanceWallet,
                                                 contentDescription = null,
                                                 tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(22.dp).align(Alignment.Center)
+                                                modifier = Modifier.size(22.dp)
                                             )
                                         }
                                         Spacer(Modifier.width(14.dp))
