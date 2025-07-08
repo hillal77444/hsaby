@@ -522,39 +522,39 @@ fun AddTransactionScreen(
     if (isDialogShown) {
         AlertDialog(
             onDismissRequest = { isDialogShown = false },
-            title = null, // سنستخدم تصميم مخصص
+            title = null, // تصميم مخصص
             text = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     // أيقونة نجاح
                     Box(
                         modifier = Modifier
-                            .size(64.dp)
-                            .background(Color(0xFF4CAF50), shape = CircleShape),
+                            .size(MaterialTheme.spacing.extraLarge)
+                            .background(MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.extraLarge),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(40.dp)
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(MaterialTheme.spacing.large)
                         )
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.large))
                     Text(
                         text = "تمت إضافة المعاملة بنجاح!",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary,
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
                     Text(
                         text = "هل ترغب بإرسال إشعار؟",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             },
             confirmButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)) {
                     if (lastSavedAccount?.isWhatsappEnabled() == false) {
                         Button(onClick = {
                             // إرسال واتساب
@@ -575,15 +575,18 @@ fun AddTransactionScreen(
                                     }
                                 }
                             }
-                        }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366))) {
+                        }, colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary
+                        )) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_whatsapp),
                                 contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(20.dp)
+                                tint = MaterialTheme.colorScheme.onSecondary,
+                                modifier = Modifier.size(MaterialTheme.spacing.medium)
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("واتساب", color = Color.White)
+                            Spacer(modifier = Modifier.width(MaterialTheme.spacing.extraSmall))
+                            Text("واتساب")
                         }
                     }
                     Button(onClick = {
@@ -608,39 +611,48 @@ fun AddTransactionScreen(
                                 }
                             }
                         }
-                    }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1976D2))) {
+                    }, colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_sms),
                             contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(MaterialTheme.spacing.medium)
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("SMS", color = Color.White)
+                        Spacer(modifier = Modifier.width(MaterialTheme.spacing.extraSmall))
+                        Text("SMS")
                     }
                 }
             },
             dismissButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)) {
                     Button(onClick = {
                         isDialogShown = false
                         // إعادة تعيين الحقول
                         amount = ""
                         description = ""
                         date = System.currentTimeMillis()
-                    }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))) {
-                        Text("إضافة قيد آخر", color = Color.White)
+                    }, colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )) {
+                        Text("إضافة قيد آخر")
                     }
                     Button(onClick = {
                         isDialogShown = false
                         navController.navigateUp()
-                    }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF44336))) {
-                        Text("خروج", color = Color.White)
+                    }, colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    )) {
+                        Text("خروج")
                     }
                 }
             },
-            shape = RoundedCornerShape(20.dp),
-            containerColor = Color.White
+            shape = MaterialTheme.shapes.large,
+            containerColor = MaterialTheme.colorScheme.background
         )
     }
 }
