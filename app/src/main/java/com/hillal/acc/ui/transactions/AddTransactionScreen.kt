@@ -583,16 +583,16 @@ fun AddTransactionScreen(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(MaterialTheme.spacing.large)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.large))
+                    Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "تمت إضافة المعاملة بنجاح!",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary,
                     )
-                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "هل ترغب بإرسال إشعار؟",
                         style = MaterialTheme.typography.bodyMedium,
@@ -601,7 +601,7 @@ fun AddTransactionScreen(
                 }
             },
             confirmButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (lastSavedAccount?.isWhatsappEnabled() == false) {
                         Button(onClick = {
                             // إرسال واتساب
@@ -630,9 +630,9 @@ fun AddTransactionScreen(
                                 painter = painterResource(id = R.drawable.ic_whatsapp),
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSecondary,
-                                modifier = Modifier.size(MaterialTheme.spacing.medium)
+                                modifier = Modifier.size(12.dp)
                             )
-                            Spacer(modifier = Modifier.width(MaterialTheme.spacing.extraSmall))
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text("واتساب")
                         }
                     }
@@ -666,15 +666,15 @@ fun AddTransactionScreen(
                             painter = painterResource(id = R.drawable.ic_sms),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(MaterialTheme.spacing.medium)
+                            modifier = Modifier.size(12.dp)
                         )
-                        Spacer(modifier = Modifier.width(MaterialTheme.spacing.extraSmall))
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text("SMS")
                     }
                 }
             },
             dismissButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = {
                         isDialogShown = false
                         // إعادة تعيين الحقول
