@@ -320,14 +320,15 @@ fun AddTransactionScreen(
                     var descriptionState by rememberSaveable { mutableStateOf("") }
                     ExposedDropdownMenuBox(
                         expanded = expandedSuggestions,
-                        onExpandedChange = { expandedSuggestions = it }
+                        onExpandedChange = { /* لا تفعل شيء هنا */ }
                     ) {
                         OutlinedTextField(
                             value = descriptionState,
                             onValueChange = {
                                 descriptionState = it
+                                description = it
                                 showAllSuggestions = false
-                                expandedSuggestions = suggestions.any { s -> s.startsWith(it) } && it.isNotEmpty()
+                                expandedSuggestions = it.isNotEmpty() && suggestions.any { s -> s.startsWith(it) && s != it }
                             },
                             label = { Text("البيان", fontSize = labelFontSize) },
                             modifier = Modifier
@@ -338,8 +339,8 @@ fun AddTransactionScreen(
                             trailingIcon = {
                                 if (suggestions.isNotEmpty()) {
                                     IconButton(onClick = {
-                                        showAllSuggestions = !showAllSuggestions
-                                        expandedSuggestions = showAllSuggestions
+                                        showAllSuggestions = true
+                                        expandedSuggestions = true
                                     }) {
                                         Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                                     }
@@ -353,10 +354,10 @@ fun AddTransactionScreen(
                                 showAllSuggestions = false
                             }
                         ) {
-                            val filtered = if (showAllSuggestions || descriptionState.isEmpty())
-                                suggestions.take(5)
+                            val filtered = if (showAllSuggestions)
+                                suggestions.take(10)
                             else
-                                suggestions.filter { it.startsWith(descriptionState) && it != descriptionState }.take(5)
+                                suggestions.filter { it.startsWith(descriptionState) && it != descriptionState }.take(10)
                             filtered.forEach { suggestion ->
                                 DropdownMenuItem(
                                     text = { Text(suggestion, fontSize = fieldFontSize) },
