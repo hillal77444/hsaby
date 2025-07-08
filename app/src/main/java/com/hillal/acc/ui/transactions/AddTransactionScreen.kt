@@ -315,53 +315,66 @@ fun AddTransactionScreen(
                     Spacer(modifier = Modifier.height(verticalSpacing))
                     // Description with suggestions (ExposedDropdownMenuBox)
                     var expandedSuggestions by remember { mutableStateOf(false) }
+                    var showAllSuggestions by remember { mutableStateOf(false) }
                     var descriptionState by rememberSaveable { mutableStateOf("") }
                     ExposedDropdownMenuBox(
-                        expanded = expandedSuggestions && suggestions.isNotEmpty(),
+                        expanded = expandedSuggestions,
                         onExpandedChange = { expandedSuggestions = it }
                     ) {
                         OutlinedTextField(
                             value = descriptionState,
                             onValueChange = {
                                 descriptionState = it
-                                description = it
+                                showAllSuggestions = false
                                 expandedSuggestions = suggestions.any { s -> s.startsWith(it) } && it.isNotEmpty()
                             },
                             label = { Text("البيان", fontSize = labelFontSize) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .menuAnchor(), // مهم مع ExposedDropdownMenuBox
+                                .menuAnchor(),
                             leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
                             textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize),
                             trailingIcon = {
                                 if (suggestions.isNotEmpty()) {
-                                    IconButton(onClick = { expandedSuggestions = !expandedSuggestions }) {
+                                    IconButton(onClick = {
+                                        showAllSuggestions = !showAllSuggestions
+                                        expandedSuggestions = showAllSuggestions
+                                    }) {
                                         Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                                     }
                                 }
                             }
                         )
                         ExposedDropdownMenu(
-                            expanded = expandedSuggestions && suggestions.isNotEmpty(),
-                            onDismissRequest = { expandedSuggestions = false }
+                            expanded = expandedSuggestions,
+                            onDismissRequest = {
+                                expandedSuggestions = false
+                                showAllSuggestions = false
+                            }
                         ) {
-                            suggestions.filter { it.startsWith(descriptionState) && it != descriptionState }
-                                .take(5)
-                                .forEach { suggestion ->
-                                    DropdownMenuItem(
-                                        text = { Text(suggestion, fontSize = fieldFontSize) },
-                                        onClick = {
-                                            descriptionState = suggestion
-                                            description = suggestion
-                                            expandedSuggestions = false
-                                        }
-                                    )
-                                }
+                            val filtered = if (showAllSuggestions || descriptionState.isEmpty())
+                                suggestions.take(5)
+                            else
+                                suggestions.filter { it.startsWith(descriptionState) && it != descriptionState }.take(5)
+                            filtered.forEach { suggestion ->
+                                DropdownMenuItem(
+                                    text = { Text(suggestion, fontSize = fieldFontSize) },
+                                    onClick = {
+                                        descriptionState = suggestion
+                                        description = suggestion
+                                        expandedSuggestions = false
+                                        showAllSuggestions = false
+                                    }
+                                )
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(verticalSpacing))
                     // Currency Radio Buttons
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         RadioButton(
                             selected = currency == context.getString(R.string.currency_yer),
                             onClick = { currency = context.getString(R.string.currency_yer) }
