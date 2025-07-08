@@ -63,6 +63,7 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.foundation.horizontalScroll
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
