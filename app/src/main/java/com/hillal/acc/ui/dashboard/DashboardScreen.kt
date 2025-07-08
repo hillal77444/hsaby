@@ -57,7 +57,7 @@ fun DashboardScreen(
     val screenWidth = with(LocalDensity.current) { configuration.screenWidthDp.dp }
     val screenHeight = with(LocalDensity.current) { configuration.screenHeightDp.dp }
     val blueHeight = screenHeight * 0.12f
-    val logoSize = screenWidth * 0.18f
+    val logoSize = screenWidth * 0.12f
     val cardCorner = screenWidth * 0.07f
     val cardPadding = screenWidth * 0.028f
     val fontTitle = (screenWidth.value / 15).sp
