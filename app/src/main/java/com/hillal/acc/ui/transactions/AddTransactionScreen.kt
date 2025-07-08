@@ -232,58 +232,8 @@ fun AddTransactionScreen(
                 .imePadding()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            // Header background (info color with scale)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(140.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(infoColor, Color.White),
-                            startY = 0f,
-                            endY = 400f
-                        )
-                    )
-                    .graphicsLayer {
-                        scaleX = 2.2f
-                        scaleY = 1.2f
-                    }
-            )
-            // Icon Card
-            Card(
-                modifier = Modifier
-                    .size(72.dp)
-                    .offset(y = (-100).dp)
-                    .align(CenterHorizontally),
-                shape = RoundedCornerShape(36.dp), // Changed from CircleShape to RoundedCornerShape
-                elevation = CardDefaults.cardElevation(8.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_add_circle),
-                        contentDescription = null,
-                        tint = Color(0xFF1976D2),
-                        modifier = Modifier.size(48.dp)
-                    )
-                }
-            }
-            // Title
-            Text(
-                text = "إضافة معاملة جديدة",
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-                color = Color.White,
-                modifier = Modifier.align(CenterHorizontally).offset(y = (-90).dp)
-            )
-            // Subtitle
-            Text(
-                text = "يرجى تعبئة بيانات المعاملة بدقة",
-                fontSize = 14.sp,
-                color = Color(0xFF666666),
-                modifier = Modifier.align(CenterHorizontally).offset(y = (-90).dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            // تم حذف البطاقات العلوية (الخلفية، الأيقونة، العنوان، والنص التوضيحي)
+            Spacer(modifier = Modifier.height(32.dp)) // تباعد علوي بسيط
             // Main Card
             Card(
                 modifier = Modifier
@@ -355,10 +305,13 @@ fun AddTransactionScreen(
                         )
                     }
                     Spacer(modifier = Modifier.height(verticalSpacing))
-                    // Description with suggestions
+                    // Description with suggestions (ExposedDropdownMenuBox)
                     var expandedSuggestions by remember { mutableStateOf(false) }
                     var descriptionState by rememberSaveable { mutableStateOf("") }
-                    Box {
+                    ExposedDropdownMenuBox(
+                        expanded = expandedSuggestions && suggestions.isNotEmpty(),
+                        onExpandedChange = { expandedSuggestions = it }
+                    ) {
                         OutlinedTextField(
                             value = descriptionState,
                             onValueChange = {
@@ -367,7 +320,9 @@ fun AddTransactionScreen(
                                 expandedSuggestions = suggestions.any { s -> s.startsWith(it) } && it.isNotEmpty()
                             },
                             label = { Text("البيان", fontSize = labelFontSize) },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(), // مهم مع ExposedDropdownMenuBox
                             leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
                             textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize),
                             trailingIcon = {
@@ -378,33 +333,24 @@ fun AddTransactionScreen(
                                 }
                             }
                         )
-                        DropdownMenu(
+                        ExposedDropdownMenu(
                             expanded = expandedSuggestions && suggestions.isNotEmpty(),
-                            onDismissRequest = { expandedSuggestions = false },
-                            modifier = Modifier.fillMaxWidth()
+                            onDismissRequest = { expandedSuggestions = false }
                         ) {
-                            suggestions.filter { it.startsWith(descriptionState) && it != descriptionState }.take(5).forEach { suggestion ->
-                                DropdownMenuItem(
-                                    text = { Text(suggestion, fontSize = fieldFontSize) },
-                                    onClick = {
-                                        descriptionState = suggestion
-                                        description = suggestion
-                                        expandedSuggestions = false
-                                    }
-                                )
-                            }
+                            suggestions.filter { it.startsWith(descriptionState) && it != descriptionState }
+                                .take(5)
+                                .forEach { suggestion ->
+                                    DropdownMenuItem(
+                                        text = { Text(suggestion, fontSize = fieldFontSize) },
+                                        onClick = {
+                                            descriptionState = suggestion
+                                            description = suggestion
+                                            expandedSuggestions = false
+                                        }
+                                    )
+                                }
                         }
                     }
-                    Spacer(modifier = Modifier.height(verticalSpacing))
-                    // Notes
-                    OutlinedTextField(
-                        value = notes,
-                        onValueChange = { notes = it },
-                        label = { Text("ملاحظات", fontSize = labelFontSize) },
-                        modifier = Modifier.fillMaxWidth(),
-                        leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
-                        textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize)
-                    )
                     Spacer(modifier = Modifier.height(verticalSpacing))
                     // Currency Radio Buttons
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -425,6 +371,19 @@ fun AddTransactionScreen(
                             onClick = { currency = context.getString(R.string.currency_usd) }
                         )
                         Text("دولار", fontSize = labelFontSize)
+                    }
+                    // Notes (hidden by default)
+                    val showNotes = false
+                    if (showNotes) {
+                        OutlinedTextField(
+                            value = notes,
+                            onValueChange = { notes = it },
+                            label = { Text("ملاحظات", fontSize = labelFontSize) },
+                            modifier = Modifier.fillMaxWidth(),
+                            leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
+                            textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize)
+                        )
+                        Spacer(modifier = Modifier.height(verticalSpacing))
                     }
                 }
             }
