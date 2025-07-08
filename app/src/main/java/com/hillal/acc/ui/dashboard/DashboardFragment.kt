@@ -30,6 +30,9 @@ import org.json.JSONObject
 import java.util.Locale
 import kotlin.math.roundToInt
 import androidx.compose.ui.platform.ComposeView
+import com.hillal.acc.data.room.AccountDao
+import com.hillal.acc.data.room.TransactionDao
+import com.hillal.acc.data.room.PendingOperationDao
 
 class DashboardFragment : Fragment() {
     private lateinit var dashboardViewModel: DashboardViewModel

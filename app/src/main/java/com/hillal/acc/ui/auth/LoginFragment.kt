@@ -54,6 +54,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.ui.graphics.graphicsLayer
 import com.hillal.acc.ui.auth.LoginScreen
+import com.hillal.acc.data.room.AccountDao
+import com.hillal.acc.data.room.TransactionDao
+import com.hillal.acc.data.room.PendingOperationDao
 
 class LoginFragment : Fragment() {
     private var authViewModel: AuthViewModel? = null
