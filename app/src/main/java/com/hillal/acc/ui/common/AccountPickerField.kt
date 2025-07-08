@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.sp
 import com.hillal.acc.data.model.Account
 import com.hillal.acc.data.model.Transaction
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
