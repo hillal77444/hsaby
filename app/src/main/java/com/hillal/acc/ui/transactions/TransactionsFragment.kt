@@ -59,6 +59,9 @@ import kotlin.math.abs
 import com.hillal.acc.data.db.AppDatabase
 import com.hillal.acc.data.model.PendingOperation
 import com.google.gson.Gson
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.state.MutableState
+import androidx.compose.ui.state.observeAsState
 
 class TransactionsFragment : Fragment() {
     private var binding: FragmentTransactionsBinding? = null
@@ -117,8 +120,22 @@ class TransactionsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentTransactionsBinding.inflate(inflater, container, false)
-        return binding!!.root
+        return ComposeView(requireContext()).apply {
+            setContent {
+                val viewModel: TransactionsViewModel = viewModel()
+                val transactions by viewModel.getTransactions().observeAsState(emptyList())
+                // TODO: Add other state and callbacks as needed
+                TransactionsScreen(
+                    transactions = transactions,
+                    onAddClick = { /* TODO: Navigate to add transaction */ },
+                    onDelete = { /* TODO: Handle delete */ },
+                    onEdit = { /* TODO: Handle edit */ },
+                    onWhatsApp = { /* TODO: Handle WhatsApp */ },
+                    onSms = { /* TODO: Handle SMS */ }
+                    // Add other parameters as needed
+                )
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
