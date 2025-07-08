@@ -78,6 +78,7 @@ class AddTransactionFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
+<<<<<<< HEAD
     ): View {
         // تحميل الحسابات
         accountViewModel!!.getAllAccounts().observe(this) { accounts ->
@@ -133,6 +134,24 @@ class AddTransactionFragment : Fragment() {
                 )
             }
         }
+=======
+    ): View? {
+        binding = FragmentAddTransactionBinding.inflate(inflater, container, false)
+        val view: View = binding!!.getRoot()
+        setupViews()
+        setupListeners()
+        loadAccounts()
+        loadAllTransactions()
+        setupAccountPicker()
+        setupCashboxDropdown()
+        transactionsViewModel!!.accountBalancesMap.observe(
+            getViewLifecycleOwner(),
+            Observer { balancesMap: MutableMap<Long?, MutableMap<String?, Double?>?>? ->
+                accountBalancesMap =
+                    if (balancesMap != null) balancesMap else HashMap<Long?, MutableMap<String?, Double?>?>()
+            })
+        return view
+>>>>>>> parent of 867d86c04 (تصميم اضافه معامله بشكل جديد)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
