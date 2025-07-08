@@ -30,6 +30,12 @@ import com.hillal.acc.ui.dashboard.DashboardViewModel
 import kotlin.math.roundToInt
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.layout.systemBarsPadding
 
 @Composable
 fun DashboardScreen(
@@ -57,7 +63,7 @@ fun DashboardScreen(
     val screenWidth = with(LocalDensity.current) { configuration.screenWidthDp.dp }
     val screenHeight = with(LocalDensity.current) { configuration.screenHeightDp.dp }
     val blueHeight = screenHeight * 0.12f
-    val logoSize = screenWidth * 0.12f
+    val logoSize = screenWidth * 0.18f
     val cardCorner = screenWidth * 0.07f
     val cardPadding = screenWidth * 0.028f
     val fontTitle = (screenWidth.value / 15).sp
@@ -76,6 +82,7 @@ fun DashboardScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF7F7F7))
+            .navigationBarsPadding() // يضيف padding سفلي تلقائي حسب النظام
     ) {
         Column(
             modifier = Modifier
