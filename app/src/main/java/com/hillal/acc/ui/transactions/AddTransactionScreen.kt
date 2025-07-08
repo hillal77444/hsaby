@@ -69,6 +69,7 @@ import androidx.compose.ui.text.input.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.ui.graphics.Offset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -239,7 +240,51 @@ fun AddTransactionScreen(
                 .imePadding()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            // تم حذف البطاقات العلوية (الخلفية، الأيقونة، العنوان، والنص التوضيحي)
+            // بطاقة العنوان في الأعلى
+            val cardMaxHeight = maxHeight * 0.25f
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = horizontalPadding, vertical = 16.dp),
+                shape = MaterialTheme.shapes.large,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(cardMaxHeight)
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primaryContainer,
+                                    MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+                                ),
+                                start = Offset(0f, 0f),
+                                end = Offset(400f, 100f)
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // رسم ديكوري في الخلفية
+                    Icon(
+                        imageVector = Icons.Default.AttachMoney,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                        modifier = Modifier
+                            .size(cardMaxHeight * 1.2f)
+                            .align(Alignment.CenterEnd)
+                            .offset(x = 40.dp, y = 0.dp)
+                    )
+                    // نص العنوان في المقدمة
+                    Text(
+                        text = "إضافة معاملة جديدة",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(32.dp)) // تباعد علوي بسيط
             // Main Card
             Card(
