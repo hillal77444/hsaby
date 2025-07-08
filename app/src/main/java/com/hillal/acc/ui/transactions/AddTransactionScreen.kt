@@ -38,19 +38,28 @@ import com.hillal.acc.viewmodel.CashboxViewModel
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ExperimentalMaterial3Api
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTransactionScreen(
-    transactionsViewModel: TransactionsViewModel = viewModel(),
-    accountViewModel: AccountViewModel = viewModel(),
-    cashboxViewModel: CashboxViewModel = viewModel(),
+    accounts: List<Account>,
+    cashboxes: List<Cashbox>,
+    suggestions: List<String>,
+    selectedAccountId: Long,
+    selectedCashboxId: Long,
+    accountBalancesMap: Map<Long, Map<String, Double>>,
+    onAccountSelected: (Long) -> Unit,
+    onCashboxSelected: (Long) -> Unit,
+    onAddCashbox: (String?) -> Unit,
+    onSuggestionSelected: (String) -> Unit,
+    onSaveCredit: (accountId: Long, amount: Double, description: String, notes: String, currency: String, date: Long, cashboxId: Long) -> Unit,
+    onSaveDebit: (accountId: Long, amount: Double, description: String, notes: String, currency: String, date: Long, cashboxId: Long) -> Unit,
     onCancel: () -> Unit
 ) {
-    val accounts by accountViewModel.getAllAccounts().observeAsState(emptyList())
-    val cashboxes by cashboxViewModel.getAllCashboxes().observeAsState(emptyList())
-
-    var selectedAccount by remember { mutableStateOf<Account?>(null) }
-    var selectedCashbox by remember { mutableStateOf<Cashbox?>(null) }
+    var selectedAccount by remember { mutableStateOf(accounts.find { it.id == selectedAccountId }) }
+    var selectedCashbox by remember { mutableStateOf(cashboxes.find { it.id == selectedCashboxId }) }
     var amount by remember { mutableStateOf("") }
     var date by remember { mutableStateOf(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())) }
     var selectedCurrency by remember { mutableStateOf("ريال يمني") }
@@ -59,6 +68,11 @@ fun AddTransactionScreen(
     var showDatePicker by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var successMessage by remember { mutableStateOf<String?>(null) }
+    var showAccountDropdown by remember { mutableStateOf(false) }
+    var showCashboxDropdown by remember { mutableStateOf(false) }
+    var showSuggestions by remember { mutableStateOf(false) }
+    var showAccountSheet by remember { mutableStateOf(false) }
+    var accountSearch by remember { mutableStateOf("") }
 
     if (showDatePicker) {
         androidx.compose.material3.AlertDialog(
@@ -152,12 +166,15 @@ fun AddTransactionScreen(
             Column(modifier = Modifier.padding(14.dp)) {
                 // Row: الحساب والصندوق
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // حقل الحساب
                     OutlinedTextField(
                         value = selectedAccount?.getName() ?: "",
                         onValueChange = { },
                         label = { Text("اختر الحساب") },
                         leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .fillMaxWidth(0.92f)
+                            .clickable { showAccountSheet = true },
                         singleLine = true,
                         readOnly = true,
                         colors = OutlinedTextFieldDefaults.colors(
@@ -165,6 +182,52 @@ fun AddTransactionScreen(
                             unfocusedBorderColor = Color(0xFF1976D2)
                         )
                     )
+                    if (showAccountSheet) {
+                        ModalBottomSheet(onDismissRequest = { showAccountSheet = false }) {
+                            Column(Modifier.padding(16.dp)) {
+                                OutlinedTextField(
+                                    value = accountSearch,
+                                    onValueChange = { accountSearch = it },
+                                    label = { Text("بحث عن حساب") },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                val filteredAccounts = if (accountSearch.isBlank()) accounts else accounts.filter { it.getName().contains(accountSearch, ignoreCase = true) }
+                                if (filteredAccounts.isEmpty()) {
+                                    Text("لا توجد حسابات مطابقة", color = Color.Gray, modifier = Modifier.padding(8.dp))
+                                } else {
+                                    filteredAccounts.forEach { account ->
+                                        val balances = accountBalancesMap[account.id] ?: emptyMap()
+                                        Row(
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .clickable {
+                                                    selectedAccount = account
+                                                    onAccountSelected(account.id)
+                                                    showAccountSheet = false
+                                                    accountSearch = ""
+                                                }
+                                                .padding(vertical = 12.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Column {
+                                                Text(account.getName(), fontWeight = FontWeight.Medium)
+                                                if (balances.isNotEmpty()) {
+                                                    Text(
+                                                        balances.entries.joinToString(" | ") { (currency, value) -> "الرصيد: ${value.toLong()} $currency" },
+                                                        color = Color(0xFF1976D2), fontSize = 13.sp
+                                                    )
+                                                }
+                                                if (!account.getNotes().isNullOrBlank()) {
+                                                    Text(account.getNotes()!!, color = Color.Gray, fontSize = 12.sp)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                     OutlinedTextField(
                         value = selectedCashbox?.name ?: "",
                         onValueChange = { },
@@ -226,12 +289,30 @@ fun AddTransactionScreen(
                 Spacer(Modifier.height(12.dp))
                 OutlinedTextField(
                     value = description,
-                    onValueChange = { description = it },
+                    onValueChange = {
+                        description = it
+                        showSuggestions = it.isNotBlank() && suggestions.isNotEmpty()
+                    },
                     label = { Text("البيان") },
                     singleLine = false,
                     minLines = 2,
                     modifier = Modifier.fillMaxWidth(0.92f)
                 )
+                DropdownMenu(
+                    expanded = showSuggestions,
+                    onDismissRequest = { showSuggestions = false }
+                ) {
+                    suggestions.filter { it.contains(description) }.forEach { suggestion ->
+                        DropdownMenuItem(
+                            text = { Text(suggestion) },
+                            onClick = {
+                                description = suggestion
+                                onSuggestionSelected(suggestion)
+                                showSuggestions = false
+                            }
+                        )
+                    }
+                }
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = notes,
@@ -260,18 +341,16 @@ fun AddTransactionScreen(
                                 errorMessage = "الرجاء إدخال مبلغ صحيح"
                                 return@Button
                             }
-                            val transaction = Transaction(
+                            val dateMillis = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(date)?.time ?: System.currentTimeMillis()
+                            onSaveCredit(
                                 selectedAccount!!.id,
                                 amount.toDouble(),
-                                "credit",
                                 description,
-                                selectedCurrency
+                                notes,
+                                selectedCurrency,
+                                dateMillis,
+                                selectedCashbox?.id ?: -1L
                             )
-                            transaction.setNotes(notes)
-                            transaction.setTransactionDate(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(date)?.time ?: System.currentTimeMillis())
-                            transaction.setCashboxId(selectedCashbox?.id ?: -1)
-                            transactionsViewModel.insertTransaction(transaction)
-                            successMessage = "تمت إضافة المعاملة بنجاح"
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
@@ -292,18 +371,16 @@ fun AddTransactionScreen(
                                 errorMessage = "الرجاء إدخال مبلغ صحيح"
                                 return@Button
                             }
-                            val transaction = Transaction(
+                            val dateMillis = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(date)?.time ?: System.currentTimeMillis()
+                            onSaveDebit(
                                 selectedAccount!!.id,
                                 amount.toDouble(),
-                                "debit",
                                 description,
-                                selectedCurrency
+                                notes,
+                                selectedCurrency,
+                                dateMillis,
+                                selectedCashbox?.id ?: -1L
                             )
-                            transaction.setNotes(notes)
-                            transaction.setTransactionDate(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(date)?.time ?: System.currentTimeMillis())
-                            transaction.setCashboxId(selectedCashbox?.id ?: -1)
-                            transactionsViewModel.insertTransaction(transaction)
-                            successMessage = "تمت إضافة المعاملة بنجاح"
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF44336))

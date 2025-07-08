@@ -44,39 +44,34 @@ import java.util.Calendar
 import java.util.Locale
 import kotlin.math.abs
 
-class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
-    private var binding: FragmentAddTransactionBinding? = null
+class AddTransactionFragment : Fragment() {
     private var transactionsViewModel: TransactionsViewModel? = null
     private var accountViewModel: AccountViewModel? = null
+    private var cashboxViewModel: CashboxViewModel? = null
+    private var transactionRepository: TransactionRepository? = null
     private var userPreferences: UserPreferences? = null
-    private var selectedAccountId: Long = -1
-    private val calendar: Calendar = Calendar.getInstance()
-    private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale("ar"))
-    private var allAccounts: MutableList<Account?>? = ArrayList<Account?>()
-    private var allTransactions: MutableList<Transaction> = ArrayList<Transaction>()
-    private var accountBalancesMap: MutableMap<Long?, MutableMap<String?, Double?>?> =
-        HashMap<Long?, MutableMap<String?, Double?>?>()
+    private var allAccounts: List<Account> = emptyList()
+    private var allCashboxes: List<Cashbox> = emptyList()
+    private var suggestions: List<String> = emptyList()
+    private var selectedAccountId: Long = -1L
+    private var selectedCashboxId: Long = -1L
+    private var mainCashboxId: Long = -1L
+    private var isDialogShown = false
     private var lastSavedTransaction: Transaction? = null
     private var lastSavedAccount: Account? = null
     private var lastSavedBalance = 0.0
-    private var transactionRepository: TransactionRepository? = null
-    private var isDialogShown = false
-    private var selectedCashboxId: Long = -1
-    private var mainCashboxId: Long = -1
-    private var allCashboxes: MutableList<Cashbox> = ArrayList<Cashbox>()
-    private var cashboxViewModel: CashboxViewModel? = null
+    private val calendar: Calendar = Calendar.getInstance()
+    private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale("ar"))
+    private var accountBalancesMap: Map<Long, Map<String, Double>> = emptyMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        transactionsViewModel =
-            ViewModelProvider(this).get<TransactionsViewModel>(TransactionsViewModel::class.java)
-        accountViewModel =
-            ViewModelProvider(this).get<AccountViewModel>(AccountViewModel::class.java)
+        transactionsViewModel = ViewModelProvider(this).get(TransactionsViewModel::class.java)
+        accountViewModel = ViewModelProvider(this).get(AccountViewModel::class.java)
+        cashboxViewModel = ViewModelProvider(this).get(CashboxViewModel::class.java)
         userPreferences = UserPreferences(requireContext())
         val app = requireActivity().getApplication() as App
         transactionRepository = TransactionRepository(app.getDatabase())
-        cashboxViewModel =
-            ViewModelProvider(this).get<CashboxViewModel>(CashboxViewModel::class.java)
     }
 
     override fun onCreateView(
@@ -84,9 +79,56 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // تحميل الحسابات
+        accountViewModel!!.getAllAccounts().observe(this) { accounts ->
+            allAccounts = accounts.filterNotNull()
+        }
+        // تحميل الصناديق
+        cashboxViewModel!!.getAllCashboxes().observe(this) { cashboxes ->
+            allCashboxes = cashboxes.filterNotNull()
+        }
+        // تحميل الاقتراحات (افتراضيًا للحساب الأول)
+        if (allAccounts.isNotEmpty()) {
+            loadAccountSuggestions(allAccounts[0].id)
+        }
+        // تحميل الأرصدة
+        transactionsViewModel!!.accountBalancesMap.observe(this) { balancesMap ->
+            accountBalancesMap = balancesMap?.mapNotNull { (k, v) ->
+                if (k != null && v != null) k to v.filterKeys { it != null }.mapKeys { it.key!! }.filterValues { it != null }.mapValues { it.value!! } else null
+            }?.toMap() ?: emptyMap()
+        }
         return androidx.compose.ui.platform.ComposeView(requireContext()).apply {
             setContent {
                 AddTransactionScreen(
+                    accounts = allAccounts,
+                    cashboxes = allCashboxes,
+                    suggestions = suggestions,
+                    accountBalancesMap = accountBalancesMap,
+                    selectedAccountId = selectedAccountId,
+                    selectedCashboxId = selectedCashboxId,
+                    onAccountSelected = { id ->
+                        selectedAccountId = id
+                        loadAccountSuggestions(id)
+                    },
+                    onCashboxSelected = { id ->
+                        selectedCashboxId = id
+                    },
+                    onAddCashbox = { name ->
+                        openAddCashboxDialog(name)
+                    },
+                    onSuggestionSelected = { suggestion ->
+                        // يمكن تحديث حقل البيان في Compose عبر State
+                    },
+                    onSaveCredit = { accountId, amount, description, notes, currency, date, cashboxId ->
+                        saveTransactionFromCompose(
+                            accountId, amount, description, notes, currency, date, cashboxId, isDebit = false
+                        )
+                    },
+                    onSaveDebit = { accountId, amount, description, notes, currency, date, cashboxId ->
+                        saveTransactionFromCompose(
+                            accountId, amount, description, notes, currency, date, cashboxId, isDebit = true
+                        )
+                    },
                     onCancel = { requireActivity().onBackPressedDispatcher.onBackPressed() }
                 )
             }
@@ -100,7 +142,7 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
         }
         // ضبط insets للجذر عند ظهور الكيبورد أو أزرار النظام
         ViewCompat.setOnApplyWindowInsetsListener(
-            binding!!.getRoot(),
+            view,
             OnApplyWindowInsetsListener { v: View?, insets: WindowInsetsCompat? ->
                 var bottom = insets!!.getInsets(WindowInsetsCompat.Type.ime()).bottom
                 if (bottom == 0) {
@@ -118,8 +160,8 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
         transactionsViewModel!!.accountBalancesMap.observe(
             getViewLifecycleOwner(),
             Observer { balancesMap: MutableMap<Long?, MutableMap<String?, Double?>?>? ->
-                accountBalancesMap =
-                    if (balancesMap != null) balancesMap else HashMap<Long?, MutableMap<String?, Double?>?>()
+                // accountBalancesMap =
+                //     if (balancesMap != null) balancesMap else HashMap<Long?, MutableMap<String?, Double?>?>()
             })
     }
 
@@ -303,6 +345,67 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
         } catch (e: NumberFormatException) {
             binding!!.amountEditText.setError(getString(R.string.error_invalid_amount))
         }
+    }
+
+    private fun saveTransactionFromCompose(
+        accountId: Long,
+        amount: Double,
+        description: String,
+        notes: String,
+        currency: String,
+        date: Long,
+        cashboxId: Long,
+        isDebit: Boolean
+    ) {
+        // نفس منطق saveTransaction القديم لكن استخدم القيم القادمة من Compose
+        if (accountId == -1L) {
+            Toast.makeText(requireContext(), "الرجاء اختيار الحساب", Toast.LENGTH_SHORT).show()
+            return
+        }
+        accountViewModel!!.getAccountById(accountId)
+            .observe(viewLifecycleOwner, Observer { account: Account? ->
+                if (account != null) {
+                    val transaction = Transaction(
+                        accountId,
+                        amount,
+                        if (isDebit) "debit" else "credit",
+                        description,
+                        currency
+                    )
+                    transaction.id = System.currentTimeMillis()
+                    transaction.setNotes(notes)
+                    transaction.setTransactionDate(date)
+                    transaction.setUpdatedAt(System.currentTimeMillis())
+                    transaction.setServerId(-1)
+                    transaction.setWhatsappEnabled(account.isWhatsappEnabled())
+                    transaction.setCashboxId(cashboxId)
+                    transactionsViewModel!!.insertTransaction(transaction)
+                    lastSavedTransaction = transaction
+                    lastSavedAccount = account
+                    transactionRepository!!.getBalanceUntilDate(
+                        accountId,
+                        transaction.getTransactionDate(),
+                        currency
+                    ).observe(viewLifecycleOwner, Observer { balance: Double? ->
+                        lastSavedBalance = balance ?: 0.0
+                        showSuccessDialog()
+                    })
+                    // تحديث اقتراحات البيان
+                    if (description.isNotBlank()) {
+                        val prefs = requireContext().getSharedPreferences(
+                            "suggestions",
+                            Context.MODE_PRIVATE
+                        )
+                        val key = "descriptions_" + accountId
+                        var suggestions: MutableSet<String?> =
+                            prefs.getStringSet(key, HashSet<String?>())!!
+                        suggestions = HashSet<String?>(suggestions)
+                        suggestions.add(description)
+                        prefs.edit().putStringSet(key, suggestions).apply()
+                        loadAccountSuggestions(accountId)
+                    }
+                }
+            })
     }
 
     private val selectedCurrency: String
@@ -538,8 +641,9 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
 
     private fun loadAccountSuggestions(accountId: Long) {
         val prefs = requireContext().getSharedPreferences("suggestions", Context.MODE_PRIVATE)
-        val suggestions: MutableSet<String?> =
-            prefs.getStringSet("descriptions_" + accountId, HashSet<String?>())!!
+        val key = "descriptions_" + accountId
+        val set = prefs.getStringSet(key, HashSet<String>())
+        suggestions = set?.filterNotNull() ?: emptyList()
         val adapter = ArrayAdapter<String?>(
             requireContext(),
             R.layout.dropdown_item_suggestion,
