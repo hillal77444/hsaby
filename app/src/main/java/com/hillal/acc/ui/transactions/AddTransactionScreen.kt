@@ -70,6 +70,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.material.icons.filled.Star
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -234,7 +235,7 @@ fun AddTransactionScreen(
         val infoColor = Color(0xFF1976D2).copy(alpha = 0.15f)
         val primaryColor = MaterialTheme.colorScheme.primary
         val cardShape = RoundedCornerShape(20.dp)
-        val cardMaxHeight = this@BoxWithConstraints.maxHeight * 0.25f
+        val cardMaxHeight = this@BoxWithConstraints.maxHeight * 0.18f
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -281,6 +282,15 @@ fun AddTransactionScreen(
                             modifier = Modifier.size(cardMaxHeight * 1.2f)
                         )
                     }
+                    // أيقونة جميلة فوق العنوان
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier
+                            .size(cardMaxHeight * 0.4f)
+                            .align(Alignment.Center)
+                    )
                     // نص العنوان في المقدمة
                     Text(
                         text = "إضافة معاملة جديدة",
@@ -290,7 +300,7 @@ fun AddTransactionScreen(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(32.dp)) // تباعد علوي بسيط
+            Spacer(modifier = Modifier.height(this@BoxWithConstraints.maxHeight * 0.01f)) // تباعد نسبي أصغر
             // Main Card
             Card(
                 modifier = Modifier
