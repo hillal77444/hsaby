@@ -42,6 +42,10 @@ public class SyncManager {
             return;
         }
 
+        // عند المزامنة:
+        // 1. اجلب جميع العمليات المعلقة من PendingOperationDao
+        // 2. إذا كانت العملية DELETE، أرسل طلب حذف للـ API، وإذا نجح، احذف المعاملة محليًا واحذف العملية من الجدول
+        // 3. إذا كانت العملية UPDATE، أرسل التعديل للـ API، وإذا نجح، حدث المعاملة محليًا واحذف العملية من الجدول
         dataManager.fetchDataFromServer(new DataManager.DataCallback() {
             @Override
             public void onSuccess() {

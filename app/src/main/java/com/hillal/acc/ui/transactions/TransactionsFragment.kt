@@ -55,6 +55,15 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import kotlin.math.abs
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.bundleOf
+import com.hillal.acc.data.db.AppDatabase
+import com.hillal.acc.data.model.PendingOperation
+import com.google.gson.Gson
 
 class TransactionsFragment : Fragment() {
     private var binding: FragmentTransactionsBinding? = null
@@ -112,9 +121,82 @@ class TransactionsFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        binding = FragmentTransactionsBinding.inflate(inflater, container, false)
-        return binding!!.getRoot()
+    ): View {
+        return ComposeView(requireContext()).apply {
+            setContent {
+                val viewModel: TransactionsViewModel = viewModel()
+                val transactions by viewModel.getTransactions().observeAsState(emptyList())
+                val context = LocalContext.current
+                val calendar = Calendar.getInstance()
+                val endDateDefault = calendar.timeInMillis
+                calendar.add(Calendar.DAY_OF_MONTH, -7)
+                val startDateDefault = calendar.timeInMillis
+                var startDate by rememberSaveable { mutableStateOf(startDateDefault) }
+                var endDate by rememberSaveable { mutableStateOf(endDateDefault) }
+                TransactionsScreen(
+                    transactions = transactions,
+                    onAddClick = { /* TODO: استدعاء شاشة الإضافة */ },
+                    onDelete = { transaction ->
+                        // سجل عملية الحذف في PendingOperation فقط، ولا تخفِ المعاملة من الواجهة
+                        val pendingOp = PendingOperation("DELETE", transaction.getId(), null)
+                        val db = AppDatabase.getInstance(context)
+                        db.pendingOperationDao().insert(pendingOp)
+                        Toast.makeText(context, "تمت جدولة حذف المعاملة وستحذف بعد المزامنة مع الخادم", Toast.LENGTH_SHORT).show()
+                    },
+                    onEdit = { transaction ->
+                        // سجل عملية التعديل في PendingOperation
+                        val transactionJson = Gson().toJson(transaction)
+                        val pendingOp = PendingOperation("UPDATE", transaction.getId(), transactionJson)
+                        val db = AppDatabase.getInstance(context)
+                        db.pendingOperationDao().insert(pendingOp)
+                        Toast.makeText(context, "تمت جدولة تعديل المعاملة وستعدل بعد المزامنة مع الخادم", Toast.LENGTH_SHORT).show()
+                    },
+                    onWhatsApp = { transaction ->
+                        val accountName = transaction.getAccountName() ?: "--"
+                        val phone = transaction.getPhoneNumber() ?: ""
+                        if (phone.isEmpty()) {
+                            Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                            return@TransactionsScreen
+                        }
+                        val balance = 0.0 // يمكنك جلب الرصيد من ViewModel إذا أردت دقة أعلى
+                        val msg = NotificationUtils.buildWhatsAppMessage(context, accountName, transaction, balance, transaction.getType())
+                        NotificationUtils.sendWhatsAppMessage(context, phone, msg)
+                    },
+                    onSms = { transaction ->
+                        val phone = transaction.getPhoneNumber() ?: ""
+                        if (phone.isEmpty()) {
+                            Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                            return@TransactionsScreen
+                        }
+                        val type = transaction.getType()
+                        val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
+                        val currency = transaction.getCurrency()
+                        val typeText = if (type.equals("credit", true) || type == "له") "لكم" else "عليكم"
+                        val message = "حسابكم لدينا:\n" +
+                                typeText + " " + amountStr + " " + currency + "\n" +
+                                (transaction.getDescription() ?: "")
+                        NotificationUtils.sendSmsMessage(context, phone, message)
+                    },
+                    onAccountFilter = { account ->
+                        selectedAccount = account!!.getName()
+                        binding!!.accountFilterDropdown.setText(account.getName())
+                        applyAllFilters()
+                    },
+                    startDate = startDate,
+                    endDate = endDate,
+                    onDateFilter = { start, end ->
+                        if (start != null) startDate = start
+                        if (end != null) endDate = end
+                        // طبق الفلترة حسب التواريخ الجديدة
+                        applyAllFilters()
+                    },
+                    onSearch = { query ->
+                        currentSearchText = query
+                        applyAllFilters()
+                    }
+                )
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
