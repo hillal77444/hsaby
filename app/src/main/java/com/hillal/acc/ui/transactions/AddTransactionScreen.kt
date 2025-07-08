@@ -142,10 +142,10 @@ fun AddTransactionScreen(
         )
         // Card
         Card(
-            shape = RoundedCornerShape(cardCorner.toDp()),
+            shape = RoundedCornerShape(cardCorner),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = cardPadding.toDp(), vertical = 8.dp),
+                .padding(horizontal = cardPadding, vertical = 8.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
@@ -261,11 +261,11 @@ fun AddTransactionScreen(
                                 return@Button
                             }
                             val transaction = Transaction(
-                                accountId = selectedAccount!!.id,
-                                amount = amount.toDouble(),
-                                type = "credit",
-                                description = description,
-                                currency = selectedCurrency
+                                selectedAccount!!.id,
+                                amount.toDouble(),
+                                "credit",
+                                description,
+                                selectedCurrency
                             )
                             transaction.setNotes(notes)
                             transaction.setTransactionDate(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(date)?.time ?: System.currentTimeMillis())
@@ -293,11 +293,11 @@ fun AddTransactionScreen(
                                 return@Button
                             }
                             val transaction = Transaction(
-                                accountId = selectedAccount!!.id,
-                                amount = amount.toDouble(),
-                                type = "debit",
-                                description = description,
-                                currency = selectedCurrency
+                                selectedAccount!!.id,
+                                amount.toDouble(),
+                                "debit",
+                                description,
+                                selectedCurrency
                             )
                             transaction.setNotes(notes)
                             transaction.setTransactionDate(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(date)?.time ?: System.currentTimeMillis())
