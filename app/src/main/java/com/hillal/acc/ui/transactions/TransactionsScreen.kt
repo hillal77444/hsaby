@@ -7,11 +7,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -24,29 +23,47 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.hillal.acc.R
+import com.hillal.acc.data.model.Account
 import com.hillal.acc.data.model.Transaction
-import androidx.compose.ui.graphics.Offset
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Info
+import com.hillal.acc.ui.common.AccountPickerField
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.ui.graphics.Painter
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.SimpleDateFormat
-import androidx.compose.ui.date.DatePickerDialog
-import androidx.compose.ui.date.Calendar
-import androidx.compose.ui.date.Date
-import androidx.compose.ui.state.mutableStateOf
-import androidx.compose.ui.date.remember
-import androidx.compose.ui.date.Locale
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.layout.animateItemPlacement
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.Calendar
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.material.icons.filled.AccessTime
+import androidx.compose.ui.material.icons.filled.Delete
+import androidx.compose.ui.material.icons.filled.Edit
+import androidx.compose.ui.material.icons.filled.Info
+import androidx.compose.ui.state.mutableStateOf
+import androidx.compose.ui.date.remember
+import androidx.compose.ui.date.DatePickerDialog
+import androidx.compose.ui.date.Date
+import androidx.compose.ui.animation.AnimatedVisibility
+import androidx.compose.ui.animation.fadeIn
+import androidx.compose.ui.animation.fadeOut
+import androidx.compose.ui.animation.core.tween
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.border
+
+// Extension functions for Transaction
+fun Transaction.getAccountName(accountMap: Map<Long, Account>? = null): String? {
+    return accountMap?.get(this.getAccountId())?.getName()
+}
+
+fun Transaction.getPhoneNumber(accountMap: Map<Long, Account>? = null): String? {
+    return accountMap?.get(this.getAccountId())?.getPhoneNumber()
+}
+
+fun Transaction.getDateString(): String {
+    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    return dateFormat.format(Date(this.getTransactionDate()))
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -451,7 +468,7 @@ fun TransactionCard(
                     // اسم الحساب + أيقونة معلومات
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = transaction.getAccountName() ?: "--",
+                            text = transaction.getAccountName(null) ?: "--",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = Color.White
@@ -466,7 +483,7 @@ fun TransactionCard(
                     Icon(Icons.Default.AccessTime, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(2.dp))
                     Text(
-                        text = transaction.getDateString() ?: "--",
+                        text = transaction.getDateString(),
                         fontSize = 14.sp,
                         color = Color.White
                     )
