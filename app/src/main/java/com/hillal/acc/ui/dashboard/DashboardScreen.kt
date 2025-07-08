@@ -63,21 +63,22 @@ fun DashboardScreen(
     val screenWidth = with(LocalDensity.current) { configuration.screenWidthDp.dp }
     val screenHeight = with(LocalDensity.current) { configuration.screenHeightDp.dp }
     val minSide = minOf(screenWidth, screenHeight)
+    val maxSide = maxOf(screenWidth, screenHeight)
     val blueHeight = screenHeight * 0.12f
-    val logoSize = minSide * 0.13f
-    val cardCorner = minSide * 0.045f
-    val cardPadding = minSide * 0.018f
-    val fontTitle = (minSide.value / 22).sp
-    val fontField = (minSide.value / 28).sp
-    val fontSmall = (minSide.value / 44).sp
-    val iconSize = minSide * 0.055f
-    val marginSmall = minSide * 0.004f
-    val marginMedium = minSide * 0.012f
-    val marginLarge = minSide * 0.018f
-    val statCardHeight = minSide * 0.09f
-    val actionButtonHeight = minSide * 0.055f
-    val gridCardHeight = minSide * 0.10f
-    val verticalSpace = minSide * 0.009f
+    val logoSize = minSide * 0.16f
+    val cardCorner = minSide * 0.055f
+    val cardPadding = minSide * 0.022f
+    val fontTitle = (minSide.value / 18).sp
+    val fontField = (minSide.value / 24).sp
+    val fontSmall = (minSide.value / 36).sp
+    val iconSize = minSide * 0.07f
+    val marginSmall = minSide * 0.008f
+    val marginMedium = minSide * 0.018f
+    val marginLarge = minSide * 0.032f
+    val statCardHeight = maxSide * 0.10f
+    val actionButtonHeight = maxSide * 0.07f
+    val gridCardHeight = maxSide * 0.11f
+    val verticalSpace = minSide * 0.012f
 
     Box(
         modifier = Modifier
