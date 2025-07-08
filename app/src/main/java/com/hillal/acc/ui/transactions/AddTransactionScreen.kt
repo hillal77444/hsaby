@@ -69,7 +69,10 @@ import androidx.compose.ui.text.input.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.ui.graphics.Offset
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextRange
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -573,8 +576,7 @@ fun AddTransactionScreen(
                     // أيقونة نجاح
                     Box(
                         modifier = Modifier
-                            .size(MaterialTheme.spacing.extraLarge)
-                            .background(MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.extraLarge),
+                            .size(MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.extraLarge),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
