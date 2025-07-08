@@ -365,13 +365,13 @@ fun AddTransactionScreen(
                             selected = currency == context.getString(R.string.currency_yer),
                             onClick = { currency = context.getString(R.string.currency_yer) }
                         )
-                        Text("ريال يمني", fontSize = labelFontSize)
+                        Text("يمني", fontSize = labelFontSize)
                         Spacer(modifier = Modifier.width(8.dp))
                         RadioButton(
                             selected = currency == context.getString(R.string.currency_sar),
                             onClick = { currency = context.getString(R.string.currency_sar) }
                         )
-                        Text("ريال سعودي", fontSize = labelFontSize)
+                        Text("سعودي", fontSize = labelFontSize)
                         Spacer(modifier = Modifier.width(8.dp))
                         RadioButton(
                             selected = currency == context.getString(R.string.currency_usd),
