@@ -1,0 +1,373 @@
+ package com.hillal.acc.ui.transactions
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Money
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.hillal.acc.R
+import java.text.SimpleDateFormat
+import java.util.*
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hillal.acc.data.entities.Cashbox
+import com.hillal.acc.data.model.Account
+import com.hillal.acc.data.model.Transaction
+import com.hillal.acc.ui.transactions.TransactionsViewModel
+import com.hillal.acc.viewmodel.AccountViewModel
+import com.hillal.acc.viewmodel.CashboxViewModel
+
+@Composable
+fun AddTransactionScreen(
+    transactionsViewModel: TransactionsViewModel = viewModel(),
+    accountViewModel: AccountViewModel = viewModel(),
+    cashboxViewModel: CashboxViewModel = viewModel(),
+    onCancel: () -> Unit
+) {
+    val accounts by accountViewModel.getAllAccounts().observeAsState(emptyList())
+    val cashboxes by cashboxViewModel.getAllCashboxes().observeAsState(emptyList())
+
+    var selectedAccount by remember { mutableStateOf<Account?>(null) }
+    var selectedCashbox by remember { mutableStateOf<Cashbox?>(null) }
+    var amount by remember { mutableStateOf("") }
+    var date by remember { mutableStateOf(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())) }
+    var selectedCurrency by remember { mutableStateOf("ريال يمني") }
+    var description by remember { mutableStateOf("") }
+    var notes by remember { mutableStateOf("") }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var successMessage by remember { mutableStateOf<String?>(null) }
+
+    if (showDatePicker) {
+        val calendar = Calendar.getInstance()
+        DatePickerDialog(
+            onDateSelected = { year, month, day ->
+                calendar.set(year, month, day)
+                date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
+                showDatePicker = false
+            },
+            onDismissRequest = { showDatePicker = false }
+        )
+    }
+
+    val configuration = LocalConfiguration.current
+    val screenWidth = with(LocalDensity.current) { configuration.screenWidthDp.dp }
+    val screenHeight = with(LocalDensity.current) { configuration.screenHeightDp.dp }
+    val minSide = minOf(screenWidth, screenHeight)
+    val maxSide = maxOf(screenWidth, screenHeight)
+    val cardCorner = minSide * 0.045f
+    val cardPadding = minSide * 0.018f
+    val fontTitle = (minSide.value / 22).sp
+    val fontField = (minSide.value / 28).sp
+    val fontSmall = (minSide.value / 44).sp
+    val iconSize = minSide * 0.055f
+    val marginSmall = minSide * 0.004f
+    val marginMedium = minSide * 0.012f
+    val marginLarge = minSide * 0.018f
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF7F7F7))
+            .verticalScroll(rememberScrollState())
+            .navigationBarsPadding(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Header
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .background(Color(0xFF2196F3)),
+        )
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .offset(y = (-36).dp)
+                .background(Color.White, shape = CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_add_circle),
+                contentDescription = null,
+                tint = Color(0xFF1976D2),
+                modifier = Modifier.size(48.dp)
+            )
+        }
+        Text(
+            text = "إضافة معاملة جديدة",
+            fontSize = fontTitle,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF1976D2),
+            modifier = Modifier.padding(top = 8.dp)
+        )
+        Text(
+            text = "يرجى تعبئة بيانات المعاملة بدقة",
+            fontSize = fontSmall,
+            color = Color(0xFF666666),
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+        // Card
+        Card(
+            shape = RoundedCornerShape(cardCorner.toDp()),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = cardPadding.toDp(), vertical = 8.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Column(modifier = Modifier.padding(14.dp)) {
+                // Row: الحساب والصندوق
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = selectedAccount?.getName() ?: "",
+                        onValueChange = { },
+                        label = { Text("اختر الحساب") },
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        readOnly = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF1976D2),
+                            unfocusedBorderColor = Color(0xFF1976D2)
+                        )
+                    )
+                    OutlinedTextField(
+                        value = selectedCashbox?.name ?: "",
+                        onValueChange = { },
+                        label = { Text("اختر الصندوق") },
+                        leadingIcon = { Icon(Icons.Default.Save, contentDescription = null) },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        readOnly = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF1976D2),
+                            unfocusedBorderColor = Color(0xFF1976D2)
+                        )
+                    )
+                }
+                Spacer(Modifier.height(12.dp))
+                DropdownMenuBox(
+                    label = "اختر الحساب",
+                    items = accounts,
+                    selectedItem = selectedAccount,
+                    onItemSelected = { selectedAccount = it },
+                    itemLabel = { it?.getName() ?: "" }
+                )
+                Spacer(Modifier.height(8.dp))
+                DropdownMenuBox(
+                    label = "اختر الصندوق",
+                    items = cashboxes,
+                    selectedItem = selectedCashbox,
+                    onItemSelected = { selectedCashbox = it },
+                    itemLabel = { it?.name ?: "" }
+                )
+                Spacer(Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = amount,
+                    onValueChange = { amount = it },
+                    label = { Text("المبلغ") },
+                    leadingIcon = { Icon(Icons.Default.Money, contentDescription = null) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(0.92f)
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = date,
+                    onValueChange = {},
+                    label = { Text("التاريخ") },
+                    leadingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = null) },
+                    singleLine = true,
+                    readOnly = true,
+                    modifier = Modifier.fillMaxWidth(0.92f).clickable { showDatePicker = true }
+                )
+                Spacer(Modifier.height(12.dp))
+                // العملة
+                Text("العملة", fontSize = fontField, color = Color(0xFF1976D2), modifier = Modifier.padding(bottom = 4.dp))
+                Row(Modifier.fillMaxWidth(0.92f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    CurrencyRadioButton("ريال يمني", selectedCurrency) { selectedCurrency = it }
+                    CurrencyRadioButton("ريال سعودي", selectedCurrency) { selectedCurrency = it }
+                    CurrencyRadioButton("دولار أمريكي", selectedCurrency) { selectedCurrency = it }
+                }
+                Spacer(Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("البيان") },
+                    singleLine = false,
+                    minLines = 2,
+                    modifier = Modifier.fillMaxWidth(0.92f)
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = notes,
+                    onValueChange = { notes = it },
+                    label = { Text("ملاحظات (اختياري)") },
+                    singleLine = false,
+                    minLines = 1,
+                    modifier = Modifier.fillMaxWidth(0.92f)
+                )
+                Spacer(Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(0.92f),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = {
+                            errorMessage = null
+                            successMessage = null
+                            if (selectedAccount == null) {
+                                errorMessage = "الرجاء اختيار الحساب"
+                                return@Button
+                            }
+                            if (amount.isBlank() || amount.toDoubleOrNull() == null) {
+                                errorMessage = "الرجاء إدخال مبلغ صحيح"
+                                return@Button
+                            }
+                            val transaction = Transaction(
+                                accountId = selectedAccount!!.id,
+                                amount = amount.toDouble(),
+                                type = "credit",
+                                description = description,
+                                currency = selectedCurrency
+                            )
+                            transaction.setNotes(notes)
+                            transaction.setTransactionDate(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(date)?.time ?: System.currentTimeMillis())
+                            transaction.setCashboxId(selectedCashbox?.id ?: -1)
+                            transactionsViewModel.insertTransaction(transaction)
+                            successMessage = "تمت إضافة المعاملة بنجاح"
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
+                    ) {
+                        Icon(painterResource(id = R.drawable.ic_arrow_downward), contentDescription = null, tint = Color.White)
+                        Spacer(Modifier.width(4.dp))
+                        Text("له", color = Color.White)
+                    }
+                    Button(
+                        onClick = {
+                            errorMessage = null
+                            successMessage = null
+                            if (selectedAccount == null) {
+                                errorMessage = "الرجاء اختيار الحساب"
+                                return@Button
+                            }
+                            if (amount.isBlank() || amount.toDoubleOrNull() == null) {
+                                errorMessage = "الرجاء إدخال مبلغ صحيح"
+                                return@Button
+                            }
+                            val transaction = Transaction(
+                                accountId = selectedAccount!!.id,
+                                amount = amount.toDouble(),
+                                type = "debit",
+                                description = description,
+                                currency = selectedCurrency
+                            )
+                            transaction.setNotes(notes)
+                            transaction.setTransactionDate(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(date)?.time ?: System.currentTimeMillis())
+                            transaction.setCashboxId(selectedCashbox?.id ?: -1)
+                            transactionsViewModel.insertTransaction(transaction)
+                            successMessage = "تمت إضافة المعاملة بنجاح"
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF44336))
+                    ) {
+                        Icon(painterResource(id = R.drawable.ic_arrow_upward), contentDescription = null, tint = Color.White)
+                        Spacer(Modifier.width(4.dp))
+                        Text("عليه", color = Color.White)
+                    }
+                    OutlinedButton(
+                        onClick = { onCancel() },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = null, tint = Color(0xFF1976D2))
+                        Spacer(Modifier.width(4.dp))
+                        Text("إلغاء", color = Color(0xFF1976D2))
+                    }
+                }
+                errorMessage?.let {
+                    Text(it, color = Color.Red, modifier = Modifier.padding(8.dp))
+                }
+                successMessage?.let {
+                    Text(it, color = Color(0xFF4CAF50), modifier = Modifier.padding(8.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun <T> DropdownMenuBox(
+    label: String,
+    items: List<T>,
+    selectedItem: T?,
+    onItemSelected: (T?) -> Unit,
+    itemLabel: (T?) -> String
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        OutlinedTextField(
+            value = itemLabel(selectedItem),
+            onValueChange = { },
+            label = { Text(label) },
+            readOnly = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = true },
+            trailingIcon = {
+                Icon(Icons.Default.Person, contentDescription = null)
+            }
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            items.forEach { item ->
+                DropdownMenuItem(
+                    text = { Text(itemLabel(item)) },
+                    onClick = {
+                        onItemSelected(item)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CurrencyRadioButton(text: String, selected: String, onSelect: (String) -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable { onSelect(text) }
+    ) {
+        RadioButton(
+            selected = selected == text,
+            onClick = { onSelect(text) },
+            colors = RadioButtonDefaults.colors(selectedColor = Color(0xFF1976D2))
+        )
+        Text(text, color = Color(0xFF1976D2), fontSize = fontSmall)
+    }
+} 

@@ -83,22 +83,16 @@ class AddTransactionFragment : Fragment(), OnCashboxAddedListener {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        binding = FragmentAddTransactionBinding.inflate(inflater, container, false)
-        val view: View = binding!!.getRoot()
-        setupViews()
-        setupListeners()
-        loadAccounts()
-        loadAllTransactions()
-        setupAccountPicker()
-        setupCashboxDropdown()
-        transactionsViewModel!!.accountBalancesMap.observe(
-            getViewLifecycleOwner(),
-            Observer { balancesMap: MutableMap<Long?, MutableMap<String?, Double?>?>? ->
-                accountBalancesMap =
-                    if (balancesMap != null) balancesMap else HashMap<Long?, MutableMap<String?, Double?>?>()
-            })
-        return view
+    ): View {
+        return androidx.compose.ui.platform.ComposeView(requireContext()).apply {
+            setContent {
+                AddTransactionScreen(
+                    onCredit = { /* TODO: نفذ إضافة معاملة له */ },
+                    onDebit = { /* TODO: نفذ إضافة معاملة عليه */ },
+                    onCancel = { requireActivity().onBackPressedDispatcher.onBackPressed() }
+                )
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
