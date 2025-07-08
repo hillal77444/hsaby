@@ -301,7 +301,14 @@ fun AddTransactionScreen(
                             enabled = false,
                             readOnly = true,
                             leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
-                            textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize)
+                            textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                containerColor = Color.White,
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = Color.Gray,
+                                disabledBorderColor = Color.LightGray,
+                                disabledTextColor = Color.Black
+                            )
                         )
                     }
                     Spacer(modifier = Modifier.height(verticalSpacing))

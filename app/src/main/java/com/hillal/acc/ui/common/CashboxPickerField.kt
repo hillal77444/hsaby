@@ -47,7 +47,14 @@ fun CashboxPickerField(
         readOnly = true,
         trailingIcon = {
             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-        }
+        },
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            containerColor = Color.White,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = Color.Gray,
+            disabledBorderColor = Color.LightGray,
+            disabledTextColor = Color.Black
+        )
     )
     if (showDialog) {
         val configuration = LocalConfiguration.current
