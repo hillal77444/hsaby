@@ -70,7 +70,7 @@ fun DashboardScreen(
     val cardPadding = minSide * 0.022f
     val fontTitle = (minSide.value / 18).sp
     val fontField = (minSide.value / 24).sp
-    val fontSmall = (minSide.value / 36).sp
+    val fontSmall = (minSide.value / 32).sp
     val iconSize = minSide * 0.07f
     val marginSmall = minSide * 0.008f
     val marginMedium = minSide * 0.018f
