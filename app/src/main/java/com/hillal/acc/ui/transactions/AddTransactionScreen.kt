@@ -25,7 +25,8 @@ import com.hillal.acc.data.model.Transaction
 import com.hillal.acc.data.preferences.UserPreferences
 import com.hillal.acc.data.repository.TransactionRepository
 import com.hillal.acc.ui.cashbox.AddCashboxDialog
-import com.hillal.acc.ui.common.AccountPickerBottomSheet
+import com.hillal.acc.ui.common.AccountPickerField
+import com.hillal.acc.ui.common.CashboxPickerField
 import com.hillal.acc.ui.transactions.TransactionsViewModel
 import com.hillal.acc.viewmodel.AccountViewModel
 import com.hillal.acc.viewmodel.CashboxViewModel
@@ -35,6 +36,17 @@ import java.util.*
 import kotlin.math.abs
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun AddTransactionScreen(
@@ -199,16 +211,42 @@ fun AddTransactionScreen(
             readOnly = true
         )
         Spacer(modifier = Modifier.height(8.dp))
-        // Account Picker
-        OutlinedTextField(
-            value = selectedAccount?.getName() ?: "",
-            onValueChange = {},
-            label = { Text("الحساب") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { showAccountPicker = true },
-            enabled = false,
-            readOnly = true
+        // Account Picker Field
+        AccountPickerField(
+            accounts = allAccounts,
+            transactions = allTransactions,
+            balancesMap = accountBalancesMap,
+            selectedAccount = selectedAccount,
+            onAccountSelected = { account ->
+                selectedAccount = account
+                selectedAccountId = account.getId()
+                loadAccountSuggestions(selectedAccountId)
+            },
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        // Cashbox Picker Field
+        CashboxPickerField(
+            cashboxes = allCashboxes,
+            selectedCashbox = allCashboxes.find { it.id == selectedCashboxId },
+            onCashboxSelected = { cashbox ->
+                selectedCashboxId = cashbox.id
+            },
+            onAddCashbox = { name ->
+                val context = LocalContext.current
+                CashboxHelper.addCashboxToServer(
+                    context, cashboxViewModel, name,
+                    object : CashboxHelper.CashboxCallback {
+                        override fun onSuccess(cashbox: Cashbox?) {
+                            selectedCashboxId = cashbox?.id ?: -1L
+                            CashboxHelper.showSuccessMessage(context, "تم إضافة الصندوق بنجاح")
+                        }
+                        override fun onError(error: String?) {
+                            CashboxHelper.showErrorMessage(context, error)
+                        }
+                    })
+            },
+            modifier = Modifier.padding(bottom = 8.dp)
         )
         Spacer(modifier = Modifier.height(8.dp))
         // Amount
@@ -284,23 +322,6 @@ fun AddTransactionScreen(
             Text("دولار")
         }
         Spacer(modifier = Modifier.height(8.dp))
-        // Cashbox Dropdown
-        ExposedDropdownMenuBox(
-            expanded = false,
-            onExpandedChange = {}
-        ) {
-            OutlinedTextField(
-                value = selectedCashbox?.name ?: "",
-                onValueChange = {},
-                label = { Text("الصندوق") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showCashboxDialog = true },
-                enabled = false,
-                readOnly = true
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
         // Action Buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -335,32 +356,46 @@ fun AddTransactionScreen(
     }
 
     // Account Picker BottomSheet
-    if (showAccountPicker) {
-        AccountPickerBottomSheet(
-            accounts = allAccounts,
-            transactions = allTransactions,
-            balancesMap = accountBalancesMap,
-            onAccountSelected = { account ->
-                selectedAccount = account
-                selectedAccountId = account?.getId() ?: -1L
-                loadAccountSuggestions(selectedAccountId)
-                showAccountPicker = false
-            },
-            onDismiss = { showAccountPicker = false }
-        )
-    }
+    AccountPickerBottomSheetCompose(
+        show = showAccountPicker,
+        accounts = allAccounts,
+        transactions = allTransactions,
+        balancesMap = accountBalancesMap,
+        onAccountSelected = { account ->
+            selectedAccount = account
+            selectedAccountId = account.getId()
+            loadAccountSuggestions(selectedAccountId)
+            showAccountPicker = false
+        },
+        onDismiss = { showAccountPicker = false }
+    )
 
     // Cashbox Dialog
-    if (showCashboxDialog) {
-        AddCashboxDialog(
-            onCashboxAdded = { cashbox ->
-                selectedCashbox = cashbox
-                selectedCashboxId = cashbox?.id ?: -1L
-                showCashboxDialog = false
-            },
-            onDismiss = { showCashboxDialog = false }
-        )
-    }
+    AddCashboxDialogCompose(
+        show = showCashboxDialog,
+        onCashboxAdded = { name ->
+            // منطق إضافة الصندوق كما في الكود القديم
+            val context = LocalContext.current
+            val loading = remember { mutableStateOf(false) }
+            loading.value = true
+            CashboxHelper.addCashboxToServer(
+                context, cashboxViewModel, name,
+                object : CashboxHelper.CashboxCallback {
+                    override fun onSuccess(cashbox: Cashbox?) {
+                        loading.value = false
+                        selectedCashbox = cashbox
+                        selectedCashboxId = cashbox?.id ?: -1L
+                        CashboxHelper.showSuccessMessage(context, "تم إضافة الصندوق بنجاح")
+                        showCashboxDialog = false
+                    }
+                    override fun onError(error: String?) {
+                        loading.value = false
+                        CashboxHelper.showErrorMessage(context, error)
+                    }
+                })
+        },
+        onDismiss = { showCashboxDialog = false }
+    )
 
     // Success Dialog
     if (isDialogShown) {
@@ -438,6 +473,118 @@ fun AddTransactionScreen(
                     }) {
                         Text("خروج")
                     }
+                }
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AccountPickerBottomSheetCompose(
+    show: Boolean,
+    accounts: List<Account>,
+    transactions: List<Transaction>,
+    balancesMap: Map<Long, Map<String, Double>>,
+    onAccountSelected: (Account) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var search by remember { mutableStateOf("") }
+    val filteredAccounts = if (search.isBlank()) accounts else accounts.filter { it.getName()?.contains(search) == true }
+    if (show) {
+        ModalBottomSheet(onDismissRequest = onDismiss) {
+            Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                Text(text = "اختر الحساب", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = search,
+                    onValueChange = { search = it },
+                    label = { Text("بحث") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(8.dp))
+                Divider()
+                LazyColumn(Modifier.heightIn(max = 400.dp)) {
+                    items(filteredAccounts) { account ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .clickable {
+                                    onAccountSelected(account)
+                                    onDismiss()
+                                },
+                            elevation = CardDefaults.cardElevation(2.dp)
+                        ) {
+                            Column(Modifier.padding(12.dp)) {
+                                Text(account.getName() ?: "", fontWeight = FontWeight.Bold)
+                                val balance = balancesMap[account.getId()]?.values?.sum() ?: 0.0
+                                Text("الرصيد: ${balance}", fontSize = 14.sp)
+                            }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
+                    Text("إغلاق")
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddCashboxDialogCompose(
+    show: Boolean,
+    onCashboxAdded: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf(false) }
+    if (show) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("إضافة صندوق جديد") },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = {
+                            name = it
+                            error = false
+                        },
+                        label = { Text("اسم الصندوق") },
+                        isError = error,
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (error) {
+                        Text("يرجى إدخال اسم الصندوق", color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    if (name.isBlank()) {
+                        error = true
+                    } else {
+                        onCashboxAdded(name.trim())
+                        name = ""
+                        error = false
+                        onDismiss()
+                    }
+                }) {
+                    Text("حفظ")
+                }
+            },
+            dismissButton = {
+                Button(onClick = {
+                    name = ""
+                    error = false
+                    onDismiss()
+                }) {
+                    Text("إلغاء")
                 }
             }
         )
