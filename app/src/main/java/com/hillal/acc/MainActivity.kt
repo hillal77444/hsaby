@@ -29,6 +29,9 @@ import com.hillal.acc.viewmodel.AuthViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.hillal.acc.data.room.AccountDao
+import com.hillal.acc.data.room.TransactionDao
+import com.hillal.acc.data.room.PendingOperationDao
 
 class MainActivity : AppCompatActivity() {
     private var binding: ActivityMainBinding? = null

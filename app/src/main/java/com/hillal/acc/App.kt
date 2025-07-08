@@ -12,6 +12,9 @@ import com.hillal.acc.data.repository.AccountRepository
 import com.hillal.acc.data.repository.SettingsRepository
 import com.hillal.acc.data.repository.TransactionRepository
 import com.hillal.acc.data.room.AppDatabase
+import com.hillal.acc.data.room.AccountDao
+import com.hillal.acc.data.room.TransactionDao
+import com.hillal.acc.data.room.PendingOperationDao
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -139,8 +142,14 @@ class App : Application() {
         return settingsRepository!!
     }
 
+    val accountDao: AccountDao?
+        get() = database!!.accountDao()
+
     val transactionDao: TransactionDao?
         get() = database!!.transactionDao()
+
+    val pendingOperationDao: PendingOperationDao?
+        get() = database!!.pendingOperationDao()
 
     companion object {
         private const val TAG = "App"
