@@ -47,6 +47,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.Notes
 
 @Composable
 fun AddTransactionScreen(
@@ -194,147 +199,186 @@ fun AddTransactionScreen(
     }
 
     // UI
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Date Picker
-        OutlinedTextField(
-            value = dateFormat.format(Date(date)),
-            onValueChange = {},
-            label = { Text("التاريخ") },
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val screenWidth = maxWidth
+        val screenHeight = maxHeight
+        val isLargeScreen = screenWidth > 500.dp
+        val horizontalPadding = if (isLargeScreen) 48.dp else 16.dp
+        val verticalSpacing = if (isLargeScreen) 20.dp else 8.dp
+        val fieldFontSize = if (isLargeScreen) 18.sp else 15.sp
+        val labelFontSize = if (isLargeScreen) 16.sp else 13.sp
+        val buttonHeight = if (isLargeScreen) 56.dp else 48.dp
+        val buttonFontSize = if (isLargeScreen) 18.sp else 15.sp
+        val buttonShape = RoundedCornerShape(if (isLargeScreen) 16.dp else 8.dp)
+        val buttonArrangement = if (isLargeScreen) Arrangement.spacedBy(24.dp) else Arrangement.spacedBy(8.dp)
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .clickable { showDatePicker = true },
-            enabled = false,
-            readOnly = true
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        // Account Picker Field
-        AccountPickerField(
-            accounts = allAccounts,
-            transactions = allTransactions,
-            balancesMap = accountBalancesMap,
-            selectedAccount = selectedAccount,
-            onAccountSelected = { account ->
-                selectedAccount = account
-                selectedAccountId = account.getId()
-                loadAccountSuggestions(selectedAccountId)
-            },
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        // Cashbox Picker Field
-        CashboxPickerField(
-            cashboxes = allCashboxes,
-            selectedCashbox = allCashboxes.find { it.id == selectedCashboxId },
-            onCashboxSelected = { cashbox ->
-                selectedCashboxId = cashbox.id
-            },
-            onAddCashbox = { name ->
-                val context = LocalContext.current
-                CashboxHelper.addCashboxToServer(
-                    context, cashboxViewModel, name,
-                    object : CashboxHelper.CashboxCallback {
-                        override fun onSuccess(cashbox: Cashbox?) {
-                            selectedCashboxId = cashbox?.id ?: -1L
-                            CashboxHelper.showSuccessMessage(context, "تم إضافة الصندوق بنجاح")
-                        }
-                        override fun onError(error: String?) {
-                            CashboxHelper.showErrorMessage(context, error)
-                        }
-                    })
-            },
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        // Amount
-        OutlinedTextField(
-            value = amount,
-            onValueChange = { amount = it },
-            label = { Text("المبلغ") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        // Description with suggestions
-        var expandedSuggestions by remember { mutableStateOf(false) }
-        Box {
+                .fillMaxSize()
+                .padding(horizontal = horizontalPadding, vertical = verticalSpacing)
+        ) {
+            // Date Picker
             OutlinedTextField(
-                value = description,
-                onValueChange = {
-                    description = it
-                    expandedSuggestions = suggestions.any { s -> s.startsWith(it) } && it.isNotEmpty()
+                value = dateFormat.format(Date(date)),
+                onValueChange = {},
+                label = { Text("التاريخ", fontSize = labelFontSize) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showDatePicker = true },
+                enabled = false,
+                readOnly = true,
+                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
+                textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize)
+            )
+            Spacer(modifier = Modifier.height(verticalSpacing))
+            // Account Picker Field
+            AccountPickerField(
+                accounts = allAccounts,
+                transactions = allTransactions,
+                balancesMap = accountBalancesMap,
+                selectedAccount = selectedAccount,
+                onAccountSelected = { account ->
+                    selectedAccount = account
+                    selectedAccountId = account.getId()
+                    loadAccountSuggestions(selectedAccountId)
                 },
-                label = { Text("البيان") },
+                modifier = Modifier.padding(bottom = verticalSpacing)
+            )
+            Spacer(modifier = Modifier.height(verticalSpacing))
+            // Cashbox Picker Field
+            CashboxPickerField(
+                cashboxes = allCashboxes,
+                selectedCashbox = allCashboxes.find { it.id == selectedCashboxId },
+                onCashboxSelected = { cashbox ->
+                    selectedCashboxId = cashbox.id
+                },
+                onAddCashbox = { name ->
+                    val context = LocalContext.current
+                    CashboxHelper.addCashboxToServer(
+                        context, cashboxViewModel, name,
+                        object : CashboxHelper.CashboxCallback {
+                            override fun onSuccess(cashbox: Cashbox?) {
+                                selectedCashboxId = cashbox?.id ?: -1L
+                                CashboxHelper.showSuccessMessage(context, "تم إضافة الصندوق بنجاح")
+                            }
+                            override fun onError(error: String?) {
+                                CashboxHelper.showErrorMessage(context, error)
+                            }
+                        })
+                },
+                modifier = Modifier.padding(bottom = verticalSpacing)
+            )
+            Spacer(modifier = Modifier.height(verticalSpacing))
+            // Amount
+            OutlinedTextField(
+                value = amount,
+                onValueChange = { amount = it },
+                label = { Text("المبلغ", fontSize = labelFontSize) },
                 modifier = Modifier.fillMaxWidth(),
-                trailingIcon = {
-                    if (suggestions.isNotEmpty()) {
-                        IconButton(onClick = { expandedSuggestions = !expandedSuggestions }) {
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
+                textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize)
+            )
+            Spacer(modifier = Modifier.height(verticalSpacing))
+            // Description with suggestions
+            var expandedSuggestions by remember { mutableStateOf(false) }
+            Box {
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = {
+                        description = it
+                        expandedSuggestions = suggestions.any { s -> s.startsWith(it) } && it.isNotEmpty()
+                    },
+                    label = { Text("البيان", fontSize = labelFontSize) },
+                    modifier = Modifier.fillMaxWidth(),
+                    leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
+                    textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize),
+                    trailingIcon = {
+                        if (suggestions.isNotEmpty()) {
+                            IconButton(onClick = { expandedSuggestions = !expandedSuggestions }) {
+                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                            }
                         }
                     }
+                )
+                DropdownMenu(
+                    expanded = expandedSuggestions && suggestions.isNotEmpty(),
+                    onDismissRequest = { expandedSuggestions = false },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    suggestions.filter { it.startsWith(description) && it != description }.take(5).forEach { suggestion ->
+                        DropdownMenuItem(
+                            text = { Text(suggestion, fontSize = fieldFontSize) },
+                            onClick = {
+                                description = suggestion
+                                expandedSuggestions = false
+                            }
+                        )
+                    }
                 }
+            }
+            Spacer(modifier = Modifier.height(verticalSpacing))
+            // Notes
+            OutlinedTextField(
+                value = notes,
+                onValueChange = { notes = it },
+                label = { Text("ملاحظات", fontSize = labelFontSize) },
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
+                textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize)
             )
-            DropdownMenu(
-                expanded = expandedSuggestions && suggestions.isNotEmpty(),
-                onDismissRequest = { expandedSuggestions = false },
-                modifier = Modifier.fillMaxWidth()
+            Spacer(modifier = Modifier.height(verticalSpacing))
+            // Currency Radio Buttons
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = currency == context.getString(R.string.currency_yer),
+                    onClick = { currency = context.getString(R.string.currency_yer) }
+                )
+                Text("ريال يمني", fontSize = labelFontSize)
+                Spacer(modifier = Modifier.width(8.dp))
+                RadioButton(
+                    selected = currency == context.getString(R.string.currency_sar),
+                    onClick = { currency = context.getString(R.string.currency_sar) }
+                )
+                Text("ريال سعودي", fontSize = labelFontSize)
+                Spacer(modifier = Modifier.width(8.dp))
+                RadioButton(
+                    selected = currency == context.getString(R.string.currency_usd),
+                    onClick = { currency = context.getString(R.string.currency_usd) }
+                )
+                Text("دولار", fontSize = labelFontSize)
+            }
+            Spacer(modifier = Modifier.height(verticalSpacing))
+            // Action Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = buttonArrangement
             ) {
-                suggestions.filter { it.startsWith(description) && it != description }.take(5).forEach { suggestion ->
-                    DropdownMenuItem(
-                        text = { Text(suggestion) },
-                        onClick = {
-                            description = suggestion
-                            expandedSuggestions = false
-                        }
-                    )
+                Button(
+                    onClick = { saveTransaction(true) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(buttonHeight),
+                    shape = buttonShape
+                ) {
+                    Text("مدين", fontSize = buttonFontSize)
                 }
-            }
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        // Notes
-        OutlinedTextField(
-            value = notes,
-            onValueChange = { notes = it },
-            label = { Text("ملاحظات") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        // Currency Radio Buttons
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            RadioButton(
-                selected = currency == context.getString(R.string.currency_yer),
-                onClick = { currency = context.getString(R.string.currency_yer) }
-            )
-            Text("ريال يمني")
-            Spacer(modifier = Modifier.width(8.dp))
-            RadioButton(
-                selected = currency == context.getString(R.string.currency_sar),
-                onClick = { currency = context.getString(R.string.currency_sar) }
-            )
-            Text("ريال سعودي")
-            Spacer(modifier = Modifier.width(8.dp))
-            RadioButton(
-                selected = currency == context.getString(R.string.currency_usd),
-                onClick = { currency = context.getString(R.string.currency_usd) }
-            )
-            Text("دولار")
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        // Action Buttons
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Button(onClick = { saveTransaction(true) }) {
-                Text("مدين")
-            }
-            Button(onClick = { saveTransaction(false) }) {
-                Text("دائن")
-            }
-            Button(onClick = { navController.navigateUp() }) {
-                Text("إلغاء")
+                Button(
+                    onClick = { saveTransaction(false) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(buttonHeight),
+                    shape = buttonShape
+                ) {
+                    Text("دائن", fontSize = buttonFontSize)
+                }
+                Button(
+                    onClick = { navController.navigateUp() },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(buttonHeight),
+                    shape = buttonShape
+                ) {
+                    Text("إلغاء", fontSize = buttonFontSize)
+                }
             }
         }
     }
