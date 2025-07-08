@@ -382,6 +382,6 @@ fun CurrencyRadioButton(text: String, selected: String, onSelect: (String) -> Un
             onClick = { onSelect(text) },
             colors = RadioButtonDefaults.colors(selectedColor = Color(0xFF1976D2))
         )
-        Text(text, color = Color(0xFF1976D2), fontSize = fontSmall)
+        Text(text, color = Color(0xFF1976D2), fontSize = 14.sp)
     }
 } 
