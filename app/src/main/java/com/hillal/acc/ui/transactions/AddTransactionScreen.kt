@@ -235,6 +235,7 @@ fun AddTransactionScreen(
         val infoColor = Color(0xFF1976D2).copy(alpha = 0.15f)
         val primaryColor = MaterialTheme.colorScheme.primary
         val cardShape = RoundedCornerShape(20.dp)
+        val cardMaxHeight = this@BoxWithConstraints.maxHeight * 0.25f
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -243,7 +244,6 @@ fun AddTransactionScreen(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             // بطاقة العنوان في الأعلى
-            val cardMaxHeight = maxHeight * 0.25f
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -269,15 +269,19 @@ fun AddTransactionScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     // رسم ديكوري في الخلفية
-                    Icon(
-                        imageVector = Icons.Default.AttachMoney,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                    Box(
                         modifier = Modifier
                             .size(cardMaxHeight * 1.2f)
                             .align(Alignment.CenterEnd)
                             .offset(x = 40.dp, y = 0.dp)
-                    )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AttachMoney,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                            modifier = Modifier.size(cardMaxHeight * 1.2f)
+                        )
+                    }
                     // نص العنوان في المقدمة
                     Text(
                         text = "إضافة معاملة جديدة",
@@ -575,14 +579,16 @@ fun AddTransactionScreen(
                     // أيقونة نجاح
                     Box(
                         modifier = Modifier
-                            .size(MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.extraLarge),
+                            .size(48.dp)
+                            .clip(MaterialTheme.shapes.extraLarge)
+                            .background(MaterialTheme.colorScheme.primary),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(32.dp)
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
