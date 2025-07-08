@@ -79,6 +79,7 @@ class AddTransactionFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
 <<<<<<< HEAD
+<<<<<<< HEAD
     ): View {
         // تحميل الحسابات
         accountViewModel!!.getAllAccounts().observe(this) { accounts ->
@@ -135,6 +136,8 @@ class AddTransactionFragment : Fragment() {
             }
         }
 =======
+=======
+>>>>>>> parent of 867d86c04 (تصميم اضافه معامله بشكل جديد)
     ): View? {
         binding = FragmentAddTransactionBinding.inflate(inflater, container, false)
         val view: View = binding!!.getRoot()
@@ -151,6 +154,9 @@ class AddTransactionFragment : Fragment() {
                     if (balancesMap != null) balancesMap else HashMap<Long?, MutableMap<String?, Double?>?>()
             })
         return view
+<<<<<<< HEAD
+>>>>>>> parent of 867d86c04 (تصميم اضافه معامله بشكل جديد)
+=======
 >>>>>>> parent of 867d86c04 (تصميم اضافه معامله بشكل جديد)
     }
 
