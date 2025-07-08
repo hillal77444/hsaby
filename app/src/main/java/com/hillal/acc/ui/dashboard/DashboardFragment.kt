@@ -49,7 +49,7 @@ class DashboardFragment : Fragment() {
         Log.d(TAG, "DashboardFragment onCreate started")
         try {
             val app = requireActivity().application as App
-            db = app.database
+            db = app.getDatabase()
             val accountRepository = AccountRepository(db.accountDao(), db)
             val transactionRepository = TransactionRepository(db)
             dashboardViewModel = ViewModelProvider(this, DashboardViewModelFactory(accountRepository, transactionRepository))

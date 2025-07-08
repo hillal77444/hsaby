@@ -21,6 +21,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
+import com.hillal.acc.MainActivity
 import com.hillal.acc.R
 import com.hillal.acc.data.preferences.UserPreferences
 import com.hillal.acc.data.remote.DataManager
@@ -143,9 +144,9 @@ class LoginFragment : Fragment() {
                 val mainActivity = requireActivity() as MainActivity
                 val dataManager = DataManager(
                     requireContext(),
-                    mainActivity.getAccountDao(),
-                    mainActivity.getTransactionDao(),
-                    mainActivity.getPendingOperationDao()
+                    mainActivity.accountDao,
+                    mainActivity.transactionDao,
+                    mainActivity.pendingOperationDao
                 )
                 dataManager.fetchDataFromServer(object : DataManager.DataCallback {
                     override fun onSuccess() {
