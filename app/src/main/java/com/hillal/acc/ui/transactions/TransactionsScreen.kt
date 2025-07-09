@@ -115,8 +115,8 @@ fun TransactionsScreen(
                             label = "الحساب",
                             accounts = accounts,
                             transactions = transactions,
-                            balancesMap = emptyMap(),
-                            selectedAccount = null,
+                            balancesMap = balancesMap, // مرر خريطة الأرصدة الحقيقية
+                            selectedAccount = selectedAccount, // مرر الحساب المحدد فعليًا
                             onAccountSelected = onAccountFilter,
                             modifier = Modifier.weight(1f)
                         )
