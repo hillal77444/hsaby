@@ -127,17 +127,17 @@ class TransactionsFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        val viewModel: TransactionsViewModel = viewModel()
-        val accountViewModel: AccountViewModel = viewModel()
-        val navController = androidx.navigation.Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
+        val viewModel: TransactionsViewModel = ViewModelProvider(this).get(TransactionsViewModel::class.java)
+        val accountViewModel: AccountViewModel = ViewModelProvider(this).get(AccountViewModel::class.java)
+        val navController = requireActivity().findNavController(R.id.navHostFragment)
         val context = requireContext()
         return ComposeView(requireContext()).apply {
             setContent {
-                val transactionsState = viewModel.getTransactions().observeAsState(emptyList())
-                val accountsState = accountViewModel.getAllAccounts().observeAsState(emptyList())
+                val transactions by viewModel.getTransactions().observeAsState(emptyList())
+                val accounts by accountViewModel.getAllAccounts().observeAsState(emptyList())
                 TransactionsScreenContent(
-                    transactions = transactionsState.value ?: emptyList(),
-                    accounts = accountsState.value ?: emptyList(),
+                    transactions = transactions,
+                    accounts = accounts,
                     navController = navController,
                     context = context,
                     onDeleteConfirmed = { transaction -> viewModel.deleteTransaction(transaction) }
