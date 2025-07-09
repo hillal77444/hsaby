@@ -103,10 +103,11 @@ class AccountStatementComposeActivity : ComponentActivity() {
         var reportHtml by remember { mutableStateOf("") }
         
         // تحديث التقرير عند تغيير البيانات
-        LaunchedEffect(selectedAccountState, startDateState, endDateState, transactions) {
+        LaunchedEffect(selectedAccountState, startDateState, endDateState, selectedCurrencyState, transactions) {
             if (selectedAccountState != null) {
                 selectedAccount = selectedAccountState
-                updateReport(context, selectedAccountState!!, startDateState, endDateState, transactions, reportHtml) { html ->
+                selectedCurrency = selectedCurrencyState
+                updateReport(context, selectedAccountState!!, startDateState, endDateState, selectedCurrencyState, transactions, reportHtml) { html ->
                     reportHtml = html
                 }
             }
@@ -537,6 +538,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         account: Account,
         startDateStr: String,
         endDateStr: String,
+        selectedCurrency: String?,
         allTransactions: List<Transaction>,
         currentHtml: String,
         onHtmlGenerated: (String) -> Unit
@@ -551,16 +553,15 @@ class AccountStatementComposeActivity : ComponentActivity() {
             // 4. عند توليد التقرير، صفِّ المعاملات حسب العملة المختارة فقط
             val filteredTransactions = allTransactions.filter { tx ->
                 tx.accountId == account.id &&
-                (selectedCurrencyState == null || tx.currency == selectedCurrencyState) &&
+                (selectedCurrency == null || tx.currency == selectedCurrency) &&
                 isTransactionInDateRange(tx, startDate, endDate)
             }.sortedBy { it.createdAt }
             
             // 5. الرصيد التراكمي يبدأ من رصيد الحساب قبل الفترة
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
             val startDateObj = dateFormat.parse(startDateStr)
             val previousBalance = allTransactions.filter { tx ->
                 tx.accountId == account.id &&
-                (selectedCurrencyState == null || tx.currency == selectedCurrencyState) &&
+                (selectedCurrency == null || tx.currency == selectedCurrency) &&
                 Date(tx.createdAt).before(startDateObj)
             }.fold(0.0) { acc, tx ->
                 when (tx.type) {
