@@ -123,7 +123,8 @@ class TransactionsFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 val viewModel: TransactionsViewModel = viewModel()
-                val transactions by viewModel.getTransactions().observeAsState(emptyList())
+                val transactionsState = viewModel.getTransactions().observeAsState(emptyList())
+                val transactions = transactionsState.value
                 // TODO: Add other state and callbacks as needed
                 TransactionsScreen(
                     transactions = transactions,
