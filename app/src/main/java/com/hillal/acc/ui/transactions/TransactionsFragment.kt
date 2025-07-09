@@ -129,12 +129,14 @@ class TransactionsFragment : Fragment() {
     ): View? {
         val viewModel: TransactionsViewModel = ViewModelProvider(this).get(TransactionsViewModel::class.java)
         val accountViewModel: AccountViewModel = ViewModelProvider(this).get(AccountViewModel::class.java)
-        val navController = requireActivity().findNavController(R.id.navHostFragment)
+        val navController = androidx.navigation.Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_content_main)
         val context = requireContext()
         return ComposeView(requireContext()).apply {
             setContent {
-                val transactions by viewModel.getTransactions().observeAsState(emptyList())
-                val accounts by accountViewModel.getAllAccounts().observeAsState(emptyList())
+                val transactionsNullable by viewModel.getTransactions().observeAsState(emptyList())
+                val accountsNullable by accountViewModel.getAllAccounts().observeAsState(emptyList())
+                val transactions = transactionsNullable ?: emptyList()
+                val accounts = accountsNullable ?: emptyList()
                 TransactionsScreenContent(
                     transactions = transactions,
                     accounts = accounts,
