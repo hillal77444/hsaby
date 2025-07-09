@@ -184,6 +184,7 @@ fun HighlightedDescription(
     searchQuery: String,
     modifier: Modifier = Modifier
 ) {
+    val maxChars = 80 // تقريبا ما يعادل سطرين بالعربي
     if (searchQuery.isBlank()) {
         Text(
             text = description,
@@ -206,18 +207,26 @@ fun HighlightedDescription(
                 modifier = modifier
             )
         } else {
-            val before = description.substring(0, index)
-            val match = description.substring(index, index + searchQuery.length)
-            val after = description.substring(index + searchQuery.length)
+            // حدد بداية ونهاية الجزء المعروض بحيث يظهر التطابق في المنتصف تقريباً
+            val contextLength = maxChars - searchQuery.length
+            val beforeLen = contextLength / 2
+            val afterLen = contextLength - beforeLen
+            val start = maxOf(0, index - beforeLen)
+            val end = minOf(description.length, index + searchQuery.length + afterLen)
+            val shown = description.substring(start, end)
+            val matchStart = shown.indexOf(searchQuery, ignoreCase = true)
+            val matchEnd = matchStart + searchQuery.length
             val highlighted = buildAnnotatedString {
-                append(before)
+                append(shown.substring(0, matchStart))
                 withStyle(SpanStyle(background = Color(0xFFFFF59D), color = Color.Black)) {
-                    append(match)
+                    append(shown.substring(matchStart, matchEnd))
                 }
-                append(after)
+                append(shown.substring(matchEnd))
             }
+            val prefix = if (start > 0) "..." else ""
+            val suffix = if (end < description.length) "..." else ""
             Text(
-                text = highlighted,
+                text = buildAnnotatedString { append(prefix); append(highlighted); append(suffix) },
                 fontSize = 14.sp,
                 color = Color.White,
                 maxLines = 2,
