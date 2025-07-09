@@ -73,6 +73,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.fillMaxWidth
+import androidx.compose.material3.CircularProgressIndicator
 
 class TransactionsFragment : Fragment() {
     private var viewModel: TransactionsViewModel? = null
@@ -150,12 +158,79 @@ class TransactionsFragment : Fragment() {
                 var endDate by remember { mutableStateOf(today.timeInMillis) }
                 var searchQuery by remember { mutableStateOf("") }
 
+                // State للحذف
+                var showDeleteDialog by remember { mutableStateOf(false) }
+                var transactionToDelete by remember { mutableStateOf<Transaction?>(null) }
+                var showProgress by remember { mutableStateOf(false) }
+                val coroutineScope = rememberCoroutineScope()
+
                 // تصفية المعاملات حسب الفلاتر
                 val filteredTransactions = transactions.filter { tx ->
                     val accountMatch = selectedAccount == null || tx.getAccountId() == selectedAccount?.getId()
                     val dateMatch = tx.getTransactionDate() in startDate..endDate
                     val searchMatch = searchQuery.isBlank() || (tx.getDescription()?.contains(searchQuery, ignoreCase = true) == true)
                     accountMatch && dateMatch && searchMatch
+                }
+
+                if (showDeleteDialog && transactionToDelete != null) {
+                    AlertDialog(
+                        onDismissRequest = { showDeleteDialog = false; transactionToDelete = null },
+                        title = { Text("تأكيد الحذف") },
+                        text = { Text("هل أنت متأكد من حذف هذا القيد؟") },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                showDeleteDialog = false
+                                val transaction = transactionToDelete
+                                if (transaction != null) {
+                                    // تحقق من الاتصال بالإنترنت
+                                    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
+                                    val isNetworkAvailable = connectivityManager?.activeNetworkInfo?.isConnected == true
+                                    if (!isNetworkAvailable) {
+                                        Toast.makeText(context, "يرجى الاتصال بالإنترنت لحذف القيد", Toast.LENGTH_SHORT).show()
+                                        return@TextButton
+                                    }
+                                    // جلب التوكن
+                                    val token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE).getString("token", null)
+                                    if (token == null) {
+                                        Toast.makeText(context, "يرجى تسجيل الدخول أولاً", Toast.LENGTH_SHORT).show()
+                                        return@TextButton
+                                    }
+                                    showProgress = true
+                                    // حذف من الخادم
+                                    RetrofitClient.getApiService()
+                                        .deleteTransaction("Bearer $token", transaction.getServerId())
+                                        .enqueue(object : Callback<Void?> {
+                                            override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
+                                                showProgress = false
+                                                if (response.isSuccessful) {
+                                                    viewModel.deleteTransaction(transaction)
+                                                    Toast.makeText(context, "تم حذف القيد بنجاح", Toast.LENGTH_SHORT).show()
+                                                } else {
+                                                    Toast.makeText(context, "فشل في حذف القيد من السيرفر", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                            override fun onFailure(call: Call<Void?>, t: Throwable) {
+                                                showProgress = false
+                                                Toast.makeText(context, "خطأ في الاتصال بالسيرفر", Toast.LENGTH_SHORT).show()
+                                            }
+                                        })
+                                }
+                            }) { Text("نعم") }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDeleteDialog = false; transactionToDelete = null }) { Text("لا") }
+                        }
+                    )
+                }
+                if (showProgress) {
+                    // يمكنك استبداله بـ Dialog مخصص أو CircularProgressIndicator
+                    AlertDialog(
+                        onDismissRequest = {},
+                        title = { Text("جاري حذف القيد...") },
+                        text = { Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator() } },
+                        confirmButton = {},
+                        dismissButton = {}
+                    )
                 }
 
                 TransactionsScreen(
@@ -171,7 +246,10 @@ class TransactionsFragment : Fragment() {
                     searchQuery = searchQuery,
                     onSearch = { searchQuery = it },
                     onAddClick = { navController.navigate(R.id.action_transactions_to_addTransaction) },
-                    onDelete = { transaction -> viewModel.deleteTransaction(transaction) },
+                    onDelete = { transaction ->
+                        transactionToDelete = transaction
+                        showDeleteDialog = true
+                    },
                     onEdit = { transaction ->
                         val args = Bundle().apply { putLong("transactionId", transaction.getId()) }
                         navController.navigate(R.id.action_transactions_to_editTransaction, args)
