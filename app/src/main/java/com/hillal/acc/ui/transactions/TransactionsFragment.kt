@@ -135,8 +135,10 @@ class TransactionsFragment : Fragment() {
             setContent {
                 val transactionsNullable by viewModel.getTransactions().observeAsState(emptyList())
                 val accountsNullable by accountViewModel.getAllAccounts().observeAsState(emptyList())
+                val balancesMapNullable by viewModel.accountBalancesMap.observeAsState(emptyMap())
                 val transactions = transactionsNullable ?: emptyList()
                 val accounts = accountsNullable ?: emptyList()
+                val balancesMap = balancesMapNullable ?: emptyMap<Long?, Map<String?, Double?>>()
 
                 // State للفلاتر
                 var selectedAccount by remember { mutableStateOf<Account?>(null) }
@@ -177,11 +179,12 @@ class TransactionsFragment : Fragment() {
                     onWhatsApp = { transaction ->
                         val account = accounts.find { it.getId() == transaction.getAccountId() }
                         val phone = account?.getPhoneNumber()
+                        val currency = transaction.getCurrency()
+                        val balance = balancesMap[transaction.getAccountId()]?.get(currency) ?: 0.0
                         if (!phone.isNullOrBlank()) {
-                            val balance = 0.0 // يمكنك حساب الرصيد بدقة إذا أردت
                             val msg = NotificationUtils.buildWhatsAppMessage(
                                 context,
-                                account.getName() ?: "-",
+                                account?.getName() ?: "-",
                                 transaction,
                                 balance,
                                 transaction.getType()
