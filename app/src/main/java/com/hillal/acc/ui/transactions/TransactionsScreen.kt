@@ -102,17 +102,21 @@ fun TransactionsScreen(
                 .verticalScroll(scrollState)
                 .padding(bottom = bottomSpacer, start = 8.dp, end = 8.dp)
         ) {
-            // واجهة الفلاتر
+            // واجهة الفلاتر الحديثة
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp, bottom = 4.dp),
-                shape = RoundedCornerShape(10.dp),
-                elevation = CardDefaults.cardElevation(1.dp),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(4.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
                 Column(Modifier.padding(8.dp)) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         AccountPickerField(
                             label = "الحساب",
                             accounts = accounts,
@@ -124,23 +128,30 @@ fun TransactionsScreen(
                         )
                         OutlinedButton(
                             onClick = { showStartPicker = true },
-                            modifier = Modifier.height(40.dp).defaultMinSize(minWidth = 60.dp)
+                            modifier = Modifier.height(36.dp).defaultMinSize(minWidth = 54.dp)
                         ) {
-                            Text(startDate?.let { dateFormat.format(Date(it)) } ?: "من", fontSize = 14.sp)
+                            Icon(Icons.Default.AccessTime, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(2.dp))
+                            Text(startDate?.let { dateFormat.format(Date(it)) } ?: "من", fontSize = 13.sp)
                         }
                         OutlinedButton(
                             onClick = { showEndPicker = true },
-                            modifier = Modifier.height(40.dp).defaultMinSize(minWidth = 60.dp)
+                            modifier = Modifier.height(36.dp).defaultMinSize(minWidth = 54.dp)
                         ) {
-                            Text(endDate?.let { dateFormat.format(Date(it)) } ?: "إلى", fontSize = 14.sp)
+                            Icon(Icons.Default.AccessTime, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(2.dp))
+                            Text(endDate?.let { dateFormat.format(Date(it)) } ?: "إلى", fontSize = 13.sp)
                         }
                     }
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = onSearch,
-                        label = { Text("بحث في الوصف", fontSize = 13.sp) },
-                        modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-                        textStyle = LocalTextStyle.current.copy(fontSize = 14.sp),
+                        label = { Text("بحث في الوصف", fontSize = 12.sp) },
+                        leadingIcon = { Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 6.dp),
+                        textStyle = LocalTextStyle.current.copy(fontSize = 13.sp),
                         singleLine = true,
                         shape = RoundedCornerShape(8.dp)
                     )
@@ -167,33 +178,53 @@ fun TransactionsScreen(
                 )
             }
             Divider(modifier = Modifier.padding(vertical = 4.dp), color = Color(0xFFE0E0E0))
-            // إحصائيات
+            // إحصائيات بشكل بطاقات صغيرة مع أيقونات
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp, vertical = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(horizontal = 2.dp, vertical = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Card(
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp),
-                    elevation = CardDefaults.cardElevation(0.5.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F9F1))
+                    shape = RoundedCornerShape(10.dp),
+                    elevation = CardDefaults.cardElevation(1.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFEEF7FE))
                 ) {
-                    Column(Modifier.fillMaxSize().padding(vertical = 6.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(transactions.size.toString(), color = MaterialTheme.colorScheme.primary, fontSize = 16.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                        Text("إجمالي القيود", color = Color(0xFF666666), fontSize = 12.sp)
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp, horizontal = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF1976D2), modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(transactions.size.toString(), color = Color(0xFF1976D2), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            Text("إجمالي القيود", color = Color(0xFF666666), fontSize = 10.sp)
+                        }
                     }
                 }
                 Card(
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp),
-                    elevation = CardDefaults.cardElevation(0.5.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE3E8FD))
+                    shape = RoundedCornerShape(10.dp),
+                    elevation = CardDefaults.cardElevation(1.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F9F1))
                 ) {
-                    Column(Modifier.fillMaxSize().padding(vertical = 6.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(transactions.sumOf { it.getAmount() }.toString(), color = MaterialTheme.colorScheme.primary, fontSize = 16.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                        Text("إجمالي المبالغ", color = Color(0xFF666666), fontSize = 12.sp)
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp, horizontal = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null, tint = Color(0xFF43A047), modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(transactions.sumOf { it.getAmount() }.toString(), color = Color(0xFF43A047), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            Text("إجمالي المبالغ", color = Color(0xFF666666), fontSize = 10.sp)
+                        }
                     }
                 }
             }
