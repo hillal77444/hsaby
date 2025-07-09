@@ -81,15 +81,18 @@ class AccountStatementComposeActivity : ComponentActivity() {
         
         val accounts by accountStatementViewModel.allAccounts.observeAsState(initial = emptyList())
         val transactions by transactionViewModel.getAllTransactions().observeAsState(initial = emptyList())
+        var selectedAccountState by remember { mutableStateOf<Account?>(null) }
+        var startDateState by remember { mutableStateOf(startDate) }
+        var endDateState by remember { mutableStateOf(endDate) }
         var showAccountPicker by remember { mutableStateOf(false) }
         var showStartDatePicker by remember { mutableStateOf(false) }
         var showEndDatePicker by remember { mutableStateOf(false) }
         var reportHtml by remember { mutableStateOf("") }
         
         // تحديث التقرير عند تغيير البيانات
-        LaunchedEffect(selectedAccount, startDate, endDate, transactions) {
-            if (selectedAccount != null) {
-                updateReport(context, selectedAccount!!, startDate, endDate, transactions, reportHtml) { html ->
+        LaunchedEffect(selectedAccountState, startDateState, endDateState, transactions) {
+            if (selectedAccountState != null) {
+                updateReport(context, selectedAccountState!!, startDateState, endDateState, transactions, reportHtml) { html ->
                     reportHtml = html
                 }
             }
@@ -139,17 +142,17 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(dimensions.spacingLarge)
+                    .padding(dimensions.spacingMedium)
             ) {
                 // بطاقة التحكم
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(dimensions.cardCorner),
-                    elevation = CardDefaults.cardElevation(6.dp),
+                    shape = RoundedCornerShape(dimensions.cardCorner * 0.5f),
+                    elevation = CardDefaults.cardElevation(3.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
                     Column(
-                        modifier = Modifier.padding(dimensions.spacingLarge)
+                        modifier = Modifier.padding(dimensions.spacingMedium)
                     ) {
                         // اختيار الحساب
                         Row(
@@ -160,12 +163,12 @@ class AccountStatementComposeActivity : ComponentActivity() {
                                 imageVector = Icons.Default.AccountCircle,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(dimensions.iconSize)
+                                modifier = Modifier.size(dimensions.iconSize * 0.7f)
                             )
                             Spacer(modifier = Modifier.width(dimensions.spacingSmall))
                             Text(
                                 text = "اختر الحساب",
-                                fontSize = dimensions.bodyFont,
+                                fontSize = dimensions.bodyFont * 0.9f,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -177,7 +180,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                         OutlinedButton(
                             onClick = { showAccountPicker = true },
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(dimensions.cardCorner),
+                            shape = RoundedCornerShape(dimensions.cardCorner * 0.5f),
                             colors = ButtonDefaults.outlinedButtonColors(
                                 containerColor = Color(0xFFF5F5F5)
                             )
@@ -185,16 +188,16 @@ class AccountStatementComposeActivity : ComponentActivity() {
                             Icon(
                                 imageVector = Icons.Default.AccountCircle,
                                 contentDescription = null,
-                                modifier = Modifier.size(dimensions.iconSize * 0.8f)
+                                modifier = Modifier.size(dimensions.iconSize * 0.6f)
                             )
                             Spacer(modifier = Modifier.width(dimensions.spacingSmall))
                             Text(
-                                text = selectedAccount?.name ?: "اختر الحساب",
-                                fontSize = dimensions.bodyFont
+                                text = selectedAccountState?.name ?: "اختر الحساب",
+                                fontSize = dimensions.bodyFont * 0.85f
                             )
                         }
                         
-                        Spacer(modifier = Modifier.height(dimensions.spacingMedium))
+                        Spacer(modifier = Modifier.height(dimensions.spacingSmall))
                         
                         // التواريخ
                         Row(
@@ -207,7 +210,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                             ) {
                                 Text(
                                     text = "من تاريخ",
-                                    fontSize = dimensions.bodyFont,
+                                    fontSize = dimensions.bodyFont * 0.85f,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
                                 )
@@ -215,7 +218,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                                 OutlinedButton(
                                     onClick = { showStartDatePicker = true },
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(dimensions.cardCorner),
+                                    shape = RoundedCornerShape(dimensions.cardCorner * 0.5f),
                                     colors = ButtonDefaults.outlinedButtonColors(
                                         containerColor = Color(0xFFF5F5F5)
                                     )
@@ -223,12 +226,12 @@ class AccountStatementComposeActivity : ComponentActivity() {
                                     Icon(
                                         imageVector = Icons.Default.DateRange,
                                         contentDescription = null,
-                                        modifier = Modifier.size(dimensions.iconSize * 0.8f)
+                                        modifier = Modifier.size(dimensions.iconSize * 0.6f)
                                     )
                                     Spacer(modifier = Modifier.width(dimensions.spacingSmall))
                                     Text(
-                                        text = startDate,
-                                        fontSize = dimensions.bodyFont
+                                        text = startDateState,
+                                        fontSize = dimensions.bodyFont * 0.8f
                                     )
                                 }
                             }
@@ -239,7 +242,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                             ) {
                                 Text(
                                     text = "إلى تاريخ",
-                                    fontSize = dimensions.bodyFont,
+                                    fontSize = dimensions.bodyFont * 0.85f,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
                                 )
@@ -247,7 +250,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                                 OutlinedButton(
                                     onClick = { showEndDatePicker = true },
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(dimensions.cardCorner),
+                                    shape = RoundedCornerShape(dimensions.cardCorner * 0.5f),
                                     colors = ButtonDefaults.outlinedButtonColors(
                                         containerColor = Color(0xFFF5F5F5)
                                     )
@@ -255,12 +258,12 @@ class AccountStatementComposeActivity : ComponentActivity() {
                                     Icon(
                                         imageVector = Icons.Default.DateRange,
                                         contentDescription = null,
-                                        modifier = Modifier.size(dimensions.iconSize * 0.8f)
+                                        modifier = Modifier.size(dimensions.iconSize * 0.6f)
                                     )
                                     Spacer(modifier = Modifier.width(dimensions.spacingSmall))
                                     Text(
-                                        text = endDate,
-                                        fontSize = dimensions.bodyFont
+                                        text = endDateState,
+                                        fontSize = dimensions.bodyFont * 0.8f
                                     )
                                 }
                             }
@@ -268,62 +271,99 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     }
                 }
                 
-                Spacer(modifier = Modifier.height(dimensions.spacingLarge))
+                Spacer(modifier = Modifier.height(dimensions.spacingMedium))
                 
                 // عرض التقرير
-                if (reportHtml.isNotEmpty()) {
+                if (selectedAccountState != null && reportHtml.isNotEmpty()) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(dimensions.cardCorner),
-                        elevation = CardDefaults.cardElevation(4.dp),
+                        shape = RoundedCornerShape(dimensions.cardCorner * 0.5f),
+                        elevation = CardDefaults.cardElevation(3.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White)
                     ) {
-                        AndroidView(
-                            factory = { context ->
-                                WebView(context).apply {
-                                    settings.javaScriptEnabled = true
-                                    settings.domStorageEnabled = true
-                                    webView = this
-                                }
-                            },
-                            update = { webView ->
-                                webView.loadDataWithBaseURL(
-                                    null,
-                                    reportHtml,
-                                    "text/html",
-                                    "UTF-8",
-                                    null
-                                )
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(600.dp)
-                        )
+                        Column(
+                            modifier = Modifier.padding(dimensions.spacingMedium)
+                        ) {
+                            Text(
+                                text = "كشف الحساب - ${selectedAccountState?.name}",
+                                fontSize = dimensions.bodyFont * 0.9f,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = dimensions.spacingSmall)
+                            )
+                            AndroidView(
+                                factory = { context ->
+                                    WebView(context).apply {
+                                        settings.javaScriptEnabled = true
+                                        settings.domStorageEnabled = true
+                                        webView = this
+                                    }
+                                },
+                                update = { webView ->
+                                    webView.loadDataWithBaseURL(
+                                        null,
+                                        reportHtml,
+                                        "text/html",
+                                        "UTF-8",
+                                        null
+                                    )
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(400.dp)
+                            )
+                        }
                     }
-                } else {
+                } else if (selectedAccountState == null) {
                     // رسالة عند عدم اختيار حساب
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(dimensions.cardCorner),
-                        elevation = CardDefaults.cardElevation(4.dp),
+                        shape = RoundedCornerShape(dimensions.cardCorner * 0.5f),
+                        elevation = CardDefaults.cardElevation(2.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
                         )
                     ) {
                         Column(
-                            modifier = Modifier.padding(dimensions.spacingLarge),
+                            modifier = Modifier.padding(dimensions.spacingMedium),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Assessment,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(dimensions.iconSize * 2)
+                                modifier = Modifier.size(dimensions.iconSize * 1.5f)
                             )
-                            Spacer(modifier = Modifier.height(dimensions.spacingMedium))
+                            Spacer(modifier = Modifier.height(dimensions.spacingSmall))
                             Text(
                                 text = "اختر الحساب لعرض كشف الحساب",
-                                fontSize = dimensions.bodyFont,
+                                fontSize = dimensions.bodyFont * 0.9f,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
+                } else {
+                    // رسالة عند تحميل التقرير
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(dimensions.cardCorner * 0.5f),
+                        elevation = CardDefaults.cardElevation(2.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.05f)
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(dimensions.spacingMedium),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(dimensions.iconSize),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(dimensions.spacingSmall))
+                            Text(
+                                text = "جاري تحضير التقرير...",
+                                fontSize = dimensions.bodyFont * 0.9f,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                             )
                         }
@@ -337,7 +377,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
             AccountPickerDialog(
                 accounts = accounts,
                 onAccountSelected = { account ->
-                    selectedAccount = account
+                    selectedAccountState = account
                     showAccountPicker = false
                 },
                 onDismiss = { showAccountPicker = false }
@@ -349,7 +389,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
             DatePickerDialog(
                 context,
                 { _, year, month, dayOfMonth ->
-                    startDate = String.format(Locale.ENGLISH, "%04d-%02d-%02d", year, month + 1, dayOfMonth)
+                    startDateState = String.format(Locale.ENGLISH, "%04d-%02d-%02d", year, month + 1, dayOfMonth)
                     showStartDatePicker = false
                 },
                 Calendar.getInstance().get(Calendar.YEAR),
@@ -363,7 +403,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
             DatePickerDialog(
                 context,
                 { _, year, month, dayOfMonth ->
-                    endDate = String.format(Locale.ENGLISH, "%04d-%02d-%02d", year, month + 1, dayOfMonth)
+                    endDateState = String.format(Locale.ENGLISH, "%04d-%02d-%02d", year, month + 1, dayOfMonth)
                     showEndDatePicker = false
                 },
                 Calendar.getInstance().get(Calendar.YEAR),
