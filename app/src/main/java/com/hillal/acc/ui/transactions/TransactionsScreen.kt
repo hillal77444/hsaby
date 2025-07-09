@@ -88,9 +88,23 @@ fun TransactionsScreen(
     var showEndPicker by remember { mutableStateOf(false) }
     val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale("ar")) }
     val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
-    val cardHeight = screenHeight * 0.15f // 15% من ارتفاع الشاشة
-    val bottomSpacer = screenHeight * 0.09f // 9% من ارتفاع الشاشة
+
+    // مقاسات نسبية
+    val cardCorner = screenWidth * 0.045f
+    val cardPadding = screenWidth * 0.025f
+    val buttonHeight = screenHeight * 0.045f
+    val buttonMinWidth = screenWidth * 0.15f
+    val iconSize = screenWidth * 0.07f
+    val textFieldFont = (screenWidth.value * 0.035f).sp
+    val statCardCorner = screenWidth * 0.035f
+    val statIconSize = screenWidth * 0.06f
+    val statFont = (screenWidth.value * 0.038f).sp
+    val statLabelFont = (screenWidth.value * 0.028f).sp
+    val statCardPaddingV = screenHeight * 0.012f
+    val statCardPaddingH = screenWidth * 0.02f
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -100,21 +114,21 @@ fun TransactionsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(bottom = bottomSpacer, start = 8.dp, end = 8.dp)
+                .padding(bottom = screenHeight * 0.09f, start = 8.dp, end = 8.dp)
         ) {
-            // واجهة الفلاتر الحديثة
+            // واجهة الفلاتر الحديثة بمقاسات نسبية
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 4.dp),
-                shape = RoundedCornerShape(16.dp),
+                    .padding(top = cardPadding, bottom = cardPadding),
+                shape = RoundedCornerShape(cardCorner),
                 elevation = CardDefaults.cardElevation(4.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
-                Column(Modifier.padding(8.dp)) {
+                Column(Modifier.padding(cardPadding)) {
                     Row(
                         Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(cardPadding),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         AccountPickerField(
@@ -128,32 +142,32 @@ fun TransactionsScreen(
                         )
                         OutlinedButton(
                             onClick = { showStartPicker = true },
-                            modifier = Modifier.height(36.dp).defaultMinSize(minWidth = 54.dp)
+                            modifier = Modifier.height(buttonHeight).defaultMinSize(minWidth = buttonMinWidth)
                         ) {
-                            Icon(Icons.Default.AccessTime, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(2.dp))
-                            Text(startDate?.let { dateFormat.format(Date(it)) } ?: "من", fontSize = 13.sp)
+                            Icon(Icons.Default.AccessTime, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(iconSize))
+                            Spacer(Modifier.width(cardPadding / 2))
+                            Text(startDate?.let { dateFormat.format(Date(it)) } ?: "من", fontSize = textFieldFont)
                         }
                         OutlinedButton(
                             onClick = { showEndPicker = true },
-                            modifier = Modifier.height(36.dp).defaultMinSize(minWidth = 54.dp)
+                            modifier = Modifier.height(buttonHeight).defaultMinSize(minWidth = buttonMinWidth)
                         ) {
-                            Icon(Icons.Default.AccessTime, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(2.dp))
-                            Text(endDate?.let { dateFormat.format(Date(it)) } ?: "إلى", fontSize = 13.sp)
+                            Icon(Icons.Default.AccessTime, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(iconSize))
+                            Spacer(Modifier.width(cardPadding / 2))
+                            Text(endDate?.let { dateFormat.format(Date(it)) } ?: "إلى", fontSize = textFieldFont)
                         }
                     }
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = onSearch,
-                        label = { Text("بحث في الوصف", fontSize = 12.sp) },
-                        leadingIcon = { Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                        label = { Text("بحث في الوصف", fontSize = textFieldFont) },
+                        leadingIcon = { Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(iconSize)) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 6.dp),
-                        textStyle = LocalTextStyle.current.copy(fontSize = 13.sp),
+                            .padding(top = cardPadding),
+                        textStyle = LocalTextStyle.current.copy(fontSize = textFieldFont),
                         singleLine = true,
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(cardCorner)
                     )
                 }
             }
@@ -182,48 +196,48 @@ fun TransactionsScreen(
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 2.dp, vertical = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    .padding(horizontal = cardPadding / 2, vertical = cardPadding / 2),
+                horizontalArrangement = Arrangement.spacedBy(cardPadding)
             ) {
                 Card(
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(10.dp),
+                    shape = RoundedCornerShape(statCardCorner),
                     elevation = CardDefaults.cardElevation(1.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFEEF7FE))
                 ) {
                     Row(
                         Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 6.dp, horizontal = 4.dp),
+                            .padding(vertical = statCardPaddingV, horizontal = statCardPaddingH),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF1976D2), modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(4.dp))
+                        Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF1976D2), modifier = Modifier.size(statIconSize))
+                        Spacer(Modifier.width(cardPadding / 2))
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(transactions.size.toString(), color = Color(0xFF1976D2), fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                            Text("إجمالي القيود", color = Color(0xFF666666), fontSize = 10.sp)
+                            Text(transactions.size.toString(), color = Color(0xFF1976D2), fontSize = statFont, fontWeight = FontWeight.Bold)
+                            Text("إجمالي القيود", color = Color(0xFF666666), fontSize = statLabelFont)
                         }
                     }
                 }
                 Card(
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(10.dp),
+                    shape = RoundedCornerShape(statCardCorner),
                     elevation = CardDefaults.cardElevation(1.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F9F1))
                 ) {
                     Row(
                         Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 6.dp, horizontal = 4.dp),
+                            .padding(vertical = statCardPaddingV, horizontal = statCardPaddingH),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = null, tint = Color(0xFF43A047), modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(4.dp))
+                        Icon(Icons.Default.Add, contentDescription = null, tint = Color(0xFF43A047), modifier = Modifier.size(statIconSize))
+                        Spacer(Modifier.width(cardPadding / 2))
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(transactions.sumOf { it.getAmount() }.toString(), color = Color(0xFF43A047), fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                            Text("إجمالي المبالغ", color = Color(0xFF666666), fontSize = 10.sp)
+                            Text(transactions.sumOf { it.getAmount() }.toString(), color = Color(0xFF43A047), fontSize = statFont, fontWeight = FontWeight.Bold)
+                            Text("إجمالي المبالغ", color = Color(0xFF666666), fontSize = statLabelFont)
                         }
                     }
                 }
@@ -246,13 +260,13 @@ fun TransactionsScreen(
                             onSms = { onSms(transaction) }, // <-- Fix: pass transaction
                             modifier = Modifier
                                 .padding(bottom = 6.dp)
-                                .height(cardHeight)
+                                .height(screenHeight * 0.15f)
                         )
                         if (idx < transactions.lastIndex) {
                             Divider(modifier = Modifier.padding(horizontal = 8.dp), color = Color(0xFFE0E0E0))
                         }
                     }
-                    Spacer(modifier = Modifier.height(bottomSpacer))
+                    Spacer(modifier = Modifier.height(screenHeight * 0.09f))
                 }
             }
         }
