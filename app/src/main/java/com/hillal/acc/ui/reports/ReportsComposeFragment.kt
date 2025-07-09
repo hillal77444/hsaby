@@ -9,15 +9,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.findNavController
-import com.hillal.acc.ui.theme.AppTheme
+import com.hillal.acc.ui.accounts.ResponsiveAccountsTheme
 import com.hillal.acc.viewmodel.TransactionViewModel
 
 class ReportsComposeFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val transactionViewModel: TransactionViewModel by viewModels()
         return ComposeView(requireContext()).apply {
             setContent {
-                val transactionViewModel: TransactionViewModel = viewModel(owner = this@ReportsComposeFragment)
-                AppTheme {
+                ResponsiveAccountsTheme {
                     ReportsScreen(
                         transactionViewModel = transactionViewModel,
                         onAccountStatementClick = {
