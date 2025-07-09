@@ -78,8 +78,7 @@ fun TransactionCard(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(12.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+                    .padding(12.dp)
             ) {
                 // السطر الأول: اسم الحساب والمبلغ
                 Row(
@@ -112,6 +111,8 @@ fun TransactionCard(
                         text = transaction.getDescription() ?: "",
                         fontSize = 14.sp,
                         color = Color.White,
+                        maxLines = 2,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -125,18 +126,20 @@ fun TransactionCard(
                     }
                 }
                 Spacer(Modifier.height(4.dp))
-                // الأزرار
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 2.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    ActionCircleButton(icon = Icons.Default.Delete, borderColor = Color.Red, onClick = onDelete, size = buttonSize, iconSize = iconSize)
-                    ActionCircleButton(icon = Icons.Default.Edit, borderColor = Color(0xFF1976D2), onClick = onEdit, size = buttonSize, iconSize = iconSize)
-                    ActionCircleButton(painter = painterResource(id = R.drawable.ic_sms), borderColor = Color(0xFF1976D2), onClick = onSms, size = buttonSize, iconSize = iconSize)
-                    ActionCircleButton(painter = painterResource(id = R.drawable.ic_whatsapp), borderColor = Color(0xFF25D366), onClick = onWhatsApp, size = buttonSize, iconSize = iconSize)
-                }
+                Spacer(Modifier.weight(1f)) // يدفع الأزرار للأسفل دائماً
+            }
+            // الأزرار دائماً في الأسفل
+            Row(
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                ActionCircleButton(icon = Icons.Default.Delete, borderColor = Color.Red, onClick = onDelete, size = buttonSize, iconSize = iconSize)
+                ActionCircleButton(icon = Icons.Default.Edit, borderColor = Color(0xFF1976D2), onClick = onEdit, size = buttonSize, iconSize = iconSize)
+                ActionCircleButton(painter = painterResource(id = R.drawable.ic_sms), borderColor = Color(0xFF1976D2), onClick = onSms, size = buttonSize, iconSize = iconSize)
+                ActionCircleButton(painter = painterResource(id = R.drawable.ic_whatsapp), borderColor = Color(0xFF25D366), onClick = onWhatsApp, size = buttonSize, iconSize = iconSize)
             }
         }
     }
