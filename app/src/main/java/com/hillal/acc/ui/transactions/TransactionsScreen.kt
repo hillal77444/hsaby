@@ -52,6 +52,7 @@ import com.hillal.acc.ui.common.TransactionCard
 import com.hillal.acc.ui.common.ActionCircleButton
 import com.hillal.acc.ui.common.getDateString
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 // Extension functions for Transaction
 fun Transaction.getAccountName(accountMap: Map<Long, Account>? = null): String? {
@@ -218,6 +219,7 @@ fun TransactionsScreen(
                     transactions.forEach { transaction ->
                         TransactionCard(
                             transaction = transaction,
+                            accounts = accounts,
                             onDelete = { onDelete(transaction) },
                             onEdit = { onEdit(transaction) },
                             onWhatsApp = { onWhatsApp(transaction) },

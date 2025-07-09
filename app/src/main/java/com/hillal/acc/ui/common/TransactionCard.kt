@@ -29,10 +29,12 @@ import com.hillal.acc.R
 import com.hillal.acc.data.model.Transaction
 import java.text.SimpleDateFormat
 import java.util.*
+import com.hillal.acc.data.model.Account
 
 @Composable
 fun TransactionCard(
     transaction: Transaction,
+    accounts: List<Account>,
     onDelete: () -> Unit,
     onEdit: () -> Unit,
     onWhatsApp: () -> Unit,
@@ -53,6 +55,7 @@ fun TransactionCard(
             end = Offset(400f, 400f)
         )
     }
+    val accountName = accounts.find { it.getId() == transaction.getAccountId() }?.getName() ?: "--"
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -75,7 +78,7 @@ fun TransactionCard(
             ) {
                 // اسم الحساب بشكل بارز في الأعلى
                 Text(
-                    text = transaction.getAccountName(null) ?: "--",
+                    text = accountName,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
                     color = Color.White,
