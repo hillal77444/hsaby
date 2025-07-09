@@ -28,7 +28,6 @@ import com.hillal.acc.ui.common.AccountPickerField
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.layout.animateItemPlacement
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -392,7 +391,7 @@ fun TransactionsScreen(
                             onEdit = { onEdit(transaction) },
                             onWhatsApp = { onWhatsApp(transaction) },
                             onSms = { onSms(transaction) },
-                            modifier = Modifier.animateItemPlacement()
+                            modifier = Modifier
                         )
                     }
                 }
