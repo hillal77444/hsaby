@@ -11,6 +11,7 @@ from sqlalchemy import case
 import requests
 from app.admin_routes import send_transaction_notification, calculate_and_notify_transaction, send_transaction_update_notification, send_transaction_delete_notification
 import traceback
+from sqlalchemy.exc import IntegrityError
 
 main = Blueprint('main', __name__)
 logger = logging.getLogger(__name__)
@@ -213,8 +214,30 @@ def sync_data():
                         server_id=new_server_id
                     )
                     db.session.add(account)
-                    db.session.flush()
-                    logger.info(f"Added new account: {account.account_name}")
+                    try:
+                        db.session.flush()
+                        logger.info(f"Added new account: {account.account_name}")
+                    except IntegrityError:
+                        db.session.rollback()
+                        # جلب الحساب الأول وتحديثه
+                        existing_account = Account.query.filter_by(
+                            account_number=acc_data.get('account_number'),
+                            user_id=current_user_id
+                        ).first()
+                        if existing_account:
+                            existing_account.account_name = acc_data.get('account_name', existing_account.account_name)
+                            existing_account.balance = acc_data.get('balance', existing_account.balance)
+                            existing_account.phone_number = acc_data.get('phone_number', existing_account.phone_number)
+                            existing_account.notes = acc_data.get('notes', existing_account.notes)
+                            existing_account.is_debtor = acc_data.get('is_debtor', existing_account.is_debtor)
+                            existing_account.whatsapp_enabled = acc_data.get('whatsapp_enabled', existing_account.whatsapp_enabled)
+                            existing_account.user_id = current_user_id
+                            db.session.flush()
+                            account = existing_account
+                            logger.info(f"Updated existing account after IntegrityError: {account.account_name}")
+                        else:
+                            logger.error("IntegrityError but account not found!")
+                            return json_response({'error': 'حدث خطأ غير متوقع أثناء إضافة الحساب'}, 500)
                 
                 account_mappings.append({
                     'local_id': acc_data.get('id'),
@@ -354,8 +377,31 @@ def sync_data():
                     )
                     print(f"New transaction - Final cashbox_id: {transaction.cashbox_id}")
                     db.session.add(transaction)
-                    db.session.flush()
-                    logger.info(f"Added new transaction: {transaction.id}")
+                    try:
+                        db.session.flush()
+                        logger.info(f"Added new transaction: {transaction.id}")
+                    except IntegrityError:
+                        db.session.rollback()
+                        # جلب المعاملة الأولى وتحديثها
+                        existing_transaction = Transaction.query.filter_by(
+                            amount=trans_data.get('amount'),
+                            type=trans_data.get('type'),
+                            description=trans_data.get('description'),
+                            date=date,
+                            account_id=trans_data.get('account_id'),
+                            user_id=current_user_id
+                        ).first()
+                        if existing_transaction:
+                            existing_transaction.notes = trans_data.get('notes', existing_transaction.notes)
+                            existing_transaction.currency = trans_data.get('currency', existing_transaction.currency)
+                            existing_transaction.whatsapp_enabled = trans_data.get('whatsapp_enabled', existing_transaction.whatsapp_enabled)
+                            existing_transaction.cashbox_id = cashbox_id
+                            db.session.flush()
+                            transaction = existing_transaction
+                            logger.info(f"Updated existing transaction after IntegrityError: {transaction.id}")
+                        else:
+                            logger.error("IntegrityError but transaction not found!")
+                            return json_response({'error': 'حدث خطأ غير متوقع أثناء إضافة المعاملة'}, 500)
                     # حساب الرصيد وإرسال الإشعار
                     try:
                         result = calculate_and_notify_transaction(transaction.id)

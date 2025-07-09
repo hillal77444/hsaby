@@ -59,6 +59,12 @@ class Transaction(db.Model):
     cashbox_id = db.Column(db.Integer, db.ForeignKey('cashbox.id'), nullable=True, index=True)  # الصندوق المرتبط بالمعاملة
     created_at = db.Column(db.DateTime, default=get_yemen_time)
     updated_at = db.Column(db.DateTime, default=get_yemen_time, onupdate=get_yemen_time)
+    __table_args__ = (
+        db.UniqueConstraint(
+            'amount', 'type', 'description', 'date', 'account_id', 'user_id',
+            name='unique_transaction_per_account'
+        ),
+    )
 
 class AppUpdate(db.Model):
     __tablename__ = 'app_updates'
