@@ -43,8 +43,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.Calendar
-import com.hsaby.accounting.data.model.Transaction
-import com.hsaby.accounting.data.model.Account
+import com.hillal.acc.data.model.Transaction
+import com.hillal.acc.data.model.Account
 import com.hillal.acc.ui.common.AccountPickerField
 import androidx.compose.ui.geometry.Offset
 import com.hillal.acc.R
@@ -185,32 +185,10 @@ fun TransactionsScreen(
                         Text(endDate?.let { dateFormat.format(Date(it)) } ?: "إلى")
                     }
                     if (showStartPicker) {
-                        DatePickerDialog(
-                            LocalContext.current,
-                            { _, year, month, dayOfMonth ->
-                                val cal = Calendar.getInstance()
-                                cal.set(year, month, dayOfMonth)
-                                onDateFilter(cal.timeInMillis, endDate)
-                                showStartPicker = false
-                            },
-                            Calendar.getInstance().get(Calendar.YEAR),
-                            Calendar.getInstance().get(Calendar.MONTH),
-                            Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-                        ).show()
+                        // TODO: Use a Compose-compatible date picker dialog here.
                     }
                     if (showEndPicker) {
-                        DatePickerDialog(
-                            LocalContext.current,
-                            { _, year, month, dayOfMonth ->
-                                val cal = Calendar.getInstance()
-                                cal.set(year, month, dayOfMonth)
-                                onDateFilter(startDate, cal.timeInMillis)
-                                showEndPicker = false
-                            },
-                            Calendar.getInstance().get(Calendar.YEAR),
-                            Calendar.getInstance().get(Calendar.MONTH),
-                            Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-                        ).show()
+                        // TODO: Use a Compose-compatible date picker dialog here.
                     }
                 }
                 // مربع البحث
@@ -262,115 +240,6 @@ fun TransactionsScreen(
                 }
             }
             Spacer(Modifier.height(10.dp))
-            // البطاقات الإضافية (فلترة، إحصائيات، ...)
-            val isSearching = search.isNotEmpty()
-
-            if (!isSearching) {
-                // البطاقات الإضافية (فلترة، إحصائيات، ...)
-                // واجهة الفلاتر في الأعلى
-                Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        // فلتر الحساب
-                        var expanded by remember { mutableStateOf(false) }
-                        var selectedAccount by remember { mutableStateOf<Account?>(null) }
-                        // استبدل قائمة الحسابات المنسدلة التقليدية بـ AccountPickerField:
-                        AccountPickerField(
-                            label = "الحساب",
-                            accounts = accounts,
-                            transactions = transactions,
-                            balancesMap = emptyMap(), // إذا كان لديك خريطة أرصدة مررها هنا
-                            selectedAccount = selectedAccount,
-                            onAccountSelected = { account ->
-                                selectedAccount = account
-                                onAccountFilter(account)
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
-                        // فلتر التاريخ
-                        var showStartPicker by remember { mutableStateOf(false) }
-                        var showEndPicker by remember { mutableStateOf(false) }
-                        val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale("ar")) }
-                        OutlinedButton(onClick = { showStartPicker = true }) {
-                            Text(startDate?.let { dateFormat.format(Date(it)) } ?: "من")
-                        }
-                        OutlinedButton(onClick = { showEndPicker = true }) {
-                            Text(endDate?.let { dateFormat.format(Date(it)) } ?: "إلى")
-                        }
-                        if (showStartPicker) {
-                            DatePickerDialog(
-                                LocalContext.current,
-                                { _, year, month, dayOfMonth ->
-                                    val cal = Calendar.getInstance()
-                                    cal.set(year, month, dayOfMonth)
-                                    onDateFilter(cal.timeInMillis, endDate)
-                                    showStartPicker = false
-                                },
-                                Calendar.getInstance().get(Calendar.YEAR),
-                                Calendar.getInstance().get(Calendar.MONTH),
-                                Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-                            ).show()
-                        }
-                        if (showEndPicker) {
-                            DatePickerDialog(
-                                LocalContext.current,
-                                { _, year, month, dayOfMonth ->
-                                    val cal = Calendar.getInstance()
-                                    cal.set(year, month, dayOfMonth)
-                                    onDateFilter(startDate, cal.timeInMillis)
-                                    showEndPicker = false
-                                },
-                                Calendar.getInstance().get(Calendar.YEAR),
-                                Calendar.getInstance().get(Calendar.MONTH),
-                                Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-                            ).show()
-                        }
-                    }
-                    // مربع البحث
-                    var search by remember { mutableStateOf(searchQuery) }
-                    OutlinedTextField(
-                        value = search,
-                        onValueChange = {
-                            search = it
-                            onSearch(it)
-                        },
-                        label = { Text("بحث في الوصف") },
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-                    )
-                }
-                Spacer(Modifier.height(12.dp))
-                // بطاقتا الإحصائيات
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(statsCardHeight)
-                        .padding(horizontal = 20.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Card(
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(14.dp),
-                        elevation = CardDefaults.cardElevation(2.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F9F1))
-                    ) {
-                        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("0", color = MaterialTheme.colorScheme.primary, fontSize = 18.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                            Text("إجمالي القيود", color = Color(0xFF666666), fontSize = 12.sp)
-                        }
-                    }
-                    Card(
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(14.dp),
-                        elevation = CardDefaults.cardElevation(2.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFE3E8FD))
-                    ) {
-                        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("0", color = MaterialTheme.colorScheme.primary, fontSize = 18.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                            Text("إجمالي المبالغ", color = Color(0xFF666666), fontSize = 12.sp)
-                        }
-                    }
-                }
-                Spacer(Modifier.height(10.dp))
-            }
             // قائمة المعاملات تظهر دائمًا
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
