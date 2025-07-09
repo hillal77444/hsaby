@@ -164,7 +164,10 @@ fun TransactionsScreen(
                                 textStyle = LocalTextStyle.current.copy(fontSize = textFieldFont),
                                 singleLine = true,
                                 trailingIcon = {
-                                    IconButton(onClick = { isSearchActive = false }) {
+                                    IconButton(onClick = {
+                                        isSearchActive = false
+                                        onSearch("") // مسح مربع البحث عند الإغلاق
+                                    }) {
                                         Icon(Icons.Default.Close, contentDescription = "إغلاق البحث", modifier = Modifier.size(iconSize), tint = Color.Gray)
                                     }
                                 },
