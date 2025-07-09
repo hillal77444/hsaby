@@ -9,6 +9,7 @@ import com.hillal.acc.data.repository.TransactionRepository
 import com.hillal.acc.ui.transactions.AddTransactionScreen
 import com.hillal.acc.ui.transactions.TransactionsViewModel
 import com.hillal.acc.App
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 class AddTransactionFragment : Fragment() {
     override fun onCreateView(

@@ -60,8 +60,9 @@ import com.hillal.acc.data.db.AppDatabase
 import com.hillal.acc.data.model.PendingOperation
 import com.google.gson.Gson
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.state.MutableState
-import androidx.compose.ui.state.observeAsState
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.MutableState
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 class TransactionsFragment : Fragment() {
     private var binding: FragmentTransactionsBinding? = null

@@ -50,6 +50,8 @@ import androidx.compose.ui.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.border
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.livedata.observeAsState
 
 // Extension functions for Transaction
 fun Transaction.getAccountName(accountMap: Map<Long, Account>? = null): String? {
