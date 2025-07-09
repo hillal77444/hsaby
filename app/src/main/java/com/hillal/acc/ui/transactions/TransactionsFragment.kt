@@ -127,7 +127,7 @@ class TransactionsFragment : Fragment() {
                 val transactions = transactionsState.value
                 // TODO: Add other state and callbacks as needed
                 TransactionsScreen(
-                    transactions = transactions,
+                    transactions = transactions ?: emptyList(),
                     onAddClick = { /* TODO: Navigate to add transaction */ },
                     onDelete = { /* TODO: Handle delete */ },
                     onEdit = { /* TODO: Handle edit */ },
