@@ -355,12 +355,14 @@ fun AddTransactionScreen(
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
                             value = amount,
-                            onValueChange = { amount = it.filter { c -> c.isDigit() } },
+                            onValueChange = { input ->
+                                amount = input.replace(',', '.').filter { c -> c.isDigit() || c == '.' }
+                            },
                             label = { Text("المبلغ", fontSize = labelFontSize) },
                             modifier = Modifier.weight(1f),
                             leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
                             textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                         )
                         OutlinedTextField(
                             value = dateFormat.format(Date(date)),
