@@ -46,7 +46,8 @@ fun TransactionCard(
     onEdit: () -> Unit,
     onWhatsApp: () -> Unit,
     onSms: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    searchQuery: String = "" // Add this parameter with default value
 ) {
     val isDebit = transaction.getType()?.lowercase() == "debit" || transaction.getType() == "عليه"
     val gradient = if (isDebit) {
