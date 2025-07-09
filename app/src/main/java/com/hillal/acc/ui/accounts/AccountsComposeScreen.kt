@@ -32,6 +32,7 @@ import com.hillal.acc.data.model.Account
 import java.util.*
 import com.hillal.acc.ui.theme.ProvideResponsiveDimensions
 import com.hillal.acc.ui.theme.LocalResponsiveDimensions
+import com.hillal.acc.ui.accounts.ResponsiveAccountsTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,8 +46,6 @@ fun AccountsComposeScreen(
     ProvideResponsiveDimensions {
         ResponsiveAccountsTheme {
             val dimensions = LocalResponsiveDimensions.current
-            val spacing = ResponsiveSpacing()
-            val padding = ResponsivePadding()
             
             val accounts by viewModel.allAccounts.observeAsState(initial = emptyList())
             val accountBalances = remember(accounts) {
@@ -127,7 +126,7 @@ fun AccountsComposeScreen(
                 ) {
                     // Header Section
                     item {
-                        HeaderSection(dimensions = dimensions)
+                        HeaderSection()
                     }
                     
                     // Search and Filter Section
@@ -140,8 +139,7 @@ fun AccountsComposeScreen(
                                 currentSortType = it
                                 isAscendingSort = !isAscendingSort
                             },
-                            onFilterClick = { /* TODO: Implement filter */ },
-                            dimensions = dimensions
+                            onFilterClick = { /* TODO: Implement filter */ }
                         )
                     }
                     
@@ -149,8 +147,7 @@ fun AccountsComposeScreen(
                     item {
                         StatisticsSection(
                             totalAccounts = totalAccounts,
-                            activeAccounts = activeAccounts,
-                            dimensions = dimensions
+                            activeAccounts = activeAccounts
                         )
                     }
                     
@@ -168,8 +165,7 @@ fun AccountsComposeScreen(
                                 viewModel.updateAccount(account)
                             },
                             onEditClick = { onNavigateToEditAccount(account.id) },
-                            onItemClick = { onNavigateToAccountDetails(account.id) },
-                            dimensions = dimensions
+                            onItemClick = { onNavigateToAccountDetails(account.id) }
                         )
                     }
                     
@@ -200,7 +196,8 @@ fun AccountsComposeScreen(
 }
 
 @Composable
-private fun HeaderSection(dimensions: ResponsiveDimensions) {
+private fun HeaderSection() {
+    val dimensions = LocalResponsiveDimensions.current
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -265,9 +262,9 @@ private fun SearchAndFilterSection(
     onSearchQueryChange: (String) -> Unit,
     currentSortType: String,
     onSortTypeChange: (String) -> Unit,
-    onFilterClick: () -> Unit,
-    dimensions: ResponsiveDimensions
+    onFilterClick: () -> Unit
 ) {
+    val dimensions = LocalResponsiveDimensions.current
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(dimensions.cardCorner),
@@ -367,9 +364,9 @@ private fun SearchAndFilterSection(
 @Composable
 private fun StatisticsSection(
     totalAccounts: Int,
-    activeAccounts: Int,
-    dimensions: ResponsiveDimensions
+    activeAccounts: Int
 ) {
+    val dimensions = LocalResponsiveDimensions.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(dimensions.spacingSmall)
@@ -432,9 +429,9 @@ private fun AccountItem(
     balance: Double,
     onWhatsAppToggle: (Boolean) -> Unit,
     onEditClick: () -> Unit,
-    onItemClick: () -> Unit,
-    dimensions: ResponsiveDimensions
+    onItemClick: () -> Unit
 ) {
+    val dimensions = LocalResponsiveDimensions.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
