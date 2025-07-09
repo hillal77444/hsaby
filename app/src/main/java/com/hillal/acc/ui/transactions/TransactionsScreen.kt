@@ -288,7 +288,8 @@ fun TransactionsScreen(
                             onSms = { onSms(transaction) }, // <-- Fix: pass transaction
                             modifier = Modifier
                                 .padding(bottom = 6.dp)
-                                .height(screenHeight * 0.15f)
+                                .height(screenHeight * 0.15f),
+                            searchQuery = searchQuery // تمرير البحث
                         )
                         if (idx < transactions.lastIndex) {
                             Divider(modifier = Modifier.padding(horizontal = 8.dp), color = Color(0xFFE0E0E0))
