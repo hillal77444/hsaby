@@ -30,6 +30,8 @@ import com.hillal.acc.data.model.Transaction
 import java.text.SimpleDateFormat
 import java.util.*
 import com.hillal.acc.data.model.Account
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.Dp
 
 @Composable
 fun TransactionCard(
@@ -56,12 +58,16 @@ fun TransactionCard(
         )
     }
     val accountName = accounts.find { it.getId() == transaction.getAccountId() }?.getName() ?: "--"
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val buttonSize = screenHeight * 0.033f // 3.3% من ارتفاع الشاشة (مثلاً ~26dp على شاشة 800dp)
+    val iconSize = screenHeight * 0.018f // 1.8% من ارتفاع الشاشة
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(150.dp)
-            .shadow(8.dp, RoundedCornerShape(20.dp)),
-        shape = RoundedCornerShape(20.dp),
+            // لا تضع .height هنا، بل مررها من TransactionsScreen
+            .shadow(8.dp, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
@@ -73,34 +79,34 @@ fun TransactionCard(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
+                    .padding(12.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 // اسم الحساب بشكل بارز في الأعلى
                 Text(
                     text = accountName,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
+                    fontSize = 17.sp,
                     color = Color.White,
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 1
                 )
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(2.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     // المبلغ
                     Text(
                         text = "${transaction.getAmount()} ${transaction.getCurrency()}",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp,
+                        fontSize = 19.sp,
                         color = Color.White
                     )
                     // التاريخ + أيقونة ساعة
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.AccessTime, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.AccessTime, contentDescription = null, tint = Color.White, modifier = Modifier.size(iconSize))
                         Spacer(Modifier.width(2.dp))
                         Text(
                             text = transaction.getDateString(),
-                            fontSize = 14.sp,
+                            fontSize = 13.sp,
                             color = Color.White
                         )
                     }
@@ -109,7 +115,7 @@ fun TransactionCard(
                 // الوصف
                 Text(
                     text = transaction.getDescription() ?: "",
-                    fontSize = 15.sp,
+                    fontSize = 14.sp,
                     color = Color.White,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -117,13 +123,13 @@ fun TransactionCard(
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp),
+                        .padding(top = 6.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    ActionCircleButton(icon = Icons.Default.Delete, borderColor = Color.Red, onClick = onDelete)
-                    ActionCircleButton(icon = Icons.Default.Edit, borderColor = Color(0xFF1976D2), onClick = onEdit)
-                    ActionCircleButton(painter = painterResource(id = R.drawable.ic_sms), borderColor = Color(0xFF1976D2), onClick = onSms)
-                    ActionCircleButton(painter = painterResource(id = R.drawable.ic_whatsapp), borderColor = Color(0xFF25D366), onClick = onWhatsApp)
+                    ActionCircleButton(icon = Icons.Default.Delete, borderColor = Color.Red, onClick = onDelete, size = buttonSize, iconSize = iconSize)
+                    ActionCircleButton(icon = Icons.Default.Edit, borderColor = Color(0xFF1976D2), onClick = onEdit, size = buttonSize, iconSize = iconSize)
+                    ActionCircleButton(painter = painterResource(id = R.drawable.ic_sms), borderColor = Color(0xFF1976D2), onClick = onSms, size = buttonSize, iconSize = iconSize)
+                    ActionCircleButton(painter = painterResource(id = R.drawable.ic_whatsapp), borderColor = Color(0xFF25D366), onClick = onWhatsApp, size = buttonSize, iconSize = iconSize)
                 }
             }
         }
@@ -135,20 +141,22 @@ fun ActionCircleButton(
     icon: ImageVector? = null,
     painter: Painter? = null,
     borderColor: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    size: Dp = 40.dp,
+    iconSize: Dp = 22.dp
 ) {
     Box(
         modifier = Modifier
-            .size(40.dp)
+            .size(size)
             .border(2.dp, borderColor, CircleShape)
             .background(Color.White, CircleShape)
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         if (icon != null) {
-            Icon(icon, contentDescription = null, tint = borderColor, modifier = Modifier.size(22.dp))
+            Icon(icon, contentDescription = null, tint = borderColor, modifier = Modifier.size(iconSize))
         } else if (painter != null) {
-            Icon(painter = painter, contentDescription = null, tint = borderColor, modifier = Modifier.size(22.dp))
+            Icon(painter = painter, contentDescription = null, tint = borderColor, modifier = Modifier.size(iconSize))
         }
     }
 }

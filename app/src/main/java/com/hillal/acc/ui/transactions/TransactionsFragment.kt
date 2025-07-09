@@ -157,20 +157,35 @@ class TransactionsFragment : Fragment() {
                 var startDate by remember { mutableStateOf(fourDaysAgo.timeInMillis) }
                 var endDate by remember { mutableStateOf(today.timeInMillis) }
                 var searchQuery by remember { mutableStateOf("") }
+                var searchResults by remember { mutableStateOf<List<Transaction>?>(null) }
+
+                // البحث في قاعدة البيانات مباشرة عند وجود نص بحث
+                LaunchedEffect(searchQuery) {
+                    if (searchQuery.isNotBlank()) {
+                        viewModel.searchTransactionsByDescription("%$searchQuery%")?.observeForever { results ->
+                            searchResults = results?.filterNotNull()
+                        }
+                    } else {
+                        searchResults = null
+                    }
+                }
+
+                // تصفية المعاملات حسب الفلاتر (تُستخدم فقط إذا لم يكن هناك بحث)
+                val filteredTransactions = if (searchQuery.isNotBlank() && searchResults != null) {
+                    searchResults!!
+                } else {
+                    transactions.filter { tx ->
+                        val accountMatch = selectedAccount == null || tx.getAccountId() == selectedAccount?.getId()
+                        val dateMatch = tx.getTransactionDate() in startDate..endDate
+                        accountMatch && dateMatch
+                    }
+                }
 
                 // State للحذف
                 var showDeleteDialog by remember { mutableStateOf(false) }
                 var transactionToDelete by remember { mutableStateOf<Transaction?>(null) }
                 var showProgress by remember { mutableStateOf(false) }
                 val coroutineScope = rememberCoroutineScope()
-
-                // تصفية المعاملات حسب الفلاتر
-                val filteredTransactions = transactions.filter { tx ->
-                    val accountMatch = selectedAccount == null || tx.getAccountId() == selectedAccount?.getId()
-                    val dateMatch = tx.getTransactionDate() in startDate..endDate
-                    val searchMatch = searchQuery.isBlank() || (tx.getDescription()?.contains(searchQuery, ignoreCase = true) == true)
-                    accountMatch && dateMatch && searchMatch
-                }
 
                 if (showDeleteDialog && transactionToDelete != null) {
                     AlertDialog(

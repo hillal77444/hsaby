@@ -71,7 +71,7 @@ fun TransactionsScreen(
     onDelete: (Transaction) -> Unit,
     onEdit: (Transaction) -> Unit,
     onWhatsApp: (Transaction) -> Unit,
-    onSms: (Transaction) -> Unit,
+    onSms: () -> Unit,
     modifier: Modifier = Modifier,
     accounts: List<Account> = emptyList(),
     onAccountFilter: (Account?) -> Unit = {},
@@ -82,73 +82,35 @@ fun TransactionsScreen(
     onSearch: (String) -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
+    var showStartPicker by remember { mutableStateOf(false) }
+    var showEndPicker by remember { mutableStateOf(false) }
+    val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale("ar")) }
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val cardHeight = screenHeight * 0.15f // 15% من ارتفاع الشاشة
+    val bottomSpacer = screenHeight * 0.09f // 9% من ارتفاع الشاشة
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color(0xFFF6F8FB))
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(bottom = 80.dp) // مساحة للزر العائم
+                .padding(bottom = bottomSpacer, start = 8.dp, end = 8.dp)
         ) {
-            // خلفية علوية بتدرج لوني عصري
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(140.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
-                            )
-                        )
-                    )
-            )
-            // دائرة الشعار مع Glow
-            Box(
-                modifier = Modifier
-                    .size(70.dp)
-                    .align(Alignment.CenterHorizontally)
-                    .offset(y = (-35).dp)
-                    .shadow(16.dp, CircleShape, clip = false)
-            ) {
-                Surface(
-                    shape = CircleShape,
-                    color = Color.White,
-                    shadowElevation = 12.dp,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_transactions),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(16.dp).fillMaxSize()
-                    )
-                }
-            }
-            // العنوان تحت الشعار
-            Text(
-                text = "عرض وإدارة جميع المعاملات المالية",
-                color = Color.White,
-                fontSize = 15.sp,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .offset(y = (-20).dp)
-            )
             // واجهة الفلاتر
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(2.dp)
+                    .padding(top = 8.dp, bottom = 4.dp),
+                shape = RoundedCornerShape(10.dp),
+                elevation = CardDefaults.cardElevation(1.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
-                Column(Modifier.padding(12.dp)) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(Modifier.padding(8.dp)) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         AccountPickerField(
                             label = "الحساب",
                             accounts = accounts,
@@ -158,65 +120,90 @@ fun TransactionsScreen(
                             onAccountSelected = onAccountFilter,
                             modifier = Modifier.weight(1f)
                         )
-                        val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale("ar")) }
-                        OutlinedButton(onClick = {
-                            // يمكنك استدعاء DatePicker هنا
-                        }) {
-                            Text(startDate?.let { dateFormat.format(Date(it)) } ?: "من")
+                        OutlinedButton(
+                            onClick = { showStartPicker = true },
+                            modifier = Modifier.height(40.dp).defaultMinSize(minWidth = 60.dp)
+                        ) {
+                            Text(startDate?.let { dateFormat.format(Date(it)) } ?: "من", fontSize = 14.sp)
                         }
-                        OutlinedButton(onClick = {
-                            // يمكنك استدعاء DatePicker هنا
-                        }) {
-                            Text(endDate?.let { dateFormat.format(Date(it)) } ?: "إلى")
+                        OutlinedButton(
+                            onClick = { showEndPicker = true },
+                            modifier = Modifier.height(40.dp).defaultMinSize(minWidth = 60.dp)
+                        ) {
+                            Text(endDate?.let { dateFormat.format(Date(it)) } ?: "إلى", fontSize = 14.sp)
                         }
                     }
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = onSearch,
-                        label = { Text("بحث في الوصف") },
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                        label = { Text("بحث في الوصف", fontSize = 13.sp) },
+                        modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                        textStyle = LocalTextStyle.current.copy(fontSize = 14.sp),
+                        singleLine = true,
+                        shape = RoundedCornerShape(8.dp)
                     )
                 }
             }
+            if (showStartPicker) {
+                DatePickerDialog(
+                    initialDate = startDate ?: System.currentTimeMillis(),
+                    onDateSelected = { date ->
+                        onDateFilter(date, endDate)
+                        showStartPicker = false
+                    },
+                    onDismissRequest = { showStartPicker = false }
+                )
+            }
+            if (showEndPicker) {
+                DatePickerDialog(
+                    initialDate = endDate ?: System.currentTimeMillis(),
+                    onDateSelected = { date ->
+                        onDateFilter(startDate, date)
+                        showEndPicker = false
+                    },
+                    onDismissRequest = { showEndPicker = false }
+                )
+            }
+            Divider(modifier = Modifier.padding(vertical = 4.dp), color = Color(0xFFE0E0E0))
             // إحصائيات
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Card(
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(14.dp),
-                    elevation = CardDefaults.cardElevation(2.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    elevation = CardDefaults.cardElevation(0.5.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F9F1))
                 ) {
-                    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(transactions.size.toString(), color = MaterialTheme.colorScheme.primary, fontSize = 18.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    Column(Modifier.fillMaxSize().padding(vertical = 6.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(transactions.size.toString(), color = MaterialTheme.colorScheme.primary, fontSize = 16.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                         Text("إجمالي القيود", color = Color(0xFF666666), fontSize = 12.sp)
                     }
                 }
                 Card(
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(14.dp),
-                    elevation = CardDefaults.cardElevation(2.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    elevation = CardDefaults.cardElevation(0.5.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFE3E8FD))
                 ) {
-                    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(transactions.sumOf { it.getAmount() }.toString(), color = MaterialTheme.colorScheme.primary, fontSize = 18.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    Column(Modifier.fillMaxSize().padding(vertical = 6.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(transactions.sumOf { it.getAmount() }.toString(), color = MaterialTheme.colorScheme.primary, fontSize = 16.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                         Text("إجمالي المبالغ", color = Color(0xFF666666), fontSize = 12.sp)
                     }
                 }
             }
-            Spacer(Modifier.height(10.dp))
+            Divider(modifier = Modifier.padding(vertical = 4.dp), color = Color(0xFFE0E0E0))
             // قائمة المعاملات
             if (transactions.isEmpty()) {
-                Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                    Text("لا توجد معاملات للفلاتر المختارة", color = Color.Gray)
+                Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                    Text("لا توجد معاملات للفلاتر المختارة", color = Color.Gray, fontSize = 14.sp)
                 }
             } else {
                 Column(Modifier.fillMaxWidth()) {
-                    transactions.forEach { transaction ->
+                    transactions.forEachIndexed { idx, transaction ->
                         TransactionCard(
                             transaction = transaction,
                             accounts = accounts,
@@ -224,9 +211,15 @@ fun TransactionsScreen(
                             onEdit = { onEdit(transaction) },
                             onWhatsApp = { onWhatsApp(transaction) },
                             onSms = { onSms(transaction) },
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            modifier = Modifier
+                                .padding(bottom = 6.dp)
+                                .height(cardHeight)
                         )
+                        if (idx < transactions.lastIndex) {
+                            Divider(modifier = Modifier.padding(horizontal = 8.dp), color = Color(0xFFE0E0E0))
+                        }
                     }
+                    Spacer(modifier = Modifier.height(bottomSpacer))
                 }
             }
         }
@@ -235,13 +228,38 @@ fun TransactionsScreen(
             onClick = onAddClick,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 24.dp, bottom = 24.dp)
-                .size(64.dp),
+                .padding(end = 16.dp, bottom = 16.dp)
+                .size(56.dp),
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = Color.White,
             shape = CircleShape
         ) {
             Icon(Icons.Default.Add, contentDescription = "إضافة معاملة")
         }
+    }
+}
+
+// DatePickerDialog Composable (بسيط)
+@Composable
+fun DatePickerDialog(initialDate: Long, onDateSelected: (Long) -> Unit, onDismissRequest: () -> Unit) {
+    val calendar = remember { Calendar.getInstance().apply { timeInMillis = initialDate } }
+    val context = LocalContext.current
+    val datePickerDialog = remember {
+        android.app.DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                calendar.set(Calendar.YEAR, year)
+                calendar.set(Calendar.MONTH, month)
+                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                onDateSelected(calendar.timeInMillis)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+    }
+    LaunchedEffect(Unit) {
+        datePickerDialog.setOnDismissListener { onDismissRequest() }
+        datePickerDialog.show()
     }
 } 
