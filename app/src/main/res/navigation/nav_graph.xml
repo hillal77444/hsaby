@@ -97,7 +97,7 @@
     <!-- التقارير -->
     <fragment
         android:id="@+id/navigation_reports"
-        android:name="com.hillal.acc.ui.reports.ReportsFragment"
+        android:name="com.hillal.acc.ui.reports.ReportsComposeFragment"
         android:label="@string/title_reports"
         tools:layout="@layout/fragment_reports">
         <action

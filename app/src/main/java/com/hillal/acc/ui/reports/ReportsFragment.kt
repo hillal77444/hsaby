@@ -21,6 +21,7 @@ import com.hillal.acc.viewmodel.AccountViewModel
 import com.hillal.acc.viewmodel.TransactionViewModel
 import java.util.Locale
 
+// تم تحويل هذه الشاشة إلى Compose (انظر ReportsScreen.kt). يمكن حذف هذا الملف لاحقًا بعد التأكد من عمل الشاشة الجديدة.
 class ReportsFragment : Fragment() {
     private var accountViewModel: AccountViewModel? = null
     private var transactionViewModel: TransactionViewModel? = null
