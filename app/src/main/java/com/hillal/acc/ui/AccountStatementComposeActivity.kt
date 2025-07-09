@@ -82,8 +82,10 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val accounts by accountStatementViewModel.allAccounts.observeAsState(initial = emptyList())
         val transactions by transactionViewModel.getAllTransactions().observeAsState(initial = emptyList())
         var selectedAccountState by remember { mutableStateOf<Account?>(null) }
-        var startDateState by remember { mutableStateOf(startDate) }
-        var endDateState by remember { mutableStateOf(endDate) }
+        var startDateState by remember { mutableStateOf("") }
+        var endDateState by remember { mutableStateOf("") }
+        var selectedCurrencyState by remember { mutableStateOf<String?>(null) }
+        var availableCurrencies by remember { mutableStateOf(listOf<String>()) }
         var showAccountPicker by remember { mutableStateOf(false) }
         var showStartDatePicker by remember { mutableStateOf(false) }
         var showEndDatePicker by remember { mutableStateOf(false) }
@@ -95,6 +97,24 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 updateReport(context, selectedAccountState!!, startDateState, endDateState, transactions, reportHtml) { html ->
                     reportHtml = html
                 }
+            }
+        }
+
+        // 2. عند فتح الصفحة أو اختيار الحساب، عيّن التواريخ والعملات
+        LaunchedEffect(selectedAccountState) {
+            if (selectedAccountState != null) {
+                val calendar = Calendar.getInstance()
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+                val today = calendar.time
+                calendar.add(Calendar.DAY_OF_MONTH, -3)
+                val threeDaysAgo = calendar.time
+                startDateState = dateFormat.format(threeDaysAgo)
+                endDateState = dateFormat.format(today)
+                // استخراج العملات من معاملات الحساب
+                val accountTxs = transactions.filter { it.accountId == selectedAccountState!!.id }
+                val currencies = accountTxs.mapNotNull { it.currency }.distinct()
+                availableCurrencies = currencies
+                selectedCurrencyState = currencies.firstOrNull()
             }
         }
 
@@ -291,6 +311,28 @@ class AccountStatementComposeActivity : ComponentActivity() {
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(bottom = dimensions.spacingSmall)
                             )
+                            // 3. أزرار العملة في رأس التقرير
+                            if (selectedAccountState != null && availableCurrencies.isNotEmpty()) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(bottom = dimensions.spacingSmall),
+                                    horizontalArrangement = Arrangement.spacedBy(dimensions.spacingSmall)
+                                ) {
+                                    availableCurrencies.forEach { currency ->
+                                        val selected = currency == selectedCurrencyState
+                                        Button(
+                                            onClick = { selectedCurrencyState = currency },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = if (selected) MaterialTheme.colorScheme.primary else Color(0xFFF5F5F5),
+                                                contentColor = if (selected) Color.White else MaterialTheme.colorScheme.primary
+                                            ),
+                                            shape = RoundedCornerShape(dimensions.cardCorner * 0.5f),
+                                            modifier = Modifier.weight(1f)
+                                        ) {
+                                            Text(currency)
+                                        }
+                                    }
+                                }
+                            }
                             AndroidView(
                                 factory = { context ->
                                     WebView(context).apply {
@@ -487,14 +529,30 @@ class AccountStatementComposeActivity : ComponentActivity() {
             
             if (startDate == null || endDate == null) return
             
-            // تصفية المعاملات حسب الحساب والتاريخ
-            val filteredTransactions = allTransactions.filter { transaction ->
-                transaction.accountId == account.id &&
-                isTransactionInDateRange(transaction, startDate, endDate)
+            // 4. عند توليد التقرير، صفِّ المعاملات حسب العملة المختارة فقط
+            val filteredTransactions = allTransactions.filter { tx ->
+                tx.accountId == account.id &&
+                (selectedCurrencyState == null || tx.currency == selectedCurrencyState) &&
+                isTransactionInDateRange(tx, startDate, endDate)
             }.sortedBy { it.createdAt }
             
+            // 5. الرصيد التراكمي يبدأ من رصيد الحساب قبل الفترة
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+            val startDateObj = dateFormat.parse(startDateStr)
+            val previousBalance = allTransactions.filter { tx ->
+                tx.accountId == account.id &&
+                (selectedCurrencyState == null || tx.currency == selectedCurrencyState) &&
+                Date(tx.createdAt).before(startDateObj)
+            }.fold(0.0) { acc, tx ->
+                when (tx.type) {
+                    "debit" -> acc - tx.amount
+                    "credit" -> acc + tx.amount
+                    else -> acc
+                }
+            }
+
             // إنشاء HTML للتقرير
-            val html = generateReportHtml(account, startDate, endDate, filteredTransactions)
+            val html = generateReportHtml(account, startDate, endDate, filteredTransactions, previousBalance)
             onHtmlGenerated(html)
             
         } catch (e: Exception) {
@@ -511,14 +569,15 @@ class AccountStatementComposeActivity : ComponentActivity() {
         account: Account,
         startDate: Date,
         endDate: Date,
-        transactions: List<Transaction>
+        transactions: List<Transaction>,
+        previousBalance: Double
     ): String {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
         val displayDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
         
         var totalDebit = 0.0
         var totalCredit = 0.0
-        var balance = 0.0
+        var balance = previousBalance
         
         val transactionRows = transactions.joinToString("") { transaction ->
             when (transaction.type) {
