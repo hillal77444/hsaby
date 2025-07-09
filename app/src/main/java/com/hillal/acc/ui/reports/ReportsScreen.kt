@@ -23,6 +23,7 @@ import com.hillal.acc.R
 import com.hillal.acc.data.model.Transaction
 import com.hillal.acc.viewmodel.TransactionViewModel
 import java.util.Locale
+import com.hillal.acc.ui.theme.LocalResponsiveDimensions
 
 @Composable
 fun ReportsScreen(
@@ -31,6 +32,7 @@ fun ReportsScreen(
     onAccountsSummaryClick: () -> Unit,
     onCashboxStatementClick: () -> Unit
 ) {
+    val dimensions = LocalResponsiveDimensions.current
     val transactions by transactionViewModel.getAllTransactions().observeAsState(emptyList())
     val totalDebit = transactions.filter { it.getType() == "debit" }.sumOf { it.getAmount() }
     val totalCredit = transactions.filter { it.getType() == "credit" }.sumOf { it.getAmount() }
@@ -50,13 +52,13 @@ fun ReportsScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(140.dp)
+                .height(dimensions.cardHeight)
                 .background(MaterialTheme.colorScheme.primary)
         ) {}
         Card(
             modifier = Modifier
-                .size(80.dp)
-                .offset(y = (-40).dp)
+                .size(dimensions.cardHeight * 0.57f)
+                .offset(y = (-dimensions.cardHeight * 0.29f))
                 .align(Alignment.CenterHorizontally),
             shape = MaterialTheme.shapes.extraLarge,
             elevation = CardDefaults.cardElevation(8.dp),
@@ -67,34 +69,34 @@ fun ReportsScreen(
                     painter = painterResource(id = R.drawable.ic_statement),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.size(dimensions.iconSize * 2)
                 )
             }
         }
         Text(
             text = "التقارير المالية",
-            fontSize = 22.sp,
+            fontSize = dimensions.titleFont,
             fontWeight = FontWeight.Bold,
             color = Color.White,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         Text(
             text = "ملخص الحسابات والمعاملات المالية",
-            fontSize = 13.sp,
+            fontSize = dimensions.bodyFont,
             color = Color(0xFF666666),
-            modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 8.dp)
+            modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = dimensions.spacingSmall)
         )
         // بطاقة الأزرار
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 8.dp),
+                .padding(horizontal = dimensions.spacingLarge, vertical = dimensions.spacingSmall),
             shape = MaterialTheme.shapes.large,
             elevation = CardDefaults.cardElevation(6.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
-            Column(Modifier.padding(16.dp)) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(Modifier.padding(dimensions.spacingMedium)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimensions.spacingSmall)) {
                     Button(
                         onClick = onAccountsSummaryClick,
                         modifier = Modifier.weight(1f),
@@ -104,10 +106,10 @@ fun ReportsScreen(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_summary),
                             contentDescription = null,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(dimensions.iconSize)
                         )
-                        Spacer(Modifier.width(8.dp))
-                        Text("تقرير ارصدة الحسابات")
+                        Spacer(Modifier.width(dimensions.spacingSmall))
+                        Text("تقرير ارصدة الحسابات", fontSize = dimensions.bodyFont)
                     }
                     Button(
                         onClick = onAccountStatementClick,
@@ -118,14 +120,14 @@ fun ReportsScreen(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_statement),
                             contentDescription = null,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(dimensions.iconSize)
                         )
-                        Spacer(Modifier.width(8.dp))
-                        Text("كشف الحساب")
+                        Spacer(Modifier.width(dimensions.spacingSmall))
+                        Text("كشف الحساب", fontSize = dimensions.bodyFont)
                     }
                 }
-                Spacer(Modifier.height(8.dp))
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Spacer(Modifier.height(dimensions.spacingSmall))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimensions.spacingSmall)) {
                     Button(
                         onClick = onCashboxStatementClick,
                         modifier = Modifier.weight(1f),
@@ -135,10 +137,10 @@ fun ReportsScreen(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_wallet),
                             contentDescription = null,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(dimensions.iconSize)
                         )
-                        Spacer(Modifier.width(8.dp))
-                        Text("تقرير ارصدة الصناديق")
+                        Spacer(Modifier.width(dimensions.spacingSmall))
+                        Text("تقرير ارصدة الصناديق", fontSize = dimensions.bodyFont)
                     }
                 }
             }
@@ -147,25 +149,25 @@ fun ReportsScreen(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = dimensions.spacingLarge, vertical = dimensions.spacingSmall),
             shape = MaterialTheme.shapes.medium,
             elevation = CardDefaults.cardElevation(3.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
-            Column(Modifier.padding(18.dp)) {
+            Column(Modifier.padding(dimensions.spacingMedium)) {
                 Text(
                     text = "اجمالي الارصده لجميع العملات",
-                    fontSize = 16.sp,
+                    fontSize = dimensions.bodyFont,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(dimensions.spacingSmall))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     StatItem(label = "إجمالي المدينين", value = totalDebit)
                     StatItem(label = "إجمالي الدائنين", value = totalCredit)
                     StatItem(label = "الرصيد", value = netBalance)
                 }
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(dimensions.spacingSmall))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     StatItem(label = "عدد المعاملات", value = count.toDouble(), isInt = true)
                     StatItem(label = "متوسط المعاملة", value = avg)
@@ -177,16 +179,17 @@ fun ReportsScreen(
 
 @Composable
 fun StatItem(label: String, value: Double, isInt: Boolean = false) {
+    val dimensions = LocalResponsiveDimensions.current
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = if (isInt) value.toInt().toString() else String.format(Locale.ENGLISH, "%.2f", value),
             fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
+            fontSize = dimensions.statFont,
             color = MaterialTheme.colorScheme.primary
         )
         Text(
             text = label,
-            fontSize = 13.sp,
+            fontSize = dimensions.statLabelFont,
             color = Color(0xFF666666)
         )
     }

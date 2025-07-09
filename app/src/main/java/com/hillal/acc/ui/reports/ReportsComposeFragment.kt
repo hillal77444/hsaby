@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.findNavController
 import com.hillal.acc.ui.accounts.ResponsiveAccountsTheme
+import com.hillal.acc.ui.theme.ProvideResponsiveDimensions
 import com.hillal.acc.viewmodel.TransactionViewModel
 
 class ReportsComposeFragment : Fragment() {
@@ -17,19 +18,21 @@ class ReportsComposeFragment : Fragment() {
         val transactionViewModel: TransactionViewModel by viewModels()
         return ComposeView(requireContext()).apply {
             setContent {
-                ResponsiveAccountsTheme {
-                    ReportsScreen(
-                        transactionViewModel = transactionViewModel,
-                        onAccountStatementClick = {
-                            findNavController().navigate(com.hillal.acc.R.id.accountStatementFragment)
-                        },
-                        onAccountsSummaryClick = {
-                            findNavController().navigate(com.hillal.acc.R.id.accountsSummaryReportFragment)
-                        },
-                        onCashboxStatementClick = {
-                            findNavController().navigate(com.hillal.acc.R.id.cashboxStatementFragment)
-                        }
-                    )
+                ProvideResponsiveDimensions {
+                    ResponsiveAccountsTheme {
+                        ReportsScreen(
+                            transactionViewModel = transactionViewModel,
+                            onAccountStatementClick = {
+                                findNavController().navigate(com.hillal.acc.R.id.accountStatementFragment)
+                            },
+                            onAccountsSummaryClick = {
+                                findNavController().navigate(com.hillal.acc.R.id.accountsSummaryReportFragment)
+                            },
+                            onCashboxStatementClick = {
+                                findNavController().navigate(com.hillal.acc.R.id.cashboxStatementFragment)
+                            }
+                        )
+                    }
                 }
             }
         }
