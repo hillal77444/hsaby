@@ -33,7 +33,7 @@ class Account(db.Model):
     created_at = db.Column(db.DateTime, default=get_yemen_time)
     updated_at = db.Column(db.DateTime, default=get_yemen_time, onupdate=get_yemen_time)
     __table_args__ = (
-        db.UniqueConstraint('account_number', 'user_id', name='unique_account_per_user'),
+        db.UniqueConstraint('account_number', 'user_id', 'phone_number', name='unique_account_per_user'),
     )
 
 class Cashbox(db.Model):

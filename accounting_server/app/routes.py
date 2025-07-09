@@ -175,14 +175,13 @@ def sync_data():
                         user_id=current_user_id
                     ).first()
                 
-                # التحقق من تكرار الحساب
+                # التحقق من تكرار الحساب بالقيم الصحيحة
                 if not account:
                     existing_account = Account.query.filter_by(
-                        account_name=acc_data.get('account_number'),
-                        phone_number=acc_data.get('phone_number'),
-                        user_id=current_user_id
+                        account_number=acc_data.get('account_number'),
+                        user_id=current_user_id,
+                        phone_number=acc_data.get('phone_number')
                     ).first()
-                    
                     if existing_account:
                         account = existing_account
                         logger.info(f"Found existing account: {account.account_name}")
@@ -222,7 +221,8 @@ def sync_data():
                         # جلب الحساب الأول وتحديثه
                         existing_account = Account.query.filter_by(
                             account_number=acc_data.get('account_number'),
-                            user_id=current_user_id
+                            user_id=current_user_id,
+                            phone_number=acc_data.get('phone_number')
                         ).first()
                         if existing_account:
                             existing_account.account_name = acc_data.get('account_name', existing_account.account_name)
@@ -287,7 +287,7 @@ def sync_data():
                         user_id=current_user_id
                     ).first()
                 
-                # التحقق من تكرار المعاملة بجميع الحقول مع توحيد التاريخ فقط
+                # التحقق من تكرار المعاملة بالقيم الصحيحة
                 if not transaction:
                     existing_transaction = Transaction.query.filter_by(
                         amount=trans_data.get('amount'),
