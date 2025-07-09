@@ -43,6 +43,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.Calendar
+import com.hsaby.accounting.data.model.Transaction
+import com.hsaby.accounting.data.model.Account
+import com.hillal.acc.ui.common.AccountPickerField
+import androidx.compose.ui.geometry.Offset
+import com.hillal.acc.R
 
 // Extension functions for Transaction
 fun Transaction.getAccountName(accountMap: Map<Long, Account>? = null): String? {
