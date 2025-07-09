@@ -71,7 +71,7 @@ fun TransactionsScreen(
     onDelete: (Transaction) -> Unit,
     onEdit: (Transaction) -> Unit,
     onWhatsApp: (Transaction) -> Unit,
-    onSms: () -> Unit,
+    onSms: (Transaction) -> Unit, // <-- Fix: accept Transaction parameter
     modifier: Modifier = Modifier,
     accounts: List<Account> = emptyList(),
     balancesMap: Map<Long, Map<String, Double>> = emptyMap(), // أضف هذا
@@ -212,7 +212,7 @@ fun TransactionsScreen(
                             onDelete = { onDelete(transaction) },
                             onEdit = { onEdit(transaction) },
                             onWhatsApp = { onWhatsApp(transaction) },
-                            onSms = { onSms(transaction) },
+                            onSms = { onSms(transaction) }, // <-- Fix: pass transaction
                             modifier = Modifier
                                 .padding(bottom = 6.dp)
                                 .height(cardHeight)
@@ -261,7 +261,7 @@ fun DatePickerDialog(initialDate: Long, onDateSelected: (Long) -> Unit, onDismis
         )
     }
     LaunchedEffect(Unit) {
-        datePickerDialog.setOnDismissListener { onDismissRequest() }
+        datePickerDialog.setOnDismissListener { onDismissRequest() } // <-- Fix: no parameter
         datePickerDialog.show()
     }
 } 

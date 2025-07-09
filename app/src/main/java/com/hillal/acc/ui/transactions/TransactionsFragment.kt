@@ -172,12 +172,27 @@ class TransactionsFragment : Fragment() {
                 }
 
                 // تصفية المعاملات حسب الفلاتر (تُستخدم فقط إذا لم يكن هناك بحث)
+                // تأكد من أن الفلترة تتجاهل الوقت (من بداية اليوم إلى نهاية اليوم)
+                val startOfDay = Calendar.getInstance().apply {
+                    timeInMillis = startDate
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.timeInMillis
+                val endOfDay = Calendar.getInstance().apply {
+                    timeInMillis = endDate
+                    set(Calendar.HOUR_OF_DAY, 23)
+                    set(Calendar.MINUTE, 59)
+                    set(Calendar.SECOND, 59)
+                    set(Calendar.MILLISECOND, 999)
+                }.timeInMillis
                 val filteredTransactions = if (searchQuery.isNotBlank() && searchResults != null) {
                     searchResults!!
                 } else {
                     transactions.filter { tx ->
                         val accountMatch = selectedAccount == null || tx.getAccountId() == selectedAccount?.getId()
-                        val dateMatch = tx.getTransactionDate() in startDate..endDate
+                        val dateMatch = tx.getTransactionDate() in startOfDay..endOfDay
                         accountMatch && dateMatch
                     }
                 }
