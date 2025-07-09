@@ -65,7 +65,6 @@ fun TransactionCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            // لا تضع .height هنا، بل مررها من TransactionsScreen
             .shadow(8.dp, RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(8.dp),
@@ -82,25 +81,39 @@ fun TransactionCard(
                     .padding(12.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // اسم الحساب بشكل بارز في الأعلى
-                Text(
-                    text = accountName,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp,
-                    color = Color.White,
-                    modifier = Modifier.fillMaxWidth(),
-                    maxLines = 1
-                )
-                Spacer(Modifier.height(2.dp))
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    // المبلغ
+                // السطر الأول: اسم الحساب والمبلغ
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = accountName,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 17.sp,
+                        color = Color.White,
+                        maxLines = 1
+                    )
                     Text(
                         text = "${transaction.getAmount()} ${transaction.getCurrency()}",
                         fontWeight = FontWeight.Bold,
                         fontSize = 19.sp,
                         color = Color.White
                     )
-                    // التاريخ + أيقونة ساعة
+                }
+                Spacer(Modifier.height(2.dp))
+                // السطر الثاني: الوصف والتاريخ
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = transaction.getDescription() ?: "",
+                        fontSize = 14.sp,
+                        color = Color.White,
+                        modifier = Modifier.weight(1f)
+                    )
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.AccessTime, contentDescription = null, tint = Color.White, modifier = Modifier.size(iconSize))
                         Spacer(Modifier.width(2.dp))
@@ -111,19 +124,12 @@ fun TransactionCard(
                         )
                     }
                 }
-                Spacer(Modifier.height(2.dp))
-                // الوصف
-                Text(
-                    text = transaction.getDescription() ?: "",
-                    fontSize = 14.sp,
-                    color = Color.White,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Spacer(Modifier.height(4.dp))
                 // الأزرار
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .padding(top = 6.dp),
+                        .padding(top = 2.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     ActionCircleButton(icon = Icons.Default.Delete, borderColor = Color.Red, onClick = onDelete, size = buttonSize, iconSize = iconSize)
