@@ -62,11 +62,19 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.MutableState
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.Box
+import androidx.compose.ui.text.Text
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.res.stringResource
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 
 class TransactionsFragment : Fragment() {
-    private var binding: FragmentTransactionsBinding? = null
     private var viewModel: TransactionsViewModel? = null
-    private var adapter: TransactionAdapter? = null
     private var accountViewModel: AccountViewModel? = null
     private var transactionViewModel: TransactionViewModel? = null
     private var transactionRepository: TransactionRepository? = null
@@ -116,54 +124,97 @@ class TransactionsFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
+        val viewModel: TransactionsViewModel = viewModel()
+        val accountViewModel: AccountViewModel = viewModel()
+        val navController = findNavController()
+        val context = requireContext()
+        // State for accounts
+        val accountsState = accountViewModel.getAllAccounts().observeAsState(emptyList<Account>())
         return ComposeView(requireContext()).apply {
             setContent {
-                val viewModel: TransactionsViewModel = viewModel()
                 val transactionsState = viewModel.getTransactions().observeAsState(emptyList())
-                val transactions = transactionsState.value
-                // TODO: Add other state and callbacks as needed
-                TransactionsScreen(
-                    transactions = transactions ?: emptyList(),
-                    onAddClick = { /* TODO: Navigate to add transaction */ },
-                    onDelete = { /* TODO: Handle delete */ },
-                    onEdit = { /* TODO: Handle edit */ },
-                    onWhatsApp = { /* TODO: Handle WhatsApp */ },
-                    onSms = { /* TODO: Handle SMS */ }
-                    // Add other parameters as needed
-                )
+                val transactions = transactionsState.value ?: emptyList()
+                val accounts = accountsState.value ?: emptyList()
+                // حالة Dialog الحذف
+                var showDeleteDialog by remember { mutableStateOf(false) }
+                var transactionToDelete by remember { mutableStateOf<Transaction?>(null) }
+                // Toast
+                val toastHost = LocalContext.current
+                // واجهة المستخدم
+                Box {
+                    TransactionsScreen(
+                        transactions = transactions,
+                        accounts = accounts,
+                        onAddClick = {
+                            navController.navigate(R.id.action_transactions_to_addTransaction)
+                        },
+                        onDelete = { transaction ->
+                            transactionToDelete = transaction
+                            showDeleteDialog = true
+                        },
+                        onEdit = { transaction ->
+                            val args = Bundle().apply { putLong("transactionId", transaction.getId()) }
+                            navController.navigate(R.id.action_transactions_to_editTransaction, args)
+                        },
+                        onWhatsApp = { transaction ->
+                            val account = accounts.find { it.getId() == transaction.getAccountId() }
+                            val phone = account?.getPhoneNumber()
+                            if (!phone.isNullOrBlank()) {
+                                val balance = 0.0 // يمكنك حساب الرصيد بدقة إذا أردت
+                                val msg = NotificationUtils.buildWhatsAppMessage(
+                                    context,
+                                    account.getName() ?: "-",
+                                    transaction,
+                                    balance,
+                                    transaction.getType()
+                                )
+                                NotificationUtils.sendWhatsAppMessage(context, phone, msg)
+                            } else {
+                                Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        onSms = { transaction ->
+                            val account = accounts.find { it.getId() == transaction.getAccountId() }
+                            val phone = account?.getPhoneNumber()
+                            if (!phone.isNullOrBlank()) {
+                                val msg = "حسابكم لدينا: ${transaction.getAmount()} ${transaction.getCurrency()}\n${transaction.getDescription()}"
+                                NotificationUtils.sendSmsMessage(context, phone, msg)
+                            } else {
+                                Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    )
+                    // Dialog تأكيد الحذف
+                    if (showDeleteDialog && transactionToDelete != null) {
+                        AlertDialog(
+                            onDismissRequest = { showDeleteDialog = false },
+                            title = { Text("حذف القيد") },
+                            text = { Text("هل أنت متأكد أنك تريد حذف هذا القيد؟") },
+                            confirmButton = {
+                                TextButton(onClick = {
+                                    viewModel.deleteTransaction(transactionToDelete)
+                                    Toast.makeText(toastHost, "تم حذف القيد بنجاح", Toast.LENGTH_SHORT).show()
+                                    showDeleteDialog = false
+                                    transactionToDelete = null
+                                }) {
+                                    Text("نعم")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = {
+                                    showDeleteDialog = false
+                                    transactionToDelete = null
+                                }) {
+                                    Text("لا")
+                                }
+                            }
+                        )
+                    }
+                }
             }
         }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        // تهيئة الـ RecyclerView والـ Adapter بشكل صحيح
-        val recyclerView = view.findViewById<RecyclerView>(R.id.transactionsRecyclerView)
-        recyclerView.setLayoutManager(LinearLayoutManager(getContext()))
-        adapter =
-            TransactionAdapter(TransactionDiffCallback(), requireContext(), getViewLifecycleOwner())
-        recyclerView.setAdapter(adapter)
-
-        // إعداد المستمعين للأزرار بشكل منفصل
-        setupAdapterListeners()
-
-
-        // إعداد الفلاتر
-        setupAccountFilter()
-        setupDateFilter()
-
-
-        // إعداد FAB
-        setupFab()
-
-
-        // مراقبة البيانات
-        observeAccountsAndTransactions()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -214,9 +265,8 @@ class TransactionsFragment : Fragment() {
                                             // فلترة الحساب فقط
                                             if (selectedAccount != null && !selectedAccount!!.isEmpty()) {
                                                 var account: Account? = null
-                                                if (adapter != null && adapter!!.getAccountMap() != null) {
-                                                    account = adapter!!.getAccountMap()
-                                                        .get(t!!.getAccountId())
+                                                if (accountMap.containsKey(t!!.getAccountId())) {
+                                                    account = accountMap.get(t!!.getAccountId())
                                                 }
                                                 val accountName =
                                                     if (account != null) account.getName() else null
@@ -233,17 +283,17 @@ class TransactionsFragment : Fragment() {
 
 
                                         // تحديث الإحصائيات والقائمة
-                                        binding!!.totalTransactionsText.setText(filtered.size.toString())
-                                        binding!!.totalAmountText.setText(
-                                            String.format(
-                                                Locale.ENGLISH,
-                                                "%.2f",
-                                                totalAmount
-                                            )
-                                        )
-                                        adapter!!.submitList(filtered)
-                                        binding!!.transactionsRecyclerView.setVisibility(if (filtered.isEmpty()) View.GONE else View.VISIBLE)
-                                        binding!!.emptyView.setVisibility(if (filtered.isEmpty()) View.VISIBLE else View.GONE)
+                                        // binding!!.totalTransactionsText.setText(filtered.size.toString())
+                                        // binding!!.totalAmountText.setText(
+                                        //     String.format(
+                                        //         Locale.ENGLISH,
+                                        //         "%.2f",
+                                        //         totalAmount
+                                        //     )
+                                        // )
+                                        // adapter!!.submitList(filtered)
+                                        // binding!!.transactionsRecyclerView.setVisibility(if (filtered.isEmpty()) View.GONE else View.VISIBLE)
+                                        // binding!!.emptyView.setVisibility(if (filtered.isEmpty()) View.VISIBLE else View.GONE)
                                     }
                                 })
                     }
@@ -281,176 +331,6 @@ class TransactionsFragment : Fragment() {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    private fun setupAdapterListeners() {
-        // مستمع الحذف
-        adapter!!.setOnDeleteClickListener(OnDeleteClickListener { transaction: Transaction? ->
-            AlertDialog.Builder(requireContext())
-                .setTitle("تأكيد الحذف")
-                .setMessage("هل أنت متأكد من حذف هذا القيد؟")
-                .setPositiveButton(
-                    "نعم",
-                    DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int ->
-                        if (!this.isNetworkAvailable) {
-                            Toast.makeText(
-                                requireContext(),
-                                "يرجى الاتصال بالإنترنت لحذف القيد",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            return@OnClickListener
-                        }
-                        // عرض مؤشر تحميل
-                        val progressDialog = ProgressDialog(requireContext())
-                        progressDialog.setMessage("جاري حذف القيد...")
-                        progressDialog.setCancelable(false)
-                        progressDialog.show()
-
-
-                        // الحصول على token المستخدم
-                        val token = requireContext().getSharedPreferences(
-                            "auth_prefs",
-                            Context.MODE_PRIVATE
-                        )
-                            .getString("token", null)
-
-                        if (token == null) {
-                            progressDialog.dismiss()
-                            Toast.makeText(
-                                requireContext(),
-                                "يرجى تسجيل الدخول أولاً",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            return@OnClickListener
-                        }
-
-
-                        // إرسال طلب الحذف إلى السيرفر
-                        RetrofitClient.getApiService()
-                            .deleteTransaction("Bearer " + token, transaction!!.getServerId())
-                            .enqueue(object : Callback<Void?> {
-                                override fun onResponse(
-                                    call: Call<Void?>,
-                                    response: Response<Void?>
-                                ) {
-                                    progressDialog.dismiss()
-                                    if (response.isSuccessful()) {
-                                        // إذا نجح الحذف من السيرفر، نقوم بحذفه من قاعدة البيانات المحلية
-                                        transactionViewModel!!.deleteTransaction(transaction)
-                                        requireActivity().runOnUiThread(Runnable {
-                                            Toast.makeText(
-                                                requireContext(),
-                                                "تم حذف القيد بنجاح",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        })
-                                    } else {
-                                        requireActivity().runOnUiThread(Runnable {
-                                            Toast.makeText(
-                                                requireContext(),
-                                                "فشل في حذف القيد من السيرفر",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        })
-                                    }
-                                }
-
-                                override fun onFailure(call: Call<Void?>, t: Throwable) {
-                                    progressDialog.dismiss()
-                                    requireActivity().runOnUiThread(Runnable {
-                                        Toast.makeText(
-                                            requireContext(),
-                                            "خطأ في الاتصال بالسيرفر",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    })
-                                }
-                            })
-                    })
-                .setNegativeButton("لا", null)
-                .show()
-        })
-
-        // مستمع التعديل
-        adapter!!.setOnEditClickListener(OnEditClickListener { transaction: Transaction? ->
-            val args = Bundle()
-            args.putLong("transactionId", transaction!!.getId())
-            findNavController(requireView()).navigate(
-                R.id.action_transactions_to_editTransaction,
-                args
-            )
-        })
-
-        // مستمع واتساب
-        adapter!!.setOnWhatsAppClickListener(OnWhatsAppClickListener { transaction: Transaction?, phoneNumber: String? ->
-            if (phoneNumber == null || phoneNumber.isEmpty()) {
-                Toast.makeText(requireContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
-                return@OnWhatsAppClickListener
-            }
-            // الحصول على معلومات الحساب
-            accountViewModel!!.getAccountById(transaction!!.getAccountId())
-                .observe(getViewLifecycleOwner(), Observer { account: Account? ->
-                    if (account != null) {
-                        // مراقبة الرصيد حتى التاريخ
-                        transactionRepository!!.getBalanceUntilDate(
-                            transaction.getAccountId(),
-                            transaction.getTransactionDate(),
-                            transaction.getCurrency()
-                        )
-                            .observe(getViewLifecycleOwner(), Observer { balance: Double? ->
-                                if (balance != null) {
-                                    val type = transaction.getType()
-                                    val message = buildWhatsAppMessage(
-                                        account.getName(),
-                                        transaction,
-                                        balance,
-                                        type
-                                    )
-                                    sendWhatsAppMessage(requireContext(), phoneNumber, message)
-                                }
-                            })
-                    }
-                })
-        })
-
-        // مستمع SMS
-        adapter!!.setOnSmsClickListener(OnSmsClickListener { transaction: Transaction?, phoneNumber: String? ->
-            if (phoneNumber == null || phoneNumber.isEmpty()) {
-                Toast.makeText(requireContext(), "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
-                return@OnSmsClickListener
-            }
-            accountViewModel!!.getAccountById(transaction!!.getAccountId())
-                .observe(getViewLifecycleOwner(), Observer { account: Account? ->
-                    if (account != null) {
-                        transactionRepository!!.getBalanceUntilDate(
-                            transaction.getAccountId(),
-                            transaction.getTransactionDate(),
-                            transaction.getCurrency()
-                        )
-                            .observe(getViewLifecycleOwner(), Observer { balance: Double? ->
-                                if (balance != null) {
-                                    val type = transaction.getType()
-                                    val amountStr =
-                                        String.format(Locale.US, "%.0f", transaction.getAmount())
-                                    val balanceStr = String.format(Locale.US, "%.0f", abs(balance))
-                                    val currency = transaction.getCurrency()
-                                    val typeText = if (type.equals(
-                                            "credit",
-                                            ignoreCase = true
-                                        ) || type == "له"
-                                    ) "لكم" else "عليكم"
-                                    val balanceText =
-                                        if (balance >= 0) "الرصيد لكم " else "الرصيد عليكم "
-                                    val message = ("حسابكم لدينا:\n"
-                                            + typeText + " " + amountStr + " " + currency + "\n"
-                                            + transaction.getDescription() + "\n"
-                                            + balanceText + balanceStr + " " + currency)
-                                    sendSmsMessage(requireContext(), phoneNumber, message)
-                                }
-                            })
-                    }
-                })
-        })
-    }
-
     private fun setupAccountFilter() {
         // تحميل الحسابات
         accountViewModel!!.getAllAccounts()
@@ -463,15 +343,15 @@ class TransactionsFragment : Fragment() {
                         accountMap.put(account.getId(), account)
                     }
                     // تعيين الخريطة للـ adapter بعد كل تحديث
-                    if (adapter != null) {
-                        adapter!!.setAccountMap(accountMap)
-                    }
+                    // if (adapter != null) {
+                    //     adapter!!.setAccountMap(accountMap)
+                    // }
                 }
             })
 
         // إعداد مستمع النقر على حقل اختيار الحساب
-        binding!!.accountFilterDropdown.setFocusable(false)
-        binding!!.accountFilterDropdown.setOnClickListener(View.OnClickListener { v: View? -> showAccountPicker() })
+        // binding!!.accountFilterDropdown.setFocusable(false)
+        // binding!!.accountFilterDropdown.setOnClickListener(View.OnClickListener { v: View? -> showAccountPicker() })
     }
 
     private fun showAccountPicker() {
@@ -485,7 +365,7 @@ class TransactionsFragment : Fragment() {
             accountBalancesMap,
             AccountPickerBottomSheet.OnAccountSelectedListener { account: Account? ->
                 selectedAccount = account!!.getName()
-                binding!!.accountFilterDropdown.setText(account.getName())
+                // binding!!.accountFilterDropdown.setText(account.getName())
                 applyAllFilters()
             }
         )
@@ -493,13 +373,13 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun setupDateFilter() {
-        updateDateInputs()
-        binding!!.startDateFilter.setOnClickListener(View.OnClickListener { v: View? ->
-            showDatePicker(true)
-        })
-        binding!!.endDateFilter.setOnClickListener(View.OnClickListener { v: View? ->
-            showDatePicker(false)
-        })
+        // updateDateInputs()
+        // binding!!.startDateFilter.setOnClickListener(View.OnClickListener { v: View? ->
+        //     showDatePicker(true)
+        // })
+        // binding!!.endDateFilter.setOnClickListener(View.OnClickListener { v: View? ->
+        //     showDatePicker(false)
+        // })
     }
 
     private fun showDatePicker(isStart: Boolean) {
@@ -596,7 +476,7 @@ class TransactionsFragment : Fragment() {
                 selectedCal.set(Calendar.MILLISECOND, 999)
                 endDate = selectedCal
             }
-            updateDateInputs()
+            // updateDateInputs()
 
 
             // إذا كان البحث نشط، نطبق الفلاتر مباشرة
@@ -654,32 +534,32 @@ class TransactionsFragment : Fragment() {
 
     private fun updateDateInputs() {
         val sdf = SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH)
-        binding!!.startDateFilter.setText(sdf.format(startDate!!.getTime()))
-        binding!!.endDateFilter.setText(sdf.format(endDate!!.getTime()))
+        // binding!!.startDateFilter.setText(sdf.format(startDate!!.getTime()))
+        // binding!!.endDateFilter.setText(sdf.format(endDate!!.getTime()))
     }
 
     private fun setupFab() {
-        binding!!.fabAddTransaction.setOnClickListener(View.OnClickListener { v: View? ->
-            findNavController(requireView())
-                .navigate(R.id.action_transactions_to_addTransaction)
-        })
+        // binding!!.fabAddTransaction.setOnClickListener(View.OnClickListener { v: View? ->
+        //     findNavController(requireView())
+        //         .navigate(R.id.action_transactions_to_addTransaction)
+        // })
 
-        val originalMargin =
-            (binding!!.fabAddTransaction.getLayoutParams() as MarginLayoutParams).bottomMargin
-        ViewCompat.setOnApplyWindowInsetsListener(
-            binding!!.fabAddTransaction,
-            OnApplyWindowInsetsListener { v: View?, insets: WindowInsetsCompat? ->
-                val bottom = insets!!.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
-                val params = v!!.getLayoutParams() as MarginLayoutParams
-                params.bottomMargin = originalMargin + bottom
-                v.setLayoutParams(params)
-                insets
-            })
+        // val originalMargin =
+        //     (binding!!.fabAddTransaction.getLayoutParams() as MarginLayoutParams).bottomMargin
+        // ViewCompat.setOnApplyWindowInsetsListener(
+        //     binding!!.fabAddTransaction,
+        //     OnApplyWindowInsetsListener { v: View?, insets: WindowInsetsCompat? ->
+        //         val bottom = insets!!.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
+        //         val params = v!!.getLayoutParams() as MarginLayoutParams
+        //         params.bottomMargin = originalMargin + bottom
+        //         v.setLayoutParams(params)
+        //         insets
+        //     })
     }
 
     private fun observeAccountsAndTransactions() {
         // عرض مؤشر التحميل
-        binding!!.progressBar.setVisibility(View.VISIBLE)
+        // binding!!.progressBar.setVisibility(View.VISIBLE)
 
 
         // مراقبة الحسابات
@@ -695,7 +575,7 @@ class TransactionsFragment : Fragment() {
 
 
                     // تحديث المحول بالحسابات
-                    adapter!!.setAccountMap(accountMap)
+                    // adapter!!.setAccountMap(accountMap)
 
 
                     // تحميل المعاملات مع التصفية الافتراضية
@@ -711,7 +591,7 @@ class TransactionsFragment : Fragment() {
         viewModel!!.getTransactions()
             .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
                 // إخفاء مؤشر التحميل
-                binding!!.progressBar.setVisibility(View.GONE)
+                // binding!!.progressBar.setVisibility(View.GONE)
                 if (transactions != null) {
                     allTransactions = transactions
                     applyAllFilters()
@@ -780,8 +660,8 @@ class TransactionsFragment : Fragment() {
             // فلترة الحساب
             if (selectedAccount != null && !selectedAccount!!.isEmpty()) {
                 var account: Account? = null
-                if (adapter != null && adapter!!.getAccountMap() != null) {
-                    account = adapter!!.getAccountMap().get(t.getAccountId())
+                if (accountMap.containsKey(t.getAccountId())) {
+                    account = accountMap.get(t.getAccountId())
                 }
                 val accountName = if (account != null) account.getName() else null
                 if (accountName == null || accountName != selectedAccount) match = false
@@ -802,11 +682,11 @@ class TransactionsFragment : Fragment() {
 
 
         // تحديث الإحصائيات
-        binding!!.totalTransactionsText.setText(filtered.size.toString())
-        binding!!.totalAmountText.setText(String.format(Locale.ENGLISH, "%.2f", totalAmount))
-        adapter!!.submitList(filtered)
-        binding!!.transactionsRecyclerView.setVisibility(if (filtered.isEmpty()) View.GONE else View.VISIBLE)
-        binding!!.emptyView.setVisibility(if (filtered.isEmpty()) View.VISIBLE else View.GONE)
+        // binding!!.totalTransactionsText.setText(filtered.size.toString())
+        // binding!!.totalAmountText.setText(String.format(Locale.ENGLISH, "%.2f", totalAmount))
+        // adapter!!.submitList(filtered)
+        // binding!!.transactionsRecyclerView.setVisibility(if (filtered.isEmpty()) View.GONE else View.VISIBLE)
+        // binding!!.emptyView.setVisibility(if (filtered.isEmpty()) View.VISIBLE else View.GONE)
     }
 
     private val isUserLoggedIn: Boolean
@@ -837,9 +717,9 @@ class TransactionsFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         // تحديث القائمة فقط إذا كانت فارغة
-        if (adapter!!.getItemCount() == 0) {
-            loadTransactions()
-        }
+        // if (adapter!!.getItemCount() == 0) {
+        //     loadTransactions()
+        // }
     }
 
     override fun onPause() {
@@ -848,21 +728,21 @@ class TransactionsFragment : Fragment() {
 
     private fun loadTransactions() {
         // عرض مؤشر التحميل
-        binding!!.progressBar.setVisibility(View.VISIBLE)
+        // binding!!.progressBar.setVisibility(View.VISIBLE)
 
 
         // تحميل البيانات من قاعدة البيانات المحلية
         viewModel!!.getTransactions()
             .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
                 // إخفاء مؤشر التحميل
-                binding!!.progressBar.setVisibility(View.GONE)
+                // binding!!.progressBar.setVisibility(View.GONE)
                 if (transactions != null && !transactions.isEmpty()) {
                     // تحديث القائمة
                     allTransactions = transactions
                     applyAllFilters()
                 } else {
                     // عرض رسالة عدم وجود بيانات
-                    binding!!.emptyView.setVisibility(View.VISIBLE)
+                    // binding!!.emptyView.setVisibility(View.VISIBLE)
                 }
             })
     }
@@ -873,7 +753,7 @@ class TransactionsFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding = null
+        // binding = null
     }
 
     private fun buildWhatsAppMessage(
