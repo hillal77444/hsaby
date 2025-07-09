@@ -13,6 +13,8 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -105,6 +107,8 @@ fun TransactionsScreen(
     val statCardPaddingV = screenHeight * 0.012f
     val statCardPaddingH = screenWidth * 0.02f
 
+    var isSearchActive by remember { mutableStateOf(false) }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -116,7 +120,7 @@ fun TransactionsScreen(
                 .verticalScroll(scrollState)
                 .padding(bottom = screenHeight * 0.09f, start = 8.dp, end = 8.dp)
         ) {
-            // واجهة الفلاتر الحديثة بمقاسات نسبية
+            // البطاقة العلوية الجديدة
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -126,23 +130,59 @@ fun TransactionsScreen(
                 colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
                 Column(Modifier.padding(cardPadding)) {
+                    // السطر الأول: اختيار الحساب أو البحث
                     Row(
                         Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (!isSearchActive) {
+                            // اختيار الحساب ممتد للطرف
+                            Box(Modifier.weight(1f)) {
+                                AccountPickerField(
+                                    label = "الحساب",
+                                    accounts = accounts,
+                                    transactions = transactions,
+                                    balancesMap = balancesMap,
+                                    selectedAccount = selectedAccount,
+                                    onAccountSelected = onAccountFilter,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            IconButton(
+                                onClick = { isSearchActive = true },
+                                modifier = Modifier.size(iconSize * 1.1f)
+                            ) {
+                                Icon(Icons.Default.Search, contentDescription = "بحث", modifier = Modifier.size(iconSize), tint = MaterialTheme.colorScheme.primary)
+                            }
+                        } else {
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = onSearch,
+                                label = { Text("بحث في الوصف", fontSize = textFieldFont) },
+                                modifier = Modifier.weight(1f),
+                                textStyle = LocalTextStyle.current.copy(fontSize = textFieldFont),
+                                singleLine = true,
+                                trailingIcon = {
+                                    IconButton(onClick = { isSearchActive = false }) {
+                                        Icon(Icons.Default.Close, contentDescription = "إغلاق البحث", modifier = Modifier.size(iconSize), tint = Color.Gray)
+                                    }
+                                },
+                                shape = RoundedCornerShape(cardCorner)
+                            )
+                        }
+                    }
+                    // السطر الثاني: التواريخ
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = cardPadding),
                         horizontalArrangement = Arrangement.spacedBy(cardPadding),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        AccountPickerField(
-                            label = "الحساب",
-                            accounts = accounts,
-                            transactions = transactions,
-                            balancesMap = balancesMap,
-                            selectedAccount = selectedAccount,
-                            onAccountSelected = onAccountFilter,
-                            modifier = Modifier.weight(1f)
-                        )
                         OutlinedButton(
                             onClick = { showStartPicker = true },
-                            modifier = Modifier.height(buttonHeight).defaultMinSize(minWidth = buttonMinWidth)
+                            modifier = Modifier.height(buttonHeight).weight(1f)
                         ) {
                             Icon(Icons.Default.AccessTime, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(iconSize))
                             Spacer(Modifier.width(cardPadding / 2))
@@ -150,25 +190,13 @@ fun TransactionsScreen(
                         }
                         OutlinedButton(
                             onClick = { showEndPicker = true },
-                            modifier = Modifier.height(buttonHeight).defaultMinSize(minWidth = buttonMinWidth)
+                            modifier = Modifier.height(buttonHeight).weight(1f)
                         ) {
                             Icon(Icons.Default.AccessTime, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(iconSize))
                             Spacer(Modifier.width(cardPadding / 2))
                             Text(endDate?.let { dateFormat.format(Date(it)) } ?: "إلى", fontSize = textFieldFont)
                         }
                     }
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = onSearch,
-                        label = { Text("بحث في الوصف", fontSize = textFieldFont) },
-                        leadingIcon = { Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(iconSize)) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = cardPadding),
-                        textStyle = LocalTextStyle.current.copy(fontSize = textFieldFont),
-                        singleLine = true,
-                        shape = RoundedCornerShape(cardCorner)
-                    )
                 }
             }
             if (showStartPicker) {
