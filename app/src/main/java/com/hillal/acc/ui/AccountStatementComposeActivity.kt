@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,7 +36,7 @@ import com.hillal.acc.ui.accounts.ResponsiveAccountsTheme
 import com.hillal.acc.ui.theme.LocalResponsiveDimensions
 import com.hillal.acc.ui.theme.ProvideResponsiveDimensions
 import com.hillal.acc.viewmodel.AccountStatementViewModel
-import com.hillal.acc.viewmodel.TransactionsViewModel
+import com.hillal.acc.viewmodel.TransactionViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -76,24 +77,14 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val dimensions = LocalResponsiveDimensions.current
         val context = LocalContext.current
         val accountStatementViewModel: AccountStatementViewModel = viewModel()
-        val transactionsViewModel: TransactionsViewModel = viewModel()
+        val transactionViewModel: TransactionViewModel = viewModel()
         
-        var accounts by remember { mutableStateOf<List<Account>>(emptyList()) }
-        var transactions by remember { mutableStateOf<List<Transaction>>(emptyList()) }
+        val accounts by accountStatementViewModel.allAccounts.observeAsState(initial = emptyList())
+        val transactions by transactionViewModel.getAllTransactions().observeAsState(initial = emptyList())
         var showAccountPicker by remember { mutableStateOf(false) }
         var showStartDatePicker by remember { mutableStateOf(false) }
         var showEndDatePicker by remember { mutableStateOf(false) }
         var reportHtml by remember { mutableStateOf("") }
-        
-        // مراقبة البيانات
-        LaunchedEffect(Unit) {
-            accountStatementViewModel.allAccounts.observe(this@AccountStatementComposeActivity) { accountsList ->
-                accounts = accountsList
-            }
-            transactionsViewModel.getAllTransactions().observe(this@AccountStatementComposeActivity) { transactionsList ->
-                transactions = transactionsList
-            }
-        }
         
         // تحديث التقرير عند تغيير البيانات
         LaunchedEffect(selectedAccount, startDate, endDate, transactions) {
