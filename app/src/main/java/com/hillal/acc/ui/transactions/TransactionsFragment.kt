@@ -81,6 +81,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
 
 class TransactionsFragment : Fragment() {
     private var viewModel: TransactionsViewModel? = null
