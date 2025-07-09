@@ -74,6 +74,8 @@ fun TransactionsScreen(
     onSms: () -> Unit,
     modifier: Modifier = Modifier,
     accounts: List<Account> = emptyList(),
+    balancesMap: Map<Long, Map<String, Double>> = emptyMap(), // أضف هذا
+    selectedAccount: Account? = null, // أضف هذا
     onAccountFilter: (Account?) -> Unit = {},
     startDate: Long? = null,
     endDate: Long? = null,
@@ -115,8 +117,8 @@ fun TransactionsScreen(
                             label = "الحساب",
                             accounts = accounts,
                             transactions = transactions,
-                            balancesMap = balancesMap, // مرر خريطة الأرصدة الحقيقية
-                            selectedAccount = selectedAccount, // مرر الحساب المحدد فعليًا
+                            balancesMap = balancesMap,
+                            selectedAccount = selectedAccount,
                             onAccountSelected = onAccountFilter,
                             modifier = Modifier.weight(1f)
                         )

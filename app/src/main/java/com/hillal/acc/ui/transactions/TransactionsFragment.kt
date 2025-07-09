@@ -251,6 +251,17 @@ class TransactionsFragment : Fragment() {
                 TransactionsScreen(
                     transactions = filteredTransactions,
                     accounts = accounts,
+                    balancesMap = (balancesMapNullable ?: emptyMap())
+                        .filterKeys { it != null }
+                        .mapKeys { it.key!! }
+                        .mapValues { entry ->
+                            (entry.value as? Map<String?, Double?>)
+                                ?.filterKeys { it != null }
+                                ?.mapKeys { it.key!! }
+                                ?.filterValues { it != null }
+                                ?.mapValues { it.value!! } ?: emptyMap()
+                        },
+                    selectedAccount = selectedAccount,
                     onAccountFilter = { selectedAccount = it },
                     startDate = startDate,
                     endDate = endDate,
