@@ -48,149 +48,298 @@ fun ReportsScreen(
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(scrollState)
     ) {
-        // رأس الصفحة
+        // رأس الصفحة المحسن
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(dimensions.cardHeight)
-                .background(MaterialTheme.colorScheme.primary)
-        ) {}
+                .height(dimensions.cardHeight * 0.4f) // تقليل الارتفاع
+                .background(
+                    MaterialTheme.colorScheme.primary
+                )
+        ) {
+            // نمط خلفية جميل
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Color(0xFF1976D2).copy(alpha = 0.1f)
+                    )
+            )
+        }
+        
+        // البطاقة العلوية المحسنة
         Card(
             modifier = Modifier
-                .size(dimensions.cardHeight * 0.57f)
-                .offset(y = (-dimensions.cardHeight * 0.29f))
+                .size(dimensions.cardHeight * 0.25f) // تقليل الحجم
+                .offset(y = (-dimensions.cardHeight * 0.15f)) // تقليل الإزاحة
                 .align(Alignment.CenterHorizontally),
             shape = MaterialTheme.shapes.extraLarge,
-            elevation = CardDefaults.cardElevation(8.dp),
+            elevation = CardDefaults.cardElevation(12.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+            Box(
+                contentAlignment = Alignment.Center, 
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+                    )
+            ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_statement),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(dimensions.iconSize * 2)
+                    modifier = Modifier.size(dimensions.iconSize * 1.5f) // تقليل حجم الأيقونة
                 )
             }
         }
-        Text(
-            text = "التقارير المالية",
-            fontSize = dimensions.titleFont,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-        Text(
-            text = "ملخص الحسابات والمعاملات المالية",
-            fontSize = dimensions.bodyFont,
-            color = Color(0xFF666666),
-            modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = dimensions.spacingSmall)
-        )
-        // بطاقة الأزرار
+        
+        // النصوص المحسنة
+        Column(
+            modifier = Modifier.padding(horizontal = dimensions.spacingLarge),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "التقارير المالية",
+                fontSize = dimensions.titleFont * 0.9f, // تقليل حجم الخط
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                modifier = Modifier.padding(top = dimensions.spacingSmall)
+            )
+            Text(
+                text = "ملخص الحسابات والمعاملات المالية",
+                fontSize = dimensions.bodyFont * 0.85f,
+                color = Color.White.copy(alpha = 0.9f),
+                modifier = Modifier.padding(bottom = dimensions.spacingMedium)
+            )
+        }
+        
+        // بطاقة الأزرار المحسنة
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = dimensions.spacingLarge, vertical = dimensions.spacingSmall),
             shape = MaterialTheme.shapes.large,
-            elevation = CardDefaults.cardElevation(6.dp),
+            elevation = CardDefaults.cardElevation(8.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
-            Column(Modifier.padding(dimensions.spacingMedium)) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimensions.spacingSmall)) {
+            Column(
+                Modifier.padding(dimensions.spacingMedium)
+            ) {
+                Text(
+                    text = "التقارير المتاحة",
+                    fontSize = dimensions.bodyFont,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = dimensions.spacingSmall)
+                )
+                
+                Row(
+                    Modifier.fillMaxWidth(), 
+                    horizontalArrangement = Arrangement.spacedBy(dimensions.spacingSmall)
+                ) {
                     Button(
                         onClick = onAccountsSummaryClick,
                         modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009688), contentColor = Color.White),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF009688), 
+                            contentColor = Color.White
+                        ),
                         shape = MaterialTheme.shapes.medium
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_summary),
                             contentDescription = null,
-                            modifier = Modifier.size(dimensions.iconSize)
+                            modifier = Modifier.size(dimensions.iconSize * 0.8f)
                         )
                         Spacer(Modifier.width(dimensions.spacingSmall))
-                        Text("تقرير ارصدة الحسابات", fontSize = dimensions.bodyFont)
+                        Text(
+                            "تقرير ارصدة الحسابات", 
+                            fontSize = dimensions.bodyFont * 0.9f
+                        )
                     }
                     Button(
                         onClick = onAccountStatementClick,
                         modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5), contentColor = Color.White),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF3F51B5), 
+                            contentColor = Color.White
+                        ),
                         shape = MaterialTheme.shapes.medium
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_statement),
                             contentDescription = null,
-                            modifier = Modifier.size(dimensions.iconSize)
+                            modifier = Modifier.size(dimensions.iconSize * 0.8f)
                         )
                         Spacer(Modifier.width(dimensions.spacingSmall))
-                        Text("كشف الحساب", fontSize = dimensions.bodyFont)
+                        Text(
+                            "كشف الحساب", 
+                            fontSize = dimensions.bodyFont * 0.9f
+                        )
                     }
                 }
                 Spacer(Modifier.height(dimensions.spacingSmall))
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimensions.spacingSmall)) {
+                Row(
+                    Modifier.fillMaxWidth(), 
+                    horizontalArrangement = Arrangement.spacedBy(dimensions.spacingSmall)
+                ) {
                     Button(
                         onClick = onCashboxStatementClick,
                         modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1976D2), contentColor = Color.White),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF1976D2), 
+                            contentColor = Color.White
+                        ),
                         shape = MaterialTheme.shapes.medium
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_wallet),
                             contentDescription = null,
-                            modifier = Modifier.size(dimensions.iconSize)
+                            modifier = Modifier.size(dimensions.iconSize * 0.8f)
                         )
                         Spacer(Modifier.width(dimensions.spacingSmall))
-                        Text("تقرير ارصدة الصناديق", fontSize = dimensions.bodyFont)
+                        Text(
+                            "تقرير ارصدة الصناديق", 
+                            fontSize = dimensions.bodyFont * 0.9f
+                        )
                     }
                 }
             }
         }
-        // بطاقة الإحصائيات
+        
+        // بطاقة الإحصائيات المحسنة
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = dimensions.spacingLarge, vertical = dimensions.spacingSmall),
             shape = MaterialTheme.shapes.medium,
-            elevation = CardDefaults.cardElevation(3.dp),
+            elevation = CardDefaults.cardElevation(6.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
-            Column(Modifier.padding(dimensions.spacingMedium)) {
-                Text(
-                    text = "اجمالي الارصده لجميع العملات",
-                    fontSize = dimensions.bodyFont,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+            Column(
+                Modifier.padding(dimensions.spacingMedium)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_summary),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(dimensions.iconSize)
+                    )
+                    Spacer(Modifier.width(dimensions.spacingSmall))
+                    Text(
+                        text = "إحصائيات عامة",
+                        fontSize = dimensions.bodyFont,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                Spacer(Modifier.height(dimensions.spacingMedium))
+                
+                // الإحصائيات الأولى
+                Row(
+                    Modifier.fillMaxWidth(), 
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    StatItem(
+                        label = "إجمالي المدينين", 
+                        value = totalDebit,
+                        color = Color(0xFFE57373)
+                    )
+                    StatItem(
+                        label = "إجمالي الدائنين", 
+                        value = totalCredit,
+                        color = Color(0xFF81C784)
+                    )
+                    StatItem(
+                        label = "الرصيد", 
+                        value = netBalance,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                Spacer(Modifier.height(dimensions.spacingMedium))
+                
+                // الإحصائيات الثانية
+                Row(
+                    Modifier.fillMaxWidth(), 
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    StatItem(
+                        label = "عدد المعاملات", 
+                        value = count.toDouble(), 
+                        isInt = true,
+                        color = Color(0xFF64B5F6)
+                    )
+                    StatItem(
+                        label = "متوسط المعاملة", 
+                        value = avg,
+                        color = Color(0xFFFFB74D)
+                    )
+                }
+            }
+        }
+        
+        // بطاقة إضافية للمعلومات
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = dimensions.spacingLarge, vertical = dimensions.spacingSmall),
+            shape = MaterialTheme.shapes.medium,
+            elevation = CardDefaults.cardElevation(4.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+            )
+        ) {
+            Row(
+                modifier = Modifier.padding(dimensions.spacingMedium),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_info),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(dimensions.iconSize)
                 )
-                Spacer(Modifier.height(dimensions.spacingSmall))
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    StatItem(label = "إجمالي المدينين", value = totalDebit)
-                    StatItem(label = "إجمالي الدائنين", value = totalCredit)
-                    StatItem(label = "الرصيد", value = netBalance)
-                }
-                Spacer(Modifier.height(dimensions.spacingSmall))
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    StatItem(label = "عدد المعاملات", value = count.toDouble(), isInt = true)
-                    StatItem(label = "متوسط المعاملة", value = avg)
-                }
+                Spacer(Modifier.width(dimensions.spacingSmall))
+                Text(
+                    text = "يمكنك الوصول إلى جميع التقارير المالية من خلال الأزرار أعلاه",
+                    fontSize = dimensions.bodyFont * 0.9f,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
             }
         }
     }
 }
 
 @Composable
-fun StatItem(label: String, value: Double, isInt: Boolean = false) {
+fun StatItem(
+    label: String, 
+    value: Double, 
+    isInt: Boolean = false,
+    color: Color = MaterialTheme.colorScheme.primary
+) {
     val dimensions = LocalResponsiveDimensions.current
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(vertical = dimensions.spacingSmall)
+    ) {
         Text(
             text = if (isInt) value.toInt().toString() else String.format(Locale.ENGLISH, "%.2f", value),
             fontWeight = FontWeight.Bold,
-            fontSize = dimensions.statFont,
-            color = MaterialTheme.colorScheme.primary
+            fontSize = dimensions.statFont * 0.9f,
+            color = color
         )
         Text(
             text = label,
-            fontSize = dimensions.statLabelFont,
-            color = Color(0xFF666666)
+            fontSize = dimensions.statLabelFont * 0.85f,
+            color = Color(0xFF666666),
+            modifier = Modifier.padding(top = dimensions.spacingSmall)
         )
     }
 } 
