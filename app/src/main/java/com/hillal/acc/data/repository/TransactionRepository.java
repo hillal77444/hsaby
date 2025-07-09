@@ -114,4 +114,8 @@ public class TransactionRepository {
     public LiveData<List<Transaction>> searchTransactionsByDescription(String query) {
         return transactionDao.searchTransactionsByDescription(query);
     }
+
+    public LiveData<Double> getBalanceUntilTransaction(long accountId, long transactionDate, long transactionId, String currency) {
+        return transactionDao.getBalanceUntilTransaction(accountId, transactionDate, transactionId, currency);
+    }
 }

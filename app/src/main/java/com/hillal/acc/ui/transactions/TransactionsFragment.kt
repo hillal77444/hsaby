@@ -300,16 +300,22 @@ class TransactionsFragment : Fragment() {
                         val account = accounts.find { it.getId() == transaction.getAccountId() }
                         val phone = account?.getPhoneNumber()
                         val currency = transaction.getCurrency()
-                        val balance = balancesMap[transaction.getAccountId()]?.get(currency) ?: 0.0
                         if (!phone.isNullOrBlank()) {
-                            val msg = NotificationUtils.buildWhatsAppMessage(
-                                context,
-                                account?.getName() ?: "-",
-                                transaction,
-                                balance,
-                                transaction.getType()
-                            )
-                            NotificationUtils.sendWhatsAppMessage(context, phone, msg)
+                            transactionRepository?.getBalanceUntilTransaction(
+                                transaction.getAccountId(),
+                                transaction.getTransactionDate(),
+                                transaction.getId(),
+                                currency
+                            )?.observe(viewLifecycleOwner) { balance ->
+                                val msg = NotificationUtils.buildWhatsAppMessage(
+                                    context,
+                                    account?.getName() ?: "-",
+                                    transaction,
+                                    balance ?: 0.0,
+                                    transaction.getType()
+                                )
+                                NotificationUtils.sendWhatsAppMessage(context, phone, msg)
+                            }
                         } else {
                             Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
                         }
@@ -317,9 +323,17 @@ class TransactionsFragment : Fragment() {
                     onSms = { transaction ->
                         val account = accounts.find { it.getId() == transaction.getAccountId() }
                         val phone = account?.getPhoneNumber()
+                        val currency = transaction.getCurrency()
                         if (!phone.isNullOrBlank()) {
-                            val msg = "حسابكم لدينا: ${transaction.getAmount()} ${transaction.getCurrency()}\n${transaction.getDescription()}"
-                            NotificationUtils.sendSmsMessage(context, phone, msg)
+                            transactionRepository?.getBalanceUntilTransaction(
+                                transaction.getAccountId(),
+                                transaction.getTransactionDate(),
+                                transaction.getId(),
+                                currency
+                            )?.observe(viewLifecycleOwner) { balance ->
+                                val msg = "حسابكم لدينا: ${transaction.getAmount()} ${transaction.getCurrency()}\n${transaction.getDescription()}\nالرصيد: ${balance ?: 0.0} ${transaction.getCurrency()}"
+                                NotificationUtils.sendSmsMessage(context, phone, msg)
+                            }
                         } else {
                             Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
                         }

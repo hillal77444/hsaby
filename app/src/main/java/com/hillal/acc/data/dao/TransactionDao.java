@@ -81,6 +81,9 @@ public interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE account_id = :accountId AND transaction_date BETWEEN :fromDate AND :toDate ORDER BY transaction_date DESC")
     LiveData<List<Transaction>> getTransactionsByAccountAndDateRange(long accountId, long fromDate, long toDate);
 
+    @Query("SELECT SUM(CASE WHEN type = 'credit' THEN amount ELSE -amount END) FROM transactions WHERE account_id = :accountId AND currency = :currency AND (transaction_date < :transactionDate OR (transaction_date = :transactionDate AND id <= :transactionId))")
+    LiveData<Double> getBalanceUntilTransaction(long accountId, long transactionDate, long transactionId, String currency);
+
     @Query("SELECT SUM(CASE WHEN type = 'credit' THEN amount ELSE -amount END) FROM transactions WHERE account_id = :accountId AND transaction_date <= :transactionDate AND currency = :currency")
     LiveData<Double> getBalanceUntilDate(long accountId, long transactionDate, String currency);
 
