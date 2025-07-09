@@ -30,6 +30,8 @@ import androidx.lifecycle.Observer
 import com.hillal.acc.R
 import com.hillal.acc.data.model.Account
 import java.util.*
+import com.hillal.acc.ui.theme.ProvideResponsiveDimensions
+import com.hillal.acc.ui.theme.LocalResponsiveDimensions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,167 +42,165 @@ fun AccountsComposeScreen(
     onNavigateToAccountDetails: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    ResponsiveAccountsTheme {
-        val spacing = ResponsiveSpacing()
-        val padding = ResponsivePadding()
-        
-        val accounts by viewModel.allAccounts.observeAsState(initial = emptyList())
-        val accountBalances = remember(accounts) {
-            val balances = mutableStateMapOf<Long, Double>()
-            accounts.forEach { account: Account ->
-                balances[account.id] = account.balance
+    ProvideResponsiveDimensions {
+        ResponsiveAccountsTheme {
+            val dimensions = LocalResponsiveDimensions.current
+            val spacing = ResponsiveSpacing()
+            val padding = ResponsivePadding()
+            
+            val accounts by viewModel.allAccounts.observeAsState(initial = emptyList())
+            val accountBalances = remember(accounts) {
+                val balances = mutableStateMapOf<Long, Double>()
+                accounts.forEach { account: Account ->
+                    balances[account.id] = account.balance
+                }
+                balances
             }
-            balances
-        }
-        var searchQuery by remember { mutableStateOf("") }
-        var isAscendingSort by remember { mutableStateOf(true) }
-        var currentSortType by remember { mutableStateOf("balance") }
-        
-        // حساب الإحصائيات
-        val totalAccounts = accounts.size
-        val activeAccounts = accounts.count { account: Account -> account.isWhatsappEnabled() }
-        
-        // البحث في الحسابات
-        val filteredAccounts = remember(accounts, searchQuery) {
-            if (searchQuery.isEmpty()) {
-                accounts
-            } else {
-                accounts.filter { account: Account ->
-                    account.name.contains(searchQuery, ignoreCase = true) ||
-                    account.phoneNumber.contains(searchQuery, ignoreCase = true)
-                }
-            }
-        }
-        
-        // ترتيب الحسابات
-        val sortedAccounts = remember(filteredAccounts, currentSortType, isAscendingSort, accountBalances) {
-            when (currentSortType) {
-                "balance" -> {
-                    if (isAscendingSort) {
-                        filteredAccounts.sortedBy { account: Account -> accountBalances[account.id] ?: 0.0 }
-                    } else {
-                        filteredAccounts.sortedByDescending { account: Account -> accountBalances[account.id] ?: 0.0 }
+            var searchQuery by remember { mutableStateOf("") }
+            var isAscendingSort by remember { mutableStateOf(true) }
+            var currentSortType by remember { mutableStateOf("balance") }
+            
+            // حساب الإحصائيات
+            val totalAccounts = accounts.size
+            val activeAccounts = accounts.count { account: Account -> account.isWhatsappEnabled() }
+            
+            // البحث في الحسابات
+            val filteredAccounts = remember(accounts, searchQuery) {
+                if (searchQuery.isEmpty()) {
+                    accounts
+                } else {
+                    accounts.filter { account: Account ->
+                        account.name.contains(searchQuery, ignoreCase = true) ||
+                        account.phoneNumber.contains(searchQuery, ignoreCase = true)
                     }
-                }
-                "name" -> {
-                    if (isAscendingSort) {
-                        filteredAccounts.sortedBy { account: Account -> account.name }
-                    } else {
-                        filteredAccounts.sortedByDescending { account: Account -> account.name }
-                    }
-                }
-                "number" -> {
-                    if (isAscendingSort) {
-                        filteredAccounts.sortedBy { account: Account -> account.serverId }
-                    } else {
-                        filteredAccounts.sortedByDescending { account: Account -> account.serverId }
-                    }
-                }
-                "date" -> {
-                    if (isAscendingSort) {
-                        filteredAccounts.sortedBy { account: Account -> account.createdAt }
-                    } else {
-                        filteredAccounts.sortedByDescending { account: Account -> account.createdAt }
-                    }
-                }
-                else -> filteredAccounts
-            }
-        }
-        
-        // الحصول على الأرصدة - سيتم تحديثها تلقائياً عند تغيير الحسابات
-        // accountBalances سيتم تحديثها من خلال observeAsState
-        
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
-        ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding.large),
-                verticalArrangement = Arrangement.spacedBy(spacing.large)
-            ) {
-                // Header Section
-                item {
-                    HeaderSection(spacing = spacing, padding = padding)
-                }
-                
-                // Search and Filter Section
-                item {
-                    SearchAndFilterSection(
-                        searchQuery = searchQuery,
-                        onSearchQueryChange = { searchQuery = it },
-                        currentSortType = currentSortType,
-                        onSortTypeChange = { 
-                            currentSortType = it
-                            isAscendingSort = !isAscendingSort
-                        },
-                        onFilterClick = { /* TODO: Implement filter */ },
-                        spacing = spacing,
-                        padding = padding
-                    )
-                }
-                
-                // Statistics Section
-                item {
-                    StatisticsSection(
-                        totalAccounts = totalAccounts,
-                        activeAccounts = activeAccounts,
-                        spacing = spacing,
-                        padding = padding
-                    )
-                }
-                
-                // Accounts List
-                items(
-                    items = sortedAccounts,
-                    key = { account -> account.id }
-                ) { account ->
-                    AccountItem(
-                        account = account,
-                        balance = accountBalances[account.id] ?: 0.0,
-                        onWhatsAppToggle = { isEnabled ->
-                            account.setWhatsappEnabled(isEnabled)
-                            account.setUpdatedAt(System.currentTimeMillis())
-                            viewModel.updateAccount(account)
-                        },
-                        onEditClick = { onNavigateToEditAccount(account.id) },
-                        onItemClick = { onNavigateToAccountDetails(account.id) },
-                        spacing = spacing,
-                        padding = padding
-                    )
-                }
-                
-                // Bottom spacing for FAB
-                item {
-                    Spacer(modifier = Modifier.height(80.dp))
                 }
             }
             
-            // Floating Action Button
-            FloatingActionButton(
-                onClick = onNavigateToAddAccount,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(padding.large),
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+            // ترتيب الحسابات
+            val sortedAccounts = remember(filteredAccounts, currentSortType, isAscendingSort, accountBalances) {
+                when (currentSortType) {
+                    "balance" -> {
+                        if (isAscendingSort) {
+                            filteredAccounts.sortedBy { account: Account -> accountBalances[account.id] ?: 0.0 }
+                        } else {
+                            filteredAccounts.sortedByDescending { account: Account -> accountBalances[account.id] ?: 0.0 }
+                        }
+                    }
+                    "name" -> {
+                        if (isAscendingSort) {
+                            filteredAccounts.sortedBy { account: Account -> account.name }
+                        } else {
+                            filteredAccounts.sortedByDescending { account: Account -> account.name }
+                        }
+                    }
+                    "number" -> {
+                        if (isAscendingSort) {
+                            filteredAccounts.sortedBy { account: Account -> account.serverId }
+                        } else {
+                            filteredAccounts.sortedByDescending { account: Account -> account.serverId }
+                        }
+                    }
+                    "date" -> {
+                        if (isAscendingSort) {
+                            filteredAccounts.sortedBy { account: Account -> account.createdAt }
+                        } else {
+                            filteredAccounts.sortedByDescending { account: Account -> account.createdAt }
+                        }
+                    }
+                    else -> filteredAccounts
+                }
+            }
+            
+            // الحصول على الأرصدة - سيتم تحديثها تلقائياً عند تغيير الحسابات
+            // accountBalances سيتم تحديثها من خلال observeAsState
+            
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.add_account)
-                )
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(dimensions.spacingLarge),
+                    verticalArrangement = Arrangement.spacedBy(dimensions.spacingLarge)
+                ) {
+                    // Header Section
+                    item {
+                        HeaderSection(dimensions = dimensions)
+                    }
+                    
+                    // Search and Filter Section
+                    item {
+                        SearchAndFilterSection(
+                            searchQuery = searchQuery,
+                            onSearchQueryChange = { searchQuery = it },
+                            currentSortType = currentSortType,
+                            onSortTypeChange = { 
+                                currentSortType = it
+                                isAscendingSort = !isAscendingSort
+                            },
+                            onFilterClick = { /* TODO: Implement filter */ },
+                            dimensions = dimensions
+                        )
+                    }
+                    
+                    // Statistics Section
+                    item {
+                        StatisticsSection(
+                            totalAccounts = totalAccounts,
+                            activeAccounts = activeAccounts,
+                            dimensions = dimensions
+                        )
+                    }
+                    
+                    // Accounts List
+                    items(
+                        items = sortedAccounts,
+                        key = { account -> account.id }
+                    ) { account ->
+                        AccountItem(
+                            account = account,
+                            balance = accountBalances[account.id] ?: 0.0,
+                            onWhatsAppToggle = { isEnabled ->
+                                account.setWhatsappEnabled(isEnabled)
+                                account.setUpdatedAt(System.currentTimeMillis())
+                                viewModel.updateAccount(account)
+                            },
+                            onEditClick = { onNavigateToEditAccount(account.id) },
+                            onItemClick = { onNavigateToAccountDetails(account.id) },
+                            dimensions = dimensions
+                        )
+                    }
+                    
+                    // Bottom spacing for FAB
+                    item {
+                        Spacer(modifier = Modifier.height(dimensions.cardHeight * 0.5f))
+                    }
+                }
+                
+                // Floating Action Button
+                FloatingActionButton(
+                    onClick = onNavigateToAddAccount,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(dimensions.spacingLarge),
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.add_account),
+                        modifier = Modifier.size(dimensions.iconSize * 1.2f)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun HeaderSection(
-    spacing: ResponsiveSpacingValues,
-    padding: ResponsivePaddingValues
-) {
+private fun HeaderSection(dimensions: ResponsiveDimensions) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -208,8 +208,8 @@ private fun HeaderSection(
         // Logo Circle
         Card(
             modifier = Modifier
-                .size(64.dp)
-                .padding(top = spacing.xl),
+                .size(dimensions.cardHeight * 0.53f)
+                .padding(top = dimensions.spacingLarge),
             shape = CircleShape,
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -221,7 +221,7 @@ private fun HeaderSection(
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
                     contentDescription = null,
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.size(dimensions.iconSize * 1.3f),
                     tint = Color(0xFF152FD9)
                 )
             }
@@ -229,19 +229,19 @@ private fun HeaderSection(
         
         // Title with Icon
         Row(
-            modifier = Modifier.padding(top = spacing.large),
+            modifier = Modifier.padding(top = dimensions.spacingLarge),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Default.AccountCircle,
                 contentDescription = null,
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(dimensions.iconSize),
                 tint = Color(0xFF152FD9)
             )
-            Spacer(modifier = Modifier.width(spacing.small))
+            Spacer(modifier = Modifier.width(dimensions.spacingSmall))
             Text(
                 text = "إدارة الحسابات",
-                style = MaterialTheme.typography.headlineMedium,
+                fontSize = dimensions.titleFont,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF152FD9)
             )
@@ -250,10 +250,10 @@ private fun HeaderSection(
         // Description
         Text(
             text = "عرض وإدارة جميع الحسابات",
-            style = MaterialTheme.typography.bodyMedium,
+            fontSize = dimensions.bodyFont,
             color = Color(0xFF666666),
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = spacing.small, bottom = spacing.large)
+            modifier = Modifier.padding(top = dimensions.spacingSmall, bottom = dimensions.spacingLarge)
         )
     }
 }
@@ -266,29 +266,29 @@ private fun SearchAndFilterSection(
     currentSortType: String,
     onSortTypeChange: (String) -> Unit,
     onFilterClick: () -> Unit,
-    spacing: ResponsiveSpacingValues,
-    padding: ResponsivePaddingValues
+    dimensions: ResponsiveDimensions
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(dimensions.cardCorner),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier.padding(padding.large),
-            verticalArrangement = Arrangement.spacedBy(spacing.medium)
+            modifier = Modifier.padding(dimensions.spacingLarge),
+            verticalArrangement = Arrangement.spacedBy(dimensions.spacingMedium)
         ) {
             // Search Field
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = onSearchQueryChange,
-                label = { Text("البحث في الحسابات...") },
+                label = { Text("البحث في الحسابات...", fontSize = dimensions.bodyFont) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = null,
-                        tint = Color(0xFF152FD9)
+                        tint = Color(0xFF152FD9),
+                        modifier = Modifier.size(dimensions.iconSize)
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -297,13 +297,14 @@ private fun SearchAndFilterSection(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFF152FD9),
                     unfocusedBorderColor = Color(0xFF666666)
-                )
+                ),
+                textStyle = LocalTextStyle.current.copy(fontSize = dimensions.bodyFont)
             )
             
             // Filter and Sort Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(spacing.small)
+                horizontalArrangement = Arrangement.spacedBy(dimensions.spacingSmall)
             ) {
                 Button(
                     onClick = onFilterClick,
@@ -312,15 +313,15 @@ private fun SearchAndFilterSection(
                         containerColor = Color(0xFFF3F4F6),
                         contentColor = Color(0xFF152FD9)
                     ),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(dimensions.cardCorner)
                 ) {
                     Icon(
                         imageVector = Icons.Default.FilterList,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(dimensions.iconSize * 0.7f)
                     )
-                    Spacer(modifier = Modifier.width(spacing.small))
-                    Text("تصفية")
+                    Spacer(modifier = Modifier.width(dimensions.spacingSmall))
+                    Text("تصفية", fontSize = dimensions.bodyFont)
                 }
                 
                 Button(
@@ -339,14 +340,14 @@ private fun SearchAndFilterSection(
                         containerColor = Color(0xFFF3F4F6),
                         contentColor = Color(0xFF152FD9)
                     ),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(dimensions.cardCorner)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Sort,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(dimensions.iconSize * 0.7f)
                     )
-                    Spacer(modifier = Modifier.width(spacing.small))
+                    Spacer(modifier = Modifier.width(dimensions.spacingSmall))
                     Text(
                         when (currentSortType) {
                             "balance" -> "ترتيب (الرصيد)"
@@ -354,7 +355,8 @@ private fun SearchAndFilterSection(
                             "number" -> "ترتيب (الرقم)"
                             "date" -> "ترتيب (التاريخ)"
                             else -> "ترتيب (الرصيد)"
-                        }
+                        },
+                        fontSize = dimensions.bodyFont
                     )
                 }
             }
@@ -366,33 +368,32 @@ private fun SearchAndFilterSection(
 private fun StatisticsSection(
     totalAccounts: Int,
     activeAccounts: Int,
-    spacing: ResponsiveSpacingValues,
-    padding: ResponsivePaddingValues
+    dimensions: ResponsiveDimensions
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(spacing.small)
+        horizontalArrangement = Arrangement.spacedBy(dimensions.spacingSmall)
     ) {
         // Total Accounts Card
         Card(
             modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(dimensions.cardCorner),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Column(
-                modifier = Modifier.padding(padding.large),
+                modifier = Modifier.padding(dimensions.spacingLarge),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = totalAccounts.toString(),
-                    style = MaterialTheme.typography.headlineSmall,
+                    fontSize = dimensions.statFont,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1976D2)
                 )
                 Text(
                     text = "إجمالي الحسابات",
-                    style = MaterialTheme.typography.bodySmall,
+                    fontSize = dimensions.statLabelFont,
                     color = Color(0xFF666666)
                 )
             }
@@ -401,23 +402,23 @@ private fun StatisticsSection(
         // Active Accounts Card
         Card(
             modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(dimensions.cardCorner),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Column(
-                modifier = Modifier.padding(padding.large),
+                modifier = Modifier.padding(dimensions.spacingLarge),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = activeAccounts.toString(),
-                    style = MaterialTheme.typography.headlineSmall,
+                    fontSize = dimensions.statFont,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1976D2)
                 )
                 Text(
                     text = "الحسابات النشطة",
-                    style = MaterialTheme.typography.bodySmall,
+                    fontSize = dimensions.statLabelFont,
                     color = Color(0xFF666666)
                 )
             }
@@ -432,24 +433,23 @@ private fun AccountItem(
     onWhatsAppToggle: (Boolean) -> Unit,
     onEditClick: () -> Unit,
     onItemClick: () -> Unit,
-    spacing: ResponsiveSpacingValues,
-    padding: ResponsivePaddingValues
+    dimensions: ResponsiveDimensions
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onItemClick() },
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(dimensions.cardCorner),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
-            modifier = Modifier.padding(padding.large),
+            modifier = Modifier.padding(dimensions.spacingLarge),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Account Icon
             Card(
-                modifier = Modifier.size(48.dp),
+                modifier = Modifier.size(dimensions.iconSize * 2),
                 shape = CircleShape,
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD)),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -461,13 +461,13 @@ private fun AccountItem(
                     Icon(
                         imageVector = Icons.Default.AccountCircle,
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(dimensions.iconSize),
                         tint = Color(0xFF152FD9)
                     )
                 }
             }
             
-            Spacer(modifier = Modifier.width(spacing.medium))
+            Spacer(modifier = Modifier.width(dimensions.spacingMedium))
             
             // Account Information
             Column(
@@ -475,43 +475,43 @@ private fun AccountItem(
             ) {
                 Text(
                     text = account.name,
-                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = dimensions.bodyFont,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF152FD9)
                 )
                 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = spacing.small)
+                    modifier = Modifier.padding(top = dimensions.spacingSmall)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Phone,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(dimensions.iconSize * 0.7f),
                         tint = Color(0xFF666666)
                     )
-                    Spacer(modifier = Modifier.width(spacing.small))
+                    Spacer(modifier = Modifier.width(dimensions.spacingSmall))
                     Text(
                         text = account.phoneNumber,
-                        style = MaterialTheme.typography.bodySmall,
+                        fontSize = dimensions.statLabelFont,
                         color = Color(0xFF666666)
                     )
                 }
                 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = spacing.small)
+                    modifier = Modifier.padding(top = dimensions.spacingSmall)
                 ) {
                     Icon(
                         imageVector = Icons.Default.AccountCircle,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(dimensions.iconSize * 0.7f),
                         tint = Color(0xFF666666)
                     )
-                    Spacer(modifier = Modifier.width(spacing.small))
+                    Spacer(modifier = Modifier.width(dimensions.spacingSmall))
                     Text(
                         text = if (account.serverId > 0) "رقم الحساب: ${account.serverId}" else "رقم: غير محدد",
-                        style = MaterialTheme.typography.bodySmall,
+                        fontSize = dimensions.statLabelFont,
                         color = Color(0xFF999999),
                         fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                     )
@@ -523,10 +523,10 @@ private fun AccountItem(
                     } else {
                         String.format(Locale.US, "له %,d يمني", balance.toLong())
                     },
-                    style = MaterialTheme.typography.bodyMedium,
+                    fontSize = dimensions.bodyFont,
                     fontWeight = FontWeight.Bold,
                     color = if (balance < 0) Color(0xFFE53E3E) else Color(0xFF22C55E),
-                    modifier = Modifier.padding(top = spacing.small)
+                    modifier = Modifier.padding(top = dimensions.spacingSmall)
                 )
             }
             
@@ -540,10 +540,10 @@ private fun AccountItem(
                 ) {
                     Text(
                         text = "واتساب",
-                        style = MaterialTheme.typography.bodySmall,
+                        fontSize = dimensions.statLabelFont,
                         color = Color(0xFF666666)
                     )
-                    Spacer(modifier = Modifier.width(spacing.small))
+                    Spacer(modifier = Modifier.width(dimensions.spacingSmall))
                     Switch(
                         checked = account.isWhatsappEnabled(),
                         onCheckedChange = onWhatsAppToggle,
@@ -556,7 +556,7 @@ private fun AccountItem(
                     )
                 }
                 
-                Spacer(modifier = Modifier.height(spacing.small))
+                Spacer(modifier = Modifier.height(dimensions.spacingSmall))
                 
                 // Edit Button
                 Button(
@@ -564,18 +564,18 @@ private fun AccountItem(
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF152FD9)
                     ),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.height(32.dp)
+                    shape = RoundedCornerShape(dimensions.cardCorner),
+                    modifier = Modifier.height(dimensions.iconSize * 1.5f)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(dimensions.iconSize * 0.7f)
                     )
-                    Spacer(modifier = Modifier.width(spacing.small))
+                    Spacer(modifier = Modifier.width(dimensions.spacingSmall))
                     Text(
                         text = "تعديل",
-                        style = MaterialTheme.typography.bodySmall
+                        fontSize = dimensions.statLabelFont
                     )
                 }
             }
