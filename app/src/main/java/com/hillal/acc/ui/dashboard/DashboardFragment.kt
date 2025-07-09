@@ -24,7 +24,7 @@ import com.hillal.acc.data.room.AppDatabase
 import com.hillal.acc.data.sync.MigrationManager
 import com.hillal.acc.data.sync.SyncManager
 import com.hillal.acc.data.model.ServerAppUpdateInfo
-import com.hillal.acc.ui.AccountStatementActivity
+
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.Locale
@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.ComposeView
 import com.hillal.acc.data.room.AccountDao
 import com.hillal.acc.data.room.TransactionDao
 import com.hillal.acc.data.room.PendingOperationDao
+import com.hillal.acc.ui.AccountStatementComposeActivity
 
 class DashboardFragment : Fragment() {
     private lateinit var dashboardViewModel: DashboardViewModel
@@ -86,7 +87,7 @@ class DashboardFragment : Fragment() {
                     onEditProfile = { Navigation.findNavController(requireView()).navigate(R.id.editProfileFragment) },
                     onAddAccount = { Navigation.findNavController(requireView()).navigate(R.id.addAccountFragment) },
                     onAddTransaction = { Navigation.findNavController(requireView()).navigate(R.id.addTransactionFragment) },
-                    onReport = { startActivity(Intent(requireContext(), AccountStatementActivity::class.java)) },
+                    onReport = { startActivity(Intent(requireContext(), AccountStatementComposeActivity::class.java)) },
                     onAccounts = { Navigation.findNavController(requireView()).navigate(R.id.navigation_accounts) },
                     onTransactions = { Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment) },
                     onReports = { Navigation.findNavController(requireView()).navigate(R.id.navigation_reports) },

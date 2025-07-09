@@ -70,8 +70,8 @@ fun ReportsScreen(
         // البطاقة العلوية المحسنة
         Card(
             modifier = Modifier
-                .size(dimensions.cardHeight * 0.25f) // تقليل الحجم
-                .offset(y = (-dimensions.cardHeight * 0.15f)) // تقليل الإزاحة
+                .size(dimensions.cardHeight * 0.1f) // تقليل الحجم
+                .offset(y = (-dimensions.cardHeight * 0.1f)) // تقليل الإزاحة
                 .align(Alignment.CenterHorizontally),
             shape = MaterialTheme.shapes.extraLarge,
             elevation = CardDefaults.cardElevation(12.dp),

@@ -45,6 +45,12 @@
             android:excludeFromRecents="false"
             android:windowSoftInputMode="adjustResize" />
         <activity 
+            android:name=".ui.AccountStatementComposeActivity"
+            android:exported="false"
+            android:documentLaunchMode="never"
+            android:excludeFromRecents="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity 
             android:name=".ui.CashboxStatementActivity"
             android:exported="false"
             android:documentLaunchMode="never"

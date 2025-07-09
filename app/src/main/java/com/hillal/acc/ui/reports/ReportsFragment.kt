@@ -16,7 +16,8 @@ import androidx.navigation.Navigation.findNavController
 import com.google.android.material.button.MaterialButton
 import com.hillal.acc.R
 import com.hillal.acc.data.model.Transaction
-import com.hillal.acc.ui.AccountStatementActivity
+
+import com.hillal.acc.ui.AccountStatementComposeActivity
 import com.hillal.acc.viewmodel.AccountViewModel
 import com.hillal.acc.viewmodel.TransactionViewModel
 import java.util.Locale
@@ -59,7 +60,7 @@ class ReportsFragment : Fragment() {
         val viewAccountStatementButton =
             view.findViewById<MaterialButton>(R.id.viewAccountStatementButton)
         viewAccountStatementButton.setOnClickListener(View.OnClickListener { v: View? ->
-            val intent = Intent(getActivity(), AccountStatementActivity::class.java)
+            val intent = Intent(requireContext(), AccountStatementComposeActivity::class.java)
             startActivity(intent)
         })
 
