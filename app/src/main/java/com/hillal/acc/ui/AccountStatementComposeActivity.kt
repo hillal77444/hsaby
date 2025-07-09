@@ -2,6 +2,7 @@ package com.hillal.acc.ui
 
 import android.app.DatePickerDialog
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.webkit.WebView
 import android.widget.Toast
@@ -39,6 +40,16 @@ import com.hillal.acc.viewmodel.AccountStatementViewModel
 import com.hillal.acc.viewmodel.TransactionViewModel
 import java.text.SimpleDateFormat
 import java.util.*
+import java.io.File
+import java.io.FileOutputStream
+import android.graphics.pdf.PdfDocument
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.view.View
+import android.webkit.WebViewClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
+import androidx.core.content.FileProvider
 
 class AccountStatementComposeActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -94,6 +105,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         // تحديث التقرير عند تغيير البيانات
         LaunchedEffect(selectedAccountState, startDateState, endDateState, transactions) {
             if (selectedAccountState != null) {
+                selectedAccount = selectedAccountState
                 updateReport(context, selectedAccountState!!, startDateState, endDateState, transactions, reportHtml) { html ->
                     reportHtml = html
                 }
@@ -146,6 +158,13 @@ class AccountStatementComposeActivity : ComponentActivity() {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_print),
                             contentDescription = "طباعة",
+                            modifier = Modifier.size(dimensions.iconSize)
+                        )
+                    }
+                    IconButton(onClick = { shareReportAsPdf() }) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = "مشاركة",
                             modifier = Modifier.size(dimensions.iconSize)
                         )
                     }
@@ -684,6 +703,120 @@ class AccountStatementComposeActivity : ComponentActivity() {
             val printManager = getSystemService(Context.PRINT_SERVICE) as android.print.PrintManager
             val printAdapter = webView.createPrintDocumentAdapter("كشف الحساب")
             printManager.print("كشف الحساب", printAdapter, null)
+        }
+    }
+
+    private fun shareReportAsPdf() {
+        if (webView != null && selectedAccount != null) {
+            try {
+                // إنشاء ملف PDF مؤقت
+                val pdfFile = createPdfFromWebView()
+                if (pdfFile != null) {
+                    // مشاركة الملف
+                    val uri = FileProvider.getUriForFile(
+                        this,
+                        "${packageName}.provider",
+                        pdfFile
+                    )
+                    val shareIntent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_STREAM, uri)
+                        putExtra(Intent.EXTRA_SUBJECT, "كشف الحساب - ${selectedAccount?.name}")
+                        putExtra(Intent.EXTRA_TEXT, "كشف الحساب التفصيلي")
+                        type = "application/pdf"
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    startActivity(Intent.createChooser(shareIntent, "مشاركة كشف الحساب"))
+                } else {
+                    Toast.makeText(this, "فشل في إنشاء ملف PDF", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this, "خطأ في مشاركة التقرير: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, "يرجى اختيار حساب أولاً", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun createPdfFromWebView(): File? {
+        return try {
+            val webView = webView ?: return null
+            
+            // انتظار تحميل الصفحة
+            webView.webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    // إنشاء PDF بعد تحميل الصفحة
+                    createPdfDocument()
+                }
+            }
+            
+            // إعادة تحميل الصفحة لضمان تحديث المحتوى
+            webView.reload()
+            
+            // إنشاء ملف مؤقت
+            val pdfFile = File(cacheDir, "account_statement_${System.currentTimeMillis()}.pdf")
+            pdfFile
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun createPdfDocument() {
+        val webView = webView ?: return
+        
+        try {
+            // إنشاء PDF Document
+            val pdfDocument = PdfDocument()
+            
+            // الحصول على أبعاد WebView
+            val width = webView.width
+            val height = webView.height
+            
+            if (width > 0 && height > 0) {
+                // إنشاء صفحة PDF
+                val pageInfo = PdfDocument.PageInfo.Builder(width, height, 1).create()
+                val page = pdfDocument.startPage(pageInfo)
+                
+                // رسم WebView على صفحة PDF
+                val canvas = page.canvas
+                webView.draw(canvas)
+                
+                pdfDocument.finishPage(page)
+                
+                // حفظ PDF في ملف
+                val pdfFile = File(cacheDir, "account_statement_${System.currentTimeMillis()}.pdf")
+                val outputStream = FileOutputStream(pdfFile)
+                pdfDocument.writeTo(outputStream)
+                pdfDocument.close()
+                outputStream.close()
+                
+                // مشاركة الملف
+                sharePdfFile(pdfFile)
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "خطأ في إنشاء PDF: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun sharePdfFile(pdfFile: File) {
+        try {
+            val uri = FileProvider.getUriForFile(
+                this,
+                "${packageName}.provider",
+                pdfFile
+            )
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_SUBJECT, "كشف الحساب - ${selectedAccount?.name}")
+                putExtra(Intent.EXTRA_TEXT, "كشف الحساب التفصيلي")
+                type = "application/pdf"
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(Intent.createChooser(shareIntent, "مشاركة كشف الحساب"))
+        } catch (e: Exception) {
+            Toast.makeText(this, "خطأ في مشاركة الملف: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 } 
