@@ -32,6 +32,11 @@ import java.util.*
 import com.hillal.acc.data.model.Account
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 fun TransactionCard(
@@ -107,12 +112,9 @@ fun TransactionCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = transaction.getDescription() ?: "",
-                        fontSize = 14.sp,
-                        color = Color.White,
-                        maxLines = 2,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    HighlightedDescription(
+                        description = transaction.getDescription() ?: "",
+                        searchQuery = searchQuery,
                         modifier = Modifier.weight(1f)
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -173,4 +175,54 @@ fun ActionCircleButton(
 fun Transaction.getDateString(): String {
     val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     return dateFormat.format(Date(this.getTransactionDate()))
+}
+
+@Composable
+fun HighlightedDescription(
+    description: String,
+    searchQuery: String,
+    modifier: Modifier = Modifier
+) {
+    if (searchQuery.isBlank()) {
+        Text(
+            text = description,
+            fontSize = 14.sp,
+            color = Color.White,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = modifier
+        )
+    } else {
+        val index = description.indexOf(searchQuery, ignoreCase = true)
+        if (index == -1) {
+            // لا يوجد تطابق، اعرض أول سطرين عادي
+            Text(
+                text = description,
+                fontSize = 14.sp,
+                color = Color.White,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = modifier
+            )
+        } else {
+            val before = description.substring(0, index)
+            val match = description.substring(index, index + searchQuery.length)
+            val after = description.substring(index + searchQuery.length)
+            val highlighted = buildAnnotatedString {
+                append(before)
+                withStyle(SpanStyle(background = Color(0xFFFFF59D), color = Color.Black)) {
+                    append(match)
+                }
+                append(after)
+            }
+            Text(
+                text = highlighted,
+                fontSize = 14.sp,
+                color = Color.White,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = modifier
+            )
+        }
+    }
 } 
