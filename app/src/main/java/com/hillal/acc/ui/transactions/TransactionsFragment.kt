@@ -137,12 +137,70 @@ class TransactionsFragment : Fragment() {
                 val accountsNullable by accountViewModel.getAllAccounts().observeAsState(emptyList())
                 val transactions = transactionsNullable ?: emptyList()
                 val accounts = accountsNullable ?: emptyList()
-                TransactionsScreenContent(
-                    transactions = transactions,
+
+                // State للفلاتر
+                var selectedAccount by remember { mutableStateOf<Account?>(null) }
+                val today = remember { Calendar.getInstance() }
+                val fourDaysAgo = remember {
+                    Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -4); set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }
+                }
+                var startDate by remember { mutableStateOf(fourDaysAgo.timeInMillis) }
+                var endDate by remember { mutableStateOf(today.timeInMillis) }
+                var searchQuery by remember { mutableStateOf("") }
+
+                // تصفية المعاملات حسب الفلاتر
+                val filteredTransactions = transactions.filter { tx ->
+                    val accountMatch = selectedAccount == null || tx.getAccountId() == selectedAccount?.getId()
+                    val dateMatch = tx.getTransactionDate() in startDate..endDate
+                    val searchMatch = searchQuery.isBlank() || (tx.getDescription()?.contains(searchQuery, ignoreCase = true) == true)
+                    accountMatch && dateMatch && searchMatch
+                }
+
+                TransactionsScreen(
+                    transactions = filteredTransactions,
                     accounts = accounts,
-                    navController = navController,
-                    context = context,
-                    onDeleteConfirmed = { transaction -> viewModel.deleteTransaction(transaction) }
+                    onAccountFilter = { selectedAccount = it },
+                    startDate = startDate,
+                    endDate = endDate,
+                    onDateFilter = { start, end ->
+                        if (start != null) startDate = start
+                        if (end != null) endDate = end
+                    },
+                    searchQuery = searchQuery,
+                    onSearch = { searchQuery = it },
+                    onAddClick = { navController.navigate(R.id.action_transactions_to_addTransaction) },
+                    onDelete = { transaction -> viewModel.deleteTransaction(transaction) },
+                    onEdit = { transaction ->
+                        val args = Bundle().apply { putLong("transactionId", transaction.getId()) }
+                        navController.navigate(R.id.action_transactions_to_editTransaction, args)
+                    },
+                    onWhatsApp = { transaction ->
+                        val account = accounts.find { it.getId() == transaction.getAccountId() }
+                        val phone = account?.getPhoneNumber()
+                        if (!phone.isNullOrBlank()) {
+                            val balance = 0.0 // يمكنك حساب الرصيد بدقة إذا أردت
+                            val msg = NotificationUtils.buildWhatsAppMessage(
+                                context,
+                                account.getName() ?: "-",
+                                transaction,
+                                balance,
+                                transaction.getType()
+                            )
+                            NotificationUtils.sendWhatsAppMessage(context, phone, msg)
+                        } else {
+                            Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onSms = { transaction ->
+                        val account = accounts.find { it.getId() == transaction.getAccountId() }
+                        val phone = account?.getPhoneNumber()
+                        if (!phone.isNullOrBlank()) {
+                            val msg = "حسابكم لدينا: ${transaction.getAmount()} ${transaction.getCurrency()}\n${transaction.getDescription()}"
+                            NotificationUtils.sendSmsMessage(context, phone, msg)
+                        } else {
+                            Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 )
             }
         }
