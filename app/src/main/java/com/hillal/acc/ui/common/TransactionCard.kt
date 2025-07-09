@@ -66,8 +66,8 @@ fun TransactionCard(
     val accountName = accounts.find { it.getId() == transaction.getAccountId() }?.getName() ?: "--"
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
-    val buttonSize = screenHeight * 0.06f // زيادة الحجم: 6% من ارتفاع الشاشة
-    val iconSize = screenHeight * 0.035f // زيادة الحجم: 3.5% من ارتفاع الشاشة
+    val buttonSize = screenHeight * 0.04f // زيادة الحجم: 6% من ارتفاع الشاشة
+    val iconSize = screenHeight * 0.03f // زيادة الحجم: 3.5% من ارتفاع الشاشة
     Card(
         modifier = modifier
             .fillMaxWidth()

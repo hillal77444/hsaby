@@ -288,7 +288,7 @@ fun TransactionsScreen(
                             onSms = { onSms(transaction) }, // <-- Fix: pass transaction
                             modifier = Modifier
                                 .padding(bottom = 6.dp)
-                                .height(screenHeight * 0.15f),
+                                .height(screenHeight * 0.18f),
                             searchQuery = searchQuery // تمرير البحث
                         )
                         if (idx < transactions.lastIndex) {
