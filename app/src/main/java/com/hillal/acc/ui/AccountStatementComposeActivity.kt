@@ -742,7 +742,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
             cell.horizontalAlignment = com.itextpdf.text.Element.ALIGN_CENTER
             cell.verticalAlignment = com.itextpdf.text.Element.ALIGN_MIDDLE
             cell.setPadding(6f)
-            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+            try {
+                cell.setRunDirection(PdfWriter.RUN_DIRECTION_RTL)
+            } catch (_: Exception) {}
             table.addCell(cell)
         }
         val displayDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
@@ -760,11 +762,11 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 }
             }
         // أضف صف الرصيد السابق في أول الجدول
-        val prevBalanceCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont)); prevBalanceCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-        val prevDescCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("الرصيد السابق", arabicFont)); prevDescCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-        val prevDebitCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont)); prevDebitCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-        val prevCreditCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont)); prevCreditCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-        val prevBalanceValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", previousBalance), arabicFont)); prevBalanceValueCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        val prevBalanceCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont)); try { prevBalanceCell.setRunDirection(PdfWriter.RUN_DIRECTION_RTL) } catch (_: Exception) {}
+        val prevDescCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("الرصيد السابق", arabicFont)); try { prevDescCell.setRunDirection(PdfWriter.RUN_DIRECTION_RTL) } catch (_: Exception) {}
+        val prevDebitCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont)); try { prevDebitCell.setRunDirection(PdfWriter.RUN_DIRECTION_RTL) } catch (_: Exception) {}
+        val prevCreditCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont)); try { prevCreditCell.setRunDirection(PdfWriter.RUN_DIRECTION_RTL) } catch (_: Exception) {}
+        val prevBalanceValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", previousBalance), arabicFont)); try { prevBalanceValueCell.setRunDirection(PdfWriter.RUN_DIRECTION_RTL) } catch (_: Exception) {}
         table.addCell(prevBalanceCell)
         table.addCell(prevDescCell)
         table.addCell(prevDebitCell)
