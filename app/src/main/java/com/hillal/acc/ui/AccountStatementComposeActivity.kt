@@ -43,11 +43,14 @@ import java.util.*
 import java.io.File
 import androidx.core.content.FileProvider
 import com.hillal.acc.ui.common.AccountPickerField
-import com.tom_roush.pdfbox.pdmodel.PDDocument
-import com.tom_roush.pdfbox.pdmodel.PDPage
-import com.tom_roush.pdfbox.pdmodel.PDPageContentStream
-import com.tom_roush.pdfbox.pdmodel.common.PDRectangle
-import com.tom_roush.pdfbox.pdmodel.font.PDType0Font
+import com.itextpdf.text.BaseFont
+import com.itextpdf.text.Document
+import com.itextpdf.text.pdf.PdfPCell
+import com.itextpdf.text.pdf.PdfPTable
+import com.itextpdf.text.pdf.PdfWriter
+import com.itextpdf.text.Font
+import com.itextpdf.text.Paragraph
+import com.itextpdf.text.Element
 import android.net.Uri
 import android.print.PrintDocumentAdapter
 import android.print.PrintDocumentInfo
@@ -666,7 +669,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     (selectedCurrency == null || tx.currency == selectedCurrency) &&
                     Date(tx.createdAt) >= startDateObj && Date(tx.createdAt) <= endDateObj
                 }.sortedBy { it.createdAt }
-                val pdfFile = generateAccountStatementPdfWithPdfBox(
+                val pdfFile = generateAccountStatementPdfWithITextG(
                     context = this,
                     account = selectedAccount,
                     startDate = startDate,
@@ -687,7 +690,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         }
     }
 
-    private fun generateAccountStatementPdfWithPdfBox(
+    private fun generateAccountStatementPdfWithITextG(
         context: Context,
         account: Account,
         startDate: String,
@@ -700,57 +703,54 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val startDateObj = dateFormat.parse(startDate)
         val endDateObj = dateFormat.parse(endDate)
         val safeAccountName = account.name.replace(Regex("[^\u0600-\u06FFa-zA-Z0-9_]"), "_")
-        val fileName = "كشف_حساب_${safeAccountName}_${startDate}_${endDate}_pdfbox.pdf"
+        val fileName = "كشف_حساب_${safeAccountName}_${startDate}_${endDate}_itextg.pdf"
         val pdfFile = File(context.cacheDir, fileName)
 
-        val document = PDDocument()
-        val page = PDPage(PDRectangle.A4)
-        document.addPage(page)
+        val document = Document()
+        PdfWriter.getInstance(document, FileOutputStream(pdfFile))
+        document.open()
 
         // تحميل الخط العربي
-        val fontStream = context.assets.open("fonts/Amiri-1.002/Amiri-Regular.ttf")
-        val font = PDType0Font.load(document, fontStream, true)
-
-        var contentStream = PDPageContentStream(document, page)
-        contentStream.setFont(font, 14f)
+        val font = BaseFont.createFont("fonts/Amiri-1.002/Amiri-Regular.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED)
 
         // إعدادات أولية
         val margin = 40f
-        var y = page.mediaBox.height - margin
-        val lineHeight = 22f
+        var y = document.bottomMargin
+        val lineHeight = 12f // Adjusted for iTextG
         val tableColWidths = floatArrayOf(70f, 170f, 60f, 60f, 70f) // التاريخ، الوصف، مدين، دائن، رصيد
-        val pageWidth = page.mediaBox.width
+        val pageWidth = document.pageSize.width
 
         // عنوان التقرير
-        contentStream.beginText()
-        contentStream.setFont(font, 18f)
-        contentStream.newLineAtOffset(pageWidth - margin - 250f, y)
-        contentStream.showText("كشف الحساب التفصيلي")
-        contentStream.endText()
-        y -= lineHeight * 1.5f
+        document.add(Paragraph("كشف الحساب التفصيلي", Font(font, 18)))
+        y = document.bottomMargin + document.topMargin + 20f
 
         // معلومات الحساب
         val info = "اسم الحساب: ${account.name}   |   رقم الهاتف: ${account.phoneNumber}   |   الفترة: من $startDate إلى $endDate" +
             (if (selectedCurrency != null) "   |   العملة: $selectedCurrency" else "")
-        contentStream.beginText()
-        contentStream.setFont(font, 13f)
-        contentStream.newLineAtOffset(pageWidth - margin - 450f, y)
-        contentStream.showText(info)
-        contentStream.endText()
-        y -= lineHeight * 1.5f
+        document.add(Paragraph(info, Font(font, 13)))
+        y += lineHeight * 1.5f
 
         // رؤوس الجدول
-        val headers = listOf("التاريخ", "الوصف", "مدين", "دائن", "الرصيد")
-        var x = margin
-        for ((i, h) in headers.withIndex()) {
-            contentStream.beginText()
-            contentStream.setFont(font, 13f)
-            contentStream.newLineAtOffset(x, y)
-            contentStream.showText(h)
-            contentStream.endText()
-            x += tableColWidths[i]
-        }
-        y -= lineHeight
+        val table = PdfPTable(5) // 5 columns
+        table.setWidthPercentage(100f)
+        table.setSpacingBefore(10f)
+        table.setSpacingAfter(10f)
+
+        val headerCell = PdfPCell(Paragraph("التاريخ", Font(font, 13, Font.BOLD)))
+        headerCell.setHorizontalAlignment(Element.ALIGN_CENTER)
+        table.addCell(headerCell)
+        headerCell = PdfPCell(Paragraph("الوصف", Font(font, 13, Font.BOLD)))
+        headerCell.setHorizontalAlignment(Element.ALIGN_CENTER)
+        table.addCell(headerCell)
+        headerCell = PdfPCell(Paragraph("مدين", Font(font, 13, Font.BOLD)))
+        headerCell.setHorizontalAlignment(Element.ALIGN_CENTER)
+        table.addCell(headerCell)
+        headerCell = PdfPCell(Paragraph("دائن", Font(font, 13, Font.BOLD)))
+        headerCell.setHorizontalAlignment(Element.ALIGN_CENTER)
+        table.addCell(headerCell)
+        headerCell = PdfPCell(Paragraph("الرصيد", Font(font, 13, Font.BOLD)))
+        headerCell.setHorizontalAlignment(Element.ALIGN_CENTER)
+        table.addCell(headerCell)
 
         // حساب الرصيد السابق
         val previousBalance = transactions
@@ -767,17 +767,11 @@ class AccountStatementComposeActivity : ComponentActivity() {
         var totalCredit = 0.0
 
         // صف الرصيد السابق
-        x = margin
-        val prevRow = listOf("", "الرصيد السابق", "", "", String.format(Locale.ENGLISH, "%.2f", previousBalance))
-        for ((i, cell) in prevRow.withIndex()) {
-            contentStream.beginText()
-            contentStream.setFont(font, 12f)
-            contentStream.newLineAtOffset(x, y)
-            contentStream.showText(cell)
-            contentStream.endText()
-            x += tableColWidths[i]
-        }
-        y -= lineHeight
+        table.addCell(Paragraph("الرصيد السابق", Font(font, 12)))
+        table.addCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", previousBalance), Font(font, 12)))
+        table.addCell(Paragraph("", Font(font, 12)))
+        table.addCell(Paragraph("", Font(font, 12)))
+        table.addCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", previousBalance), Font(font, 12)))
 
         // المعاملات
         val filteredTxs = transactions.filter { tx ->
@@ -786,17 +780,10 @@ class AccountStatementComposeActivity : ComponentActivity() {
         }.sortedBy { it.createdAt }
 
         for (tx in filteredTxs) {
-            if (y < margin + lineHeight * 4) {
-                // صفحة جديدة
-                contentStream.close()
-                val newPage = PDPage(PDRectangle.A4)
-                document.addPage(newPage)
-                y = newPage.mediaBox.height - margin
-                x = margin
-                contentStream = PDPageContentStream(document, newPage)
-                contentStream.setFont(font, 14f)
+            if (y > document.bottomMargin + document.topMargin + document.pageSize.height - 100f) { // Check if page is full
+                document.newPage()
+                y = document.bottomMargin + document.topMargin
             }
-            x = margin
             val dateStr = displayDateFormat.format(Date(tx.createdAt))
             val desc = tx.description ?: ""
             val debit = if (tx.type == "debit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
@@ -808,36 +795,24 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 balance += tx.amount
                 totalCredit += tx.amount
             }
-            val row = listOf(dateStr, desc, debit, credit, String.format(Locale.ENGLISH, "%.2f", balance))
-            for ((i, cell) in row.withIndex()) {
-                contentStream.beginText()
-                contentStream.setFont(font, 12f)
-                contentStream.newLineAtOffset(x, y)
-                contentStream.showText(cell)
-                contentStream.endText()
-                x += tableColWidths[i]
-            }
-            y -= lineHeight
+            table.addCell(Paragraph(dateStr, Font(font, 12)))
+            table.addCell(Paragraph(desc, Font(font, 12)))
+            table.addCell(Paragraph(debit, Font(font, 12)))
+            table.addCell(Paragraph(credit, Font(font, 12)))
+            table.addCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", balance), Font(font, 12)))
+            y += lineHeight
         }
 
         // ملخص الحساب
-        y -= lineHeight
-        val summary = listOf(
-            "إجمالي عليه: ${String.format(Locale.ENGLISH, "%.2f", totalDebit)}",
-            "إجمالي له: ${String.format(Locale.ENGLISH, "%.2f", totalCredit)}",
-            "الرصيد النهائي: ${String.format(Locale.ENGLISH, "%.2f", balance)}"
-        )
-        for (s in summary) {
-            contentStream.beginText()
-            contentStream.setFont(font, 13f)
-            contentStream.newLineAtOffset(pageWidth - margin - 250f, y)
-            contentStream.showText(s)
-            contentStream.endText()
-            y -= lineHeight
-        }
+        document.add(Paragraph("ملخص الحساب", Font(font, 13, Font.BOLD)))
+        y += lineHeight * 0.5f
+        document.add(Paragraph("إجمالي عليه: ${String.format(Locale.ENGLISH, "%.2f", totalDebit)}", Font(font, 13)))
+        y += lineHeight
+        document.add(Paragraph("إجمالي له: ${String.format(Locale.ENGLISH, "%.2f", totalCredit)}", Font(font, 13)))
+        y += lineHeight
+        document.add(Paragraph("الرصيد النهائي: ${String.format(Locale.ENGLISH, "%.2f", balance)}", Font(font, 13)))
+        y += lineHeight
 
-        contentStream.close()
-        document.save(pdfFile)
         document.close()
         return pdfFile
     }
@@ -880,44 +855,5 @@ class AccountStatementComposeActivity : ComponentActivity() {
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         context.startActivity(Intent.createChooser(shareIntent, "مشاركة كشف الحساب"))
-    }
-
-    fun createAndShareArabicPdf(context: Context, text: String, fontName: String = "Amiri-Regular.ttf") {
-        // 1. إنشاء مستند PDF
-        val document = PDDocument()
-        val page = PDPage(PDRectangle.A4)
-        document.addPage(page)
-
-        // 2. تحميل الخط العربي من assets/fonts
-        val fontStream = context.assets.open("fonts/Amiri-1.002/$fontName")
-        val font = PDType0Font.load(document, fontStream, true)
-
-        // 3. كتابة النص العربي
-        val contentStream = PDPageContentStream(document, page)
-        contentStream.beginText()
-        contentStream.setFont(font, 18f)
-        // حدد مكان النص (x, y)
-        contentStream.newLineAtOffset(50f, 750f)
-        contentStream.showText(text)
-        contentStream.endText()
-        contentStream.close()
-
-        // 4. حفظ الملف في cache
-        val file = File(context.cacheDir, "arabic_report.pdf")
-        document.save(file)
-        document.close()
-
-        // 5. مشاركة الملف
-        val uri: Uri = FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.provider",
-            file
-        )
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "application/pdf"
-            putExtra(Intent.EXTRA_STREAM, uri)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-        context.startActivity(Intent.createChooser(shareIntent, "مشاركة PDF"))
     }
 } 
