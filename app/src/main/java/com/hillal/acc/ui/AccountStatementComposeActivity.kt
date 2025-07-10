@@ -688,6 +688,8 @@ class AccountStatementComposeActivity : ComponentActivity() {
         selectedCurrency: String?,
         transactions: List<Transaction>
     ): File {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+        val startDateObj = dateFormat.parse(startDate)
         // تجهيز اسم الملف: كشف_حساب_اسم_الحساب_من_إلى.pdf
         val safeAccountName = account.name.replace(Regex("[^\u0600-\u06FFa-zA-Z0-9_]"), "_")
         val fileName = "كشف_حساب_${safeAccountName}_${startDate}_${endDate}.pdf"
@@ -714,7 +716,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
         // العنوان الرئيسي
         val title = com.itextpdf.text.Paragraph("كشف الحساب التفصيلي", titleFont)
         title.alignment = com.itextpdf.text.Element.ALIGN_RIGHT
-        title.runDirection = PdfWriter.RUN_DIRECTION_RTL
         document.add(title)
         document.add(com.itextpdf.text.Paragraph(" "))
 
@@ -725,7 +726,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
             arabicFont
         )
         info.alignment = com.itextpdf.text.Element.ALIGN_RIGHT
-        info.runDirection = PdfWriter.RUN_DIRECTION_RTL
         document.add(info)
         document.add(com.itextpdf.text.Paragraph(" "))
 
@@ -733,7 +733,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val table = com.itextpdf.text.pdf.PdfPTable(5)
         table.widthPercentage = 100f
         table.setWidths(floatArrayOf(2f, 4f, 2f, 2f, 2f))
-        table.runDirection = PdfWriter.RUN_DIRECTION_RTL
         val headerBg = com.itextpdf.text.BaseColor(25, 118, 210)
         val headers = listOf("التاريخ", "الوصف", "مدين", "دائن", "الرصيد")
         for (h in headers) {
@@ -742,9 +741,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
             cell.horizontalAlignment = com.itextpdf.text.Element.ALIGN_CENTER
             cell.verticalAlignment = com.itextpdf.text.Element.ALIGN_MIDDLE
             cell.setPadding(6f)
-            try {
-                cell.setRunDirection(PdfWriter.RUN_DIRECTION_RTL)
-            } catch (_: Exception) {}
             table.addCell(cell)
         }
         val displayDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
@@ -762,11 +758,11 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 }
             }
         // أضف صف الرصيد السابق في أول الجدول
-        val prevBalanceCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont)); try { prevBalanceCell.setRunDirection(PdfWriter.RUN_DIRECTION_RTL) } catch (_: Exception) {}
-        val prevDescCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("الرصيد السابق", arabicFont)); try { prevDescCell.setRunDirection(PdfWriter.RUN_DIRECTION_RTL) } catch (_: Exception) {}
-        val prevDebitCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont)); try { prevDebitCell.setRunDirection(PdfWriter.RUN_DIRECTION_RTL) } catch (_: Exception) {}
-        val prevCreditCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont)); try { prevCreditCell.setRunDirection(PdfWriter.RUN_DIRECTION_RTL) } catch (_: Exception) {}
-        val prevBalanceValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", previousBalance), arabicFont)); try { prevBalanceValueCell.setRunDirection(PdfWriter.RUN_DIRECTION_RTL) } catch (_: Exception) {}
+        val prevBalanceCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont))
+        val prevDescCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("الرصيد السابق", arabicFont))
+        val prevDebitCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont))
+        val prevCreditCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont))
+        val prevBalanceValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", previousBalance), arabicFont))
         table.addCell(prevBalanceCell)
         table.addCell(prevDescCell)
         table.addCell(prevDebitCell)
@@ -774,32 +770,25 @@ class AccountStatementComposeActivity : ComponentActivity() {
         table.addCell(prevBalanceValueCell)
         transactions.forEach { tx ->
             val dateCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(displayDateFormat.format(Date(tx.createdAt)), arabicFont))
-            dateCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
             table.addCell(dateCell)
             val descCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(tx.description ?: "", arabicFont))
-            descCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
             table.addCell(descCell)
             if (tx.type == "debit") {
                 val debitCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", tx.amount), debitFont))
-                debitCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
                 table.addCell(debitCell)
                 val emptyCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont))
-                emptyCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
                 table.addCell(emptyCell)
                 balance -= tx.amount
                 totalDebit += tx.amount
             } else {
                 val emptyCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont))
-                emptyCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
                 table.addCell(emptyCell)
                 val creditCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", tx.amount), creditFont))
-                creditCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
                 table.addCell(creditCell)
                 balance += tx.amount
                 totalCredit += tx.amount
             }
             val balanceCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", balance), arabicFont))
-            balanceCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
             table.addCell(balanceCell)
         }
         document.add(table)
@@ -808,35 +797,27 @@ class AccountStatementComposeActivity : ComponentActivity() {
         // ملخص الحساب
         val summaryTitle = com.itextpdf.text.Paragraph("ملخص الحساب", summaryLabelFont)
         summaryTitle.alignment = com.itextpdf.text.Element.ALIGN_RIGHT
-        summaryTitle.runDirection = PdfWriter.RUN_DIRECTION_RTL
         document.add(summaryTitle)
         val summaryTable = com.itextpdf.text.pdf.PdfPTable(2)
         summaryTable.widthPercentage = 60f
         summaryTable.horizontalAlignment = com.itextpdf.text.Element.ALIGN_RIGHT
         summaryTable.setWidths(floatArrayOf(2f, 2f))
-        summaryTable.runDirection = PdfWriter.RUN_DIRECTION_RTL
         val debitLabelCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("إجمالي عليه:", summaryLabelFont))
-        debitLabelCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
         summaryTable.addCell(debitLabelCell)
         val debitValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", totalDebit), debitFont))
-        debitValueCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
         summaryTable.addCell(debitValueCell)
         val creditLabelCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("إجمالي له:", summaryLabelFont))
-        creditLabelCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
         summaryTable.addCell(creditLabelCell)
         val creditValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", totalCredit), creditFont))
-        creditValueCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
         summaryTable.addCell(creditValueCell)
         val balanceLabelCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("الرصيد النهائي:", summaryLabelFont))
-        balanceLabelCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
         summaryTable.addCell(balanceLabelCell)
         val balanceValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", balance), summaryValueFont))
-        balanceValueCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
         summaryTable.addCell(balanceValueCell)
         document.add(summaryTable)
 
         document.close()
-                outputStream.close()
+        outputStream.close()
         return pdfFile
     }
 
