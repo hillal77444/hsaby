@@ -43,7 +43,6 @@ import java.util.*
 import java.io.File
 import androidx.core.content.FileProvider
 import com.hillal.acc.ui.common.AccountPickerField
-import com.itextpdf.text.BaseFont
 import com.itextpdf.text.Document
 import com.itextpdf.text.pdf.PdfPCell
 import com.itextpdf.text.pdf.PdfPTable
@@ -59,7 +58,7 @@ import android.print.PrintAttributes
 import android.os.ParcelFileDescriptor
 import java.io.FileOutputStream
 import com.itextpdf.text.BaseColor
-import io.github.seen_arabic.arabicservices.ArabicReshaper
+import io.github.seenarabic.arabicservices.ArabicReshaper
 
 class AccountStatementComposeActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -753,7 +752,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
 
         // حساب الرصيد السابق
         val previousBalance = transactions
-            .filter { dateFormat.parse(it.createdAt) < startDateObj }
+            .filter { Date(it.createdAt) < startDateObj }
             .fold(0.0) { acc, tx ->
                 when (tx.type) {
                     "debit" -> acc - tx.amount
@@ -777,7 +776,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
 
         // المعاملات
         val filteredTxs = transactions.filter { tx ->
-            dateFormat.parse(tx.createdAt) >= startDateObj && dateFormat.parse(tx.createdAt) <= endDateObj &&
+            Date(tx.createdAt) >= startDateObj && Date(tx.createdAt) <= endDateObj &&
             (selectedCurrency == null || tx.currency == selectedCurrency)
         }.sortedBy { it.createdAt }
 
