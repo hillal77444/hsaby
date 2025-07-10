@@ -58,6 +58,7 @@ import android.print.PageRange
 import android.print.PrintAttributes
 import android.os.ParcelFileDescriptor
 import java.io.FileOutputStream
+import com.itextpdf.text.BaseColor
 
 class AccountStatementComposeActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -707,54 +708,48 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val pdfFile = File(context.cacheDir, fileName)
 
         val document = Document()
-        PdfWriter.getInstance(document, FileOutputStream(pdfFile))
+        val writer = PdfWriter.getInstance(document, FileOutputStream(pdfFile))
         document.open()
 
         // تحميل الخط العربي
-        val font = BaseFont.createFont("fonts/Amiri-1.002/Amiri-Regular.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED)
-
-        // إعدادات أولية
-        val margin = 40f
-        var y = document.bottomMargin
-        val lineHeight = 12f // Adjusted for iTextG
-        val tableColWidths = floatArrayOf(70f, 170f, 60f, 60f, 70f) // التاريخ، الوصف، مدين، دائن، رصيد
-        val pageWidth = document.pageSize.width
+        val fontPath = "fonts/Amiri-1.002/Amiri-Regular.ttf"
+        val baseFont = BaseFont.createFont("/assets/$fontPath", BaseFont.IDENTITY_H, BaseFont.EMBEDDED)
+        val fontTitle = Font(baseFont, 18f, Font.BOLD)
+        val fontNormal = Font(baseFont, 13f, Font.NORMAL)
+        val fontHeader = Font(baseFont, 13f, Font.BOLD, BaseColor.WHITE)
+        val fontDebit = Font(baseFont, 13f, Font.NORMAL, BaseColor(0xD3, 0x2F, 0x2F)) // أحمر
+        val fontCredit = Font(baseFont, 13f, Font.NORMAL, BaseColor(0x38, 0x8E, 0x3C)) // أخضر
 
         // عنوان التقرير
-        document.add(Paragraph("كشف الحساب التفصيلي", Font(font, 18)))
-        y = document.bottomMargin + document.topMargin + 20f
+        val title = Paragraph("كشف الحساب التفصيلي", fontTitle)
+        title.alignment = Element.ALIGN_CENTER
+        document.add(title)
+        document.add(Paragraph(" "))
 
         // معلومات الحساب
         val info = "اسم الحساب: ${account.name}   |   رقم الهاتف: ${account.phoneNumber}   |   الفترة: من $startDate إلى $endDate" +
             (if (selectedCurrency != null) "   |   العملة: $selectedCurrency" else "")
-        document.add(Paragraph(info, Font(font, 13)))
-        y += lineHeight * 1.5f
+        val infoPara = Paragraph(info, fontNormal)
+        infoPara.alignment = Element.ALIGN_RIGHT
+        document.add(infoPara)
+        document.add(Paragraph(" "))
 
-        // رؤوس الجدول
-        val table = PdfPTable(5) // 5 columns
-        table.setWidthPercentage(100f)
-        table.setSpacingBefore(10f)
-        table.setSpacingAfter(10f)
-
-        val headerCell = PdfPCell(Paragraph("التاريخ", Font(font, 13, Font.BOLD)))
-        headerCell.setHorizontalAlignment(Element.ALIGN_CENTER)
-        table.addCell(headerCell)
-        headerCell = PdfPCell(Paragraph("الوصف", Font(font, 13, Font.BOLD)))
-        headerCell.setHorizontalAlignment(Element.ALIGN_CENTER)
-        table.addCell(headerCell)
-        headerCell = PdfPCell(Paragraph("مدين", Font(font, 13, Font.BOLD)))
-        headerCell.setHorizontalAlignment(Element.ALIGN_CENTER)
-        table.addCell(headerCell)
-        headerCell = PdfPCell(Paragraph("دائن", Font(font, 13, Font.BOLD)))
-        headerCell.setHorizontalAlignment(Element.ALIGN_CENTER)
-        table.addCell(headerCell)
-        headerCell = PdfPCell(Paragraph("الرصيد", Font(font, 13, Font.BOLD)))
-        headerCell.setHorizontalAlignment(Element.ALIGN_CENTER)
-        table.addCell(headerCell)
+        // رؤوس الجدول مع ألوان
+        val table = PdfPTable(5)
+        table.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        table.widthPercentage = 100f
+        table.setWidths(floatArrayOf(2f, 5f, 2f, 2f, 2f))
+        val headers = listOf("التاريخ", "الوصف", "عليه", "له", "الرصيد")
+        for (h in headers) {
+            val cell = PdfPCell(Paragraph(h, fontHeader))
+            cell.horizontalAlignment = Element.ALIGN_CENTER
+            cell.backgroundColor = BaseColor(0x19, 0x76, 0xD2) // أزرق
+            table.addCell(cell)
+        }
 
         // حساب الرصيد السابق
         val previousBalance = transactions
-            .filter { Date(it.createdAt) < startDateObj }
+            .filter { dateFormat.parse(it.createdAt) < startDateObj }
             .fold(0.0) { acc, tx ->
                 when (tx.type) {
                     "debit" -> acc - tx.amount
@@ -767,27 +762,28 @@ class AccountStatementComposeActivity : ComponentActivity() {
         var totalCredit = 0.0
 
         // صف الرصيد السابق
-        table.addCell(Paragraph("الرصيد السابق", Font(font, 12)))
-        table.addCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", previousBalance), Font(font, 12)))
-        table.addCell(Paragraph("", Font(font, 12)))
-        table.addCell(Paragraph("", Font(font, 12)))
-        table.addCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", previousBalance), Font(font, 12)))
+        val prevRow = listOf("", "الرصيد السابق", "", "", String.format(Locale.ENGLISH, "%.2f", previousBalance))
+        for (cellText in prevRow) {
+            val cell = PdfPCell(Paragraph(cellText, fontNormal))
+            cell.horizontalAlignment = Element.ALIGN_CENTER
+            cell.colspan = 1
+            cell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
+            table.addCell(cell)
+        }
 
         // المعاملات
         val filteredTxs = transactions.filter { tx ->
-            Date(tx.createdAt) >= startDateObj && Date(tx.createdAt) <= endDateObj &&
+            dateFormat.parse(tx.createdAt) >= startDateObj && dateFormat.parse(tx.createdAt) <= endDateObj &&
             (selectedCurrency == null || tx.currency == selectedCurrency)
         }.sortedBy { it.createdAt }
 
         for (tx in filteredTxs) {
-            if (y > document.bottomMargin + document.topMargin + document.pageSize.height - 100f) { // Check if page is full
-                document.newPage()
-                y = document.bottomMargin + document.topMargin
-            }
-            val dateStr = displayDateFormat.format(Date(tx.createdAt))
+            val dateStr = displayDateFormat.format(dateFormat.parse(tx.createdAt))
             val desc = tx.description ?: ""
             val debit = if (tx.type == "debit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
             val credit = if (tx.type == "credit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
+            val debitCell = PdfPCell(Paragraph(debit, fontDebit))
+            val creditCell = PdfPCell(Paragraph(credit, fontCredit))
             if (tx.type == "debit") {
                 balance -= tx.amount
                 totalDebit += tx.amount
@@ -795,25 +791,37 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 balance += tx.amount
                 totalCredit += tx.amount
             }
-            table.addCell(Paragraph(dateStr, Font(font, 12)))
-            table.addCell(Paragraph(desc, Font(font, 12)))
-            table.addCell(Paragraph(debit, Font(font, 12)))
-            table.addCell(Paragraph(credit, Font(font, 12)))
-            table.addCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", balance), Font(font, 12)))
-            y += lineHeight
+            val row = listOf(
+                PdfPCell(Paragraph(dateStr, fontNormal)),
+                PdfPCell(Paragraph(desc, fontNormal)),
+                debitCell,
+                creditCell,
+                PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", balance), fontNormal))
+            )
+            for (cell in row) {
+                cell.horizontalAlignment = Element.ALIGN_CENTER
+                cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+                table.addCell(cell)
+            }
         }
 
+        document.add(table)
+        document.add(Paragraph(" "))
+
         // ملخص الحساب
-        document.add(Paragraph("ملخص الحساب", Font(font, 13, Font.BOLD)))
-        y += lineHeight * 0.5f
-        document.add(Paragraph("إجمالي عليه: ${String.format(Locale.ENGLISH, "%.2f", totalDebit)}", Font(font, 13)))
-        y += lineHeight
-        document.add(Paragraph("إجمالي له: ${String.format(Locale.ENGLISH, "%.2f", totalCredit)}", Font(font, 13)))
-        y += lineHeight
-        document.add(Paragraph("الرصيد النهائي: ${String.format(Locale.ENGLISH, "%.2f", balance)}", Font(font, 13)))
-        y += lineHeight
+        val summary = listOf(
+            "إجمالي عليه: ${String.format(Locale.ENGLISH, "%.2f", totalDebit)}",
+            "إجمالي له: ${String.format(Locale.ENGLISH, "%.2f", totalCredit)}",
+            "الرصيد النهائي: ${String.format(Locale.ENGLISH, "%.2f", balance)}"
+        )
+        for (s in summary) {
+            val para = Paragraph(s, fontHeader)
+            para.alignment = Element.ALIGN_RIGHT
+            document.add(para)
+        }
 
         document.close()
+        writer.close()
         return pdfFile
     }
 
