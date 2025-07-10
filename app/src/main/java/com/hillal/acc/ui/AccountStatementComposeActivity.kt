@@ -54,6 +54,7 @@ import com.hillal.acc.ui.common.AccountPickerField
 import com.itextpdf.text.Document
 import com.itextpdf.text.pdf.PdfWriter
 import java.io.StringReader
+import com.itextpdf.text.pdf.BaseFont
 
 class AccountStatementComposeActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -568,18 +569,28 @@ class AccountStatementComposeActivity : ComponentActivity() {
         <head>
             <meta charset="UTF-8">
             <style>
-                body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
-                .header { background-color: #1976d2; color: white; padding: 20px; border-radius: 10px; margin-bottom: 10px; }
-                .account-info-row { background-color: white; padding: 8px 15px; border-radius: 8px; margin-bottom: 18px; font-size: 0.98em; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 12px; color: #333; }
-                .account-info-row span { font-weight: bold; color: #1976d2; font-size: 0.98em; }
-                .account-info-row .divider { color: #aaa; font-weight: normal; margin: 0 6px; }
-                .transactions-table { width: 100%; border-collapse: collapse; background-color: white; border-radius: 10px; overflow: hidden; }
-                .transactions-table th { background-color: #1976d2; color: white; padding: 12px; text-align: center; }
-                .transactions-table td { padding: 10px; text-align: center; border-bottom: 1px solid #eee; }
+                @font-face {
+                    font-family: 'Amiri';
+                    src: url('file:///android_asset/fonts/Amiri-1.002/Amiri-Regular.ttf');
+                }
+                body { font-family: 'Amiri', Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+                .header, .account-info-row, .transactions-table, .summary {
+                    width: 100%;
+                    max-width: 100vw;
+                    box-sizing: border-box;
+                    margin: 0 auto 10px auto;
+                }
+                .header { background-color: #1976d2; color: white; padding: 16px; border-radius: 10px; margin-bottom: 10px; }
+                .account-info-row { background-color: white; padding: 8px 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.97em; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 10px; color: #333; }
+                .account-info-row span { font-weight: bold; color: #1976d2; font-size: 0.97em; }
+                .account-info-row .divider { color: #aaa; font-weight: normal; margin: 0 4px; }
+                .transactions-table { width: 100%; border-collapse: collapse; background-color: white; border-radius: 10px; overflow: hidden; table-layout: fixed; }
+                .transactions-table th { background-color: #1976d2; color: white; padding: 10px; text-align: center; font-size: 0.97em; }
+                .transactions-table td { padding: 8px; text-align: center; border-bottom: 1px solid #eee; word-break: break-word; font-size: 0.97em; }
                 .debit { color: #d32f2f; font-weight: bold; }
                 .credit { color: #388e3c; font-weight: bold; }
-                .summary { background-color: white; padding: 12px; border-radius: 10px; margin-top: 18px; }
-                .summary-row { display: flex; justify-content: space-between; margin: 8px 0; }
+                .summary { background-color: white; padding: 10px; border-radius: 10px; margin-top: 10px; width: 100%; }
+                .summary-row { display: flex; justify-content: space-between; margin: 6px 0; }
                 .summary-label { font-weight: bold; color: #666; }
                 .summary-value { font-weight: bold; color: #1976d2; }
             </style>
@@ -677,24 +688,33 @@ class AccountStatementComposeActivity : ComponentActivity() {
         selectedCurrency: String?,
         transactions: List<Transaction>
     ): File {
-        val pdfFile = File(cacheDir, "account_statement_${System.currentTimeMillis()}.pdf")
+        // تجهيز اسم الملف: كشف_حساب_اسم_الحساب_من_إلى.pdf
+        val safeAccountName = account.name.replace(Regex("[^\u0600-\u06FFa-zA-Z0-9_]"), "_")
+        val fileName = "كشف_حساب_${safeAccountName}_${startDate}_${endDate}.pdf"
+        val pdfFile = File(cacheDir, fileName)
         val document = Document()
         val outputStream = FileOutputStream(pdfFile)
         val writer = PdfWriter.getInstance(document, outputStream)
         document.open()
 
-        // إعداد الخطوط والألوان
-        val titleFont = com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 18f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(25, 118, 210))
-        val headerFont = com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 14f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor.WHITE)
-        val cellFont = com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12f, com.itextpdf.text.Font.NORMAL, com.itextpdf.text.BaseColor(33, 33, 33))
-        val debitFont = com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(211, 47, 47))
-        val creditFont = com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(56, 142, 60))
-        val summaryLabelFont = com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(102, 102, 102))
-        val summaryValueFont = com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(25, 118, 210))
+        // تحميل خط Amiri من assets
+        val fontStream = assets.open("fonts/Amiri-1.002/Amiri-Regular.ttf")
+        val fontBytes = ByteArray(fontStream.available())
+        fontStream.read(fontBytes)
+        fontStream.close()
+        val baseFont = BaseFont.createFont("Amiri-Regular.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, false, fontBytes, null)
+        val arabicFont = com.itextpdf.text.Font(baseFont, 14f, com.itextpdf.text.Font.NORMAL, com.itextpdf.text.BaseColor(33, 33, 33))
+        val titleFont = com.itextpdf.text.Font(baseFont, 18f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(25, 118, 210))
+        val headerFont = com.itextpdf.text.Font(baseFont, 14f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor.WHITE)
+        val debitFont = com.itextpdf.text.Font(baseFont, 12f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(211, 47, 47))
+        val creditFont = com.itextpdf.text.Font(baseFont, 12f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(56, 142, 60))
+        val summaryLabelFont = com.itextpdf.text.Font(baseFont, 12f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(102, 102, 102))
+        val summaryValueFont = com.itextpdf.text.Font(baseFont, 12f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(25, 118, 210))
 
         // العنوان الرئيسي
         val title = com.itextpdf.text.Paragraph("كشف الحساب التفصيلي", titleFont)
-        title.alignment = com.itextpdf.text.Element.ALIGN_CENTER
+        title.alignment = com.itextpdf.text.Element.ALIGN_RIGHT
+        title.runDirection = PdfWriter.RUN_DIRECTION_RTL
         document.add(title)
         document.add(com.itextpdf.text.Paragraph(" "))
 
@@ -702,9 +722,10 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val info = com.itextpdf.text.Paragraph(
             "اسم الحساب: ${account.name}   |   رقم الهاتف: ${account.phoneNumber}   |   الفترة: من $startDate إلى $endDate" +
             (if (selectedCurrency != null) "   |   العملة: $selectedCurrency" else ""),
-            cellFont
+            arabicFont
         )
-        info.alignment = com.itextpdf.text.Element.ALIGN_CENTER
+        info.alignment = com.itextpdf.text.Element.ALIGN_RIGHT
+        info.runDirection = PdfWriter.RUN_DIRECTION_RTL
         document.add(info)
         document.add(com.itextpdf.text.Paragraph(" "))
 
@@ -712,6 +733,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val table = com.itextpdf.text.pdf.PdfPTable(5)
         table.widthPercentage = 100f
         table.setWidths(floatArrayOf(2f, 4f, 2f, 2f, 2f))
+        table.runDirection = PdfWriter.RUN_DIRECTION_RTL
         val headerBg = com.itextpdf.text.BaseColor(25, 118, 210)
         val headers = listOf("التاريخ", "الوصف", "مدين", "دائن", "الرصيد")
         for (h in headers) {
@@ -720,27 +742,63 @@ class AccountStatementComposeActivity : ComponentActivity() {
             cell.horizontalAlignment = com.itextpdf.text.Element.ALIGN_CENTER
             cell.verticalAlignment = com.itextpdf.text.Element.ALIGN_MIDDLE
             cell.setPadding(6f)
+            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
             table.addCell(cell)
         }
         val displayDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
         var totalDebit = 0.0
         var totalCredit = 0.0
         var balance = 0.0
+        // حساب الرصيد السابق قبل الفترة
+        val previousBalance = transactions
+            .filter { Date(it.createdAt) < startDateObj }
+            .fold(0.0) { acc, tx ->
+                when (tx.type) {
+                    "debit" -> acc - tx.amount
+                    "credit" -> acc + tx.amount
+                    else -> acc
+                }
+            }
+        // أضف صف الرصيد السابق في أول الجدول
+        val prevBalanceCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont)); prevBalanceCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        val prevDescCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("الرصيد السابق", arabicFont)); prevDescCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        val prevDebitCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont)); prevDebitCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        val prevCreditCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont)); prevCreditCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        val prevBalanceValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", previousBalance), arabicFont)); prevBalanceValueCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        table.addCell(prevBalanceCell)
+        table.addCell(prevDescCell)
+        table.addCell(prevDebitCell)
+        table.addCell(prevCreditCell)
+        table.addCell(prevBalanceValueCell)
         transactions.forEach { tx ->
-            table.addCell(com.itextpdf.text.Phrase(displayDateFormat.format(Date(tx.createdAt)), cellFont))
-            table.addCell(com.itextpdf.text.Phrase(tx.description ?: "", cellFont))
+            val dateCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(displayDateFormat.format(Date(tx.createdAt)), arabicFont))
+            dateCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+            table.addCell(dateCell)
+            val descCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(tx.description ?: "", arabicFont))
+            descCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+            table.addCell(descCell)
             if (tx.type == "debit") {
-                table.addCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", tx.amount), debitFont))
-                table.addCell(com.itextpdf.text.Phrase("", cellFont))
+                val debitCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", tx.amount), debitFont))
+                debitCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+                table.addCell(debitCell)
+                val emptyCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont))
+                emptyCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+                table.addCell(emptyCell)
                 balance -= tx.amount
                 totalDebit += tx.amount
             } else {
-                table.addCell(com.itextpdf.text.Phrase("", cellFont))
-                table.addCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", tx.amount), creditFont))
+                val emptyCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont))
+                emptyCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+                table.addCell(emptyCell)
+                val creditCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", tx.amount), creditFont))
+                creditCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+                table.addCell(creditCell)
                 balance += tx.amount
                 totalCredit += tx.amount
             }
-            table.addCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", balance), cellFont))
+            val balanceCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", balance), arabicFont))
+            balanceCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+            table.addCell(balanceCell)
         }
         document.add(table)
         document.add(com.itextpdf.text.Paragraph(" "))
@@ -748,21 +806,35 @@ class AccountStatementComposeActivity : ComponentActivity() {
         // ملخص الحساب
         val summaryTitle = com.itextpdf.text.Paragraph("ملخص الحساب", summaryLabelFont)
         summaryTitle.alignment = com.itextpdf.text.Element.ALIGN_RIGHT
+        summaryTitle.runDirection = PdfWriter.RUN_DIRECTION_RTL
         document.add(summaryTitle)
         val summaryTable = com.itextpdf.text.pdf.PdfPTable(2)
         summaryTable.widthPercentage = 60f
         summaryTable.horizontalAlignment = com.itextpdf.text.Element.ALIGN_RIGHT
         summaryTable.setWidths(floatArrayOf(2f, 2f))
-        summaryTable.addCell(com.itextpdf.text.Phrase("إجمالي المدينين:", summaryLabelFont))
-        summaryTable.addCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", totalDebit), debitFont))
-        summaryTable.addCell(com.itextpdf.text.Phrase("إجمالي الدائنين:", summaryLabelFont))
-        summaryTable.addCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", totalCredit), creditFont))
-        summaryTable.addCell(com.itextpdf.text.Phrase("الرصيد النهائي:", summaryLabelFont))
-        summaryTable.addCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", balance), summaryValueFont))
+        summaryTable.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        val debitLabelCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("إجمالي المدينين:", summaryLabelFont))
+        debitLabelCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        summaryTable.addCell(debitLabelCell)
+        val debitValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", totalDebit), debitFont))
+        debitValueCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        summaryTable.addCell(debitValueCell)
+        val creditLabelCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("إجمالي الدائنين:", summaryLabelFont))
+        creditLabelCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        summaryTable.addCell(creditLabelCell)
+        val creditValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", totalCredit), creditFont))
+        creditValueCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        summaryTable.addCell(creditValueCell)
+        val balanceLabelCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("الرصيد النهائي:", summaryLabelFont))
+        balanceLabelCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        summaryTable.addCell(balanceLabelCell)
+        val balanceValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", balance), summaryValueFont))
+        balanceValueCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        summaryTable.addCell(balanceValueCell)
         document.add(summaryTable)
 
         document.close()
-                outputStream.close()
+        outputStream.close()
         return pdfFile
     }
 
