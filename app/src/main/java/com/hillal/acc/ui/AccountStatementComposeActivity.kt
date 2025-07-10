@@ -51,7 +51,11 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import androidx.core.content.FileProvider
 import com.hillal.acc.ui.common.AccountPickerField
-import org.xhtmlrenderer.pdf.ITextRenderer
+import android.print.PrintAttributes
+import android.print.PrintDocumentAdapter
+import android.print.PrintDocumentInfo
+import android.print.PageRange
+import android.os.ParcelFileDescriptor
 
 class AccountStatementComposeActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -182,13 +186,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                         )
                     }
                     IconButton(onClick = {
-                        shareReportAsPdf(
-                            selectedAccountState,
-                            startDateState,
-                            endDateState,
-                            selectedCurrencyState,
-                            transactions
-                        )
+                        exportWebViewToPdfAndShare(webView, this, selectedAccountState?.name ?: "", startDateState, endDateState)
                     }) {
                         Icon(
                             imageVector = Icons.Default.Share,
@@ -682,7 +680,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 val pdfFile = File(cacheDir, fileName)
                 // توليد PDF من HTML
                 generatePdfFromHtml(html, pdfFile, this)
-                sharePdfFile(pdfFile)
+                sharePdfFile(this, pdfFile)
             } catch (e: Exception) {
                 Toast.makeText(this, "خطأ في مشاركة التقرير: ${e.message}", Toast.LENGTH_SHORT).show()
             }
@@ -692,37 +690,84 @@ class AccountStatementComposeActivity : ComponentActivity() {
     }
 
     fun generatePdfFromHtml(html: String, outputFile: File, context: Context) {
-        val renderer = ITextRenderer()
-        // إذا لم يعمل الخط مباشرة من android_asset، انسخ الخط مؤقتًا إلى cacheDir واستخدم مساره المطلق
-        val fontAssetPath = "fonts/Cairo-Regular.ttf"
-        val fontFile = File(context.cacheDir, "Cairo-Regular.ttf")
-        if (!fontFile.exists()) {
-            context.assets.open(fontAssetPath).use { input ->
-                fontFile.outputStream().use { output ->
-                    input.copyTo(output)
+        val printAdapter = webView.createPrintDocumentAdapter("كشف الحساب")
+        val printAttributes = PrintAttributes.Builder()
+            .setMediaSize(PrintAttributes.MediaSize.ISO_A4)
+            .setResolution(PrintAttributes.Resolution("pdf", "pdf", 600, 600))
+            .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
+            .build()
+
+        val pdfFileDescriptor = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_WRITE)
+
+        printAdapter.onLayout(
+            null, printAttributes, null,
+            object : PrintDocumentAdapter.LayoutResultCallback() {
+                override fun onLayoutFinished(info: PrintDocumentInfo?, changed: Boolean) {
+                    printAdapter.onWrite(
+                        arrayOf(PageRange.ALL_PAGES),
+                        pdfFileDescriptor,
+                        null,
+                        object : PrintDocumentAdapter.WriteResultCallback() {
+                            override fun onWriteFinished(pages: Array<PageRange>) {
+                                pdfFileDescriptor.close()
+                                // مشاركة الملف بعد توليده
+                                sharePdfFile(context, outputFile)
+                            }
+                        }
+                    )
                 }
-            }
-        }
-        renderer.fontResolver.addFont(fontFile.absolutePath, true)
-        renderer.setDocumentFromString(html)
-        renderer.layout()
-        FileOutputStream(outputFile).use { os ->
-            renderer.createPDF(os)
-        }
+            }, null
+        )
+    }
+
+    // أضف الدالة الجديدة لمشاركة PDF من WebView مباشرة
+    fun exportWebViewToPdfAndShare(webView: WebView, context: Context, accountName: String, startDate: String, endDate: String) {
+        val safeAccountName = accountName.replace(Regex("[^\u0600-\u06FFa-zA-Z0-9_]"), "_")
+        val fileName = "كشف_حساب_${safeAccountName}_${startDate}_${endDate}.pdf"
+        val file = File(context.cacheDir, fileName)
+
+        val printAdapter = webView.createPrintDocumentAdapter(fileName)
+        val printAttributes = PrintAttributes.Builder()
+            .setMediaSize(PrintAttributes.MediaSize.ISO_A4)
+            .setResolution(PrintAttributes.Resolution("pdf", "pdf", 600, 600))
+            .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
+            .build()
+
+        val pdfFileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_WRITE)
+
+        printAdapter.onLayout(
+            null, printAttributes, null,
+            object : PrintDocumentAdapter.LayoutResultCallback() {
+                override fun onLayoutFinished(info: PrintDocumentInfo?, changed: Boolean) {
+                    printAdapter.onWrite(
+                        arrayOf(PageRange.ALL_PAGES),
+                        pdfFileDescriptor,
+                        null,
+                        object : PrintDocumentAdapter.WriteResultCallback() {
+                            override fun onWriteFinished(pages: Array<PageRange>) {
+                                pdfFileDescriptor.close()
+                                // مشاركة الملف بعد توليده
+                                sharePdfFile(context, file)
+                            }
+                        }
+                    )
+                }
+            }, null
+        )
     }
 
     // تعريف دالة مشاركة ملف PDF إذا لم تكن موجودة
-    private fun sharePdfFile(pdfFile: File) {
-        val uri = androidx.core.content.FileProvider.getUriForFile(
-            this,
-            "$packageName.provider",
-            pdfFile
+    fun sharePdfFile(context: Context, file: File) {
+        val uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.provider",
+            file
         )
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "application/pdf"
             putExtra(Intent.EXTRA_STREAM, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        startActivity(Intent.createChooser(shareIntent, "مشاركة كشف الحساب"))
+        context.startActivity(Intent.createChooser(shareIntent, "مشاركة كشف الحساب"))
     }
 } 
