@@ -183,7 +183,15 @@ class AccountStatementComposeActivity : ComponentActivity() {
                             modifier = Modifier.size(dimensions.iconSize)
                         )
                     }
-                    IconButton(onClick = { shareReportAsPdf(transactions) }) {
+                    IconButton(onClick = {
+                        shareReportAsPdf(
+                            selectedAccountState,
+                            startDateState,
+                            endDateState,
+                            selectedCurrencyState,
+                            transactions
+                        )
+                    }) {
                         Icon(
                             imageVector = Icons.Default.Share,
                             contentDescription = "مشاركة",
@@ -350,6 +358,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
                                         settings.setSupportZoom(true)
                                         settings.builtInZoomControls = true
                                         settings.displayZoomControls = false
+                                        isVerticalScrollBarEnabled = true
+                                        isHorizontalScrollBarEnabled = true
+                                        overScrollMode = WebView.OVER_SCROLL_IF_CONTENT_SCROLLS
                                         webView = this
                                     }
                                 },
@@ -362,9 +373,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                                         null
                                     )
                                 },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(400.dp)
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
                     }
@@ -628,19 +637,25 @@ class AccountStatementComposeActivity : ComponentActivity() {
         }
     }
 
-    private fun shareReportAsPdf(transactions: List<Transaction>) {
+    private fun shareReportAsPdf(
+        selectedAccount: Account?,
+        startDate: String,
+        endDate: String,
+        selectedCurrency: String?,
+        transactions: List<Transaction>
+    ) {
         if (selectedAccount != null) {
             try {
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
                 val startDateObj = dateFormat.parse(startDate)
                 val endDateObj = dateFormat.parse(endDate)
                 val filteredTransactions = transactions.filter { tx ->
-                    tx.accountId == selectedAccount!!.id &&
+                    tx.accountId == selectedAccount.id &&
                     (selectedCurrency == null || tx.currency == selectedCurrency) &&
                     Date(tx.createdAt) >= startDateObj && Date(tx.createdAt) <= endDateObj
                 }.sortedBy { it.createdAt }
                 val pdfFile = generateAccountStatementPdf(
-                    selectedAccount!!,
+                    selectedAccount,
                     startDate,
                     endDate,
                     selectedCurrency,
