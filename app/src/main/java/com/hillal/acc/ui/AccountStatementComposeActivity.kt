@@ -43,18 +43,16 @@ import java.util.*
 import java.io.File
 import androidx.core.content.FileProvider
 import com.hillal.acc.ui.common.AccountPickerField
-<<<<<<< HEAD
-import android.print.PrintAttributes
-import android.print.PrintDocumentAdapter
-import android.print.PrintDocumentInfo
-import android.print.PageRange
-import android.os.ParcelFileDescriptor
-=======
 import com.itextpdf.text.Document
 import com.itextpdf.text.pdf.PdfWriter
 import java.io.StringReader
 import com.itextpdf.text.pdf.BaseFont
->>>>>>> parent of a4e7ab781 (ل)
+import com.tom_roush.pdfbox.pdmodel.PDDocument
+import com.tom_roush.pdfbox.pdmodel.PDPage
+import com.tom_roush.pdfbox.pdmodel.PDPageContentStream
+import com.tom_roush.pdfbox.pdmodel.common.PDRectangle
+import com.tom_roush.pdfbox.pdmodel.font.PDType0Font
+import android.net.Uri
 
 class AccountStatementComposeActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -642,7 +640,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
         }
     }
 
-<<<<<<< HEAD
     // أضف الدالة الجديدة لمشاركة PDF من WebView مباشرة
     class MyLayoutResultCallback(val onFinish: () -> Unit) : PrintDocumentAdapter.LayoutResultCallback() {
         override fun onLayoutFinished(info: PrintDocumentInfo?, changed: Boolean) {
@@ -653,7 +650,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
     class MyWriteResultCallback(val onFinish: () -> Unit) : PrintDocumentAdapter.WriteResultCallback() {
         override fun onWriteFinished(pages: Array<PageRange>) {
             onFinish()
-=======
+        }
+    }
+
     private fun shareReportAsPdf(
         selectedAccount: Account?,
         startDate: String,
@@ -845,7 +844,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
             startActivity(Intent.createChooser(shareIntent, "مشاركة كشف الحساب"))
         } catch (e: Exception) {
             Toast.makeText(this, "خطأ في مشاركة الملف: ${e.message}", Toast.LENGTH_SHORT).show()
->>>>>>> parent of a4e7ab781 (ل)
         }
     }
 
@@ -892,5 +890,44 @@ class AccountStatementComposeActivity : ComponentActivity() {
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         context.startActivity(Intent.createChooser(shareIntent, "مشاركة كشف الحساب"))
+    }
+
+    fun createAndShareArabicPdf(context: Context, text: String, fontName: String = "Amiri-Regular.ttf") {
+        // 1. إنشاء مستند PDF
+        val document = PDDocument()
+        val page = PDPage(PDRectangle.A4)
+        document.addPage(page)
+
+        // 2. تحميل الخط العربي من assets/fonts
+        val fontStream = context.assets.open("fonts/Amiri-1.002/$fontName")
+        val font = PDType0Font.load(document, fontStream)
+
+        // 3. كتابة النص العربي
+        val contentStream = PDPageContentStream(document, page)
+        contentStream.beginText()
+        contentStream.setFont(font, 18f)
+        // حدد مكان النص (x, y)
+        contentStream.newLineAtOffset(50f, 750f)
+        contentStream.showText(text)
+        contentStream.endText()
+        contentStream.close()
+
+        // 4. حفظ الملف في cache
+        val file = File(context.cacheDir, "arabic_report.pdf")
+        document.save(file)
+        document.close()
+
+        // 5. مشاركة الملف
+        val uri: Uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.provider",
+            file
+        )
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "application/pdf"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        context.startActivity(Intent.createChooser(shareIntent, "مشاركة PDF"))
     }
 } 
