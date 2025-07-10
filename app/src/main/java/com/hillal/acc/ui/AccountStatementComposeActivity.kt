@@ -884,7 +884,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                         object : PrintDocumentAdapter.WriteResultCallback() {
                             override fun onWriteFinished(pages: Array<PageRange>) {
                                 pdfFileDescriptor.close()
-                                sharePdfFile(file)
+                                sharePdfFile(context, file)
                             }
                         }
                     )
