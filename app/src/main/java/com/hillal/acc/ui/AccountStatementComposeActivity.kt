@@ -184,7 +184,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                             modifier = Modifier.size(dimensions.iconSize)
                         )
                     }
-                    IconButton(onClick = { shareReportAsPdf() }) {
+                    IconButton(onClick = { shareReportAsPdf(transactions) }) {
                         Icon(
                             imageVector = Icons.Default.Share,
                             contentDescription = "مشاركة",
@@ -629,10 +629,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
         }
     }
 
-    private fun shareReportAsPdf() {
+    private fun shareReportAsPdf(transactions: List<Transaction>) {
         if (selectedAccount != null) {
             try {
-                // فلترة المعاملات حسب الحساب، العملة، والتواريخ
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
                 val startDateObj = dateFormat.parse(startDate)
                 val endDateObj = dateFormat.parse(endDate)
