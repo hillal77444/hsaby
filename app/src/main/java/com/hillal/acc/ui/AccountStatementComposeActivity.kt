@@ -59,6 +59,7 @@ import android.print.PrintAttributes
 import android.os.ParcelFileDescriptor
 import java.io.FileOutputStream
 import com.itextpdf.text.BaseColor
+import io.github.seen_arabic.arabicservices.ArabicReshaper
 
 class AccountStatementComposeActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -719,14 +720,20 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val fontCredit = Font(Font.FontFamily.HELVETICA, 13f, Font.NORMAL, BaseColor(0x38, 0x8E, 0x3C)) // أخضر
 
         // عنوان التقرير
-        val title = Paragraph("كشف الحساب التفصيلي", fontTitle)
+        val reshapedTitle = ArabicReshaper.reshape("كشف الحساب التفصيلي")
+        val title = Paragraph(reshapedTitle, fontTitle)
         title.alignment = Element.ALIGN_CENTER
         document.add(title)
         document.add(Paragraph(" "))
 
         // معلومات الحساب
-        val info = "اسم الحساب: ${account.name}   |   رقم الهاتف: ${account.phoneNumber}   |   الفترة: من $startDate إلى $endDate" +
-            (if (selectedCurrency != null) "   |   العملة: $selectedCurrency" else "")
+        val reshapedAccountName = ArabicReshaper.reshape(account.name)
+        val reshapedPhoneNumber = ArabicReshaper.reshape(account.phoneNumber)
+        val reshapedStartDate = ArabicReshaper.reshape(startDate)
+        val reshapedEndDate = ArabicReshaper.reshape(endDate)
+        val reshapedCurrency = ArabicReshaper.reshape(selectedCurrency ?: "")
+        val info = "اسم الحساب: $reshapedAccountName   |   رقم الهاتف: $reshapedPhoneNumber   |   الفترة: من $reshapedStartDate إلى $reshapedEndDate" +
+            (if (selectedCurrency != null) "   |   العملة: $reshapedCurrency" else "")
         val infoPara = Paragraph(info, fontNormal)
         infoPara.alignment = Element.ALIGN_RIGHT
         document.add(infoPara)
@@ -777,6 +784,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         for (tx in filteredTxs) {
             val dateStr = displayDateFormat.format(Date(tx.createdAt)) // أصلح هنا: حول Long إلى Date
             val desc = tx.description ?: ""
+            val reshapedDesc = ArabicReshaper.reshape(desc)
             val debit = if (tx.type == "debit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
             val credit = if (tx.type == "credit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
             val debitCell = PdfPCell(Paragraph(debit, fontDebit))
@@ -790,7 +798,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
             }
             val row = listOf(
                 PdfPCell(Paragraph(dateStr, fontNormal)),
-                PdfPCell(Paragraph(desc, fontNormal)),
+                PdfPCell(Paragraph(reshapedDesc, fontNormal)),
                 debitCell,
                 creditCell,
                 PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", balance), fontNormal))

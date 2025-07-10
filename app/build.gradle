@@ -161,4 +161,5 @@ dependencies {
 
     implementation 'androidx.annotation:annotation:1.7.1'
     implementation 'com.itextpdf:itextg:5.5.10'
+    implementation 'io.github.seen-arabic:arabic-services:1.0.1'
 } 
