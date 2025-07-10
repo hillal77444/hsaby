@@ -82,8 +82,6 @@ public class BetterArabicReshaper {
                 sb.append(getForm(curr, 3)); // medial
             }
         }
-        // معالجة اتجاه النص (Bidi)
-        Bidi bidi = new Bidi(sb.toString(), Bidi.DIRECTION_RIGHT_TO_LEFT);
-        return bidi.writeReordered(Bidi.DO_MIRRORING);
+        return sb.toString();
     }
 } 
