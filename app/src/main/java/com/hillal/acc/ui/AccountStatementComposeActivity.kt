@@ -51,6 +51,10 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import androidx.core.content.FileProvider
 import com.hillal.acc.ui.common.AccountPickerField
+import com.itextpdf.text.Document
+import com.itextpdf.text.pdf.PdfWriter
+import com.itextpdf.tool.xml.XMLWorkerHelper
+import java.io.StringReader
 
 class AccountStatementComposeActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -628,7 +632,8 @@ class AccountStatementComposeActivity : ComponentActivity() {
     private fun shareReportAsPdf() {
         if (webView != null && selectedAccount != null) {
             try {
-                createPdfAndShareFromWebView()
+                // استخدم HTML الحالي للتقرير
+                shareReportHtmlAsPdf(reportHtml)
             } catch (e: Exception) {
                 Toast.makeText(this, "خطأ في مشاركة التقرير: ${e.message}", Toast.LENGTH_SHORT).show()
             }
@@ -637,86 +642,23 @@ class AccountStatementComposeActivity : ComponentActivity() {
         }
     }
 
-    private fun createPdfAndShareFromWebView() {
-        val printAdapter = webView.createPrintDocumentAdapter("كشف الحساب")
-        val fileName = "account_statement_${System.currentTimeMillis()}.pdf"
-        val pdfFile = File(cacheDir, fileName)
-        val printAttributes = android.print.PrintAttributes.Builder()
-            .setMediaSize(android.print.PrintAttributes.MediaSize.ISO_A4)
-            .setResolution(android.print.PrintAttributes.Resolution("pdf", "pdf", 600, 600))
-            .setMinMargins(android.print.PrintAttributes.Margins.NO_MARGINS)
-            .build()
-
-        val pdfWriteJob = object : android.print.PrintDocumentAdapter.WriteResultCallback() {
-            override fun onWriteFinished(pages: Array<android.print.PageRange>) {
-                sharePdfFile(pdfFile)
-            }
-        }
-
-        val fileDescriptor = android.os.ParcelFileDescriptor.open(pdfFile, android.os.ParcelFileDescriptor.MODE_TRUNCATE or android.os.ParcelFileDescriptor.MODE_READ_WRITE or android.os.ParcelFileDescriptor.MODE_CREATE)
-        printAdapter.onLayout(null, printAttributes, null, object : android.print.PrintDocumentAdapter.LayoutResultCallback() {
-            override fun onLayoutFinished(info: android.print.PrintDocumentInfo?, changed: Boolean) {
-                printAdapter.onWrite(arrayOf(android.print.PageRange.ALL_PAGES), fileDescriptor, null, pdfWriteJob)
-            }
-        }, null)
-    }
-
-    private fun createPdfFromWebView(): File? {
-        return try {
-            val webView = webView ?: return null
-            
-            // انتظار تحميل الصفحة
-            webView.webViewClient = object : WebViewClient() {
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    super.onPageFinished(view, url)
-                    // إنشاء PDF بعد تحميل الصفحة
-                    createPdfDocument()
-                }
-            }
-            
-            // إعادة تحميل الصفحة لضمان تحديث المحتوى
-            webView.reload()
-            
-            // إنشاء ملف مؤقت
-            val pdfFile = File(cacheDir, "account_statement_${System.currentTimeMillis()}.pdf")
-            pdfFile
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    private fun createPdfDocument() {
-        val webView = webView ?: return
-        
+    private fun shareReportHtmlAsPdf(html: String) {
         try {
-            // إنشاء PDF Document
-            val pdfDocument = PdfDocument()
-            
-            // الحصول على أبعاد WebView
-            val width = webView.width
-            val height = webView.height
-            
-            if (width > 0 && height > 0) {
-                // إنشاء صفحة PDF
-                val pageInfo = PdfDocument.PageInfo.Builder(width, height, 1).create()
-                val page = pdfDocument.startPage(pageInfo)
-                
-                // رسم WebView على صفحة PDF
-                val canvas = page.canvas
-                webView.draw(canvas)
-                
-                pdfDocument.finishPage(page)
-                
-                // حفظ PDF في ملف
-                val pdfFile = File(cacheDir, "account_statement_${System.currentTimeMillis()}.pdf")
-                val outputStream = FileOutputStream(pdfFile)
-                pdfDocument.writeTo(outputStream)
-                pdfDocument.close()
-                outputStream.close()
-                
-                // مشاركة الملف
-                sharePdfFile(pdfFile)
-            }
+            val pdfFile = File(cacheDir, "account_statement_${System.currentTimeMillis()}.pdf")
+            val document = Document()
+            val outputStream = FileOutputStream(pdfFile)
+            val writer = PdfWriter.getInstance(document, outputStream)
+            document.open()
+            val css = "" // يمكن إضافة CSS خارجي إذا رغبت
+            XMLWorkerHelper.getInstance().parseXHtml(
+                writer,
+                document,
+                StringReader(html),
+                StringReader(css)
+            )
+            document.close()
+            outputStream.close()
+            sharePdfFile(pdfFile)
         } catch (e: Exception) {
             Toast.makeText(this, "خطأ في إنشاء PDF: ${e.message}", Toast.LENGTH_SHORT).show()
         }
