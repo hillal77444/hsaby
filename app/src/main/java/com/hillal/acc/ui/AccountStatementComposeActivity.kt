@@ -636,6 +636,18 @@ class AccountStatementComposeActivity : ComponentActivity() {
     }
 
     // أضف الدالة الجديدة لمشاركة PDF من WebView مباشرة
+    class MyLayoutResultCallback(val onFinish: () -> Unit) : PrintDocumentAdapter.LayoutResultCallback() {
+        override fun onLayoutFinished(info: PrintDocumentInfo?, changed: Boolean) {
+            onFinish()
+        }
+    }
+
+    class MyWriteResultCallback(val onFinish: () -> Unit) : PrintDocumentAdapter.WriteResultCallback() {
+        override fun onWriteFinished(pages: Array<PageRange>) {
+            onFinish()
+        }
+    }
+
     fun exportWebViewToPdfAndShare(webView: WebView, context: Context, accountName: String, startDate: String, endDate: String) {
         val safeAccountName = accountName.replace(Regex("[^\u0600-\u06FFa-zA-Z0-9_]"), "_")
         val fileName = "كشف_حساب_${safeAccountName}_${startDate}_${endDate}.pdf"
@@ -652,21 +664,16 @@ class AccountStatementComposeActivity : ComponentActivity() {
 
         printAdapter.onLayout(
             null, printAttributes, null,
-            object : PrintDocumentAdapter.LayoutResultCallback() {
-                override fun onLayoutFinished(info: PrintDocumentInfo?, changed: Boolean) {
-                    printAdapter.onWrite(
-                        arrayOf(PageRange.ALL_PAGES),
-                        pdfFileDescriptor,
-                        null,
-                        object : PrintDocumentAdapter.WriteResultCallback() {
-                            override fun onWriteFinished(pages: Array<PageRange>) {
-                                pdfFileDescriptor.close()
-                                // مشاركة الملف بعد توليده
-                                sharePdfFile(context, file)
-                            }
-                        }
-                    )
-                }
+            MyLayoutResultCallback {
+                printAdapter.onWrite(
+                    arrayOf(PageRange.ALL_PAGES),
+                    pdfFileDescriptor,
+                    null,
+                    MyWriteResultCallback {
+                        pdfFileDescriptor.close()
+                        sharePdfFile(context, file)
+                    }
+                )
             }, null
         )
     }
