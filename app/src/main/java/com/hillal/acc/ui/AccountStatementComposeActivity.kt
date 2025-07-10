@@ -705,7 +705,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
 
         // تحميل الخط العربي
         val fontStream = context.assets.open("fonts/Amiri-1.002/Amiri-Regular.ttf")
-        val font = PDType0Font.load(document, fontStream)
+        val font = PDType0Font.load(document, fontStream, true)
 
         var contentStream = PDPageContentStream(document, page)
         contentStream.setFont(font, 14f)
@@ -882,7 +882,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
 
         // 2. تحميل الخط العربي من assets/fonts
         val fontStream = context.assets.open("fonts/Amiri-1.002/$fontName")
-        val font = PDType0Font.load(document, fontStream)
+        val font = PDType0Font.load(document, fontStream, true)
 
         // 3. كتابة النص العربي
         val contentStream = PDPageContentStream(document, page)
