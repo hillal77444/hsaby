@@ -58,7 +58,7 @@ import android.print.PrintAttributes
 import android.os.ParcelFileDescriptor
 import java.io.FileOutputStream
 import com.itextpdf.text.BaseColor
-import io.github.seenarabic.arabicservices.ArabicReshaper
+import com.hillal.acc.util.ArabicReshaper
 
 class AccountStatementComposeActivity : ComponentActivity() {
     private lateinit var webView: WebView
