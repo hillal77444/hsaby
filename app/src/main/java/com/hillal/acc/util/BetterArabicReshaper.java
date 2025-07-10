@@ -1,5 +1,7 @@
 package com.hillal.acc.util;
 
+import java.text.Bidi;
+
 public class BetterArabicReshaper {
     // كود ربط الحروف العربية (مقتبس من Better-Arabic-Reshaper - نسخة مبسطة)
     // يدعم معظم الحروف العربية الشائعة ويكفي للتقارير المالية
@@ -80,6 +82,8 @@ public class BetterArabicReshaper {
                 sb.append(getForm(curr, 3)); // medial
             }
         }
-        return sb.toString();
+        // معالجة اتجاه النص (Bidi)
+        Bidi bidi = new Bidi(sb.toString(), Bidi.DIRECTION_RIGHT_TO_LEFT);
+        return bidi.writeReordered(Bidi.DO_MIRRORING);
     }
 } 
