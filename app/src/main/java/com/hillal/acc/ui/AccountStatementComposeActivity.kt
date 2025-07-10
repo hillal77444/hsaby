@@ -859,40 +859,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
         }
     }
 
-    fun exportWebViewToPdfAndShare(webView: WebView, context: Context, accountName: String, startDate: String, endDate: String) {
-        val safeAccountName = accountName.replace(Regex("[^\u0600-\u06FFa-zA-Z0-9_]"), "_")
-        val fileName = "كشف_حساب_${safeAccountName}_${startDate}_${endDate}.pdf"
-        val file = File(context.cacheDir, fileName)
-
-        val printAdapter = webView.createPrintDocumentAdapter(fileName)
-        val printAttributes = PrintAttributes.Builder()
-            .setMediaSize(PrintAttributes.MediaSize.ISO_A4)
-            .setResolution(PrintAttributes.Resolution("pdf", "pdf", 600, 600))
-            .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
-            .build()
-
-        val pdfFileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_WRITE)
-
-        printAdapter.onLayout(
-            null, printAttributes, null,
-            object : PrintDocumentAdapter.LayoutResultCallback() {
-                override fun onLayoutFinished(info: PrintDocumentInfo?, changed: Boolean) {
-                    printAdapter.onWrite(
-                        arrayOf(PageRange.ALL_PAGES),
-                        pdfFileDescriptor,
-                        null,
-                        object : PrintDocumentAdapter.WriteResultCallback() {
-                            override fun onWriteFinished(pages: Array<PageRange>) {
-                                pdfFileDescriptor.close()
-                                sharePdfFile(context, file)
-                            }
-                        }
-                    )
-                }
-            }, null
-        )
-    }
-
     // تعريف دالة مشاركة ملف PDF إذا لم تكن موجودة
     fun sharePdfFile(context: Context, file: File) {
         val uri = FileProvider.getUriForFile(
