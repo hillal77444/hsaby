@@ -676,7 +676,11 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 )
                 sharePdfFile(pdfFile)
             } catch (e: Exception) {
-                Toast.makeText(this, "خطأ في مشاركة التقرير: ${e.message}", Toast.LENGTH_SHORT).show()
+                val errorMsg = "خطأ في مشاركة التقرير: ${e.message}\n${e.stackTraceToString()}"
+                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                val clip = android.content.ClipData.newPlainText("Error", errorMsg)
+                clipboard.setPrimaryClip(clip)
+                Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show()
             }
         } else {
             Toast.makeText(this, "يرجى اختيار حساب أولاً", Toast.LENGTH_SHORT).show()
@@ -855,7 +859,11 @@ class AccountStatementComposeActivity : ComponentActivity() {
             }
             startActivity(Intent.createChooser(shareIntent, "مشاركة كشف الحساب"))
         } catch (e: Exception) {
-            Toast.makeText(this, "خطأ في مشاركة الملف: ${e.message}", Toast.LENGTH_SHORT).show()
+            val errorMsg = "خطأ في مشاركة الملف: ${e.message}\n${e.stackTraceToString()}"
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            val clip = android.content.ClipData.newPlainText("Error", errorMsg)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show()
         }
     }
 
