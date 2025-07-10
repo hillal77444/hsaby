@@ -41,14 +41,6 @@ import com.hillal.acc.viewmodel.TransactionViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 import java.io.File
-import java.io.FileOutputStream
-import android.graphics.pdf.PdfDocument
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.view.View
-import android.webkit.WebViewClient
-import android.webkit.WebResourceRequest
-import android.webkit.WebSettings
 import androidx.core.content.FileProvider
 import com.hillal.acc.ui.common.AccountPickerField
 import android.print.PrintAttributes
@@ -641,83 +633,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
             val printAdapter = webView.createPrintDocumentAdapter("كشف الحساب")
             printManager.print("كشف الحساب", printAdapter, null)
         }
-    }
-
-    private fun shareReportAsPdf(
-        selectedAccount: Account?,
-        startDate: String,
-        endDate: String,
-        selectedCurrency: String?,
-        transactions: List<Transaction>
-    ) {
-        if (selectedAccount != null) {
-            try {
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
-                val startDateObj = dateFormat.parse(startDate)
-                val endDateObj = dateFormat.parse(endDate)
-                val filteredTransactions = transactions.filter { tx ->
-                    tx.accountId == selectedAccount.id &&
-                    (selectedCurrency == null || tx.currency == selectedCurrency) &&
-                    Date(tx.createdAt) >= startDateObj && Date(tx.createdAt) <= endDateObj
-                }.sortedBy { it.createdAt }
-                // حساب الرصيد السابق قبل الفترة
-                val previousBalance = transactions.filter { tx ->
-                    tx.accountId == selectedAccount.id &&
-                    (selectedCurrency == null || tx.currency == selectedCurrency) &&
-                    Date(tx.createdAt) < startDateObj
-                }.fold(0.0) { acc, tx ->
-                    when (tx.type) {
-                        "debit" -> acc - tx.amount
-                        "credit" -> acc + tx.amount
-                        else -> acc
-                    }
-                }
-                // توليد HTML بالترتيب الصحيح
-                val html = generateReportHtml(selectedAccount, startDateObj, endDateObj, filteredTransactions, previousBalance)
-                // اسم الملف
-                val safeAccountName = selectedAccount.name.replace(Regex("[^\u0600-\u06FFa-zA-Z0-9_]"), "_")
-                val fileName = "كشف_حساب_${safeAccountName}_${startDate}_${endDate}.pdf"
-                val pdfFile = File(cacheDir, fileName)
-                // توليد PDF من HTML
-                generatePdfFromHtml(html, pdfFile, this)
-                sharePdfFile(this, pdfFile)
-            } catch (e: Exception) {
-                Toast.makeText(this, "خطأ في مشاركة التقرير: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            Toast.makeText(this, "يرجى اختيار حساب أولاً", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    fun generatePdfFromHtml(html: String, outputFile: File, context: Context) {
-        val printAdapter = webView.createPrintDocumentAdapter("كشف الحساب")
-        val printAttributes = PrintAttributes.Builder()
-            .setMediaSize(PrintAttributes.MediaSize.ISO_A4)
-            .setResolution(PrintAttributes.Resolution("pdf", "pdf", 600, 600))
-            .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
-            .build()
-
-        val pdfFileDescriptor = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_WRITE)
-
-        printAdapter.onLayout(
-            null, printAttributes, null,
-            object : PrintDocumentAdapter.LayoutResultCallback() {
-                override fun onLayoutFinished(info: PrintDocumentInfo?, changed: Boolean) {
-                    printAdapter.onWrite(
-                        arrayOf(PageRange.ALL_PAGES),
-                        pdfFileDescriptor,
-                        null,
-                        object : PrintDocumentAdapter.WriteResultCallback() {
-                            override fun onWriteFinished(pages: Array<PageRange>) {
-                                pdfFileDescriptor.close()
-                                // مشاركة الملف بعد توليده
-                                sharePdfFile(context, outputFile)
-                            }
-                        }
-                    )
-                }
-            }, null
-        )
     }
 
     // أضف الدالة الجديدة لمشاركة PDF من WebView مباشرة
