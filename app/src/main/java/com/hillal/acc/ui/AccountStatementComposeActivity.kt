@@ -611,8 +611,8 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     <tr>
                         <th>التاريخ</th>
                         <th>الوصف</th>
-                        <th>مدين</th>
-                        <th>دائن</th>
+                        <th>عليه</th>
+                        <th>له</th>
                         <th>الرصيد</th>
                     </tr>
                 </thead>
@@ -623,11 +623,11 @@ class AccountStatementComposeActivity : ComponentActivity() {
             <div class="summary">
                 <h3 style="font-size:1.05em; margin-bottom:8px;">ملخص الحساب</h3>
                 <div class="summary-row">
-                    <span class="summary-label">إجمالي المدينين:</span>
+                    <span class="summary-label">إجمالي عليه:</span>
                     <span class="summary-value debit">${String.format(Locale.ENGLISH, "%.2f", totalDebit)}</span>
                 </div>
                 <div class="summary-row">
-                    <span class="summary-label">إجمالي الدائنين:</span>
+                    <span class="summary-label">إجمالي له:</span>
                     <span class="summary-value credit">${String.format(Locale.ENGLISH, "%.2f", totalCredit)}</span>
                 </div>
                 <div class="summary-row">
@@ -815,13 +815,13 @@ class AccountStatementComposeActivity : ComponentActivity() {
         summaryTable.horizontalAlignment = com.itextpdf.text.Element.ALIGN_RIGHT
         summaryTable.setWidths(floatArrayOf(2f, 2f))
         summaryTable.runDirection = PdfWriter.RUN_DIRECTION_RTL
-        val debitLabelCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("إجمالي المدينين:", summaryLabelFont))
+        val debitLabelCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("إجمالي عليه:", summaryLabelFont))
         debitLabelCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
         summaryTable.addCell(debitLabelCell)
         val debitValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", totalDebit), debitFont))
         debitValueCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
         summaryTable.addCell(debitValueCell)
-        val creditLabelCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("إجمالي الدائنين:", summaryLabelFont))
+        val creditLabelCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("إجمالي له:", summaryLabelFont))
         creditLabelCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
         summaryTable.addCell(creditLabelCell)
         val creditValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", totalCredit), creditFont))
@@ -836,7 +836,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         document.add(summaryTable)
 
         document.close()
-        outputStream.close()
+                 outputStream.close()
         return pdfFile
     }
 
