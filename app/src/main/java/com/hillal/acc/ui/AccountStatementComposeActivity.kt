@@ -50,6 +50,7 @@ import android.webkit.WebViewClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import androidx.core.content.FileProvider
+import com.hillal.acc.ui.common.AccountPickerField
 
 class AccountStatementComposeActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -102,6 +103,23 @@ class AccountStatementComposeActivity : ComponentActivity() {
         var showEndDatePicker by remember { mutableStateOf(false) }
         var reportHtml by remember { mutableStateOf("") }
         
+        // حساب أرصدة العملات لكل حساب
+        val balancesMap = remember(transactions) {
+            accounts.associate { account ->
+                val txs = transactions.filter { it.accountId == account.id }
+                val currencyMap = txs.groupBy { it.currency ?: "" }.mapValues { (_, txs) ->
+                    txs.fold(0.0) { acc, tx ->
+                        when (tx.type) {
+                            "debit" -> acc - tx.amount
+                            "credit" -> acc + tx.amount
+                            else -> acc
+                        }
+                    }
+                }
+                account.id to currencyMap
+            }
+        }
+
         // تحديث التقرير عند تغيير البيانات
         LaunchedEffect(selectedAccountState, startDateState, endDateState, selectedCurrencyState, transactions) {
             if (selectedAccountState != null) {
@@ -195,47 +213,15 @@ class AccountStatementComposeActivity : ComponentActivity() {
                         modifier = Modifier.padding(dimensions.spacingMedium)
                     ) {
                         // اختيار الحساب
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AccountCircle,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(dimensions.iconSize * 0.7f)
-                            )
-                            Spacer(modifier = Modifier.width(dimensions.spacingSmall))
-                            Text(
-                                text = "اختر الحساب",
-                                fontSize = dimensions.bodyFont * 0.9f,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        
-                        Spacer(modifier = Modifier.height(dimensions.spacingSmall))
-                        
-                        // زر اختيار الحساب
-                        OutlinedButton(
-                            onClick = { showAccountPicker = true },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(dimensions.cardCorner * 0.5f),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                containerColor = Color(0xFFF5F5F5)
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AccountCircle,
-                                contentDescription = null,
-                                modifier = Modifier.size(dimensions.iconSize * 0.6f)
-                            )
-                            Spacer(modifier = Modifier.width(dimensions.spacingSmall))
-                            Text(
-                                text = selectedAccountState?.name ?: "اختر الحساب",
-                                fontSize = dimensions.bodyFont * 0.85f
-                            )
-                        }
+                        AccountPickerField(
+                            label = "الحساب",
+                            accounts = accounts,
+                            transactions = transactions,
+                            balancesMap = balancesMap,
+                            selectedAccount = selectedAccountState,
+                            onAccountSelected = { selectedAccountState = it },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                         
                         Spacer(modifier = Modifier.height(dimensions.spacingSmall))
                         
@@ -437,18 +423,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
             }
         }
         
-        // عرض اختيار الحساب
-        if (showAccountPicker) {
-            AccountPickerDialog(
-                accounts = accounts,
-                onAccountSelected = { account ->
-                    selectedAccountState = account
-                    showAccountPicker = false
-                },
-                onDismiss = { showAccountPicker = false }
-            )
-        }
-        
         // عرض اختيار تاريخ البداية
         if (showStartDatePicker) {
             DatePickerDialog(
@@ -476,64 +450,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
             ).show()
         }
-    }
-
-    @Composable
-    fun AccountPickerDialog(
-        accounts: List<Account>,
-        onAccountSelected: (Account) -> Unit,
-        onDismiss: () -> Unit
-    ) {
-        val dimensions = LocalResponsiveDimensions.current
-        
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = {
-                Text(
-                    text = "اختر الحساب",
-                    fontSize = dimensions.titleFont,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                LazyColumn {
-                    items(accounts) { account ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onAccountSelected(account) }
-                                .padding(dimensions.spacingMedium),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AccountCircle,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(dimensions.iconSize)
-                            )
-                            Spacer(modifier = Modifier.width(dimensions.spacingSmall))
-                            Column {
-                                Text(
-                                    text = account.name,
-                                    fontSize = dimensions.bodyFont,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = account.phoneNumber,
-                                    fontSize = dimensions.bodyFont * 0.8f,
-                                    color = Color(0xFF666666)
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = onDismiss) {
-                    Text("إلغاء")
-                }
-            }
-        )
     }
 
     private fun updateReport(
