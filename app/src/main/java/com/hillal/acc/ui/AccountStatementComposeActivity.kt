@@ -711,29 +711,32 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val writer = PdfWriter.getInstance(document, FileOutputStream(pdfFile))
         document.open()
 
-        // ملاحظة: دعم العربية في iTextG محدود جداً، الحروف قد تظهر منفصلة
-        val fontTitle = Font(Font.FontFamily.HELVETICA, 18f, Font.BOLD)
-        val fontNormal = Font(Font.FontFamily.HELVETICA, 13f, Font.NORMAL)
-        val fontHeader = Font(Font.FontFamily.HELVETICA, 13f, Font.BOLD, BaseColor.WHITE)
-        val fontDebit = Font(Font.FontFamily.HELVETICA, 13f, Font.NORMAL, BaseColor(0xD3, 0x2F, 0x2F)) // أحمر
-        val fontCredit = Font(Font.FontFamily.HELVETICA, 13f, Font.NORMAL, BaseColor(0x38, 0x8E, 0x3C)) // أخضر
+        // تحميل خط Amiri من assets
+        val amiriFontFile = File(context.cacheDir, "Amiri-Regular.ttf")
+        if (!amiriFontFile.exists()) {
+            context.assets.open("fonts/Amiri-1.002/Amiri-Regular.ttf").use { input ->
+                amiriFontFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+        }
+        val amiriBaseFont = com.itextpdf.text.pdf.BaseFont.createFont(amiriFontFile.absolutePath, com.itextpdf.text.pdf.BaseFont.IDENTITY_H, com.itextpdf.text.pdf.BaseFont.EMBEDDED)
+        val fontAmiri = com.itextpdf.text.Font(amiriBaseFont, 13f, com.itextpdf.text.Font.NORMAL)
+        val fontAmiriBold = com.itextpdf.text.Font(amiriBaseFont, 15f, com.itextpdf.text.Font.BOLD)
+        val fontHeader = com.itextpdf.text.Font(amiriBaseFont, 13f, com.itextpdf.text.Font.BOLD, BaseColor.WHITE)
+        val fontDebit = com.itextpdf.text.Font(amiriBaseFont, 13f, com.itextpdf.text.Font.NORMAL, BaseColor(0xD3, 0x2F, 0x2F))
+        val fontCredit = com.itextpdf.text.Font(amiriBaseFont, 13f, com.itextpdf.text.Font.NORMAL, BaseColor(0x38, 0x8E, 0x3C))
 
         // عنوان التقرير
-        val reshapedTitle = ArabicReshaper.reshape("كشف الحساب التفصيلي")
-        val title = Paragraph(reshapedTitle, fontTitle)
+        val title = Paragraph(ArabicReshaper.reshape("كشف الحساب التفصيلي"), fontAmiriBold)
         title.alignment = Element.ALIGN_CENTER
         document.add(title)
         document.add(Paragraph(" "))
 
         // معلومات الحساب
-        val reshapedAccountName = ArabicReshaper.reshape(account.name)
-        val reshapedPhoneNumber = ArabicReshaper.reshape(account.phoneNumber)
-        val reshapedStartDate = ArabicReshaper.reshape(startDate)
-        val reshapedEndDate = ArabicReshaper.reshape(endDate)
-        val reshapedCurrency = ArabicReshaper.reshape(selectedCurrency ?: "")
-        val info = "اسم الحساب: $reshapedAccountName   |   رقم الهاتف: $reshapedPhoneNumber   |   الفترة: من $reshapedStartDate إلى $reshapedEndDate" +
-            (if (selectedCurrency != null) "   |   العملة: $reshapedCurrency" else "")
-        val infoPara = Paragraph(info, fontNormal)
+        val info = "اسم الحساب: ${ArabicReshaper.reshape(account.name)}   |   رقم الهاتف: ${account.phoneNumber}   |   الفترة: من ${startDate} إلى ${endDate}" +
+            (if (selectedCurrency != null) "   |   العملة: ${ArabicReshaper.reshape(selectedCurrency)}" else "")
+        val infoPara = Paragraph(info, fontAmiri)
         infoPara.alignment = Element.ALIGN_RIGHT
         document.add(infoPara)
         document.add(Paragraph(" "))
@@ -744,7 +747,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         table.setWidths(floatArrayOf(2f, 5f, 2f, 2f, 2f))
         val headers = listOf("التاريخ", "الوصف", "عليه", "له", "الرصيد")
         for (h in headers) {
-            val cell = PdfPCell(Paragraph(h, fontHeader))
+            val cell = PdfPCell(Paragraph(ArabicReshaper.reshape(h), fontHeader))
             cell.horizontalAlignment = Element.ALIGN_CENTER
             cell.backgroundColor = BaseColor(0x19, 0x76, 0xD2) // أزرق
             table.addCell(cell)
@@ -765,9 +768,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
         var totalCredit = 0.0
 
         // صف الرصيد السابق
-        val prevRow = listOf("", "الرصيد السابق", "", "", String.format(Locale.ENGLISH, "%.2f", previousBalance))
+        val prevRow = listOf("", ArabicReshaper.reshape("الرصيد السابق"), "", "", String.format(Locale.ENGLISH, "%.2f", previousBalance))
         for (cellText in prevRow) {
-            val cell = PdfPCell(Paragraph(cellText, fontNormal))
+            val cell = PdfPCell(Paragraph(cellText, fontAmiri))
             cell.horizontalAlignment = Element.ALIGN_CENTER
             cell.colspan = 1
             cell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
@@ -781,9 +784,8 @@ class AccountStatementComposeActivity : ComponentActivity() {
         }.sortedBy { it.createdAt }
 
         for (tx in filteredTxs) {
-            val dateStr = displayDateFormat.format(Date(tx.createdAt)) // أصلح هنا: حول Long إلى Date
+            val dateStr = displayDateFormat.format(Date(tx.createdAt))
             val desc = tx.description ?: ""
-            val reshapedDesc = ArabicReshaper.reshape(desc)
             val debit = if (tx.type == "debit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
             val credit = if (tx.type == "credit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
             val debitCell = PdfPCell(Paragraph(debit, fontDebit))
@@ -796,11 +798,11 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 totalCredit += tx.amount
             }
             val row = listOf(
-                PdfPCell(Paragraph(dateStr, fontNormal)),
-                PdfPCell(Paragraph(reshapedDesc, fontNormal)),
+                PdfPCell(Paragraph(dateStr, fontAmiri)),
+                PdfPCell(Paragraph(ArabicReshaper.reshape(desc), fontAmiri)),
                 debitCell,
                 creditCell,
-                PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", balance), fontNormal))
+                PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", balance), fontAmiri))
             )
             for (cell in row) {
                 cell.horizontalAlignment = Element.ALIGN_CENTER
@@ -813,9 +815,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
 
         // ملخص الحساب
         val summary = listOf(
-            "إجمالي عليه: ${String.format(Locale.ENGLISH, "%.2f", totalDebit)}",
-            "إجمالي له: ${String.format(Locale.ENGLISH, "%.2f", totalCredit)}",
-            "الرصيد النهائي: ${String.format(Locale.ENGLISH, "%.2f", balance)}"
+            ArabicReshaper.reshape("إجمالي عليه: ") + String.format(Locale.ENGLISH, "%.2f", totalDebit),
+            ArabicReshaper.reshape("إجمالي له: ") + String.format(Locale.ENGLISH, "%.2f", totalCredit),
+            ArabicReshaper.reshape("الرصيد النهائي: ") + String.format(Locale.ENGLISH, "%.2f", balance)
         )
         for (s in summary) {
             val para = Paragraph(s, fontHeader)
