@@ -58,6 +58,8 @@
 -keep class com.tom_roush.pdfbox.pdmodel.** { *; }
 -keep class com.tom_roush.pdfbox.cos.** { *; }
 -keep class com.tom_roush.pdfbox.util.** { *; }
+-dontwarn com.gemalto.jp2.**
+-keep class com.tom_roush.pdfbox.filter.JPXFilter { *; }
 
 # Keep image processing libraries
 -keep class com.gemalto.jp2.** { *; }
