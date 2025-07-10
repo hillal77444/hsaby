@@ -662,8 +662,20 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     (selectedCurrency == null || tx.currency == selectedCurrency) &&
                     Date(tx.createdAt) >= startDateObj && Date(tx.createdAt) <= endDateObj
                 }.sortedBy { it.createdAt }
-                // توليد HTML بنفس طريقة WebView
-                val html = generateReportHtml(selectedAccount, startDateObj, endDateObj, selectedCurrency, filteredTransactions)
+                // حساب الرصيد السابق قبل الفترة
+                val previousBalance = transactions.filter { tx ->
+                    tx.accountId == selectedAccount.id &&
+                    (selectedCurrency == null || tx.currency == selectedCurrency) &&
+                    Date(tx.createdAt) < startDateObj
+                }.fold(0.0) { acc, tx ->
+                    when (tx.type) {
+                        "debit" -> acc - tx.amount
+                        "credit" -> acc + tx.amount
+                        else -> acc
+                    }
+                }
+                // توليد HTML بالترتيب الصحيح
+                val html = generateReportHtml(selectedAccount, startDateObj, endDateObj, filteredTransactions, previousBalance)
                 // اسم الملف
                 val safeAccountName = selectedAccount.name.replace(Regex("[^\u0600-\u06FFa-zA-Z0-9_]"), "_")
                 val fileName = "كشف_حساب_${safeAccountName}_${startDate}_${endDate}.pdf"
@@ -697,5 +709,20 @@ class AccountStatementComposeActivity : ComponentActivity() {
         FileOutputStream(outputFile).use { os ->
             renderer.createPDF(os)
         }
+    }
+
+    // تعريف دالة مشاركة ملف PDF إذا لم تكن موجودة
+    private fun sharePdfFile(pdfFile: File) {
+        val uri = androidx.core.content.FileProvider.getUriForFile(
+            this,
+            "$packageName.provider",
+            pdfFile
+        )
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "application/pdf"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        startActivity(Intent.createChooser(shareIntent, "مشاركة كشف الحساب"))
     }
 } 
