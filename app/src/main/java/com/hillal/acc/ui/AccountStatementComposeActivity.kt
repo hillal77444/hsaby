@@ -711,14 +711,12 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val writer = PdfWriter.getInstance(document, FileOutputStream(pdfFile))
         document.open()
 
-        // تحميل الخط العربي
-        val fontPath = "fonts/Amiri-1.002/Amiri-Regular.ttf"
-        val baseFont = BaseFont.createFont("/assets/$fontPath", BaseFont.IDENTITY_H, BaseFont.EMBEDDED)
-        val fontTitle = Font(baseFont, 18f, Font.BOLD)
-        val fontNormal = Font(baseFont, 13f, Font.NORMAL)
-        val fontHeader = Font(baseFont, 13f, Font.BOLD, BaseColor.WHITE)
-        val fontDebit = Font(baseFont, 13f, Font.NORMAL, BaseColor(0xD3, 0x2F, 0x2F)) // أحمر
-        val fontCredit = Font(baseFont, 13f, Font.NORMAL, BaseColor(0x38, 0x8E, 0x3C)) // أخضر
+        // ملاحظة: دعم العربية في iTextG محدود جداً، الحروف قد تظهر منفصلة
+        val fontTitle = Font(Font.FontFamily.HELVETICA, 18f, Font.BOLD)
+        val fontNormal = Font(Font.FontFamily.HELVETICA, 13f, Font.NORMAL)
+        val fontHeader = Font(Font.FontFamily.HELVETICA, 13f, Font.BOLD, BaseColor.WHITE)
+        val fontDebit = Font(Font.FontFamily.HELVETICA, 13f, Font.NORMAL, BaseColor(0xD3, 0x2F, 0x2F)) // أحمر
+        val fontCredit = Font(Font.FontFamily.HELVETICA, 13f, Font.NORMAL, BaseColor(0x38, 0x8E, 0x3C)) // أخضر
 
         // عنوان التقرير
         val title = Paragraph("كشف الحساب التفصيلي", fontTitle)
@@ -736,7 +734,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
 
         // رؤوس الجدول مع ألوان
         val table = PdfPTable(5)
-        table.runDirection = PdfWriter.RUN_DIRECTION_RTL
         table.widthPercentage = 100f
         table.setWidths(floatArrayOf(2f, 5f, 2f, 2f, 2f))
         val headers = listOf("التاريخ", "الوصف", "عليه", "له", "الرصيد")
@@ -778,7 +775,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         }.sortedBy { it.createdAt }
 
         for (tx in filteredTxs) {
-            val dateStr = displayDateFormat.format(dateFormat.parse(tx.createdAt))
+            val dateStr = displayDateFormat.format(Date(tx.createdAt)) // أصلح هنا: حول Long إلى Date
             val desc = tx.description ?: ""
             val debit = if (tx.type == "debit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
             val credit = if (tx.type == "credit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
@@ -800,7 +797,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
             )
             for (cell in row) {
                 cell.horizontalAlignment = Element.ALIGN_CENTER
-                cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
                 table.addCell(cell)
             }
         }
