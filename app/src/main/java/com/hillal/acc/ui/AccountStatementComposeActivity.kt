@@ -178,7 +178,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                         )
                     }
                     IconButton(onClick = {
-                        exportWebViewToPdfAndShare(webView, this, selectedAccountState?.name ?: "", startDateState, endDateState)
+                        exportWebViewToPdfAndShare(webView, context, selectedAccountState?.name ?: "", startDateState, endDateState)
                     }) {
                         Icon(
                             imageVector = Icons.Default.Share,
