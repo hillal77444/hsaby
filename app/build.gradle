@@ -87,6 +87,7 @@ android {
         exclude 'META-INF/notice.txt'
         exclude 'META-INF/ASL2.0'
         exclude 'META-INF/LICENSE-LGPL-3.txt'
+        exclude 'META-INF/LICENSE-W3C-TEST'
     }
 }
 
