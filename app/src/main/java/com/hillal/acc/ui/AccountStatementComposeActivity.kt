@@ -704,7 +704,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
             cell.backgroundColor = headerBg
             cell.horizontalAlignment = com.itextpdf.text.Element.ALIGN_CENTER
             cell.verticalAlignment = com.itextpdf.text.Element.ALIGN_MIDDLE
-            cell.padding = 6f
+            cell.setPadding(6f)
             table.addCell(cell)
         }
         val displayDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
