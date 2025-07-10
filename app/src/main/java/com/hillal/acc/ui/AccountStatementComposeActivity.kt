@@ -53,7 +53,6 @@ import androidx.core.content.FileProvider
 import com.hillal.acc.ui.common.AccountPickerField
 import com.itextpdf.text.Document
 import com.itextpdf.text.pdf.PdfWriter
-import com.itextpdf.tool.xml.XMLWorkerHelper
 import java.io.StringReader
 
 class AccountStatementComposeActivity : ComponentActivity() {
