@@ -53,6 +53,12 @@ import com.tom_roush.pdfbox.pdmodel.PDPageContentStream
 import com.tom_roush.pdfbox.pdmodel.common.PDRectangle
 import com.tom_roush.pdfbox.pdmodel.font.PDType0Font
 import android.net.Uri
+import android.print.PrintDocumentAdapter
+import android.print.PrintDocumentInfo
+import android.print.PageRange
+import android.print.PrintAttributes
+import android.os.ParcelFileDescriptor
+import java.io.FileOutputStream
 
 class AccountStatementComposeActivity : ComponentActivity() {
     private lateinit var webView: WebView
