@@ -132,3 +132,5 @@
 -keepattributes *Annotation*
 -keepattributes Signature
 -keepattributes Exceptions
+-keep class android.print.** { *; }
+-keep class android.print.PrintDocumentAdapter$* { *; }
