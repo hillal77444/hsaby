@@ -184,8 +184,15 @@ class AccountStatementComposeActivity : ComponentActivity() {
                             modifier = Modifier.size(dimensions.iconSize)
                         )
                     }
+                    // استبدل زر المشاركة ليستخدم shareReportAsPdf مباشرة
                     IconButton(onClick = {
-                        exportWebViewToPdfAndShare(webView, context, selectedAccountState?.name ?: "", startDateState, endDateState)
+                        shareReportAsPdf(
+                            selectedAccountState,
+                            startDateState,
+                            endDateState,
+                            selectedCurrencyState,
+                            transactions
+                        )
                     }) {
                         Icon(
                             imageVector = Icons.Default.Share,
@@ -642,19 +649,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
         }
     }
 
-    // أضف الدالة الجديدة لمشاركة PDF من WebView مباشرة
-    class MyLayoutResultCallback(val onFinish: () -> Unit) : PrintDocumentAdapter.LayoutResultCallback() {
-        override fun onLayoutFinished(info: PrintDocumentInfo?, changed: Boolean) {
-            onFinish()
-        }
-    }
-
-    class MyWriteResultCallback(val onFinish: () -> Unit) : PrintDocumentAdapter.WriteResultCallback() {
-        override fun onWriteFinished(pages: Array<PageRange>) {
-            onFinish()
-        }
-    }
-
     private fun shareReportAsPdf(
         selectedAccount: Account?,
         startDate: String,
@@ -881,16 +875,20 @@ class AccountStatementComposeActivity : ComponentActivity() {
 
         printAdapter.onLayout(
             null, printAttributes, null,
-            MyLayoutResultCallback {
-                printAdapter.onWrite(
-                    arrayOf(PageRange.ALL_PAGES),
-                    pdfFileDescriptor,
-                    null,
-                    MyWriteResultCallback {
-                        pdfFileDescriptor.close()
-                        sharePdfFile(file)
-                    }
-                )
+            object : PrintDocumentAdapter.LayoutResultCallback() {
+                override fun onLayoutFinished(info: PrintDocumentInfo?, changed: Boolean) {
+                    printAdapter.onWrite(
+                        arrayOf(PageRange.ALL_PAGES),
+                        pdfFileDescriptor,
+                        null,
+                        object : PrintDocumentAdapter.WriteResultCallback() {
+                            override fun onWriteFinished(pages: Array<PageRange>) {
+                                pdfFileDescriptor.close()
+                                sharePdfFile(file)
+                            }
+                        }
+                    )
+                }
             }, null
         )
     }
