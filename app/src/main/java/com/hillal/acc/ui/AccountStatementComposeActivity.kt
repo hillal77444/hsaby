@@ -747,7 +747,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         document.add(summaryTable)
 
         document.close()
-        outputStream.close()
+                outputStream.close()
         return pdfFile
     }
 
