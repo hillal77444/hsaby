@@ -358,6 +358,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
                                     WebView(context).apply {
                                         settings.javaScriptEnabled = true
                                         settings.domStorageEnabled = true
+                                        settings.setSupportZoom(true)
+                                        settings.builtInZoomControls = true
+                                        settings.displayZoomControls = false
                                         webView = this
                                     }
                                 },
@@ -638,32 +641,32 @@ class AccountStatementComposeActivity : ComponentActivity() {
             <meta charset="UTF-8">
             <style>
                 body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
-                .header { background-color: #1976d2; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-                .account-info { background-color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+                .header { background-color: #1976d2; color: white; padding: 20px; border-radius: 10px; margin-bottom: 10px; }
+                .account-info-row { background-color: white; padding: 8px 15px; border-radius: 8px; margin-bottom: 18px; font-size: 0.98em; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 12px; color: #333; }
+                .account-info-row span { font-weight: bold; color: #1976d2; font-size: 0.98em; }
+                .account-info-row .divider { color: #aaa; font-weight: normal; margin: 0 6px; }
                 .transactions-table { width: 100%; border-collapse: collapse; background-color: white; border-radius: 10px; overflow: hidden; }
                 .transactions-table th { background-color: #1976d2; color: white; padding: 12px; text-align: center; }
                 .transactions-table td { padding: 10px; text-align: center; border-bottom: 1px solid #eee; }
                 .debit { color: #d32f2f; font-weight: bold; }
                 .credit { color: #388e3c; font-weight: bold; }
-                .summary { background-color: white; padding: 15px; border-radius: 10px; margin-top: 20px; }
-                .summary-row { display: flex; justify-content: space-between; margin: 10px 0; }
+                .summary { background-color: white; padding: 12px; border-radius: 10px; margin-top: 18px; }
+                .summary-row { display: flex; justify-content: space-between; margin: 8px 0; }
                 .summary-label { font-weight: bold; color: #666; }
                 .summary-value { font-weight: bold; color: #1976d2; }
             </style>
         </head>
         <body>
             <div class="header">
-                <h1>كشف الحساب التفصيلي</h1>
-                <p>${account.name}</p>
+                <h1 style="font-size:1.3em; margin:0 0 8px 0;">كشف الحساب التفصيلي</h1>
             </div>
-            
-            <div class="account-info">
-                <h3>معلومات الحساب</h3>
-                <p><strong>اسم الحساب:</strong> ${account.name}</p>
-                <p><strong>رقم الهاتف:</strong> ${account.phoneNumber}</p>
-                <p><strong>الفترة:</strong> من ${displayDateFormat.format(startDate)} إلى ${displayDateFormat.format(endDate)}</p>
+            <div class="account-info-row">
+                <span>اسم الحساب: ${account.name}</span>
+                <span class="divider">|</span>
+                <span>رقم الهاتف: ${account.phoneNumber}</span>
+                <span class="divider">|</span>
+                <span>الفترة: من ${displayDateFormat.format(startDate)} إلى ${displayDateFormat.format(endDate)}</span>
             </div>
-            
             <table class="transactions-table">
                 <thead>
                     <tr>
@@ -678,9 +681,8 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     $transactionRows
                 </tbody>
             </table>
-            
             <div class="summary">
-                <h3>ملخص الحساب</h3>
+                <h3 style="font-size:1.05em; margin-bottom:8px;">ملخص الحساب</h3>
                 <div class="summary-row">
                     <span class="summary-label">إجمالي المدينين:</span>
                     <span class="summary-value debit">${String.format(Locale.ENGLISH, "%.2f", totalDebit)}</span>
@@ -710,33 +712,37 @@ class AccountStatementComposeActivity : ComponentActivity() {
     private fun shareReportAsPdf() {
         if (webView != null && selectedAccount != null) {
             try {
-                // إنشاء ملف PDF مؤقت
-                val pdfFile = createPdfFromWebView()
-                if (pdfFile != null) {
-                    // مشاركة الملف
-                    val uri = FileProvider.getUriForFile(
-                        this,
-                        "${packageName}.provider",
-                        pdfFile
-                    )
-                    val shareIntent = Intent().apply {
-                        action = Intent.ACTION_SEND
-                        putExtra(Intent.EXTRA_STREAM, uri)
-                        putExtra(Intent.EXTRA_SUBJECT, "كشف الحساب - ${selectedAccount?.name}")
-                        putExtra(Intent.EXTRA_TEXT, "كشف الحساب التفصيلي")
-                        type = "application/pdf"
-                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    }
-                    startActivity(Intent.createChooser(shareIntent, "مشاركة كشف الحساب"))
-                } else {
-                    Toast.makeText(this, "فشل في إنشاء ملف PDF", Toast.LENGTH_SHORT).show()
-                }
+                createPdfAndShareFromWebView()
             } catch (e: Exception) {
                 Toast.makeText(this, "خطأ في مشاركة التقرير: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         } else {
             Toast.makeText(this, "يرجى اختيار حساب أولاً", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun createPdfAndShareFromWebView() {
+        val printAdapter = webView.createPrintDocumentAdapter("كشف الحساب")
+        val fileName = "account_statement_${System.currentTimeMillis()}.pdf"
+        val pdfFile = File(cacheDir, fileName)
+        val printAttributes = android.print.PrintAttributes.Builder()
+            .setMediaSize(android.print.PrintAttributes.MediaSize.ISO_A4)
+            .setResolution(android.print.PrintAttributes.Resolution("pdf", "pdf", 600, 600))
+            .setMinMargins(android.print.PrintAttributes.Margins.NO_MARGINS)
+            .build()
+
+        val pdfWriteJob = object : android.print.PrintDocumentAdapter.WriteResultCallback() {
+            override fun onWriteFinished(pages: Array<android.print.PageRange>) {
+                sharePdfFile(pdfFile)
+            }
+        }
+
+        val fileDescriptor = android.os.ParcelFileDescriptor.open(pdfFile, android.os.ParcelFileDescriptor.MODE_TRUNCATE or android.os.ParcelFileDescriptor.MODE_READ_WRITE or android.os.ParcelFileDescriptor.MODE_CREATE)
+        printAdapter.onLayout(null, printAttributes, null, object : android.print.PrintDocumentAdapter.LayoutResultCallback() {
+            override fun onLayoutFinished(info: android.print.PrintDocumentInfo?, changed: Boolean) {
+                printAdapter.onWrite(arrayOf(android.print.PageRange.ALL_PAGES), fileDescriptor, null, pdfWriteJob)
+            }
+        }, null)
     }
 
     private fun createPdfFromWebView(): File? {
