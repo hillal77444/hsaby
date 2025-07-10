@@ -630,10 +630,25 @@ class AccountStatementComposeActivity : ComponentActivity() {
     }
 
     private fun shareReportAsPdf() {
-        if (webView != null && selectedAccount != null) {
+        if (selectedAccount != null) {
             try {
-                // استخدم HTML الحالي للتقرير
-                shareReportHtmlAsPdf(reportHtml)
+                // فلترة المعاملات حسب الحساب، العملة، والتواريخ
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+                val startDateObj = dateFormat.parse(startDate)
+                val endDateObj = dateFormat.parse(endDate)
+                val filteredTransactions = transactions.filter { tx ->
+                    tx.accountId == selectedAccount!!.id &&
+                    (selectedCurrency == null || tx.currency == selectedCurrency) &&
+                    Date(tx.createdAt) >= startDateObj && Date(tx.createdAt) <= endDateObj
+                }.sortedBy { it.createdAt }
+                val pdfFile = generateAccountStatementPdf(
+                    selectedAccount!!,
+                    startDate,
+                    endDate,
+                    selectedCurrency,
+                    filteredTransactions
+                )
+                sharePdfFile(pdfFile)
             } catch (e: Exception) {
                 Toast.makeText(this, "خطأ في مشاركة التقرير: ${e.message}", Toast.LENGTH_SHORT).show()
             }
@@ -642,26 +657,100 @@ class AccountStatementComposeActivity : ComponentActivity() {
         }
     }
 
-    private fun shareReportHtmlAsPdf(html: String) {
-        try {
-            val pdfFile = File(cacheDir, "account_statement_${System.currentTimeMillis()}.pdf")
-            val document = Document()
-            val outputStream = FileOutputStream(pdfFile)
-            val writer = PdfWriter.getInstance(document, outputStream)
-            document.open()
-            val css = "" // يمكن إضافة CSS خارجي إذا رغبت
-            XMLWorkerHelper.getInstance().parseXHtml(
-                writer,
-                document,
-                StringReader(html),
-                StringReader(css)
-            )
-            document.close()
-            outputStream.close()
-            sharePdfFile(pdfFile)
-        } catch (e: Exception) {
-            Toast.makeText(this, "خطأ في إنشاء PDF: ${e.message}", Toast.LENGTH_SHORT).show()
+    private fun generateAccountStatementPdf(
+        account: Account,
+        startDate: String,
+        endDate: String,
+        selectedCurrency: String?,
+        transactions: List<Transaction>
+    ): File {
+        val pdfFile = File(cacheDir, "account_statement_${System.currentTimeMillis()}.pdf")
+        val document = Document()
+        val outputStream = FileOutputStream(pdfFile)
+        val writer = PdfWriter.getInstance(document, outputStream)
+        document.open()
+
+        // إعداد الخطوط والألوان
+        val titleFont = com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 18f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(25, 118, 210))
+        val headerFont = com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 14f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor.WHITE)
+        val cellFont = com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12f, com.itextpdf.text.Font.NORMAL, com.itextpdf.text.BaseColor(33, 33, 33))
+        val debitFont = com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(211, 47, 47))
+        val creditFont = com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(56, 142, 60))
+        val summaryLabelFont = com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(102, 102, 102))
+        val summaryValueFont = com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(25, 118, 210))
+
+        // العنوان الرئيسي
+        val title = com.itextpdf.text.Paragraph("كشف الحساب التفصيلي", titleFont)
+        title.alignment = com.itextpdf.text.Element.ALIGN_CENTER
+        document.add(title)
+        document.add(com.itextpdf.text.Paragraph(" "))
+
+        // معلومات الحساب في سطر واحد
+        val info = com.itextpdf.text.Paragraph(
+            "اسم الحساب: ${account.name}   |   رقم الهاتف: ${account.phoneNumber}   |   الفترة: من $startDate إلى $endDate" +
+            (if (selectedCurrency != null) "   |   العملة: $selectedCurrency" else ""),
+            cellFont
+        )
+        info.alignment = com.itextpdf.text.Element.ALIGN_CENTER
+        document.add(info)
+        document.add(com.itextpdf.text.Paragraph(" "))
+
+        // جدول المعاملات
+        val table = com.itextpdf.text.pdf.PdfPTable(5)
+        table.widthPercentage = 100f
+        table.setWidths(floatArrayOf(2f, 4f, 2f, 2f, 2f))
+        val headerBg = com.itextpdf.text.BaseColor(25, 118, 210)
+        val headers = listOf("التاريخ", "الوصف", "مدين", "دائن", "الرصيد")
+        for (h in headers) {
+            val cell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(h, headerFont))
+            cell.backgroundColor = headerBg
+            cell.horizontalAlignment = com.itextpdf.text.Element.ALIGN_CENTER
+            cell.verticalAlignment = com.itextpdf.text.Element.ALIGN_MIDDLE
+            cell.padding = 6f
+            table.addCell(cell)
         }
+        val displayDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
+        var totalDebit = 0.0
+        var totalCredit = 0.0
+        var balance = 0.0
+        transactions.forEach { tx ->
+            table.addCell(com.itextpdf.text.Phrase(displayDateFormat.format(Date(tx.createdAt)), cellFont))
+            table.addCell(com.itextpdf.text.Phrase(tx.description ?: "", cellFont))
+            if (tx.type == "debit") {
+                table.addCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", tx.amount), debitFont))
+                table.addCell(com.itextpdf.text.Phrase("", cellFont))
+                balance -= tx.amount
+                totalDebit += tx.amount
+            } else {
+                table.addCell(com.itextpdf.text.Phrase("", cellFont))
+                table.addCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", tx.amount), creditFont))
+                balance += tx.amount
+                totalCredit += tx.amount
+            }
+            table.addCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", balance), cellFont))
+        }
+        document.add(table)
+        document.add(com.itextpdf.text.Paragraph(" "))
+
+        // ملخص الحساب
+        val summaryTitle = com.itextpdf.text.Paragraph("ملخص الحساب", summaryLabelFont)
+        summaryTitle.alignment = com.itextpdf.text.Element.ALIGN_RIGHT
+        document.add(summaryTitle)
+        val summaryTable = com.itextpdf.text.pdf.PdfPTable(2)
+        summaryTable.widthPercentage = 60f
+        summaryTable.horizontalAlignment = com.itextpdf.text.Element.ALIGN_RIGHT
+        summaryTable.setWidths(floatArrayOf(2f, 2f))
+        summaryTable.addCell(com.itextpdf.text.Phrase("إجمالي المدينين:", summaryLabelFont))
+        summaryTable.addCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", totalDebit), debitFont))
+        summaryTable.addCell(com.itextpdf.text.Phrase("إجمالي الدائنين:", summaryLabelFont))
+        summaryTable.addCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", totalCredit), creditFont))
+        summaryTable.addCell(com.itextpdf.text.Phrase("الرصيد النهائي:", summaryLabelFont))
+        summaryTable.addCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", balance), summaryValueFont))
+        document.add(summaryTable)
+
+        document.close()
+        outputStream.close()
+        return pdfFile
     }
 
     private fun sharePdfFile(pdfFile: File) {
