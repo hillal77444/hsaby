@@ -43,11 +43,18 @@ import java.util.*
 import java.io.File
 import androidx.core.content.FileProvider
 import com.hillal.acc.ui.common.AccountPickerField
+<<<<<<< HEAD
 import android.print.PrintAttributes
 import android.print.PrintDocumentAdapter
 import android.print.PrintDocumentInfo
 import android.print.PageRange
 import android.os.ParcelFileDescriptor
+=======
+import com.itextpdf.text.Document
+import com.itextpdf.text.pdf.PdfWriter
+import java.io.StringReader
+import com.itextpdf.text.pdf.BaseFont
+>>>>>>> parent of a4e7ab781 (ل)
 
 class AccountStatementComposeActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -635,6 +642,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         }
     }
 
+<<<<<<< HEAD
     // أضف الدالة الجديدة لمشاركة PDF من WebView مباشرة
     class MyLayoutResultCallback(val onFinish: () -> Unit) : PrintDocumentAdapter.LayoutResultCallback() {
         override fun onLayoutFinished(info: PrintDocumentInfo?, changed: Boolean) {
@@ -645,6 +653,199 @@ class AccountStatementComposeActivity : ComponentActivity() {
     class MyWriteResultCallback(val onFinish: () -> Unit) : PrintDocumentAdapter.WriteResultCallback() {
         override fun onWriteFinished(pages: Array<PageRange>) {
             onFinish()
+=======
+    private fun shareReportAsPdf(
+        selectedAccount: Account?,
+        startDate: String,
+        endDate: String,
+        selectedCurrency: String?,
+        transactions: List<Transaction>
+    ) {
+        if (selectedAccount != null) {
+            try {
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+                val startDateObj = dateFormat.parse(startDate)
+                val endDateObj = dateFormat.parse(endDate)
+                val filteredTransactions = transactions.filter { tx ->
+                    tx.accountId == selectedAccount.id &&
+                    (selectedCurrency == null || tx.currency == selectedCurrency) &&
+                    Date(tx.createdAt) >= startDateObj && Date(tx.createdAt) <= endDateObj
+                }.sortedBy { it.createdAt }
+                val pdfFile = generateAccountStatementPdf(
+                    selectedAccount,
+                    startDate,
+                    endDate,
+                    selectedCurrency,
+                    filteredTransactions
+                )
+                sharePdfFile(pdfFile)
+            } catch (e: Exception) {
+                Toast.makeText(this, "خطأ في مشاركة التقرير: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, "يرجى اختيار حساب أولاً", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun generateAccountStatementPdf(
+        account: Account,
+        startDate: String,
+        endDate: String,
+        selectedCurrency: String?,
+        transactions: List<Transaction>
+    ): File {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+        val startDateObj = dateFormat.parse(startDate)
+        // تجهيز اسم الملف: كشف_حساب_اسم_الحساب_من_إلى.pdf
+        val safeAccountName = account.name.replace(Regex("[^\u0600-\u06FFa-zA-Z0-9_]"), "_")
+        val fileName = "كشف_حساب_${safeAccountName}_${startDate}_${endDate}.pdf"
+        val pdfFile = File(cacheDir, fileName)
+        val document = Document()
+        val outputStream = FileOutputStream(pdfFile)
+        val writer = PdfWriter.getInstance(document, outputStream)
+        document.open()
+
+        // تحميل خط Amiri من assets
+        val fontStream = assets.open("fonts/Amiri-1.002/Amiri-Regular.ttf")
+        val fontBytes = ByteArray(fontStream.available())
+        fontStream.read(fontBytes)
+        fontStream.close()
+        val baseFont = BaseFont.createFont("Amiri-Regular.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, false, fontBytes, null)
+        val arabicFont = com.itextpdf.text.Font(baseFont, 14f, com.itextpdf.text.Font.NORMAL, com.itextpdf.text.BaseColor(33, 33, 33))
+        val titleFont = com.itextpdf.text.Font(baseFont, 18f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(25, 118, 210))
+        val headerFont = com.itextpdf.text.Font(baseFont, 14f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor.WHITE)
+        val debitFont = com.itextpdf.text.Font(baseFont, 12f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(211, 47, 47))
+        val creditFont = com.itextpdf.text.Font(baseFont, 12f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(56, 142, 60))
+        val summaryLabelFont = com.itextpdf.text.Font(baseFont, 12f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(102, 102, 102))
+        val summaryValueFont = com.itextpdf.text.Font(baseFont, 12f, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor(25, 118, 210))
+
+        // العنوان الرئيسي
+        val title = com.itextpdf.text.Paragraph("كشف الحساب التفصيلي", titleFont)
+        title.alignment = com.itextpdf.text.Element.ALIGN_RIGHT
+        document.add(title)
+        document.add(com.itextpdf.text.Paragraph(" "))
+
+        // معلومات الحساب في سطر واحد
+        val info = com.itextpdf.text.Paragraph(
+            "اسم الحساب: ${account.name}   |   رقم الهاتف: ${account.phoneNumber}   |   الفترة: من $startDate إلى $endDate" +
+            (if (selectedCurrency != null) "   |   العملة: $selectedCurrency" else ""),
+            arabicFont
+        )
+        info.alignment = com.itextpdf.text.Element.ALIGN_RIGHT
+        document.add(info)
+        document.add(com.itextpdf.text.Paragraph(" "))
+
+        // جدول المعاملات
+        val table = com.itextpdf.text.pdf.PdfPTable(5)
+        table.widthPercentage = 100f
+        table.setWidths(floatArrayOf(2f, 4f, 2f, 2f, 2f))
+        val headerBg = com.itextpdf.text.BaseColor(25, 118, 210)
+        val headers = listOf("التاريخ", "الوصف", "مدين", "دائن", "الرصيد")
+        for (h in headers) {
+            val cell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(h, headerFont))
+            cell.backgroundColor = headerBg
+            cell.horizontalAlignment = com.itextpdf.text.Element.ALIGN_CENTER
+            cell.verticalAlignment = com.itextpdf.text.Element.ALIGN_MIDDLE
+            cell.setPadding(6f)
+            table.addCell(cell)
+        }
+        val displayDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
+        var totalDebit = 0.0
+        var totalCredit = 0.0
+        var balance = 0.0
+        // حساب الرصيد السابق قبل الفترة
+        val previousBalance = transactions
+            .filter { Date(it.createdAt) < startDateObj }
+            .fold(0.0) { acc, tx ->
+                when (tx.type) {
+                    "debit" -> acc - tx.amount
+                    "credit" -> acc + tx.amount
+                    else -> acc
+                }
+            }
+        // أضف صف الرصيد السابق في أول الجدول
+        val prevBalanceCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont))
+        val prevDescCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("الرصيد السابق", arabicFont))
+        val prevDebitCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont))
+        val prevCreditCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont))
+        val prevBalanceValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", previousBalance), arabicFont))
+        table.addCell(prevBalanceCell)
+        table.addCell(prevDescCell)
+        table.addCell(prevDebitCell)
+        table.addCell(prevCreditCell)
+        table.addCell(prevBalanceValueCell)
+        transactions.forEach { tx ->
+            val dateCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(displayDateFormat.format(Date(tx.createdAt)), arabicFont))
+            table.addCell(dateCell)
+            val descCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(tx.description ?: "", arabicFont))
+            table.addCell(descCell)
+            if (tx.type == "debit") {
+                val debitCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", tx.amount), debitFont))
+                table.addCell(debitCell)
+                val emptyCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont))
+                table.addCell(emptyCell)
+                balance -= tx.amount
+                totalDebit += tx.amount
+            } else {
+                val emptyCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("", arabicFont))
+                table.addCell(emptyCell)
+                val creditCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", tx.amount), creditFont))
+                table.addCell(creditCell)
+                balance += tx.amount
+                totalCredit += tx.amount
+            }
+            val balanceCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", balance), arabicFont))
+            table.addCell(balanceCell)
+        }
+        document.add(table)
+        document.add(com.itextpdf.text.Paragraph(" "))
+
+        // ملخص الحساب
+        val summaryTitle = com.itextpdf.text.Paragraph("ملخص الحساب", summaryLabelFont)
+        summaryTitle.alignment = com.itextpdf.text.Element.ALIGN_RIGHT
+        document.add(summaryTitle)
+        val summaryTable = com.itextpdf.text.pdf.PdfPTable(2)
+        summaryTable.widthPercentage = 60f
+        summaryTable.horizontalAlignment = com.itextpdf.text.Element.ALIGN_RIGHT
+        summaryTable.setWidths(floatArrayOf(2f, 2f))
+        val debitLabelCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("إجمالي عليه:", summaryLabelFont))
+        summaryTable.addCell(debitLabelCell)
+        val debitValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", totalDebit), debitFont))
+        summaryTable.addCell(debitValueCell)
+        val creditLabelCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("إجمالي له:", summaryLabelFont))
+        summaryTable.addCell(creditLabelCell)
+        val creditValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", totalCredit), creditFont))
+        summaryTable.addCell(creditValueCell)
+        val balanceLabelCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase("الرصيد النهائي:", summaryLabelFont))
+        summaryTable.addCell(balanceLabelCell)
+        val balanceValueCell = com.itextpdf.text.pdf.PdfPCell(com.itextpdf.text.Phrase(String.format(Locale.ENGLISH, "%.2f", balance), summaryValueFont))
+        summaryTable.addCell(balanceValueCell)
+        document.add(summaryTable)
+
+        document.close()
+        outputStream.close()
+        return pdfFile
+    }
+
+    private fun sharePdfFile(pdfFile: File) {
+        try {
+            val uri = FileProvider.getUriForFile(
+                this,
+                "${packageName}.provider",
+                pdfFile
+            )
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_SUBJECT, "كشف الحساب - ${selectedAccount?.name}")
+                putExtra(Intent.EXTRA_TEXT, "كشف الحساب التفصيلي")
+                type = "application/pdf"
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(Intent.createChooser(shareIntent, "مشاركة كشف الحساب"))
+        } catch (e: Exception) {
+            Toast.makeText(this, "خطأ في مشاركة الملف: ${e.message}", Toast.LENGTH_SHORT).show()
+>>>>>>> parent of a4e7ab781 (ل)
         }
     }
 
