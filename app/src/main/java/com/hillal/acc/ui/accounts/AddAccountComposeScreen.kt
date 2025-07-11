@@ -390,6 +390,7 @@ private fun FormSection(
                         imageVector = Icons.Default.PersonAdd, // أيقونة مضمونة الظهور
                         contentDescription = "اختيار من جهات الاتصال",
                         modifier = Modifier.size(24.dp)
+                        tint = Color(0xFF152FD9)
                     )
                 }
             }
