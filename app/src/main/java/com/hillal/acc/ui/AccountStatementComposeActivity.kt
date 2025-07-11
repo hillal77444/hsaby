@@ -60,6 +60,7 @@ import java.io.FileOutputStream
 import com.itextpdf.text.BaseColor
 import com.hillal.acc.util.ArabicReshaper
 import com.hillal.acc.util.arabic.ArabicUtilities
+import com.itextpdf.text.Rectangle
 
 class AccountStatementComposeActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -785,17 +786,27 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val fontCredit = com.itextpdf.text.Font(cairoBaseFont, 13f, Font.NORMAL, BaseColor(0x38, 0x8E, 0x3C))
 
         // عنوان التقرير
-        val title = Paragraph(ArabicUtilities.reshape("كشف الحساب التفصيلي"), fontCairoBold)
-        title.alignment = Element.ALIGN_CENTER
-        document.add(title)
+        val titleCell = PdfPCell(Paragraph(ArabicUtilities.reshape("كشف الحساب التفصيلي"), fontCairoBold))
+        titleCell.horizontalAlignment = Element.ALIGN_CENTER
+        titleCell.border = Rectangle.NO_BORDER
+        titleCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        val titleTable = PdfPTable(1)
+        titleTable.widthPercentage = 100f
+        titleTable.addCell(titleCell)
+        document.add(titleTable)
         document.add(Paragraph(" "))
 
         // معلومات الحساب
         val info = "اسم الحساب: " + ArabicUtilities.reshape(account.name) + "   |   رقم الهاتف: " + account.phoneNumber + "   |   الفترة: من " + startDate + " إلى " + displayDateFormat.format(endDate) +
             (if (selectedCurrency != null) "   |   العملة: " + ArabicUtilities.reshape(selectedCurrency) else "")
-        val infoPara = Paragraph(info, fontCairo)
-        infoPara.alignment = Element.ALIGN_RIGHT
-        document.add(infoPara)
+        val infoCell = PdfPCell(Paragraph(info, fontCairo))
+        infoCell.horizontalAlignment = Element.ALIGN_RIGHT
+        infoCell.border = Rectangle.NO_BORDER
+        infoCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        val infoTable = PdfPTable(1)
+        infoTable.widthPercentage = 100f
+        infoTable.addCell(infoCell)
+        document.add(infoTable)
         document.add(Paragraph(" "))
 
         // إنشاء الجدول مع تحديد عدد الأعمدة ونسب العرض
