@@ -53,13 +53,16 @@ fun AccountsComposeScreen(
         val typography = MaterialTheme.typography
 
         val accounts by viewModel.allAccounts.observeAsState(initial = emptyList())
+        
+        // حساب الأرصدة الديناميكية من العمليات لكل حساب
         val accountBalances = remember(accounts) {
             val balances = mutableStateMapOf<Long, Double>()
-            accounts.forEach { account: Account ->
-                balances[account.id] = account.balance
+            accounts.forEach { account ->
+                balances[account.id] = 0.0 // سيتم تحديثه لاحقاً من observeAsState
             }
             balances
         }
+        
         var searchQuery by remember { mutableStateOf("") }
         var sortType by remember { mutableStateOf("balance_desc") }
         val sortOptions = listOf(
@@ -82,7 +85,7 @@ fun AccountsComposeScreen(
             }
         }
 
-        // ترتيب الحسابات حسب الفلترة
+        // ترتيب الحسابات حسب الفلترة - استخدام الرصيد الديناميكي
         val sortedAccounts = remember(filteredAccounts, sortType, accountBalances) {
             when (sortType) {
                 "balance_desc" -> filteredAccounts.sortedByDescending { account: Account -> accountBalances[account.id] ?: 0.0 }
@@ -130,7 +133,8 @@ fun AccountsComposeScreen(
                     ) { account ->
                         AccountItemModern(
                             account = account,
-                            balance = accountBalances[account.id] ?: 0.0,
+                            viewModel = viewModel,
+                            accountBalances = accountBalances, // تمرير مصفوفة الأرصدة
                             onWhatsAppToggle = { isEnabled ->
                                 account.setWhatsappEnabled(isEnabled)
                                 account.setUpdatedAt(System.currentTimeMillis())
@@ -303,7 +307,8 @@ private fun AccountsHeaderModern(
 @Composable
 private fun AccountItemModern(
     account: Account,
-    balance: Double,
+    viewModel: AccountViewModel,
+    accountBalances: MutableStateMap<Long, Double>,
     onWhatsAppToggle: (Boolean) -> Unit,
     onEditClick: () -> Unit,
     onItemClick: () -> Unit
@@ -311,6 +316,15 @@ private fun AccountItemModern(
     val dimens = LocalAppDimensions.current
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
+    
+    // جلب الرصيد من العمليات (مدين/دائن) بعملة يمني
+    val balanceYemeni by viewModel.getAccountBalanceYemeni(account.id).observeAsState(0.0)
+    
+    // تحديث مصفوفة الأرصدة للفرز
+    LaunchedEffect(balanceYemeni) {
+        accountBalances[account.id] = balanceYemeni
+    }
+    
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -426,14 +440,14 @@ private fun AccountItemModern(
                         )
                     }
                     Text(
-                        text = if (balance < 0) {
-                            String.format(Locale.US, "عليه %,d يمني", kotlin.math.abs(balance.toLong()))
+                        text = if (balanceYemeni < 0) {
+                            String.format(Locale.US, "عليه %,d يمني", kotlin.math.abs(balanceYemeni.toLong()))
                         } else {
-                            String.format(Locale.US, "له %,d يمني", balance.toLong())
+                            String.format(Locale.US, "له %,d يمني", balanceYemeni.toLong())
                         },
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (balance < 0) colors.error else colors.success,
+                        color = if (balanceYemeni < 0) colors.error else colors.success,
                         modifier = Modifier.padding(top = 2.dp)
                     )
                 }
