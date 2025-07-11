@@ -94,6 +94,6 @@ public class BetterArabicReshaper {
     public static String reshapeAndBidi(String text) {
         String reshaped = reshapeArabic(text);
         Bidi bidi = new Bidi(reshaped, Bidi.DIRECTION_RIGHT_TO_LEFT);
-        return bidi.writeReordered(Bidi.DO_MIRRORING);
+        return bidi.writeReordered(0);
     }
 } 
