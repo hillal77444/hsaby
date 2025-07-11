@@ -30,6 +30,10 @@ import com.hillal.acc.R
 import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.autofill.autofill
+import androidx.compose.ui.platform.LocalAutofill
+import androidx.compose.ui.platform.LocalAutofillTree
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,6 +58,8 @@ fun LoginScreen(
         var isLoading by remember { mutableStateOf(false) }
         var errorMessage by remember { mutableStateOf<String?>(null) }
 
+        val autofill = LocalAutofill.current
+        val autofillTree = LocalAutofillTree.current
         val screenWidth = configuration.screenWidthDp.dp
         val screenHeight = configuration.screenHeightDp.dp
         val blueHeight = screenHeight * 0.15f
@@ -145,7 +151,11 @@ fun LoginScreen(
                             singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(fieldHeight),
+                                .height(fieldHeight)
+                                .autofill(
+                                    autofillTypes = listOf(AutofillType.PhoneNumber, AutofillType.Username),
+                                    onFill = { phone = it }
+                                ),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.surface,
                                 focusedBorderColor = colors.primary,
@@ -176,7 +186,11 @@ fun LoginScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(fieldHeight),
+                                .height(fieldHeight)
+                                .autofill(
+                                    autofillTypes = listOf(AutofillType.Password),
+                                    onFill = { password = it }
+                                ),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.surface,
                                 focusedBorderColor = colors.primary,
@@ -285,6 +299,7 @@ fun LoginScreen(
                         Text("عن التطبيق", color = colors.onPrimary, fontSize = fontSmall, style = typography.bodyMedium)
                     }
                 }
+                Spacer(modifier = Modifier.height(marginLarge)) // فارق سفلي ديناميكي
             }
         }
     }

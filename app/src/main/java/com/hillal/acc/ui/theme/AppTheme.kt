@@ -11,10 +11,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.Dp
 
 // ألوان المشروع
 private val LightColors = lightColorScheme(
-    primary = Color(0xFF152FD9),
+    primary = Color(0xFFA7C7FF), // أزرق فاتح وخفيف
     onPrimary = Color.White,
     secondary = Color(0xFF22C55E),
     onSecondary = Color.White,
@@ -57,14 +59,27 @@ val AppShapes = Shapes(
 
 // أبعاد ومسافات مرنة (يمكنك تعديلها حسب الحاجة)
 data class AppDimensions(
-    val spacingSmall: Int = 8,
-    val spacingMedium: Int = 16,
-    val spacingLarge: Int = 24,
-    val cardCorner: Int = 16,
-    val iconSize: Int = 24
+    val spacingSmall: Dp,
+    val spacingMedium: Dp,
+    val spacingLarge: Dp,
+    val cardCorner: Dp,
+    val iconSize: Dp
 )
 
-val LocalAppDimensions = androidx.compose.runtime.staticCompositionLocalOf { AppDimensions() }
+@Composable
+fun calculateAppDimensions(): AppDimensions {
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    return AppDimensions(
+        spacingSmall = screenWidth * 0.02f,   // 2% من العرض
+        spacingMedium = screenWidth * 0.04f,  // 4% من العرض
+        spacingLarge = screenWidth * 0.08f,   // 8% من العرض
+        cardCorner = screenWidth * 0.04f,     // 4% من العرض
+        iconSize = screenWidth * 0.06f        // 6% من العرض
+    )
+}
+
+val LocalAppDimensions = androidx.compose.runtime.staticCompositionLocalOf { AppDimensions(8.dp, 16.dp, 24.dp, 16.dp, 24.dp) }
 
 @Composable
 fun AppTheme(
@@ -72,7 +87,7 @@ fun AppTheme(
     content: @Composable () -> Unit
 ) {
     val colors = if (useDarkTheme) DarkColors else LightColors
-    val dimensions = AppDimensions()
+    val dimensions = calculateAppDimensions()
     CompositionLocalProvider(LocalAppDimensions provides dimensions) {
         MaterialTheme(
             colorScheme = colors,
