@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.Dp
 
 // ألوان المشروع
 private val LightColors = lightColorScheme(
-    primary = Color(0xFFA7C7FF), // أزرق فاتح وخفيف
+    primary = Color(0xFF0F69F5), // أزرق فاتح وخفيف
     onPrimary = Color.White,
     secondary = Color(0xFF22C55E),
     onSecondary = Color.White,
