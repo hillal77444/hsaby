@@ -785,12 +785,16 @@ class AccountStatementComposeActivity : ComponentActivity() {
         var totalDebit = 0.0
         var totalCredit = 0.0
 
-        // صف الرصيد السابق
-        val prevRow = listOf("", ArabicReshaper.reshape("الرصيد السابق"), "", "", String.format(Locale.ENGLISH, "%.2f", previousBalance))
-        for (cellText in prevRow) {
-            val cell = PdfPCell(Paragraph(cellText, fontCairo))
+        // صف الرصيد السابق (قبل التكرار على المعاملات)
+        val prevRow = listOf(
+            PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", previousBalance), fontCairo)), // الرصيد
+            PdfPCell(Paragraph("", fontCairo)), // له
+            PdfPCell(Paragraph("", fontCairo)), // عليه
+            PdfPCell(Paragraph(ArabicReshaper.reshape("الرصيد السابق"), fontCairo)), // تفاصيل
+            PdfPCell(Paragraph("", fontCairo)) // التاريخ
+        )
+        for (cell in prevRow) {
             cell.horizontalAlignment = Element.ALIGN_CENTER
-            cell.colspan = 1
             cell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
             table.addCell(cell)
         }
