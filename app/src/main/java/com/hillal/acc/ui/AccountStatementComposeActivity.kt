@@ -626,9 +626,15 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 .account-info-row { background-color: white; padding: 8px 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.88em; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 10px; color: #333; }
                 .account-info-row span { font-weight: bold; color: #1976d2; font-size: 0.88em; }
                 .account-info-row .divider { color: #aaa; font-weight: normal; margin: 0 4px; }
-                .transactions-table { width: 100%; border-collapse: collapse; background-color: white; border-radius: 10px; overflow: hidden; table-layout: fixed; }
-                .transactions-table th { background-color: #1976d2; color: white; padding: 10px; text-align: center; font-size: 0.88em; font-weight: bold; }
-                .transactions-table td { padding: 8px; text-align: center; border-bottom: 1px solid #eee; word-break: break-word; font-size: 0.88em; }
+                .transactions-table { width: 100%; max-width: 100vw; border-collapse: collapse; background-color: white; border-radius: 10px; overflow-x: auto; table-layout: fixed; }
+                .transactions-table th { background-color: #1976d2; color: white; padding: 10px; text-align: center; font-size: 0.75em; font-weight: bold; }
+                .transactions-table td { padding: 8px; text-align: center; border-bottom: 1px solid #eee; word-break: break-word; font-size: 0.75em; }
+                /* جعل عمود الوصف أعرض */
+                .transactions-table td:nth-child(4), .transactions-table th:nth-child(4) { width: 32%; }
+                .transactions-table td:nth-child(1), .transactions-table th:nth-child(1),
+                .transactions-table td:nth-child(2), .transactions-table th:nth-child(2),
+                .transactions-table td:nth-child(3), .transactions-table th:nth-child(3),
+                .transactions-table td:nth-child(5), .transactions-table th:nth-child(5) { width: 17%; }
                 .debit { color: #d32f2f; font-weight: bold; }
                 .credit { color: #388e3c; font-weight: bold; }
                 .summary { background-color: white; padding: 10px; border-radius: 10px; margin-top: 10px; width: 100%; }
