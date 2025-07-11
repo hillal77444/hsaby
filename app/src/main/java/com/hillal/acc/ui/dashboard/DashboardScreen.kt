@@ -36,6 +36,8 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.layout.systemBarsPadding
+import com.hillal.acc.ui.theme.AppTheme
+import com.hillal.acc.ui.theme.LocalAppDimensions
 
 @Composable
 fun DashboardScreen(
@@ -52,250 +54,258 @@ fun DashboardScreen(
     onTransfer: () -> Unit,
     onExchange: () -> Unit
 ) {
-    val totalDebtors by viewModel.totalDebtors.observeAsState()
-    val totalCreditors by viewModel.totalCreditors.observeAsState()
-    val accounts by viewModel.accounts.observeAsState()
-    val netBalance by viewModel.netBalance.observeAsState()
-    val scrollState = rememberScrollState()
+    AppTheme {
+        val totalDebtors by viewModel.totalDebtors.observeAsState()
+        val totalCreditors by viewModel.totalCreditors.observeAsState()
+        val accounts by viewModel.accounts.observeAsState()
+        val netBalance by viewModel.netBalance.observeAsState()
+        val scrollState = rememberScrollState()
 
-    // نسب ديناميكية موحدة مع شاشات الدخول/التسجيل
-    val configuration = LocalConfiguration.current
-    val screenWidth = with(LocalDensity.current) { configuration.screenWidthDp.dp }
-    val screenHeight = with(LocalDensity.current) { configuration.screenHeightDp.dp }
-    val minSide = minOf(screenWidth, screenHeight)
-    val maxSide = maxOf(screenWidth, screenHeight)
-    val blueHeight = screenHeight * 0.12f
-    val logoSize = minSide * 0.16f
-    val cardCorner = minSide * 0.055f
-    val cardPadding = minSide * 0.022f
-    val fontTitle = (minSide.value / 18).sp
-    val fontField = (minSide.value / 24).sp
-    val fontSmall = (minSide.value / 32).sp
-    val iconSize = minSide * 0.07f
-    val marginSmall = minSide * 0.008f
-    val marginMedium = minSide * 0.018f
-    val marginLarge = minSide * 0.032f
-    val statCardHeight = maxSide * 0.10f
-    val actionButtonHeight = maxSide * 0.07f
-    val gridCardHeight = maxSide * 0.11f
-    val verticalSpace = minSide * 0.012f
+        val configuration = LocalConfiguration.current
+        val dimens = LocalAppDimensions.current
+        val colors = MaterialTheme.colorScheme
+        val typography = MaterialTheme.typography
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF7F7F7))
-            .navigationBarsPadding() // يضيف padding سفلي تلقائي حسب النظام
-    ) {
-        Column(
+        val screenWidth = configuration.screenWidthDp.toFloat().dp
+        val screenHeight = configuration.screenHeightDp.toFloat().dp
+        val minSide = minOf(screenWidth, screenHeight)
+        val maxSide = maxOf(screenWidth, screenHeight)
+        val blueHeight = screenHeight * 0.10f // أصغر
+        val logoSize = minSide * 0.16f        // أصغر
+        val cardCorner = dimens.cardCorner
+        val cardPadding = dimens.spacingMedium
+        val fontTitle = typography.headlineMedium.fontSize
+        val fontField = typography.bodyLarge.fontSize
+        val fontSmall = typography.bodyMedium.fontSize
+        val iconSize = dimens.iconSize
+        val marginSmall = dimens.spacingSmall
+        val marginMedium = dimens.spacingMedium
+        val marginLarge = dimens.spacingLarge
+        val statCardHeight = maxSide * 0.10f
+        val actionButtonHeight = maxSide * 0.07f
+        val gridCardHeight = maxSide * 0.11f
+        val verticalSpace = minSide * 0.012f
+
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .background(colors.background)
+                .navigationBarsPadding() // يضيف padding سفلي تلقائي حسب النظام
         ) {
-            // المستطيل الأزرق العلوي
-            Box(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(blueHeight)
-                    .background(Color(0xFF2196F3))
-            )
-            // الشعار متداخل مع البطاقة
-            Box(
-                modifier = Modifier
-                    .size(logoSize)
-                    .offset(y = -logoSize / 2)
-                    .background(Color.White, shape = CircleShape),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .verticalScroll(scrollState),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Image(
-                    painter = painterResource(id = R.mipmap.ic_launcher),
-                    contentDescription = "Logo",
-                    modifier = Modifier.size(logoSize * 0.8f)
+                // المستطيل الأزرق العلوي
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(blueHeight)
+                        .background(colors.primary)
                 )
-            }
-            // عبارة ترحيب
-            Text(
-                text = "مرحباً، $userName!",
-                color = Color(0xFF2196F3),
-                fontWeight = FontWeight.Bold,
-                fontSize = fontTitle,
-                modifier = Modifier.padding(top = marginSmall, bottom = marginMedium)
-            )
-            // بطاقة المستخدم مع زر التعديل
-            Card(
-                shape = RoundedCornerShape(cardCorner),
-                modifier = Modifier
-                    .fillMaxWidth(0.92f)
-                    .wrapContentHeight(),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(cardPadding)
+                // الشعار متداخل مع البطاقة
+                Box(
+                    modifier = Modifier
+                        .size(logoSize)
+                        .offset(y = -logoSize / 3) // تراكب أقل
+                        .background(colors.surface, shape = CircleShape),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = userName,
-                        color = Color(0xFF152FD9),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = fontField,
+                    Image(
+                        painter = painterResource(id = R.mipmap.ic_launcher),
+                        contentDescription = "Logo",
+                        modifier = Modifier.size(logoSize * 0.8f)
+                    )
+                }
+                Spacer(modifier = Modifier.height(marginSmall)) // مسافة واضحة وصغيرة بين الشعار والبطاقة
+                // عبارة ترحيب
+                Text(
+                    text = "مرحباً، $userName!",
+                    color = colors.primary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = fontTitle,
+                    modifier = Modifier.padding(top = marginSmall, bottom = marginMedium),
+                    style = typography.headlineMedium
+                )
+                // بطاقة المستخدم مع زر التعديل
+                Card(
+                    shape = RoundedCornerShape(cardCorner),
+                    modifier = Modifier
+                        .fillMaxWidth(0.92f)
+                        .wrapContentHeight(),
+                    colors = CardDefaults.cardColors(containerColor = colors.surface)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(cardPadding)
+                    ) {
+                        Text(
+                            text = userName,
+                            color = colors.primary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = fontField,
+                            modifier = Modifier.weight(1f),
+                            style = typography.bodyLarge
+                        )
+                        IconButton(onClick = onEditProfile) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_edit),
+                                contentDescription = "تعديل الملف",
+                                tint = colors.primary,
+                                modifier = Modifier.size(iconSize * 1.2f)
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(marginLarge))
+                // بطاقات الإحصائيات الأربع
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(0.92f),
+                    horizontalArrangement = Arrangement.spacedBy(marginSmall)
+                ) {
+                    StatCardOld(
+                        icon = R.drawable.ic_money,
+                        value = "${netBalance?.toInt() ?: 0} يمني",
+                        label = "الرصيد",
+                        subLabel = "الرصيد",
+                        color = Color(0xFFB2F2E5),
+                        iconTint = Color(0xFF009688),
+                        valueColor = Color(0xFF009688),
+                        valueFontSize = fontSmall,
+                        labelFontSize = fontSmall,
+                        modifier = Modifier.weight(1f).height(statCardHeight)
+                    )
+                    StatCardOld(
+                        icon = R.drawable.ic_arrow_downward,
+                        value = "${totalDebtors?.toInt() ?: 0}",
+                        label = "إجمالي عليكم",
+                        subLabel = "إجمالي عليكم",
+                        color = Color(0xFFFFF3E0),
+                        iconTint = Color(0xFFFF9800),
+                        valueColor = Color(0xFFFF9800),
+                        valueFontSize = fontSmall,
+                        labelFontSize = fontSmall,
+                        modifier = Modifier.weight(1f).height(statCardHeight)
+                    )
+                    StatCardOld(
+                        icon = R.drawable.ic_arrow_upward,
+                        value = "${totalCreditors?.toInt() ?: 0}",
+                        label = "إجمالي لكم",
+                        subLabel = "إجمالي لكم",
+                        color = Color(0xFFE8F5E9),
+                        iconTint = Color(0xFF4CAF50),
+                        valueColor = Color(0xFF4CAF50),
+                        valueFontSize = fontSmall,
+                        labelFontSize = fontSmall,
+                        modifier = Modifier.weight(1f).height(statCardHeight)
+                    )
+                    StatCardOld(
+                        icon = R.drawable.ic_accounts,
+                        value = "${accounts?.size ?: 0}",
+                        label = "عدد الحسابات",
+                        subLabel = "عدد الحسابات",
+                        color = Color(0xFFE3F2FD),
+                        iconTint = Color(0xFF1976D2),
+                        valueColor = Color(0xFF1976D2),
+                        valueFontSize = fontSmall,
+                        labelFontSize = fontSmall,
+                        modifier = Modifier.weight(1f).height(statCardHeight)
+                    )
+                }
+                Spacer(modifier = Modifier.height(marginLarge))
+                // أزرار الإجراءات الثلاثة
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(0.92f),
+                    horizontalArrangement = Arrangement.spacedBy(marginMedium)
+                ) {
+                    ActionButton(
+                        text = "إضافة قيد",
+                        icon = R.drawable.ic_add,
+                        height = actionButtonHeight,
+                        backgroundColor = colors.primary,
+                        fontSize = fontSmall,
+                        onClick = onAddTransaction,
                         modifier = Modifier.weight(1f)
                     )
-                    IconButton(onClick = onEditProfile) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_edit),
-                            contentDescription = "تعديل الملف",
-                            tint = Color(0xFF152FD9),
-                            modifier = Modifier.size(iconSize * 1.2f)
+                    ActionButton(
+                        text = "إضافة حساب",
+                        icon = R.drawable.ic_add_account,
+                        height = actionButtonHeight,
+                        backgroundColor = Color(0xFF388E3C),
+                        fontSize = fontSmall,
+                        onClick = onAddAccount,
+                        modifier = Modifier.weight(1f)
+                    )
+                    ActionButton(
+                        text = "كشف الحساب",
+                        icon = R.drawable.ic_statement,
+                        height = actionButtonHeight,
+                        backgroundColor = Color(0xFFFF9800),
+                        fontSize = fontSmall,
+                        onClick = onReport,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                Spacer(modifier = Modifier.height(marginLarge))
+                // شبكة البطاقات الشبكية (Grid) 3 أعمدة × صفين
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.92f),
+                    verticalArrangement = Arrangement.spacedBy(marginMedium)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(marginMedium)
+                    ) {
+                        GridCardOld(
+                            icon = R.drawable.ic_accounts,
+                            title = "الحسابات",
+                            onClick = onAccounts,
+                            modifier = Modifier.weight(1f).height(gridCardHeight)
+                        )
+                        GridCardOld(
+                            icon = R.drawable.ic_transactions,
+                            title = "المعاملات",
+                            onClick = onTransactions,
+                            modifier = Modifier.weight(1f).height(gridCardHeight)
+                        )
+                        GridCardOld(
+                            icon = R.drawable.ic_reports,
+                            title = "التقارير",
+                            onClick = onReports,
+                            modifier = Modifier.weight(1f).height(gridCardHeight)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(marginMedium)
+                    ) {
+                        GridCardOld(
+                            icon = R.drawable.ic_arrow_downward,
+                            title = "متابعة الديون",
+                            onClick = onDebts,
+                            modifier = Modifier.weight(1f).height(gridCardHeight)
+                        )
+                        GridCardOld(
+                            icon = R.drawable.ic_currency_exchange,
+                            title = "صرف العملات",
+                            onClick = onExchange,
+                            modifier = Modifier.weight(1f).height(gridCardHeight)
+                        )
+                        GridCardOld(
+                            icon = R.drawable.ic_sync_alt,
+                            title = "تحويل بين الحسابات",
+                            onClick = onTransfer,
+                            modifier = Modifier.weight(1f).height(gridCardHeight)
                         )
                     }
                 }
+                Spacer(modifier = Modifier.height(marginLarge))
             }
-            Spacer(modifier = Modifier.height(marginLarge))
-            // بطاقات الإحصائيات الأربع
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(0.92f),
-                horizontalArrangement = Arrangement.spacedBy(marginSmall)
-            ) {
-                StatCardOld(
-                    icon = R.drawable.ic_money,
-                    value = "${netBalance?.toInt() ?: 0} يمني",
-                    label = "الرصيد",
-                    subLabel = "الرصيد",
-                    color = Color(0xFFB2F2E5),
-                    iconTint = Color(0xFF009688),
-                    valueColor = Color(0xFF009688),
-                    valueFontSize = fontSmall,
-                    labelFontSize = fontSmall,
-                    modifier = Modifier.weight(1f).height(statCardHeight)
-                )
-                StatCardOld(
-                    icon = R.drawable.ic_arrow_downward,
-                    value = "${totalDebtors?.toInt() ?: 0}",
-                    label = "إجمالي عليكم",
-                    subLabel = "إجمالي عليكم",
-                    color = Color(0xFFFFF3E0),
-                    iconTint = Color(0xFFFF9800),
-                    valueColor = Color(0xFFFF9800),
-                    valueFontSize = fontSmall,
-                    labelFontSize = fontSmall,
-                    modifier = Modifier.weight(1f).height(statCardHeight)
-                )
-                StatCardOld(
-                    icon = R.drawable.ic_arrow_upward,
-                    value = "${totalCreditors?.toInt() ?: 0}",
-                    label = "إجمالي لكم",
-                    subLabel = "إجمالي لكم",
-                    color = Color(0xFFE8F5E9),
-                    iconTint = Color(0xFF4CAF50),
-                    valueColor = Color(0xFF4CAF50),
-                    valueFontSize = fontSmall,
-                    labelFontSize = fontSmall,
-                    modifier = Modifier.weight(1f).height(statCardHeight)
-                )
-                StatCardOld(
-                    icon = R.drawable.ic_accounts,
-                    value = "${accounts?.size ?: 0}",
-                    label = "عدد الحسابات",
-                    subLabel = "عدد الحسابات",
-                    color = Color(0xFFE3F2FD),
-                    iconTint = Color(0xFF1976D2),
-                    valueColor = Color(0xFF1976D2),
-                    valueFontSize = fontSmall,
-                    labelFontSize = fontSmall,
-                    modifier = Modifier.weight(1f).height(statCardHeight)
-                )
-            }
-            Spacer(modifier = Modifier.height(marginLarge))
-            // أزرار الإجراءات الثلاثة
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(0.92f),
-                horizontalArrangement = Arrangement.spacedBy(marginMedium)
-            ) {
-                ActionButton(
-                    text = "إضافة قيد",
-                    icon = R.drawable.ic_add,
-                    height = actionButtonHeight,
-                    backgroundColor = Color(0xFF1976D2),
-                    fontSize = fontSmall,
-                    onClick = onAddTransaction,
-                    modifier = Modifier.weight(1f)
-                )
-                ActionButton(
-                    text = "إضافة حساب",
-                    icon = R.drawable.ic_add_account,
-                    height = actionButtonHeight,
-                    backgroundColor = Color(0xFF388E3C),
-                    fontSize = fontSmall,
-                    onClick = onAddAccount,
-                    modifier = Modifier.weight(1f)
-                )
-                ActionButton(
-                    text = "كشف الحساب",
-                    icon = R.drawable.ic_statement,
-                    height = actionButtonHeight,
-                    backgroundColor = Color(0xFFFF9800),
-                    fontSize = fontSmall,
-                    onClick = onReport,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            Spacer(modifier = Modifier.height(marginLarge))
-            // شبكة البطاقات الشبكية (Grid) 3 أعمدة × صفين
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(0.92f),
-                verticalArrangement = Arrangement.spacedBy(marginMedium)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(marginMedium)
-                ) {
-                    GridCardOld(
-                        icon = R.drawable.ic_accounts,
-                        title = "الحسابات",
-                        onClick = onAccounts,
-                        modifier = Modifier.weight(1f).height(gridCardHeight)
-                    )
-                    GridCardOld(
-                        icon = R.drawable.ic_transactions,
-                        title = "المعاملات",
-                        onClick = onTransactions,
-                        modifier = Modifier.weight(1f).height(gridCardHeight)
-                    )
-                    GridCardOld(
-                        icon = R.drawable.ic_reports,
-                        title = "التقارير",
-                        onClick = onReports,
-                        modifier = Modifier.weight(1f).height(gridCardHeight)
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(marginMedium)
-                ) {
-                    GridCardOld(
-                        icon = R.drawable.ic_arrow_downward,
-                        title = "متابعة الديون",
-                        onClick = onDebts,
-                        modifier = Modifier.weight(1f).height(gridCardHeight)
-                    )
-                    GridCardOld(
-                        icon = R.drawable.ic_currency_exchange,
-                        title = "صرف العملات",
-                        onClick = onExchange,
-                        modifier = Modifier.weight(1f).height(gridCardHeight)
-                    )
-                    GridCardOld(
-                        icon = R.drawable.ic_sync_alt,
-                        title = "تحويل بين الحسابات",
-                        onClick = onTransfer,
-                        modifier = Modifier.weight(1f).height(gridCardHeight)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(marginLarge))
         }
     }
 }
