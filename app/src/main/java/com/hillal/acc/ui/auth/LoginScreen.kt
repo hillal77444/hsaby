@@ -30,10 +30,6 @@ import com.hillal.acc.R
 import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.autofill.AutofillType
-import androidx.compose.ui.autofill.autofill
-import androidx.compose.ui.platform.LocalAutofill
-import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.ExperimentalComposeUiApi
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -58,10 +54,6 @@ fun LoginScreen(
         var passwordVisible by remember { mutableStateOf(false) }
         var isLoading by remember { mutableStateOf(false) }
         var errorMessage by remember { mutableStateOf<String?>(null) }
-
-        // Autofill API تجريبية
-        val autofill = LocalAutofill.current
-        val autofillTree = LocalAutofillTree.current
 
         val screenWidth = configuration.screenWidthDp.toFloat().dp
         val screenHeight = configuration.screenHeightDp.toFloat().dp
@@ -154,11 +146,7 @@ fun LoginScreen(
                             singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(fieldHeight)
-                                .autofill(
-                                    autofillTypes = listOf(AutofillType.PhoneNumber, AutofillType.Username),
-                                    onFill = { phone = it }
-                                ),
+                                .height(fieldHeight),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.surface,
                                 focusedBorderColor = colors.primary,
@@ -189,11 +177,7 @@ fun LoginScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(fieldHeight)
-                                .autofill(
-                                    autofillTypes = listOf(AutofillType.Password),
-                                    onFill = { password = it }
-                                ),
+                                .height(fieldHeight),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.surface,
                                 focusedBorderColor = colors.primary,
