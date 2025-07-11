@@ -387,7 +387,7 @@ private fun FormSection(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.PersonAddAlt1,
+                        imageVector = Icons.Default.PersonAdd, // أيقونة مضمونة الظهور
                         contentDescription = "اختيار من جهات الاتصال",
                         modifier = Modifier.size(24.dp)
                     )
