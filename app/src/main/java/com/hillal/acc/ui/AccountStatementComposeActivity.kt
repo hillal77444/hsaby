@@ -683,7 +683,8 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     startDate = startDate,
                     endDate = endDate,
                     selectedCurrency = selectedCurrency,
-                    transactions = filteredTransactions
+                    transactions = filteredTransactions,
+                    allTransactions = transactions // Pass all transactions for previous balance calculation
                 )
                 sharePdfFile(pdfFile)
             } catch (e: Exception) {
@@ -704,7 +705,8 @@ class AccountStatementComposeActivity : ComponentActivity() {
         startDate: String,
         endDate: String,
         selectedCurrency: String?,
-        transactions: List<Transaction>
+        transactions: List<Transaction>, // معاملات الفترة فقط
+        allTransactions: List<Transaction> // كل معاملات الحساب
     ): File {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
         val displayDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
@@ -775,9 +777,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
             table.addCell(cell)
         }
 
-        // حساب الرصيد السابق
-        val previousBalance = transactions
-            .filter { Date(it.createdAt) < startDateObj }
+        // حساب الرصيد السابق من كل العمليات
+        val previousBalance = allTransactions
+            .filter { Date(it.createdAt) < startDateObj && (selectedCurrency == null || it.currency == selectedCurrency) }
             .fold(0.0) { acc, tx ->
                 when (tx.type) {
                     "debit" -> acc - tx.amount
