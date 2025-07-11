@@ -58,8 +58,8 @@ fun LoginScreen(
 
         val screenWidth = configuration.screenWidthDp.toFloat().dp
         val screenHeight = configuration.screenHeightDp.toFloat().dp
-        val blueHeight = screenHeight * 0.15f
-        val logoSize = screenWidth * 0.22f
+        val blueHeight = screenHeight * 0.10f // أصغر
+        val logoSize = screenWidth * 0.16f    // أصغر
         val cardCorner = dimens.cardCorner
         val cardPadding = dimens.spacingMedium
         val fieldHeight = screenHeight * 0.078f
@@ -96,7 +96,7 @@ fun LoginScreen(
                 Box(
                     modifier = Modifier
                         .size(logoSize)
-                        .offset(y = -logoSize / 2)
+                        .offset(y = -logoSize / 3) // تراكب أقل
                         .background(colors.surface, shape = CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
@@ -107,6 +107,7 @@ fun LoginScreen(
                         modifier = Modifier.size(logoSize * 0.8f)
                     )
                 }
+                Spacer(modifier = Modifier.height(marginSmall)) // مسافة واضحة وصغيرة بين الشعار والبطاقة
                 // البطاقة البيضاء
                 Card(
                     shape = RoundedCornerShape(cardCorner),
