@@ -1,4 +1,4 @@
-package org.amr.arabic;
+package com.hillal.acc.util.arabic;
 
 /*
  *	Date : 8th of June 2009

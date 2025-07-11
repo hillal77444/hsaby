@@ -1,4 +1,4 @@
-package org.amr.arabic;
+package com.hillal.acc.util.arabic;
 /*
  *	Date : 25th of March 2008
  *	the class is Arabic string reshaper, this class is targeting Android platform
