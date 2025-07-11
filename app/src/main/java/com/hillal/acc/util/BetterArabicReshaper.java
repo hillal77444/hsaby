@@ -93,6 +93,33 @@ public class BetterArabicReshaper {
      */
     public static String reshapeAndBidi(String text) {
         String reshaped = reshapeArabic(text);
-        return new StringBuilder(reshaped).reverse().toString();
+        String[] lines = reshaped.split("\\r?\\n");
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < lines.length; i++) {
+            result.append(reverseArabicOnly(lines[i]));
+            if (i < lines.length - 1) result.append("\n");
+        }
+        return result.toString();
+    }
+
+    /**
+     * تعكس فقط الحروف العربية في السطر وتترك الأرقام والإنجليزي في مكانهم
+     */
+    private static String reverseArabicOnly(String line) {
+        StringBuilder sb = new StringBuilder();
+        int i = line.length() - 1;
+        while (i >= 0) {
+            char c = line.charAt(i);
+            if (isArabicChar(c)) {
+                // اجمع كل الحروف العربية المتتالية
+                int arabicEnd = i;
+                while (i >= 0 && isArabicChar(line.charAt(i))) i--;
+                sb.append(line.substring(i + 1, arabicEnd + 1));
+            } else {
+                sb.append(c);
+                i--;
+            }
+        }
+        return sb.toString();
     }
 } 
