@@ -812,7 +812,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         // إنشاء الجدول مع تحديد عدد الأعمدة ونسب العرض
         val table = PdfPTable(5)
         table.widthPercentage = 100f
-        table.setWidths(floatArrayOf(2f, 2f, 2f, 5f, 2f)) // Adjusted widths for new order
+        table.setWidths(floatArrayOf(2f, 5f, 2f, 2f, 2f))
 
         // رؤوس الجدول مع ألوان (PDF)
         val headers = listOf("الرصيد", "تفاصيل", "عليه", "له", "التاريخ")
