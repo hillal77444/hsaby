@@ -61,12 +61,14 @@ fun AccountsComposeScreen(
             balances
         }
         var searchQuery by remember { mutableStateOf("") }
-        var isAscendingSort by remember { mutableStateOf(true) }
-        var currentSortType by remember { mutableStateOf("balance") }
-
-        // حساب الإحصائيات
-        val totalAccounts = accounts.size
-        val activeAccounts = accounts.count { account: Account -> account.isWhatsappEnabled() }
+        var sortType by remember { mutableStateOf("balance_desc") }
+        val sortOptions = listOf(
+            "balance_desc" to "الرصيد الأكبر",
+            "balance_asc" to "الرصيد الأصغر",
+            "name" to "الاسم",
+            "number" to "رقم الحساب"
+        )
+        var filterMenuExpanded by remember { mutableStateOf(false) }
 
         // البحث في الحسابات
         val filteredAccounts = remember(accounts, searchQuery) {
@@ -80,37 +82,13 @@ fun AccountsComposeScreen(
             }
         }
 
-        // ترتيب الحسابات
-        val sortedAccounts = remember(filteredAccounts, currentSortType, isAscendingSort, accountBalances) {
-            when (currentSortType) {
-                "balance" -> {
-                    if (isAscendingSort) {
-                        filteredAccounts.sortedBy { account: Account -> accountBalances[account.id] ?: 0.0 }
-                    } else {
-                        filteredAccounts.sortedByDescending { account: Account -> accountBalances[account.id] ?: 0.0 }
-                    }
-                }
-                "name" -> {
-                    if (isAscendingSort) {
-                        filteredAccounts.sortedBy { account: Account -> account.name }
-                    } else {
-                        filteredAccounts.sortedByDescending { account: Account -> account.name }
-                    }
-                }
-                "number" -> {
-                    if (isAscendingSort) {
-                        filteredAccounts.sortedBy { account: Account -> account.serverId }
-                    } else {
-                        filteredAccounts.sortedByDescending { account: Account -> account.serverId }
-                    }
-                }
-                "date" -> {
-                    if (isAscendingSort) {
-                        filteredAccounts.sortedBy { account: Account -> account.createdAt }
-                    } else {
-                        filteredAccounts.sortedByDescending { account: Account -> account.createdAt }
-                    }
-                }
+        // ترتيب الحسابات حسب الفلترة
+        val sortedAccounts = remember(filteredAccounts, sortType, accountBalances) {
+            when (sortType) {
+                "balance_desc" -> filteredAccounts.sortedByDescending { account: Account -> accountBalances[account.id] ?: 0.0 }
+                "balance_asc" -> filteredAccounts.sortedBy { account: Account -> accountBalances[account.id] ?: 0.0 }
+                "name" -> filteredAccounts.sortedBy { account: Account -> account.name }
+                "number" -> filteredAccounts.sortedBy { account: Account -> account.serverId }
                 else -> filteredAccounts
             }
         }
@@ -124,11 +102,19 @@ fun AccountsComposeScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 // رأس الصفحة الجديد
-                AccountsHeader(
+                AccountsHeaderWithFilter(
                     searchQuery = searchQuery,
                     onSearchQueryChange = { searchQuery = it },
                     totalCount = filteredAccounts.size,
-                    onFilterClick = { /* TODO: فلترة */ }
+                    sortType = sortType,
+                    sortOptions = sortOptions,
+                    filterMenuExpanded = filterMenuExpanded,
+                    onFilterClick = { filterMenuExpanded = true },
+                    onFilterSelect = {
+                        sortType = it
+                        filterMenuExpanded = false
+                    },
+                    onFilterDismiss = { filterMenuExpanded = false }
                 )
 
                 // قائمة الحسابات
@@ -180,11 +166,16 @@ fun AccountsComposeScreen(
 }
 
 @Composable
-private fun AccountsHeader(
+private fun AccountsHeaderWithFilter(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     totalCount: Int,
-    onFilterClick: () -> Unit
+    sortType: String,
+    sortOptions: List<Pair<String, String>>,
+    filterMenuExpanded: Boolean,
+    onFilterClick: () -> Unit,
+    onFilterSelect: (String) -> Unit,
+    onFilterDismiss: () -> Unit
 ) {
     val dimens = LocalAppDimensions.current
     val colors = MaterialTheme.colorScheme
@@ -208,7 +199,7 @@ private fun AccountsHeader(
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = "إدارة النقاط والفروع",
+                text = "إدارة الحسابات",
                 color = colors.primary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
@@ -226,14 +217,32 @@ private fun AccountsHeader(
                 .padding(horizontal = dimens.spacingLarge),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(colors.primary, shape = CircleShape)
-                    .clickable { onFilterClick() },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(imageVector = Icons.Default.FilterList, contentDescription = "فلترة", tint = Color.White)
+            Box {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(colors.primary, shape = CircleShape)
+                        .clickable { onFilterClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(imageVector = Icons.Default.FilterList, contentDescription = "فلترة", tint = Color.White)
+                }
+                DropdownMenu(
+                    expanded = filterMenuExpanded,
+                    onDismissRequest = onFilterDismiss
+                ) {
+                    sortOptions.forEach { (value, label) ->
+                        DropdownMenuItem(
+                            text = { Text(label) },
+                            onClick = { onFilterSelect(value) },
+                            leadingIcon = {
+                                if (value == sortType) {
+                                    Icon(imageVector = Icons.Default.Check, contentDescription = null, tint = colors.primary)
+                                }
+                            }
+                        )
+                    }
+                }
             }
             Spacer(modifier = Modifier.width(dimens.spacingSmall))
             OutlinedTextField(
@@ -292,7 +301,7 @@ private fun AccountItemModern(
             // يسار: سويتش واتساب + زر تعديل
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(end = 8.dp)
+                modifier = Modifier.padding(end = 4.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Switch(
@@ -308,12 +317,12 @@ private fun AccountItemModern(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("واتساب", fontSize = 12.sp, color = colors.onSurfaceVariant)
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
+                Spacer(modifier = Modifier.height(4.dp))
+                IconButton(
                     onClick = onEditClick,
-                    colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.height(32.dp)
+                    modifier = Modifier
+                        .size(32.dp)
+                        .background(colors.primary, shape = CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
@@ -321,11 +330,9 @@ private fun AccountItemModern(
                         modifier = Modifier.size(16.dp),
                         tint = Color.White
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("تعديل", fontSize = 13.sp, color = Color.White)
                 }
             }
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(4.dp))
             // يمين: بيانات الحساب وصورة شخصية
             Row(
                 modifier = Modifier.weight(1f),
