@@ -757,11 +757,13 @@ class AccountStatementComposeActivity : ComponentActivity() {
         document.add(infoPara)
         document.add(Paragraph(" "))
 
-        // رؤوس الجدول مع ألوان
+        // إنشاء الجدول مع تحديد عدد الأعمدة ونسب العرض
         val table = PdfPTable(5)
         table.widthPercentage = 100f
         table.setWidths(floatArrayOf(2f, 5f, 2f, 2f, 2f))
-        val headers = listOf("التاريخ", "الوصف", "عليه", "له", "الرصيد")
+
+        // رؤوس الجدول مع ألوان (PDF)
+        val headers = listOf("الرصيد", "له", "عليه", "تفاصيل", "التاريخ")
         for (h in headers) {
             val cell = PdfPCell(Paragraph(ArabicReshaper.reshape(h), fontHeader))
             cell.horizontalAlignment = Element.ALIGN_CENTER
@@ -804,8 +806,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
             val desc = tx.description ?: ""
             val debit = if (tx.type == "debit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
             val credit = if (tx.type == "credit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
-            val debitCell = PdfPCell(Paragraph(debit, fontDebit))
-            val creditCell = PdfPCell(Paragraph(credit, fontCredit))
             if (tx.type == "debit") {
                 balance -= tx.amount
                 totalDebit += tx.amount
@@ -814,11 +814,11 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 totalCredit += tx.amount
             }
             val row = listOf(
-                PdfPCell(Paragraph(dateStr, fontCairo)),
-                PdfPCell(Paragraph(ArabicReshaper.reshape(desc), fontCairo)),
-                debitCell,
-                creditCell,
-                PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", balance), fontCairo))
+                PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", balance), fontCairo)), // الرصيد أول عمود
+                PdfPCell(Paragraph(credit, fontCredit)), // له
+                PdfPCell(Paragraph(debit, fontDebit)), // عليه
+                PdfPCell(Paragraph(ArabicReshaper.reshape(desc), fontCairo)), // تفاصيل
+                PdfPCell(Paragraph(dateStr, fontCairo)) // التاريخ آخر عمود
             )
             for (cell in row) {
                 cell.horizontalAlignment = Element.ALIGN_CENTER
