@@ -34,8 +34,9 @@ import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.autofill.autofill
 import androidx.compose.ui.platform.LocalAutofill
 import androidx.compose.ui.platform.LocalAutofillTree
+import androidx.compose.ui.ExperimentalComposeUiApi
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreen(
     onLoginClick: (String, String) -> Unit,
@@ -58,24 +59,26 @@ fun LoginScreen(
         var isLoading by remember { mutableStateOf(false) }
         var errorMessage by remember { mutableStateOf<String?>(null) }
 
+        // Autofill API تجريبية
         val autofill = LocalAutofill.current
         val autofillTree = LocalAutofillTree.current
-        val screenWidth = configuration.screenWidthDp.dp
-        val screenHeight = configuration.screenHeightDp.dp
+
+        val screenWidth = configuration.screenWidthDp.toFloat().dp
+        val screenHeight = configuration.screenHeightDp.toFloat().dp
         val blueHeight = screenHeight * 0.15f
         val logoSize = screenWidth * 0.22f
-        val cardCorner = dimens.cardCorner.dp
-        val cardPadding = dimens.spacingMedium.dp
+        val cardCorner = dimens.cardCorner
+        val cardPadding = dimens.spacingMedium
         val fieldHeight = screenHeight * 0.078f
         val buttonHeight = screenHeight * 0.055f
         val fontTitle = typography.headlineMedium.fontSize
         val fontField = typography.bodyLarge.fontSize
         val fontButton = typography.bodyLarge.fontSize
         val fontSmall = typography.bodyMedium.fontSize
-        val iconSize = dimens.iconSize.dp
-        val marginSmall = dimens.spacingSmall.dp
-        val marginMedium = dimens.spacingMedium.dp
-        val marginLarge = dimens.spacingLarge.dp
+        val iconSize = dimens.iconSize
+        val marginSmall = dimens.spacingSmall
+        val marginMedium = dimens.spacingMedium
+        val marginLarge = dimens.spacingLarge
 
         Box(
             modifier = Modifier
