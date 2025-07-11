@@ -430,8 +430,8 @@ private fun FormSection(
                     checked = whatsappEnabled,
                     onCheckedChange = onWhatsappEnabledChange,
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color(0xFF22C55E),
-                        checkedTrackColor = Color(0xFF22C55E),
+                        checkedThumbColor = Color.White, // الدائرة بيضاء عند التفعيل
+                        checkedTrackColor = Color(0xFF22C55E), // الخلفية خضراء عند التفعيل
                         uncheckedThumbColor = Color(0xFF666666),
                         uncheckedTrackColor = Color(0xFFE0E0E0)
                     )
