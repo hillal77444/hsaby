@@ -119,14 +119,14 @@ fun DashboardScreen(
                         modifier = Modifier.size(logoSize * 0.8f)
                     )
                 }
-                Spacer(modifier = Modifier.height(marginSmall)) // مسافة واضحة وصغيرة بين الشعار والبطاقة
+                // لا يوجد Spacer بين الشعار والرسالة الترحيبية
                 // عبارة ترحيب
                 Text(
                     text = "مرحباً، $userName!",
                     color = colors.primary,
                     fontWeight = FontWeight.Bold,
                     fontSize = fontTitle,
-                    modifier = Modifier.padding(top = marginSmall, bottom = marginMedium),
+                    modifier = Modifier.padding(top = 2.dp, bottom = marginMedium),
                     style = typography.headlineMedium
                 )
                 // بطاقة المستخدم مع زر التعديل
