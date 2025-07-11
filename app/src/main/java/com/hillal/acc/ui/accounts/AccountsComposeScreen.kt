@@ -36,7 +36,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.ui.res.painterResource
 import com.hillal.acc.ui.theme.success
 import com.hillal.acc.ui.theme.successContainer
-import androidx.compose.foundation.shadow
+import androidx.compose.ui.draw.shadow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
