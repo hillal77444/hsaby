@@ -14,7 +14,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.MutableStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -308,7 +307,7 @@ private fun AccountsHeaderModern(
 private fun AccountItemModern(
     account: Account,
     viewModel: AccountViewModel,
-    accountBalances: MutableStateMap<Long, Double>,
+    accountBalances: MutableMap<Long, Double>,
     onWhatsAppToggle: (Boolean) -> Unit,
     onEditClick: () -> Unit,
     onItemClick: () -> Unit
