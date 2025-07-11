@@ -769,6 +769,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
             val cell = PdfPCell(Paragraph(ArabicUtilities.reshape(h), fontHeader))
             cell.horizontalAlignment = Element.ALIGN_CENTER
             cell.backgroundColor = BaseColor(0x19, 0x76, 0xD2) // أزرق
+            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL // أضف هذا السطر
             table.addCell(cell)
         }
 
@@ -797,6 +798,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         for (cell in prevRow) {
             cell.horizontalAlignment = Element.ALIGN_CENTER
             cell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
+            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL // أضف هذا السطر
             table.addCell(cell)
         }
 
@@ -827,6 +829,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
             )
             for (cell in row) {
                 cell.horizontalAlignment = Element.ALIGN_CENTER
+                cell.runDirection = PdfWriter.RUN_DIRECTION_RTL // أضف هذا السطر
                 table.addCell(cell)
             }
         }
