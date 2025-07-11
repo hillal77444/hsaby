@@ -34,6 +34,8 @@ import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.ui.res.painterResource
+import com.hillal.acc.ui.theme.success
+import com.hillal.acc.ui.theme.successContainer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
