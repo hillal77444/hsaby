@@ -215,7 +215,7 @@ private fun AccountsHeaderModern(
                 }
             }
             Text(
-                text = "إدارة الحسابات"
+                text = "إدارة الحسابات",
                 color = colors.primary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
