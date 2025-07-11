@@ -576,7 +576,13 @@ class AccountStatementComposeActivity : ComponentActivity() {
             <style>
                 @font-face {
                     font-family: 'Cairo';
-                    src: url('file:///android_asset/fonts/Cairo/Cairo-Regular.ttf');
+                    src: url('file:///android_asset/fonts/Cairo/static/Cairo-Regular.ttf');
+                    font-weight: normal;
+                }
+                @font-face {
+                    font-family: 'Cairo';
+                    src: url('file:///android_asset/fonts/Cairo/static/Cairo-Bold.ttf');
+                    font-weight: bold;
                 }
                 body { font-family: 'Cairo', Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
                 .header, .account-info-row, .transactions-table, .summary {
@@ -585,12 +591,12 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     box-sizing: border-box;
                     margin: 0 auto 10px auto;
                 }
-                .header { background-color: #1976d2; color: white; padding: 16px; border-radius: 10px; margin-bottom: 10px; }
+                .header { background-color: #1976d2; color: white; padding: 16px; border-radius: 10px; margin-bottom: 10px; font-weight: bold; }
                 .account-info-row { background-color: white; padding: 8px 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.88em; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 10px; color: #333; }
                 .account-info-row span { font-weight: bold; color: #1976d2; font-size: 0.88em; }
                 .account-info-row .divider { color: #aaa; font-weight: normal; margin: 0 4px; }
                 .transactions-table { width: 100%; border-collapse: collapse; background-color: white; border-radius: 10px; overflow: hidden; table-layout: fixed; }
-                .transactions-table th { background-color: #1976d2; color: white; padding: 10px; text-align: center; font-size: 0.88em; }
+                .transactions-table th { background-color: #1976d2; color: white; padding: 10px; text-align: center; font-size: 0.88em; font-weight: bold; }
                 .transactions-table td { padding: 8px; text-align: center; border-bottom: 1px solid #eee; word-break: break-word; font-size: 0.88em; }
                 .debit { color: #d32f2f; font-weight: bold; }
                 .credit { color: #388e3c; font-weight: bold; }
@@ -711,19 +717,29 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val writer = PdfWriter.getInstance(document, FileOutputStream(pdfFile))
         document.open()
 
-        // تحميل خط Cairo من assets
-        val cairoFontFile = File(context.cacheDir, "Cairo-Regular.ttf")
-        if (!cairoFontFile.exists()) {
-            context.assets.open("fonts/Cairo/Cairo-Regular.ttf").use { input ->
-                cairoFontFile.outputStream().use { output ->
+        // تحميل خط Cairo-Regular للنص العادي
+        val cairoRegularFontFile = File(context.cacheDir, "Cairo-Regular.ttf")
+        if (!cairoRegularFontFile.exists()) {
+            context.assets.open("fonts/Cairo/static/Cairo-Regular.ttf").use { input ->
+                cairoRegularFontFile.outputStream().use { output ->
                     input.copyTo(output)
                 }
             }
         }
-        val cairoBaseFont = com.itextpdf.text.pdf.BaseFont.createFont(cairoFontFile.absolutePath, com.itextpdf.text.pdf.BaseFont.IDENTITY_H, com.itextpdf.text.pdf.BaseFont.EMBEDDED)
+        // تحميل خط Cairo-Bold للعناوين
+        val cairoBoldFontFile = File(context.cacheDir, "Cairo-Bold.ttf")
+        if (!cairoBoldFontFile.exists()) {
+            context.assets.open("fonts/Cairo/static/Cairo-Bold.ttf").use { input ->
+                cairoBoldFontFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+        }
+        val cairoBaseFont = com.itextpdf.text.pdf.BaseFont.createFont(cairoRegularFontFile.absolutePath, com.itextpdf.text.pdf.BaseFont.IDENTITY_H, com.itextpdf.text.pdf.BaseFont.EMBEDDED)
+        val cairoBoldBaseFont = com.itextpdf.text.pdf.BaseFont.createFont(cairoBoldFontFile.absolutePath, com.itextpdf.text.pdf.BaseFont.IDENTITY_H, com.itextpdf.text.pdf.BaseFont.EMBEDDED)
         val fontCairo = com.itextpdf.text.Font(cairoBaseFont, 13f, Font.NORMAL)
-        val fontCairoBold = com.itextpdf.text.Font(cairoBaseFont, 15f, Font.BOLD)
-        val fontHeader = com.itextpdf.text.Font(cairoBaseFont, 13f, Font.BOLD, BaseColor.WHITE)
+        val fontCairoBold = com.itextpdf.text.Font(cairoBoldBaseFont, 15f, Font.BOLD)
+        val fontHeader = com.itextpdf.text.Font(cairoBoldBaseFont, 13f, Font.BOLD, BaseColor.WHITE)
         val fontDebit = com.itextpdf.text.Font(cairoBaseFont, 13f, Font.NORMAL, BaseColor(0xD3, 0x2F, 0x2F))
         val fontCredit = com.itextpdf.text.Font(cairoBaseFont, 13f, Font.NORMAL, BaseColor(0x38, 0x8E, 0x3C))
 
