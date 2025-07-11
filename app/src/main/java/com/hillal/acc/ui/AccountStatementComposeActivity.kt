@@ -816,9 +816,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
         // حساب الرصيد السابق من كل العمليات
         val previousBalance = allTransactions
             .filter { 
-                val txDay = Date(it.transactionDate)
-                val startDay = startDateObj
-                (txDay.before(startDay)) && (selectedCurrency == null || it.currency == selectedCurrency)
+                it.accountId == account.id &&
+                (selectedCurrency == null || it.currency == selectedCurrency) &&
+                Date(it.transactionDate).before(startDateObj)
             }
             .fold(0.0) { acc, tx ->
                 when (tx.type) {
