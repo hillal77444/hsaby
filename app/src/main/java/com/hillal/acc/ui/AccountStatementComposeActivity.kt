@@ -59,6 +59,7 @@ import android.os.ParcelFileDescriptor
 import java.io.FileOutputStream
 import com.itextpdf.text.BaseColor
 import com.hillal.acc.util.ArabicReshaper
+import com.hillal.acc.util.arabic.ArabicUtilities
 
 class AccountStatementComposeActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -744,14 +745,14 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val fontCredit = com.itextpdf.text.Font(cairoBaseFont, 13f, Font.NORMAL, BaseColor(0x38, 0x8E, 0x3C))
 
         // عنوان التقرير
-        val title = Paragraph(ArabicReshaper.reshape("كشف الحساب التفصيلي"), fontCairoBold)
+        val title = Paragraph(ArabicUtilities.reshape("كشف الحساب التفصيلي"), fontCairoBold)
         title.alignment = Element.ALIGN_CENTER
         document.add(title)
         document.add(Paragraph(" "))
 
         // معلومات الحساب
-        val info = "اسم الحساب: ${ArabicReshaper.reshape(account.name)}   |   رقم الهاتف: ${account.phoneNumber}   |   الفترة: من ${startDate} إلى ${endDate}" +
-            (if (selectedCurrency != null) "   |   العملة: ${ArabicReshaper.reshape(selectedCurrency)}" else "")
+        val info = "اسم الحساب: " + ArabicUtilities.reshape(account.name) + "   |   رقم الهاتف: " + account.phoneNumber + "   |   الفترة: من " + startDate + " إلى " + endDate +
+            (if (selectedCurrency != null) "   |   العملة: " + ArabicUtilities.reshape(selectedCurrency) else "")
         val infoPara = Paragraph(info, fontCairo)
         infoPara.alignment = Element.ALIGN_RIGHT
         document.add(infoPara)
@@ -765,7 +766,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         // رؤوس الجدول مع ألوان (PDF)
         val headers = listOf("الرصيد", "تفاصيل", "عليه", "له", "التاريخ")
         for (h in headers) {
-            val cell = PdfPCell(Paragraph(ArabicReshaper.reshape(h), fontHeader))
+            val cell = PdfPCell(Paragraph(ArabicUtilities.reshape(h), fontHeader))
             cell.horizontalAlignment = Element.ALIGN_CENTER
             cell.backgroundColor = BaseColor(0x19, 0x76, 0xD2) // أزرق
             table.addCell(cell)
@@ -788,7 +789,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         // صف الرصيد السابق (قبل التكرار على المعاملات)
         val prevRow = listOf(
             PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", previousBalance), fontCairo)), // الرصيد
-            PdfPCell(Paragraph(ArabicReshaper.reshape("الرصيد السابق"), fontCairo)), // تفاصيل
+            PdfPCell(Paragraph(ArabicUtilities.reshape("الرصيد السابق"), fontCairo)), // تفاصيل
             PdfPCell(Paragraph("", fontCairo)), // عليه
             PdfPCell(Paragraph("", fontCairo)), // له
             PdfPCell(Paragraph("", fontCairo)) // التاريخ
@@ -819,7 +820,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
             }
             val row = listOf(
                 PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", balance), fontCairo)), // الرصيد
-                PdfPCell(Paragraph(ArabicReshaper.reshape(desc), fontCairo)), // تفاصيل (الوصف)
+                PdfPCell(Paragraph(ArabicUtilities.reshape(desc), fontCairo)), // تفاصيل (الوصف)
                 PdfPCell(Paragraph(debit, fontDebit)), // عليه
                 PdfPCell(Paragraph(credit, fontCredit)), // له
                 PdfPCell(Paragraph(dateStr, fontCairo)) // التاريخ
@@ -835,9 +836,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
 
         // ملخص الحساب
         val summary = listOf(
-            ArabicReshaper.reshape("إجمالي عليه: ") + String.format(Locale.ENGLISH, "%.2f", totalDebit),
-            ArabicReshaper.reshape("إجمالي له: ") + String.format(Locale.ENGLISH, "%.2f", totalCredit),
-            ArabicReshaper.reshape("الرصيد النهائي: ") + String.format(Locale.ENGLISH, "%.2f", balance)
+            ArabicUtilities.reshape("إجمالي عليه: ") + String.format(Locale.ENGLISH, "%.2f", totalDebit),
+            ArabicUtilities.reshape("إجمالي له: ") + String.format(Locale.ENGLISH, "%.2f", totalCredit),
+            ArabicUtilities.reshape("الرصيد النهائي: ") + String.format(Locale.ENGLISH, "%.2f", balance)
         )
         for (s in summary) {
             val para = Paragraph(s, fontHeader)
