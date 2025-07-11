@@ -523,6 +523,26 @@ class AccountStatementComposeActivity : ComponentActivity() {
         return transactionDate >= startDate && transactionDate <= endDate
     }
 
+    // دالة مساعدة لمقارنة الأيام فقط (بدون وقت)
+    private fun isSameDayOrInRange(txDate: Date, start: Date, end: Date): Boolean {
+        val calTx = Calendar.getInstance().apply { time = txDate }
+        val calStart = Calendar.getInstance().apply { time = start }
+        val calEnd = Calendar.getInstance().apply { time = end }
+        calTx.set(Calendar.HOUR_OF_DAY, 0)
+        calTx.set(Calendar.MINUTE, 0)
+        calTx.set(Calendar.SECOND, 0)
+        calTx.set(Calendar.MILLISECOND, 0)
+        calStart.set(Calendar.HOUR_OF_DAY, 0)
+        calStart.set(Calendar.MINUTE, 0)
+        calStart.set(Calendar.SECOND, 0)
+        calStart.set(Calendar.MILLISECOND, 0)
+        calEnd.set(Calendar.HOUR_OF_DAY, 0)
+        calEnd.set(Calendar.MINUTE, 0)
+        calEnd.set(Calendar.SECOND, 0)
+        calEnd.set(Calendar.MILLISECOND, 0)
+        return !calTx.before(calStart) && !calTx.after(calEnd)
+    }
+
     private fun generateReportHtml(
         account: Account,
         startDate: Date,
@@ -777,9 +797,33 @@ class AccountStatementComposeActivity : ComponentActivity() {
             table.addCell(cell)
         }
 
+        // دالة مساعدة لمقارنة الأيام فقط (بدون وقت)
+        private fun isSameDayOrInRange(txDate: Date, start: Date, end: Date): Boolean {
+            val calTx = Calendar.getInstance().apply { time = txDate }
+            val calStart = Calendar.getInstance().apply { time = start }
+            val calEnd = Calendar.getInstance().apply { time = end }
+            calTx.set(Calendar.HOUR_OF_DAY, 0)
+            calTx.set(Calendar.MINUTE, 0)
+            calTx.set(Calendar.SECOND, 0)
+            calTx.set(Calendar.MILLISECOND, 0)
+            calStart.set(Calendar.HOUR_OF_DAY, 0)
+            calStart.set(Calendar.MINUTE, 0)
+            calStart.set(Calendar.SECOND, 0)
+            calStart.set(Calendar.MILLISECOND, 0)
+            calEnd.set(Calendar.HOUR_OF_DAY, 0)
+            calEnd.set(Calendar.MINUTE, 0)
+            calEnd.set(Calendar.SECOND, 0)
+            calEnd.set(Calendar.MILLISECOND, 0)
+            return !calTx.before(calStart) && !calTx.after(calEnd)
+        }
+
         // حساب الرصيد السابق من كل العمليات
         val previousBalance = allTransactions
-            .filter { Date(it.createdAt) < startDateObj && (selectedCurrency == null || it.currency == selectedCurrency) }
+            .filter { 
+                val txDay = Date(it.date)
+                val startDay = startDateObj
+                (txDay.before(startDay)) && (selectedCurrency == null || it.currency == selectedCurrency)
+            }
             .fold(0.0) { acc, tx ->
                 when (tx.type) {
                     "debit" -> acc - tx.amount
@@ -808,12 +852,14 @@ class AccountStatementComposeActivity : ComponentActivity() {
 
         // المعاملات
         val filteredTxs = transactions.filter { tx ->
-            Date(tx.createdAt) >= startDateObj && Date(tx.createdAt) <= endDateObj &&
-            (selectedCurrency == null || tx.currency == selectedCurrency)
-        }.sortedBy { it.createdAt }
+            val txDay = Date(tx.date)
+            val startDay = startDateObj
+            val endDay = endDateObj
+            isSameDayOrInRange(txDay, startDay, endDay) && (selectedCurrency == null || tx.currency == selectedCurrency)
+        }.sortedBy { it.date }
 
         for (tx in filteredTxs) {
-            val dateStr = displayDateFormat.format(Date(tx.createdAt))
+            val dateStr = displayDateFormat.format(Date(tx.date))
             val desc = tx.description ?: ""
             val debit = if (tx.type == "debit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
             val credit = if (tx.type == "credit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
