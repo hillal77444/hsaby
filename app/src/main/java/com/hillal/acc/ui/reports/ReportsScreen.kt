@@ -52,7 +52,7 @@ fun ReportsScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(dimensions.cardHeight * 0.4f) // تقليل الارتفاع
+                .height(dimensions.cardHeight * 0.18f) // تقليل الارتفاع بشكل أكبر
                 .background(
                     MaterialTheme.colorScheme.primary
                 )
@@ -71,7 +71,7 @@ fun ReportsScreen(
         Card(
             modifier = Modifier
                 .size(dimensions.cardHeight * 0.25f) // تقليل الحجم
-                .offset(y = (-dimensions.cardHeight * 0.15f)) // تقليل الإزاحة
+                .offset(y = (-dimensions.cardHeight * 0.02f)) // إزاحة رأسية بسيطة جداً
                 .align(Alignment.CenterHorizontally),
             shape = MaterialTheme.shapes.extraLarge,
             elevation = CardDefaults.cardElevation(12.dp),
