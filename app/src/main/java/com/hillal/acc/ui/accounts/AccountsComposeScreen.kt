@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.ui.res.painterResource
 import com.hillal.acc.ui.theme.success
 import com.hillal.acc.ui.theme.successContainer
+import androidx.compose.foundation.shadow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -114,73 +115,52 @@ fun AccountsComposeScreen(
             }
         }
 
-        // الحصول على الأرصدة - سيتم تحديثها تلقائياً عند تغيير الحسابات
-        // accountBalances سيتم تحديثها من خلال observeAsState
-
         Box(
             modifier = modifier
                 .fillMaxSize()
                 .background(colors.background)
-                .navigationBarsPadding()
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(dimens.spacingLarge),
-                verticalArrangement = Arrangement.spacedBy(dimens.spacingLarge)
+            Column(
+                modifier = Modifier.fillMaxSize()
             ) {
-                // Header Section
-                item {
-                    HeaderSection()
-                }
+                // رأس الصفحة الجديد
+                AccountsHeader(
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = { searchQuery = it },
+                    totalCount = filteredAccounts.size,
+                    onFilterClick = { /* TODO: فلترة */ }
+                )
 
-                // Search and Filter Section
-                item {
-                    SearchAndFilterSection(
-                        searchQuery = searchQuery,
-                        onSearchQueryChange = { searchQuery = it },
-                        currentSortType = currentSortType,
-                        onSortTypeChange = {
-                            currentSortType = it
-                            isAscendingSort = !isAscendingSort
-                        },
-                        onFilterClick = { /* TODO: Implement filter */ }
-                    )
-                }
-
-                // Statistics Section
-                item {
-                    StatisticsSection(
-                        totalAccounts = totalAccounts,
-                        activeAccounts = activeAccounts
-                    )
-                }
-
-                // Accounts List
-                items(
-                    items = sortedAccounts,
-                    key = { account -> account.id }
-                ) { account ->
-                    AccountItem(
-                        account = account,
-                        balance = accountBalances[account.id] ?: 0.0,
-                        onWhatsAppToggle = { isEnabled ->
-                            account.setWhatsappEnabled(isEnabled)
-                            account.setUpdatedAt(System.currentTimeMillis())
-                            viewModel.updateAccount(account)
-                        },
-                        onEditClick = { onNavigateToEditAccount(account.id) },
-                        onItemClick = { onNavigateToAccountDetails(account.id) }
-                    )
-                }
-
-                // Bottom spacing for FAB
-                item {
-                    Spacer(modifier = Modifier.height(dimens.cardCorner * 2))
+                // قائمة الحسابات
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = dimens.spacingLarge),
+                    verticalArrangement = Arrangement.spacedBy(dimens.spacingMedium)
+                ) {
+                    items(
+                        items = sortedAccounts,
+                        key = { account -> account.id }
+                    ) { account ->
+                        AccountItemModern(
+                            account = account,
+                            balance = accountBalances[account.id] ?: 0.0,
+                            onWhatsAppToggle = { isEnabled ->
+                                account.setWhatsappEnabled(isEnabled)
+                                account.setUpdatedAt(System.currentTimeMillis())
+                                viewModel.updateAccount(account)
+                            },
+                            onEditClick = { onNavigateToEditAccount(account.id) },
+                            onItemClick = { onNavigateToAccountDetails(account.id) }
+                        )
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(80.dp))
+                    }
                 }
             }
 
-            // Floating Action Button
+            // زر إضافة حساب عائم
             FloatingActionButton(
                 onClick = onNavigateToAddAccount,
                 modifier = Modifier
@@ -191,7 +171,7 @@ fun AccountsComposeScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.add_account),
+                    contentDescription = "إضافة حساب",
                     modifier = Modifier.size(dimens.iconSize * 1.2f)
                 )
             }
@@ -200,243 +180,91 @@ fun AccountsComposeScreen(
 }
 
 @Composable
-private fun HeaderSection() {
-    val dimens = LocalAppDimensions.current
-    val colors = MaterialTheme.colorScheme
-    val typography = MaterialTheme.typography
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Logo Circle
-        Card(
-            modifier = Modifier
-                .size(dimens.cardCorner * 3.2f)
-                .padding(top = dimens.spacingLarge),
-            shape = CircleShape,
-            colors = CardDefaults.cardColors(containerColor = colors.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = null,
-                    modifier = Modifier.size(dimens.iconSize * 1.3f),
-                    tint = colors.primary
-                )
-            }
-        }
-
-        // Title with Icon
-        Row(
-            modifier = Modifier.padding(top = dimens.spacingLarge),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.AccountCircle,
-                contentDescription = null,
-                modifier = Modifier.size(dimens.iconSize),
-                tint = colors.primary
-            )
-            Spacer(modifier = Modifier.width(dimens.spacingSmall))
-            Text(
-                text = "إدارة الحسابات",
-                fontSize = typography.headlineMedium.fontSize,
-                fontWeight = FontWeight.Bold,
-                color = colors.primary,
-                style = typography.headlineMedium
-            )
-        }
-
-        // Description
-        Text(
-            text = "عرض وإدارة جميع الحسابات",
-            fontSize = typography.bodyMedium.fontSize,
-            color = colors.onSurface,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = dimens.spacingSmall, bottom = dimens.spacingLarge),
-            style = typography.bodyMedium
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SearchAndFilterSection(
+private fun AccountsHeader(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
-    currentSortType: String,
-    onSortTypeChange: (String) -> Unit,
+    totalCount: Int,
     onFilterClick: () -> Unit
 ) {
     val dimens = LocalAppDimensions.current
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(dimens.cardCorner),
-        colors = CardDefaults.cardColors(containerColor = colors.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(bottom = dimens.spacingMedium)
+            .shadow(2.dp, RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
     ) {
-        Column(
-            modifier = Modifier.padding(dimens.spacingLarge),
-            verticalArrangement = Arrangement.spacedBy(dimens.spacingMedium)
+        // شريط العنوان والأزرار
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = dimens.spacingLarge, vertical = dimens.spacingMedium),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Search Field
+            IconButton(onClick = { /* TODO: تحديث */ }) {
+                Icon(imageVector = Icons.Default.Refresh, contentDescription = "تحديث", tint = colors.primary)
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = "إدارة النقاط والفروع",
+                color = colors.primary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                modifier = Modifier.align(Alignment.CenterVertically)
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(onClick = { /* TODO: رجوع */ }) {
+                Icon(imageVector = Icons.Default.ArrowForward, contentDescription = "رجوع", tint = colors.primary)
+            }
+        }
+        // شريط البحث والفلتر
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = dimens.spacingLarge),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(colors.primary, shape = CircleShape)
+                    .clickable { onFilterClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(imageVector = Icons.Default.FilterList, contentDescription = "فلترة", tint = Color.White)
+            }
+            Spacer(modifier = Modifier.width(dimens.spacingSmall))
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = onSearchQueryChange,
-                label = { Text("البحث في الحسابات...", fontSize = typography.bodyMedium.fontSize) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = null,
-                        tint = colors.primary,
-                        modifier = Modifier.size(dimens.iconSize)
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                singleLine = true,
+                placeholder = { Text("الاسم | رقم الحساب | الموبايل", color = colors.onSurfaceVariant) },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = colors.primary,
-                    unfocusedBorderColor = colors.onSurfaceVariant
+                    unfocusedBorderColor = colors.onSurfaceVariant,
+                    cursorColor = colors.primary
                 ),
-                textStyle = LocalTextStyle.current.copy(fontSize = typography.bodyMedium.fontSize)
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodyMedium
             )
-
-            // Filter and Sort Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)
-            ) {
-                Button(
-                    onClick = onFilterClick,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.surfaceVariant,
-                        contentColor = colors.primary
-                    ),
-                    shape = RoundedCornerShape(dimens.cardCorner)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FilterList,
-                        contentDescription = null,
-                        modifier = Modifier.size(dimens.iconSize * 0.7f)
-                    )
-                    Spacer(modifier = Modifier.width(dimens.spacingSmall))
-                    Text("تصفية", fontSize = typography.bodyMedium.fontSize)
-                }
-
-                Button(
-                    onClick = {
-                        val nextSortType = when (currentSortType) {
-                            "balance" -> "name"
-                            "name" -> "number"
-                            "number" -> "date"
-                            "date" -> "balance"
-                            else -> "balance"
-                        }
-                        onSortTypeChange(nextSortType)
-                    },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.surfaceVariant,
-                        contentColor = colors.primary
-                    ),
-                    shape = RoundedCornerShape(dimens.cardCorner)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Sort,
-                        contentDescription = null,
-                        modifier = Modifier.size(dimens.iconSize * 0.7f)
-                    )
-                    Spacer(modifier = Modifier.width(dimens.spacingSmall))
-                    Text(
-                        when (currentSortType) {
-                            "balance" -> "ترتيب (الرصيد)"
-                            "name" -> "ترتيب (الاسم)"
-                            "number" -> "ترتيب (الرقم)"
-                            "date" -> "ترتيب (التاريخ)"
-                            else -> "ترتيب (الرصيد)"
-                        },
-                        fontSize = typography.bodyMedium.fontSize
-                    )
-                }
-            }
         }
+        // عدد النتائج
+        Text(
+            text = "${totalCount} :العدد",
+            color = colors.onSurfaceVariant,
+            fontSize = 13.sp,
+            modifier = Modifier.padding(start = dimens.spacingLarge, top = 4.dp)
+        )
     }
 }
 
 @Composable
-private fun StatisticsSection(
-    totalAccounts: Int,
-    activeAccounts: Int
-) {
-    val dimens = LocalAppDimensions.current
-    val colors = MaterialTheme.colorScheme
-    val typography = MaterialTheme.typography
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)
-    ) {
-        // Total Accounts Card
-        Card(
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(dimens.cardCorner),
-            colors = CardDefaults.cardColors(containerColor = colors.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(dimens.spacingLarge),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = totalAccounts.toString(),
-                    fontSize = typography.headlineSmall.fontSize,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.primary
-                )
-                Text(
-                    text = "إجمالي الحسابات",
-                    fontSize = typography.bodySmall.fontSize,
-                    color = colors.onSurfaceVariant
-                )
-            }
-        }
-
-        // Active Accounts Card
-        Card(
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(dimens.cardCorner),
-            colors = CardDefaults.cardColors(containerColor = colors.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(dimens.spacingLarge),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = activeAccounts.toString(),
-                    fontSize = typography.headlineSmall.fontSize,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.primary
-                )
-                Text(
-                    text = "الحسابات النشطة",
-                    fontSize = typography.bodySmall.fontSize,
-                    color = colors.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun AccountItem(
+private fun AccountItemModern(
     account: Account,
     balance: Double,
     onWhatsAppToggle: (Boolean) -> Unit,
@@ -449,132 +277,24 @@ private fun AccountItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(vertical = 4.dp)
             .clickable { onItemClick() },
-        shape = RoundedCornerShape(dimens.cardCorner),
-        colors = CardDefaults.cardColors(containerColor = colors.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Row(
-            modifier = Modifier.padding(dimens.spacingLarge),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Account Icon
-            Card(
-                modifier = Modifier.size(dimens.iconSize * 2),
-                shape = CircleShape,
-                colors = CardDefaults.cardColors(containerColor = colors.surfaceVariant),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = null,
-                        modifier = Modifier.size(dimens.iconSize),
-                        tint = colors.primary
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(dimens.spacingMedium))
-
-            // Account Information
+            // يسار: سويتش واتساب + زر تعديل
             Column(
-                modifier = Modifier.weight(1f)
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(end = 8.dp)
             ) {
-                Text(
-                    text = account.name,
-                    fontSize = typography.bodyMedium.fontSize,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.primary
-                )
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = dimens.spacingSmall)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Phone,
-                        contentDescription = null,
-                        modifier = Modifier.size(dimens.iconSize * 0.7f),
-                        tint = colors.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.width(dimens.spacingSmall))
-                    Text(
-                        text = account.phoneNumber,
-                        fontSize = typography.bodySmall.fontSize,
-                        color = colors.onSurfaceVariant
-                    )
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = dimens.spacingSmall)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = null,
-                        modifier = Modifier.size(dimens.iconSize * 0.7f),
-                        tint = colors.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.width(dimens.spacingSmall))
-                    Text(
-                        text = if (account.serverId > 0) "رقم الحساب: ${account.serverId}" else "رقم: غير محدد",
-                        fontSize = typography.bodySmall.fontSize,
-                        color = colors.onSurfaceVariant,
-                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-                    )
-                }
-
-                Text(
-                    text = if (balance < 0) {
-                        String.format(Locale.US, "عليه %,d يمني", kotlin.math.abs(balance.toLong()))
-                    } else {
-                        String.format(Locale.US, "له %,d يمني", balance.toLong())
-                    },
-                    fontSize = typography.bodyMedium.fontSize,
-                    fontWeight = FontWeight.Bold,
-                    color = if (balance < 0) colors.error else colors.success,
-                    modifier = Modifier.padding(top = dimens.spacingSmall)
-                )
-            }
-
-            // Action Buttons
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // WhatsApp Switch
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (account.isWhatsappEnabled()) {
-                        Box(
-                            modifier = Modifier
-                                .size(dimens.iconSize * 1.1f)
-                                .background(
-                                    color = colors.success,
-                                    shape = CircleShape
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_whatsapp),
-                                contentDescription = "واتساب",
-                                tint = colors.onPrimary,
-                                modifier = Modifier.size(dimens.iconSize * 0.7f)
-                            )
-                        }
-                    } else {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_whatsapp),
-                            contentDescription = "واتساب",
-                            tint = colors.onSurfaceVariant,
-                            modifier = Modifier.size(dimens.iconSize * 0.7f)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(dimens.spacingSmall))
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Switch(
                         checked = account.isWhatsappEnabled(),
                         onCheckedChange = onWhatsAppToggle,
@@ -585,28 +305,101 @@ private fun AccountItem(
                             uncheckedTrackColor = colors.onSurfaceVariant
                         )
                     )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("واتساب", fontSize = 12.sp, color = colors.onSurfaceVariant)
                 }
-
-                Spacer(modifier = Modifier.height(dimens.spacingSmall))
-
-                // Edit Button
+                Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = onEditClick,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.primary
-                    ),
-                    shape = RoundedCornerShape(dimens.cardCorner),
-                    modifier = Modifier.height(dimens.iconSize * 1.5f)
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.height(32.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = null,
-                        modifier = Modifier.size(dimens.iconSize * 0.7f)
+                        contentDescription = "تعديل",
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.White
                     )
-                    Spacer(modifier = Modifier.width(dimens.spacingSmall))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("تعديل", fontSize = 13.sp, color = Color.White)
+                }
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            // يمين: بيانات الحساب وصورة شخصية
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // صورة شخصية دائرية
+                Card(
+                    modifier = Modifier.size(48.dp),
+                    shape = CircleShape,
+                    colors = CardDefaults.cardColors(containerColor = colors.primary.copy(alpha = 0.13f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp),
+                            tint = colors.primary
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                // بيانات الحساب
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text(
-                        text = "تعديل",
-                        fontSize = typography.bodySmall.fontSize
+                        text = account.name,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.primary,
+                        fontSize = 17.sp
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Phone,
+                            contentDescription = null,
+                            modifier = Modifier.size(15.dp),
+                            tint = colors.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = account.phoneNumber,
+                            fontSize = 13.sp,
+                            color = colors.onSurfaceVariant
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = null,
+                            modifier = Modifier.size(15.dp),
+                            tint = colors.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (account.serverId > 0) "رقم الحساب: ${account.serverId}" else "رقم: غير محدد",
+                            fontSize = 13.sp,
+                            color = colors.onSurfaceVariant,
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                        )
+                    }
+                    Text(
+                        text = if (balance < 0) {
+                            String.format(Locale.US, "عليه %,d يمني", kotlin.math.abs(balance.toLong()))
+                        } else {
+                            String.format(Locale.US, "له %,d يمني", balance.toLong())
+                        },
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (balance < 0) colors.error else colors.success,
+                        modifier = Modifier.padding(top = 2.dp)
                     )
                 }
             }
