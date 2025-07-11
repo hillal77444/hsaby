@@ -84,4 +84,16 @@ public class BetterArabicReshaper {
         }
         return sb.toString();
     }
+
+    /**
+     * تعيد النص العربي بشكل صحيح للعرض: تشكل الحروف وتضبط اتجاه النص (RTL)
+     * استخدم هذه الدالة بدلاً من reshapeArabic فقط عند الطباعة أو التصدير.
+     * @param text النص العربي الأصلي
+     * @return نص عربي مشكل وجاهز للعرض من اليمين لليسار
+     */
+    public static String reshapeAndBidi(String text) {
+        String reshaped = reshapeArabic(text);
+        Bidi bidi = new Bidi(reshaped, Bidi.DIRECTION_RIGHT_TO_LEFT);
+        return bidi.writeReordered(Bidi.DO_MIRRORING);
+    }
 } 
