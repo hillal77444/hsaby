@@ -575,9 +575,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     """
                     <tr>
                         <td>${displayDateFormat.format(Date(transaction.transactionDate))}</td>
-                        <td>${transaction.description}</td>
-                        <td class="debit">${String.format(Locale.ENGLISH, "%.2f", transaction.amount)}</td>
                         <td></td>
+                        <td class="debit">${String.format(Locale.ENGLISH, "%.2f", transaction.amount)}</td>
+                        <td>${transaction.description}</td>
                         <td>${String.format(Locale.ENGLISH, "%.2f", balance)}</td>
                     </tr>
                     """
@@ -588,9 +588,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     """
                     <tr>
                         <td>${displayDateFormat.format(Date(transaction.transactionDate))}</td>
-                        <td>${transaction.description}</td>
-                        <td></td>
                         <td class="credit">${String.format(Locale.ENGLISH, "%.2f", transaction.amount)}</td>
+                        <td></td>
+                        <td>${transaction.description}</td>
                         <td>${String.format(Locale.ENGLISH, "%.2f", balance)}</td>
                     </tr>
                     """
@@ -652,9 +652,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 <thead>
                     <tr>
                         <th>التاريخ</th>
-                        <th>الوصف</th>
-                        <th>عليه</th>
                         <th>له</th>
+                        <th>عليه</th>
+                        <th>الوصف</th>
                         <th>الرصيد</th>
                     </tr>
                 </thead>
@@ -812,7 +812,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         // إنشاء الجدول مع تحديد عدد الأعمدة ونسب العرض
         val table = PdfPTable(5)
         table.widthPercentage = 100f
-        table.setWidths(floatArrayOf(2f, 5f, 2f, 2f, 2f))
+        table.setWidths(floatArrayOf(2f, 2f, 2f, 5f, 2f)) // Adjusted widths for new order
 
         // رؤوس الجدول مع ألوان (PDF)
         val headers = listOf("الرصيد", "تفاصيل", "عليه", "له", "التاريخ")
