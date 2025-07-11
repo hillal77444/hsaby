@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.graphics.luminance
 
 // ألوان المشروع
 private val LightColors = lightColorScheme(
@@ -25,7 +26,9 @@ private val LightColors = lightColorScheme(
     surface = Color.White,
     onSurface = Color(0xFF222222),
     error = Color(0xFFE53E3E),
-    onError = Color.White
+    onError = Color.White,
+    // Custom success colors
+    // These are not part of the default ColorScheme, so we will add them as extensions
 )
 
 private val DarkColors = darkColorScheme(
@@ -38,8 +41,26 @@ private val DarkColors = darkColorScheme(
     surface = Color(0xFF23262F),
     onSurface = Color(0xFFF3F4F6),
     error = Color(0xFFE57373),
-    onError = Color(0xFF23262F)
+    onError = Color(0xFF23262F),
+    // Custom success colors
+    // These are not part of the default ColorScheme, so we will add them as extensions
 )
+
+// Custom Success Colors
+val SuccessLight = Color(0xFF22C55E) // Green
+val SuccessContainerLight = Color(0xFFD1FADF) // Light green background
+val SuccessDark = Color(0xFF22C55E) // Green
+val SuccessContainerDark = Color(0xFF00522E) // Dark green background
+
+// Extensions to access custom colors from MaterialTheme.colorScheme
+val ColorScheme.success: Color
+    get() = if (isLight) SuccessLight else SuccessDark
+
+val ColorScheme.successContainer: Color
+    get() = if (isLight) SuccessContainerLight else SuccessContainerDark
+
+private val ColorScheme.isLight: Boolean
+    get() = this.background.luminance() > 0.5f
 
 // الخطوط
 val AppTypography = Typography(
