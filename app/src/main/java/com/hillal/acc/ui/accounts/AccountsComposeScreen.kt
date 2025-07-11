@@ -37,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import com.hillal.acc.ui.theme.success
 import com.hillal.acc.ui.theme.successContainer
 import androidx.compose.ui.draw.shadow
+import androidx.compose.runtime.mutableStateMapOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -318,11 +319,11 @@ private fun AccountItemModern(
     val typography = MaterialTheme.typography
     
     // جلب الرصيد من العمليات (مدين/دائن) بعملة يمني
-    val balanceYemeni by viewModel.getAccountBalanceYemeni(account.id).observeAsState(0.0)
+    val balanceYemeni by viewModel.getAccountBalanceYemeni(account.id ?: 0L).observeAsState(0.0)
     
     // تحديث مصفوفة الأرصدة للفرز
     LaunchedEffect(balanceYemeni) {
-        accountBalances[account.id] = balanceYemeni
+        accountBalances[account.id ?: 0L] = balanceYemeni ?: 0.0
     }
     
     Card(
@@ -440,14 +441,14 @@ private fun AccountItemModern(
                         )
                     }
                     Text(
-                        text = if (balanceYemeni < 0) {
-                            String.format(Locale.US, "عليه %,d يمني", kotlin.math.abs(balanceYemeni.toLong()))
+                        text = if ((balanceYemeni ?: 0.0) < 0) {
+                            String.format(Locale.US, "عليه %,d يمني", kotlin.math.abs((balanceYemeni ?: 0.0).toLong()))
                         } else {
-                            String.format(Locale.US, "له %,d يمني", balanceYemeni.toLong())
+                            String.format(Locale.US, "له %,d يمني", (balanceYemeni ?: 0.0).toLong())
                         },
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (balanceYemeni < 0) colors.error else colors.success,
+                        color = if ((balanceYemeni ?: 0.0) < 0) colors.error else colors.success,
                         modifier = Modifier.padding(top = 2.dp)
                     )
                 }
