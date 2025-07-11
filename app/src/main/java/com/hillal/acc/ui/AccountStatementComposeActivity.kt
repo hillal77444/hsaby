@@ -493,14 +493,14 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 tx.accountId == account.id &&
                 (selectedCurrency == null || tx.currency == selectedCurrency) &&
                 isTransactionInDateRange(tx, startDate, endDate)
-            }.sortedBy { it.createdAt }
+            }.sortedBy { it.transactionDate }
             
             // 5. الرصيد التراكمي يبدأ من رصيد الحساب قبل الفترة
             val startDateObj = dateFormat.parse(startDateStr)
             val previousBalance = allTransactions.filter { tx ->
                 tx.accountId == account.id &&
                 (selectedCurrency == null || tx.currency == selectedCurrency) &&
-                Date(tx.createdAt).before(startDateObj)
+                Date(tx.transactionDate).before(startDateObj)
             }.fold(0.0) { acc, tx ->
                 when (tx.type) {
                     "debit" -> acc - tx.amount
@@ -519,7 +519,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
     }
 
     private fun isTransactionInDateRange(transaction: Transaction, startDate: Date, endDate: Date): Boolean {
-        val transactionDate = Date(transaction.createdAt)
+        val transactionDate = Date(transaction.transactionDate)
         return transactionDate >= startDate && transactionDate <= endDate
     }
 
@@ -564,7 +564,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     balance -= transaction.amount
                     """
                     <tr>
-                        <td>${displayDateFormat.format(Date(transaction.createdAt))}</td>
+                        <td>${displayDateFormat.format(Date(transaction.transactionDate))}</td>
                         <td>${transaction.description}</td>
                         <td class="debit">${String.format(Locale.ENGLISH, "%.2f", transaction.amount)}</td>
                         <td></td>
@@ -577,7 +577,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     balance += transaction.amount
                     """
                     <tr>
-                        <td>${displayDateFormat.format(Date(transaction.createdAt))}</td>
+                        <td>${displayDateFormat.format(Date(transaction.transactionDate))}</td>
                         <td>${transaction.description}</td>
                         <td></td>
                         <td class="credit">${String.format(Locale.ENGLISH, "%.2f", transaction.amount)}</td>
@@ -695,8 +695,8 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 val filteredTransactions = transactions.filter { tx ->
                     tx.accountId == selectedAccount.id &&
                     (selectedCurrency == null || tx.currency == selectedCurrency) &&
-                    Date(tx.createdAt) >= startDateObj && Date(tx.createdAt) <= endDateObj
-                }.sortedBy { it.createdAt }
+                    Date(tx.transactionDate) >= startDateObj && Date(tx.transactionDate) <= endDateObj
+                }.sortedBy { it.transactionDate }
                 val pdfFile = generateAccountStatementPdfWithITextG(
                     context = this,
                     account = selectedAccount,
@@ -769,7 +769,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
         // عنوان التقرير
         val title = Paragraph(ArabicUtilities.reshape("كشف الحساب التفصيلي"), fontCairoBold)
         title.alignment = Element.ALIGN_CENTER
-        title.runDirection = PdfWriter.RUN_DIRECTION_RTL // أضف هذا السطر
         document.add(title)
         document.add(Paragraph(" "))
 
@@ -778,7 +777,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
             (if (selectedCurrency != null) "   |   العملة: " + ArabicUtilities.reshape(selectedCurrency) else "")
         val infoPara = Paragraph(info, fontCairo)
         infoPara.alignment = Element.ALIGN_RIGHT
-        infoPara.runDirection = PdfWriter.RUN_DIRECTION_RTL // أضف هذا السطر
         document.add(infoPara)
         document.add(Paragraph(" "))
 
@@ -797,30 +795,10 @@ class AccountStatementComposeActivity : ComponentActivity() {
             table.addCell(cell)
         }
 
-        // دالة مساعدة لمقارنة الأيام فقط (بدون وقت)
-        private fun isSameDayOrInRange(txDate: Date, start: Date, end: Date): Boolean {
-            val calTx = Calendar.getInstance().apply { time = txDate }
-            val calStart = Calendar.getInstance().apply { time = start }
-            val calEnd = Calendar.getInstance().apply { time = end }
-            calTx.set(Calendar.HOUR_OF_DAY, 0)
-            calTx.set(Calendar.MINUTE, 0)
-            calTx.set(Calendar.SECOND, 0)
-            calTx.set(Calendar.MILLISECOND, 0)
-            calStart.set(Calendar.HOUR_OF_DAY, 0)
-            calStart.set(Calendar.MINUTE, 0)
-            calStart.set(Calendar.SECOND, 0)
-            calStart.set(Calendar.MILLISECOND, 0)
-            calEnd.set(Calendar.HOUR_OF_DAY, 0)
-            calEnd.set(Calendar.MINUTE, 0)
-            calEnd.set(Calendar.SECOND, 0)
-            calEnd.set(Calendar.MILLISECOND, 0)
-            return !calTx.before(calStart) && !calTx.after(calEnd)
-        }
-
         // حساب الرصيد السابق من كل العمليات
         val previousBalance = allTransactions
             .filter { 
-                val txDay = Date(it.date)
+                val txDay = Date(it.transactionDate)
                 val startDay = startDateObj
                 (txDay.before(startDay)) && (selectedCurrency == null || it.currency == selectedCurrency)
             }
@@ -852,14 +830,14 @@ class AccountStatementComposeActivity : ComponentActivity() {
 
         // المعاملات
         val filteredTxs = transactions.filter { tx ->
-            val txDay = Date(tx.date)
+            val txDay = Date(tx.transactionDate)
             val startDay = startDateObj
             val endDay = endDateObj
             isSameDayOrInRange(txDay, startDay, endDay) && (selectedCurrency == null || tx.currency == selectedCurrency)
-        }.sortedBy { it.date }
+        }.sortedBy { it.transactionDate }
 
         for (tx in filteredTxs) {
-            val dateStr = displayDateFormat.format(Date(tx.date))
+            val dateStr = displayDateFormat.format(Date(tx.transactionDate))
             val desc = tx.description ?: ""
             val debit = if (tx.type == "debit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
             val credit = if (tx.type == "credit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
