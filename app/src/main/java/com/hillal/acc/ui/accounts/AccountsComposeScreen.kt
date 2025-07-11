@@ -33,6 +33,7 @@ import java.util.*
 import com.hillal.acc.ui.theme.ProvideResponsiveDimensions
 import com.hillal.acc.ui.theme.LocalResponsiveDimensions
 import com.hillal.acc.ui.accounts.ResponsiveAccountsTheme
+import androidx.compose.ui.res.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -535,18 +536,38 @@ private fun AccountItem(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "واتساب",
-                        fontSize = dimensions.statLabelFont,
-                        color = Color(0xFF666666)
-                    )
+                    if (account.isWhatsappEnabled()) {
+                        Box(
+                            modifier = Modifier
+                                .size(dimensions.iconSize * 1.1f)
+                                .background(
+                                    color = Color(0xFF22C55E),
+                                    shape = CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_whatsapp),
+                                contentDescription = "واتساب",
+                                tint = Color.White,
+                                modifier = Modifier.size(dimensions.iconSize * 0.7f)
+                            )
+                        }
+                    } else {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_whatsapp),
+                            contentDescription = "واتساب",
+                            tint = Color(0xFFCCCCCC),
+                            modifier = Modifier.size(dimensions.iconSize * 0.7f)
+                        )
+                    }
                     Spacer(modifier = Modifier.width(dimensions.spacingSmall))
                     Switch(
                         checked = account.isWhatsappEnabled(),
                         onCheckedChange = onWhatsAppToggle,
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = if (account.isWhatsappEnabled()) Color(0xFF22C55E) else Color(0xFF666666),
-                            checkedTrackColor = if (account.isWhatsappEnabled()) Color(0xFF22C55E) else Color(0xFFE0E0E0),
+                            checkedThumbColor = Color(0xFF22C55E),
+                            checkedTrackColor = Color(0xFFB9F5D8),
                             uncheckedThumbColor = Color(0xFF666666),
                             uncheckedTrackColor = Color(0xFFE0E0E0)
                         )
