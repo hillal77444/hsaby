@@ -102,7 +102,7 @@ fun AccountsComposeScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 // رأس الصفحة الجديد
-                AccountsHeaderWithFilter(
+                AccountsHeaderModern(
                     searchQuery = searchQuery,
                     onSearchQueryChange = { searchQuery = it },
                     totalCount = filteredAccounts.size,
@@ -166,7 +166,7 @@ fun AccountsComposeScreen(
 }
 
 @Composable
-private fun AccountsHeaderWithFilter(
+private fun AccountsHeaderModern(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     totalCount: Int,
@@ -185,29 +185,55 @@ private fun AccountsHeaderWithFilter(
             .fillMaxWidth()
             .background(Color.White)
             .padding(bottom = dimens.spacingMedium)
-            .shadow(2.dp, RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
     ) {
         // شريط العنوان والأزرار
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = dimens.spacingLarge, vertical = dimens.spacingMedium),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = dimens.spacingLarge, vertical = dimens.spacingMedium)
         ) {
-            IconButton(onClick = { /* TODO: تحديث */ }) {
-                Icon(imageVector = Icons.Default.Refresh, contentDescription = "تحديث", tint = colors.primary)
+            Row(
+                modifier = Modifier.align(Alignment.CenterStart),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = { /* TODO: تحديث */ },
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color.Transparent, shape = CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "تحديث",
+                        tint = colors.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
-            Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = "إدارة الحسابات",
+                text = "إدارة الحسابات"
                 color = colors.primary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
-                modifier = Modifier.align(Alignment.CenterVertically)
+                modifier = Modifier.align(Alignment.Center)
             )
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = { /* TODO: رجوع */ }) {
-                Icon(imageVector = Icons.Default.ArrowForward, contentDescription = "رجوع", tint = colors.primary)
+            Row(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = { /* TODO: رجوع */ },
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color.Transparent, shape = CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowForward,
+                        contentDescription = "رجوع",
+                        tint = colors.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
         }
         // شريط البحث والفلتر
@@ -255,8 +281,10 @@ private fun AccountsHeaderWithFilter(
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = colors.primary,
-                    unfocusedBorderColor = colors.onSurfaceVariant,
-                    cursorColor = colors.primary
+                    unfocusedBorderColor = Color(0xFFF3F4F6), // رمادي فاتح جدًا
+                    cursorColor = colors.primary,
+                    unfocusedContainerColor = Color(0xFFF3F4F6),
+                    focusedContainerColor = Color(0xFFF3F4F6)
                 ),
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium
