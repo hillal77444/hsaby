@@ -747,6 +747,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         // عنوان التقرير
         val title = Paragraph(ArabicUtilities.reshape("كشف الحساب التفصيلي"), fontCairoBold)
         title.alignment = Element.ALIGN_CENTER
+        title.runDirection = PdfWriter.RUN_DIRECTION_RTL // أضف هذا السطر
         document.add(title)
         document.add(Paragraph(" "))
 
@@ -755,6 +756,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
             (if (selectedCurrency != null) "   |   العملة: " + ArabicUtilities.reshape(selectedCurrency) else "")
         val infoPara = Paragraph(info, fontCairo)
         infoPara.alignment = Element.ALIGN_RIGHT
+        infoPara.runDirection = PdfWriter.RUN_DIRECTION_RTL // أضف هذا السطر
         document.add(infoPara)
         document.add(Paragraph(" "))
 
