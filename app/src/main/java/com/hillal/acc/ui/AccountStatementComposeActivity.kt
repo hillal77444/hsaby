@@ -575,10 +575,10 @@ class AccountStatementComposeActivity : ComponentActivity() {
             <meta charset="UTF-8">
             <style>
                 @font-face {
-                    font-family: 'Amiri';
-                    src: url('file:///android_asset/fonts/Amiri-1.002/Amiri-Regular.ttf');
+                    font-family: 'Cairo';
+                    src: url('file:///android_asset/fonts/Cairo/Cairo-Regular.ttf');
                 }
-                body { font-family: 'Amiri', Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+                body { font-family: 'Cairo', Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
                 .header, .account-info-row, .transactions-table, .summary {
                     width: 100%;
                     max-width: 100vw;
@@ -711,24 +711,24 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val writer = PdfWriter.getInstance(document, FileOutputStream(pdfFile))
         document.open()
 
-        // تحميل خط Amiri من assets
-        val amiriFontFile = File(context.cacheDir, "Amiri-Regular.ttf")
-        if (!amiriFontFile.exists()) {
-            context.assets.open("fonts/Amiri-1.002/Amiri-Regular.ttf").use { input ->
-                amiriFontFile.outputStream().use { output ->
+        // تحميل خط Cairo من assets
+        val cairoFontFile = File(context.cacheDir, "Cairo-Regular.ttf")
+        if (!cairoFontFile.exists()) {
+            context.assets.open("fonts/Cairo/Cairo-Regular.ttf").use { input ->
+                cairoFontFile.outputStream().use { output ->
                     input.copyTo(output)
                 }
             }
         }
-        val amiriBaseFont = com.itextpdf.text.pdf.BaseFont.createFont(amiriFontFile.absolutePath, com.itextpdf.text.pdf.BaseFont.IDENTITY_H, com.itextpdf.text.pdf.BaseFont.EMBEDDED)
-        val fontAmiri = com.itextpdf.text.Font(amiriBaseFont, 13f, com.itextpdf.text.Font.NORMAL)
-        val fontAmiriBold = com.itextpdf.text.Font(amiriBaseFont, 15f, com.itextpdf.text.Font.BOLD)
-        val fontHeader = com.itextpdf.text.Font(amiriBaseFont, 13f, com.itextpdf.text.Font.BOLD, BaseColor.WHITE)
-        val fontDebit = com.itextpdf.text.Font(amiriBaseFont, 13f, com.itextpdf.text.Font.NORMAL, BaseColor(0xD3, 0x2F, 0x2F))
-        val fontCredit = com.itextpdf.text.Font(amiriBaseFont, 13f, com.itextpdf.text.Font.NORMAL, BaseColor(0x38, 0x8E, 0x3C))
+        val cairoBaseFont = com.itextpdf.text.pdf.BaseFont.createFont(cairoFontFile.absolutePath, com.itextpdf.text.pdf.BaseFont.IDENTITY_H, com.itextpdf.text.pdf.BaseFont.EMBEDDED)
+        val fontCairo = com.itextpdf.text.Font(cairoBaseFont, 13f, Font.NORMAL)
+        val fontCairoBold = com.itextpdf.text.Font(cairoBaseFont, 15f, Font.BOLD)
+        val fontHeader = com.itextpdf.text.Font(cairoBaseFont, 13f, Font.BOLD, BaseColor.WHITE)
+        val fontDebit = com.itextpdf.text.Font(cairoBaseFont, 13f, Font.NORMAL, BaseColor(0xD3, 0x2F, 0x2F))
+        val fontCredit = com.itextpdf.text.Font(cairoBaseFont, 13f, Font.NORMAL, BaseColor(0x38, 0x8E, 0x3C))
 
         // عنوان التقرير
-        val title = Paragraph(ArabicReshaper.reshape("كشف الحساب التفصيلي"), fontAmiriBold)
+        val title = Paragraph(ArabicReshaper.reshape("كشف الحساب التفصيلي"), fontCairoBold)
         title.alignment = Element.ALIGN_CENTER
         document.add(title)
         document.add(Paragraph(" "))
@@ -736,7 +736,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         // معلومات الحساب
         val info = "اسم الحساب: ${ArabicReshaper.reshape(account.name)}   |   رقم الهاتف: ${account.phoneNumber}   |   الفترة: من ${startDate} إلى ${endDate}" +
             (if (selectedCurrency != null) "   |   العملة: ${ArabicReshaper.reshape(selectedCurrency)}" else "")
-        val infoPara = Paragraph(info, fontAmiri)
+        val infoPara = Paragraph(info, fontCairo)
         infoPara.alignment = Element.ALIGN_RIGHT
         document.add(infoPara)
         document.add(Paragraph(" "))
@@ -770,7 +770,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         // صف الرصيد السابق
         val prevRow = listOf("", ArabicReshaper.reshape("الرصيد السابق"), "", "", String.format(Locale.ENGLISH, "%.2f", previousBalance))
         for (cellText in prevRow) {
-            val cell = PdfPCell(Paragraph(cellText, fontAmiri))
+            val cell = PdfPCell(Paragraph(cellText, fontCairo))
             cell.horizontalAlignment = Element.ALIGN_CENTER
             cell.colspan = 1
             cell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
@@ -798,11 +798,11 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 totalCredit += tx.amount
             }
             val row = listOf(
-                PdfPCell(Paragraph(dateStr, fontAmiri)),
-                PdfPCell(Paragraph(ArabicReshaper.reshape(desc), fontAmiri)),
+                PdfPCell(Paragraph(dateStr, fontCairo)),
+                PdfPCell(Paragraph(ArabicReshaper.reshape(desc), fontCairo)),
                 debitCell,
                 creditCell,
-                PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", balance), fontAmiri))
+                PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", balance), fontCairo))
             )
             for (cell in row) {
                 cell.horizontalAlignment = Element.ALIGN_CENTER
