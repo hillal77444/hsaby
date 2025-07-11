@@ -484,7 +484,16 @@ class AccountStatementComposeActivity : ComponentActivity() {
         try {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
             val startDate = dateFormat.parse(startDateStr)
-            val endDate = dateFormat.parse(endDateStr)
+            val endDateRaw = dateFormat.parse(endDateStr)
+            // ضبط نهاية اليوم لـ endDate
+            val endCal = Calendar.getInstance().apply {
+                time = endDateRaw
+                set(Calendar.HOUR_OF_DAY, 23)
+                set(Calendar.MINUTE, 59)
+                set(Calendar.SECOND, 59)
+                set(Calendar.MILLISECOND, 999)
+            }
+            val endDate = endCal.time
             
             if (startDate == null || endDate == null) return
             
@@ -691,11 +700,20 @@ class AccountStatementComposeActivity : ComponentActivity() {
             try {
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
                 val startDateObj = dateFormat.parse(startDate)
-                val endDateObj = dateFormat.parse(endDate)
+                val endDateRaw = dateFormat.parse(endDate)
+                // ضبط نهاية اليوم لـ endDate
+                val endCal = Calendar.getInstance().apply {
+                    time = endDateRaw
+                    set(Calendar.HOUR_OF_DAY, 23)
+                    set(Calendar.MINUTE, 59)
+                    set(Calendar.SECOND, 59)
+                    set(Calendar.MILLISECOND, 999)
+                }
+                val endDate = endCal.time
                 val filteredTransactions = transactions.filter { tx ->
                     tx.accountId == selectedAccount.id &&
                     (selectedCurrency == null || tx.currency == selectedCurrency) &&
-                    Date(tx.transactionDate) >= startDateObj && Date(tx.transactionDate) <= endDateObj
+                    Date(tx.transactionDate) >= startDateObj && Date(tx.transactionDate) <= endDate
                 }.sortedBy { it.transactionDate }
                 val pdfFile = generateAccountStatementPdfWithITextG(
                     context = this,
@@ -723,7 +741,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         context: Context,
         account: Account,
         startDate: String,
-        endDate: String,
+        endDate: Date,
         selectedCurrency: String?,
         transactions: List<Transaction>, // معاملات الفترة فقط
         allTransactions: List<Transaction> // كل معاملات الحساب
@@ -731,7 +749,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
         val displayDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
         val startDateObj = dateFormat.parse(startDate)
-        val endDateObj = dateFormat.parse(endDate)
+        val endDateObj = endDate
         val safeAccountName = account.name.replace(Regex("[^\u0600-\u06FFa-zA-Z0-9_]"), "_")
         val fileName = "كشف_حساب_${safeAccountName}_${startDate}_${endDate}_itextg.pdf"
         val pdfFile = File(context.cacheDir, fileName)
@@ -773,7 +791,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         document.add(Paragraph(" "))
 
         // معلومات الحساب
-        val info = "اسم الحساب: " + ArabicUtilities.reshape(account.name) + "   |   رقم الهاتف: " + account.phoneNumber + "   |   الفترة: من " + startDate + " إلى " + endDate +
+        val info = "اسم الحساب: " + ArabicUtilities.reshape(account.name) + "   |   رقم الهاتف: " + account.phoneNumber + "   |   الفترة: من " + startDate + " إلى " + displayDateFormat.format(endDate) +
             (if (selectedCurrency != null) "   |   العملة: " + ArabicUtilities.reshape(selectedCurrency) else "")
         val infoPara = Paragraph(info, fontCairo)
         infoPara.alignment = Element.ALIGN_RIGHT
