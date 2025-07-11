@@ -31,6 +31,7 @@ import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -286,7 +287,11 @@ fun LoginScreen(
                         Text("عن التطبيق", color = colors.onPrimary, fontSize = fontSmall, style = typography.bodyMedium)
                     }
                 }
-                Spacer(modifier = Modifier.height(marginLarge)) // فارق سفلي ديناميكي
+                Spacer(
+                    modifier = Modifier
+                        .height(marginLarge)
+                        .navigationBarsPadding() // يضمن عدم التداخل مع شريط التنقل السفلي
+                )
             }
         }
     }
