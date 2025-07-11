@@ -102,6 +102,13 @@ public class BetterArabicReshaper {
         return result.toString();
     }
 
+    private static boolean isNumberOrSeparator(char c) {
+        // الأرقام العربية والهندية والفواصل والنقاط
+        return (c >= '0' && c <= '9') ||
+               (c >= '\u0660' && c <= '\u0669') || // أرقام هندية
+               c == ',' || c == '.' || c == '٫' || c == '٬' || c == '،' || c == '%';
+    }
+
     /**
      * تعكس فقط الحروف العربية في السطر وتترك الأرقام والإنجليزي في مكانهم
      */
@@ -115,6 +122,11 @@ public class BetterArabicReshaper {
                 int arabicEnd = i;
                 while (i >= 0 && isArabicChar(line.charAt(i))) i--;
                 sb.append(line.substring(i + 1, arabicEnd + 1));
+            } else if (isNumberOrSeparator(c)) {
+                // اجمع كل الأرقام والفواصل المتتالية
+                int numEnd = i;
+                while (i >= 0 && isNumberOrSeparator(line.charAt(i))) i--;
+                sb.append(line.substring(i + 1, numEnd + 1));
             } else {
                 sb.append(c);
                 i--;
