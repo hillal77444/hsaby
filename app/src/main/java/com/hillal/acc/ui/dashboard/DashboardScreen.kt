@@ -79,8 +79,8 @@ fun DashboardScreen(
         val fontSmall = typography.bodyMedium.fontSize
         val iconSize = dimens.iconSize
         val marginSmall = dimens.spacingSmall
-        val marginMedium = dimens.spacingMedium
-        val marginLarge = dimens.spacingLarge
+        val marginMedium = dimens.spacingMedium / 2 // نصف القيمة السابقة
+        val marginLarge = dimens.spacingLarge / 2   // نصف القيمة السابقة
         val statCardHeight = maxSide * 0.10f
         val actionButtonHeight = maxSide * 0.07f
         val gridCardHeight = maxSide * 0.11f
