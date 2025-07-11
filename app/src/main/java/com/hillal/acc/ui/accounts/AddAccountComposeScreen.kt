@@ -248,7 +248,7 @@ private fun HeaderSection(
         // Logo Circle
         Card(
             modifier = Modifier
-                .size(64.dp)
+                .size(40.dp)
                 .padding(top = spacing.xl),
             shape = CircleShape,
             colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -261,7 +261,7 @@ private fun HeaderSection(
                 Icon(
                     imageVector = Icons.Default.PersonAdd,
                     contentDescription = null,
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.size(26.dp),
                     tint = Color(0xFF152FD9)
                 )
             }
