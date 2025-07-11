@@ -167,27 +167,15 @@ fun DashboardScreen(
                     horizontalArrangement = Arrangement.spacedBy(marginSmall)
                 ) {
                     StatCardOld(
-                        icon = R.drawable.ic_money,
-                        value = "${netBalance?.toInt() ?: 0} يمني",
-                        label = "الرصيد",
-                        subLabel = "الرصيد",
-                        color = Color(0xFFB2F2E5),
-                        iconTint = Color(0xFF009688),
-                        valueColor = Color(0xFF009688),
-                        valueFontSize = fontSmall,
-                        labelFontSize = fontSmall,
-                        modifier = Modifier.weight(1f).height(statCardHeight)
-                    )
-                    StatCardOld(
-                        icon = R.drawable.ic_arrow_downward,
-                        value = "${totalDebtors?.toInt() ?: 0}",
-                        label = "إجمالي عليكم",
-                        subLabel = "إجمالي عليكم",
-                        color = Color(0xFFFFF3E0),
-                        iconTint = Color(0xFFFF9800),
-                        valueColor = Color(0xFFFF9800),
-                        valueFontSize = fontSmall,
-                        labelFontSize = fontSmall,
+                        icon = R.drawable.ic_accounts,
+                        value = "${accounts?.size ?: 0}",
+                        label = "عدد الحسابات",
+                        subLabel = "عدد الحسابات",
+                        color = Color(0xFFE3F2FD),
+                        iconTint = Color(0xFF1976D2),
+                        valueColor = Color(0xFF1976D2),
+                        valueFontSize = fontSmall * 0.85f,
+                        labelFontSize = fontSmall * 0.85f,
                         modifier = Modifier.weight(1f).height(statCardHeight)
                     )
                     StatCardOld(
@@ -198,20 +186,32 @@ fun DashboardScreen(
                         color = Color(0xFFE8F5E9),
                         iconTint = Color(0xFF4CAF50),
                         valueColor = Color(0xFF4CAF50),
-                        valueFontSize = fontSmall,
-                        labelFontSize = fontSmall,
+                        valueFontSize = fontSmall * 0.85f,
+                        labelFontSize = fontSmall * 0.85f,
                         modifier = Modifier.weight(1f).height(statCardHeight)
                     )
                     StatCardOld(
-                        icon = R.drawable.ic_accounts,
-                        value = "${accounts?.size ?: 0}",
-                        label = "عدد الحسابات",
-                        subLabel = "عدد الحسابات",
-                        color = Color(0xFFE3F2FD),
-                        iconTint = Color(0xFF1976D2),
-                        valueColor = Color(0xFF1976D2),
-                        valueFontSize = fontSmall,
-                        labelFontSize = fontSmall,
+                        icon = R.drawable.ic_arrow_downward,
+                        value = "${totalDebtors?.toInt() ?: 0}",
+                        label = "إجمالي عليكم",
+                        subLabel = "إجمالي عليكم",
+                        color = Color(0xFFFFF3E0),
+                        iconTint = Color(0xFFFF9800),
+                        valueColor = Color(0xFFFF9800),
+                        valueFontSize = fontSmall * 0.85f,
+                        labelFontSize = fontSmall * 0.85f,
+                        modifier = Modifier.weight(1f).height(statCardHeight)
+                    )
+                    StatCardOld(
+                        icon = R.drawable.ic_money,
+                        value = "${netBalance?.toInt() ?: 0} يمني",
+                        label = "الرصيد",
+                        subLabel = "الرصيد",
+                        color = Color(0xFFB2F2E5),
+                        iconTint = Color(0xFF009688),
+                        valueColor = Color(0xFF009688),
+                        valueFontSize = fontSmall * 0.85f,
+                        labelFontSize = fontSmall * 0.85f,
                         modifier = Modifier.weight(1f).height(statCardHeight)
                     )
                 }
