@@ -525,198 +525,205 @@ fun AddTransactionScreen(
                 Spacer(modifier = Modifier.height(dimens.spacingMedium))
             }
         }
-    }
 
-    // Date Picker Dialog
-    if (showDatePicker) {
-        val calendar = Calendar.getInstance().apply { timeInMillis = date }
-        DatePickerDialog(
-            context,
-            { _, year, month, dayOfMonth ->
-                calendar.set(year, month, dayOfMonth)
-                date = calendar.timeInMillis
-                showDatePicker = false
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).show()
-    }
+        // Date Picker Dialog
+        if (showDatePicker) {
+            val calendar = Calendar.getInstance().apply { timeInMillis = date }
+            DatePickerDialog(
+                context,
+                { _, year, month, dayOfMonth ->
+                    calendar.set(year, month, dayOfMonth)
+                    date = calendar.timeInMillis
+                    showDatePicker = false
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
 
-    // Account Picker BottomSheet
-    AccountPickerBottomSheetCompose(
-        show = showAccountPicker,
-        accounts = allAccounts,
-        transactions = allTransactions,
-        balancesMap = accountBalancesMap,
-        onAccountSelected = { account ->
-            selectedAccount = account
-            selectedAccountId = account.getId()
-            loadAccountSuggestions(selectedAccountId)
-            showAccountPicker = false
-        },
-        onDismiss = { showAccountPicker = false },
-        dimens = dimens
-    )
+        // Account Picker BottomSheet
+        if (showAccountPicker) {
+            AccountPickerBottomSheetCompose(
+                show = showAccountPicker,
+                accounts = allAccounts,
+                transactions = allTransactions,
+                balancesMap = accountBalancesMap,
+                onAccountSelected = { account ->
+                    selectedAccount = account
+                    selectedAccountId = account.getId()
+                    // suggestions
+                    val prefs = context.getSharedPreferences("suggestions", Context.MODE_PRIVATE)
+                    val set = prefs.getStringSet("descriptions_" + selectedAccountId, setOf()) ?: setOf()
+                    suggestions = set.filterNotNull()
+                    showAccountPicker = false
+                },
+                onDismiss = { showAccountPicker = false },
+                dimens = dimens
+            )
+        }
 
-    // Cashbox Dialog
-    AddCashboxDialogCompose(
-        show = showCashboxDialog,
-        onCashboxAdded = { name ->
-            CashboxHelper.addCashboxToServer(
-                context, cashboxViewModel, name,
-                object : CashboxHelper.CashboxCallback {
-                    override fun onSuccess(cashbox: Cashbox?) {
-                        selectedCashbox = cashbox
-                        selectedCashboxId = cashbox?.id ?: -1L
-                        CashboxHelper.showSuccessMessage(context, "تم إضافة الصندوق بنجاح")
-                        showCashboxDialog = false
-                    }
-                    override fun onError(error: String?) {
-                        CashboxHelper.showErrorMessage(context, error)
-                    }
-                })
-        },
-        onDismiss = { showCashboxDialog = false }
-    )
+        // Cashbox Dialog
+        if (showCashboxDialog) {
+            AddCashboxDialogCompose(
+                show = showCashboxDialog,
+                onCashboxAdded = { name ->
+                    CashboxHelper.addCashboxToServer(
+                        context, cashboxViewModel, name,
+                        object : CashboxHelper.CashboxCallback {
+                            override fun onSuccess(cashbox: Cashbox?) {
+                                selectedCashbox = cashbox
+                                selectedCashboxId = cashbox?.id ?: -1L
+                                CashboxHelper.showSuccessMessage(context, "تم إضافة الصندوق بنجاح")
+                                showCashboxDialog = false
+                            }
+                            override fun onError(error: String?) {
+                                CashboxHelper.showErrorMessage(context, error)
+                            }
+                        })
+                },
+                onDismiss = { showCashboxDialog = false }
+            )
+        }
 
-    // Success Dialog
-    if (isDialogShown) {
-        AlertDialog(
-            onDismissRequest = { isDialogShown = false },
-            title = null, // تصميم مخصص
-            text = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    // أيقونة نجاح
-                    Box(
-                        modifier = Modifier
-                            .size(dimens.successIconSize)
-                            .clip(MaterialTheme.shapes.extraLarge)
-                            .background(colors.primary),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            tint = colors.onPrimary,
-                            modifier = Modifier.size(dimens.successIconSize)
+        // Success Dialog
+        if (isDialogShown) {
+            AlertDialog(
+                onDismissRequest = { isDialogShown = false },
+                title = null, // تصميم مخصص
+                text = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        // أيقونة نجاح
+                        Box(
+                            modifier = Modifier
+                                .size(dimens.successIconSize)
+                                .clip(MaterialTheme.shapes.extraLarge)
+                                .background(colors.primary),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                tint = colors.onPrimary,
+                                modifier = Modifier.size(dimens.successIconSize)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(dimens.spacingMedium))
+                        Text(
+                            text = "تمت إضافة المعاملة بنجاح!",
+                            style = typography.titleLarge,
+                            color = colors.primary,
+                        )
+                        Spacer(modifier = Modifier.height(dimens.spacingSmall))
+                        Text(
+                            text = "هل ترغب بإرسال إشعار؟",
+                            style = typography.bodyMedium,
+                            color = colors.onSurfaceVariant
                         )
                     }
-                    Spacer(modifier = Modifier.height(dimens.spacingMedium))
-                    Text(
-                        text = "تمت إضافة المعاملة بنجاح!",
-                        style = typography.titleLarge,
-                        color = colors.primary,
-                    )
-                    Spacer(modifier = Modifier.height(dimens.spacingSmall))
-                    Text(
-                        text = "هل ترغب بإرسال إشعار؟",
-                        style = typography.bodyMedium,
-                        color = colors.onSurfaceVariant
-                    )
-                }
-            },
-            confirmButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)) {
-                    if (lastSavedAccount?.isWhatsappEnabled() == false) {
+                },
+                confirmButton = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)) {
+                        if (lastSavedAccount?.isWhatsappEnabled() == false) {
+                            Button(onClick = {
+                                // إرسال واتساب
+                                lastSavedAccount?.let { account ->
+                                    lastSavedTransaction?.let { transaction ->
+                                        val phone = account.getPhoneNumber()
+                                        if (!phone.isNullOrEmpty()) {
+                                            val msg = NotificationUtils.buildWhatsAppMessage(
+                                                context,
+                                                account.getName(),
+                                                transaction,
+                                                lastSavedBalance,
+                                                transaction.getType()
+                                            )
+                                            NotificationUtils.sendWhatsAppMessage(context, phone, msg)
+                                        } else {
+                                            Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                }
+                            }, colors = ButtonDefaults.buttonColors(
+                                containerColor = colors.secondary,
+                                contentColor = colors.onSecondary
+                            )) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_whatsapp),
+                                    contentDescription = null,
+                                    tint = colors.onSecondary,
+                                    modifier = Modifier.size(dimens.whatsappIconSize)
+                                )
+                                Spacer(modifier = Modifier.width(dimens.spacingSmall))
+                                Text("واتساب")
+                            }
+                        }
                         Button(onClick = {
-                            // إرسال واتساب
+                            // إرسال SMS
                             lastSavedAccount?.let { account ->
                                 lastSavedTransaction?.let { transaction ->
                                     val phone = account.getPhoneNumber()
                                     if (!phone.isNullOrEmpty()) {
-                                        val msg = NotificationUtils.buildWhatsAppMessage(
-                                            context,
-                                            account.getName(),
-                                            transaction,
-                                            lastSavedBalance,
-                                            transaction.getType()
-                                        )
-                                        NotificationUtils.sendWhatsAppMessage(context, phone, msg)
+                                        val type = transaction.getType()
+                                        val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
+                                        val balanceStr = String.format(Locale.US, "%.0f", abs(lastSavedBalance))
+                                        val currency = transaction.getCurrency()
+                                        val typeText = if (type.equals("credit", true) || type == "له") "لكم" else "عليكم"
+                                        val balanceText = if (lastSavedBalance >= 0) "الرصيد لكم " else "الرصيد عليكم "
+                                        val message = "حسابكم لدينا:\n" +
+                                                typeText + " " + amountStr + " " + currency + "\n" +
+                                                transaction.getDescription() + "\n" +
+                                                balanceText + balanceStr + " " + currency
+                                        NotificationUtils.sendSmsMessage(context, phone, message)
                                     } else {
                                         Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             }
                         }, colors = ButtonDefaults.buttonColors(
-                            containerColor = colors.secondary,
-                            contentColor = colors.onSecondary
+                            containerColor = colors.primary,
+                            contentColor = colors.onPrimary
                         )) {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_whatsapp),
+                                painter = painterResource(id = R.drawable.ic_sms),
                                 contentDescription = null,
-                                tint = colors.onSecondary,
-                                modifier = Modifier.size(dimens.whatsappIconSize)
+                                tint = colors.onPrimary,
+                                modifier = Modifier.size(dimens.smsIconSize)
                             )
                             Spacer(modifier = Modifier.width(dimens.spacingSmall))
-                            Text("واتساب")
+                            Text("SMS")
                         }
                     }
-                    Button(onClick = {
-                        // إرسال SMS
-                        lastSavedAccount?.let { account ->
-                            lastSavedTransaction?.let { transaction ->
-                                val phone = account.getPhoneNumber()
-                                if (!phone.isNullOrEmpty()) {
-                                    val type = transaction.getType()
-                                    val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
-                                    val balanceStr = String.format(Locale.US, "%.0f", abs(lastSavedBalance))
-                                    val currency = transaction.getCurrency()
-                                    val typeText = if (type.equals("credit", true) || type == "له") "لكم" else "عليكم"
-                                    val balanceText = if (lastSavedBalance >= 0) "الرصيد لكم " else "الرصيد عليكم "
-                                    val message = "حسابكم لدينا:\n" +
-                                            typeText + " " + amountStr + " " + currency + "\n" +
-                                            transaction.getDescription() + "\n" +
-                                            balanceText + balanceStr + " " + currency
-                                    NotificationUtils.sendSmsMessage(context, phone, message)
-                                } else {
-                                    Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
-                                }
-                            }
+                },
+                dismissButton = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)) {
+                        Button(onClick = {
+                            isDialogShown = false
+                            // إعادة تعيين الحقول
+                            amount = ""
+                            description = ""
+                            date = System.currentTimeMillis()
+                        }, colors = ButtonDefaults.buttonColors(
+                            containerColor = colors.secondaryContainer,
+                            contentColor = colors.onSecondaryContainer
+                        )) {
+                            Text("إضافة قيد آخر")
                         }
-                    }, colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.primary,
-                        contentColor = colors.onPrimary
-                    )) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_sms),
-                            contentDescription = null,
-                            tint = colors.onPrimary,
-                            modifier = Modifier.size(dimens.smsIconSize)
-                        )
-                        Spacer(modifier = Modifier.width(dimens.spacingSmall))
-                        Text("SMS")
+                        Button(onClick = {
+                            isDialogShown = false
+                            navController.navigateUp()
+                        }, colors = ButtonDefaults.buttonColors(
+                            containerColor = colors.error,
+                            contentColor = colors.onError
+                        )) {
+                            Text("خروج")
+                        }
                     }
-                }
-            },
-            dismissButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)) {
-                    Button(onClick = {
-                        isDialogShown = false
-                        // إعادة تعيين الحقول
-                        amount = ""
-                        description = ""
-                        date = System.currentTimeMillis()
-                    }, colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.secondaryContainer,
-                        contentColor = colors.onSecondaryContainer
-                    )) {
-                        Text("إضافة قيد آخر")
-                    }
-                    Button(onClick = {
-                        isDialogShown = false
-                        navController.navigateUp()
-                    }, colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.error,
-                        contentColor = colors.onError
-                    )) {
-                        Text("خروج")
-                    }
-                }
-            },
-            shape = MaterialTheme.shapes.large,
-            containerColor = colors.background
-        )
+                },
+                shape = MaterialTheme.shapes.large,
+                containerColor = colors.background
+            )
+        }
     }
 }
 
