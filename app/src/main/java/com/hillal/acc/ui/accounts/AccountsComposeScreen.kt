@@ -39,66 +39,59 @@ import java.util.*
 import androidx.compose.ui.draw.scale
 
 @Composable
-fun AccountsAppBar(
+fun CustomAppBar(
+    title: String = "إدارة الحسابات",
     onBackClick: () -> Unit,
-    onRefreshClick: () -> Unit
-) {
-    TopAppBar(
-        title = { Text("إدارة الحسابات", color = Color(0xFF1976D2), fontWeight = FontWeight.Bold, fontSize = 22.sp) },
-        navigationIcon = {
-            IconButton(onClick = onBackClick) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "رجوع", tint = Color(0xFF1976D2))
-            }
-        },
-        actions = {
-            IconButton(onClick = onRefreshClick) {
-                Icon(Icons.Default.Refresh, contentDescription = "تحديث", tint = Color(0xFF1976D2))
-            }
-        }
-    )
-}
-
-@Composable
-fun AccountsCustomHeader(
-    title: String,
-    onBackClick: () -> Unit,
-    onRefreshClick: () -> Unit
+    onRefreshClick: () -> Unit,
+    useMaterial3: Boolean = true
 ) {
     val blue = Color(0xFF1976D2)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp, bottom = 8.dp, start = 12.dp, end = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // زر التحديث الدائري
-        IconButton(
-            onClick = onRefreshClick,
-            modifier = Modifier
-                .size(40.dp)
-                .background(blue.copy(alpha = 0.08f), shape = CircleShape)
-        ) {
-            Icon(Icons.Default.Refresh, contentDescription = "تحديث", tint = blue)
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        // العنوان في المنتصف
-        Text(
-            text = title,
-            color = blue,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
+    if (useMaterial3) {
+        TopAppBar(
+            title = { Text(title, color = blue, fontWeight = FontWeight.Bold, fontSize = 22.sp) },
+            navigationIcon = {
+                IconButton(onClick = onBackClick) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "رجوع", tint = blue)
+                }
+            },
+            actions = {
+                IconButton(onClick = onRefreshClick) {
+                    Icon(Icons.Default.Refresh, contentDescription = "تحديث", tint = blue)
+                }
+            }
         )
-        Spacer(modifier = Modifier.weight(1f))
-        // زر الرجوع الدائري
-        IconButton(
-            onClick = onBackClick,
+    } else {
+        Row(
             modifier = Modifier
-                .size(40.dp)
-                .background(blue.copy(alpha = 0.08f), shape = CircleShape)
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 8.dp, start = 12.dp, end = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "رجوع", tint = blue)
+            IconButton(
+                onClick = onRefreshClick,
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(blue.copy(alpha = 0.08f), shape = CircleShape)
+            ) {
+                Icon(Icons.Default.Refresh, contentDescription = "تحديث", tint = blue)
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = title,
+                color = blue,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                modifier = Modifier.align(Alignment.CenterVertically)
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(
+                onClick = onBackClick,
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(blue.copy(alpha = 0.08f), shape = CircleShape)
+            ) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "رجوع", tint = blue)
+            }
         }
     }
 }
@@ -230,9 +223,11 @@ fun AccountsComposeScreen(
 
         Scaffold(
             topBar = {
-                AccountsAppBar(
+                CustomAppBar(
+                    title = "إدارة الحسابات",
                     onBackClick = { /* TODO: رجوع */ },
-                    onRefreshClick = { /* TODO: تحديث */ }
+                    onRefreshClick = { /* TODO: تحديث */ },
+                    useMaterial3 = false
                 )
             },
             floatingActionButton = {
