@@ -142,7 +142,7 @@ fun ReportsScreen(
                         Spacer(Modifier.width(dimens.spacingSmall / 2))
                         Text(
                             "تقرير الأرصدة",
-                            style = typography.bodyMedium
+                            style = typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                         )
                     }
                     Button(
@@ -162,7 +162,7 @@ fun ReportsScreen(
                         Spacer(Modifier.width(dimens.spacingSmall / 2))
                         Text(
                             "كشف الحساب",
-                            style = typography.bodyMedium
+                            style = typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                         )
                     }
                 }
@@ -188,7 +188,7 @@ fun ReportsScreen(
                         Spacer(Modifier.width(dimens.spacingSmall / 2))
                         Text(
                             "كشف الصندوق",
-                            style = typography.bodyMedium
+                            style = typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                         )
                     }
                 }
