@@ -89,7 +89,8 @@ data class AppDimensions(
     val buttonCorner: Dp = 16.dp,
     val successIconSize: Dp = 48.dp,
     val whatsappIconSize: Dp = 32.dp,
-    val smsIconSize: Dp = 28.dp
+    val smsIconSize: Dp = 28.dp,
+    val fieldHorizontalPadding: Dp = 4.dp // جديد
 )
 
 @Composable
@@ -107,11 +108,12 @@ fun calculateAppDimensions(): AppDimensions {
         buttonCorner = cardCorner,
         successIconSize = screenWidth * 0.13f,    // 13% من العرض
         whatsappIconSize = screenWidth * 0.09f,   // 9% من العرض
-        smsIconSize = screenWidth * 0.08f         // 8% من العرض
+        smsIconSize = screenWidth * 0.08f,        // 8% من العرض
+        fieldHorizontalPadding = screenWidth * 0.015f // 1.5% من العرض
     )
 }
 
-val LocalAppDimensions = androidx.compose.runtime.staticCompositionLocalOf { AppDimensions(8.dp, 16.dp, 24.dp, 16.dp, 24.dp, 48.dp, 16.dp, 48.dp, 32.dp, 28.dp) }
+val LocalAppDimensions = androidx.compose.runtime.staticCompositionLocalOf { AppDimensions(8.dp, 16.dp, 24.dp, 16.dp, 24.dp, 48.dp, 16.dp, 48.dp, 32.dp, 28.dp, 4.dp) }
 
 @Composable
 fun AppTheme(

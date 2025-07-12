@@ -34,18 +34,21 @@ fun AccountPickerField(
     modifier: Modifier = Modifier
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    val dimens = com.hillal.acc.ui.theme.LocalAppDimensions.current
     OutlinedTextField(
         value = selectedAccount?.getName() ?: "",
         onValueChange = {},
         label = { Text(label) },
         modifier = modifier
             .fillMaxWidth()
+            .padding(horizontal = dimens.fieldHorizontalPadding)
             .clickable { showDialog = true },
         enabled = false,
         readOnly = true,
         trailingIcon = {
             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
         },
+        textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
         colors = TextFieldDefaults.outlinedTextFieldColors(
             containerColor = Color.White,
             focusedBorderColor = MaterialTheme.colorScheme.primary,
