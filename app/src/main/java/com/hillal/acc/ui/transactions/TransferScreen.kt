@@ -13,11 +13,16 @@ import com.hillal.acc.data.entities.Cashbox
 import com.hillal.acc.ui.common.AccountPickerField
 import com.hillal.acc.ui.common.CashboxPickerField
 import com.hillal.acc.ui.theme.LocalAppDimensions
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenu
 
 @Composable
 fun TransferScreen(
     accounts: List<Account>,
     cashboxes: List<Cashbox>,
+    currencies: List<String>,
     transactions: List<com.hillal.acc.data.model.Transaction>,
     balancesMap: Map<Long, Map<String, Double>>,
     onAddCashbox: (String) -> Unit,

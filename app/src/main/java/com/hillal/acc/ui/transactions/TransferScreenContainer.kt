@@ -41,8 +41,19 @@ fun TransferScreenContainer(
 ) {
     val accounts by accountViewModel.allAccounts.observeAsState(emptyList())
     val cashboxes by cashboxViewModel.getAllCashboxes().observeAsState(emptyList())
-    val transactions by transactionsViewModel.allTransactions.observeAsState(emptyList())
-    val balancesMap by transactionsViewModel.accountBalancesMap.observeAsState(emptyMap())
+    val transactionsNullable by transactionsViewModel.getTransactions().observeAsState(emptyList())
+    val transactions = transactionsNullable ?: emptyList()
+    val balancesMapNullable by transactionsViewModel.accountBalancesMap.observeAsState(emptyMap())
+    val balancesMap = (balancesMapNullable ?: emptyMap())
+        .filterKeys { it != null }
+        .mapKeys { it.key!! }
+        .mapValues { entry ->
+            (entry.value as? Map<String?, Double?>)
+                ?.filterKeys { it != null }
+                ?.mapKeys { it.key!! }
+                ?.filterValues { it != null }
+                ?.mapValues { it.value!! } ?: emptyMap()
+        }
     val currencies = stringArrayResource(id = R.array.currencies_array).toList()
     val snackbarHostState = rememberSnackbarHostState()
     var isLoading by remember { mutableStateOf(false) }
