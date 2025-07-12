@@ -31,11 +31,15 @@ import androidx.compose.ui.res.stringArrayResource
 import com.hillal.acc.R
 import androidx.compose.ui.unit.dp
 import com.hillal.acc.App
+import androidx.compose.foundation.layout.imePadding
+import androidx.navigation.NavController
+import android.widget.Toast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransferScreenContainer(
-    transactionsViewModel: TransactionsViewModel = viewModel()
+    transactionsViewModel: TransactionsViewModel = viewModel(),
+    navController: NavController? = null
 ) {
     val context = LocalContext.current
     val accountRepository = remember { (context.applicationContext as App).getAccountRepository() }
@@ -61,6 +65,8 @@ fun TransferScreenContainer(
     val currencies = stringArrayResource(id = R.array.currencies_array).toList()
     var isLoading by remember { mutableStateOf(false) }
 
+    // البيانات يتم تحميلها تلقائياً عبر LiveData
+
     // إضافة صندوق جديد
     fun addCashbox(name: String) {
         val newCashbox = Cashbox()
@@ -69,7 +75,7 @@ fun TransferScreenContainer(
     }
 
     Scaffold { padding ->
-        Surface(modifier = Modifier.padding(padding)) {
+        Surface(modifier = Modifier.padding(padding).imePadding()) {
             TransferScreen(
                 accounts = accounts,
                 cashboxes = cashboxes,
@@ -77,6 +83,7 @@ fun TransferScreenContainer(
                 transactions = transactions,
                 balancesMap = balancesMap,
                 onAddCashbox = { addCashbox(it) },
+                onNavigateBack = { navController?.navigateUp() },
                 onTransfer = { fromAccount, toAccount, cashbox, currency, amount, notes ->
                     isLoading = true
                     try {
@@ -109,7 +116,11 @@ fun TransferScreenContainer(
                         // إضافة المعاملتين
                         transactionsViewModel.insertTransaction(debitTx)
                         transactionsViewModel.insertTransaction(creditTx)
+                        
+                        // إظهار إشعار النجاح في الشاشة الرئيسية
+                        Toast.makeText(context, "تم التحويل بنجاح! تم تحويل $amountValue $currency من ${fromAccount.getName()} إلى ${toAccount.getName()}", Toast.LENGTH_LONG).show()
                     } catch (e: Exception) {
+                        Toast.makeText(context, "حدث خطأ أثناء التحويل: ${e.message}", Toast.LENGTH_LONG).show()
                     }
                     isLoading = false
                 }

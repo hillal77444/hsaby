@@ -48,6 +48,11 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +63,8 @@ fun TransferScreen(
     transactions: List<com.hillal.acc.data.model.Transaction>,
     balancesMap: Map<Long, Map<String, Double>>,
     onAddCashbox: (String) -> Unit,
-    onTransfer: (fromAccount: Account, toAccount: Account, cashbox: Cashbox, currency: String, amount: String, notes: String) -> Unit
+    onTransfer: (fromAccount: Account, toAccount: Account, cashbox: Cashbox, currency: String, amount: String, notes: String) -> Unit,
+    onNavigateBack: () -> Unit = {}
 ) {
     AppTheme {
         val dimens = LocalAppDimensions.current
@@ -69,7 +75,7 @@ fun TransferScreen(
         
         var fromAccount by remember { mutableStateOf<Account?>(null) }
         var toAccount by remember { mutableStateOf<Account?>(null) }
-        var selectedCashbox by remember { mutableStateOf<Cashbox?>(null) }
+        var selectedCashbox by remember { mutableStateOf<Cashbox?>(cashboxes.firstOrNull()) }
         var selectedCurrency by remember { mutableStateOf(currencies.firstOrNull() ?: "") }
         var amount by remember { mutableStateOf("") }
         var notes by remember { mutableStateOf("") }
@@ -79,6 +85,20 @@ fun TransferScreen(
         var isTransferring by remember { mutableStateOf(false) }
         
         val scrollState = rememberScrollState()
+        
+        // تحديث الصندوق المحدد تلقائياً عند تغيير قائمة الصناديق
+        LaunchedEffect(cashboxes) {
+            if (selectedCashbox == null && cashboxes.isNotEmpty()) {
+                selectedCashbox = cashboxes.first()
+            }
+        }
+        
+        // تحديث العملة المحددة تلقائياً عند تغيير قائمة العملات
+        LaunchedEffect(currencies) {
+            if (selectedCurrency.isBlank() && currencies.isNotEmpty()) {
+                selectedCurrency = currencies.first()
+            }
+        }
         
         // Animations
         val headerScale by animateFloatAsState(
@@ -105,7 +125,9 @@ fun TransferScreen(
                     .fillMaxSize()
                     .verticalScroll(scrollState)
                     .padding(horizontal = dimens.spacingMedium)
-                    .navigationBarsPadding(),
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
+                    .imePadding(),
                 verticalArrangement = Arrangement.spacedBy(dimens.spacingSmall) // Reduced spacing
             ) {
                 Spacer(Modifier.height(dimens.spacingMedium)) // Reduced top spacing
@@ -312,7 +334,7 @@ fun TransferScreen(
                                             onValueChange = {},
                                             readOnly = true,
                                             label = { Text("العملة") },
-                                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                                            modifier = Modifier.menuAnchor().fillMaxWidth().imePadding(),
                                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = showCurrencyMenu) },
                                             colors = androidx.compose.material3.TextFieldDefaults.outlinedTextFieldColors(
                                                 containerColor = colors.background,
@@ -382,7 +404,7 @@ fun TransferScreen(
                                 value = amount,
                                 onValueChange = { amount = it },
                                 label = { Text("أدخل المبلغ") },
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().imePadding(),
                                 singleLine = true,
                                 colors = androidx.compose.material3.TextFieldDefaults.outlinedTextFieldColors(
                                     containerColor = colors.background,
@@ -434,7 +456,7 @@ fun TransferScreen(
                                 value = notes,
                                 onValueChange = { notes = it },
                                 label = { Text("ملاحظات (اختياري)") },
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().imePadding(),
                                 singleLine = false,
                                 maxLines = 2,
                                 colors = androidx.compose.material3.TextFieldDefaults.outlinedTextFieldColors(
@@ -536,10 +558,13 @@ fun TransferScreen(
                             successMessage = "تم التحويل بنجاح!"
                             onTransfer(fromAccount!!, toAccount!!, selectedCashbox!!, selectedCurrency, amount, notes)
                             
-                            // Simulate loading
+                            // Simulate loading and then close screen
                             coroutineScope.launch {
                                 delay(2000)
                                 isTransferring = false
+                                // Close screen after success
+                                delay(500)
+                                onNavigateBack()
                             }
                         }
                     },

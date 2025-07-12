@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import androidx.navigation.Navigation
 
 class TransferComposeFragment : Fragment() {
     override fun onCreateView(
@@ -15,7 +16,9 @@ class TransferComposeFragment : Fragment() {
     ): View? {
         return ComposeView(requireContext()).apply {
             setContent {
-                TransferScreenContainer()
+                TransferScreenContainer(
+                    navController = Navigation.findNavController(requireView())
+                )
             }
         }
     }
