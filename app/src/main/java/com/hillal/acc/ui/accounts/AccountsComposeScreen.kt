@@ -37,6 +37,7 @@ import com.hillal.acc.ui.theme.success
 import com.hillal.acc.ui.theme.successContainer
 import java.util.*
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.text.TextOverflow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,112 +74,78 @@ fun CustomAppBar(
 }
 
 @Composable
-fun AccountsSearchAndFilterBar(
-    searchQuery: String,
-    onSearchQueryChange: (String) -> Unit,
-    sortType: String,
-    sortOptions: List<Pair<String, String>>,
-    filterMenuExpanded: Boolean,
+fun ModernSearchBar(
+    value: String,
+    onValueChange: (String) -> Unit,
     onFilterClick: () -> Unit,
-    onFilterSelect: (String) -> Unit,
-    onFilterDismiss: () -> Unit
+    modifier: Modifier = Modifier,
+    placeholder: String = "ابحث...",
+    showClear: Boolean = true,
+    onClear: (() -> Unit)? = null
 ) {
     val blue = Color(0xFF1976D2)
-    val background = Color.White
     val shadowColor = Color(0x22000000)
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp
-    // الهوامش وحجم الأيقونات حسب حجم الشاشة
-    val horizontalPadding = when {
-        screenWidth < 340 -> 4.dp
-        screenWidth < 400 -> 8.dp
-        else -> 12.dp
-    }
-    val verticalPadding = if (screenWidth < 400) 4.dp else 8.dp
-    val iconSize = if (screenWidth < 400) 20.dp else 26.dp
-    val searchIconSize = if (screenWidth < 400) 18.dp else 22.dp
-    val clearIconSize = if (screenWidth < 400) 16.dp else 20.dp
-    val textFieldHeight = if (screenWidth < 400) 40.dp else 48.dp
-    val textFieldFontSize = if (screenWidth < 400) 14.sp else 16.sp
-    val placeholderFontSize = if (screenWidth < 400) 13.sp else 15.sp
-    val cardCorner = if (screenWidth < 400) 10.dp else 18.dp
-    val textFieldCorner = if (screenWidth < 400) 10.dp else 14.dp
+    val iconSize = 20.dp
+    val cardCorner = 13.dp
+    val textFieldHeight = 44.dp
+    val textFieldFontSize = 15.sp
 
-    Box(
-        modifier = Modifier
+    Row(
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = horizontalPadding, vertical = verticalPadding)
-            .shadow(4.dp, RoundedCornerShape(cardCorner), ambientColor = shadowColor, spotColor = shadowColor)
-            .background(background, shape = RoundedCornerShape(cardCorner))
+            .shadow(2.dp, RoundedCornerShape(cardCorner), ambientColor = shadowColor, spotColor = shadowColor)
+            .background(Color.White, shape = RoundedCornerShape(cardCorner))
+            .padding(horizontal = 4.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        // زر الفلترة
+        IconButton(
+            onClick = onFilterClick,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 6.dp, vertical = 2.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .size(iconSize + 8.dp)
+                .background(blue.copy(alpha = 0.10f), shape = CircleShape)
         ) {
-            // زر الفلترة الدائري
-            Box {
-                IconButton(
-                    onClick = onFilterClick,
-                    modifier = Modifier
-                        .size(iconSize + 8.dp)
-                        .background(blue.copy(alpha = 0.10f), shape = CircleShape)
-                ) {
-                    Icon(Icons.Default.FilterList, contentDescription = "فلترة", tint = blue, modifier = Modifier.size(iconSize))
-                }
-                DropdownMenu(
-                    expanded = filterMenuExpanded,
-                    onDismissRequest = onFilterDismiss
-                ) {
-                    sortOptions.forEach { (value, label) ->
-                        DropdownMenuItem(
-                            text = { Text(label) },
-                            onClick = { onFilterSelect(value) },
-                            leadingIcon = {
-                                if (value == sortType) {
-                                    Icon(Icons.Default.Check, contentDescription = null, tint = blue)
-                                }
-                            }
-                        )
+            Icon(Icons.Default.FilterList, contentDescription = "فلترة", tint = blue, modifier = Modifier.size(iconSize))
+        }
+        Spacer(modifier = Modifier.width(2.dp))
+        // مربع البحث
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = {
+                Text(
+                    placeholder,
+                    color = Color(0xFFB0B0B0),
+                    fontSize = textFieldFontSize,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            leadingIcon = {
+                Icon(Icons.Default.Search, contentDescription = null, tint = blue, modifier = Modifier.size(iconSize))
+            },
+            trailingIcon = {
+                if (showClear && value.isNotEmpty() && onClear != null) {
+                    IconButton(onClick = onClear) {
+                        Icon(Icons.Default.Close, contentDescription = "مسح", tint = Color(0xFFB0B0B0), modifier = Modifier.size(iconSize - 2.dp))
                     }
                 }
-            }
-            Spacer(modifier = Modifier.width(6.dp))
-            // حقل البحث العصري
-            Box(modifier = Modifier.weight(1f)) {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = onSearchQueryChange,
-                    placeholder = {
-                        Text("ابحث بالاسم أو رقم الحساب أو الموبايل", color = Color(0xFFB0B0B0), fontSize = placeholderFontSize)
-                    },
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = null, tint = blue, modifier = Modifier.size(searchIconSize))
-                    },
-                    trailingIcon = {
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { onSearchQueryChange("") }) {
-                                Icon(Icons.Default.Close, contentDescription = "مسح", tint = Color(0xFFB0B0B0), modifier = Modifier.size(clearIconSize))
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(textFieldHeight),
-                    shape = RoundedCornerShape(textFieldCorner),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = blue,
-                        unfocusedBorderColor = Color(0xFFF3F4F6),
-                        cursorColor = blue,
-                        unfocusedContainerColor = Color(0xFFF8F9FA),
-                        focusedContainerColor = Color(0xFFF8F9FA)
-                    ),
-                    singleLine = true,
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = textFieldFontSize)
-                )
-            }
-        }
+            },
+            modifier = Modifier
+                .weight(1f)
+                .height(textFieldHeight),
+            shape = RoundedCornerShape(cardCorner),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = blue,
+                unfocusedBorderColor = Color(0xFFF3F4F6),
+                cursorColor = blue,
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
+            ),
+            singleLine = true,
+            maxLines = 1,
+            textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = textFieldFontSize, color = Color.Black)
+        )
     }
 }
 
@@ -197,9 +164,7 @@ fun AccountsComposeScreen(
         val typography = MaterialTheme.typography
 
         val accounts by viewModel.allAccounts.observeAsState(initial = emptyList())
-        // احسب الأرصدة مرة واحدة فقط عند دخول الشاشة
         val accountBalances by viewModel.getAllAccountsBalancesYemeniMap().observeAsState(initial = emptyMap())
-        // الفلترة والفرز حسب الرصيد المعروض فقط
         var searchQuery by remember { mutableStateOf("") }
         var sortType by remember { mutableStateOf("balance_desc") }
         val sortOptions = listOf(
@@ -210,7 +175,6 @@ fun AccountsComposeScreen(
         )
         var filterMenuExpanded by remember { mutableStateOf(false) }
 
-        // الفلترة والفرز حسب الرصيد المعروض فقط
         val filteredAccounts = remember(accounts, searchQuery) {
             if (searchQuery.isEmpty()) {
                 accounts
@@ -221,7 +185,6 @@ fun AccountsComposeScreen(
                 }
             }
         }
-        // منطق الفرز حسب الرصيد المعروض فقط (داخل LazyColumn)
         val sortedAccounts = when (sortType) {
             "balance_desc" -> filteredAccounts.sortedByDescending { account ->
                 accountBalances[account.id] ?: 0.0
@@ -236,12 +199,42 @@ fun AccountsComposeScreen(
 
         Scaffold(
             topBar = {
-                CustomAppBar(
-                    title = "إدارة الحسابات",
-                    onBackClick = { /* TODO: رجوع */ },
-                    onRefreshClick = { /* TODO: تحديث */ },
-                    useMaterial3 = false
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.White)
+                ) {
+                    CustomAppBar(
+                        title = "إدارة الحسابات",
+                        useMaterial3 = true
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    ModernSearchBar(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        onFilterClick = { filterMenuExpanded = true },
+                        onClear = { searchQuery = "" }
+                    )
+                    DropdownMenu(
+                        expanded = filterMenuExpanded,
+                        onDismissRequest = { filterMenuExpanded = false }
+                    ) {
+                        sortOptions.forEach { (value, label) ->
+                            DropdownMenuItem(
+                                text = { Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                onClick = {
+                                    sortType = value
+                                    filterMenuExpanded = false
+                                },
+                                leadingIcon = {
+                                    if (value == sortType) {
+                                        Icon(Icons.Default.Check, contentDescription = null, tint = Color(0xFF1976D2))
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
             },
             floatingActionButton = {
                 FloatingActionButton(
@@ -264,28 +257,12 @@ fun AccountsComposeScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                // شريط البحث والفلترة
-                AccountsSearchAndFilterBar(
-                    searchQuery = searchQuery,
-                    onSearchQueryChange = { searchQuery = it },
-                    sortType = sortType,
-                    sortOptions = sortOptions,
-                    filterMenuExpanded = filterMenuExpanded,
-                    onFilterClick = { filterMenuExpanded = true },
-                    onFilterSelect = {
-                        sortType = it
-                        filterMenuExpanded = false
-                    },
-                    onFilterDismiss = { filterMenuExpanded = false }
-                )
-                // عدد النتائج
                 Text(
                     text = "العدد: ${filteredAccounts.size}",
                     color = Color(0xFF888888),
                     fontSize = 13.sp,
                     modifier = Modifier.padding(start = 32.dp, top = 2.dp, bottom = 4.dp)
                 )
-                // قائمة الحسابات
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
