@@ -11,8 +11,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateMapOf
@@ -231,6 +229,12 @@ fun AccountsComposeScreen(
         }
 
         Scaffold(
+            topBar = {
+                AccountsAppBar(
+                    onBackClick = { /* TODO: رجوع */ },
+                    onRefreshClick = { /* TODO: تحديث */ }
+                )
+            },
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = onNavigateToAddAccount,
@@ -252,12 +256,6 @@ fun AccountsComposeScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                // الهيدر المخصص
-                AccountsCustomHeader(
-                    title = "إدارة النقاط والفروع", // يمكنك تغيير النص هنا
-                    onBackClick = { /* TODO: رجوع */ },
-                    onRefreshClick = { /* TODO: تحديث */ }
-                )
                 // شريط البحث والفلترة
                 AccountsSearchAndFilterBar(
                     searchQuery = searchQuery,
