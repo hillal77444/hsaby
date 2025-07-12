@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hillal.acc.data.entities.Cashbox
+import androidx.compose.foundation.layout.imePadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +45,7 @@ fun CashboxPickerField(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = dimens.fieldHorizontalPadding)
+            .imePadding()
             .clickable { showDialog = true },
         enabled = false,
         readOnly = true,
@@ -51,6 +53,7 @@ fun CashboxPickerField(
             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
         },
         textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
+        singleLine = true,
         colors = TextFieldDefaults.outlinedTextFieldColors(
             containerColor = Color.White,
             focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -123,7 +126,7 @@ fun CashboxPickerField(
                             onValueChange = { search = it },
                             label = { Text("بحث", color = MaterialTheme.colorScheme.secondary) },
                             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().imePadding(),
                             singleLine = true,
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -145,7 +148,7 @@ fun CashboxPickerField(
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = 6.dp, horizontal = 2.dp)
+                                        .padding(vertical = 3.dp, horizontal = 1.dp)
                                         .clickable {
                                             onCashboxSelected(cashbox)
                                             showDialog = false
@@ -156,7 +159,7 @@ fun CashboxPickerField(
                                 ) {
                                     Row(
                                         Modifier
-                                            .padding(14.dp)
+                                            .padding(8.dp)
                                             .fillMaxWidth(),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
@@ -172,7 +175,7 @@ fun CashboxPickerField(
                                                 modifier = Modifier.size(22.dp)
                                             )
                                         }
-                                        Spacer(Modifier.width(14.dp))
+                                        Spacer(Modifier.width(8.dp))
                                         Text(
                                             cashbox.name ?: "",
                                             fontWeight = FontWeight.Bold,

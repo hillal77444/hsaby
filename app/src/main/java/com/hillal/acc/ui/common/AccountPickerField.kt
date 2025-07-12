@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.imePadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +43,7 @@ fun AccountPickerField(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = dimens.fieldHorizontalPadding)
+            .imePadding()
             .clickable { showDialog = true },
         enabled = false,
         readOnly = true,
@@ -49,6 +51,7 @@ fun AccountPickerField(
             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
         },
         textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
+        singleLine = true,
         colors = TextFieldDefaults.outlinedTextFieldColors(
             containerColor = Color.White,
             focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -81,7 +84,7 @@ fun AccountPickerField(
                         value = search,
                         onValueChange = { search = it },
                         label = { Text("بحث", color = MaterialTheme.colorScheme.secondary) },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().imePadding(),
                         singleLine = true,
                         colors = TextFieldDefaults.outlinedTextFieldColors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -102,7 +105,7 @@ fun AccountPickerField(
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = 4.dp)
+                                        .padding(vertical = 2.dp)
                                         .clickable {
                                             onAccountSelected(account)
                                             showDialog = false
@@ -113,7 +116,7 @@ fun AccountPickerField(
                                 ) {
                                     Row(
                                         Modifier
-                                            .padding(12.dp)
+                                            .padding(8.dp)
                                             .fillMaxWidth(),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
@@ -123,7 +126,7 @@ fun AccountPickerField(
                                             tint = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.size(32.dp)
                                         )
-                                        Spacer(Modifier.width(12.dp))
+                                        Spacer(Modifier.width(8.dp))
                                         Column(Modifier.weight(1f)) {
                                             Text(account.getName() ?: "", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                                             val balances = balancesMap[account.getId()] ?: emptyMap()

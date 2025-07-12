@@ -53,6 +53,8 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.navigation.NavController
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,6 +87,39 @@ fun TransferScreen(
         var isTransferring by remember { mutableStateOf(false) }
         
         val scrollState = rememberScrollState()
+        
+        // دالة للتحقق من صحة إدخال المبلغ (أرقام وفواصل فقط)
+        fun isValidAmount(input: String): Boolean {
+            if (input.isEmpty()) return true
+            // يسمح بالأرقام والفواصل والنقاط فقط
+            val regex = Regex("^[0-9.,]*$")
+            return regex.matches(input)
+        }
+        
+        // دالة لتنظيف وتنسيق المبلغ
+        fun formatAmount(input: String): String {
+            if (input.isEmpty()) return ""
+            // إزالة جميع الأحرف غير المسموح بها
+            val cleaned = input.replace(Regex("[^0-9.,]"), "")
+            // التأكد من وجود فاصلة واحدة فقط
+            val commaCount = cleaned.count { it == ',' }
+            if (commaCount > 1) {
+                val parts = cleaned.split(",")
+                return parts.take(2).joinToString(",")
+            }
+            // تنسيق الأرقام بإضافة فواصل للآلاف
+            val parts = cleaned.split(",")
+            if (parts.size == 2) {
+                val wholePart = parts[0]
+                val decimalPart = parts[1]
+                val formattedWhole = wholePart.reversed().chunked(3).joinToString(",").reversed()
+                return "$formattedWhole,$decimalPart"
+            } else {
+                val wholePart = cleaned
+                val formattedWhole = wholePart.reversed().chunked(3).joinToString(",").reversed()
+                return formattedWhole
+            }
+        }
         
         // تحديث الصندوق المحدد تلقائياً عند تغيير قائمة الصناديق
         LaunchedEffect(cashboxes) {
@@ -402,10 +437,17 @@ fun TransferScreen(
                             }
                             OutlinedTextField(
                                 value = amount,
-                                onValueChange = { amount = it },
+                                onValueChange = { newValue ->
+                                    if (isValidAmount(newValue)) {
+                                        amount = formatAmount(newValue)
+                                    }
+                                },
                                 label = { Text("أدخل المبلغ") },
                                 modifier = Modifier.fillMaxWidth().imePadding(),
                                 singleLine = true,
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Number
+                                ),
                                 colors = androidx.compose.material3.TextFieldDefaults.outlinedTextFieldColors(
                                     containerColor = colors.background,
                                     focusedBorderColor = colors.primary,
@@ -552,11 +594,16 @@ fun TransferScreen(
                         if (fromAccount == null || toAccount == null || selectedCashbox == null || amount.isBlank() || selectedCurrency.isBlank()) {
                             errorMessage = "يرجى تعبئة جميع الحقول المطلوبة"
                             successMessage = null
+                        } else if (!isValidAmount(amount) || amount.toDoubleOrNull() == null) {
+                            errorMessage = "يرجى إدخال مبلغ صحيح"
+                            successMessage = null
                         } else {
                             isTransferring = true
                             errorMessage = null
                             successMessage = "تم التحويل بنجاح!"
-                            onTransfer(fromAccount!!, toAccount!!, selectedCashbox!!, selectedCurrency, amount, notes)
+                            // تنظيف المبلغ من الفواصل وتحويله إلى رقم
+                            val cleanAmount = amount.replace(",", "")
+                            onTransfer(fromAccount!!, toAccount!!, selectedCashbox!!, selectedCurrency, cleanAmount, notes)
                             
                             // Simulate loading and then close screen
                             coroutineScope.launch {
