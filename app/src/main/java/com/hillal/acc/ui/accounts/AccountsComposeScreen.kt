@@ -199,40 +199,56 @@ fun AccountsComposeScreen(
 
         Scaffold(
             topBar = {
-                Column(
+                val dimens = LocalAppDimensions.current
+                val colors = MaterialTheme.colorScheme
+                val typography = MaterialTheme.typography
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.White)
+                        .padding(horizontal = dimens.spacingLarge, vertical = dimens.spacingMedium),
+                    shape = RoundedCornerShape(dimens.cardCorner),
+                    colors = CardDefaults.cardColors(containerColor = colors.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
                 ) {
-                    CustomAppBar(
-                        title = "إدارة الحسابات",
-                        useMaterial3 = true
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    ModernSearchBar(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        onFilterClick = { filterMenuExpanded = true },
-                        onClear = { searchQuery = "" }
-                    )
-                    DropdownMenu(
-                        expanded = filterMenuExpanded,
-                        onDismissRequest = { filterMenuExpanded = false }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(dimens.spacingMedium),
+                        verticalArrangement = Arrangement.spacedBy(dimens.spacingSmall)
                     ) {
-                        sortOptions.forEach { (value, label) ->
-                            DropdownMenuItem(
-                                text = { Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                                onClick = {
-                                    sortType = value
-                                    filterMenuExpanded = false
-                                },
-                                leadingIcon = {
-                                    if (value == sortType) {
-                                        Icon(Icons.Default.Check, contentDescription = null, tint = Color(0xFF1976D2))
-                                    }
+                        Text(
+                            text = "إدارة الحسابات",
+                            style = typography.headlineMedium,
+                            color = colors.primary,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(bottom = dimens.spacingSmall / 2)
+                        )
+                        ModernSearchBar(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            onFilterClick = { filterMenuExpanded = true },
+                            onClear = { searchQuery = "" },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+                DropdownMenu(
+                    expanded = filterMenuExpanded,
+                    onDismissRequest = { filterMenuExpanded = false }
+                ) {
+                    sortOptions.forEach { (value, label) ->
+                        DropdownMenuItem(
+                            text = { Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                            onClick = {
+                                sortType = value
+                                filterMenuExpanded = false
+                            },
+                            leadingIcon = {
+                                if (value == sortType) {
+                                    Icon(Icons.Default.Check, contentDescription = null, tint = colors.primary)
                                 }
-                            )
-                        }
+                            }
+                        )
                     }
                 }
             },
