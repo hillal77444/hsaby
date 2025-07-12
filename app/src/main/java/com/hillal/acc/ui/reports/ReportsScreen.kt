@@ -23,7 +23,9 @@ import com.hillal.acc.R
 import com.hillal.acc.data.model.Transaction
 import com.hillal.acc.viewmodel.TransactionViewModel
 import java.util.Locale
-import com.hillal.acc.ui.theme.LocalResponsiveDimensions
+import com.hillal.acc.ui.theme.LocalAppDimensions
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 
 @Composable
 fun ReportsScreen(
@@ -32,7 +34,9 @@ fun ReportsScreen(
     onAccountsSummaryClick: () -> Unit,
     onCashboxStatementClick: () -> Unit
 ) {
-    val dimensions = LocalResponsiveDimensions.current
+    val dimens = LocalAppDimensions.current
+    val colors = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
     val transactions by transactionViewModel.getAllTransactions().observeAsState(emptyList())
     val totalDebit = transactions.filter { it.getType() == "debit" }.sumOf { it.getAmount() }
     val totalCredit = transactions.filter { it.getType() == "credit" }.sumOf { it.getAmount() }
@@ -45,180 +49,162 @@ fun ReportsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(colors.background)
             .verticalScroll(scrollState)
+            .navigationBarsPadding() // رفع المحتوى عن أزرار النظام
     ) {
-        // رأس الصفحة المحسن
+        // البطاقة العلوية الجذابة
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(dimensions.cardHeight * 0.18f) // تقليل الارتفاع بشكل أكبر
-                .background(
-                    MaterialTheme.colorScheme.primary
-                )
+                .padding(top = dimens.spacingMedium, bottom = dimens.spacingSmall / 2) // تقليل الهوامش
         ) {
-            // نمط خلفية جميل
-            Box(
+            Card(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Color(0xFF1976D2).copy(alpha = 0.1f)
-                    )
-            )
-        }
-        
-        // البطاقة العلوية المحسنة
-        Card(
-            modifier = Modifier
-                .size(dimensions.cardHeight * 0.25f) // تقليل الحجم
-                .offset(y = (-dimensions.cardHeight * 0.02f)) // إزاحة رأسية بسيطة جداً
-                .align(Alignment.CenterHorizontally),
-            shape = MaterialTheme.shapes.extraLarge,
-            elevation = CardDefaults.cardElevation(12.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
-        ) {
-            Box(
-                contentAlignment = Alignment.Center, 
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
-                    )
+                    .fillMaxWidth(0.95f)
+                    .height(dimens.cardHeight * 0.6f)
+                    .align(Alignment.Center),
+                shape = RoundedCornerShape(dimens.cardCorner * 1.2f),
+                elevation = CardDefaults.cardElevation(8.dp),
+                colors = CardDefaults.cardColors(containerColor = colors.primary)
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_statement),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(dimensions.iconSize * 1.5f) // تقليل حجم الأيقونة
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = dimens.spacingMedium, vertical = dimens.spacingSmall / 2),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(dimens.iconSize * 2f)
+                            .background(colors.onPrimary.copy(alpha = 0.10f), shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_statement),
+                            contentDescription = null,
+                            tint = colors.onPrimary,
+                            modifier = Modifier.size(dimens.iconSize * 1.1f)
+                        )
+                    }
+                    Spacer(Modifier.width(dimens.spacingMedium))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "التقارير المالية",
+                            style = typography.headlineSmall.copy(color = colors.onPrimary, fontWeight = FontWeight.Bold),
+                            maxLines = 1
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            text = "ملخص الحسابات والمعاملات",
+                            style = typography.bodyMedium.copy(color = colors.onPrimary.copy(alpha = 0.85f)),
+                            maxLines = 1
+                        )
+                    }
+                }
             }
         }
-        
-        // النصوص المحسنة
-        Column(
-            modifier = Modifier.padding(horizontal = dimensions.spacingLarge),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "التقارير المالية",
-                fontSize = dimensions.titleFont * 0.9f, // تقليل حجم الخط
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier.padding(top = dimensions.spacingSmall)
-            )
-            Text(
-                text = "ملخص الحسابات والمعاملات المالية",
-                fontSize = dimensions.bodyFont * 0.85f,
-                color = Color.White.copy(alpha = 0.9f),
-                modifier = Modifier.padding(bottom = dimensions.spacingMedium)
-            )
-        }
-        
-        // بطاقة الأزرار المحسنة
+        // بطاقة الأزرار
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = dimensions.spacingLarge, vertical = dimensions.spacingSmall),
-            shape = MaterialTheme.shapes.large,
-            elevation = CardDefaults.cardElevation(8.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+                .padding(horizontal = dimens.spacingMedium, vertical = dimens.spacingSmall / 2),
+            shape = RoundedCornerShape(dimens.cardCorner),
+            elevation = CardDefaults.cardElevation(4.dp),
+            colors = CardDefaults.cardColors(containerColor = colors.surface)
         ) {
             Column(
-                Modifier.padding(dimensions.spacingMedium)
+                Modifier.padding(dimens.spacingSmall / 1.5f)
             ) {
                 Text(
                     text = "التقارير المتاحة",
-                    fontSize = dimensions.bodyFont,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = dimensions.spacingSmall)
+                    style = typography.bodyLarge.copy(color = colors.primary, fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(bottom = dimens.spacingSmall / 2)
                 )
-                
                 Row(
-                    Modifier.fillMaxWidth(), 
-                    horizontalArrangement = Arrangement.spacedBy(dimensions.spacingSmall)
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall / 2)
                 ) {
                     Button(
                         onClick = onAccountsSummaryClick,
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF009688), 
-                            contentColor = Color.White
+                            containerColor = colors.secondary,
+                            contentColor = colors.onSecondary
                         ),
-                        shape = MaterialTheme.shapes.medium
+                        shape = RoundedCornerShape(dimens.cardCorner)
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_summary),
                             contentDescription = null,
-                            modifier = Modifier.size(dimensions.iconSize * 0.8f)
+                            modifier = Modifier.size(dimens.iconSize * 0.8f)
                         )
-                        Spacer(Modifier.width(dimensions.spacingSmall))
+                        Spacer(Modifier.width(dimens.spacingSmall / 2))
                         Text(
-                            "تقرير ارصدة الحسابات", 
-                            fontSize = dimensions.bodyFont * 0.9f
+                            "تقرير الأرصدة",
+                            style = typography.bodyMedium
                         )
                     }
                     Button(
                         onClick = onAccountStatementClick,
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF3F51B5), 
-                            contentColor = Color.White
+                            containerColor = colors.tertiary,
+                            contentColor = colors.onTertiary
                         ),
-                        shape = MaterialTheme.shapes.medium
+                        shape = RoundedCornerShape(dimens.cardCorner)
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_statement),
                             contentDescription = null,
-                            modifier = Modifier.size(dimensions.iconSize * 0.8f)
+                            modifier = Modifier.size(dimens.iconSize * 0.8f)
                         )
-                        Spacer(Modifier.width(dimensions.spacingSmall))
+                        Spacer(Modifier.width(dimens.spacingSmall / 2))
                         Text(
-                            "كشف الحساب", 
-                            fontSize = dimensions.bodyFont * 0.9f
+                            "كشف الحساب",
+                            style = typography.bodyMedium
                         )
                     }
                 }
-                Spacer(Modifier.height(dimensions.spacingSmall))
+                Spacer(Modifier.height(dimens.spacingSmall / 2))
                 Row(
-                    Modifier.fillMaxWidth(), 
-                    horizontalArrangement = Arrangement.spacedBy(dimensions.spacingSmall)
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall / 2)
                 ) {
                     Button(
                         onClick = onCashboxStatementClick,
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF1976D2), 
-                            contentColor = Color.White
+                            containerColor = colors.primaryContainer,
+                            contentColor = colors.onPrimaryContainer
                         ),
-                        shape = MaterialTheme.shapes.medium
+                        shape = RoundedCornerShape(dimens.cardCorner)
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_wallet),
                             contentDescription = null,
-                            modifier = Modifier.size(dimensions.iconSize * 0.8f)
+                            modifier = Modifier.size(dimens.iconSize * 0.8f)
                         )
-                        Spacer(Modifier.width(dimensions.spacingSmall))
+                        Spacer(Modifier.width(dimens.spacingSmall / 2))
                         Text(
-                            "تقرير ارصدة الصناديق", 
-                            fontSize = dimensions.bodyFont * 0.9f
+                            "كشف الصندوق",
+                            style = typography.bodyMedium
                         )
                     }
                 }
             }
         }
-        
         // بطاقة الإحصائيات المحسنة
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = dimensions.spacingLarge, vertical = dimensions.spacingSmall),
+                .padding(horizontal = dimens.spacingMedium, vertical = dimens.spacingSmall / 2),
             shape = MaterialTheme.shapes.medium,
-            elevation = CardDefaults.cardElevation(6.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            elevation = CardDefaults.cardElevation(4.dp),
+            colors = CardDefaults.cardColors(containerColor = colors.surface)
         ) {
             Column(
-                Modifier.padding(dimensions.spacingMedium)
+                Modifier.padding(dimens.spacingMedium / 1.5f)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -227,20 +213,18 @@ fun ReportsScreen(
                     Icon(
                         painter = painterResource(id = R.drawable.ic_summary),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(dimensions.iconSize)
+                        tint = colors.primary,
+                        modifier = Modifier.size(dimens.iconSize)
                     )
-                    Spacer(Modifier.width(dimensions.spacingSmall))
+                    Spacer(Modifier.width(dimens.spacingSmall))
                     Text(
                         text = "إحصائيات عامة",
-                        fontSize = dimensions.bodyFont,
+                        fontSize = dimens.bodyFont,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = colors.primary
                     )
                 }
-                
-                Spacer(Modifier.height(dimensions.spacingMedium))
-                
+                Spacer(Modifier.height(dimens.spacingSmall))
                 // الإحصائيات الأولى
                 Row(
                     Modifier.fillMaxWidth(), 
@@ -249,22 +233,20 @@ fun ReportsScreen(
                     StatItem(
                         label = "إجمالي المدينين", 
                         value = totalDebit,
-                        color = Color(0xFFE57373)
+                        color = colors.error
                     )
                     StatItem(
                         label = "إجمالي الدائنين", 
                         value = totalCredit,
-                        color = Color(0xFF81C784)
+                        color = colors.secondary
                     )
                     StatItem(
                         label = "الرصيد", 
                         value = netBalance,
-                        color = MaterialTheme.colorScheme.primary
+                        color = colors.primary
                     )
                 }
-                
-                Spacer(Modifier.height(dimensions.spacingMedium))
-                
+                Spacer(Modifier.height(dimens.spacingSmall))
                 // الإحصائيات الثانية
                 Row(
                     Modifier.fillMaxWidth(), 
@@ -274,43 +256,42 @@ fun ReportsScreen(
                         label = "عدد المعاملات", 
                         value = count.toDouble(), 
                         isInt = true,
-                        color = Color(0xFF64B5F6)
+                        color = colors.tertiary
                     )
                     StatItem(
                         label = "متوسط المعاملة", 
                         value = avg,
-                        color = Color(0xFFFFB74D)
+                        color = colors.primaryContainer
                     )
                 }
             }
         }
-        
         // بطاقة إضافية للمعلومات
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = dimensions.spacingLarge, vertical = dimensions.spacingSmall),
+                .padding(horizontal = dimens.spacingMedium, vertical = dimens.spacingSmall / 2),
             shape = MaterialTheme.shapes.medium,
-            elevation = CardDefaults.cardElevation(4.dp),
+            elevation = CardDefaults.cardElevation(2.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+                containerColor = colors.primary.copy(alpha = 0.04f)
             )
         ) {
             Row(
-                modifier = Modifier.padding(dimensions.spacingMedium),
+                modifier = Modifier.padding(dimens.spacingMedium / 1.5f),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_info),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(dimensions.iconSize)
+                    tint = colors.primary,
+                    modifier = Modifier.size(dimens.iconSize)
                 )
-                Spacer(Modifier.width(dimensions.spacingSmall))
+                Spacer(Modifier.width(dimens.spacingSmall))
                 Text(
                     text = "يمكنك الوصول إلى جميع التقارير المالية من خلال الأزرار أعلاه",
-                    fontSize = dimensions.bodyFont * 0.9f,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    fontSize = dimens.bodyFont * 0.9f,
+                    color = colors.onSurface.copy(alpha = 0.7f)
                 )
             }
         }
@@ -324,22 +305,23 @@ fun StatItem(
     isInt: Boolean = false,
     color: Color = MaterialTheme.colorScheme.primary
 ) {
-    val dimensions = LocalResponsiveDimensions.current
+    val dimens = LocalAppDimensions.current
+    val colors = MaterialTheme.colorScheme
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(vertical = dimensions.spacingSmall)
+        modifier = Modifier.padding(vertical = dimens.spacingSmall / 2)
     ) {
         Text(
             text = if (isInt) value.toInt().toString() else String.format(Locale.ENGLISH, "%.2f", value),
             fontWeight = FontWeight.Bold,
-            fontSize = dimensions.statFont * 0.9f,
+            fontSize = dimens.statFont * 0.9f,
             color = color
         )
         Text(
             text = label,
-            fontSize = dimensions.statLabelFont * 0.85f,
-            color = Color(0xFF666666),
-            modifier = Modifier.padding(top = dimensions.spacingSmall)
+            fontSize = dimens.statLabelFont * 0.85f,
+            color = colors.onSurface.copy(alpha = 0.65f),
+            modifier = Modifier.padding(top = dimens.spacingSmall / 2)
         )
     }
 } 
