@@ -76,6 +76,124 @@ import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
 import com.hillal.acc.ui.theme.AppDimensions
 
+// دوال مساعدة لتحويل الأرقام إلى كلمات
+private fun wholeNumberToWords(number: Long): String {
+    if (number == 0L) return "صفر"
+    if (number < 0L) return "سالب ${wholeNumberToWords(-number)}"
+    
+    val units = arrayOf("", "ألف", "ألفان", "آلاف", "ألفاً")
+    val tens = arrayOf("", "عشرة", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون", "سبعون", "ثمانون", "تسعون")
+    val ones = arrayOf("", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة", "ثمانية", "تسعة")
+    
+    return when {
+        number < 10L -> ones[number.toInt()]
+        number < 20L -> when (number) {
+            10L -> "عشرة"
+            11L -> "أحد عشر"
+            12L -> "اثنا عشر"
+            13L -> "ثلاثة عشر"
+            14L -> "أربعة عشر"
+            15L -> "خمسة عشر"
+            16L -> "ستة عشر"
+            17L -> "سبعة عشر"
+            18L -> "ثمانية عشر"
+            19L -> "تسعة عشر"
+            else -> ones[(number - 10).toInt()] + " عشر"
+        }
+        number < 100L -> {
+            val ten = number / 10L
+            val one = number % 10L
+            when {
+                one == 0L -> tens[ten.toInt()]
+                else -> ones[one.toInt()] + " و" + tens[ten.toInt()]
+            }
+        }
+        number < 1000L -> {
+            val hundred = number / 100L
+            val remainder = number % 100L
+            when {
+                remainder == 0L -> ones[hundred.toInt()] + "مائة"
+                else -> ones[hundred.toInt()] + "مائة و" + wholeNumberToWords(remainder)
+            }
+        }
+        number < 1000000L -> {
+            val thousand = number / 1000L
+            val remainder = number % 1000L
+            val thousandWords = when {
+                thousand == 1L -> "ألف"
+                thousand == 2L -> "ألفان"
+                thousand < 11L -> wholeNumberToWords(thousand) + " آلاف"
+                else -> wholeNumberToWords(thousand) + " ألف"
+            }
+            when {
+                remainder == 0L -> thousandWords
+                else -> thousandWords + " و" + wholeNumberToWords(remainder)
+            }
+        }
+        number < 1000000000L -> {
+            val million = number / 1000000L
+            val remainder = number % 1000000L
+            val millionWords = when {
+                million == 1L -> "مليون"
+                million == 2L -> "مليونان"
+                million < 11L -> wholeNumberToWords(million) + " ملايين"
+                else -> wholeNumberToWords(million) + " مليون"
+            }
+            when {
+                remainder == 0L -> millionWords
+                else -> millionWords + " و" + wholeNumberToWords(remainder)
+            }
+        }
+        else -> {
+            val billion = number / 1000000000L
+            val remainder = number % 1000000000L
+            val billionWords = when {
+                billion == 1L -> "مليار"
+                billion == 2L -> "ملياران"
+                billion < 11L -> wholeNumberToWords(billion) + " مليارات"
+                else -> wholeNumberToWords(billion) + " مليار"
+            }
+            when {
+                remainder == 0L -> billionWords
+                else -> billionWords + " و" + wholeNumberToWords(remainder)
+            }
+        }
+    }
+}
+
+private fun decimalToWords(decimal: Int): String {
+    if (decimal == 0) return ""
+    
+    val ones = arrayOf("", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة", "ثمانية", "تسعة")
+    val tens = arrayOf("", "عشرة", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون", "سبعون", "ثمانون", "تسعون")
+    
+    return when {
+        decimal < 10 -> ones[decimal]
+        decimal < 20 -> when (decimal) {
+            10 -> "عشرة"
+            11 -> "أحد عشر"
+            12 -> "اثنا عشر"
+            13 -> "ثلاثة عشر"
+            14 -> "أربعة عشر"
+            15 -> "خمسة عشر"
+            16 -> "ستة عشر"
+            17 -> "سبعة عشر"
+            18 -> "ثمانية عشر"
+            19 -> "تسعة عشر"
+            else -> ones[decimal - 10] + " عشر"
+        }
+        decimal < 100 -> {
+            val ten = decimal / 10
+            val one = decimal % 10
+            when {
+                one == 0 -> tens[ten]
+                else -> ones[one] + " و" + tens[ten]
+            }
+        }
+        else -> "مائة"
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,8 +236,81 @@ fun AddTransactionScreen(
         var lastSavedAccount by remember { mutableStateOf<Account?>(null) }
         var lastSavedBalance by remember { mutableStateOf(0.0) }
         var suggestions by remember { mutableStateOf(listOf<String>()) }
+        var lastAmountUpdate by remember { mutableStateOf("") }
         val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale("ar")) }
+        
+        // دالة للتحقق من صحة إدخال المبلغ (أرقام إنجليزية وفواصل فقط)
+        fun isValidAmount(input: String): Boolean {
+            if (input.isEmpty()) return true
+            // يسمح بالأرقام الإنجليزية والفواصل والنقاط فقط
+            val regex = Regex("^[0-9.,]*$")
+            return regex.matches(input)
+        }
+        
+        // دالة لتنظيف وتنسيق المبلغ
+        fun formatAmount(input: String): String {
+            if (input.isEmpty()) return ""
+            // إزالة جميع الأحرف غير المسموح بها
+            val cleaned = input.replace(Regex("[^0-9.,]"), "")
+            // التأكد من وجود فاصلة واحدة فقط
+            val commaCount = cleaned.count { it == ',' }
+            if (commaCount > 1) {
+                val parts = cleaned.split(",")
+                return parts.take(2).joinToString(",")
+            }
+            // تنسيق الأرقام بإضافة فواصل للآلاف
+            val parts = cleaned.split(",")
+            if (parts.size == 2) {
+                val wholePart = parts[0]
+                val decimalPart = parts[1]
+                val formattedWhole = wholePart.reversed().chunked(3).joinToString(",").reversed()
+                return "$formattedWhole,$decimalPart"
+            } else {
+                val wholePart = cleaned
+                val formattedWhole = wholePart.reversed().chunked(3).joinToString(",").reversed()
+                return formattedWhole
+            }
+        }
+        
+        // دالة لتحويل الأرقام إلى كلمات باللغة العربية
+        fun numberToArabicWords(number: String): String {
+            if (number.isEmpty()) return ""
+            
+            // تنظيف المبلغ من الفواصل وتحويله إلى رقم
+            val cleanNumber = number.replace(",", "")
+            val doubleValue = cleanNumber.toDoubleOrNull() ?: return ""
+            
+            return when {
+                doubleValue == 0.0 -> "صفر"
+                doubleValue < 1.0 -> {
+                    val decimal = (doubleValue * 100).toInt()
+                    when (decimal) {
+                        0 -> "صفر"
+                        in 1..9 -> "صفر و${decimalToWords(decimal)}"
+                        else -> decimalToWords(decimal)
+                    }
+                }
+                else -> {
+                    val whole = doubleValue.toLong()
+                    val decimal = ((doubleValue - whole) * 100).toInt()
+                    
+                    val wholeWords = wholeNumberToWords(whole)
+                    val decimalWords = if (decimal > 0) decimalToWords(decimal) else ""
+                    
+                    when {
+                        decimalWords.isEmpty() -> wholeWords
+                        wholeWords == "صفر" -> decimalWords
+                        else -> "$wholeWords و$decimalWords"
+                    }
+                }
+            }
+        }
 
+        // تحديث الكتابة تلقائياً عند تغيير المبلغ
+        LaunchedEffect(amount) {
+            lastAmountUpdate = amount
+        }
+        
         // Observers
         LaunchedEffect(Unit) {
             accountViewModel.getAllAccounts().observe(lifecycleOwner) { accounts ->
@@ -175,7 +366,9 @@ fun AddTransactionScreen(
                 Toast.makeText(context, context.getString(R.string.error_amount_required), Toast.LENGTH_SHORT).show()
                 return
             }
-            val amountDouble = amount.toDoubleOrNull()
+            // تنظيف المبلغ من الفواصل
+            val cleanAmount = amount.replace(",", "")
+            val amountDouble = cleanAmount.toDoubleOrNull()
             if (amountDouble == null) {
                 Toast.makeText(context, context.getString(R.string.error_invalid_amount), Toast.LENGTH_SHORT).show()
                 return
@@ -350,17 +543,41 @@ fun AddTransactionScreen(
                         Spacer(modifier = Modifier.height(dimens.spacingSmall))
                         // Row: مبلغ وتاريخ
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)) {
-                            OutlinedTextField(
-                                value = amount,
-                                onValueChange = { input ->
-                                    amount = input.replace(',', '.').filter { c -> c.isDigit() || c == '.' }
-                                },
-                                label = { Text("المبلغ", fontSize = typography.bodyLarge.fontSize) },
-                                modifier = Modifier.weight(1f),
-                                leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
-                                textStyle = typography.bodyLarge,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                OutlinedTextField(
+                                    value = amount,
+                                    onValueChange = { newValue ->
+                                        if (isValidAmount(newValue)) {
+                                            amount = formatAmount(newValue)
+                                            lastAmountUpdate = amount // تحديث للكتابة التلقائية
+                                        }
+                                    },
+                                    label = { Text("المبلغ", fontSize = typography.bodyLarge.fontSize) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
+                                    textStyle = typography.bodyLarge,
+                                    singleLine = true,
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                )
+                                
+                                // عرض المبلغ بالكلمات العربية
+                                if (lastAmountUpdate.isNotBlank()) {
+                                    val arabicWords = numberToArabicWords(lastAmountUpdate)
+                                    if (arabicWords.isNotBlank()) {
+                                        Text(
+                                            text = arabicWords,
+                                            style = typography.bodySmall.copy(
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Normal
+                                            ),
+                                            color = colors.primary.copy(alpha = 0.7f),
+                                            modifier = Modifier.padding(top = 4.dp, start = 4.dp),
+                                            maxLines = 2,
+                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+                            }
                             OutlinedTextField(
                                 value = dateFormat.format(Date(date)),
                                 onValueChange = {},
