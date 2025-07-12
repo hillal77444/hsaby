@@ -161,21 +161,8 @@ fun AccountsComposeScreen(
         val typography = MaterialTheme.typography
 
         val accounts by viewModel.allAccounts.observeAsState(initial = emptyList())
-        // اجمع الأرصدة المعروضة لكل حساب في خريطة مؤقتة
-        val displayedBalances = remember(accounts) {
-            mutableStateMapOf<Long, Double>().apply {
-                accounts.forEach { account ->
-                    this[account.id] = 0.0
-                }
-            }
-        }
-        // تحديث الرصيد المعروض عند تغييره في البطاقة
-        accounts.forEach { account ->
-            val balance by viewModel.getAccountBalanceYemeni(account.id ?: 0L).observeAsState(0.0)
-            LaunchedEffect(balance) {
-                displayedBalances[account.id] = balance ?: 0.0
-            }
-        }
+        val accountBalances by viewModel.getAllAccountsBalancesYemeniMap().observeAsState(initial = emptyMap())
+        // الفلترة والفرز حسب الرصيد المعروض فقط
         var searchQuery by remember { mutableStateOf("") }
         var sortType by remember { mutableStateOf("balance_desc") }
         val sortOptions = listOf(
@@ -198,16 +185,12 @@ fun AccountsComposeScreen(
             }
         }
         // منطق الفرز حسب الرصيد المعروض فقط (داخل LazyColumn)
-        // احذف أي forEach أو LaunchedEffect أو observeAsState خارج Composable
-        // واجعل الفرز يتم فقط على القيم التي يتم عرضها فعلياً في البطاقة
         val sortedAccounts = when (sortType) {
             "balance_desc" -> filteredAccounts.sortedByDescending { account ->
-                val balance by viewModel.getAccountBalanceYemeni(account.id ?: 0L).observeAsState(0.0)
-                balance ?: 0.0
+                accountBalances[account.id] ?: 0.0
             }
             "balance_asc" -> filteredAccounts.sortedBy { account ->
-                val balance by viewModel.getAccountBalanceYemeni(account.id ?: 0L).observeAsState(0.0)
-                balance ?: 0.0
+                accountBalances[account.id] ?: 0.0
             }
             "name" -> filteredAccounts.sortedBy { it.name }
             "number" -> filteredAccounts.sortedBy { it.serverId }

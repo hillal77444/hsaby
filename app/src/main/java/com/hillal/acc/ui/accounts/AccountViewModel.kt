@@ -34,6 +34,10 @@ class AccountViewModel(private val accountRepository: AccountRepository) : ViewM
         return accountRepository.getAccountBalanceYemeni(accountId)
     }
 
+    fun getAllAccountsBalancesYemeniMap(): LiveData<Map<Long, Double>> {
+        return accountRepository.getAllAccountsBalancesYemeniMap()
+    }
+
     fun getAccountByPhoneNumber(phoneNumber: String): Account? {
         return accountRepository.getAccountByPhoneNumber(phoneNumber)
     }

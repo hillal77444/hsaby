@@ -2,6 +2,7 @@ package com.hillal.acc.data.repository;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 import com.hillal.acc.data.model.Account;
 import com.hillal.acc.data.model.Transaction;
@@ -12,6 +13,8 @@ import com.hillal.acc.data.room.AppDatabase;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AccountRepository {
     private final AccountDao accountDao;
@@ -131,5 +134,32 @@ public class AccountRepository {
 
     public void clearAllData() {
         database.clearAllTables();
+    }
+
+    // دالة تعيد جميع أرصدة الحسابات بالريال اليمني كخريطة
+    public LiveData<Map<Long, Double>> getAllAccountsBalancesYemeniMap() {
+        MutableLiveData<Map<Long, Double>> balancesLiveData = new MutableLiveData<>();
+        getAllAccounts().observeForever(new Observer<List<Account>>() {
+            @Override
+            public void onChanged(List<Account> accounts) {
+                if (accounts == null) {
+                    balancesLiveData.postValue(new HashMap<>());
+                    return;
+                }
+                Map<Long, Double> balancesMap = new HashMap<>();
+                for (Account account : accounts) {
+                    long accountId = account.getId();
+                    LiveData<Double> balanceLiveData = transactionDao.getAccountBalanceYemeni(accountId);
+                    balanceLiveData.observeForever(new Observer<Double>() {
+                        @Override
+                        public void onChanged(Double balance) {
+                            balancesMap.put(accountId, balance != null ? balance : 0.0);
+                            balancesLiveData.postValue(new HashMap<>(balancesMap));
+                        }
+                    });
+                }
+            }
+        });
+        return balancesLiveData;
     }
 } 
