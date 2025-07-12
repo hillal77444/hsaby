@@ -9,6 +9,7 @@ import com.hillal.acc.data.model.Account
 import com.hillal.acc.data.entities.Cashbox
 import com.hillal.acc.data.model.Transaction
 import com.hillal.acc.ui.accounts.AccountViewModel
+import com.hillal.acc.ui.accounts.AccountViewModelFactory
 import com.hillal.acc.viewmodel.CashboxViewModel
 import com.hillal.acc.ui.common.AccountPickerField
 import com.hillal.acc.ui.common.CashboxPickerField
@@ -29,14 +30,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
 import com.hillal.acc.R
 import androidx.compose.ui.unit.dp
+import com.hillal.acc.App
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransferScreenContainer(
-    accountViewModel: AccountViewModel = viewModel(),
-    cashboxViewModel: CashboxViewModel = viewModel(),
     transactionsViewModel: TransactionsViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    val accountRepository = remember { (context.applicationContext as App).getAccountRepository() }
+    val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModelFactory(accountRepository))
+    // If you have a similar factory for CashboxViewModel, use it here as well
+    val cashboxViewModel: CashboxViewModel = viewModel()
+
     val accounts by accountViewModel.allAccounts.observeAsState(emptyList())
     val cashboxes by cashboxViewModel.getAllCashboxes().observeAsState(emptyList())
     val transactionsNullable by transactionsViewModel.getTransactions().observeAsState(emptyList())
@@ -76,13 +82,9 @@ fun TransferScreenContainer(
                     try {
                         val amountValue = amount.toDoubleOrNull()
                         if (amountValue == null || amountValue <= 0) {
-                            // onResult(false, "يرجى إدخال مبلغ صحيح") // This line was removed from the new_code
-                            // isLoading = false // This line was removed from the new_code
                             return@TransferScreen
                         }
                         if (fromAccount.getId() == toAccount.getId()) {
-                            // onResult(false, "لا يمكن اختيار نفس الحساب مرتين") // This line was removed from the new_code
-                            // isLoading = false // This line was removed from the new_code
                             return@TransferScreen
                         }
                         // إنشاء معاملة الخصم
@@ -107,9 +109,7 @@ fun TransferScreenContainer(
                         // إضافة المعاملتين
                         transactionsViewModel.insertTransaction(debitTx)
                         transactionsViewModel.insertTransaction(creditTx)
-                        // onResult(true, "تم التحويل بنجاح!") // This line was removed from the new_code
                     } catch (e: Exception) {
-                        // onResult(false, "حدث خطأ أثناء التحويل") // This line was removed from the new_code
                     }
                     isLoading = false
                 }
