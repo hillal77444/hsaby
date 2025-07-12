@@ -37,7 +37,7 @@ import com.hillal.acc.ui.theme.success
 import com.hillal.acc.ui.theme.successContainer
 import java.util.*
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.text.TextOverflow
+import androidx.compose.ui.text.style.TextOverflow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
