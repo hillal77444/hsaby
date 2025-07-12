@@ -199,10 +199,10 @@ fun AddAccountComposeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(dimens.spacingLarge)
+                    .padding(dimens.spacingMedium)
                     .imePadding()
                     .navigationBarsPadding(),
-                verticalArrangement = Arrangement.spacedBy(dimens.spacingLarge)
+                verticalArrangement = Arrangement.spacedBy(dimens.spacingMedium)
             ) {
                 // Header Section
                 HeaderSection(dimens, colors, typography)
@@ -232,7 +232,7 @@ fun AddAccountComposeScreen(
                     colors = colors,
                     typography = typography
                 )
-                Spacer(modifier = Modifier.height(dimens.spacingLarge))
+                Spacer(modifier = Modifier.height(dimens.spacingMedium))
             }
         }
     }
@@ -251,8 +251,8 @@ private fun HeaderSection(
         // Logo Circle
         Card(
             modifier = Modifier
-                .size(dimens.iconSize * 2)
-                .padding(top = dimens.spacingLarge),
+                .size(dimens.iconSize)
+                .padding(top = dimens.spacingMedium),
             shape = CircleShape,
             colors = CardDefaults.cardColors(containerColor = colors.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -264,23 +264,23 @@ private fun HeaderSection(
                 Icon(
                     imageVector = Icons.Default.PersonAdd,
                     contentDescription = null,
-                    modifier = Modifier.size(dimens.iconSize * 1.1f),
+                    modifier = Modifier.size(dimens.iconSize * 0.7f),
                     tint = colors.primary
                 )
             }
         }
         // Title with Icon
         Row(
-            modifier = Modifier.padding(top = dimens.spacingLarge),
+            modifier = Modifier.padding(top = dimens.spacingMedium),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Default.PersonAdd,
                 contentDescription = null,
-                modifier = Modifier.size(dimens.iconSize),
+                modifier = Modifier.size(dimens.iconSize * 0.7f),
                 tint = colors.primary
             )
-            Spacer(modifier = Modifier.width(dimens.spacingSmall))
+            Spacer(modifier = Modifier.width(dimens.spacingSmall / 2))
             Text(
                 text = "إضافة حساب جديد",
                 style = typography.headlineMedium,
@@ -294,7 +294,7 @@ private fun HeaderSection(
             style = typography.bodyMedium,
             color = colors.onSurface,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = dimens.spacingSmall, bottom = dimens.spacingLarge)
+            modifier = Modifier.padding(top = dimens.spacingSmall / 2, bottom = dimens.spacingMedium)
         )
     }
 }
@@ -324,8 +324,8 @@ private fun FormSection(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier.padding(dimens.spacingLarge),
-            verticalArrangement = Arrangement.spacedBy(dimens.spacingMedium)
+            modifier = Modifier.padding(dimens.spacingSmall),
+            verticalArrangement = Arrangement.spacedBy(dimens.spacingSmall / 2)
         ) {
             // Name Field
             OutlinedTextField(
@@ -381,19 +381,42 @@ private fun FormSection(
                     ),
                     textStyle = typography.bodyLarge
                 )
-                Button(
-                    onClick = onPickContact,
-                    modifier = Modifier.size(dimens.iconSize * 2),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.surfaceVariant,
-                        contentColor = colors.primary
-                    ),
-                    shape = RoundedCornerShape(dimens.cardCorner / 2)
+                // زر جهات الاتصال بشكل أنيق
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .padding(top = 2.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.PersonAdd,
-                        contentDescription = "اختيار من جهات الاتصال",
-                        modifier = Modifier.size(dimens.iconSize)
+                    Surface(
+                        onClick = onPickContact,
+                        shape = CircleShape,
+                        color = colors.primaryContainer,
+                        tonalElevation = 4.dp,
+                        shadowElevation = 4.dp,
+                        modifier = Modifier
+                            .size(dimens.iconSize * 1.4f)
+                            .then(Modifier)
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Contacts,
+                                contentDescription = "اختيار من جهات الاتصال",
+                                tint = colors.primary,
+                                modifier = Modifier.size(dimens.iconSize)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "جهات الاتصال",
+                        style = typography.labelLarge,
+                        color = colors.primary,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = typography.labelLarge.fontSize * 0.95f
                     )
                 }
             }
@@ -446,7 +469,7 @@ private fun FormSection(
                 text = "سيتم إرسال إشعارات واتساب للعميل عند إضافة معاملات جديدة",
                 style = typography.bodySmall,
                 color = colors.onSurface,
-                modifier = Modifier.padding(start = dimens.spacingMedium)
+                modifier = Modifier.padding(start = dimens.spacingSmall)
             )
         }
     }
