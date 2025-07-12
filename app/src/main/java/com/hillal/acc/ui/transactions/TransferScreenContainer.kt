@@ -12,11 +12,7 @@ import com.hillal.acc.ui.accounts.AccountViewModel
 import com.hillal.acc.viewmodel.CashboxViewModel
 import com.hillal.acc.ui.common.AccountPickerField
 import com.hillal.acc.ui.common.CashboxPickerField
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.rememberSnackbarHostState
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -57,7 +53,6 @@ fun TransferScreenContainer(
                 ?.mapValues { it.value!! } ?: emptyMap()
         }
     val currencies = stringArrayResource(id = R.array.currencies_array).toList()
-    val snackbarHostState = rememberSnackbarHostState()
     var isLoading by remember { mutableStateOf(false) }
 
     // إضافة صندوق جديد
@@ -67,9 +62,7 @@ fun TransferScreenContainer(
         cashboxViewModel.insert(newCashbox)
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { padding ->
+    Scaffold { padding ->
         Surface(modifier = Modifier.padding(padding)) {
             TransferScreen(
                 accounts = accounts,
