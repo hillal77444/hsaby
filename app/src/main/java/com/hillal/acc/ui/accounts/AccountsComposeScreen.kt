@@ -94,8 +94,7 @@ fun ModernSearchBar(
         modifier = modifier
             .fillMaxWidth()
             .shadow(2.dp, RoundedCornerShape(cardCorner), ambientColor = shadowColor, spotColor = shadowColor)
-            .background(Color.White, shape = RoundedCornerShape(cardCorner))
-            .padding(horizontal = 4.dp, vertical = 2.dp),
+            .background(Color.White, shape = RoundedCornerShape(cardCorner)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // زر الفلترة
@@ -107,7 +106,7 @@ fun ModernSearchBar(
         ) {
             Icon(Icons.Default.FilterList, contentDescription = "فلترة", tint = blue, modifier = Modifier.size(iconSize))
         }
-        Spacer(modifier = Modifier.width(2.dp))
+        Spacer(modifier = Modifier.width(0.dp))
         // مربع البحث
         OutlinedTextField(
             value = value,
@@ -132,8 +131,7 @@ fun ModernSearchBar(
                 }
             },
             modifier = Modifier
-                .weight(1f)
-                .height(textFieldHeight),
+                .fillMaxWidth(),
             shape = RoundedCornerShape(cardCorner),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = blue,
