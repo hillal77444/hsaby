@@ -161,7 +161,13 @@ fun AccountsComposeScreen(
         val typography = MaterialTheme.typography
 
         val accounts by viewModel.allAccounts.observeAsState(initial = emptyList())
-        val accountBalances by viewModel.getAllAccountsBalancesYemeniMap().observeAsState(initial = emptyMap())
+        // احسب الأرصدة مرة واحدة فقط عند دخول الشاشة
+        val accountBalancesState = remember { mutableStateOf<Map<Long, Double>>(emptyMap()) }
+        LaunchedEffect(Unit) {
+            val balances = viewModel.getAllAccountsBalancesYemeniMap().value ?: emptyMap()
+            accountBalancesState.value = balances
+        }
+        val accountBalances = accountBalancesState.value
         // الفلترة والفرز حسب الرصيد المعروض فقط
         var searchQuery by remember { mutableStateOf("") }
         var sortType by remember { mutableStateOf("balance_desc") }

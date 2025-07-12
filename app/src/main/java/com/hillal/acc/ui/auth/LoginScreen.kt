@@ -56,6 +56,13 @@ fun LoginScreen(
         var isLoading by remember { mutableStateOf(false) }
         var errorMessage by remember { mutableStateOf<String?>(null) }
 
+        // عند ظهور رسالة خطأ، أوقف التحميل تلقائياً
+        LaunchedEffect(errorMessage) {
+            if (errorMessage != null) {
+                isLoading = false
+            }
+        }
+
         val screenWidth = configuration.screenWidthDp.toFloat().dp
         val screenHeight = configuration.screenHeightDp.toFloat().dp
         val blueHeight = screenHeight * 0.10f // أصغر
