@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.unit.TextUnit
 
 // ألوان المشروع
 private val LightColors = lightColorScheme(
@@ -90,13 +91,18 @@ data class AppDimensions(
     val successIconSize: Dp = 48.dp,
     val whatsappIconSize: Dp = 32.dp,
     val smsIconSize: Dp = 28.dp,
-    val fieldHorizontalPadding: Dp = 4.dp // جديد
+    val fieldHorizontalPadding: Dp = 4.dp, // جديد
+    val cardHeight: Dp = 120.dp, // جديد
+    val bodyFont: TextUnit = 14.sp, // جديد
+    val statFont: TextUnit = 18.sp, // جديد
+    val statLabelFont: TextUnit = 13.sp // جديد
 )
 
 @Composable
 fun calculateAppDimensions(): AppDimensions {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
+    val screenHeight = configuration.screenHeightDp.dp
     val cardCorner = screenWidth * 0.04f
     return AppDimensions(
         spacingSmall = screenWidth * 0.02f,   // 2% من العرض
@@ -109,7 +115,11 @@ fun calculateAppDimensions(): AppDimensions {
         successIconSize = screenWidth * 0.13f,    // 13% من العرض
         whatsappIconSize = screenWidth * 0.09f,   // 9% من العرض
         smsIconSize = screenWidth * 0.08f,        // 8% من العرض
-        fieldHorizontalPadding = screenWidth * 0.015f // 1.5% من العرض
+        fieldHorizontalPadding = screenWidth * 0.015f, // 1.5% من العرض
+        cardHeight = screenHeight * 0.15f, // 15% من الارتفاع
+        bodyFont = (screenWidth.value * 0.045f).sp, // ديناميكي
+        statFont = (screenWidth.value * 0.048f).sp, // ديناميكي
+        statLabelFont = (screenWidth.value * 0.035f).sp // ديناميكي
     )
 }
 

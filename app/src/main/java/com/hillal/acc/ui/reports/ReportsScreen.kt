@@ -62,7 +62,7 @@ fun ReportsScreen(
             Card(
                 modifier = Modifier
                     .fillMaxWidth(0.95f)
-                    .height(dimens.cardHeight * 0.6f)
+                    .height(dimens.cardHeight)
                     .align(Alignment.Center),
                 shape = RoundedCornerShape(dimens.cardCorner * 1.2f),
                 elevation = CardDefaults.cardElevation(8.dp),
@@ -313,8 +313,8 @@ fun StatItem(
     ) {
         Text(
             text = if (isInt) value.toInt().toString() else String.format(Locale.ENGLISH, "%.2f", value),
-            fontWeight = FontWeight.Bold,
             fontSize = dimens.statFont * 0.9f,
+            fontWeight = FontWeight.Bold,
             color = color
         )
         Text(
