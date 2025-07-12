@@ -149,8 +149,8 @@ fun ReportsScreen(
                         onClick = onAccountStatementClick,
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = colors.tertiary,
-                            contentColor = colors.onTertiary
+                            containerColor = colors.primary,
+                            contentColor = colors.onPrimary
                         ),
                         shape = RoundedCornerShape(dimens.cardCorner)
                     ) {
@@ -261,7 +261,7 @@ fun ReportsScreen(
                     StatItem(
                         label = "متوسط المعاملة", 
                         value = avg,
-                        color = colors.primaryContainer
+                        color = colors.secondary
                     )
                 }
             }
