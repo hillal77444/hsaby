@@ -190,6 +190,12 @@
         android:label="صرف العملات" >
     </fragment>
 
+    <!-- تحويل بين الحسابات -->
+    <fragment
+        android:id="@+id/transferFragment"
+        android:name="com.hillal.acc.ui.transactions.TransferComposeFragment"
+        android:label="تحويل بين الحسابات" />
+
     <action
         android:id="@+id/action_dashboard_to_exchange"
         app:destination="@id/exchangeFragment" />

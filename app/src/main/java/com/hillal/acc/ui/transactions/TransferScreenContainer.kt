@@ -41,7 +41,7 @@ fun TransferScreenContainer(
 ) {
     val accounts by accountViewModel.allAccounts.observeAsState(emptyList())
     val cashboxes by cashboxViewModel.getAllCashboxes().observeAsState(emptyList())
-    val transactions by transactionsViewModel.getTransactions().observeAsState(emptyList())
+    val transactions by transactionsViewModel.allTransactions.observeAsState(emptyList())
     val balancesMap by transactionsViewModel.accountBalancesMap.observeAsState(emptyMap())
     val currencies = stringArrayResource(id = R.array.currencies_array).toList()
     val snackbarHostState = rememberSnackbarHostState()
@@ -65,18 +65,18 @@ fun TransferScreenContainer(
                 transactions = transactions,
                 balancesMap = balancesMap,
                 onAddCashbox = { addCashbox(it) },
-                onTransfer = { fromAccount, toAccount, cashbox, currency, amount, notes, onResult ->
+                onTransfer = { fromAccount, toAccount, cashbox, currency, amount, notes ->
                     isLoading = true
                     try {
                         val amountValue = amount.toDoubleOrNull()
                         if (amountValue == null || amountValue <= 0) {
-                            onResult(false, "يرجى إدخال مبلغ صحيح")
-                            isLoading = false
+                            // onResult(false, "يرجى إدخال مبلغ صحيح") // This line was removed from the new_code
+                            // isLoading = false // This line was removed from the new_code
                             return@TransferScreen
                         }
                         if (fromAccount.getId() == toAccount.getId()) {
-                            onResult(false, "لا يمكن اختيار نفس الحساب مرتين")
-                            isLoading = false
+                            // onResult(false, "لا يمكن اختيار نفس الحساب مرتين") // This line was removed from the new_code
+                            // isLoading = false // This line was removed from the new_code
                             return@TransferScreen
                         }
                         // إنشاء معاملة الخصم
@@ -101,9 +101,9 @@ fun TransferScreenContainer(
                         // إضافة المعاملتين
                         transactionsViewModel.insertTransaction(debitTx)
                         transactionsViewModel.insertTransaction(creditTx)
-                        onResult(true, "تم التحويل بنجاح!")
+                        // onResult(true, "تم التحويل بنجاح!") // This line was removed from the new_code
                     } catch (e: Exception) {
-                        onResult(false, "حدث خطأ أثناء التحويل")
+                        // onResult(false, "حدث خطأ أثناء التحويل") // This line was removed from the new_code
                     }
                     isLoading = false
                 }

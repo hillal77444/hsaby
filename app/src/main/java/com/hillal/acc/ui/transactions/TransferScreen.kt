@@ -8,23 +8,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.hillal.acc.ui.accounts.AccountPickerField
-import com.hillal.acc.ui.cashbox.CashboxPickerField
+import com.hillal.acc.data.model.Account
+import com.hillal.acc.data.entities.Cashbox
+import com.hillal.acc.ui.common.AccountPickerField
+import com.hillal.acc.ui.common.CashboxPickerField
 import com.hillal.acc.ui.theme.LocalAppDimensions
 
 @Composable
 fun TransferScreen(
-    accounts: List<AccountUiModel>,
-    cashboxes: List<CashboxUiModel>,
-    currencies: List<String>,
-    onTransfer: (fromAccount: AccountUiModel, toAccount: AccountUiModel, cashbox: CashboxUiModel, currency: String, amount: String, notes: String) -> Unit
+    accounts: List<Account>,
+    cashboxes: List<Cashbox>,
+    transactions: List<com.hillal.acc.data.model.Transaction>,
+    balancesMap: Map<Long, Map<String, Double>>,
+    onAddCashbox: (String) -> Unit,
+    onTransfer: (fromAccount: Account, toAccount: Account, cashbox: Cashbox, currency: String, amount: String, notes: String) -> Unit
 ) {
     val dimens = LocalAppDimensions.current
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
-    var fromAccount by remember { mutableStateOf<AccountUiModel?>(null) }
-    var toAccount by remember { mutableStateOf<AccountUiModel?>(null) }
-    var selectedCashbox by remember { mutableStateOf<CashboxUiModel?>(null) }
+    var fromAccount by remember { mutableStateOf<Account?>(null) }
+    var toAccount by remember { mutableStateOf<Account?>(null) }
+    var selectedCashbox by remember { mutableStateOf<Cashbox?>(null) }
     var selectedCurrency by remember { mutableStateOf(currencies.firstOrNull() ?: "") }
     var amount by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
@@ -48,18 +52,22 @@ fun TransferScreen(
             Column(Modifier.padding(dimens.spacingMedium)) {
                 Text("من الحساب", style = typography.bodySmall)
                 AccountPickerField(
+                    label = "من الحساب",
                     accounts = accounts,
+                    transactions = transactions,
+                    balancesMap = balancesMap,
                     selectedAccount = fromAccount,
-                    onAccountSelected = { fromAccount = it },
-                    modifier = Modifier.fillMaxWidth()
+                    onAccountSelected = { fromAccount = it }
                 )
                 Spacer(Modifier.height(dimens.spacingSmall))
                 Text("إلى الحساب", style = typography.bodySmall)
                 AccountPickerField(
+                    label = "إلى الحساب",
                     accounts = accounts,
+                    transactions = transactions,
+                    balancesMap = balancesMap,
                     selectedAccount = toAccount,
-                    onAccountSelected = { toAccount = it },
-                    modifier = Modifier.fillMaxWidth()
+                    onAccountSelected = { toAccount = it }
                 )
             }
         }
@@ -74,7 +82,7 @@ fun TransferScreen(
                     cashboxes = cashboxes,
                     selectedCashbox = selectedCashbox,
                     onCashboxSelected = { selectedCashbox = it },
-                    modifier = Modifier.fillMaxWidth()
+                    onAddCashbox = onAddCashbox
                 )
                 Spacer(Modifier.height(dimens.spacingSmall))
                 Text("اختر العملة", style = typography.bodySmall)
@@ -158,6 +166,4 @@ fun TransferScreen(
         }
         Spacer(Modifier.height(dimens.spacingLarge))
     }
-}
-
-// ملاحظة: يجب تعريف AccountUiModel وCashboxUiModel أو استخدام النماذج الفعلية لديك 
+} 
