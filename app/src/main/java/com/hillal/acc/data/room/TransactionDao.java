@@ -117,4 +117,8 @@ public interface TransactionDao {
 
     @Query("SELECT SUM(CASE WHEN type = 'credit' THEN amount ELSE -amount END) FROM transactions WHERE account_id = :accountId AND currency = :currency AND (transaction_date < :transactionDate OR (transaction_date = :transactionDate AND id <= :transactionId))")
     LiveData<Double> getBalanceUntilTransaction(long accountId, long transactionDate, long transactionId, String currency);
+
+    // دالة تعيد جميع أرصدة الحسابات بالريال اليمني دفعة واحدة
+    @Query("SELECT account_id, SUM(CASE WHEN type = 'credit' OR type = 'له' THEN amount ELSE -amount END) as balance FROM transactions WHERE currency = 'يمني' GROUP BY account_id")
+    LiveData<List<AccountBalanceYemeni>> getAllAccountsBalancesYemeni();
 } 
