@@ -1,7 +1,17 @@
 package com.hillal.acc.ui.transactions
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,11 +23,6 @@ import com.hillal.acc.data.entities.Cashbox
 import com.hillal.acc.ui.common.AccountPickerField
 import com.hillal.acc.ui.common.CashboxPickerField
 import com.hillal.acc.ui.theme.LocalAppDimensions
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExposedDropdownMenu
-import androidx.compose.material3.ExperimentalMaterial3Api
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -150,7 +155,7 @@ fun TransferScreen(
             Text(errorMessage!!, color = colors.error, style = typography.bodyMedium)
         }
         if (successMessage != null) {
-            Text(successMessage!!, color = colors.success, style = typography.bodyMedium)
+            Text(successMessage!!, color = colors.primary, style = typography.bodyMedium)
         }
         Spacer(Modifier.weight(1f))
         Button(
