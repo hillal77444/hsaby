@@ -56,6 +56,124 @@ import androidx.navigation.NavController
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 
+// دوال مساعدة لتحويل الأرقام إلى كلمات
+private fun wholeNumberToWords(number: Long): String {
+    if (number == 0L) return "صفر"
+    if (number < 0L) return "سالب ${wholeNumberToWords(-number)}"
+    
+    val units = arrayOf("", "ألف", "ألفان", "آلاف", "ألفاً")
+    val tens = arrayOf("", "عشرة", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون", "سبعون", "ثمانون", "تسعون")
+    val ones = arrayOf("", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة", "ثمانية", "تسعة")
+    
+    return when {
+        number < 10L -> ones[number.toInt()]
+        number < 20L -> when (number) {
+            10L -> "عشرة"
+            11L -> "أحد عشر"
+            12L -> "اثنا عشر"
+            13L -> "ثلاثة عشر"
+            14L -> "أربعة عشر"
+            15L -> "خمسة عشر"
+            16L -> "ستة عشر"
+            17L -> "سبعة عشر"
+            18L -> "ثمانية عشر"
+            19L -> "تسعة عشر"
+            else -> ones[(number - 10).toInt()] + " عشر"
+        }
+        number < 100L -> {
+            val ten = number / 10L
+            val one = number % 10L
+            when {
+                one == 0L -> tens[ten.toInt()]
+                else -> ones[one.toInt()] + " و" + tens[ten.toInt()]
+            }
+        }
+        number < 1000L -> {
+            val hundred = number / 100L
+            val remainder = number % 100L
+            when {
+                remainder == 0L -> ones[hundred.toInt()] + "مائة"
+                else -> ones[hundred.toInt()] + "مائة و" + wholeNumberToWords(remainder)
+            }
+        }
+        number < 1000000L -> {
+            val thousand = number / 1000L
+            val remainder = number % 1000L
+            val thousandWords = when {
+                thousand == 1L -> "ألف"
+                thousand == 2L -> "ألفان"
+                thousand < 11L -> wholeNumberToWords(thousand) + " آلاف"
+                else -> wholeNumberToWords(thousand) + " ألف"
+            }
+            when {
+                remainder == 0L -> thousandWords
+                else -> thousandWords + " و" + wholeNumberToWords(remainder)
+            }
+        }
+        number < 1000000000L -> {
+            val million = number / 1000000L
+            val remainder = number % 1000000L
+            val millionWords = when {
+                million == 1L -> "مليون"
+                million == 2L -> "مليونان"
+                million < 11L -> wholeNumberToWords(million) + " ملايين"
+                else -> wholeNumberToWords(million) + " مليون"
+            }
+            when {
+                remainder == 0L -> millionWords
+                else -> millionWords + " و" + wholeNumberToWords(remainder)
+            }
+        }
+        else -> {
+            val billion = number / 1000000000L
+            val remainder = number % 1000000000L
+            val billionWords = when {
+                billion == 1L -> "مليار"
+                billion == 2L -> "ملياران"
+                billion < 11L -> wholeNumberToWords(billion) + " مليارات"
+                else -> wholeNumberToWords(billion) + " مليار"
+            }
+            when {
+                remainder == 0L -> billionWords
+                else -> billionWords + " و" + wholeNumberToWords(remainder)
+            }
+        }
+    }
+}
+
+private fun decimalToWords(decimal: Int): String {
+    if (decimal == 0) return ""
+    
+    val ones = arrayOf("", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة", "ثمانية", "تسعة")
+    val tens = arrayOf("", "عشرة", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون", "سبعون", "ثمانون", "تسعون")
+    
+    return when {
+        decimal < 10 -> ones[decimal]
+        decimal < 20 -> when (decimal) {
+            10 -> "عشرة"
+            11 -> "أحد عشر"
+            12 -> "اثنا عشر"
+            13 -> "ثلاثة عشر"
+            14 -> "أربعة عشر"
+            15 -> "خمسة عشر"
+            16 -> "ستة عشر"
+            17 -> "سبعة عشر"
+            18 -> "ثمانية عشر"
+            19 -> "تسعة عشر"
+            else -> ones[decimal - 10] + " عشر"
+        }
+        decimal < 100 -> {
+            val ten = decimal / 10
+            val one = decimal % 10
+            when {
+                one == 0 -> tens[ten]
+                else -> ones[one] + " و" + tens[ten]
+            }
+        }
+        else -> "مائة"
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransferScreen(
@@ -155,125 +273,6 @@ fun TransferScreen(
                         else -> "$wholeWords و$decimalWords"
                     }
                 }
-            }
-        }
-        
-        // دالة لتحويل الأرقام الصحيحة إلى كلمات
-        private fun wholeNumberToWords(number: Long): String {
-            if (number == 0L) return "صفر"
-            if (number < 0L) return "سالب ${wholeNumberToWords(-number)}"
-            
-            val units = arrayOf("", "ألف", "ألفان", "آلاف", "ألفاً")
-            val tens = arrayOf("", "عشرة", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون", "سبعون", "ثمانون", "تسعون")
-            val ones = arrayOf("", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة", "ثمانية", "تسعة")
-            
-            return when {
-                number < 10L -> ones[number.toInt()]
-                number < 20L -> when (number) {
-                    10L -> "عشرة"
-                    11L -> "أحد عشر"
-                    12L -> "اثنا عشر"
-                    13L -> "ثلاثة عشر"
-                    14L -> "أربعة عشر"
-                    15L -> "خمسة عشر"
-                    16L -> "ستة عشر"
-                    17L -> "سبعة عشر"
-                    18L -> "ثمانية عشر"
-                    19L -> "تسعة عشر"
-                    else -> ones[(number - 10).toInt()] + " عشر"
-                }
-                number < 100L -> {
-                    val ten = number / 10L
-                    val one = number % 10L
-                    when {
-                        one == 0L -> tens[ten.toInt()]
-                        else -> ones[one.toInt()] + " و" + tens[ten.toInt()]
-                    }
-                }
-                number < 1000L -> {
-                    val hundred = number / 100L
-                    val remainder = number % 100L
-                    when {
-                        remainder == 0L -> ones[hundred.toInt()] + "مائة"
-                        else -> ones[hundred.toInt()] + "مائة و" + wholeNumberToWords(remainder)
-                    }
-                }
-                number < 1000000L -> {
-                    val thousand = number / 1000L
-                    val remainder = number % 1000L
-                    val thousandWords = when {
-                        thousand == 1L -> "ألف"
-                        thousand == 2L -> "ألفان"
-                        thousand < 11L -> wholeNumberToWords(thousand) + " آلاف"
-                        else -> wholeNumberToWords(thousand) + " ألف"
-                    }
-                    when {
-                        remainder == 0L -> thousandWords
-                        else -> thousandWords + " و" + wholeNumberToWords(remainder)
-                    }
-                }
-                number < 1000000000L -> {
-                    val million = number / 1000000L
-                    val remainder = number % 1000000L
-                    val millionWords = when {
-                        million == 1L -> "مليون"
-                        million == 2L -> "مليونان"
-                        million < 11L -> wholeNumberToWords(million) + " ملايين"
-                        else -> wholeNumberToWords(million) + " مليون"
-                    }
-                    when {
-                        remainder == 0L -> millionWords
-                        else -> millionWords + " و" + wholeNumberToWords(remainder)
-                    }
-                }
-                else -> {
-                    val billion = number / 1000000000L
-                    val remainder = number % 1000000000L
-                    val billionWords = when {
-                        billion == 1L -> "مليار"
-                        billion == 2L -> "ملياران"
-                        billion < 11L -> wholeNumberToWords(billion) + " مليارات"
-                        else -> wholeNumberToWords(billion) + " مليار"
-                    }
-                    when {
-                        remainder == 0L -> billionWords
-                        else -> billionWords + " و" + wholeNumberToWords(remainder)
-                    }
-                }
-            }
-        }
-        
-        // دالة لتحويل الكسور العشرية إلى كلمات
-        private fun decimalToWords(decimal: Int): String {
-            if (decimal == 0) return ""
-            
-            val ones = arrayOf("", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة", "ثمانية", "تسعة")
-            val tens = arrayOf("", "عشرة", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون", "سبعون", "ثمانون", "تسعون")
-            
-            return when {
-                decimal < 10 -> ones[decimal]
-                decimal < 20 -> when (decimal) {
-                    10 -> "عشرة"
-                    11 -> "أحد عشر"
-                    12 -> "اثنا عشر"
-                    13 -> "ثلاثة عشر"
-                    14 -> "أربعة عشر"
-                    15 -> "خمسة عشر"
-                    16 -> "ستة عشر"
-                    17 -> "سبعة عشر"
-                    18 -> "ثمانية عشر"
-                    19 -> "تسعة عشر"
-                    else -> ones[decimal - 10] + " عشر"
-                }
-                decimal < 100 -> {
-                    val ten = decimal / 10
-                    val one = decimal % 10
-                    when {
-                        one == 0 -> tens[ten]
-                        else -> ones[one] + " و" + tens[ten]
-                    }
-                }
-                else -> "مائة"
             }
         }
         
