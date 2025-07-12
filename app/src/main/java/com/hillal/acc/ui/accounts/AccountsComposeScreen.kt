@@ -38,6 +38,7 @@ import com.hillal.acc.ui.theme.successContainer
 import java.util.*
 import androidx.compose.ui.draw.scale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomAppBar(
     title: String = "إدارة الحسابات",
