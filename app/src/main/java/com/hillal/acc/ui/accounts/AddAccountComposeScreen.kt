@@ -40,6 +40,8 @@ import com.hillal.acc.data.model.Account
 import java.util.*
 import android.app.Activity
 import androidx.compose.material.icons.filled.PersonAddAlt1
+import com.hillal.acc.ui.theme.AppTheme
+import com.hillal.acc.ui.theme.LocalAppDimensions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,159 +52,160 @@ fun AddAccountComposeScreen(
     initialAccount: Account? = null,
     onSave: ((Account) -> Unit)? = null
 ) {
-    val context = LocalContext.current
-    val spacing = ResponsiveSpacing()
-    val padding = ResponsivePadding()
-    
-    // State variables
-    var name by remember { mutableStateOf(initialAccount?.name ?: "") }
-    var phone by remember { mutableStateOf(initialAccount?.phoneNumber ?: "") }
-    var notes by remember { mutableStateOf(initialAccount?.notes ?: "") }
-    var whatsappEnabled by remember { mutableStateOf(initialAccount?.isWhatsappEnabled ?: true) }
-    var nameError by remember { mutableStateOf<String?>(null) }
-    var phoneError by remember { mutableStateOf<String?>(null) }
-    var isSaving by remember { mutableStateOf(false) }
-    
-    // Contact picker launcher (دقيق)
-    val contactPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val uri = result.data?.data
-            uri?.let {
-                try {
-                    val cursor: Cursor? = context.contentResolver.query(
-                        it,
-                        arrayOf(
-                            ContactsContract.CommonDataKinds.Phone.NUMBER,
-                            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
-                        ),
-                        null,
-                        null,
-                        null
-                    )
-                    cursor?.use { cursor ->
-                        if (cursor.moveToFirst()) {
-                            val phoneNumber = cursor.getString(0)
-                            val contactName = cursor.getString(1)
-                            val cleanPhone = phoneNumber.replace(Regex("[^0-9+]"), "")
-                            name = contactName
-                            phone = cleanPhone
-                            nameError = null
-                            phoneError = null
+    AppTheme {
+        val context = LocalContext.current
+        val dimens = LocalAppDimensions.current
+        val colors = MaterialTheme.colorScheme
+        val typography = MaterialTheme.typography
+
+        // State variables
+        var name by remember { mutableStateOf(initialAccount?.name ?: "") }
+        var phone by remember { mutableStateOf(initialAccount?.phoneNumber ?: "") }
+        var notes by remember { mutableStateOf(initialAccount?.notes ?: "") }
+        var whatsappEnabled by remember { mutableStateOf(initialAccount?.isWhatsappEnabled ?: true) }
+        var nameError by remember { mutableStateOf<String?>(null) }
+        var phoneError by remember { mutableStateOf<String?>(null) }
+        var isSaving by remember { mutableStateOf(false) }
+
+        // Contact picker launcher (دقيق)
+        val contactPickerLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val uri = result.data?.data
+                uri?.let {
+                    try {
+                        val cursor: Cursor? = context.contentResolver.query(
+                            it,
+                            arrayOf(
+                                ContactsContract.CommonDataKinds.Phone.NUMBER,
+                                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+                            ),
+                            null,
+                            null,
+                            null
+                        )
+                        cursor?.use { cursor ->
+                            if (cursor.moveToFirst()) {
+                                val phoneNumber = cursor.getString(0)
+                                val contactName = cursor.getString(1)
+                                val cleanPhone = phoneNumber.replace(Regex("[^0-9+]"), "")
+                                name = contactName
+                                phone = cleanPhone
+                                nameError = null
+                                phoneError = null
+                            }
                         }
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "حدث خطأ أثناء اختيار جهة الاتصال", Toast.LENGTH_SHORT).show()
                     }
-                } catch (e: Exception) {
-                    Toast.makeText(context, "حدث خطأ أثناء اختيار جهة الاتصال", Toast.LENGTH_SHORT).show()
                 }
             }
         }
-    }
-    
-    // Permission launcher
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            val intent = Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI)
-            contactPickerLauncher.launch(intent)
-        } else {
-            Toast.makeText(context, "يجب السماح بالوصول إلى جهات الاتصال لاختيار جهة اتصال", Toast.LENGTH_LONG).show()
-        }
-    }
-    
-    // Function to pick contact
-    val pickContact = {
-        when {
-            ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED -> {
+
+        // Permission launcher
+        val permissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
                 val intent = Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI)
                 contactPickerLauncher.launch(intent)
+            } else {
+                Toast.makeText(context, "يجب السماح بالوصول إلى جهات الاتصال لاختيار جهة اتصال", Toast.LENGTH_LONG).show()
             }
-            else -> {
-                permissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+        }
+
+        // Function to pick contact
+        val pickContact = {
+            when {
+                ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED -> {
+                    val intent = Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI)
+                    contactPickerLauncher.launch(intent)
+                }
+                else -> {
+                    permissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+                }
             }
         }
-    }
-    
-    // Function to save or update account
-    val saveAccount = fun() {
-        // Reset errors
-        nameError = null
-        phoneError = null
-        
-        // Validation
-        if (name.isEmpty()) {
-            nameError = "الرجاء إدخال اسم الحساب"
-            return
-        }
-        
-        if (phone.isEmpty()) {
-            phoneError = "الرجاء إدخال رقم الهاتف"
-            return
-        }
-        
-        // Check if phone number already exists (فقط عند الإضافة)
-        if (initialAccount == null) {
-            val existingAccount = viewModel.getAccountByPhoneNumber(phone)
-            if (existingAccount != null) {
-                phoneError = "رقم الهاتف موجود مسبقاً"
+
+        // Function to save or update account
+        val saveAccount = fun() {
+            // Reset errors
+            nameError = null
+            phoneError = null
+
+            // Validation
+            if (name.isEmpty()) {
+                nameError = "الرجاء إدخال اسم الحساب"
                 return
             }
-        }
-        
-        // Set saving state
-        isSaving = true
-        
-        val account = if (initialAccount != null) {
-            // تحديث حساب موجود
-            initialAccount.name = name
-            initialAccount.phoneNumber = phone
-            initialAccount.notes = notes
-            initialAccount.isWhatsappEnabled = whatsappEnabled
-            initialAccount
-        } else {
-            // إنشاء حساب جديد
-            Account(
-                viewModel.generateUniqueAccountNumber(),
-                name,
-                100.0, // Opening balance
-                phone,
-                false // isDebtor
-            ).apply {
-                this.notes = notes
-                this.setWhatsappEnabled(whatsappEnabled)
-                this.serverId = -1
+
+            if (phone.isEmpty()) {
+                phoneError = "الرجاء إدخال رقم الهاتف"
+                return
             }
+
+            // Check if phone number already exists (فقط عند الإضافة)
+            if (initialAccount == null) {
+                val existingAccount = viewModel.getAccountByPhoneNumber(phone)
+                if (existingAccount != null) {
+                    phoneError = "رقم الهاتف موجود مسبقاً"
+                    return
+                }
+            }
+
+            // Set saving state
+            isSaving = true
+
+            val account = if (initialAccount != null) {
+                // تحديث حساب موجود
+                initialAccount.name = name
+                initialAccount.phoneNumber = phone
+                initialAccount.notes = notes
+                initialAccount.isWhatsappEnabled = whatsappEnabled
+                initialAccount
+            } else {
+                // إنشاء حساب جديد
+                Account(
+                    viewModel.generateUniqueAccountNumber(),
+                    name,
+                    100.0, // Opening balance
+                    phone,
+                    false // isDebtor
+                ).apply {
+                    this.notes = notes
+                    this.setWhatsappEnabled(whatsappEnabled)
+                    this.serverId = -1
+                }
+            }
+
+            if (onSave != null) {
+                onSave(account)
+                Toast.makeText(context, "تم تحديث الحساب بنجاح", Toast.LENGTH_SHORT).show()
+            } else {
+                viewModel.insertAccount(account)
+                Toast.makeText(context, "حساب جديد إضاف بنجاح", Toast.LENGTH_SHORT).show()
+            }
+            isSaving = false
+            onNavigateBack()
         }
-        
-        if (onSave != null) {
-            onSave(account)
-            Toast.makeText(context, "تم تحديث الحساب بنجاح", Toast.LENGTH_SHORT).show()
-        } else {
-            viewModel.insertAccount(account)
-            Toast.makeText(context, "حساب جديد إضاف بنجاح", Toast.LENGTH_SHORT).show()
-        }
-        isSaving = false
-        onNavigateBack()
-    }
-    
-    ResponsiveAccountsTheme {
+
         Box(
             modifier = modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
+                .background(colors.background)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(padding.large)
-                    .imePadding(),
-                verticalArrangement = Arrangement.spacedBy(spacing.large)
+                    .padding(dimens.spacingLarge)
+                    .imePadding()
+                    .navigationBarsPadding(),
+                verticalArrangement = Arrangement.spacedBy(dimens.spacingLarge)
             ) {
                 // Header Section
-                HeaderSection(spacing = spacing, padding = padding)
-                
+                HeaderSection(dimens, colors, typography)
                 // Form Section
                 FormSection(
                     name = name,
@@ -216,21 +219,20 @@ fun AddAccountComposeScreen(
                     whatsappEnabled = whatsappEnabled,
                     onWhatsappEnabledChange = { whatsappEnabled = it },
                     onPickContact = pickContact,
-                    spacing = spacing,
-                    padding = padding
+                    dimens = dimens,
+                    colors = colors,
+                    typography = typography
                 )
-                
                 // Buttons Section
                 ButtonsSection(
                     onSave = saveAccount,
                     onCancel = onNavigateBack,
                     isSaving = isSaving,
-                    spacing = spacing,
-                    padding = padding
+                    dimens = dimens,
+                    colors = colors,
+                    typography = typography
                 )
-                
-                // Bottom spacing
-                Spacer(modifier = Modifier.height(80.dp))
+                Spacer(modifier = Modifier.height(dimens.spacingLarge))
             }
         }
     }
@@ -238,8 +240,9 @@ fun AddAccountComposeScreen(
 
 @Composable
 private fun HeaderSection(
-    spacing: ResponsiveSpacingValues,
-    padding: ResponsivePaddingValues
+    dimens: com.hillal.acc.ui.theme.AppDimensions,
+    colors: ColorScheme,
+    typography: Typography
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -248,10 +251,10 @@ private fun HeaderSection(
         // Logo Circle
         Card(
             modifier = Modifier
-                .size(40.dp)
-                .padding(top = spacing.xl),
+                .size(dimens.iconSize * 2)
+                .padding(top = dimens.spacingLarge),
             shape = CircleShape,
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = colors.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Box(
@@ -261,39 +264,37 @@ private fun HeaderSection(
                 Icon(
                     imageVector = Icons.Default.PersonAdd,
                     contentDescription = null,
-                    modifier = Modifier.size(26.dp),
-                    tint = Color(0xFF152FD9)
+                    modifier = Modifier.size(dimens.iconSize * 1.1f),
+                    tint = colors.primary
                 )
             }
         }
-        
         // Title with Icon
         Row(
-            modifier = Modifier.padding(top = spacing.large),
+            modifier = Modifier.padding(top = dimens.spacingLarge),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Default.PersonAdd,
                 contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = Color(0xFF152FD9)
+                modifier = Modifier.size(dimens.iconSize),
+                tint = colors.primary
             )
-            Spacer(modifier = Modifier.width(spacing.small))
+            Spacer(modifier = Modifier.width(dimens.spacingSmall))
             Text(
                 text = "إضافة حساب جديد",
-                style = MaterialTheme.typography.headlineMedium,
+                style = typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF152FD9)
+                color = colors.primary
             )
         }
-        
         // Description
         Text(
             text = "يرجى تعبئة بيانات الحساب بدقة",
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFF666666),
+            style = typography.bodyMedium,
+            color = colors.onSurface,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = spacing.small, bottom = spacing.large)
+            modifier = Modifier.padding(top = dimens.spacingSmall, bottom = dimens.spacingLarge)
         )
     }
 }
@@ -312,109 +313,112 @@ private fun FormSection(
     whatsappEnabled: Boolean,
     onWhatsappEnabledChange: (Boolean) -> Unit,
     onPickContact: () -> Unit,
-    spacing: ResponsiveSpacingValues,
-    padding: ResponsivePaddingValues
+    dimens: com.hillal.acc.ui.theme.AppDimensions,
+    colors: ColorScheme,
+    typography: Typography
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(dimens.cardCorner),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier.padding(padding.large),
-            verticalArrangement = Arrangement.spacedBy(spacing.medium)
+            modifier = Modifier.padding(dimens.spacingLarge),
+            verticalArrangement = Arrangement.spacedBy(dimens.spacingMedium)
         ) {
             // Name Field
             OutlinedTextField(
                 value = name,
                 onValueChange = onNameChange,
-                label = { Text("اسم الحساب") },
+                label = { Text("اسم الحساب", fontSize = typography.bodyLarge.fontSize) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = null,
-                        tint = Color(0xFF152FD9)
+                        tint = colors.primary,
+                        modifier = Modifier.size(dimens.iconSize)
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 singleLine = true,
                 isError = nameError != null,
-                supportingText = nameError?.let { { Text(it) } },
+                supportingText = nameError?.let { { Text(it, color = colors.error, style = typography.bodySmall) } },
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF152FD9),
-                    unfocusedBorderColor = Color(0xFF666666),
-                    errorBorderColor = Color(0xFFE53E3E)
-                )
+                    focusedBorderColor = colors.primary,
+                    unfocusedBorderColor = colors.onSurface,
+                    errorBorderColor = colors.error
+                ),
+                textStyle = typography.bodyLarge
             )
-            
             // Phone Field with Contact Picker
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(spacing.small)
+                horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)
             ) {
                 OutlinedTextField(
                     value = phone,
                     onValueChange = onPhoneChange,
-                    label = { Text("رقم الهاتف") },
+                    label = { Text("رقم الهاتف", fontSize = typography.bodyLarge.fontSize) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Phone,
                             contentDescription = null,
-                            tint = Color(0xFF152FD9)
+                            tint = colors.primary,
+                            modifier = Modifier.size(dimens.iconSize)
                         )
                     },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     singleLine = true,
                     isError = phoneError != null,
-                    supportingText = phoneError?.let { { Text(it) } },
+                    supportingText = phoneError?.let { { Text(it, color = colors.error, style = typography.bodySmall) } },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFF152FD9),
-                        unfocusedBorderColor = Color(0xFF666666),
-                        errorBorderColor = Color(0xFFE53E3E)
-                    )
+                        focusedBorderColor = colors.primary,
+                        unfocusedBorderColor = colors.onSurface,
+                        errorBorderColor = colors.error
+                    ),
+                    textStyle = typography.bodyLarge
                 )
-                
                 Button(
                     onClick = onPickContact,
-                    modifier = Modifier.size(48.dp),
+                    modifier = Modifier.size(dimens.iconSize * 2),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFF3F4F6),
-                        contentColor = Color(0xFF152FD9)
+                        containerColor = colors.surfaceVariant,
+                        contentColor = colors.primary
                     ),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(dimens.cardCorner / 2)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.PersonAdd, // أيقونة مضمونة الظهور
+                        imageVector = Icons.Default.PersonAdd,
                         contentDescription = "اختيار من جهات الاتصال",
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(dimens.iconSize)
                     )
                 }
             }
-            
             // Notes Field
             OutlinedTextField(
                 value = notes,
                 onValueChange = onNotesChange,
-                label = { Text("ملاحظات") },
+                label = { Text("ملاحظات", fontSize = typography.bodyLarge.fontSize) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Note,
                         contentDescription = null,
-                        tint = Color(0xFF152FD9)
+                        tint = colors.primary,
+                        modifier = Modifier.size(dimens.iconSize)
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 minLines = 3,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF152FD9),
-                    unfocusedBorderColor = Color(0xFF666666)
-                )
+                    focusedBorderColor = colors.primary,
+                    unfocusedBorderColor = colors.onSurface
+                ),
+                textStyle = typography.bodyLarge
             )
-            
             // WhatsApp Switch
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -422,28 +426,27 @@ private fun FormSection(
             ) {
                 Text(
                     text = "تفعيل واتساب",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF152FD9),
+                    style = typography.bodyMedium,
+                    color = colors.primary,
                     modifier = Modifier.weight(1f)
                 )
                 Switch(
                     checked = whatsappEnabled,
                     onCheckedChange = onWhatsappEnabledChange,
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color.White, // الدائرة بيضاء عند التفعيل
-                        checkedTrackColor = Color(0xFF22C55E), // الخلفية خضراء عند التفعيل
-                        uncheckedThumbColor = Color(0xFF666666),
-                        uncheckedTrackColor = Color(0xFFE0E0E0)
+                        checkedThumbColor = colors.onPrimary,
+                        checkedTrackColor = colors.secondary,
+                        uncheckedThumbColor = colors.onSurface,
+                        uncheckedTrackColor = colors.surfaceVariant
                     )
                 )
             }
-            
             // WhatsApp description
             Text(
                 text = "سيتم إرسال إشعارات واتساب للعميل عند إضافة معاملات جديدة",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color(0xFF666666),
-                modifier = Modifier.padding(start = spacing.medium)
+                style = typography.bodySmall,
+                color = colors.onSurface,
+                modifier = Modifier.padding(start = dimens.spacingMedium)
             )
         }
     }
@@ -454,62 +457,62 @@ private fun ButtonsSection(
     onSave: () -> Unit,
     onCancel: () -> Unit,
     isSaving: Boolean,
-    spacing: ResponsiveSpacingValues,
-    padding: ResponsivePaddingValues
+    dimens: com.hillal.acc.ui.theme.AppDimensions,
+    colors: ColorScheme,
+    typography: Typography
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(spacing.small)
+        verticalArrangement = Arrangement.spacedBy(dimens.spacingSmall)
     ) {
         // Save Button
         Button(
             onClick = onSave,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF152FD9)
+                containerColor = colors.primary
             ),
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(dimens.cardCorner / 2),
             enabled = !isSaving
         ) {
             if (isSaving) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(16.dp),
-                    color = Color.White,
+                    modifier = Modifier.size(dimens.iconSize * 0.7f),
+                    color = colors.onPrimary,
                     strokeWidth = 2.dp
                 )
             } else {
                 Icon(
                     imageVector = Icons.Default.Save,
                     contentDescription = null,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(dimens.iconSize * 0.7f)
                 )
             }
-            Spacer(modifier = Modifier.width(spacing.small))
+            Spacer(modifier = Modifier.width(dimens.spacingSmall))
             Text(
                 text = if (isSaving) "جاري الحفظ..." else "حفظ",
-                style = MaterialTheme.typography.bodyMedium,
+                style = typography.bodyMedium,
                 fontWeight = FontWeight.Bold
             )
         }
-        
         // Cancel Button
         Button(
             onClick = onCancel,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFE53E3E)
+                containerColor = colors.error
             ),
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(dimens.cardCorner / 2)
         ) {
             Icon(
-                imageVector = Icons.Default.Cancel,
+                imageVector = Icons.Default.Close,
                 contentDescription = null,
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(dimens.iconSize * 0.7f)
             )
-            Spacer(modifier = Modifier.width(spacing.small))
+            Spacer(modifier = Modifier.width(dimens.spacingSmall))
             Text(
                 text = "إلغاء",
-                style = MaterialTheme.typography.bodyMedium,
+                style = typography.bodyMedium,
                 fontWeight = FontWeight.Bold
             )
         }
