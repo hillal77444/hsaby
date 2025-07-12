@@ -87,7 +87,7 @@ fun AccountsSearchAndFilterBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 2.dp),
+            .padding(horizontal = 8.dp, vertical = 4.dp), // هوامش مرنة
         verticalAlignment = Alignment.CenterVertically
     ) {
         // زر الفلترة الدائري
@@ -130,8 +130,9 @@ fun AccountsSearchAndFilterBar(
             },
             modifier = Modifier
                 .weight(1f)
-                .height(44.dp),
-            shape = RoundedCornerShape(16.dp),
+                .defaultMinSize(minHeight = 44.dp)
+                .fillMaxWidth(), // يجعل مربع البحث يتمدد تلقائياً
+            shape = RoundedCornerShape(10.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = blue,
                 unfocusedBorderColor = Color(0xFFF3F4F6),
@@ -140,7 +141,8 @@ fun AccountsSearchAndFilterBar(
                 focusedContainerColor = Color(0xFFF3F4F6)
             ),
             singleLine = true,
-            textStyle = MaterialTheme.typography.bodyMedium
+            textStyle = MaterialTheme.typography.bodyMedium,
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp) // هوامش داخلية مناسبة
         )
     }
 }
@@ -160,12 +162,20 @@ fun AccountsComposeScreen(
         val typography = MaterialTheme.typography
 
         val accounts by viewModel.allAccounts.observeAsState(initial = emptyList())
-        val accountBalances = remember(accounts) {
-            val balances = mutableStateMapOf<Long, Double>()
-            accounts.forEach { account ->
-                balances[account.id] = 0.0
+        // اجمع الأرصدة المعروضة لكل حساب في خريطة مؤقتة
+        val displayedBalances = remember(accounts) {
+            mutableStateMapOf<Long, Double>().apply {
+                accounts.forEach { account ->
+                    this[account.id] = 0.0
+                }
             }
-            balances
+        }
+        // تحديث الرصيد المعروض عند تغييره في البطاقة
+        accounts.forEach { account ->
+            val balance by viewModel.getAccountBalanceYemeni(account.id ?: 0L).observeAsState(0.0)
+            LaunchedEffect(balance) {
+                displayedBalances[account.id] = balance ?: 0.0
+            }
         }
         var searchQuery by remember { mutableStateOf("") }
         var sortType by remember { mutableStateOf("balance_desc") }
@@ -177,6 +187,7 @@ fun AccountsComposeScreen(
         )
         var filterMenuExpanded by remember { mutableStateOf(false) }
 
+        // الفلترة والفرز حسب الرصيد المعروض فقط
         val filteredAccounts = remember(accounts, searchQuery) {
             if (searchQuery.isEmpty()) {
                 accounts
@@ -187,10 +198,10 @@ fun AccountsComposeScreen(
                 }
             }
         }
-        val sortedAccounts = remember(filteredAccounts, sortType, accountBalances) {
+        val sortedAccounts = remember(filteredAccounts, sortType, displayedBalances.toMap()) {
             when (sortType) {
-                "balance_desc" -> filteredAccounts.sortedByDescending { account: Account -> accountBalances[account.id] ?: 0.0 }
-                "balance_asc" -> filteredAccounts.sortedBy { account: Account -> accountBalances[account.id] ?: 0.0 }
+                "balance_desc" -> filteredAccounts.sortedByDescending { account: Account -> displayedBalances[account.id] ?: 0.0 }
+                "balance_asc" -> filteredAccounts.sortedBy { account: Account -> displayedBalances[account.id] ?: 0.0 }
                 "name" -> filteredAccounts.sortedBy { account: Account -> account.name }
                 "number" -> filteredAccounts.sortedBy { account: Account -> account.serverId }
                 else -> filteredAccounts
@@ -262,7 +273,7 @@ fun AccountsComposeScreen(
                         AccountItemModern(
                             account = account,
                             viewModel = viewModel,
-                            accountBalances = accountBalances,
+                            accountBalances = displayedBalances,
                             onWhatsAppToggle = { isEnabled ->
                                 account.setWhatsappEnabled(isEnabled)
                                 account.setUpdatedAt(System.currentTimeMillis())
@@ -360,24 +371,6 @@ private fun AccountItemModern(
                         fontSize = 12.sp,
                         color = lightGray,
                         fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(6.dp))
-                
-                // أيقونة شخص
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = gray
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "شخص",
-                        fontSize = 12.sp,
-                        color = gray
                     )
                 }
                 
