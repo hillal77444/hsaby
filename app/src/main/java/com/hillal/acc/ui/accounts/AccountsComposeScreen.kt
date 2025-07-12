@@ -131,7 +131,7 @@ fun AccountsSearchAndFilterBar(
             modifier = Modifier
                 .weight(1f)
                 .defaultMinSize(minHeight = 44.dp)
-                .fillMaxWidth(), // يجعل مربع البحث يتمدد تلقائياً
+                .fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = blue,
@@ -141,8 +141,7 @@ fun AccountsSearchAndFilterBar(
                 focusedContainerColor = Color(0xFFF3F4F6)
             ),
             singleLine = true,
-            textStyle = MaterialTheme.typography.bodyMedium,
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp) // هوامش داخلية مناسبة
+            textStyle = MaterialTheme.typography.bodyMedium
         )
     }
 }
@@ -198,14 +197,21 @@ fun AccountsComposeScreen(
                 }
             }
         }
-        val sortedAccounts = remember(filteredAccounts, sortType, displayedBalances.toMap()) {
-            when (sortType) {
-                "balance_desc" -> filteredAccounts.sortedByDescending { account: Account -> displayedBalances[account.id] ?: 0.0 }
-                "balance_asc" -> filteredAccounts.sortedBy { account: Account -> displayedBalances[account.id] ?: 0.0 }
-                "name" -> filteredAccounts.sortedBy { account: Account -> account.name }
-                "number" -> filteredAccounts.sortedBy { account: Account -> account.serverId }
-                else -> filteredAccounts
+        // منطق الفرز حسب الرصيد المعروض فقط (داخل LazyColumn)
+        // احذف أي forEach أو LaunchedEffect أو observeAsState خارج Composable
+        // واجعل الفرز يتم فقط على القيم التي يتم عرضها فعلياً في البطاقة
+        val sortedAccounts = when (sortType) {
+            "balance_desc" -> filteredAccounts.sortedByDescending { account ->
+                val balance by viewModel.getAccountBalanceYemeni(account.id ?: 0L).observeAsState(0.0)
+                balance ?: 0.0
             }
+            "balance_asc" -> filteredAccounts.sortedBy { account ->
+                val balance by viewModel.getAccountBalanceYemeni(account.id ?: 0L).observeAsState(0.0)
+                balance ?: 0.0
+            }
+            "name" -> filteredAccounts.sortedBy { it.name }
+            "number" -> filteredAccounts.sortedBy { it.serverId }
+            else -> filteredAccounts
         }
 
         Scaffold(
@@ -273,7 +279,7 @@ fun AccountsComposeScreen(
                         AccountItemModern(
                             account = account,
                             viewModel = viewModel,
-                            accountBalances = displayedBalances,
+                            accountBalance = accountBalances[account.id] ?: 0.0,
                             onWhatsAppToggle = { isEnabled ->
                                 account.setWhatsappEnabled(isEnabled)
                                 account.setUpdatedAt(System.currentTimeMillis())
@@ -296,7 +302,7 @@ fun AccountsComposeScreen(
 private fun AccountItemModern(
     account: Account,
     viewModel: AccountViewModel,
-    accountBalances: MutableMap<Long, Double>,
+    accountBalance: Double,
     onWhatsAppToggle: (Boolean) -> Unit,
     onEditClick: () -> Unit,
     onItemClick: () -> Unit
@@ -307,8 +313,11 @@ private fun AccountItemModern(
     val red = Color(0xFFD32F2F)
     val gray = Color(0xFF666666)
     val lightGray = Color(0xFF999999)
-    val balanceYemeni by viewModel.getAccountBalanceYemeni(account.id ?: 0L).observeAsState(0.0)
-    LaunchedEffect(balanceYemeni) { accountBalances[account.id ?: 0L] = balanceYemeni ?: 0.0 }
+    // احذف LaunchedEffect خارج Composable
+    // واجعل الرصيد يتم جمعه فقط داخل Composable
+    // لأنه يتم عرضه في البطاقة
+    // val balanceYemeni by viewModel.getAccountBalanceYemeni(account.id ?: 0L).observeAsState(0.0)
+    // LaunchedEffect(balanceYemeni) { accountBalances[account.id ?: 0L] = balanceYemeni ?: 0.0 }
     
     Card(
         modifier = Modifier
@@ -378,14 +387,14 @@ private fun AccountItemModern(
                 
                 // الرصيد
                 Text(
-                    text = if ((balanceYemeni ?: 0.0) < 0) {
-                        String.format(Locale.US, "عليه %,d يمني", kotlin.math.abs((balanceYemeni ?: 0.0).toLong()))
+                    text = if ((accountBalance) < 0) {
+                        String.format(Locale.US, "عليه %,d يمني", kotlin.math.abs((accountBalance).toLong()))
                     } else {
-                        String.format(Locale.US, "له %,d يمني", (balanceYemeni ?: 0.0).toLong())
+                        String.format(Locale.US, "له %,d يمني", (accountBalance).toLong())
                     },
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if ((balanceYemeni ?: 0.0) < 0) red else green,
+                    color = if ((accountBalance) < 0) red else green,
                     modifier = Modifier.padding(top = 2.dp)
                 )
             }
