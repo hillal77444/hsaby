@@ -74,6 +74,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.material.icons.filled.Star
 import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
+import com.hillal.acc.ui.theme.AppDimensions
 
 
 @OptIn(ExperimentalMaterial3Api::class)
