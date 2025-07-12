@@ -60,6 +60,124 @@ fun AccountsAppBar(
     )
 }
 
+@Composable
+fun AccountsCustomHeader(
+    title: String,
+    onBackClick: () -> Unit,
+    onRefreshClick: () -> Unit
+) {
+    val blue = Color(0xFF1976D2)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp, bottom = 8.dp, start = 12.dp, end = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // زر التحديث الدائري
+        IconButton(
+            onClick = onRefreshClick,
+            modifier = Modifier
+                .size(40.dp)
+                .background(blue.copy(alpha = 0.08f), shape = CircleShape)
+        ) {
+            Icon(Icons.Default.Refresh, contentDescription = "تحديث", tint = blue)
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        // العنوان في المنتصف
+        Text(
+            text = title,
+            color = blue,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        // زر الرجوع الدائري
+        IconButton(
+            onClick = onBackClick,
+            modifier = Modifier
+                .size(40.dp)
+                .background(blue.copy(alpha = 0.08f), shape = CircleShape)
+        ) {
+            Icon(Icons.Default.ArrowBack, contentDescription = "رجوع", tint = blue)
+        }
+    }
+}
+
+@Composable
+fun AccountsSearchAndFilterBar(
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    sortType: String,
+    sortOptions: List<Pair<String, String>>,
+    filterMenuExpanded: Boolean,
+    onFilterClick: () -> Unit,
+    onFilterSelect: (String) -> Unit,
+    onFilterDismiss: () -> Unit
+) {
+    val blue = Color(0xFF1976D2)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // زر الفلترة الدائري
+        Box {
+            IconButton(
+                onClick = onFilterClick,
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(blue.copy(alpha = 0.12f), shape = CircleShape)
+            ) {
+                Icon(Icons.Default.FilterList, contentDescription = "فلترة", tint = blue)
+            }
+            DropdownMenu(
+                expanded = filterMenuExpanded,
+                onDismissRequest = onFilterDismiss
+            ) {
+                sortOptions.forEach { (value, label) ->
+                    DropdownMenuItem(
+                        text = { Text(label) },
+                        onClick = { onFilterSelect(value) },
+                        leadingIcon = {
+                            if (value == sortType) {
+                                Icon(Icons.Default.Check, contentDescription = null, tint = blue)
+                            }
+                        }
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        // حقل البحث
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = onSearchQueryChange,
+            placeholder = {
+                Text("الاسم | رقم الحساب | الموبايل", color = Color(0xFFB0B0B0))
+            },
+            leadingIcon = {
+                Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFFB0B0B0), modifier = Modifier.size(20.dp))
+            },
+            modifier = Modifier
+                .weight(1f)
+                .height(44.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = blue,
+                unfocusedBorderColor = Color(0xFFF3F4F6),
+                cursorColor = blue,
+                unfocusedContainerColor = Color(0xFFF3F4F6),
+                focusedContainerColor = Color(0xFFF3F4F6)
+            ),
+            singleLine = true,
+            textStyle = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountsComposeScreen(
@@ -75,16 +193,13 @@ fun AccountsComposeScreen(
         val typography = MaterialTheme.typography
 
         val accounts by viewModel.allAccounts.observeAsState(initial = emptyList())
-        
-        // حساب الأرصدة الديناميكية من العمليات لكل حساب
         val accountBalances = remember(accounts) {
             val balances = mutableStateMapOf<Long, Double>()
             accounts.forEach { account ->
-                balances[account.id] = 0.0 // سيتم تحديثه لاحقاً من observeAsState
+                balances[account.id] = 0.0
             }
             balances
         }
-        
         var searchQuery by remember { mutableStateOf("") }
         var sortType by remember { mutableStateOf("balance_desc") }
         val sortOptions = listOf(
@@ -95,7 +210,6 @@ fun AccountsComposeScreen(
         )
         var filterMenuExpanded by remember { mutableStateOf(false) }
 
-        // البحث في الحسابات
         val filteredAccounts = remember(accounts, searchQuery) {
             if (searchQuery.isEmpty()) {
                 accounts
@@ -106,8 +220,6 @@ fun AccountsComposeScreen(
                 }
             }
         }
-
-        // ترتيب الحسابات حسب الفلترة - استخدام الرصيد الديناميكي
         val sortedAccounts = remember(filteredAccounts, sortType, accountBalances) {
             when (sortType) {
                 "balance_desc" -> filteredAccounts.sortedByDescending { account: Account -> accountBalances[account.id] ?: 0.0 }
@@ -119,12 +231,6 @@ fun AccountsComposeScreen(
         }
 
         Scaffold(
-            topBar = {
-                AccountsAppBar(
-                    onBackClick = { /* TODO: رجوع */ },
-                    onRefreshClick = { /* TODO: تحديث */ }
-                )
-            },
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = onNavigateToAddAccount,
@@ -146,11 +252,16 @@ fun AccountsComposeScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                // شريط البحث والفلترة العصري
-                AccountsHeaderSearchBar(
+                // الهيدر المخصص
+                AccountsCustomHeader(
+                    title = "إدارة النقاط والفروع", // يمكنك تغيير النص هنا
+                    onBackClick = { /* TODO: رجوع */ },
+                    onRefreshClick = { /* TODO: تحديث */ }
+                )
+                // شريط البحث والفلترة
+                AccountsSearchAndFilterBar(
                     searchQuery = searchQuery,
                     onSearchQueryChange = { searchQuery = it },
-                    totalCount = filteredAccounts.size,
                     sortType = sortType,
                     sortOptions = sortOptions,
                     filterMenuExpanded = filterMenuExpanded,
@@ -160,6 +271,13 @@ fun AccountsComposeScreen(
                         filterMenuExpanded = false
                     },
                     onFilterDismiss = { filterMenuExpanded = false }
+                )
+                // عدد النتائج
+                Text(
+                    text = "العدد: ${filteredAccounts.size}",
+                    color = Color(0xFF888888),
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(start = 32.dp, top = 2.dp, bottom = 4.dp)
                 )
                 // قائمة الحسابات
                 LazyColumn(
@@ -175,7 +293,7 @@ fun AccountsComposeScreen(
                         AccountItemModern(
                             account = account,
                             viewModel = viewModel,
-                            accountBalances = accountBalances, // تمرير مصفوفة الأرصدة
+                            accountBalances = accountBalances,
                             onWhatsAppToggle = { isEnabled ->
                                 account.setWhatsappEnabled(isEnabled)
                                 account.setUpdatedAt(System.currentTimeMillis())
@@ -192,91 +310,6 @@ fun AccountsComposeScreen(
             }
         }
     }
-}
-
-@Composable
-private fun AccountsHeaderSearchBar(
-    searchQuery: String,
-    onSearchQueryChange: (String) -> Unit,
-    totalCount: Int,
-    sortType: String,
-    sortOptions: List<Pair<String, String>>,
-    filterMenuExpanded: Boolean,
-    onFilterClick: () -> Unit,
-    onFilterSelect: (String) -> Unit,
-    onFilterDismiss: () -> Unit
-) {
-    val blue = Color(0xFF1976D2)
-    // شريط البحث والفلترة العصري
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = onSearchQueryChange,
-            placeholder = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFFB0B0B0), modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text("الاسم | رقم الحساب | الموبايل", color = Color(0xFFB0B0B0))
-                }
-            },
-            leadingIcon = {
-                Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFFB0B0B0), modifier = Modifier.size(20.dp))
-            },
-            modifier = Modifier
-                .weight(1f)
-                .height(48.dp)
-                .shadow(2.dp, RoundedCornerShape(16.dp)),
-            shape = RoundedCornerShape(16.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFF1976D2),
-                unfocusedBorderColor = Color(0xFFF3F4F6),
-                cursorColor = Color(0xFF1976D2),
-                unfocusedContainerColor = Color(0xFFF3F4F6),
-                focusedContainerColor = Color(0xFFF3F4F6)
-            ),
-            singleLine = true,
-            textStyle = MaterialTheme.typography.bodyMedium
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Box {
-            IconButton(
-                onClick = onFilterClick,
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(Color(0xFF1976D2), shape = CircleShape)
-            ) {
-                Icon(Icons.Default.FilterList, contentDescription = "فلترة", tint = Color.White)
-            }
-            DropdownMenu(
-                expanded = filterMenuExpanded,
-                onDismissRequest = onFilterDismiss
-            ) {
-                sortOptions.forEach { (value, label) ->
-                    DropdownMenuItem(
-                        text = { Text(label) },
-                        onClick = { onFilterSelect(value) },
-                        leadingIcon = {
-                            if (value == sortType) {
-                                Icon(Icons.Default.Check, contentDescription = null, tint = Color(0xFF1976D2))
-                            }
-                        }
-                    )
-                }
-            }
-        }
-    }
-    // عدد النتائج بشكل أنيق
-    Text(
-        text = "العدد: $totalCount",
-        color = Color(0xFF888888),
-        fontSize = 13.sp,
-        modifier = Modifier.padding(start = 24.dp, bottom = 4.dp)
-    )
 }
 
 @Composable
