@@ -168,6 +168,8 @@ class LoginFragment : Fragment() {
             isLoading = false
             return
         }
+        isLoading = true // <-- تفعيل التحميل فور الضغط
+        errorMessage = null
         authViewModel.login(phone, password, object : AuthViewModel.AuthCallback {
             override fun onSuccess() {
                 isLoading = false
@@ -198,6 +200,7 @@ class LoginFragment : Fragment() {
                     }
                     override fun onError(error: String) {
                         loadingDialog?.dismiss()
+                        isLoading = false
                         errorMessage = "فشل في جلب البيانات: $error"
                         Toast.makeText(
                             requireContext(),
