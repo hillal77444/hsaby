@@ -38,10 +38,6 @@ class AccountViewModel(private val accountRepository: AccountRepository) : ViewM
         return accountRepository.getAllAccountsBalancesYemeniMap()
     }
 
-    fun getAllAccountsBalancesYemeniMapOnce(): Map<Long, Double> {
-        return accountRepository.getAllAccountsBalancesYemeniMapOnce()
-    }
-
     fun getAccountByPhoneNumber(phoneNumber: String): Account? {
         return accountRepository.getAccountByPhoneNumber(phoneNumber)
     }

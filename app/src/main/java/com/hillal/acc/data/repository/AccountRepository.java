@@ -162,15 +162,4 @@ public class AccountRepository {
         });
         return balancesLiveData;
     }
-
-    // دالة جديدة: جلب الأرصدة دفعة واحدة فقط
-    public Map<Long, Double> getAllAccountsBalancesYemeniMapOnce() {
-        List<Account> accounts = accountDao.getAllAccountsSync();
-        Map<Long, Double> balancesMap = new HashMap<>();
-        for (Account account : accounts) {
-            Double balance = transactionDao.getAccountBalanceYemeniSync(account.getId());
-            balancesMap.put(account.getId(), balance != null ? balance : 0.0);
-        }
-        return balancesMap;
-    }
 } 
