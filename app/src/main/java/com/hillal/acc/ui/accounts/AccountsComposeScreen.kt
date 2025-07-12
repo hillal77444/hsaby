@@ -84,65 +84,101 @@ fun AccountsSearchAndFilterBar(
     onFilterDismiss: () -> Unit
 ) {
     val blue = Color(0xFF1976D2)
-    Row(
+    val background = Color.White
+    val shadowColor = Color(0x22000000)
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
+    // الهوامش وحجم الأيقونات حسب حجم الشاشة
+    val horizontalPadding = when {
+        screenWidth < 340 -> 4.dp
+        screenWidth < 400 -> 8.dp
+        else -> 12.dp
+    }
+    val verticalPadding = if (screenWidth < 400) 4.dp else 8.dp
+    val iconSize = if (screenWidth < 400) 20.dp else 26.dp
+    val searchIconSize = if (screenWidth < 400) 18.dp else 22.dp
+    val clearIconSize = if (screenWidth < 400) 16.dp else 20.dp
+    val textFieldHeight = if (screenWidth < 400) 40.dp else 48.dp
+    val textFieldFontSize = if (screenWidth < 400) 14.sp else 16.sp
+    val placeholderFontSize = if (screenWidth < 400) 13.sp else 15.sp
+    val cardCorner = if (screenWidth < 400) 10.dp else 18.dp
+    val textFieldCorner = if (screenWidth < 400) 10.dp else 14.dp
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp), // هوامش مرنة
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = horizontalPadding, vertical = verticalPadding)
+            .shadow(4.dp, RoundedCornerShape(cardCorner), ambientColor = shadowColor, spotColor = shadowColor)
+            .background(background, shape = RoundedCornerShape(cardCorner))
     ) {
-        // زر الفلترة الدائري
-        Box {
-            IconButton(
-                onClick = onFilterClick,
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(blue.copy(alpha = 0.12f), shape = CircleShape)
-            ) {
-                Icon(Icons.Default.FilterList, contentDescription = "فلترة", tint = blue)
-            }
-            DropdownMenu(
-                expanded = filterMenuExpanded,
-                onDismissRequest = onFilterDismiss
-            ) {
-                sortOptions.forEach { (value, label) ->
-                    DropdownMenuItem(
-                        text = { Text(label) },
-                        onClick = { onFilterSelect(value) },
-                        leadingIcon = {
-                            if (value == sortType) {
-                                Icon(Icons.Default.Check, contentDescription = null, tint = blue)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 6.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // زر الفلترة الدائري
+            Box {
+                IconButton(
+                    onClick = onFilterClick,
+                    modifier = Modifier
+                        .size(iconSize + 8.dp)
+                        .background(blue.copy(alpha = 0.10f), shape = CircleShape)
+                ) {
+                    Icon(Icons.Default.FilterList, contentDescription = "فلترة", tint = blue, modifier = Modifier.size(iconSize))
+                }
+                DropdownMenu(
+                    expanded = filterMenuExpanded,
+                    onDismissRequest = onFilterDismiss
+                ) {
+                    sortOptions.forEach { (value, label) ->
+                        DropdownMenuItem(
+                            text = { Text(label) },
+                            onClick = { onFilterSelect(value) },
+                            leadingIcon = {
+                                if (value == sortType) {
+                                    Icon(Icons.Default.Check, contentDescription = null, tint = blue)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
+            Spacer(modifier = Modifier.width(6.dp))
+            // حقل البحث العصري
+            Box(modifier = Modifier.weight(1f)) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
+                    placeholder = {
+                        Text("ابحث بالاسم أو رقم الحساب أو الموبايل", color = Color(0xFFB0B0B0), fontSize = placeholderFontSize)
+                    },
+                    leadingIcon = {
+                        Icon(Icons.Default.Search, contentDescription = null, tint = blue, modifier = Modifier.size(searchIconSize))
+                    },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { onSearchQueryChange("") }) {
+                                Icon(Icons.Default.Close, contentDescription = "مسح", tint = Color(0xFFB0B0B0), modifier = Modifier.size(clearIconSize))
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(textFieldHeight),
+                    shape = RoundedCornerShape(textFieldCorner),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = blue,
+                        unfocusedBorderColor = Color(0xFFF3F4F6),
+                        cursorColor = blue,
+                        unfocusedContainerColor = Color(0xFFF8F9FA),
+                        focusedContainerColor = Color(0xFFF8F9FA)
+                    ),
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = textFieldFontSize)
+                )
+            }
         }
-        Spacer(modifier = Modifier.width(8.dp))
-        // حقل البحث
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = onSearchQueryChange,
-            placeholder = {
-                Text("الاسم | رقم الحساب | الموبايل", color = Color(0xFFB0B0B0))
-            },
-            leadingIcon = {
-                Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFFB0B0B0), modifier = Modifier.size(20.dp))
-            },
-            modifier = Modifier
-                .weight(1f)
-                .defaultMinSize(minHeight = 44.dp)
-                .fillMaxWidth(),
-            shape = RoundedCornerShape(10.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = blue,
-                unfocusedBorderColor = Color(0xFFF3F4F6),
-                cursorColor = blue,
-                unfocusedContainerColor = Color(0xFFF3F4F6),
-                focusedContainerColor = Color(0xFFF3F4F6)
-            ),
-            singleLine = true,
-            textStyle = MaterialTheme.typography.bodyMedium
-        )
     }
 }
 
