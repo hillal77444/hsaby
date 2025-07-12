@@ -203,7 +203,7 @@ fun TransferScreen(
                                 ) {
                                     Text("من:", style = typography.bodySmall, color = colors.onSurface)
                                     AccountPickerField(
-                                        label = "اختر الحساب",
+                                        label = "الحساب",
                                         accounts = accounts,
                                         transactions = transactions,
                                         balancesMap = balancesMap,
@@ -221,7 +221,7 @@ fun TransferScreen(
                                 ) {
                                     Text("إلى:", style = typography.bodySmall, color = colors.onSurface)
                                     AccountPickerField(
-                                        label = "اختر الحساب",
+                                        label = "الحساب",
                                         accounts = accounts,
                                         transactions = transactions,
                                         balancesMap = balancesMap,
@@ -311,7 +311,7 @@ fun TransferScreen(
                                             value = selectedCurrency,
                                             onValueChange = {},
                                             readOnly = true,
-                                            label = { Text("اختر العملة") },
+                                            label = { Text("العملة") },
                                             modifier = Modifier.menuAnchor().fillMaxWidth(),
                                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = showCurrencyMenu) },
                                             colors = androidx.compose.material3.TextFieldDefaults.outlinedTextFieldColors(
