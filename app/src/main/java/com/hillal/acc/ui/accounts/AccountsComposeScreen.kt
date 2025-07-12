@@ -42,24 +42,15 @@ import androidx.compose.ui.draw.scale
 @Composable
 fun CustomAppBar(
     title: String = "إدارة الحسابات",
-    onBackClick: () -> Unit,
-    onRefreshClick: () -> Unit,
+    onBackClick: () -> Unit = {},
+    onRefreshClick: () -> Unit = {},
     useMaterial3: Boolean = true
 ) {
     val blue = Color(0xFF1976D2)
     if (useMaterial3) {
         TopAppBar(
-            title = { Text(title, color = blue, fontWeight = FontWeight.Bold, fontSize = 22.sp) },
-            navigationIcon = {
-                IconButton(onClick = onBackClick) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "رجوع", tint = blue)
-                }
-            },
-            actions = {
-                IconButton(onClick = onRefreshClick) {
-                    Icon(Icons.Default.Refresh, contentDescription = "تحديث", tint = blue)
-                }
-            }
+            title = { Text(title, color = blue, fontWeight = FontWeight.Bold, fontSize = 22.sp) }
+            // تمت إزالة الأزرار الجانبية
         )
     } else {
         Row(
@@ -68,14 +59,6 @@ fun CustomAppBar(
                 .padding(top = 16.dp, bottom = 8.dp, start = 12.dp, end = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = onRefreshClick,
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(blue.copy(alpha = 0.08f), shape = CircleShape)
-            ) {
-                Icon(Icons.Default.Refresh, contentDescription = "تحديث", tint = blue)
-            }
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = title,
@@ -85,14 +68,6 @@ fun CustomAppBar(
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
             Spacer(modifier = Modifier.weight(1f))
-            IconButton(
-                onClick = onBackClick,
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(blue.copy(alpha = 0.08f), shape = CircleShape)
-            ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "رجوع", tint = blue)
-            }
         }
     }
 }
