@@ -46,6 +46,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,6 +65,7 @@ fun TransferScreen(
         val colors = MaterialTheme.colorScheme
         val typography = MaterialTheme.typography
         val haptic = LocalHapticFeedback.current
+        val coroutineScope = rememberCoroutineScope()
         
         var fromAccount by remember { mutableStateOf<Account?>(null) }
         var toAccount by remember { mutableStateOf<Account?>(null) }
@@ -207,7 +210,7 @@ fun TransferScreen(
                                         selectedAccount = fromAccount,
                                         onAccountSelected = { 
                                             fromAccount = it
-                                            haptic.performHapticFeedback(HapticFeedbackType.SelectionChange)
+                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                         }
                                     )
                                 }
@@ -225,7 +228,7 @@ fun TransferScreen(
                                         selectedAccount = toAccount,
                                         onAccountSelected = { 
                                             toAccount = it
-                                            haptic.performHapticFeedback(HapticFeedbackType.SelectionChange)
+                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                         }
                                     )
                                 }
@@ -286,7 +289,7 @@ fun TransferScreen(
                                         selectedCashbox = selectedCashbox,
                                         onCashboxSelected = { 
                                             selectedCashbox = it
-                                            haptic.performHapticFeedback(HapticFeedbackType.SelectionChange)
+                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                         },
                                         onAddCashbox = onAddCashbox
                                     )
@@ -301,7 +304,7 @@ fun TransferScreen(
                                         expanded = showCurrencyMenu,
                                         onExpandedChange = { 
                                             showCurrencyMenu = !showCurrencyMenu
-                                            haptic.performHapticFeedback(HapticFeedbackType.SelectionChange)
+                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                         }
                                     ) {
                                         OutlinedTextField(
@@ -327,7 +330,7 @@ fun TransferScreen(
                                                     onClick = {
                                                         selectedCurrency = currency
                                                         showCurrencyMenu = false
-                                                        haptic.performHapticFeedback(HapticFeedbackType.SelectionChange)
+                                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                                     }
                                                 )
                                             }
@@ -458,7 +461,7 @@ fun TransferScreen(
                 ) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = colors.successContainer),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E8)),
                         shape = RoundedCornerShape(dimens.cardCorner)
                     ) {
                         Row(
@@ -468,13 +471,13 @@ fun TransferScreen(
                             Icon(
                                 Icons.Default.CheckCircle,
                                 contentDescription = null,
-                                tint = colors.success,
+                                tint = Color(0xFF4CAF50),
                                 modifier = Modifier.size(dimens.iconSize)
                             )
                             Spacer(Modifier.width(dimens.spacingSmall))
                             Text(
                                 successMessage ?: "",
-                                color = colors.success,
+                                color = Color(0xFF4CAF50),
                                 style = typography.bodyMedium
                             )
                         }
@@ -534,7 +537,7 @@ fun TransferScreen(
                             onTransfer(fromAccount!!, toAccount!!, selectedCashbox!!, selectedCurrency, amount, notes)
                             
                             // Simulate loading
-                            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
+                            coroutineScope.launch {
                                 delay(2000)
                                 isTransferring = false
                             }
