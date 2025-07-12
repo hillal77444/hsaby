@@ -11,6 +11,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateMapOf
@@ -37,6 +39,26 @@ import com.hillal.acc.ui.theme.success
 import com.hillal.acc.ui.theme.successContainer
 import java.util.*
 import androidx.compose.ui.draw.scale
+
+@Composable
+fun AccountsAppBar(
+    onBackClick: () -> Unit,
+    onRefreshClick: () -> Unit
+) {
+    TopAppBar(
+        title = { Text("إدارة الحسابات", color = Color(0xFF1976D2), fontWeight = FontWeight.Bold, fontSize = 22.sp) },
+        navigationIcon = {
+            IconButton(onClick = onBackClick) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "رجوع", tint = Color(0xFF1976D2))
+            }
+        },
+        actions = {
+            IconButton(onClick = onRefreshClick) {
+                Icon(Icons.Default.Refresh, contentDescription = "تحديث", tint = Color(0xFF1976D2))
+            }
+        }
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,16 +118,36 @@ fun AccountsComposeScreen(
             }
         }
 
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .background(colors.background)
-        ) {
+        Scaffold(
+            topBar = {
+                AccountsAppBar(
+                    onBackClick = { /* TODO: رجوع */ },
+                    onRefreshClick = { /* TODO: تحديث */ }
+                )
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = onNavigateToAddAccount,
+                    modifier = Modifier.padding(dimens.spacingLarge),
+                    containerColor = colors.primary,
+                    contentColor = colors.onPrimary
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "إضافة حساب",
+                        modifier = Modifier.size(dimens.iconSize * 1.2f)
+                    )
+                }
+            },
+            containerColor = colors.background
+        ) { innerPadding ->
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
             ) {
-                // رأس الصفحة الجديد
-                AccountsHeaderModern(
+                // شريط البحث والفلترة العصري
+                AccountsHeaderSearchBar(
                     searchQuery = searchQuery,
                     onSearchQueryChange = { searchQuery = it },
                     totalCount = filteredAccounts.size,
@@ -119,7 +161,6 @@ fun AccountsComposeScreen(
                     },
                     onFilterDismiss = { filterMenuExpanded = false }
                 )
-
                 // قائمة الحسابات
                 LazyColumn(
                     modifier = Modifier
@@ -149,28 +190,12 @@ fun AccountsComposeScreen(
                     }
                 }
             }
-
-            // زر إضافة حساب عائم
-            FloatingActionButton(
-                onClick = onNavigateToAddAccount,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(dimens.spacingLarge),
-                containerColor = colors.primary,
-                contentColor = colors.onPrimary
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "إضافة حساب",
-                    modifier = Modifier.size(dimens.iconSize * 1.2f)
-                )
-            }
         }
     }
 }
 
 @Composable
-private fun AccountsHeaderModern(
+private fun AccountsHeaderSearchBar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     totalCount: Int,
@@ -182,35 +207,6 @@ private fun AccountsHeaderModern(
     onFilterDismiss: () -> Unit
 ) {
     val blue = Color(0xFF1976D2)
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(vertical = 12.dp)
-    ) {
-        // زر تحديث في أقصى اليسار
-        IconButton(
-            onClick = { /* TODO: تحديث */ },
-            modifier = Modifier.align(Alignment.CenterStart)
-        ) {
-            Icon(Icons.Default.Refresh, contentDescription = "تحديث", tint = blue)
-        }
-        // العنوان الحالي في المنتصف
-        Text(
-            text = "إدارة الحسابات", // أبقي النص كما هو في الكود الحالي
-            color = blue,
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-            modifier = Modifier.align(Alignment.Center)
-        )
-        // زر رجوع في أقصى اليمين
-        IconButton(
-            onClick = { /* TODO: رجوع */ },
-            modifier = Modifier.align(Alignment.CenterEnd)
-        ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "رجوع", tint = blue)
-        }
-    }
     // شريط البحث والفلترة العصري
     Row(
         modifier = Modifier
