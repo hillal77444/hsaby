@@ -72,6 +72,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.material.icons.filled.Star
+import com.hillal.acc.ui.theme.AppTheme
+import com.hillal.acc.ui.theme.LocalAppDimensions
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,448 +86,444 @@ fun AddTransactionScreen(
     transactionRepository: TransactionRepository,
     userPreferences: UserPreferences = UserPreferences(LocalContext.current)
 ) {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val coroutineScope = rememberCoroutineScope()
+    AppTheme {
+        val context = LocalContext.current
+        val lifecycleOwner = LocalLifecycleOwner.current
+        val coroutineScope = rememberCoroutineScope()
+        val dimens = LocalAppDimensions.current
+        val colors = MaterialTheme.colorScheme
+        val typography = MaterialTheme.typography
 
-    // State variables
-    var selectedAccount by remember { mutableStateOf<Account?>(null) }
-    var selectedAccountId by remember { mutableStateOf(-1L) }
-    var selectedCashbox by remember { mutableStateOf<Cashbox?>(null) }
-    var selectedCashboxId by remember { mutableStateOf(-1L) }
-    var mainCashboxId by remember { mutableStateOf(-1L) }
-    var allAccounts by remember { mutableStateOf(listOf<Account>()) }
-    var allCashboxes by remember { mutableStateOf(listOf<Cashbox>()) }
-    var allTransactions by remember { mutableStateOf(listOf<Transaction>()) }
-    var accountBalancesMap by remember { mutableStateOf(mapOf<Long, Map<String, Double>>()) }
-    var amount by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf(userPreferences.getUserName()) }
-    var currency by remember { mutableStateOf(context.getString(R.string.currency_yer)) }
-    var date by remember { mutableStateOf(Calendar.getInstance().timeInMillis) }
-    var showDatePicker by remember { mutableStateOf(false) }
-    var showAccountPicker by remember { mutableStateOf(false) }
-    var showCashboxDialog by remember { mutableStateOf(false) }
-    var isDialogShown by remember { mutableStateOf(false) }
-    var lastSavedTransaction by remember { mutableStateOf<Transaction?>(null) }
-    var lastSavedAccount by remember { mutableStateOf<Account?>(null) }
-    var lastSavedBalance by remember { mutableStateOf(0.0) }
-    var suggestions by remember { mutableStateOf(listOf<String>()) }
-    val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale("ar")) }
+        // State variables
+        var selectedAccount by remember { mutableStateOf<Account?>(null) }
+        var selectedAccountId by remember { mutableStateOf(-1L) }
+        var selectedCashbox by remember { mutableStateOf<Cashbox?>(null) }
+        var selectedCashboxId by remember { mutableStateOf(-1L) }
+        var mainCashboxId by remember { mutableStateOf(-1L) }
+        var allAccounts by remember { mutableStateOf(listOf<Account>()) }
+        var allCashboxes by remember { mutableStateOf(listOf<Cashbox>()) }
+        var allTransactions by remember { mutableStateOf(listOf<Transaction>()) }
+        var accountBalancesMap by remember { mutableStateOf(mapOf<Long, Map<String, Double>>()) }
+        var amount by remember { mutableStateOf("") }
+        var description by remember { mutableStateOf("") }
+        var notes by remember { mutableStateOf(userPreferences.getUserName()) }
+        var currency by remember { mutableStateOf(context.getString(R.string.currency_yer)) }
+        var date by remember { mutableStateOf(Calendar.getInstance().timeInMillis) }
+        var showDatePicker by remember { mutableStateOf(false) }
+        var showAccountPicker by remember { mutableStateOf(false) }
+        var showCashboxDialog by remember { mutableStateOf(false) }
+        var isDialogShown by remember { mutableStateOf(false) }
+        var lastSavedTransaction by remember { mutableStateOf<Transaction?>(null) }
+        var lastSavedAccount by remember { mutableStateOf<Account?>(null) }
+        var lastSavedBalance by remember { mutableStateOf(0.0) }
+        var suggestions by remember { mutableStateOf(listOf<String>()) }
+        val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale("ar")) }
 
-    // Observers
-    LaunchedEffect(Unit) {
-        accountViewModel.getAllAccounts().observe(lifecycleOwner) { accounts ->
-            if (accounts != null) {
-                // ترتيب الحسابات حسب عدد المعاملات
-                val accountTransactionCount = mutableMapOf<Long, Int>()
-                for (transaction in allTransactions) {
-                    val accountId = transaction.getAccountId()
-                    accountTransactionCount[accountId] = accountTransactionCount.getOrDefault(accountId, 0) + 1
+        // Observers
+        LaunchedEffect(Unit) {
+            accountViewModel.getAllAccounts().observe(lifecycleOwner) { accounts ->
+                if (accounts != null) {
+                    // ترتيب الحسابات حسب عدد المعاملات
+                    val accountTransactionCount = mutableMapOf<Long, Int>()
+                    for (transaction in allTransactions) {
+                        val accountId = transaction.getAccountId()
+                        accountTransactionCount[accountId] = accountTransactionCount.getOrDefault(accountId, 0) + 1
+                    }
+                    val sortedAccounts = accounts.filterNotNull().sortedByDescending { account ->
+                        accountTransactionCount.getOrDefault(account.getId(), 0)
+                    }
+                    allAccounts = sortedAccounts
                 }
-                val sortedAccounts = accounts.filterNotNull().sortedByDescending { account ->
-                    accountTransactionCount.getOrDefault(account.getId(), 0)
+            }
+            cashboxViewModel.getAllCashboxes().observe(lifecycleOwner) { cashboxes ->
+                if (cashboxes != null) {
+                    allCashboxes = cashboxes.filterNotNull()
+                    if (allCashboxes.isNotEmpty()) {
+                        mainCashboxId = allCashboxes[0].id
+                        if (selectedCashboxId == -1L) {
+                            selectedCashbox = allCashboxes[0]
+                            selectedCashboxId = allCashboxes[0].id
+                        }
+                    }
                 }
-                allAccounts = sortedAccounts
+            }
+            transactionsViewModel.accountBalancesMap.observe(lifecycleOwner) { balancesMap ->
+                if (balancesMap != null) {
+                    accountBalancesMap = balancesMap.filterKeys { it != null }.mapKeys { it.key!! } as Map<Long, Map<String, Double>>
+                }
+            }
+            transactionsViewModel.getTransactions().observe(lifecycleOwner) { txs ->
+                if (txs != null) allTransactions = txs
             }
         }
-        cashboxViewModel.getAllCashboxes().observe(lifecycleOwner) { cashboxes ->
-            if (cashboxes != null) {
-                allCashboxes = cashboxes.filterNotNull()
-                if (allCashboxes.isNotEmpty()) {
-                    mainCashboxId = allCashboxes[0].id
-                    if (selectedCashboxId == -1L) {
-                        selectedCashbox = allCashboxes[0]
-                        selectedCashboxId = allCashboxes[0].id
+
+        // Suggestions
+        fun loadAccountSuggestions(accountId: Long) {
+            val prefs = context.getSharedPreferences("suggestions", Context.MODE_PRIVATE)
+            val set = prefs.getStringSet("descriptions_" + accountId, setOf()) ?: setOf()
+            suggestions = set.filterNotNull()
+        }
+
+        // Save Transaction
+        fun saveTransaction(isDebit: Boolean) {
+            if (selectedAccountId == -1L) {
+                Toast.makeText(context, "الرجاء اختيار الحساب", Toast.LENGTH_SHORT).show()
+                return
+            }
+            if (amount.isEmpty()) {
+                Toast.makeText(context, context.getString(R.string.error_amount_required), Toast.LENGTH_SHORT).show()
+                return
+            }
+            val amountDouble = amount.toDoubleOrNull()
+            if (amountDouble == null) {
+                Toast.makeText(context, context.getString(R.string.error_invalid_amount), Toast.LENGTH_SHORT).show()
+                return
+            }
+            accountViewModel.getAccountById(selectedAccountId).observe(lifecycleOwner) { account ->
+                if (account != null) {
+                    val transaction = Transaction(
+                        selectedAccountId,
+                        amountDouble,
+                        if (isDebit) "debit" else "credit",
+                        description,
+                        currency
+                    )
+                    transaction.id = System.currentTimeMillis()
+                    transaction.setNotes(notes)
+                    transaction.setTransactionDate(date)
+                    transaction.setUpdatedAt(System.currentTimeMillis())
+                    transaction.setServerId(-1)
+                    transaction.setWhatsappEnabled(account.isWhatsappEnabled())
+                    // Cashbox logic
+                    val cashboxIdToSave = when {
+                        selectedCashboxId != -1L -> selectedCashboxId
+                        mainCashboxId != -1L -> mainCashboxId
+                        allCashboxes.isNotEmpty() -> allCashboxes[0].id
+                        else -> -1L
+                    }
+                    transaction.setCashboxId(cashboxIdToSave)
+                    transactionsViewModel.insertTransaction(transaction)
+                    lastSavedTransaction = transaction
+                    lastSavedAccount = account
+                    // Get balance
+                    transactionRepository.getBalanceUntilDate(selectedAccountId, transaction.getTransactionDate(), currency)
+                        .observe(lifecycleOwner) { balance ->
+                            lastSavedBalance = balance ?: 0.0
+                            isDialogShown = true
+                        }
+                    // Save suggestion
+                    val desc = description.trim()
+                    if (desc.isNotEmpty()) {
+                        val prefs = context.getSharedPreferences("suggestions", Context.MODE_PRIVATE)
+                        val key = "descriptions_" + selectedAccountId
+                        val oldSet = prefs.getStringSet(key, setOf()) ?: setOf()
+                        val newSet = oldSet.toMutableSet()
+                        newSet.add(desc)
+                        prefs.edit().putStringSet(key, newSet).apply()
+                        loadAccountSuggestions(selectedAccountId)
                     }
                 }
             }
         }
-        transactionsViewModel.accountBalancesMap.observe(lifecycleOwner) { balancesMap ->
-            if (balancesMap != null) {
-                accountBalancesMap = balancesMap.filterKeys { it != null }.mapKeys { it.key!! } as Map<Long, Map<String, Double>>
-            }
-        }
-        transactionsViewModel.getTransactions().observe(lifecycleOwner) { txs ->
-            if (txs != null) allTransactions = txs
-        }
-    }
 
-    // Suggestions
-    fun loadAccountSuggestions(accountId: Long) {
-        val prefs = context.getSharedPreferences("suggestions", Context.MODE_PRIVATE)
-        val set = prefs.getStringSet("descriptions_" + accountId, setOf()) ?: setOf()
-        suggestions = set.filterNotNull()
-    }
-
-    // Save Transaction
-    fun saveTransaction(isDebit: Boolean) {
-        if (selectedAccountId == -1L) {
-            Toast.makeText(context, "الرجاء اختيار الحساب", Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (amount.isEmpty()) {
-            Toast.makeText(context, context.getString(R.string.error_amount_required), Toast.LENGTH_SHORT).show()
-            return
-        }
-        val amountDouble = amount.toDoubleOrNull()
-        if (amountDouble == null) {
-            Toast.makeText(context, context.getString(R.string.error_invalid_amount), Toast.LENGTH_SHORT).show()
-            return
-        }
-        accountViewModel.getAccountById(selectedAccountId).observe(lifecycleOwner) { account ->
-            if (account != null) {
-                val transaction = Transaction(
-                    selectedAccountId,
-                    amountDouble,
-                    if (isDebit) "debit" else "credit",
-                    description,
-                    currency
-                )
-                transaction.id = System.currentTimeMillis()
-                transaction.setNotes(notes)
-                transaction.setTransactionDate(date)
-                transaction.setUpdatedAt(System.currentTimeMillis())
-                transaction.setServerId(-1)
-                transaction.setWhatsappEnabled(account.isWhatsappEnabled())
-                // Cashbox logic
-                val cashboxIdToSave = when {
-                    selectedCashboxId != -1L -> selectedCashboxId
-                    mainCashboxId != -1L -> mainCashboxId
-                    allCashboxes.isNotEmpty() -> allCashboxes[0].id
-                    else -> -1L
-                }
-                transaction.setCashboxId(cashboxIdToSave)
-                transactionsViewModel.insertTransaction(transaction)
-                lastSavedTransaction = transaction
-                lastSavedAccount = account
-                // Get balance
-                transactionRepository.getBalanceUntilDate(selectedAccountId, transaction.getTransactionDate(), currency)
-                    .observe(lifecycleOwner) { balance ->
-                        lastSavedBalance = balance ?: 0.0
-                        isDialogShown = true
-                    }
-                // Save suggestion
-                val desc = description.trim()
-                if (desc.isNotEmpty()) {
-                    val prefs = context.getSharedPreferences("suggestions", Context.MODE_PRIVATE)
-                    val key = "descriptions_" + selectedAccountId
-                    val oldSet = prefs.getStringSet(key, setOf()) ?: setOf()
-                    val newSet = oldSet.toMutableSet()
-                    newSet.add(desc)
-                    prefs.edit().putStringSet(key, newSet).apply()
-                    loadAccountSuggestions(selectedAccountId)
-                }
-            }
-        }
-    }
-
-    // UI
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val screenWidth = maxWidth
-        val isLargeScreen = screenWidth > 500.dp
-        val horizontalPadding = if (isLargeScreen) 48.dp else 16.dp
-        val verticalSpacing = if (isLargeScreen) 20.dp else 8.dp
-        val fieldFontSize = if (isLargeScreen) 18.sp else 15.sp
-        val labelFontSize = if (isLargeScreen) 16.sp else 13.sp
-        val buttonHeight = if (isLargeScreen) 56.dp else 48.dp
-        val buttonFontSize = if (isLargeScreen) 18.sp else 15.sp
-        val buttonShape = RoundedCornerShape(if (isLargeScreen) 16.dp else 8.dp)
-        val buttonArrangement = if (isLargeScreen) Arrangement.spacedBy(24.dp) else Arrangement.spacedBy(8.dp)
-        val scrollState = rememberScrollState()
-        val infoColor = Color(0xFF1976D2).copy(alpha = 0.15f)
-        val primaryColor = MaterialTheme.colorScheme.primary
-        val cardShape = RoundedCornerShape(20.dp)
-        val cardMaxHeight = this@BoxWithConstraints.maxHeight * 0.18f
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .imePadding()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            // بطاقة العنوان في الأعلى
-            Card(
+        // UI
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val screenWidth = maxWidth
+            val scrollState = rememberScrollState()
+            val cardShape = RoundedCornerShape(dimens.cardCorner)
+            val cardMaxHeight = this@BoxWithConstraints.maxHeight * 0.18f
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = horizontalPadding, vertical = 16.dp),
-                shape = MaterialTheme.shapes.large,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .imePadding()
+                    .background(colors.background),
+                verticalArrangement = Arrangement.spacedBy(dimens.spacingSmall)
             ) {
-                Box(
+                // بطاقة العنوان في الأعلى
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(cardMaxHeight)
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primaryContainer,
-                                    MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
-                                ),
-                                start = Offset(0f, 0f),
-                                end = Offset(400f, 100f)
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
+                        .padding(horizontal = dimens.spacingMedium, vertical = dimens.spacingSmall),
+                    shape = cardShape,
+                    colors = CardDefaults.cardColors(containerColor = colors.primaryContainer),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
-                    // رسم ديكوري في الخلفية
                     Box(
                         modifier = Modifier
-                            .size(cardMaxHeight * 1.2f)
-                            .align(Alignment.CenterEnd)
-                            .offset(x = 40.dp, y = 0.dp)
+                            .fillMaxWidth()
+                            .height(cardMaxHeight)
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        colors.primaryContainer,
+                                        colors.secondaryContainer.copy(alpha = 0.5f)
+                                    ),
+                                    start = Offset(0f, 0f),
+                                    end = Offset(400f, 100f)
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.AttachMoney,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
-                            modifier = Modifier.size(cardMaxHeight * 1.2f)
-                        )
-                    }
-                    // أيقونة جميلة فوق العنوان
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier
-                            .size(cardMaxHeight * 0.4f)
-                            .align(Alignment.Center)
-                    )
-                    // نص العنوان في المقدمة
-                    Text(
-                        text = "إضافة معاملة جديدة",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(this@BoxWithConstraints.maxHeight * 0.01f)) // تباعد نسبي أصغر
-            // Main Card
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                    .shadow(4.dp, cardShape),
-                shape = cardShape,
-                colors = CardDefaults.cardColors(containerColor = Color.White)
-            ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    // Row: حساب وصندوق
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Box(Modifier.weight(1f)) {
-                            AccountPickerField(
-                                accounts = allAccounts,
-                                transactions = allTransactions,
-                                balancesMap = accountBalancesMap,
-                                selectedAccount = selectedAccount,
-                                onAccountSelected = { account ->
-                                    selectedAccount = account
-                                    selectedAccountId = account.getId()
-                                    loadAccountSuggestions(selectedAccountId)
-                                }
-                            )
-                        }
-                        Box(Modifier.weight(1f)) {
-                            CashboxPickerField(
-                                cashboxes = allCashboxes,
-                                selectedCashbox = allCashboxes.find { it.id == selectedCashboxId },
-                                onCashboxSelected = { cashbox ->
-                                    selectedCashboxId = cashbox.id
-                                },
-                                onAddCashbox = { name ->
-                                    CashboxHelper.addCashboxToServer(
-                                        context, cashboxViewModel, name,
-                                        object : CashboxHelper.CashboxCallback {
-                                            override fun onSuccess(cashbox: Cashbox?) {
-                                                selectedCashboxId = cashbox?.id ?: -1L
-                                                CashboxHelper.showSuccessMessage(context, "تم إضافة الصندوق بنجاح")
-                                            }
-                                            override fun onError(error: String?) {
-                                                CashboxHelper.showErrorMessage(context, error)
-                                            }
-                                        })
-                                }
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(verticalSpacing))
-                    // Row: مبلغ وتاريخ
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(
-                            value = amount,
-                            onValueChange = { input ->
-                                amount = input.replace(',', '.').filter { c -> c.isDigit() || c == '.' }
-                            },
-                            label = { Text("المبلغ", fontSize = labelFontSize) },
-                            modifier = Modifier.weight(1f),
-                            leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
-                            textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                        )
-                        OutlinedTextField(
-                            value = dateFormat.format(Date(date)),
-                            onValueChange = {},
-                            label = { Text("التاريخ", fontSize = labelFontSize) },
-                            modifier = Modifier.weight(1f).clickable { showDatePicker = true },
-                            enabled = true, // يجب أن يكون true ليعمل النقر
-                            readOnly = true, // فقط للقراءة
-                            leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
-                            textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize),
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                containerColor = Color.White,
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = Color.Gray,
-                                disabledBorderColor = Color.LightGray,
-                                disabledTextColor = Color.Black
-                            )
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(verticalSpacing))
-                    // Description with suggestions (ExposedDropdownMenuBox)
-                    var expandedSuggestions by remember { mutableStateOf(false) }
-                    var showAllSuggestions by remember { mutableStateOf(false) }
-                    var descriptionState by rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("")) }
-                    ExposedDropdownMenuBox(
-                        expanded = expandedSuggestions,
-                        onExpandedChange = { /* لا تفعل شيء هنا */ }
-                    ) {
-                        OutlinedTextField(
-                            value = descriptionState,
-                            onValueChange = {
-                                descriptionState = it
-                                description = it.text
-                                showAllSuggestions = false
-                                expandedSuggestions = it.text.isNotEmpty() && suggestions.any { s -> s.startsWith(it.text) && s != it.text }
-                            },
-                            label = { Text("البيان", fontSize = labelFontSize) },
+                        // رسم ديكوري في الخلفية
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor(),
-                            leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
-                            textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize),
-                            trailingIcon = {
-                                if (suggestions.isNotEmpty()) {
-                                    IconButton(onClick = {
-                                        showAllSuggestions = true
-                                        expandedSuggestions = true
-                                    }) {
-                                        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                                    }
-                                }
-                            }
-                        )
-                        ExposedDropdownMenu(
-                            expanded = expandedSuggestions,
-                            onDismissRequest = {
-                                expandedSuggestions = false
-                                showAllSuggestions = false
-                            }
+                                .size(cardMaxHeight * 1.1f)
+                                .align(Alignment.CenterEnd)
+                                .offset(x = dimens.spacingMedium, y = 0.dp)
                         ) {
-                            val filtered = if (showAllSuggestions)
-                                suggestions.take(10)
-                            else if (descriptionState.text.isNotEmpty())
-                                suggestions.filter { it.startsWith(descriptionState.text) && it != descriptionState.text }.take(10)
-                            else
-                                emptyList()
-                            filtered.forEach { suggestion ->
-                                DropdownMenuItem(
-                                    text = { Text(suggestion, fontSize = fieldFontSize) },
-                                    onClick = {
-                                        descriptionState = TextFieldValue(
-                                            suggestion,
-                                            TextRange(suggestion.length)
-                                        )
-                                        description = suggestion
-                                        expandedSuggestions = false
-                                        showAllSuggestions = false
+                            Icon(
+                                imageVector = Icons.Default.AttachMoney,
+                                contentDescription = null,
+                                tint = colors.primary.copy(alpha = 0.10f),
+                                modifier = Modifier.size(cardMaxHeight * 1.1f)
+                            )
+                        }
+                        // أيقونة جميلة فوق العنوان
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = null,
+                            tint = colors.secondary,
+                            modifier = Modifier
+                                .size(cardMaxHeight * 0.4f)
+                                .align(Alignment.Center)
+                        )
+                        // نص العنوان في المقدمة
+                        Text(
+                            text = "إضافة معاملة جديدة",
+                            style = typography.headlineSmall,
+                            color = colors.onPrimaryContainer,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(dimens.spacingSmall))
+                // Main Card
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = dimens.spacingMedium, end = dimens.spacingMedium, bottom = dimens.spacingSmall)
+                        .shadow(4.dp, cardShape),
+                    shape = cardShape,
+                    colors = CardDefaults.cardColors(containerColor = colors.surface)
+                ) {
+                    Column(modifier = Modifier.padding(dimens.spacingSmall)) {
+                        // Row: حساب وصندوق
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)) {
+                            Box(Modifier.weight(1f)) {
+                                AccountPickerField(
+                                    accounts = allAccounts,
+                                    transactions = allTransactions,
+                                    balancesMap = accountBalancesMap,
+                                    selectedAccount = selectedAccount,
+                                    onAccountSelected = { account ->
+                                        selectedAccount = account
+                                        selectedAccountId = account.getId()
+                                        loadAccountSuggestions(selectedAccountId)
+                                    }
+                                )
+                            }
+                            Box(Modifier.weight(1f)) {
+                                CashboxPickerField(
+                                    cashboxes = allCashboxes,
+                                    selectedCashbox = allCashboxes.find { it.id == selectedCashboxId },
+                                    onCashboxSelected = { cashbox ->
+                                        selectedCashboxId = cashbox.id
+                                    },
+                                    onAddCashbox = { name ->
+                                        CashboxHelper.addCashboxToServer(
+                                            context, cashboxViewModel, name,
+                                            object : CashboxHelper.CashboxCallback {
+                                                override fun onSuccess(cashbox: Cashbox?) {
+                                                    selectedCashboxId = cashbox?.id ?: -1L
+                                                    CashboxHelper.showSuccessMessage(context, "تم إضافة الصندوق بنجاح")
+                                                }
+                                                override fun onError(error: String?) {
+                                                    CashboxHelper.showErrorMessage(context, error)
+                                                }
+                                            })
                                     }
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.height(dimens.spacingSmall))
+                        // Row: مبلغ وتاريخ
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)) {
+                            OutlinedTextField(
+                                value = amount,
+                                onValueChange = { input ->
+                                    amount = input.replace(',', '.').filter { c -> c.isDigit() || c == '.' }
+                                },
+                                label = { Text("المبلغ", fontSize = typography.bodyLarge.fontSize) },
+                                modifier = Modifier.weight(1f),
+                                leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
+                                textStyle = typography.bodyLarge,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                            )
+                            OutlinedTextField(
+                                value = dateFormat.format(Date(date)),
+                                onValueChange = {},
+                                label = { Text("التاريخ", fontSize = typography.bodyLarge.fontSize) },
+                                modifier = Modifier.weight(1f).clickable { showDatePicker = true },
+                                enabled = true,
+                                readOnly = true,
+                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
+                                textStyle = typography.bodyLarge,
+                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                    containerColor = colors.surface,
+                                    focusedBorderColor = colors.primary,
+                                    unfocusedBorderColor = colors.onSurface,
+                                    disabledBorderColor = colors.surfaceVariant,
+                                    disabledTextColor = colors.onSurface
+                                )
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(dimens.spacingSmall))
+                        // Description with suggestions (ExposedDropdownMenuBox)
+                        var expandedSuggestions by remember { mutableStateOf(false) }
+                        var showAllSuggestions by remember { mutableStateOf(false) }
+                        var descriptionState by rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("")) }
+                        ExposedDropdownMenuBox(
+                            expanded = expandedSuggestions,
+                            onExpandedChange = { /* لا تفعل شيء هنا */ }
+                        ) {
+                            OutlinedTextField(
+                                value = descriptionState,
+                                onValueChange = {
+                                    descriptionState = it
+                                    description = it.text
+                                    showAllSuggestions = false
+                                    expandedSuggestions = it.text.isNotEmpty() && suggestions.any { s -> s.startsWith(it.text) && s != it.text }
+                                },
+                                label = { Text("البيان", fontSize = typography.bodyLarge.fontSize) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor(),
+                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
+                                textStyle = typography.bodyLarge,
+                                trailingIcon = {
+                                    if (suggestions.isNotEmpty()) {
+                                        IconButton(onClick = {
+                                            showAllSuggestions = true
+                                            expandedSuggestions = true
+                                        }) {
+                                            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                                        }
+                                    }
+                                }
+                            )
+                            ExposedDropdownMenu(
+                                expanded = expandedSuggestions,
+                                onDismissRequest = {
+                                    expandedSuggestions = false
+                                    showAllSuggestions = false
+                                }
+                            ) {
+                                val filtered = if (showAllSuggestions)
+                                    suggestions.take(10)
+                                else if (descriptionState.text.isNotEmpty())
+                                    suggestions.filter { it.startsWith(descriptionState.text) && it != descriptionState.text }.take(10)
+                                else
+                                    emptyList()
+                                filtered.forEach { suggestion ->
+                                    DropdownMenuItem(
+                                        text = { Text(suggestion, fontSize = typography.bodyLarge.fontSize) },
+                                        onClick = {
+                                            descriptionState = TextFieldValue(
+                                                suggestion,
+                                                TextRange(suggestion.length)
+                                            )
+                                            description = suggestion
+                                            expandedSuggestions = false
+                                            showAllSuggestions = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(dimens.spacingSmall))
+                        // Currency Radio Buttons
+                        Row(
+                            modifier = Modifier.horizontalScroll(rememberScrollState()),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = currency == context.getString(R.string.currency_yer),
+                                onClick = { currency = context.getString(R.string.currency_yer) }
+                            )
+                            Text("يمني", fontSize = typography.bodyLarge.fontSize)
+                            Spacer(modifier = Modifier.width(dimens.spacingSmall))
+                            RadioButton(
+                                selected = currency == context.getString(R.string.currency_sar),
+                                onClick = { currency = context.getString(R.string.currency_sar) }
+                            )
+                            Text("سعودي", fontSize = typography.bodyLarge.fontSize)
+                            Spacer(modifier = Modifier.width(dimens.spacingSmall))
+                            RadioButton(
+                                selected = currency == context.getString(R.string.currency_usd),
+                                onClick = { currency = context.getString(R.string.currency_usd) }
+                            )
+                            Text("دولار", fontSize = typography.bodyLarge.fontSize)
+                        }
+                        Spacer(modifier = Modifier.height(dimens.spacingSmall))
+                        // Notes (hidden by default)
+                        val showNotes = false
+                        if (showNotes) {
+                            OutlinedTextField(
+                                value = notes,
+                                onValueChange = { notes = it },
+                                label = { Text("ملاحظات", fontSize = typography.bodyLarge.fontSize) },
+                                modifier = Modifier.fillMaxWidth(),
+                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
+                                textStyle = typography.bodyLarge
+                            )
+                            Spacer(modifier = Modifier.height(dimens.spacingSmall))
+                        }
                     }
-                    Spacer(modifier = Modifier.height(verticalSpacing))
-                    // Currency Radio Buttons
-                    Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
-                        verticalAlignment = Alignment.CenterVertically
+                }
+                // Action Buttons في الأسفل
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = dimens.spacingMedium, vertical = dimens.spacingSmall),
+                    horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)
+                ) {
+                    Button(
+                        onClick = { saveTransaction(false) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(dimens.buttonHeight),
+                        shape = RoundedCornerShape(dimens.buttonCorner),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50), contentColor = Color.White)
                     ) {
-                        RadioButton(
-                            selected = currency == context.getString(R.string.currency_yer),
-                            onClick = { currency = context.getString(R.string.currency_yer) }
-                        )
-                        Text("يمني", fontSize = labelFontSize)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        RadioButton(
-                            selected = currency == context.getString(R.string.currency_sar),
-                            onClick = { currency = context.getString(R.string.currency_sar) }
-                        )
-                        Text("سعودي", fontSize = labelFontSize)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        RadioButton(
-                            selected = currency == context.getString(R.string.currency_usd),
-                            onClick = { currency = context.getString(R.string.currency_usd) }
-                        )
-                        Text("دولار", fontSize = labelFontSize)
+                        Icon(Icons.Default.ArrowDownward, contentDescription = null)
+                        Spacer(Modifier.width(dimens.spacingSmall))
+                        Text("له", fontSize = typography.bodyLarge.fontSize)
                     }
-                    // Notes (hidden by default)
-                    val showNotes = false
-                    if (showNotes) {
-                        OutlinedTextField(
-                            value = notes,
-                            onValueChange = { notes = it },
-                            label = { Text("ملاحظات", fontSize = labelFontSize) },
-                            modifier = Modifier.fillMaxWidth(),
-                            leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
-                            textStyle = LocalTextStyle.current.copy(fontSize = fieldFontSize)
-                        )
-                        Spacer(modifier = Modifier.height(verticalSpacing))
+                    Button(
+                        onClick = { saveTransaction(true) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(dimens.buttonHeight),
+                        shape = RoundedCornerShape(dimens.buttonCorner),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF44336), contentColor = Color.White)
+                    ) {
+                        Icon(Icons.Default.ArrowUpward, contentDescription = null)
+                        Spacer(Modifier.width(dimens.spacingSmall))
+                        Text("عليه", fontSize = typography.bodyLarge.fontSize)
+                    }
+                    Button(
+                        onClick = { navController.navigateUp() },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(dimens.buttonHeight),
+                        shape = RoundedCornerShape(dimens.buttonCorner)
+                    ) {
+                        Text("إلغاء", fontSize = typography.bodyLarge.fontSize)
                     }
                 }
+                Spacer(modifier = Modifier.height(dimens.spacingMedium))
             }
-            // Action Buttons في الأسفل
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = buttonArrangement
-            ) {
-                Button(
-                    onClick = { saveTransaction(false) },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(buttonHeight),
-                    shape = buttonShape,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50), contentColor = Color.White)
-                ) {
-                    Icon(Icons.Default.ArrowDownward, contentDescription = null)
-                    Spacer(Modifier.width(4.dp))
-                    Text("له", fontSize = buttonFontSize)
-                }
-                Button(
-                    onClick = { saveTransaction(true) },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(buttonHeight),
-                    shape = buttonShape,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF44336), contentColor = Color.White)
-                ) {
-                    Icon(Icons.Default.ArrowUpward, contentDescription = null)
-                    Spacer(Modifier.width(4.dp))
-                    Text("عليه", fontSize = buttonFontSize)
-                }
-                Button(
-                    onClick = { navController.navigateUp() },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(buttonHeight),
-                    shape = buttonShape
-                ) {
-                    Text("إلغاء", fontSize = buttonFontSize)
-                }
-            }
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 
@@ -591,34 +589,34 @@ fun AddTransactionScreen(
                     // أيقونة نجاح
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(dimens.successIconSize)
                             .clip(MaterialTheme.shapes.extraLarge)
-                            .background(MaterialTheme.colorScheme.primary),
+                            .background(colors.primary),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(32.dp)
+                            tint = colors.onPrimary,
+                            modifier = Modifier.size(dimens.successIconSize)
                         )
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(dimens.spacingMedium))
                     Text(
                         text = "تمت إضافة المعاملة بنجاح!",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary,
+                        style = typography.titleLarge,
+                        color = colors.primary,
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(dimens.spacingSmall))
                     Text(
                         text = "هل ترغب بإرسال إشعار؟",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = typography.bodyMedium,
+                        color = colors.onSurfaceVariant
                     )
                 }
             },
             confirmButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)) {
                     if (lastSavedAccount?.isWhatsappEnabled() == false) {
                         Button(onClick = {
                             // إرسال واتساب
@@ -640,16 +638,16 @@ fun AddTransactionScreen(
                                 }
                             }
                         }, colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary
+                            containerColor = colors.secondary,
+                            contentColor = colors.onSecondary
                         )) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_whatsapp),
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSecondary,
-                                modifier = Modifier.size(12.dp)
+                                tint = colors.onSecondary,
+                                modifier = Modifier.size(dimens.whatsappIconSize)
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(dimens.spacingSmall))
                             Text("واتساب")
                         }
                     }
@@ -676,22 +674,22 @@ fun AddTransactionScreen(
                             }
                         }
                     }, colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        containerColor = colors.primary,
+                        contentColor = colors.onPrimary
                     )) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_sms),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(12.dp)
+                            tint = colors.onPrimary,
+                            modifier = Modifier.size(dimens.smsIconSize)
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(dimens.spacingSmall))
                         Text("SMS")
                     }
                 }
             },
             dismissButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)) {
                     Button(onClick = {
                         isDialogShown = false
                         // إعادة تعيين الحقول
@@ -699,8 +697,8 @@ fun AddTransactionScreen(
                         description = ""
                         date = System.currentTimeMillis()
                     }, colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        containerColor = colors.secondaryContainer,
+                        contentColor = colors.onSecondaryContainer
                     )) {
                         Text("إضافة قيد آخر")
                     }
@@ -708,15 +706,15 @@ fun AddTransactionScreen(
                         isDialogShown = false
                         navController.navigateUp()
                     }, colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError
+                        containerColor = colors.error,
+                        contentColor = colors.onError
                     )) {
                         Text("خروج")
                     }
                 }
             },
             shape = MaterialTheme.shapes.large,
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = colors.background
         )
     }
 }
@@ -735,38 +733,38 @@ fun AccountPickerBottomSheetCompose(
     val filteredAccounts = if (search.isBlank()) accounts else accounts.filter { it.getName()?.contains(search) == true }
     if (show) {
         ModalBottomSheet(onDismissRequest = onDismiss) {
-            Column(Modifier.fillMaxWidth().padding(16.dp)) {
-                Text(text = "اختر الحساب", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                Spacer(Modifier.height(8.dp))
+            Column(Modifier.fillMaxWidth().padding(dimens.spacingMedium)) {
+                Text(text = "اختر الحساب", fontWeight = FontWeight.Bold, fontSize = dimens.titleFontSize)
+                Spacer(Modifier.height(dimens.spacingSmall))
                 OutlinedTextField(
                     value = search,
                     onValueChange = { search = it },
                     label = { Text("بحث") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(dimens.spacingSmall))
                 Divider()
                 LazyColumn(Modifier.heightIn(max = 400.dp)) {
                     items(filteredAccounts) { account ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 4.dp)
+                                .padding(vertical = dimens.spacingSmall)
                                 .clickable {
                                     onAccountSelected(account)
                                     onDismiss()
                                 },
                             elevation = CardDefaults.cardElevation(2.dp)
                         ) {
-                            Column(Modifier.padding(12.dp)) {
+                            Column(Modifier.padding(dimens.spacingSmall)) {
                                 Text(account.getName() ?: "", fontWeight = FontWeight.Bold)
                                 val balance = balancesMap[account.getId()]?.values?.sum() ?: 0.0
-                                Text("الرصيد: ${balance}", fontSize = 14.sp)
+                                Text("الرصيد: ${balance}", fontSize = dimens.smallFontSize)
                             }
                         }
                     }
                 }
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(dimens.spacingSmall))
                 TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
                     Text("إغلاق")
                 }
