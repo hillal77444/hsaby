@@ -36,6 +36,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreen(
+    isLoading: Boolean,
+    errorMessage: String?,
     onLoginClick: (String, String) -> Unit,
     onRegisterClick: () -> Unit,
     onPrivacyClick: () -> Unit,
@@ -53,15 +55,6 @@ fun LoginScreen(
         var phone by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
         var passwordVisible by remember { mutableStateOf(false) }
-        var isLoading by remember { mutableStateOf(false) }
-        var errorMessage by remember { mutableStateOf<String?>(null) }
-
-        // عند ظهور رسالة خطأ، أوقف التحميل تلقائياً
-        LaunchedEffect(errorMessage) {
-            if (errorMessage != null) {
-                isLoading = false
-            }
-        }
 
         val screenWidth = configuration.screenWidthDp.toFloat().dp
         val screenHeight = configuration.screenHeightDp.toFloat().dp
@@ -224,8 +217,6 @@ fun LoginScreen(
                         }
                         Button(
                             onClick = {
-                                isLoading = true
-                                errorMessage = null
                                 onLoginClick(phone, password)
                             },
                             enabled = !isLoading,

@@ -59,8 +59,10 @@ import com.hillal.acc.data.room.TransactionDao
 import com.hillal.acc.data.room.PendingOperationDao
 
 class LoginFragment : Fragment() {
-    private var authViewModel: AuthViewModel? = null
+    private lateinit var authViewModel: AuthViewModel
     private var loadingDialog: ProgressDialog? = null
+    private var isLoading: Boolean = false
+    private var errorMessage: String? = null
 
     // دالة مساعدة لنسخ النص إلى الحافظة
     private fun copyToClipboard(text: String?) {
@@ -75,9 +77,12 @@ class LoginFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        authViewModel = ViewModelProvider(this).get(AuthViewModel::class.java)
         return ComposeView(requireContext()).apply {
             setContent {
                 LoginScreen(
+                    isLoading = isLoading,
+                    errorMessage = errorMessage,
                     onLoginClick = { phone, password ->
                         handleLogin(phone, password)
                     },
@@ -114,23 +119,59 @@ class LoginFragment : Fragment() {
         }
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        authViewModel.getAuthState().observe(viewLifecycleOwner) { state ->
+            when (state) {
+                AuthViewModel.AuthState.LOADING -> {
+                    isLoading = true
+                    errorMessage = null
+                }
+                AuthViewModel.AuthState.SUCCESS -> {
+                    isLoading = false
+                    errorMessage = null
+                }
+                AuthViewModel.AuthState.ERROR -> {
+                    isLoading = false
+                    errorMessage = "فشل تسجيل الدخول. تحقق من البيانات أو الاتصال."
+                }
+                else -> {
+                    isLoading = false
+                    errorMessage = null
+                }
+            }
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle("تأكيد الخروج")
+                    .setMessage("هل تريد الخروج من التطبيق؟")
+                    .setPositiveButton("نعم") { _, _ ->
+                        requireActivity().finish()
+                    }
+                    .setNegativeButton("لا", null)
+                    .show()
+            }
+        })
+    }
+
     private fun handleLogin(phone: String, password: String) {
         if (phone.isEmpty()) {
-            Toast.makeText(requireContext(), "الرجاء إدخال رقم الهاتف", Toast.LENGTH_SHORT).show()
+            errorMessage = "الرجاء إدخال رقم الهاتف"
+            isLoading = false
             return
         }
         if (password.isEmpty()) {
-            Toast.makeText(requireContext(), "الرجاء إدخال كلمة المرور", Toast.LENGTH_SHORT).show()
+            errorMessage = "الرجاء إدخال كلمة المرور"
+            isLoading = false
             return
         }
-        if (authViewModel == null) {
-            authViewModel = ViewModelProvider(this).get(AuthViewModel::class.java)
-        }
-        // تعطيل الزر أثناء عملية تسجيل الدخول (يمكنك تحسين ذلك بإضافة حالة loading)
-        Log.d(TAG, "Attempting to login with phone: $phone")
-        authViewModel!!.login(phone, password, object : AuthViewModel.AuthCallback {
+        authViewModel.login(phone, password, object : AuthViewModel.AuthCallback {
             override fun onSuccess() {
-                Log.d(TAG, "Login successful")
+                isLoading = false
+                errorMessage = null
                 Toast.makeText(requireContext(), "تم تسجيل الدخول بنجاح", Toast.LENGTH_SHORT).show()
                 val authRepository = AuthRepository(requireActivity().application)
                 val userName = authRepository.getCurrentUser()?.getUsername() ?: ""
@@ -151,15 +192,13 @@ class LoginFragment : Fragment() {
                 dataManager.fetchDataFromServer(object : DataManager.DataCallback {
                     override fun onSuccess() {
                         loadingDialog?.dismiss()
-                        Log.d(TAG, "Data fetched successfully")
                         NavHostFragment.findNavController(this@LoginFragment)
                             .navigate(R.id.navigation_dashboard)
                         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
                     }
                     override fun onError(error: String) {
                         loadingDialog?.dismiss()
-                        Log.e(TAG, "Failed to fetch data: $error")
-                        copyToClipboard("تفاصيل الخطأ:\n$error")
+                        errorMessage = "فشل في جلب البيانات: $error"
                         Toast.makeText(
                             requireContext(),
                             "فشل في جلب البيانات: $error\nتم نسخ تفاصيل الخطأ إلى الحافظة",
@@ -171,25 +210,9 @@ class LoginFragment : Fragment() {
                 })
             }
             override fun onError(error: String?) {
-                Log.e(TAG, "Login failed: $error")
+                isLoading = false
+                errorMessage = error ?: "فشل تسجيل الدخول. تحقق من البيانات أو الاتصال."
                 Toast.makeText(requireContext(), error, Toast.LENGTH_LONG).show()
-            }
-        })
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                    .setTitle("تأكيد الخروج")
-                    .setMessage("هل تريد الخروج من التطبيق؟")
-                    .setPositiveButton("نعم") { _, _ ->
-                        requireActivity().finish()
-                    }
-                    .setNegativeButton("لا", null)
-                    .show()
             }
         })
     }
