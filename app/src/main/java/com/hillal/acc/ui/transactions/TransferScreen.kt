@@ -10,7 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExposedDropdownMenu
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -58,8 +58,7 @@ fun TransferScreen(
         Spacer(Modifier.height(dimens.spacingLarge))
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium,
-            elevation = CardDefaults.cardElevation(4.dp)
+            shape = MaterialTheme.shapes.medium
         ) {
             Column(Modifier.padding(dimens.spacingMedium)) {
                 Text("من الحساب", style = typography.bodySmall)
@@ -85,8 +84,7 @@ fun TransferScreen(
         }
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium,
-            elevation = CardDefaults.cardElevation(4.dp)
+            shape = MaterialTheme.shapes.medium
         ) {
             Column(Modifier.padding(dimens.spacingMedium)) {
                 Text("اختر الصندوق", style = typography.bodySmall)
@@ -110,7 +108,7 @@ fun TransferScreen(
                         modifier = Modifier.menuAnchor().fillMaxWidth(),
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = showCurrencyMenu) }
                     )
-                    ExposedDropdownMenu(
+                    DropdownMenu(
                         expanded = showCurrencyMenu,
                         onDismissRequest = { showCurrencyMenu = false }
                     ) {
@@ -129,8 +127,7 @@ fun TransferScreen(
         }
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium,
-            elevation = CardDefaults.cardElevation(4.dp)
+            shape = MaterialTheme.shapes.medium
         ) {
             Column(Modifier.padding(dimens.spacingMedium)) {
                 OutlinedTextField(
