@@ -97,37 +97,14 @@ fun ModernSearchBar(
             .background(Color.White, shape = RoundedCornerShape(cardCorner)),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // زر الفلترة مع القائمة المنسدلة بجانبه
-        Box(
-            modifier = Modifier.menuAnchor()
+        // زر الفلترة فقط
+        IconButton(
+            onClick = onFilterClick,
+            modifier = Modifier
+                .size(iconSize + 8.dp)
+                .background(blue.copy(alpha = 0.10f), shape = CircleShape)
         ) {
-            IconButton(
-                onClick = onFilterClick,
-                modifier = Modifier
-                    .size(iconSize + 8.dp)
-                    .background(blue.copy(alpha = 0.10f), shape = CircleShape)
-            ) {
-                Icon(Icons.Default.FilterList, contentDescription = "فلترة", tint = blue, modifier = Modifier.size(iconSize))
-            }
-            DropdownMenu(
-                expanded = filterMenuExpanded,
-                onDismissRequest = { filterMenuExpanded = false }
-            ) {
-                sortOptions.forEach { (value, label) ->
-                    DropdownMenuItem(
-                        text = { Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                        onClick = {
-                            sortType = value
-                            filterMenuExpanded = false
-                        },
-                        leadingIcon = {
-                            if (value == sortType) {
-                                Icon(Icons.Default.Check, contentDescription = null, tint = blue)
-                            }
-                        }
-                    )
-                }
-            }
+            Icon(Icons.Default.FilterList, contentDescription = "فلترة", tint = blue, modifier = Modifier.size(iconSize))
         }
         Spacer(modifier = Modifier.width(0.dp))
         // مربع البحث
@@ -244,13 +221,35 @@ fun AccountsComposeScreen(
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = dimens.spacingSmall / 2)
                         )
-                        ModernSearchBar(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            onFilterClick = { filterMenuExpanded = true },
-                            onClear = { searchQuery = "" },
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        Box {
+                            ModernSearchBar(
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                onFilterClick = { filterMenuExpanded = true },
+                                onClear = { searchQuery = "" },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            DropdownMenu(
+                                expanded = filterMenuExpanded,
+                                onDismissRequest = { filterMenuExpanded = false },
+                                modifier = Modifier.align(Alignment.TopStart)
+                            ) {
+                                sortOptions.forEach { (value, label) ->
+                                    DropdownMenuItem(
+                                        text = { Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                        onClick = {
+                                            sortType = value
+                                            filterMenuExpanded = false
+                                        },
+                                        leadingIcon = {
+                                            if (value == sortType) {
+                                                Icon(Icons.Default.Check, contentDescription = null, tint = colors.primary)
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             },

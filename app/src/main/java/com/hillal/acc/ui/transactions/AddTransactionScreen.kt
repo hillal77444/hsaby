@@ -555,7 +555,8 @@ fun AddTransactionScreen(
             loadAccountSuggestions(selectedAccountId)
             showAccountPicker = false
         },
-        onDismiss = { showAccountPicker = false }
+        onDismiss = { showAccountPicker = false },
+        dimens = dimens
     )
 
     // Cashbox Dialog
@@ -727,14 +728,15 @@ fun AccountPickerBottomSheetCompose(
     transactions: List<Transaction>,
     balancesMap: Map<Long, Map<String, Double>>,
     onAccountSelected: (Account) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    dimens: AppDimensions // أضف هذا الباراميتر
 ) {
     var search by remember { mutableStateOf("") }
     val filteredAccounts = if (search.isBlank()) accounts else accounts.filter { it.getName()?.contains(search) == true }
     if (show) {
         ModalBottomSheet(onDismissRequest = onDismiss) {
             Column(Modifier.fillMaxWidth().padding(dimens.spacingMedium)) {
-                Text(text = "اختر الحساب", fontWeight = FontWeight.Bold, fontSize = dimens.titleFontSize)
+                Text(text = "اختر الحساب", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Spacer(Modifier.height(dimens.spacingSmall))
                 OutlinedTextField(
                     value = search,
@@ -759,7 +761,7 @@ fun AccountPickerBottomSheetCompose(
                             Column(Modifier.padding(dimens.spacingSmall)) {
                                 Text(account.getName() ?: "", fontWeight = FontWeight.Bold)
                                 val balance = balancesMap[account.getId()]?.values?.sum() ?: 0.0
-                                Text("الرصيد: ${balance}", fontSize = dimens.smallFontSize)
+                                Text("الرصيد: ${balance}", fontSize = 13.sp)
                             }
                         }
                     }

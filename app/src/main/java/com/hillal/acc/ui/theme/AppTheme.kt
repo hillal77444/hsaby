@@ -84,23 +84,28 @@ data class AppDimensions(
     val spacingMedium: Dp,
     val spacingLarge: Dp,
     val cardCorner: Dp,
-    val iconSize: Dp
+    val iconSize: Dp,
+    val buttonHeight: Dp = 48.dp,
+    val buttonCorner: Dp = 16.dp
 )
 
 @Composable
 fun calculateAppDimensions(): AppDimensions {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
+    val cardCorner = screenWidth * 0.04f
     return AppDimensions(
         spacingSmall = screenWidth * 0.02f,   // 2% من العرض
         spacingMedium = screenWidth * 0.04f,  // 4% من العرض
         spacingLarge = screenWidth * 0.08f,   // 8% من العرض
-        cardCorner = screenWidth * 0.04f,     // 4% من العرض
-        iconSize = screenWidth * 0.06f        // 6% من العرض
+        cardCorner = cardCorner,              // 4% من العرض
+        iconSize = screenWidth * 0.06f,       // 6% من العرض
+        buttonHeight = 48.dp,
+        buttonCorner = cardCorner
     )
 }
 
-val LocalAppDimensions = androidx.compose.runtime.staticCompositionLocalOf { AppDimensions(8.dp, 16.dp, 24.dp, 16.dp, 24.dp) }
+val LocalAppDimensions = androidx.compose.runtime.staticCompositionLocalOf { AppDimensions(8.dp, 16.dp, 24.dp, 16.dp, 24.dp, 48.dp, 16.dp) }
 
 @Composable
 fun AppTheme(
