@@ -37,6 +37,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.BlurEffect
 
 @Composable
 fun TransactionCard(
@@ -47,18 +48,18 @@ fun TransactionCard(
     onWhatsApp: () -> Unit,
     onSms: () -> Unit,
     modifier: Modifier = Modifier,
-    searchQuery: String = "" // Add this parameter with default value
+    searchQuery: String = ""
 ) {
     val isDebit = transaction.getType()?.lowercase() == "debit" || transaction.getType() == "عليه"
     val gradient = if (isDebit) {
         Brush.linearGradient(
-            colors = listOf(Color(0xFFFF5252), Color(0xFFFF8A80)),
+            colors = listOf(Color(0xFFFF5252).copy(alpha = 0.18f), Color(0xFFFF8A80).copy(alpha = 0.18f)),
             start = Offset(0f, 0f),
             end = Offset(400f, 400f)
         )
     } else {
         Brush.linearGradient(
-            colors = listOf(Color(0xFF43EA7D), Color(0xFF1CBF4F)),
+            colors = listOf(Color(0xFF43EA7D).copy(alpha = 0.18f), Color(0xFF1CBF4F).copy(alpha = 0.18f)),
             start = Offset(0f, 0f),
             end = Offset(400f, 400f)
         )
@@ -66,51 +67,81 @@ fun TransactionCard(
     val accountName = accounts.find { it.getId() == transaction.getAccountId() }?.getName() ?: "--"
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
-    val buttonSize = screenHeight * 0.045f // زيادة الحجم: 6% من ارتفاع الشاشة
-    val iconSize = screenHeight * 0.03f // زيادة الحجم: 3.5% من ارتفاع الشاشة
+    val dimens = com.hillal.acc.ui.theme.LocalAppDimensions.current
+    val buttonSize = screenHeight * 0.045f
+    val iconSize = screenHeight * 0.03f
+    val cardHeight = screenHeight * 0.13f // بطاقة مضغوطة
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(8.dp, RoundedCornerShape(16.dp)),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+            .height(cardHeight)
+            .shadow(6.dp, RoundedCornerShape(18.dp)),
+        shape = RoundedCornerShape(18.dp),
+        elevation = CardDefaults.cardElevation(6.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.55f))
     ) {
         Box(
             modifier = Modifier
                 .background(gradient)
                 .fillMaxSize()
+                .blur(10.dp)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(12.dp)
+                    .padding(horizontal = 10.dp, vertical = 8.dp)
             ) {
-                // السطر الأول: اسم الحساب والمبلغ
+                // الصف الأول: أيقونة + اسم الحساب + المبلغ + الأزرار
                 Row(
                     Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // دائرة أيقونة أو أول حرف من اسم الحساب
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .background(
+                                if (isDebit) Color(0xFFFF5252) else Color(0xFF43EA7D),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = accountName.take(1),
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
                     Text(
                         text = accountName,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 17.sp,
-                        color = Color.White,
-                        maxLines = 1
+                        fontSize = 15.sp,
+                        color = Color(0xFF222222),
+                        maxLines = 1,
+                        modifier = Modifier.weight(1f)
                     )
                     Text(
                         text = "${transaction.getAmount()} ${transaction.getCurrency()}",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 19.sp,
-                        color = Color.White
+                        fontSize = 17.sp,
+                        color = if (isDebit) Color(0xFFFF5252) else Color(0xFF43EA7D),
+                        modifier = Modifier.padding(horizontal = 6.dp)
                     )
+                    // أزرار العمليات
+                    ActionCircleButton(icon = Icons.Default.Delete, borderColor = Color.Red, onClick = onDelete, size = 32.dp, iconSize = 18.dp)
+                    Spacer(Modifier.width(2.dp))
+                    ActionCircleButton(icon = Icons.Default.Edit, borderColor = Color(0xFF1976D2), onClick = onEdit, size = 32.dp, iconSize = 18.dp)
+                    Spacer(Modifier.width(2.dp))
+                    ActionCircleButton(painter = painterResource(id = com.hillal.acc.R.drawable.ic_sms), borderColor = Color(0xFF1976D2), onClick = onSms, size = 32.dp, iconSize = 18.dp)
+                    Spacer(Modifier.width(2.dp))
+                    ActionCircleButton(painter = painterResource(id = com.hillal.acc.R.drawable.ic_whatsapp), borderColor = Color(0xFF25D366), onClick = onWhatsApp, size = 32.dp, iconSize = 18.dp)
                 }
                 Spacer(Modifier.height(2.dp))
-                // السطر الثاني: الوصف والتاريخ
+                // الصف الثاني: الوصف (سطرين) + التاريخ
                 Row(
                     Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     HighlightedDescription(
@@ -118,31 +149,17 @@ fun TransactionCard(
                         searchQuery = searchQuery,
                         modifier = Modifier.weight(1f)
                     )
+                    Spacer(Modifier.width(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.AccessTime, contentDescription = null, tint = Color.White, modifier = Modifier.size(iconSize))
+                        Icon(Icons.Default.AccessTime, contentDescription = null, tint = Color(0xFF888888), modifier = Modifier.size(15.dp))
                         Spacer(Modifier.width(2.dp))
                         Text(
                             text = transaction.getDateString(),
-                            fontSize = 13.sp,
-                            color = Color.White
+                            fontSize = 12.sp,
+                            color = Color(0xFF888888)
                         )
                     }
                 }
-                Spacer(Modifier.height(4.dp))
-                Spacer(Modifier.weight(1f)) // يدفع الأزرار للأسفل دائماً
-            }
-            // الأزرار دائماً في الأسفل
-            Row(
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                ActionCircleButton(icon = Icons.Default.Delete, borderColor = Color.Red, onClick = onDelete, size = buttonSize, iconSize = iconSize)
-                ActionCircleButton(icon = Icons.Default.Edit, borderColor = Color(0xFF1976D2), onClick = onEdit, size = buttonSize, iconSize = iconSize)
-                ActionCircleButton(painter = painterResource(id = R.drawable.ic_sms), borderColor = Color(0xFF1976D2), onClick = onSms, size = buttonSize, iconSize = iconSize)
-                ActionCircleButton(painter = painterResource(id = R.drawable.ic_whatsapp), borderColor = Color(0xFF25D366), onClick = onWhatsApp, size = buttonSize, iconSize = iconSize)
             }
         }
     }
@@ -184,52 +201,44 @@ fun HighlightedDescription(
     searchQuery: String,
     modifier: Modifier = Modifier
 ) {
-    val maxChars = 80 // تقريبا ما يعادل سطرين بالعربي
+    val maxLines = 2
+    val fontSize = 14.sp
     if (searchQuery.isBlank()) {
         Text(
             text = description,
-            fontSize = 14.sp,
-            color = Color.White,
-            maxLines = 2,
+            fontSize = fontSize,
+            color = Color(0xFF444444),
+            maxLines = maxLines,
             overflow = TextOverflow.Ellipsis,
             modifier = modifier
         )
     } else {
         val index = description.indexOf(searchQuery, ignoreCase = true)
         if (index == -1) {
-            // لا يوجد تطابق، اعرض أول سطرين عادي
             Text(
                 text = description,
-                fontSize = 14.sp,
-                color = Color.White,
-                maxLines = 2,
+                fontSize = fontSize,
+                color = Color(0xFF444444),
+                maxLines = maxLines,
                 overflow = TextOverflow.Ellipsis,
                 modifier = modifier
             )
         } else {
-            // حدد بداية ونهاية الجزء المعروض بحيث يظهر التطابق في المنتصف تقريباً
-            val contextLength = maxChars - searchQuery.length
-            val beforeLen = contextLength / 2
-            val afterLen = contextLength - beforeLen
-            val start = maxOf(0, index - beforeLen)
-            val end = minOf(description.length, index + searchQuery.length + afterLen)
-            val shown = description.substring(start, end)
-            val matchStart = shown.indexOf(searchQuery, ignoreCase = true)
-            val matchEnd = matchStart + searchQuery.length
+            val before = description.substring(0, index)
+            val match = description.substring(index, index + searchQuery.length)
+            val after = description.substring(index + searchQuery.length)
             val highlighted = buildAnnotatedString {
-                append(shown.substring(0, matchStart))
+                append(before)
                 withStyle(SpanStyle(background = Color(0xFFFFF59D), color = Color.Black)) {
-                    append(shown.substring(matchStart, matchEnd))
+                    append(match)
                 }
-                append(shown.substring(matchEnd))
+                append(after)
             }
-            val prefix = if (start > 0) "..." else ""
-            val suffix = if (end < description.length) "..." else ""
             Text(
-                text = buildAnnotatedString { append(prefix); append(highlighted); append(suffix) },
-                fontSize = 14.sp,
-                color = Color.White,
-                maxLines = 2,
+                text = highlighted,
+                fontSize = fontSize,
+                color = Color(0xFF444444),
+                maxLines = maxLines,
                 overflow = TextOverflow.Ellipsis,
                 modifier = modifier
             )
