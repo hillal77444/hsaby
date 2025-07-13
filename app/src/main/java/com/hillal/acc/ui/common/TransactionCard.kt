@@ -81,11 +81,16 @@ fun TransactionCard(
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.55f))
     ) {
         Box(
-            modifier = Modifier
-                .background(gradient)
-                .fillMaxSize()
-                .blur(10.dp)
+            modifier = Modifier.fillMaxSize()
         ) {
+            // طبقة الخلفية الزجاجية فقط
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(gradient)
+                    .blur(10.dp)
+            )
+            // طبقة المحتوى الأمامي (النصوص والأزرار)
             Column(
                 modifier = Modifier
                     .fillMaxSize()
