@@ -127,7 +127,7 @@ fun DashboardScreen(
                 // عبارة ترحيب
                 Text(
                     text = "مرحباً، $userName!",
-                    color = colors.primary,
+                    color = colors.onPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize = fontTitle,
                     modifier = Modifier.padding(top = 2.dp, bottom = marginMedium),
