@@ -60,11 +60,21 @@ import androidx.compose.ui.text.input.KeyboardType
 private fun wholeNumberToWords(number: Long): String {
     if (number == 0L) return "صفر"
     if (number < 0L) return "سالب ${wholeNumberToWords(-number)}"
-    
-    val units = arrayOf("", "ألف", "ألفان", "آلاف", "ألفاً")
+
+    val hundredsMap = mapOf(
+        1L to "مائة",
+        2L to "مئتان",
+        3L to "ثلاثمائة",
+        4L to "أربعمائة",
+        5L to "خمسمائة",
+        6L to "ستمائة",
+        7L to "سبعمائة",
+        8L to "ثمانمائة",
+        9L to "تسعمائة"
+    )
     val tens = arrayOf("", "عشرة", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون", "سبعون", "ثمانون", "تسعون")
     val ones = arrayOf("", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة", "ثمانية", "تسعة")
-    
+
     return when {
         number < 10L -> ones[number.toInt()]
         number < 20L -> when (number) {
@@ -91,9 +101,10 @@ private fun wholeNumberToWords(number: Long): String {
         number < 1000L -> {
             val hundred = number / 100L
             val remainder = number % 100L
-            when {
-                remainder == 0L -> ones[hundred.toInt()] + "مائة"
-                else -> ones[hundred.toInt()] + "مائة و" + wholeNumberToWords(remainder)
+            val hundredWord = hundredsMap[hundred] ?: (ones[hundred.toInt()] + "مائة")
+            return when {
+                remainder == 0L -> hundredWord
+                else -> wholeNumberToWords(remainder) + " و" + hundredWord
             }
         }
         number < 1000000L -> {
@@ -600,7 +611,7 @@ fun TransferScreen(
                                 value = amount,
                                 onValueChange = { newValue ->
                                     if (isValidAmount(newValue)) {
-                                        amount = formatAmount(newValue)
+                                        amount = newValue // بدون تنسيق فواصل
                                         lastAmountUpdate = amount // تحديث للكتابة التلقائية
                                     }
                                 },
