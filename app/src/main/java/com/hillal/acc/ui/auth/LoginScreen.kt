@@ -279,24 +279,33 @@ fun LoginScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(marginSmall))
-                // استبدال الروابط السريعة في الأسفل بكولمن عمودي مع أيقونات وتأثير وضوح
-                Column(
+                // استبدال الروابط السريعة في الأسفل بـ Row واحد مع أزرار واضحة
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = marginSmall),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(bottom = marginSmall, start = marginSmall, end = marginSmall),
+                    horizontalArrangement = Arrangement.spacedBy(marginSmall, Alignment.CenterHorizontally)
                 ) {
-                    TextButton(onClick = onPrivacyClick) {
+                    OutlinedButton(
+                        onClick = onPrivacyClick,
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Icon(Icons.Default.Info, contentDescription = null, tint = colors.primary, modifier = Modifier.size(dimens.iconSizeSmall))
                         Spacer(Modifier.width(4.dp))
                         Text("سياسة الخصوصية", fontSize = dimens.fontSmall, color = colors.primary, fontWeight = FontWeight.Medium)
                     }
-                    TextButton(onClick = onContactClick) {
+                    OutlinedButton(
+                        onClick = onContactClick,
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Icon(Icons.Default.Phone, contentDescription = null, tint = colors.primary, modifier = Modifier.size(dimens.iconSizeSmall))
                         Spacer(Modifier.width(4.dp))
                         Text("تواصل معنا", fontSize = dimens.fontSmall, color = colors.primary, fontWeight = FontWeight.Medium)
                     }
-                    TextButton(onClick = onAboutClick) {
+                    OutlinedButton(
+                        onClick = onAboutClick,
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Icon(Icons.Default.Info, contentDescription = null, tint = colors.primary, modifier = Modifier.size(dimens.iconSizeSmall))
                         Spacer(Modifier.width(4.dp))
                         Text("حول التطبيق", fontSize = dimens.fontSmall, color = colors.primary, fontWeight = FontWeight.Medium)
