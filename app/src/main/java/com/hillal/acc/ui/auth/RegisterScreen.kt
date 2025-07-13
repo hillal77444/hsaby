@@ -32,6 +32,8 @@ import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.shadow
+import androidx.compose.foundation.layout.imePadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,65 +58,66 @@ fun RegisterScreen(
         var confirmPasswordVisible by remember { mutableStateOf(false) }
         var localError by remember { mutableStateOf<String?>(null) }
 
-        val screenWidth = configuration.screenWidthDp.toFloat().dp
-        val screenHeight = configuration.screenHeightDp.toFloat().dp
-        val blueHeight = screenHeight * 0.10f // أصغر
-        val logoSize = screenWidth * 0.16f    // أصغر
+        val logoSize = dimens.logoSize
         val cardCorner = dimens.cardCorner
         val cardPadding = dimens.spacingMedium
-        val fieldHeight = screenHeight * 0.078f
-        val buttonHeight = screenHeight * 0.055f
+        val fieldHeight = dimens.fieldHeight
+        val buttonHeight = dimens.buttonHeight
         val fontTitle = typography.headlineMedium.fontSize
         val fontField = typography.bodyLarge.fontSize
         val fontButton = typography.bodyLarge.fontSize
-        val fontSmall = typography.bodyMedium.fontSize
+        val fontSmall = dimens.fontSmall
         val iconSize = dimens.iconSize
+        val iconSizeSmall = dimens.iconSizeSmall
         val marginSmall = dimens.spacingSmall
         val marginMedium = dimens.spacingMedium
         val marginLarge = dimens.spacingLarge
+        val cardElevation = dimens.cardElevation
+        val fieldCorner = dimens.cardCorner
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(colors.background)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(colors.gradient1, colors.gradient2)
+                    )
+                )
+                .navigationBarsPadding()
+                .imePadding()
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .imePadding(),
+                    .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // المستطيل العلوي
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(blueHeight)
-                        .background(colors.primary)
-                )
-                // الشعار متداخل مع البطاقة
-                Box(
-                    modifier = Modifier
-                        .size(logoSize)
-                        .offset(y = -logoSize / 3) // تراكب أقل
-                        .background(colors.surface, shape = CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.mipmap.ic_launcher),
-                        contentDescription = "Logo",
-                        contentScale = ContentScale.Inside,
-                        modifier = Modifier.size(logoSize * 0.8f)
-                    )
+                Spacer(modifier = Modifier.height(marginMedium))
+                // الشعار مع أنيميشن دخول خفيف
+                androidx.compose.animation.AnimatedVisibility(visible = true, enter = androidx.compose.animation.fadeIn()) {
+                    Box(
+                        modifier = Modifier
+                            .size(logoSize)
+                            .background(colors.surface, shape = CircleShape)
+                            .shadow(cardElevation, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.mipmap.ic_launcher),
+                            contentDescription = "Logo",
+                            contentScale = ContentScale.Inside,
+                            modifier = Modifier.size(logoSize * 0.8f)
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.height(marginSmall)) // مسافة واضحة وصغيرة بين الشعار والبطاقة
+                Spacer(modifier = Modifier.height(marginSmall))
                 // البطاقة البيضاء
                 Card(
                     shape = RoundedCornerShape(cardCorner),
-                    elevation = CardDefaults.cardElevation(12.dp),
+                    elevation = CardDefaults.cardElevation(cardElevation),
                     colors = CardDefaults.cardColors(containerColor = colors.surface),
                     modifier = Modifier
-                        .fillMaxWidth(0.92f)
+                        .fillMaxWidth(0.97f)
                         .wrapContentHeight()
                 ) {
                     Column(
@@ -122,14 +125,14 @@ fun RegisterScreen(
                             .fillMaxWidth()
                             .padding(all = cardPadding),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(marginMedium)
+                        verticalArrangement = Arrangement.spacedBy(marginSmall)
                     ) {
                         Text(
                             text = "إنشاء حساب جديد",
                             color = colors.primary,
                             fontWeight = FontWeight.Bold,
                             fontSize = fontTitle,
-                            modifier = Modifier.padding(bottom = marginSmall),
+                            modifier = Modifier.padding(bottom = 2.dp),
                             style = typography.headlineMedium,
                             textAlign = TextAlign.Center
                         )
@@ -142,10 +145,11 @@ fun RegisterScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(fieldHeight),
+                            shape = RoundedCornerShape(fieldCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
-                                containerColor = colors.surface,
+                                containerColor = colors.backgroundVariant,
                                 focusedBorderColor = colors.primary,
-                                unfocusedBorderColor = colors.onSurface,
+                                unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
                         )
@@ -158,10 +162,11 @@ fun RegisterScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(fieldHeight),
+                            shape = RoundedCornerShape(fieldCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
-                                containerColor = colors.surface,
+                                containerColor = colors.backgroundVariant,
                                 focusedBorderColor = colors.primary,
-                                unfocusedBorderColor = colors.onSurface,
+                                unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
                         )
@@ -176,16 +181,17 @@ fun RegisterScreen(
                                 val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                                 val desc = if (passwordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر"
                                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                    Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSize), tint = colors.primary)
+                                    Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSizeSmall), tint = colors.primary)
                                 }
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(fieldHeight),
+                            shape = RoundedCornerShape(fieldCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
-                                containerColor = colors.surface,
+                                containerColor = colors.backgroundVariant,
                                 focusedBorderColor = colors.primary,
-                                unfocusedBorderColor = colors.onSurface,
+                                unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
                         )
@@ -200,29 +206,39 @@ fun RegisterScreen(
                                 val image = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                                 val desc = if (confirmPasswordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر"
                                 IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                                    Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSize), tint = colors.primary)
+                                    Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSizeSmall), tint = colors.primary)
                                 }
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(fieldHeight),
+                            shape = RoundedCornerShape(fieldCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
-                                containerColor = colors.surface,
+                                containerColor = colors.backgroundVariant,
                                 focusedBorderColor = colors.primary,
-                                unfocusedBorderColor = colors.onSurface,
+                                unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
                         )
                     }
                 }
                 if (localError != null || errorMessage != null) {
-                    Text(
-                        text = localError ?: errorMessage ?: "",
-                        color = colors.error,
-                        fontSize = fontSmall,
-                        modifier = Modifier.padding(top = marginSmall),
-                        style = typography.bodyMedium
-                    )
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
+                        shape = RoundedCornerShape(fieldCorner),
+                        modifier = Modifier.fillMaxWidth(0.97f).padding(vertical = 2.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(marginSmall)) {
+                            Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(iconSizeSmall))
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = localError ?: errorMessage ?: "",
+                                color = colors.error,
+                                fontSize = fontSmall,
+                                style = typography.bodyMedium
+                            )
+                        }
+                    }
                 }
                 // زر إنشاء حساب جديد
                 Button(
@@ -241,38 +257,33 @@ fun RegisterScreen(
                     },
                     enabled = !isLoading,
                     modifier = Modifier
-                        .fillMaxWidth(0.92f)
+                        .fillMaxWidth(0.97f)
                         .padding(top = marginMedium)
                         .height(buttonHeight),
                     shape = RoundedCornerShape(cardCorner),
                     colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(
-                            color = colors.onPrimary,
-                            modifier = Modifier.size(fontButton.value.dp)
-                        )
+                        CircularProgressIndicator(color = colors.onPrimary, modifier = Modifier.size(fontButton.value.dp))
                     } else {
-                        Text("إنشاء حساب جديد", color = colors.onPrimary, fontWeight = FontWeight.Bold, fontSize = fontButton, style = typography.bodyLarge)
+                        Text("تسجيل", color = colors.onPrimary, fontSize = fontButton, style = typography.bodyLarge)
                     }
                 }
-                // زر العودة لتسجيل الدخول
-                Button(
+                OutlinedButton(
                     onClick = onBackToLogin,
                     modifier = Modifier
-                        .fillMaxWidth(0.92f)
-                        .padding(top = marginMedium, bottom = marginLarge)
+                        .fillMaxWidth(0.97f)
+                        .padding(top = marginSmall)
                         .height(buttonHeight),
-                    colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
-                    shape = RoundedCornerShape(cardCorner)
+                    shape = RoundedCornerShape(cardCorner),
+                    border = ButtonDefaults.outlinedButtonBorder,
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.primary)
                 ) {
-                    Text("العودة لتسجيل الدخول", color = colors.onPrimary, fontSize = fontButton, style = typography.bodyLarge)
+                    Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(iconSizeSmall), tint = colors.primary)
+                    Spacer(Modifier.width(4.dp))
+                    Text("العودة لتسجيل الدخول", fontWeight = FontWeight.Bold, fontSize = fontButton, style = typography.bodyLarge)
                 }
-                Spacer(
-                    modifier = Modifier
-                        .height(marginLarge)
-                        .navigationBarsPadding()
-                )
+                Spacer(modifier = Modifier.height(marginSmall))
             }
         }
     }

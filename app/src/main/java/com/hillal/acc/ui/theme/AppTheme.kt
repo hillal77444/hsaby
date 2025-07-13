@@ -95,8 +95,26 @@ data class AppDimensions(
     val cardHeight: Dp = 120.dp, // جديد
     val bodyFont: TextUnit = 14.sp, // جديد
     val statFont: TextUnit = 18.sp, // جديد
-    val statLabelFont: TextUnit = 13.sp // جديد
+    val statLabelFont: TextUnit = 13.sp, // جديد
+    // --- إضافات جمالية ---
+    val logoSize: Dp,           // حجم الشعار العلوي
+    val fieldHeight: Dp,        // ارتفاع حقول الإدخال
+    val cardElevation: Dp,      // ظل البطاقات
+    val iconSizeSmall: Dp,      // أيقونات صغيرة (مثل أيقونة كلمة السر)
+    val fontSmall: TextUnit     // حجم خط صغير (روابط، نصوص مساعدة)
 )
+
+// ألوان جمالية إضافية (يمكن استخدامها في الخلفيات أو التدرجات أو العناصر الثانوية)
+val Gradient1 = Color(0xFF4F8DFD) // أزرق متدرج عصري
+val Gradient2 = Color(0xFF6FE7DD) // أخضر-تركوازي متدرج عصري
+val Accent = Color(0xFFFFC542)    // أصفر عصري للأزرار أو الإشعارات
+val BackgroundVariant = Color(0xFFF6F8FB) // خلفية ثانوية فاتحة
+
+// يمكن إضافة هذه الألوان إلى MaterialTheme.colorScheme عبر امتدادات:
+val ColorScheme.gradient1: Color get() = Gradient1
+val ColorScheme.gradient2: Color get() = Gradient2
+val ColorScheme.accent: Color get() = Accent
+val ColorScheme.backgroundVariant: Color get() = BackgroundVariant
 
 @Composable
 fun calculateAppDimensions(): AppDimensions {
@@ -110,7 +128,7 @@ fun calculateAppDimensions(): AppDimensions {
         spacingLarge = screenWidth * 0.08f,   // 8% من العرض
         cardCorner = cardCorner,              // 4% من العرض
         iconSize = screenWidth * 0.06f,       // 6% من العرض
-        buttonHeight = 48.dp,
+        buttonHeight = screenHeight * 0.055f, // زر متجاوب
         buttonCorner = cardCorner,
         successIconSize = screenWidth * 0.13f,    // 13% من العرض
         whatsappIconSize = screenWidth * 0.09f,   // 9% من العرض
@@ -119,11 +137,24 @@ fun calculateAppDimensions(): AppDimensions {
         cardHeight = screenHeight * 0.15f, // 15% من الارتفاع
         bodyFont = (screenWidth.value * 0.045f).sp, // ديناميكي
         statFont = (screenWidth.value * 0.048f).sp, // ديناميكي
-        statLabelFont = (screenWidth.value * 0.035f).sp // ديناميكي
+        statLabelFont = (screenWidth.value * 0.035f).sp, // ديناميكي
+        // --- إضافات جمالية ---
+        logoSize = screenWidth * 0.18f, // شعار كبير نسبيًا
+        fieldHeight = screenHeight * 0.072f, // ارتفاع حقل الإدخال متجاوب
+        cardElevation = screenWidth * 0.012f, // ظل البطاقة متجاوب (مثلاً 4-8dp)
+        iconSizeSmall = screenWidth * 0.042f, // أيقونة صغيرة (مثلاً 14-18dp)
+        fontSmall = (screenWidth.value * 0.032f).sp // خط صغير (مثلاً 11-13sp)
     )
 }
 
-val LocalAppDimensions = androidx.compose.runtime.staticCompositionLocalOf { AppDimensions(8.dp, 16.dp, 24.dp, 16.dp, 24.dp, 48.dp, 16.dp, 48.dp, 32.dp, 28.dp, 2.dp) }
+val LocalAppDimensions = androidx.compose.runtime.staticCompositionLocalOf {
+    AppDimensions(
+        8.dp, 16.dp, 24.dp, 16.dp, 24.dp, 48.dp, 16.dp, 48.dp, 32.dp, 28.dp, 2.dp,
+        120.dp, 14.sp, 18.sp, 13.sp,
+        // إضافات جمالية افتراضية
+        64.dp, 48.dp, 4.dp, 16.dp, 12.sp
+    )
+}
 
 @Composable
 fun AppTheme(
