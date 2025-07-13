@@ -36,6 +36,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.shadow
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.ime.ImePadding
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable

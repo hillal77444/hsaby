@@ -32,8 +32,11 @@ import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.shadow
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.material.ColorScheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
