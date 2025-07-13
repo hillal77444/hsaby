@@ -442,21 +442,18 @@ fun GlassStatCard(
     labelFontSize: TextUnit,
     modifier: Modifier = Modifier
 ) {
-    val configuration = LocalConfiguration.current
-    val screenWidth = with(LocalDensity.current) { configuration.screenWidthDp.dp }
-    val iconSize = screenWidth * 0.07f
+    val dimens = LocalAppDimensions.current
+    val iconSize = dimens.iconSize
     Card(
         shape = RoundedCornerShape(24.dp),
-        modifier = modifier
-            .graphicsLayer {
-                alpha = 0.85f
-            }
-            .blur(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.35f)),
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.78f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(10.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = dimens.fieldHorizontalPadding, vertical = dimens.spacingSmall),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -466,19 +463,19 @@ fun GlassStatCard(
                 tint = iconTint,
                 modifier = Modifier.size(iconSize)
             )
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(1.dp))
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                 color = valueColor,
-                fontSize = valueFontSize
+                fontSize = dimens.statFont // من الثيم
             )
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.labelSmall,
                 color = valueColor,
-                fontSize = labelFontSize,
-                modifier = Modifier.padding(top = 2.dp)
+                fontSize = dimens.statLabelFont, // من الثيم
+                modifier = Modifier.padding(top = 1.dp)
             )
         }
     }
