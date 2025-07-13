@@ -3,5 +3,5 @@
     <font
         android:fontStyle="normal"
         android:fontWeight="400"
-        android:font="@assets/fonts/Cairo/static/Cairo-Regular.ttf" />
+        android:font="@font/cairo_regular" />
 </font-family> 
