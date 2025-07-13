@@ -235,7 +235,7 @@ fun RegisterScreen(
                         )
                     }
                 }
-                if (localError != null || errorMessage != null) {
+                if (errorMessage != null) {
                     Card(
                         colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
                         shape = RoundedCornerShape(cardCorner),
@@ -245,7 +245,7 @@ fun RegisterScreen(
                             Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(iconSizeSmall))
                             Spacer(Modifier.width(4.dp))
                             Text(
-                                text = localError ?: errorMessage ?: "",
+                                text = errorMessage ?: "",
                                 color = colors.error,
                                 fontSize = fontSmall,
                                 style = typography.bodyMedium

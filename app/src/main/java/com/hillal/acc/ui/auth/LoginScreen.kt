@@ -237,7 +237,7 @@ fun LoginScreen(
                                     Icon(Icons.Default.Error, contentDescription = null, tint = colors.error, modifier = Modifier.size(dimens.iconSizeSmall))
                                     Spacer(Modifier.width(4.dp))
                                     Text(
-                                        text = errorMessage,
+                                        text = errorMessage ?: "",
                                         color = colors.error,
                                         fontSize = dimens.fontSmall,
                                         style = typography.bodyMedium
