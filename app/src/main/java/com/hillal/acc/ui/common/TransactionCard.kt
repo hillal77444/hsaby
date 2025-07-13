@@ -38,6 +38,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.text.style.Shadow
 
 @Composable
 fun TransactionCard(
@@ -127,11 +128,20 @@ fun TransactionCard(
                         maxLines = 1,
                         modifier = Modifier.weight(1f)
                     )
+                    val amountColor = if (isDebit) Color(0xFFD32F2F) else Color(0xFF388E3C)
                     Text(
                         text = "${transaction.getAmount()} ${transaction.getCurrency()}",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
-                        color = if (isDebit) Color(0xFFFF5252) else Color(0xFF43EA7D),
+                        color = amountColor,
+                        style = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            shadow = Shadow(
+                                color = Color.Black.copy(alpha = 0.18f),
+                                offset = Offset(1f, 1f),
+                                blurRadius = 2f
+                            )
+                        ),
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
                 }
