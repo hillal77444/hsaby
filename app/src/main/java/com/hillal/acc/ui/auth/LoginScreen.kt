@@ -33,9 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.shadow
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.ime.ImePadding
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.ui.draw.shadow
