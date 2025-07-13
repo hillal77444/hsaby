@@ -136,7 +136,7 @@ fun RegisterScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(all = cardPadding),
+                            .padding(all = dimens.spacingSmall), // تقليل الهامش الداخلي للبطاقة
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(marginSmall)
                     ) {
