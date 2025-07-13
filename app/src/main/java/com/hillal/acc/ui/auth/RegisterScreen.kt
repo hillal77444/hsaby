@@ -94,12 +94,12 @@ fun RegisterScreen(
                     )
                 )
                 .navigationBarsPadding()
-                .imePadding()
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(scrollState),
+                    .verticalScroll(scrollState)
+                    .imePadding(), // نقلناها هنا فقط
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(marginMedium))

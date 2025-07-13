@@ -222,49 +222,43 @@ fun LoginScreen(
                                 )
                             }
                         }
+                        // رسالة الخطأ داخل كارد صغيرة تحت الزر
                         if (errorMessage != null) {
                             Card(
                                 colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
                                 shape = RoundedCornerShape(dimens.cardCorner),
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 2.dp)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(dimens.spacingSmall)) {
-                                    Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(dimens.iconSizeSmall))
+                                    Icon(Icons.Default.Error, contentDescription = null, tint = colors.error, modifier = Modifier.size(dimens.iconSizeSmall))
                                     Spacer(Modifier.width(4.dp))
                                     Text(
                                         text = errorMessage,
                                         color = colors.error,
-                                        fontSize = fontSmall,
+                                        fontSize = dimens.fontSmall,
                                         style = typography.bodyMedium
                                     )
                                 }
                             }
                         }
-                        // زر دخول مع تأثير ضغط (scale) عند الضغط
-                        var loginPressed by remember { mutableStateOf(false) }
+                        // زر الدخول مع مؤشر تحميل
                         Button(
-                            onClick = {
-                                loginPressed = true
-                                onLoginClick(phone, password)
-                                loginPressed = false
-                            },
+                            onClick = { onLoginClick(phone, password) },
                             enabled = !isLoading,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(buttonHeight)
-                                .graphicsLayer {
-                                    scaleX = if (loginPressed && !isLoading) 0.97f else 1f
-                                    scaleY = if (loginPressed && !isLoading) 0.97f else 1f
-                                },
-                            colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
-                            shape = RoundedCornerShape(cardCorner)
+                                .height(buttonHeight),
+                            shape = RoundedCornerShape(cardCorner),
+                            colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
                         ) {
                             if (isLoading) {
-                                CircularProgressIndicator(color = colors.onPrimary, modifier = Modifier.size(fontButton.value.dp))
+                                CircularProgressIndicator(color = colors.onPrimary, modifier = Modifier.size(dimens.iconSizeSmall))
                                 Spacer(Modifier.width(8.dp))
-                                Text("جاري تسجيل الدخول...", color = colors.onPrimary, fontSize = fontButton, style = typography.bodyLarge)
+                                Text("جاري تسجيل الدخول...", color = colors.onPrimary)
                             } else {
-                                Text("دخول", color = colors.onPrimary, fontSize = fontButton, style = typography.bodyLarge)
+                                Text("دخول", color = colors.onPrimary)
                             }
                         }
                         OutlinedButton(
@@ -283,19 +277,27 @@ fun LoginScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(marginSmall))
-                // روابط سريعة أسفل الشاشة
-                Row(
-                    modifier = Modifier.fillMaxWidth(0.97f),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                // استبدال الروابط السريعة في الأسفل بكولمن عمودي مع أيقونات وتأثير وضوح
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = marginSmall),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     TextButton(onClick = onPrivacyClick) {
-                        Text("سياسة الخصوصية", fontSize = dimens.fontSmall, color = colors.secondary)
+                        Icon(Icons.Default.Info, contentDescription = null, tint = colors.primary, modifier = Modifier.size(dimens.iconSizeSmall))
+                        Spacer(Modifier.width(4.dp))
+                        Text("سياسة الخصوصية", fontSize = dimens.fontSmall, color = colors.primary, fontWeight = FontWeight.Medium)
                     }
                     TextButton(onClick = onContactClick) {
-                        Text("تواصل معنا", fontSize = dimens.fontSmall, color = colors.secondary)
+                        Icon(Icons.Default.Phone, contentDescription = null, tint = colors.primary, modifier = Modifier.size(dimens.iconSizeSmall))
+                        Spacer(Modifier.width(4.dp))
+                        Text("تواصل معنا", fontSize = dimens.fontSmall, color = colors.primary, fontWeight = FontWeight.Medium)
                     }
                     TextButton(onClick = onAboutClick) {
-                        Text("حول التطبيق", fontSize = dimens.fontSmall, color = colors.secondary)
+                        Icon(Icons.Default.Info, contentDescription = null, tint = colors.primary, modifier = Modifier.size(dimens.iconSizeSmall))
+                        Spacer(Modifier.width(4.dp))
+                        Text("حول التطبيق", fontSize = dimens.fontSmall, color = colors.primary, fontWeight = FontWeight.Medium)
                     }
                 }
                 Spacer(modifier = Modifier.height(marginSmall))
