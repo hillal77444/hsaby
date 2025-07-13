@@ -16,6 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -38,6 +41,7 @@ import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.layout.systemBarsPadding
 import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
+import androidx.compose.ui.draw.shadow
 
 @Composable
 fun DashboardScreen(
@@ -89,7 +93,11 @@ fun DashboardScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(colors.background)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(Color(0xFF2196F3), Color.White)
+                    )
+                )
                 .navigationBarsPadding() // يضيف padding سفلي تلقائي حسب النظام
         ) {
             Column(
@@ -98,19 +106,15 @@ fun DashboardScreen(
                     .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // المستطيل الأزرق العلوي
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(blueHeight)
-                        .background(colors.primary)
-                )
-                // الشعار متداخل مع البطاقة
+                Spacer(modifier = Modifier.height(blueHeight * 0.5f))
+                // الشعار دائري مع ظل
                 Box(
                     modifier = Modifier
                         .size(logoSize)
-                        .offset(y = -logoSize / 3) // تراكب أقل
-                        .background(colors.surface, shape = CircleShape),
+                        .offset(y = -logoSize / 2.5f)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.85f))
+                        .shadow(12.dp, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
@@ -119,7 +123,7 @@ fun DashboardScreen(
                         modifier = Modifier.size(logoSize * 0.8f)
                     )
                 }
-                // لا يوجد Spacer بين الشعار والرسالة الترحيبية
+                Spacer(modifier = Modifier.height(8.dp))
                 // عبارة ترحيب
                 Text(
                     text = "مرحباً، $userName!",
@@ -135,7 +139,8 @@ fun DashboardScreen(
                     modifier = Modifier
                         .fillMaxWidth(0.92f)
                         .wrapContentHeight(),
-                    colors = CardDefaults.cardColors(containerColor = colors.surface)
+                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.85f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -160,54 +165,46 @@ fun DashboardScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(marginLarge))
-                // بطاقات الإحصائيات الأربع
+                // بطاقات الإحصائيات الزجاجية
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(0.92f),
                     horizontalArrangement = Arrangement.spacedBy(marginSmall)
                 ) {
-                    StatCardOld(
+                    GlassStatCard(
                         icon = R.drawable.ic_accounts,
                         value = "${accounts?.size ?: 0}",
                         label = "عدد الحسابات",
-                        subLabel = "عدد الحسابات",
-                        color = Color(0xFFE3F2FD),
                         iconTint = Color(0xFF1976D2),
                         valueColor = Color(0xFF1976D2),
                         valueFontSize = fontSmall * 0.85f,
                         labelFontSize = fontSmall * 0.85f,
                         modifier = Modifier.weight(1f).height(statCardHeight)
                     )
-                    StatCardOld(
+                    GlassStatCard(
                         icon = R.drawable.ic_arrow_upward,
                         value = "${totalCreditors?.toInt() ?: 0}",
                         label = "إجمالي لكم",
-                        subLabel = "إجمالي لكم",
-                        color = Color(0xFFE8F5E9),
                         iconTint = Color(0xFF4CAF50),
                         valueColor = Color(0xFF4CAF50),
                         valueFontSize = fontSmall * 0.85f,
                         labelFontSize = fontSmall * 0.85f,
                         modifier = Modifier.weight(1f).height(statCardHeight)
                     )
-                    StatCardOld(
+                    GlassStatCard(
                         icon = R.drawable.ic_arrow_downward,
                         value = "${totalDebtors?.toInt() ?: 0}",
                         label = "إجمالي عليكم",
-                        subLabel = "إجمالي عليكم",
-                        color = Color(0xFFFFF3E0),
                         iconTint = Color(0xFFFF9800),
                         valueColor = Color(0xFFFF9800),
                         valueFontSize = fontSmall * 0.85f,
                         labelFontSize = fontSmall * 0.85f,
                         modifier = Modifier.weight(1f).height(statCardHeight)
                     )
-                    StatCardOld(
+                    GlassStatCard(
                         icon = R.drawable.ic_money,
                         value = "${netBalance?.toInt() ?: 0} يمني",
                         label = "الرصيد",
-                        subLabel = "الرصيد",
-                        color = Color(0xFFB2F2E5),
                         iconTint = Color(0xFF009688),
                         valueColor = Color(0xFF009688),
                         valueFontSize = fontSmall * 0.85f,
@@ -428,6 +425,59 @@ fun GridCardOld(
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                 color = Color(0xFF1976D2),
                 fontSize = (iconSize * 0.9f).value.sp,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun GlassStatCard(
+    icon: Int,
+    value: String,
+    label: String,
+    iconTint: Color,
+    valueColor: Color,
+    valueFontSize: TextUnit,
+    labelFontSize: TextUnit,
+    modifier: Modifier = Modifier
+) {
+    val configuration = LocalConfiguration.current
+    val screenWidth = with(LocalDensity.current) { configuration.screenWidthDp.dp }
+    val iconSize = screenWidth * 0.07f
+    Card(
+        shape = RoundedCornerShape(24.dp),
+        modifier = modifier
+            .graphicsLayer {
+                alpha = 0.85f
+            }
+            .blur(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.35f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = null,
+                tint = iconTint,
+                modifier = Modifier.size(iconSize)
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = valueColor,
+                fontSize = valueFontSize
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = valueColor,
+                fontSize = labelFontSize,
                 modifier = Modifier.padding(top = 2.dp)
             )
         }
