@@ -46,6 +46,8 @@ import com.hillal.acc.ui.theme.gradient2
 import com.hillal.acc.ui.theme.backgroundVariant
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.KeyboardOptions
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -166,6 +168,7 @@ fun LoginScreen(
                                 )
                             },
                             singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone), // يقبل أرقام فقط
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(fieldHeight),

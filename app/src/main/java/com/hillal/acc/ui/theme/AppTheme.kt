@@ -147,7 +147,7 @@ fun calculateAppDimensions(): AppDimensions {
         statLabelFont = (screenWidth.value * 0.035f).sp, // ديناميكي
         // --- إضافات جمالية ---
         logoSize = screenWidth * 0.18f, // شعار كبير نسبيًا
-        fieldHeight = screenHeight * 0.072f, // ارتفاع حقل الإدخال متجاوب
+        fieldHeight = screenHeight * 0.1f, // ارتفاع حقل الإدخال متجاوب
         cardElevation = screenWidth * 0.012f, // ظل البطاقة متجاوب (مثلاً 4-8dp)
         iconSizeSmall = screenWidth * 0.042f, // أيقونة صغيرة (مثلاً 14-18dp)
         fontSmall = (screenWidth.value * 0.032f).sp // خط صغير (مثلاً 11-13sp)
