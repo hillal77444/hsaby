@@ -43,7 +43,7 @@ import com.hillal.acc.ui.theme.gradient1
 import com.hillal.acc.ui.theme.gradient2
 import com.hillal.acc.ui.theme.backgroundVariant
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardOptions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -174,7 +174,7 @@ fun RegisterScreen(
                             label = { Text("رقم الهاتف", fontSize = fontField) },
                             leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, modifier = Modifier.size(iconSize), tint = colors.primary) },
                             singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone), // يقبل أرقام فقط
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), // يقبل أرقام فقط
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(fieldHeight),
