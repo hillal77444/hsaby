@@ -40,6 +40,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
+import androidx.compose.ui.graphics.graphicsLayer
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -85,11 +89,14 @@ fun LoginScreen(
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(colors.primary.copy(alpha = 0.18f), colors.background)
+                        colors = listOf(
+                            try { colors.gradient1 } catch(_: Exception) { colors.primary },
+                            try { colors.gradient2 } catch(_: Exception) { colors.secondary }
+                        )
                     )
                 )
                 .navigationBarsPadding()
-                .imePadding() // أضيفت هنا لضمان عدم تغطية الكيبورد للعناصر
+                .imePadding()
         ) {
             Column(
                 modifier = Modifier
@@ -98,8 +105,11 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(marginMedium))
-                // الشعار مع أنيميشن دخول خفيف
-                androidx.compose.animation.AnimatedVisibility(visible = true, enter = androidx.compose.animation.fadeIn()) {
+                // الشعار مع أنيميشن دخول خفيف (ScaleIn + FadeIn)
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = true,
+                    enter = scaleIn(initialScale = 0.7f, animationSpec = tween(600)) + fadeIn(animationSpec = tween(600))
+                ) {
                     Box(
                         modifier = Modifier
                             .size(logoSize)
@@ -157,7 +167,7 @@ fun LoginScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(fieldHeight),
-                            shape = RoundedCornerShape(dimens.fieldCorner),
+                            shape = RoundedCornerShape(dimens.cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.background,
                                 focusedBorderColor = colors.primary,
@@ -189,7 +199,7 @@ fun LoginScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(fieldHeight),
-                            shape = RoundedCornerShape(dimens.fieldCorner),
+                            shape = RoundedCornerShape(dimens.cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.background,
                                 focusedBorderColor = colors.primary,
@@ -215,7 +225,7 @@ fun LoginScreen(
                         if (errorMessage != null) {
                             Card(
                                 colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
-                                shape = RoundedCornerShape(dimens.fieldCorner),
+                                shape = RoundedCornerShape(dimens.cardCorner),
                                 modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(dimens.spacingSmall)) {
@@ -230,17 +240,29 @@ fun LoginScreen(
                                 }
                             }
                         }
+                        // زر دخول مع تأثير ضغط (scale) عند الضغط
+                        var loginPressed by remember { mutableStateOf(false) }
                         Button(
-                            onClick = { onLoginClick(phone, password) },
+                            onClick = {
+                                loginPressed = true
+                                onLoginClick(phone, password)
+                                loginPressed = false
+                            },
                             enabled = !isLoading,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(buttonHeight),
+                                .height(buttonHeight)
+                                .graphicsLayer {
+                                    scaleX = if (loginPressed && !isLoading) 0.97f else 1f
+                                    scaleY = if (loginPressed && !isLoading) 0.97f else 1f
+                                },
                             colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
-                            shape = RoundedCornerShape(dimens.buttonCorner)
+                            shape = RoundedCornerShape(cardCorner)
                         ) {
                             if (isLoading) {
                                 CircularProgressIndicator(color = colors.onPrimary, modifier = Modifier.size(fontButton.value.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text("جاري تسجيل الدخول...", color = colors.onPrimary, fontSize = fontButton, style = typography.bodyLarge)
                             } else {
                                 Text("دخول", color = colors.onPrimary, fontSize = fontButton, style = typography.bodyLarge)
                             }

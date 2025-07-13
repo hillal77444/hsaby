@@ -34,9 +34,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.material.ColorScheme
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
+import androidx.compose.ui.graphics.graphicsLayer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,14 +78,16 @@ fun RegisterScreen(
         val marginMedium = dimens.spacingMedium
         val marginLarge = dimens.spacingLarge
         val cardElevation = dimens.cardElevation
-        val fieldCorner = dimens.cardCorner
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(colors.gradient1, colors.gradient2)
+                        colors = listOf(
+                            try { colors.gradient1 } catch(_: Exception) { colors.primary },
+                            try { colors.gradient2 } catch(_: Exception) { colors.secondary }
+                        )
                     )
                 )
                 .navigationBarsPadding()
@@ -96,8 +100,11 @@ fun RegisterScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(marginMedium))
-                // الشعار مع أنيميشن دخول خفيف
-                androidx.compose.animation.AnimatedVisibility(visible = true, enter = androidx.compose.animation.fadeIn()) {
+                // الشعار مع أنيميشن دخول خفيف (ScaleIn + FadeIn)
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = true,
+                    enter = scaleIn(initialScale = 0.7f, animationSpec = tween(600)) + fadeIn(animationSpec = tween(600))
+                ) {
                     Box(
                         modifier = Modifier
                             .size(logoSize)
@@ -148,7 +155,7 @@ fun RegisterScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(fieldHeight),
-                            shape = RoundedCornerShape(fieldCorner),
+                            shape = RoundedCornerShape(cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.backgroundVariant,
                                 focusedBorderColor = colors.primary,
@@ -165,7 +172,7 @@ fun RegisterScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(fieldHeight),
-                            shape = RoundedCornerShape(fieldCorner),
+                            shape = RoundedCornerShape(cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.backgroundVariant,
                                 focusedBorderColor = colors.primary,
@@ -190,7 +197,7 @@ fun RegisterScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(fieldHeight),
-                            shape = RoundedCornerShape(fieldCorner),
+                            shape = RoundedCornerShape(cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.backgroundVariant,
                                 focusedBorderColor = colors.primary,
@@ -215,7 +222,7 @@ fun RegisterScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(fieldHeight),
-                            shape = RoundedCornerShape(fieldCorner),
+                            shape = RoundedCornerShape(cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.backgroundVariant,
                                 focusedBorderColor = colors.primary,
@@ -228,7 +235,7 @@ fun RegisterScreen(
                 if (localError != null || errorMessage != null) {
                     Card(
                         colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
-                        shape = RoundedCornerShape(fieldCorner),
+                        shape = RoundedCornerShape(cardCorner),
                         modifier = Modifier.fillMaxWidth(0.97f).padding(vertical = 2.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(marginSmall)) {
@@ -243,9 +250,11 @@ fun RegisterScreen(
                         }
                     }
                 }
-                // زر إنشاء حساب جديد
+                // زر تسجيل مع تأثير ضغط (scale) عند الضغط
+                var registerPressed by remember { mutableStateOf(false) }
                 Button(
                     onClick = {
+                        registerPressed = true
                         localError = when {
                             displayName.isEmpty() -> "الرجاء إدخال الاسم المستخدم في الإشعارات"
                             phone.isEmpty() -> "الرجاء إدخال رقم الهاتف"
@@ -257,12 +266,17 @@ fun RegisterScreen(
                         if (localError == null) {
                             onRegister(displayName, phone, password, confirmPassword)
                         }
+                        registerPressed = false
                     },
                     enabled = !isLoading,
                     modifier = Modifier
                         .fillMaxWidth(0.97f)
                         .padding(top = marginMedium)
-                        .height(buttonHeight),
+                        .height(buttonHeight)
+                        .graphicsLayer {
+                            scaleX = if (registerPressed) 0.97f else 1f
+                            scaleY = if (registerPressed) 0.97f else 1f
+                        },
                     shape = RoundedCornerShape(cardCorner),
                     colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
                 ) {
