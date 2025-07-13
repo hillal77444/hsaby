@@ -15,11 +15,14 @@ import androidx.navigation.fragment.NavHostFragment
 import com.hillal.acc.R
 import com.hillal.acc.viewmodel.AuthViewModel
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 
 class RegisterFragment : Fragment() {
     private var authViewModel: AuthViewModel? = null
     private var isLoading = false
-    private var errorMessage: String? = null
+    private var errorMessage by mutableStateOf<String?>(null)
 
     override fun onCreateView(
         inflater: LayoutInflater,

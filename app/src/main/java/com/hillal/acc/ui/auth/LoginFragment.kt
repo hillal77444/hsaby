@@ -57,12 +57,15 @@ import com.hillal.acc.ui.auth.LoginScreen
 import com.hillal.acc.data.room.AccountDao
 import com.hillal.acc.data.room.TransactionDao
 import com.hillal.acc.data.room.PendingOperationDao
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 
 class LoginFragment : Fragment() {
     private lateinit var authViewModel: AuthViewModel
     private var loadingDialog: ProgressDialog? = null
     private var isLoading: Boolean = false
-    private var errorMessage: String? = null
+    private var errorMessage by mutableStateOf<String?>(null)
 
     // دالة مساعدة لنسخ النص إلى الحافظة
     private fun copyToClipboard(text: String?) {
