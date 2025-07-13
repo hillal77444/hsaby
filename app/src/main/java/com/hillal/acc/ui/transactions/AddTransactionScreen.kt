@@ -578,7 +578,7 @@ fun AddTransactionScreen(
                                         Text(
                                             text = arabicWords,
                                             style = typography.bodySmall.copy(
-                                                fontSize = 11.sp,
+                                                fontSize = 13.sp,
                                                 fontWeight = FontWeight.Normal
                                             ),
                                             color = colors.primary.copy(alpha = 0.7f),
