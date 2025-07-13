@@ -79,7 +79,7 @@ import com.hillal.acc.ui.theme.AppDimensions
 // دوال مساعدة لتحويل الأرقام إلى كلمات
 private fun wholeNumberToWords(number: Long): String {
     if (number == 0L) return "صفر"
-    if (number < 0L) return "سالب ${wholeNumberToWords(-number)}"
+    if (number < 0L) return "سالب "+wholeNumberToWords(-number)
 
     val hundredsMap = mapOf(
         1L to "مائة",
@@ -124,7 +124,7 @@ private fun wholeNumberToWords(number: Long): String {
             val hundredWord = hundredsMap[hundred] ?: (ones[hundred.toInt()] + "مائة")
             return when {
                 remainder == 0L -> hundredWord
-                else -> wholeNumberToWords(remainder) + " و" + hundredWord
+                else -> hundredWord + " و" + wholeNumberToWords(remainder)
             }
         }
         number < 1000000L -> {
