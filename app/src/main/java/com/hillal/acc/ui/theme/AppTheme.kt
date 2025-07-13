@@ -16,7 +16,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.TextUnit
-import android.graphics.Typeface
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.platform.Typeface as ComposeTypeface
@@ -70,30 +69,17 @@ private val ColorScheme.isLight: Boolean
 
 // الخطوط
 val CairoFontFamily = FontFamily(
-    Font(R.font.cairo_regular, FontWeight.Normal),
-    Font(R.font.cairo_bold, FontWeight.Bold)
+    Font(R.font.cairo_regular_res, FontWeight.Normal),
+    Font(R.font.cairo_bold_res, FontWeight.Bold)
 )
 
-@Composable
-fun cairoFontFamily(): FontFamily {
-    val context = LocalContext.current
-    val typeface = remember {
-        Typeface.createFromAsset(context.assets, "fonts/Cairo/static/Cairo-Regular.ttf")
-    }
-    return FontFamily(ComposeTypeface(typeface))
-}
-
-@Composable
-fun AppTypography(): Typography {
-    val cairoFont = cairoFontFamily()
-    return Typography(
-        displayLarge = TextStyle(fontFamily = cairoFont, fontWeight = FontWeight.Bold, fontSize = 32.sp),
-        headlineMedium = TextStyle(fontFamily = cairoFont, fontWeight = FontWeight.Bold, fontSize = 22.sp),
-        bodyLarge = TextStyle(fontFamily = cairoFont, fontWeight = FontWeight.Normal, fontSize = 16.sp),
-        bodyMedium = TextStyle(fontFamily = cairoFont, fontWeight = FontWeight.Normal, fontSize = 14.sp),
-        labelLarge = TextStyle(fontFamily = cairoFont, fontWeight = FontWeight.Medium, fontSize = 14.sp)
-    )
-}
+val AppTypography = Typography(
+    displayLarge = TextStyle(fontFamily = CairoFontFamily, fontWeight = FontWeight.Bold, fontSize = 32.sp),
+    headlineMedium = TextStyle(fontFamily = CairoFontFamily, fontWeight = FontWeight.Bold, fontSize = 22.sp),
+    bodyLarge = TextStyle(fontFamily = CairoFontFamily, fontWeight = FontWeight.Normal, fontSize = 16.sp),
+    bodyMedium = TextStyle(fontFamily = CairoFontFamily, fontWeight = FontWeight.Normal, fontSize = 14.sp),
+    labelLarge = TextStyle(fontFamily = CairoFontFamily, fontWeight = FontWeight.Medium, fontSize = 14.sp)
+)
 
 // الأشكال
 val AppShapes = Shapes(
@@ -189,7 +175,7 @@ fun AppTheme(
     CompositionLocalProvider(LocalAppDimensions provides dimensions) {
         MaterialTheme(
             colorScheme = colors,
-            typography = AppTypography(),
+            typography = AppTypography,
             shapes = AppShapes,
             content = content
         )
