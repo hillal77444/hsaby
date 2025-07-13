@@ -43,6 +43,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.ui.graphics.graphicsLayer
+import com.hillal.acc.ui.theme.gradient1
+import com.hillal.acc.ui.theme.gradient2
+import com.hillal.acc.ui.theme.backgroundVariant
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
