@@ -44,6 +44,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import com.hillal.acc.ui.theme.gradient1
 import com.hillal.acc.ui.theme.gradient2
 import com.hillal.acc.ui.theme.backgroundVariant
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Info
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
