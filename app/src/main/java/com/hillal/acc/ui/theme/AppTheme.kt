@@ -16,9 +16,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.platform.Typeface as ComposeTypeface
 
 // ألوان المشروع
 private val LightColors = lightColorScheme(
