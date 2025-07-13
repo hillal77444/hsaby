@@ -23,7 +23,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hillal.acc.data.entities.Cashbox
-import androidx.compose.foundation.layout.imePadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,7 +44,6 @@ fun CashboxPickerField(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = dimens.fieldHorizontalPadding)
-            .imePadding()
             .clickable { showDialog = true },
         enabled = false,
         readOnly = true,
@@ -126,7 +124,7 @@ fun CashboxPickerField(
                             onValueChange = { search = it },
                             label = { Text("بحث", color = MaterialTheme.colorScheme.secondary) },
                             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                            modifier = Modifier.fillMaxWidth().imePadding(),
+                            modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 focusedBorderColor = MaterialTheme.colorScheme.primary,
