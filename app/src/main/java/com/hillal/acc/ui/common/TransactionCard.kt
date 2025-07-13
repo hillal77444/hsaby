@@ -38,8 +38,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.text.Shadow
-import androidx.compose.ui.text.TextStyle
+import com.hillal.acc.ui.theme.DefaultTextShadow
 
 @Composable
 fun TransactionCard(
@@ -137,11 +136,7 @@ fun TransactionCard(
                         color = amountColor,
                         style = TextStyle(
                             fontWeight = FontWeight.Bold,
-                            shadow = Shadow(
-                                color = Color.Black.copy(alpha = 0.18f),
-                                offset = Offset(1f, 1f),
-                                blurRadius = 2f
-                            )
+                            shadow = DefaultTextShadow // استخدام ظل الثيم الموحد
                         ),
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )

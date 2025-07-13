@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.TextUnit
 import com.hillal.acc.R
+import androidx.compose.ui.text.Shadow
+import androidx.compose.ui.geometry.Offset
 
 // ألوان المشروع
 private val LightColors = lightColorScheme(
@@ -122,6 +124,13 @@ val ColorScheme.gradient1: Color get() = Gradient1
 val ColorScheme.gradient2: Color get() = Gradient2
 val ColorScheme.accent: Color get() = Accent
 val ColorScheme.backgroundVariant: Color get() = BackgroundVariant
+
+// ظل افتراضي للنصوص يمكن استخدامه في أي مكان في التطبيق
+val DefaultTextShadow = Shadow(
+    color = Color.Black.copy(alpha = 0.18f),
+    offset = Offset(1f, 1f),
+    blurRadius = 2f
+)
 
 @Composable
 fun calculateAppDimensions(): AppDimensions {
