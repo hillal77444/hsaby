@@ -96,7 +96,7 @@ fun TransactionCard(
                     .fillMaxSize()
                     .padding(horizontal = 14.dp, vertical = 10.dp) // padding أكبر
             ) {
-                // الصف الأول: أيقونة + اسم الحساب + المبلغ + الأزرار
+                // الصف الأول: أيقونة + اسم الحساب + المبلغ
                 Row(
                     Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -134,14 +134,6 @@ fun TransactionCard(
                         color = if (isDebit) Color(0xFFFF5252) else Color(0xFF43EA7D),
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
-                    // أزرار العمليات
-                    ActionCircleButton(icon = Icons.Default.Delete, borderColor = Color.Red, onClick = onDelete, size = 34.dp, iconSize = 20.dp)
-                    Spacer(Modifier.width(6.dp))
-                    ActionCircleButton(icon = Icons.Default.Edit, borderColor = Color(0xFF1976D2), onClick = onEdit, size = 34.dp, iconSize = 20.dp)
-                    Spacer(Modifier.width(6.dp))
-                    ActionCircleButton(painter = painterResource(id = com.hillal.acc.R.drawable.ic_sms), borderColor = Color(0xFF1976D2), onClick = onSms, size = 34.dp, iconSize = 20.dp)
-                    Spacer(Modifier.width(6.dp))
-                    ActionCircleButton(painter = painterResource(id = com.hillal.acc.R.drawable.ic_whatsapp), borderColor = Color(0xFF25D366), onClick = onWhatsApp, size = 34.dp, iconSize = 20.dp)
                 }
                 Spacer(Modifier.height(4.dp))
                 // الصف الثاني: الوصف (سطرين) + التاريخ
@@ -164,6 +156,20 @@ fun TransactionCard(
                             color = Color(0xFF888888)
                         )
                     }
+                }
+                Spacer(Modifier.height(6.dp))
+                // الصف الثالث: الأزرار في الأسفل موزعة أفقيًا
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 2.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ActionCircleButton(painter = painterResource(id = com.hillal.acc.R.drawable.ic_whatsapp), borderColor = Color(0xFF25D366), onClick = onWhatsApp, size = 34.dp, iconSize = 20.dp)
+                    ActionCircleButton(painter = painterResource(id = com.hillal.acc.R.drawable.ic_sms), borderColor = Color(0xFF1976D2), onClick = onSms, size = 34.dp, iconSize = 20.dp)
+                    ActionCircleButton(icon = Icons.Default.Delete, borderColor = Color.Red, onClick = onDelete, size = 34.dp, iconSize = 20.dp)
+                    ActionCircleButton(icon = Icons.Default.Edit, borderColor = Color(0xFF1976D2), onClick = onEdit, size = 34.dp, iconSize = 20.dp)
                 }
             }
         }
