@@ -21,7 +21,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.imePadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +42,6 @@ fun AccountPickerField(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = dimens.fieldHorizontalPadding)
-            .imePadding()
             .clickable { showDialog = true },
         enabled = false,
         readOnly = true,
@@ -84,7 +82,7 @@ fun AccountPickerField(
                         value = search,
                         onValueChange = { search = it },
                         label = { Text("بحث", color = MaterialTheme.colorScheme.secondary) },
-                        modifier = Modifier.fillMaxWidth().imePadding(),
+                        modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         colors = TextFieldDefaults.outlinedTextFieldColors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
