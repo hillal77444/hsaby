@@ -38,7 +38,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.draw.blur
-import com.hillal.acc.ui.theme.DefaultTextShadow
 
 @Composable
 fun TransactionCard(
@@ -129,17 +128,20 @@ fun TransactionCard(
                         modifier = Modifier.weight(1f)
                     )
                     val amountColor = if (isDebit) Color(0xFFD32F2F) else Color(0xFF388E3C)
-                    Text(
-                        text = "${transaction.getAmount()} ${transaction.getCurrency()}",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = amountColor,
-                        style = TextStyle(
+                    // المبلغ مع ظل أنيق وخلفية شفافة خفيفة
+                    Box(
+                        modifier = Modifier
+                            .shadow(4.dp, shape = RoundedCornerShape(8.dp))
+                            .background(Color.White.copy(alpha = 0.65f), shape = RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "${transaction.getAmount()} ${transaction.getCurrency()}",
                             fontWeight = FontWeight.Bold,
-                            shadow = DefaultTextShadow // استخدام ظل الثيم الموحد
-                        ),
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
+                            fontSize = 18.sp,
+                            color = amountColor,
+                        )
+                    }
                 }
                 Spacer(Modifier.height(4.dp))
                 // الصف الثاني: الوصف (سطرين) + التاريخ
