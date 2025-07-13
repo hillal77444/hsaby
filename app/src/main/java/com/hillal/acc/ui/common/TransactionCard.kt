@@ -37,7 +37,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.foundation.BlurEffect
+import androidx.compose.ui.draw.blur
 
 @Composable
 fun TransactionCard(
