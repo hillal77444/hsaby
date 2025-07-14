@@ -26,6 +26,11 @@ import java.util.Locale
 import com.hillal.acc.ui.theme.LocalAppDimensions
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import com.hillal.acc.util.PreferencesManager
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun ReportsScreen(
@@ -45,6 +50,11 @@ fun ReportsScreen(
     val sum = transactions.sumOf { it.getAmount() }
     val avg = if (count > 0) sum / count else 0.0
     val scrollState = rememberScrollState()
+
+    // إضافة استدعاء sessionExpiry من PreferencesManager
+    val context = LocalContext.current
+    val preferencesManager = remember { PreferencesManager(context) }
+    val sessionExpiry by preferencesManager.sessionExpiry.collectAsState(initial = null)
 
     Column(
         modifier = Modifier
@@ -277,22 +287,30 @@ fun ReportsScreen(
                 containerColor = colors.primary.copy(alpha = 0.04f)
             )
         ) {
-            Row(
-                modifier = Modifier.padding(dimens.spacingMedium / 1.5f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_info),
-                    contentDescription = null,
-                    tint = colors.primary,
-                    modifier = Modifier.size(dimens.iconSize)
-                )
-                Spacer(Modifier.width(dimens.spacingSmall))
-                Text(
-                    text = "يمكنك الوصول إلى جميع التقارير المالية من خلال الأزرار أعلاه",
-                    fontSize = dimens.bodyFont * 0.9f,
-                    color = colors.onSurface.copy(alpha = 0.7f)
-                )
+            Column(Modifier.padding(dimens.spacingMedium / 1.5f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_info),
+                        contentDescription = null,
+                        tint = colors.primary,
+                        modifier = Modifier.size(dimens.iconSize)
+                    )
+                    Spacer(Modifier.width(dimens.spacingSmall))
+                    Text(
+                        text = "يمكنك الوصول إلى جميع التقارير المالية من خلال الأزرار أعلاه",
+                        fontSize = dimens.bodyFont * 0.9f,
+                        color = colors.onSurface.copy(alpha = 0.7f)
+                    )
+                }
+                if (!sessionExpiry.isNullOrBlank()) {
+                    Spacer(Modifier.height(dimens.spacingSmall))
+                    Text(
+                        text = "تاريخ انتهاء الجلسة: ${sessionExpiry}",
+                        fontSize = dimens.bodyFont * 0.95f,
+                        color = colors.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }

@@ -24,6 +24,8 @@ class PreferencesManager @Inject constructor(
         private val USER_ID = stringPreferencesKey("user_id")
         private val USER_NAME = stringPreferencesKey("user_name")
         private val USER_EMAIL = stringPreferencesKey("user_email")
+        private val SESSION_NAME = stringPreferencesKey("session_name")
+        private val SESSION_EXPIRY = stringPreferencesKey("session_expiry")
     }
 
     val accessToken: Flow<String?>
@@ -76,4 +78,17 @@ class PreferencesManager @Inject constructor(
             preferences.remove(USER_EMAIL)
         }
     }
+
+    suspend fun saveSessionInfo(sessionName: String, sessionExpiry: String?) {
+        context.dataStore.edit { preferences ->
+            preferences[SESSION_NAME] = sessionName
+            preferences[SESSION_EXPIRY] = sessionExpiry ?: ""
+        }
+    }
+
+    val sessionName: Flow<String?>
+        get() = context.dataStore.data.map { it[SESSION_NAME] }
+
+    val sessionExpiry: Flow<String?>
+        get() = context.dataStore.data.map { it[SESSION_EXPIRY] }
 } 

@@ -83,4 +83,21 @@ class UserRepository @Inject constructor(
     fun clearUserData() {
         preferencesManager.clearAuthData()
     }
+
+    suspend fun updateUserDetailsOnServer(updateRequest: Map<String, Any>): Result<Unit> {
+        return try {
+            val response = apiService.updateUserDetails(updateRequest)
+            if (response.isSuccessful) {
+                val body = response.body() ?: return Result.failure(Exception("Empty response body"))
+                val sessionName = body["session_name"] as? String ?: ""
+                val sessionExpiry = body["session_expiry"] as? String
+                preferencesManager.saveSessionInfo(sessionName, sessionExpiry)
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Update failed: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 } 
