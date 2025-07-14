@@ -29,8 +29,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
-import com.hsaby.accounting.util.PreferencesManager
-import androidx.compose.runtime.LaunchedEffect
+import android.content.Context
 import androidx.compose.runtime.remember
 
 @Composable
@@ -54,8 +53,10 @@ fun ReportsScreen(
 
     // إضافة استدعاء sessionExpiry من PreferencesManager
     val context = LocalContext.current
-    val preferencesManager = remember { PreferencesManager(context) }
-    val sessionExpiry by preferencesManager.sessionExpiry.collectAsState(initial = null)
+    val sessionExpiry = remember {
+        context.getSharedPreferences("accounting_prefs", Context.MODE_PRIVATE)
+            .getString("session_expiry", null)
+    }
 
     Column(
         modifier = Modifier
@@ -306,7 +307,7 @@ fun ReportsScreen(
                 if (!sessionExpiry.isNullOrBlank()) {
                     Spacer(Modifier.height(dimens.spacingSmall))
                     Text(
-                        text = "تاريخ انتهاء الجلسة: ${sessionExpiry}",
+                        text = "تاريخ انتهاء الجلسة: $sessionExpiry",
                         fontSize = dimens.bodyFont * 0.95f,
                         color = colors.error,
                         fontWeight = FontWeight.Bold
