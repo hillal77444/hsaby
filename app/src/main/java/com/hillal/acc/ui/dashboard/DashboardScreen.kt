@@ -293,7 +293,7 @@ fun DashboardScreen(
                             modifier = Modifier.weight(1f).height(gridCardHeight)
                         )
                         GridCardOld(
-                            icon = R.drawable.ic_apps, // استخدم أيقونة مناسبة مثل ic_apps أو ic_grid
+                            icon = R.drawable.ic_grid, // استبدل R.drawable.ic_apps بـ R.drawable.ic_grid أو أيقونة متوفرة
                             title = "جميع الخدمات",
                             onClick = { onTransfer() }, // استبدل onTransfer بمنطق التنقل إلى AllServices
                             modifier = Modifier.weight(1f).height(gridCardHeight)
