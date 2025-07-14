@@ -1230,7 +1230,11 @@ def update_user_details():
 
         db.session.commit()
         logger.info(f"User {current_user_id} details updated: last_seen={user.last_seen}, android_version={user.android_version}, device_name={user.device_name}")
-        return json_response({'message': 'تم تحديث بيانات المستخدم بنجاح'}, 200)
+        return json_response({
+            'message': 'تم تحديث بيانات المستخدم بنجاح',
+            'session_name': user.session_name,
+            'session_expiry': user.session_expiry.isoformat() if user.session_expiry else None
+        }, 200)
 
     except Exception as e:
         print(f"Raw exception in update_user_details: {e}")

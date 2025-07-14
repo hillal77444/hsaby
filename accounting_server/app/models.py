@@ -1,9 +1,14 @@
 from app import db
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import event
 
 def get_yemen_time():
     return datetime.utcnow() + timedelta(hours=3)
+
+def default_session_expiry():
+    # توقيت اليمن UTC+3
+    yemen_tz = timezone(timedelta(hours=3))
+    return datetime.now(yemen_tz) + timedelta(days=60)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -14,7 +19,7 @@ class User(db.Model):
     android_version = db.Column(db.String(50), default='0')
     device_name = db.Column(db.String(100), default='Unknown Device')
     session_name = db.Column(db.String(100), default='admin_main')  # اسم جلسة الواتساب
-    session_expiry = db.Column(db.DateTime, nullable=True)  # تاريخ انتهاء الجلسة
+    session_expiry = db.Column(db.DateTime, nullable=True, default=default_session_expiry)  # تاريخ انتهاء الجلسة
     accounts = db.relationship('Account', backref='user', lazy=True)
     transactions = db.relationship('Transaction', backref='user', lazy=True)
 

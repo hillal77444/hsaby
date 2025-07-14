@@ -548,10 +548,14 @@ def start_whatsapp_session():
 
 
 @admin.route('/api/admin/whatsapp/qr/<session_id>')
-@admin_required
 def get_whatsapp_qr(session_id):
-    qr_url = f"/qr/{session_id}"
-    return render_template('admin/whatsapp_qr.html', qr_url=qr_url)
+    from .models import User
+    user = User.query.filter_by(session_name=session_id).first()
+    if user:
+        qr_url = f"/qr/{session_id}"
+        return render_template('admin/whatsapp_qr.html', qr_url=qr_url)
+    else:
+        return '<h2 style="color:red;text-align:center;margin-top:40px">الجلسة غير موجودة في قاعدة البيانات</h2>', 404
 
 
 @admin.route('/api/admin/whatsapp/send', methods=['POST'])
