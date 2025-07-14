@@ -141,7 +141,7 @@ fun ServiceCard(service: ServiceItem, modifier: Modifier = Modifier) {
             Spacer(Modifier.height(dimens.spacingSmall))
             Text(
                 text = service.label,
-                style = typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = colors.onSurface, fontSize = dimens.bodyFont),
+                style = typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = colors.onSurface, fontSize = dimens.bodyFont / 2),
                 maxLines = 2
             )
         }
