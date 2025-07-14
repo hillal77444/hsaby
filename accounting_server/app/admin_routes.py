@@ -546,11 +546,13 @@ def start_whatsapp_session():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+
 @admin.route('/api/admin/whatsapp/qr/<session_id>')
 @admin_required
 def get_whatsapp_qr(session_id):
-    # إعادة التوجيه مباشرة إلى صفحة Node.js لعرض رمز QR
-    return redirect(f"http://212.224.88.122:3002/qr/{session_id}")
+    qr_url = f"/qr/{session_id}"
+    return render_template('admin/whatsapp_qr.html', qr_url=qr_url)
+
 
 @admin.route('/api/admin/whatsapp/send', methods=['POST'])
 @admin_required

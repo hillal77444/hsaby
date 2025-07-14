@@ -15,6 +15,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// السماح بعرض الصفحات داخل iframe
+app.use((req, res, next) => {
+    res.removeHeader && res.removeHeader('X-Frame-Options');
+    res.setHeader('X-Frame-Options', 'ALLOWALL');
+    next();
+});
+
 // تخزين الجلسات النشطة
 const activeSessions = new Map();
 const lastQRCodes = {};
