@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.ListAlt
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,6 +28,7 @@ import com.hillal.acc.ui.theme.LocalAppDimensions
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.platform.LocalContext
+import com.hsaby.accounting.util.PreferencesManager
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import android.content.Context
@@ -53,10 +55,8 @@ fun ReportsScreen(
 
     // إضافة استدعاء sessionExpiry من PreferencesManager
     val context = LocalContext.current
-    val sessionExpiry = remember {
-        context.getSharedPreferences("accounting_prefs", Context.MODE_PRIVATE)
-            .getString("session_expiry", null)
-    }
+    val preferencesManager = remember { PreferencesManager(context) }
+    val sessionExpiry by preferencesManager.sessionExpiry.collectAsState(initial = null)
 
     Column(
         modifier = Modifier
@@ -65,6 +65,29 @@ fun ReportsScreen(
             .verticalScroll(scrollState)
             .padding(bottom = 56.dp)
     ) {
+        // نص تاريخ انتهاء الجلسة في الأعلى مع أيقونة ساعة
+        if (!sessionExpiry.isNullOrBlank()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp, bottom = 8.dp, start = 16.dp, end = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.AccessTime,
+                    contentDescription = "تاريخ انتهاء الجلسة",
+                    tint = colors.error,
+                    modifier = Modifier.size(22.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "تاريخ انتهاء الجلسة: $sessionExpiry",
+                    fontSize = 16.sp,
+                    color = colors.error,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
         // البطاقة العلوية الجذابة
         Box(
             modifier = Modifier
@@ -302,15 +325,6 @@ fun ReportsScreen(
                         text = "يمكنك الوصول إلى جميع التقارير المالية من خلال الأزرار أعلاه",
                         fontSize = dimens.bodyFont * 0.9f,
                         color = colors.onSurface.copy(alpha = 0.7f)
-                    )
-                }
-                if (!sessionExpiry.isNullOrBlank()) {
-                    Spacer(Modifier.height(dimens.spacingSmall))
-                    Text(
-                        text = "تاريخ انتهاء الجلسة: $sessionExpiry",
-                        fontSize = dimens.bodyFont * 0.95f,
-                        color = colors.error,
-                        fontWeight = FontWeight.Bold
                     )
                 }
             }
