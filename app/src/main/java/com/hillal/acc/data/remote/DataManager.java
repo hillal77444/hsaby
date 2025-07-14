@@ -118,14 +118,7 @@ public class DataManager {
                                 String sessionExpiry = body.get("session_expiry");
                                 try {
                                     com.hillal.acc.util.PreferencesManager preferencesManager = new com.hillal.acc.util.PreferencesManager(context);
-                                    CoroutineScope scope = CoroutineScope.Companion.plus(Dispatchers.getIO());
-                                    scope.launch(null, new kotlin.jvm.functions.Function1<kotlin.coroutines.Continuation<? super kotlin.Unit>, java.lang.Object>() {
-                                        @Override
-                                        public java.lang.Object invoke(kotlin.coroutines.Continuation<? super kotlin.Unit> continuation) {
-                                            preferencesManager.saveSessionInfo(sessionName != null ? sessionName : "", sessionExpiry);
-                                            return kotlin.Unit.INSTANCE;
-                                        }
-                                    }, 1, null);
+                                    preferencesManager.saveSessionInfo(sessionName != null ? sessionName : "", sessionExpiry);
                                 } catch (Exception e) {
                                     Log.e(TAG, "Failed to save session info", e);
                                 }

@@ -56,7 +56,7 @@ fun ReportsScreen(
     // إضافة استدعاء sessionExpiry من PreferencesManager
     val context = LocalContext.current
     val preferencesManager = remember { PreferencesManager(context) }
-    val sessionExpiry by preferencesManager.sessionExpiry.collectAsState(initial = null)
+    val sessionExpiry = remember { preferencesManager.getSessionExpiry() }
 
     Column(
         modifier = Modifier
