@@ -33,6 +33,46 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import android.content.Context
 import androidx.compose.runtime.remember
+import java.text.SimpleDateFormat
+import java.util.*
+
+fun formatSessionExpiry(raw: String?): String {
+    if (raw.isNullOrBlank()) return ""
+    return try {
+        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH)
+        val date = parser.parse(raw)
+        val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH)
+        // النص عربي، الأرقام إنجليزي
+        "تاريخ انتهاء الجلسة: ${formatter.format(date!!)}"
+    } catch (e: Exception) {
+        // fallback: أظهر النص كما هو
+        "تاريخ انتهاء الجلسة: $raw"
+    }
+}
+
+fun isSubscriptionExpired(raw: String?): Boolean {
+    if (raw.isNullOrBlank()) return false
+    return try {
+        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH)
+        val expiry = parser.parse(raw)
+        val now = Date()
+        expiry != null && now.after(expiry)
+    } catch (e: Exception) {
+        false
+    }
+}
+
+fun formatSubscriptionExpiry(raw: String?): String {
+    if (raw.isNullOrBlank()) return ""
+    return try {
+        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH)
+        val date = parser.parse(raw)
+        val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH)
+        formatter.format(date!!)
+    } catch (e: Exception) {
+        raw
+    }
+}
 
 @Composable
 fun ReportsScreen(
@@ -57,6 +97,8 @@ fun ReportsScreen(
     val context = LocalContext.current
     val preferencesManager = remember { PreferencesManager(context) }
     val sessionExpiry = remember { preferencesManager.getSessionExpiry() }
+    val isExpired = isSubscriptionExpired(sessionExpiry)
+    val expiryDateStr = formatSubscriptionExpiry(sessionExpiry)
 
     Column(
         modifier = Modifier
@@ -65,27 +107,47 @@ fun ReportsScreen(
             .verticalScroll(scrollState)
             .padding(bottom = 56.dp)
     ) {
-        // نص تاريخ انتهاء الجلسة في الأعلى مع أيقونة ساعة
-        if (!sessionExpiry.isNullOrBlank()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp, bottom = 8.dp, start = 16.dp, end = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+        // بطاقة الاشتراك المميزة
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(10.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = if (isExpired) Color(0xFFFFCDD2) /* أحمر فاتح */ else Color(0xFFB3E5FC) /* أزرق فاتح */
+            )
+        ) {
+            Column(
+                Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = Icons.Filled.AccessTime,
-                    contentDescription = "تاريخ انتهاء الجلسة",
-                    tint = colors.error,
-                    modifier = Modifier.size(22.dp)
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = "تاريخ انتهاء الجلسة: $sessionExpiry",
-                    fontSize = 16.sp,
-                    color = colors.error,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.AccessTime,
+                        contentDescription = "تاريخ انتهاء الاشتراك",
+                        tint = if (isExpired) Color.Red else Color(0xFF1976D2),
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = if (isExpired) "انتهى الاشتراك: $expiryDateStr" else "تاريخ انتهاء الاشتراك: $expiryDateStr",
+                        fontSize = 16.sp,
+                        color = if (isExpired) Color.Red else Color(0xFF1976D2),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                if (isExpired) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "يجب تجديد الاشتراك للاستمتاع بمزايا المزامنة",
+                        fontSize = 13.sp,
+                        color = Color.Red.copy(alpha = 0.8f),
+                        fontWeight = FontWeight.Normal
+                    )
+                }
             }
         }
         // البطاقة العلوية الجذابة
