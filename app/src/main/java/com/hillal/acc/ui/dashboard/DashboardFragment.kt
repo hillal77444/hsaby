@@ -34,6 +34,10 @@ import com.hillal.acc.data.room.AccountDao
 import com.hillal.acc.data.room.TransactionDao
 import com.hillal.acc.data.room.PendingOperationDao
 import com.hillal.acc.ui.AccountStatementComposeActivity
+import com.hillal.acc.util.PreferencesManager
+import java.text.SimpleDateFormat
+import java.util.*
+import android.widget.Toast
 
 class DashboardFragment : Fragment() {
     private lateinit var dashboardViewModel: DashboardViewModel
@@ -106,7 +110,13 @@ class DashboardFragment : Fragment() {
         Log.d(TAG, "DashboardFragment onViewCreated started")
         try {
             migrationManager = MigrationManager(requireContext())
-            migrationManager.migrateLocalData()
+            val preferencesManager = PreferencesManager(requireContext())
+            val sessionExpiry = preferencesManager.getSessionExpiry()
+            if (isSubscriptionExpired(sessionExpiry)) {
+                Toast.makeText(requireContext(), "انتهى الاشتراك، لم يتم ترحيل أي بيانات. يرجى تجديد الاشتراك للاستمتاع بمزايا المزامنة.", Toast.LENGTH_LONG).show()
+            } else {
+                migrationManager.migrateLocalData()
+            }
             sendUserDetailsToServer()
             requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
@@ -229,6 +239,18 @@ class DashboardFragment : Fragment() {
 
     private fun showErrorSnackbar(message: String) {
         Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG).show()
+    }
+
+    private fun isSubscriptionExpired(sessionExpiry: String?): Boolean {
+        if (sessionExpiry.isNullOrBlank()) return false
+        return try {
+            val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH)
+            val expiry = parser.parse(sessionExpiry)
+            val now = Date()
+            expiry != null && now.before(expiry).not()
+        } catch (e: Exception) {
+            false
+        }
     }
 
     companion object {
