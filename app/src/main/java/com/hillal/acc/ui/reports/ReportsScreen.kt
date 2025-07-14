@@ -111,15 +111,15 @@ fun ReportsScreen(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = dimens.spacingSmall, vertical = dimens.spacingSmall),
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(10.dp),
             colors = CardDefaults.cardColors(
-                containerColor = if (isExpired) Color(0xFFFFCDD2) /* أحمر فاتح */ else Color(0xFFB3E5FC) /* أزرق فاتح */
+                containerColor = if (isExpired) Color(0xFFFFCDD2) else Color(0xFFB3E5FC)
             )
         ) {
             Column(
-                Modifier.padding(16.dp),
+                Modifier.padding(dimens.spacingMedium),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
@@ -129,21 +129,21 @@ fun ReportsScreen(
                         imageVector = Icons.Filled.AccessTime,
                         contentDescription = "تاريخ انتهاء الاشتراك",
                         tint = if (isExpired) Color.Red else Color(0xFF1976D2),
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(dimens.iconSize)
                     )
-                    Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(dimens.spacingSmall))
                     Text(
                         text = if (isExpired) "انتهى الاشتراك: $expiryDateStr" else "تاريخ انتهاء الاشتراك: $expiryDateStr",
-                        fontSize = 16.sp,
+                        fontSize = dimens.bodyFont,
                         color = if (isExpired) Color.Red else Color(0xFF1976D2),
                         fontWeight = FontWeight.Bold
                     )
                 }
                 if (isExpired) {
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(dimens.spacingSmall / 2))
                     Text(
                         text = "يجب تجديد الاشتراك للاستمتاع بمزايا المزامنة",
-                        fontSize = 13.sp,
+                        fontSize = dimens.fontSmall,
                         color = Color.Red.copy(alpha = 0.8f),
                         fontWeight = FontWeight.Normal
                     )
