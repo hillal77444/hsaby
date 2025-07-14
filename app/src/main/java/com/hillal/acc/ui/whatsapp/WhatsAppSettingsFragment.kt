@@ -76,6 +76,8 @@ fun WhatsAppSettingsScreen(onNavigate: (String) -> Unit) {
     var customSessionName by remember { mutableStateOf(sessionName) }
     var isSaving by remember { mutableStateOf(false) }
     val dataManager = remember { DataManager(context, AppDatabase.getInstance(context).accountDao(), AppDatabase.getInstance(context).transactionDao(), AppDatabase.getInstance(context).pendingOperationDao()) }
+    val showLinkDialog = remember { mutableStateOf(false) }
+    val showAdminMainWarning = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -118,7 +120,13 @@ fun WhatsAppSettingsScreen(onNavigate: (String) -> Unit) {
         WhatsAppSettingCard(
             title = "ربط واتساب",
             iconRes = R.drawable.ic_sync_alt,
-            onClick = { onNavigate("whatsappLinkFragment") },
+            onClick = {
+                if (sessionName == "admin_main") {
+                    showAdminMainWarning.value = true
+                } else {
+                    showLinkDialog.value = true
+                }
+            },
             colors = colors,
             dimens = dimens,
             typography = typography
@@ -168,6 +176,73 @@ fun WhatsAppSettingsScreen(onNavigate: (String) -> Unit) {
             customSessionName = customSessionName,
             onCustomSessionChange = { customSessionName = it },
             isSaving = isSaving
+        )
+    }
+    if (showLinkDialog.value) {
+        val qrLink = "https://malyp.com/api/whatsapp/qr/$sessionName"
+        AlertDialog(
+            onDismissRequest = { showLinkDialog.value = false },
+            title = { Text("ربط واتساب برقمك الخاص", style = typography.titleLarge, color = colors.primary) },
+            text = {
+                Column {
+                    Text(
+                        "ميزة ربط واتساب تتيح لك إرسال الرسائل من رقمك الخاص مباشرة لعملائك عبر التطبيق.",
+                        style = typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = colors.onSurface)
+                    )
+                    Spacer(Modifier.height(dimens.spacingSmall))
+                    Text(
+                        "\u2022 افتح الرابط أدناه في متصفحك.\n" +
+                        "\u2022 سيظهر لك رمز QR.\n" +
+                        "\u2022 من تطبيق واتساب: الإعدادات > الأجهزة المرتبطة > ربط جهاز > ثم امسح الكود.\n\n" +
+                        "رابط الربط:",
+                        style = typography.bodyMedium.copy(color = colors.onSurface)
+                    )
+                    Spacer(Modifier.height(dimens.spacingSmall))
+                    Text(qrLink, style = typography.bodyMedium.copy(color = colors.primary))
+                }
+            },
+            confirmButton = {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    TextButton(onClick = {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(qrLink))
+                        context.startActivity(intent)
+                        showLinkDialog.value = false
+                    }) {
+                        Text("فتح الرابط")
+                    }
+                    TextButton(onClick = {
+                        val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                        val clip = android.content.ClipData.newPlainText("QR Link", qrLink)
+                        clipboard.setPrimaryClip(clip)
+                        Toast.makeText(context, "تم نسخ الرابط", Toast.LENGTH_SHORT).show()
+                        showLinkDialog.value = false
+                    }) {
+                        Text("نسخ الرابط")
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLinkDialog.value = false }) { Text("إلغاء") }
+            }
+        )
+    }
+    if (showAdminMainWarning.value) {
+        AlertDialog(
+            onDismissRequest = { showAdminMainWarning.value = false },
+            title = { Text("تنبيه", style = typography.titleLarge, color = colors.error) },
+            text = {
+                Column {
+                    Text(
+                        "ميزة  إرسال الإشعارات من رقمك الخاص عبر واتساب\n" +
+                        "يمكنك من خلال هذه الميزة ربط رقم واتساب الخاص بك بالتطبيق، بحيث يتم إرسال الرسائل والإشعارات مباشرة من رقمك إلى عملائك، مما يمنح رسائلك طابعًا شخصيًا واحترافيًا ويزيد من ثقة العملاء في التعامل معك.\n\n" +
+                        "لا يمكنك استخدام الجلسة الافتراضية \ لإرسال الرسائل من رقمك الخاص.\nيرجى إنشاء جلسة خاصة بك أولاً قبل ربط واتساب.\nاذهب إلى 'تغيير جلسة واتساب' وأنشئ جلسة جديدة باسم خاص بك.",
+                        style = typography.bodyMedium.copy(color = colors.onSurface)
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showAdminMainWarning.value = false }) { Text("حسنًا") }
+            }
         )
     }
 }
