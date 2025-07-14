@@ -33,6 +33,10 @@ import java.util.Set;
 import com.hillal.acc.data.entities.Cashbox;
 import com.hillal.acc.data.dao.CashboxDao;
 import com.hillal.acc.data.room.AppDatabase;
+import com.hillal.acc.util.PreferencesManager;
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.Dispatchers;
+import kotlinx.coroutines.launch;
 
 public class DataManager {
     private static final String TAG = "DataManager";
@@ -108,6 +112,23 @@ public class DataManager {
                         public void onResponse(Call<Map<String, String>> call, Response<Map<String, String>> response) {
                             if (response.isSuccessful() && response.body() != null) {
                                 Log.d(TAG, "User details updated successfully on server.");
+                                // حفظ session_name وsession_expiry
+                                Map<String, String> body = response.body();
+                                String sessionName = body.get("session_name");
+                                String sessionExpiry = body.get("session_expiry");
+                                try {
+                                    com.hillal.acc.util.PreferencesManager preferencesManager = new com.hillal.acc.util.PreferencesManager(context);
+                                    CoroutineScope scope = CoroutineScope.Companion.plus(Dispatchers.getIO());
+                                    scope.launch(null, new kotlin.jvm.functions.Function1<kotlin.coroutines.Continuation<? super kotlin.Unit>, java.lang.Object>() {
+                                        @Override
+                                        public java.lang.Object invoke(kotlin.coroutines.Continuation<? super kotlin.Unit> continuation) {
+                                            preferencesManager.saveSessionInfo(sessionName != null ? sessionName : "", sessionExpiry);
+                                            return kotlin.Unit.INSTANCE;
+                                        }
+                                    }, 1, null);
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Failed to save session info", e);
+                                }
                                 handler.post(() -> callback.onSuccess(null));  // تمرير null لأن هذه العملية لا تحتاج إلى ServerAppUpdateInfo
                             } else {
                                 String errorMessage = "خطأ في تحديث بيانات المستخدم: " + response.code();

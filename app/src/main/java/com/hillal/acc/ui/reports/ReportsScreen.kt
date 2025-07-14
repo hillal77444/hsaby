@@ -28,7 +28,7 @@ import com.hillal.acc.ui.theme.LocalAppDimensions
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.platform.LocalContext
-import com.hsaby.accounting.util.PreferencesManager
+import com.hillal.acc.util.PreferencesManager
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import android.content.Context
