@@ -105,7 +105,6 @@ fun ReportsScreen(
             .fillMaxSize()
             .background(colors.background)
             .verticalScroll(scrollState)
-            .padding(bottom = 56.dp)
     ) {
         // بطاقة الاشتراك المميزة
         Card(

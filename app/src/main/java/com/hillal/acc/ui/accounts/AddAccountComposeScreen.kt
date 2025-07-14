@@ -200,8 +200,7 @@ fun AddAccountComposeScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(dimens.spacingMedium)
-                    .imePadding()
-                    .padding(bottom = 56.dp),
+                    .imePadding(),
                 verticalArrangement = Arrangement.spacedBy(dimens.spacingMedium)
             ) {
                 // Header Section

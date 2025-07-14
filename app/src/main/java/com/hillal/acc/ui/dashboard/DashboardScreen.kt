@@ -97,7 +97,6 @@ fun DashboardScreen(
                         colors = listOf(Color(0xFF2196F3), Color.White)
                     )
                 )
-                .padding(bottom = 56.dp)
         ) {
             Column(
                 modifier = Modifier

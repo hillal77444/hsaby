@@ -94,7 +94,6 @@ fun RegisterScreen(
                         )
                     )
                 )
-                .padding(bottom = 56.dp)
         ) {
             Column(
                 modifier = Modifier

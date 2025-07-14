@@ -97,7 +97,6 @@ fun LoginScreen(
                         )
                     )
                 )
-                .padding(bottom = 56.dp)
                 .imePadding()
         ) {
             Column(
