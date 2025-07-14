@@ -261,10 +261,35 @@ fun ChangeSessionDialog(
     val dimens = LocalAppDimensions.current
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
-    val options = listOf("جلسة النظام", "جلسة خاصة")
-    val values = listOf("admin_main", customSessionName)
+    // منطق ترتيب الخيارات حسب الجلسة الحالية
+    val isCustom = customSessionName != "admin_main"
+    val options = if (isCustom) listOf("جلسة خاصة", "جلسة النظام") else listOf("جلسة النظام", "جلسة خاصة")
+    val values = if (isCustom) listOf("custom", "admin_main") else listOf("admin_main", "custom")
     var expanded by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableStateOf(if (selectedSession == "admin_main") 0 else 1) }
+    var selectedIndex by remember { mutableStateOf(if (isCustom) if (selectedSession == "custom") 0 else 1 else if (selectedSession == "admin_main") 0 else 1) }
+    val showConfirmDeleteDialog = remember { mutableStateOf(false) }
+    var pendingSaveToSystem by remember { mutableStateOf(false) }
+
+    if (showConfirmDeleteDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDeleteDialog.value = false },
+            title = { Text("تأكيد حذف الجلسة الخاصة", style = typography.titleLarge, color = colors.error) },
+            text = { Text("سيتم حذف الجلسة الخاصة الحالية ولن تتمكن من إرسال الرسائل من رقمك الخاص حتى تنشئ جلسة جديدة. هل أنت متأكد من المتابعة؟", style = typography.bodyMedium.copy(color = colors.onSurface)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showConfirmDeleteDialog.value = false
+                    pendingSaveToSystem = true
+                }) { Text("تأكيد") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showConfirmDeleteDialog.value = false }) { Text("إلغاء") }
+            }
+        )
+    }
+    if (pendingSaveToSystem) {
+        pendingSaveToSystem = false
+        onSave("admin_main")
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -292,18 +317,13 @@ fun ChangeSessionDialog(
                             DropdownMenuItem(
                                 text = { Text(option) },
                                 onClick = {
-                                    selectedIndex = index
-                                    expanded = false
-                                    if (index == 0) {
-                                        onSessionChange("admin_main")
+                                    // إذا كان يحول من جلسة خاصة إلى النظام، أظهر Dialog تأكيد
+                                    if (isCustom && selectedSession == "custom" && index == 1) {
+                                        showConfirmDeleteDialog.value = true
                                     } else {
-                                        // If the custom session is admin_main, generate random
-                                        var custom = customSessionName
-                                        if (custom == "admin_main") {
-                                            custom = generateRandomSessionName(length = 12)
-                                            onCustomSessionChange(custom)
-                                        }
-                                        onSessionChange("custom")
+                                        selectedIndex = index
+                                        expanded = false
+                                        onSessionChange(values[index])
                                     }
                                 },
                                 contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
@@ -314,7 +334,16 @@ fun ChangeSessionDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { if (!isSaving) onSave(if (selectedIndex == 0) "admin_main" else "custom") }) {
+            TextButton(onClick = {
+                if (!isSaving) {
+                    if (isCustom && selectedSession == "custom" && selectedIndex == 1) {
+                        // إذا كان يحفظ التحويل للنظام من جلسة خاصة، أظهر Dialog تأكيد
+                        showConfirmDeleteDialog.value = true
+                    } else {
+                        onSave(values[selectedIndex])
+                    }
+                }
+            }) {
                 Text(if (isSaving) "...جاري الحفظ" else "حفظ")
             }
         },
