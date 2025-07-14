@@ -201,7 +201,7 @@ fun AddAccountComposeScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(dimens.spacingMedium)
                     .imePadding()
-                    .navigationBarsPadding(),
+                    .padding(bottom = 56.dp),
                 verticalArrangement = Arrangement.spacedBy(dimens.spacingMedium)
             ) {
                 // Header Section

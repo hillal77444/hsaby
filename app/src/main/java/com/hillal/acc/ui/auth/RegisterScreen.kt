@@ -31,7 +31,6 @@ import com.hillal.acc.R
 import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.draw.shadow
@@ -95,7 +94,7 @@ fun RegisterScreen(
                         )
                     )
                 )
-                .navigationBarsPadding()
+                .padding(bottom = 56.dp)
         ) {
             Column(
                 modifier = Modifier

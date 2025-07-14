@@ -332,7 +332,7 @@ fun TransferScreen(
                     .verticalScroll(scrollState)
                     .padding(horizontal = dimens.spacingMedium)
                     .statusBarsPadding()
-                    .navigationBarsPadding()
+                    .padding(bottom = 56.dp)
                     .imePadding(),
                 verticalArrangement = Arrangement.spacedBy(dimens.spacingSmall) // Reduced spacing
             ) {

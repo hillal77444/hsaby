@@ -33,7 +33,6 @@ import com.hillal.acc.ui.dashboard.DashboardViewModel
 import kotlin.math.roundToInt
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.safeContentPadding
@@ -98,7 +97,7 @@ fun DashboardScreen(
                         colors = listOf(Color(0xFF2196F3), Color.White)
                     )
                 )
-                .navigationBarsPadding() // يضيف padding سفلي تلقائي حسب النظام
+                .padding(bottom = 56.dp)
         ) {
             Column(
                 modifier = Modifier

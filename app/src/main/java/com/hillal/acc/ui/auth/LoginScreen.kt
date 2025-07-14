@@ -31,8 +31,6 @@ import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.layout.imePadding
@@ -99,7 +97,7 @@ fun LoginScreen(
                         )
                     )
                 )
-                .navigationBarsPadding()
+                .padding(bottom = 56.dp)
                 .imePadding()
         ) {
             Column(

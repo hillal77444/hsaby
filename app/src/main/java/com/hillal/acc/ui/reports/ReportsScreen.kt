@@ -51,7 +51,7 @@ fun ReportsScreen(
             .fillMaxSize()
             .background(colors.background)
             .verticalScroll(scrollState)
-            .navigationBarsPadding() // رفع المحتوى عن أزرار النظام
+            .padding(bottom = 56.dp)
     ) {
         // البطاقة العلوية الجذابة
         Box(
