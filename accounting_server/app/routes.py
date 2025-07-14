@@ -1243,6 +1243,28 @@ def update_user_details():
         db.session.rollback()
         return json_response({'error': f'حدث خطأ أثناء تحديث بيانات المستخدم: {str(e)}'}, 500)
 
+@main.route('/api/update_session_name', methods=['POST'])
+@jwt_required()
+def update_session_name():
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        if not user:
+            return json_response({'error': 'المستخدم غير موجود'}, 404)
+
+        data = request.get_json()
+        new_session_name = data.get('session_name')
+        if not new_session_name:
+            return json_response({'error': 'يرجى إدخال اسم الجلسة الجديد'}, 400)
+
+        user.session_name = new_session_name
+        db.session.commit()
+
+        return json_response({'message': 'تم تحديث اسم الجلسة بنجاح', 'session_name': user.session_name}, 200)
+    except Exception as e:
+        db.session.rollback()
+        return json_response({'error': f'حدث خطأ أثناء تحديث اسم الجلسة: {str(e)}'}, 500)
+
 @main.route('/api/app/updates/check', methods=['GET'])
 @jwt_required()
 def check_for_updates():

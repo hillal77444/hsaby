@@ -200,4 +200,16 @@
         android:id="@+id/action_dashboard_to_exchange"
         app:destination="@id/exchangeFragment" />
 
+    <fragment
+        android:id="@+id/allServicesFragment"
+        android:name="com.hillal.acc.ui.home.AllServicesFragment"
+        android:label="جميع الخدمات"
+        tools:layout="@layout/fragment_all_services" />
+
+    <fragment
+        android:id="@+id/whatsappSettingsFragment"
+        android:name="com.hillal.acc.ui.whatsapp.WhatsAppSettingsFragment"
+        android:label="إعدادات واتساب"
+        tools:layout="@layout/fragment_whatsapp_settings" />
+
 </navigation>

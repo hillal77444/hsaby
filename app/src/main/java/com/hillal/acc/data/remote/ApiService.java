@@ -73,6 +73,12 @@ public interface ApiService {
         @Body com.google.gson.JsonObject requestBody
     );
 
+    @POST("api/update_session_name")
+    Call<Map<String, String>> updateSessionName(
+        @Header("Authorization") String token,
+        @Body com.google.gson.JsonObject requestBody
+    );
+
     @GET("/api/app/updates/check")
     Call<ServerAppUpdateInfo> checkForUpdates(@Header("Authorization") String token, @Query("current_version") String currentVersion);
 

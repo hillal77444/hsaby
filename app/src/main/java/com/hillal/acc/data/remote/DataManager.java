@@ -582,4 +582,38 @@ public class DataManager {
             });
         }
     }
+
+    public void updateSessionNameOnServer(String sessionName, DataCallback callback) {
+        org.json.JSONObject body = new org.json.JSONObject();
+        try {
+            body.put("session_name", sessionName);
+        } catch (org.json.JSONException e) {
+            callback.onError("خطأ في تجهيز البيانات");
+            return;
+        }
+        if (!isNetworkAvailable()) {
+            callback.onError("لا يوجد اتصال بالإنترنت");
+            return;
+        }
+        String token = getCurrentToken();
+        if (token == null) {
+            callback.onError("لا يوجد توكن مصادقة");
+            return;
+        }
+        com.google.gson.JsonObject gsonBody = gson.fromJson(body.toString(), com.google.gson.JsonObject.class);
+        apiService.updateSessionName("Bearer " + token, gsonBody).enqueue(new retrofit2.Callback<java.util.Map<String, String>>() {
+            @Override
+            public void onResponse(retrofit2.Call<java.util.Map<String, String>> call, retrofit2.Response<java.util.Map<String, String>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess();
+                } else {
+                    callback.onError("فشل في تحديث اسم الجلسة على الخادم");
+                }
+            }
+            @Override
+            public void onFailure(retrofit2.Call<java.util.Map<String, String>> call, Throwable t) {
+                callback.onError("خطأ في الاتصال بالخادم");
+            }
+        });
+    }
 } 

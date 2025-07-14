@@ -293,9 +293,9 @@ fun DashboardScreen(
                             modifier = Modifier.weight(1f).height(gridCardHeight)
                         )
                         GridCardOld(
-                            icon = R.drawable.ic_sync_alt,
-                            title = "تحويل بين الحسابات",
-                            onClick = onTransfer,
+                            icon = R.drawable.ic_apps, // استخدم أيقونة مناسبة مثل ic_apps أو ic_grid
+                            title = "جميع الخدمات",
+                            onClick = { onTransfer() }, // استبدل onTransfer بمنطق التنقل إلى AllServices
                             modifier = Modifier.weight(1f).height(gridCardHeight)
                         )
                     }
