@@ -36,7 +36,6 @@ import com.hillal.acc.data.room.AppDatabase;
 import com.hillal.acc.util.PreferencesManager;
 import kotlinx.coroutines.CoroutineScope;
 import kotlinx.coroutines.Dispatchers;
-import kotlinx.coroutines.launch;
 
 public class DataManager {
     private static final String TAG = "DataManager";
