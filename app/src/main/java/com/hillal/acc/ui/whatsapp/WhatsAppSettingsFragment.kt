@@ -100,7 +100,7 @@ fun WhatsAppSettingsScreen(onNavigate: (String) -> Unit) {
         Spacer(Modifier.height(dimens.spacingLarge))
         WhatsAppSettingCard(
             title = "تنسيق رسايل واتساب",
-            iconRes = R.drawable.ic_format,
+            iconRes = R.drawable.ic_edit,
             onClick = { showDialog.value = true },
             colors = colors,
             dimens = dimens,
@@ -109,7 +109,7 @@ fun WhatsAppSettingsScreen(onNavigate: (String) -> Unit) {
         Spacer(Modifier.height(dimens.spacingMedium))
         WhatsAppSettingCard(
             title = "تغيير جلسة واتساب",
-            iconRes = R.drawable.ic_session,
+            iconRes = R.drawable.ic_accounts,
             onClick = { showChangeSessionDialog.value = true },
             colors = colors,
             dimens = dimens,
@@ -118,7 +118,7 @@ fun WhatsAppSettingsScreen(onNavigate: (String) -> Unit) {
         Spacer(Modifier.height(dimens.spacingMedium))
         WhatsAppSettingCard(
             title = "ربط واتساب",
-            iconRes = R.drawable.ic_link,
+            iconRes = R.drawable.ic_sync_alt,
             onClick = { onNavigate("whatsappLinkFragment") },
             colors = colors,
             dimens = dimens,
@@ -253,4 +253,41 @@ fun ChangeSessionDialog(
 fun generateRandomSessionName(length: Int = 12): String {
     val chars = ('a'..'z') + ('A'..'Z') + ('0'..'9')
     return (1..length).map { chars.random() }.joinToString("")
+}
+
+@Composable
+fun WhatsAppSettingCard(
+    title: String,
+    iconRes: Int,
+    onClick: () -> Unit,
+    colors: ColorScheme,
+    dimens: com.hillal.acc.ui.theme.AppDimensions,
+    typography: androidx.compose.material3.Typography
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = dimens.spacingSmall),
+        shape = RoundedCornerShape(dimens.cardCorner),
+        elevation = CardDefaults.cardElevation(dimens.cardElevation),
+        colors = CardDefaults.cardColors(containerColor = colors.surface)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(dimens.spacingMedium)
+        ) {
+            Icon(
+                painter = painterResource(id = iconRes),
+                contentDescription = title,
+                tint = colors.primary,
+                modifier = Modifier.size(dimens.iconSize * 1.5f)
+            )
+            Spacer(Modifier.width(dimens.spacingMedium))
+            Text(
+                text = title,
+                style = typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = colors.onSurface)
+            )
+        }
+    }
 } 
