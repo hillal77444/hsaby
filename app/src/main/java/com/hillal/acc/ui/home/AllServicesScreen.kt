@@ -43,13 +43,13 @@ fun AllServicesScreen(navController: NavController) {
 
     // نقل تعريف allServices إلى هنا ليكون navController متاحًا
     val allServices = listOf(
-        ServiceItem("الحسابات", R.drawable.ic_accounts, onClick = { navController.navigate("navigation_accounts") }),
-        ServiceItem("المعاملات", R.drawable.ic_transactions, onClick = { navController.navigate("transactionsFragment") }),
-        ServiceItem("التقارير", R.drawable.ic_reports, onClick = { navController.navigate("navigation_reports") }),
-        ServiceItem("متابعة الديون", R.drawable.ic_arrow_downward, onClick = { navController.navigate("nav_summary") }),
-        ServiceItem("صرف العملات", R.drawable.ic_currency_exchange, onClick = { navController.navigate("action_dashboard_to_exchange") }),
-        ServiceItem("تحويل بين الحسابات", R.drawable.ic_sync_alt, onClick = { navController.navigate("transferFragment") }),
-        ServiceItem("إعدادات واتساب", R.drawable.ic_whatsapp, onClick = { navController.navigate("whatsappSettingsFragment") })
+        ServiceItem("الحسابات", R.drawable.ic_accounts, onClick = { navController.navigate(R.id.navigation_accounts) }),
+        ServiceItem("المعاملات", R.drawable.ic_transactions, onClick = { navController.navigate(R.id.transactionsFragment) }),
+        ServiceItem("التقارير", R.drawable.ic_reports, onClick = { navController.navigate(R.id.navigation_reports) }),
+        ServiceItem("متابعة الديون", R.drawable.ic_arrow_downward, onClick = { navController.navigate(R.id.nav_summary) }),
+        ServiceItem("صرف العملات", R.drawable.ic_currency_exchange, onClick = { navController.navigate(R.id.action_dashboard_to_exchange) }),
+        ServiceItem("تحويل بين الحسابات", R.drawable.ic_sync_alt, onClick = { navController.navigate(R.id.transferFragment) }),
+        ServiceItem("إعدادات واتساب", R.drawable.ic_whatsapp, onClick = { navController.navigate(R.id.whatsappSettingsFragment) })
     )
 
     Surface(
