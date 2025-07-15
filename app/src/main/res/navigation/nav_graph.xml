@@ -68,8 +68,8 @@
     <!-- تفاصيل الحساب -->
     <fragment
         android:id="@+id/accountDetailsFragment"
-        android:name="com.hillal.acc.ui.accounts.AccountDetailsFragment"
-        android:label="@string/menu_account_details"
+        android:name="com.hillal.acc.ui.accounts.AccountDetailsComposeFragment"
+        android:label="تفاصيل الحساب"
         tools:layout="@layout/fragment_account_details">
         <argument
             android:name="accountId"
