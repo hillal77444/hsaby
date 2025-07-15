@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -22,6 +21,9 @@ import com.hillal.acc.data.model.Transaction
 import com.hillal.acc.ui.common.TransactionCard
 import com.hillal.acc.ui.accounts.AccountViewModel
 import com.hillal.acc.ui.transactions.TransactionViewModel
+import androidx.compose.runtime.livedata.observeAsState
+import android.os.Bundle
+import com.hillal.acc.R
 
 @Composable
 fun AccountDetailsScreen(
@@ -33,7 +35,7 @@ fun AccountDetailsScreen(
     val context = LocalContext.current
     val account by accountViewModel.getAccountById(accountId).observeAsState()
     val transactionsLive = transactionViewModel.getTransactionsForAccount(accountId)
-    val transactions = transactionsLive?.observeAsState()?.value?.filterNotNull() ?: emptyList()
+    val transactions: List<Transaction> = transactionsLive?.observeAsState(emptyList())?.value?.filterNotNull() ?: emptyList()
     var searchQuery by remember { mutableStateOf("") }
 
     val filteredTransactions = if (searchQuery.isBlank()) {
@@ -60,8 +62,8 @@ fun AccountDetailsScreen(
         )
 
         // اسم الحساب في الأعلى
-        account?.let {
-            Text(text = it.getName() ?: "--", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(bottom = 8.dp))
+        account?.let { acc ->
+            Text(text = acc.getName() ?: "--", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(bottom = 8.dp))
         }
 
         // قائمة المعاملات
@@ -74,7 +76,7 @@ fun AccountDetailsScreen(
                 itemsIndexed(filteredTransactions) { idx, transaction ->
                     TransactionCard(
                         transaction = transaction,
-                        accounts = listOfNotNull(account),
+                        accounts = account?.let { listOf(it) } ?: emptyList(),
                         onDelete = {
                             transactionViewModel.deleteTransaction(transaction)
                             // يمكنك إضافة Toast أو Snackbar هنا
