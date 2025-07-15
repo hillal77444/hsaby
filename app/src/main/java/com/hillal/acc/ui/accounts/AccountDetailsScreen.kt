@@ -63,155 +63,153 @@ fun AccountDetailsScreen(
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFF6F8FB) // خلفية ناعمة
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 0.dp)
         ) {
             // شريط علوي ثابت
-            Surface(
-                tonalElevation = 2.dp,
-                shadowElevation = 4.dp,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
+            item {
+                Surface(
+                    tonalElevation = 2.dp,
+                    shadowElevation = 4.dp,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        text = account?.getName() ?: "تفاصيل الحساب",
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(vertical = 2.dp, horizontal = 8.dp)
-                    )
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = account?.getName() ?: "تفاصيل الحساب",
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(vertical = 2.dp, horizontal = 8.dp)
+                        )
+                    }
                 }
             }
-
             // شريط البحث
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                label = { Text("بحث في الوصف") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { searchQuery = "" }) {
-                            Icon(Icons.Default.Close, contentDescription = "مسح البحث")
-                        }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp)
-            )
-
-            // قائمة المعاملات
-            if (filteredTransactions.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("لا توجد معاملات لهذا الحساب", color = Color.Gray)
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 0.dp)
-                ) {
-                    itemsIndexed(filteredTransactions) { idx, transaction ->
-                        val balanceLive = transactionViewModel.getBalanceUntilTransaction(
-                            accountId = transaction.getAccountId(),
-                            transactionDate = transaction.getTransactionDate(),
-                            transactionId = transaction.getId(),
-                            currency = transaction.getCurrency() ?: "يمني"
-                        )
-                        val balance by balanceLive.observeAsState(0.0)
-                        TransactionCard(
-                            transaction = transaction,
-                            accounts = listOfNotNull(account),
-                            onDelete = {
-                                transactionToDelete = transaction
-                                showDeleteDialog = true
-                            },
-                            onEdit = {
-                                val args = Bundle().apply { putLong("transactionId", transaction.getId()) }
-                                navController.navigate(R.id.editTransactionFragment, args)
-                            },
-                            onWhatsApp = {
-                                val acc = listOfNotNull(account).find { it.getId() == transaction.getAccountId() }
-                                val phone = acc?.getPhoneNumber()
-                                if (!phone.isNullOrBlank()) {
-                                    val message = NotificationUtils.buildWhatsAppMessage(
-                                        context = context,
-                                        accountName = acc.getName() ?: "--",
-                                        transaction = transaction,
-                                        balance = balance ?: 0.0,
-                                        type = transaction.getType()
-                                    )
-                                    NotificationUtils.sendWhatsAppMessage(context, phone, message)
-                                }
-                            },
-                            onSms = {
-                                val acc = listOfNotNull(account).find { it.getId() == transaction.getAccountId() }
-                                val phone = acc?.getPhoneNumber()
-                                if (!phone.isNullOrBlank()) {
-                                    val type = transaction.getType()
-                                    val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
-                                    val balanceStr = String.format(Locale.US, "%.0f", abs(balance ?: 0.0))
-                                    val currency = transaction.getCurrency() ?: "يمني"
-                                    val typeText = if (type.equals("credit", true) || type == "له") "لكم" else "عليكم"
-                                    val balanceText = if ((balance ?: 0.0) >= 0) "الرصيد لكم " else "الرصيد عليكم "
-                                    val message = "حسابكم لدينا:\n" +
-                                            typeText + " " + amountStr + " " + currency + "\n" +
-                                            (transaction.getDescription() ?: "") + "\n" +
-                                            balanceText + balanceStr + " " + currency
-                                    NotificationUtils.sendSmsMessage(context, phone, message)
-                                }
-                            },
-                            index = idx,
-                            modifier = Modifier.height(screenHeight * 0.18f),
-                            searchQuery = searchQuery
-                        )
-                        if (idx < filteredTransactions.lastIndex) {
-                            Divider(modifier = Modifier.padding(horizontal = 12.dp), color = Color(0xFFE0E0E0))
-                        }
-                    }
-                    item {
-                        Spacer(modifier = Modifier.height(32.dp)) // مسافة أسفل القائمة
-                    }
-                }
-            }
-            // مربع حوار الحذف
-            if (showDeleteDialog && transactionToDelete != null) {
-                AlertDialog(
-                    onDismissRequest = {
-                        showDeleteDialog = false
-                        transactionToDelete = null
-                    },
-                    title = { Text("حذف القيد") },
-                    text = { Text("هل أنت متأكد أنك تريد حذف هذا القيد؟") },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            transactionViewModel.deleteTransaction(transactionToDelete)
-                            android.widget.Toast.makeText(context, "تم حذف القيد بنجاح", android.widget.Toast.LENGTH_SHORT).show()
-                            showDeleteDialog = false
-                            transactionToDelete = null
-                        }) {
-                            Text("نعم")
+            item {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    label = { Text("بحث في الوصف") },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(Icons.Default.Close, contentDescription = "مسح البحث")
+                            }
                         }
                     },
-                    dismissButton = {
-                        TextButton(onClick = {
-                            showDeleteDialog = false
-                            transactionToDelete = null
-                        }) {
-                            Text("لا")
-                        }
-                    }
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp)
                 )
             }
+            // قائمة المعاملات أو رسالة عدم وجود معاملات
+            if (filteredTransactions.isEmpty()) {
+                item {
+                    Box(modifier = Modifier.fillParentMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("لا توجد معاملات لهذا الحساب", color = Color.Gray)
+                    }
+                }
+            } else {
+                itemsIndexed(filteredTransactions) { idx, transaction ->
+                    val balanceLive = transactionViewModel.getBalanceUntilTransaction(
+                        accountId = transaction.getAccountId(),
+                        transactionDate = transaction.getTransactionDate(),
+                        transactionId = transaction.getId(),
+                        currency = transaction.getCurrency() ?: "يمني"
+                    )
+                    val balance by balanceLive.observeAsState(0.0)
+                    TransactionCard(
+                        transaction = transaction,
+                        accounts = listOfNotNull(account),
+                        onDelete = {
+                            transactionToDelete = transaction
+                            showDeleteDialog = true
+                        },
+                        onEdit = {
+                            val args = Bundle().apply { putLong("transactionId", transaction.getId()) }
+                            navController.navigate(R.id.editTransactionFragment, args)
+                        },
+                        onWhatsApp = {
+                            val acc = listOfNotNull(account).find { it.getId() == transaction.getAccountId() }
+                            val phone = acc?.getPhoneNumber()
+                            if (!phone.isNullOrBlank()) {
+                                val message = NotificationUtils.buildWhatsAppMessage(
+                                    context = context,
+                                    accountName = acc.getName() ?: "--",
+                                    transaction = transaction,
+                                    balance = balance ?: 0.0,
+                                    type = transaction.getType()
+                                )
+                                NotificationUtils.sendWhatsAppMessage(context, phone, message)
+                            }
+                        },
+                        onSms = {
+                            val acc = listOfNotNull(account).find { it.getId() == transaction.getAccountId() }
+                            val phone = acc?.getPhoneNumber()
+                            if (!phone.isNullOrBlank()) {
+                                val type = transaction.getType()
+                                val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
+                                val balanceStr = String.format(Locale.US, "%.0f", abs(balance ?: 0.0))
+                                val currency = transaction.getCurrency() ?: "يمني"
+                                val typeText = if (type.equals("credit", true) || type == "له") "لكم" else "عليكم"
+                                val balanceText = if ((balance ?: 0.0) >= 0) "الرصيد لكم " else "الرصيد عليكم "
+                                val message = "حسابكم لدينا:\n" +
+                                        typeText + " " + amountStr + " " + currency + "\n" +
+                                        (transaction.getDescription() ?: "") + "\n" +
+                                        balanceText + balanceStr + " " + currency
+                                NotificationUtils.sendSmsMessage(context, phone, message)
+                            }
+                        },
+                        index = idx,
+                        modifier = Modifier.height(screenHeight * 0.18f),
+                        searchQuery = searchQuery
+                    )
+                    if (idx < filteredTransactions.lastIndex) {
+                        Divider(modifier = Modifier.padding(horizontal = 12.dp), color = Color(0xFFE0E0E0))
+                    }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(32.dp)) // مسافة أسفل القائمة
+                }
+            }
+        }
+        // مربع حوار الحذف يبقى خارج LazyColumn
+        if (showDeleteDialog && transactionToDelete != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDeleteDialog = false
+                    transactionToDelete = null
+                },
+                title = { Text("حذف القيد") },
+                text = { Text("هل أنت متأكد أنك تريد حذف هذا القيد؟") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        transactionViewModel.deleteTransaction(transactionToDelete)
+                        android.widget.Toast.makeText(context, "تم حذف القيد بنجاح", android.widget.Toast.LENGTH_SHORT).show()
+                        showDeleteDialog = false
+                        transactionToDelete = null
+                    }) {
+                        Text("نعم")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        showDeleteDialog = false
+                        transactionToDelete = null
+                    }) {
+                        Text("لا")
+                    }
+                }
+            )
         }
     }
 } 
