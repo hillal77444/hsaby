@@ -52,6 +52,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.navigation.NavController
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
@@ -332,8 +333,9 @@ fun TransferScreen(
                     .verticalScroll(scrollState)
                     .padding(horizontal = dimens.spacingMedium)
                     .statusBarsPadding()
-                    .imePadding(),
-                verticalArrangement = Arrangement.spacedBy(dimens.spacingSmall) // Reduced spacing
+                    .imePadding()
+                    .navigationBarsPadding(), // يضيف padding سفلي ديناميكي حسب أزرار النظام
+                verticalArrangement = Arrangement.spacedBy(dimens.spacingSmall)
             ) {
                 Spacer(Modifier.height(dimens.spacingMedium)) // Reduced top spacing
                 
@@ -826,7 +828,7 @@ fun TransferScreen(
                     )
                 }
                 
-                Spacer(Modifier.height(dimens.spacingMedium)) // Reduced bottom spacing
+                Spacer(Modifier.height(dimens.spacingMedium)) // مسافة سفلية بسيطة إضافية
             }
         }
     }

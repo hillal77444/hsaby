@@ -77,7 +77,7 @@ fun AccountDetailsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .navigationBarsPadding(),
-            contentPadding = PaddingValues(bottom = 48.dp) // مسافة إضافية أكبر فوق أزرار النظام
+            contentPadding = PaddingValues(bottom = 0.dp) // لا تضف أي مسافة ثابتة
         ) {
             // شريط علوي ثابت
             item {
