@@ -182,7 +182,7 @@ class TransactionsFragment : Fragment() {
                     set(Calendar.MILLISECOND, 999)
                 }.timeInMillis
                 val filteredTransactions = if (searchQuery.isNotBlank() && searchResults != null) {
-                    searchResults
+                    searchResults // لا تطبق أي فلترة إضافية على نتائج البحث
                 } else {
                     (transactions ?: emptyList()).filter { tx ->
                         val accountMatch = selectedAccount == null || tx.getAccountId() == selectedAccount?.getId()
@@ -353,49 +353,7 @@ class TransactionsFragment : Fragment() {
                             .observe(
                                 getViewLifecycleOwner(),
                                 Observer { results: MutableList<Transaction?>? ->
-                                    if (results != null) {
-                                        // تطبيق فلتر الحساب فقط على النتائج
-                                        val filtered: MutableList<Transaction?> =
-                                            ArrayList<Transaction?>()
-                                        var totalAmount = 0.0
-
-                                        for (t in results) {
-                                            var match = true
-
-
-                                            // فلترة الحساب فقط
-                                            if (selectedAccount != null && !selectedAccount!!.isEmpty()) {
-                                                var account: Account? = null
-                                                if (accountMap.containsKey(t!!.getAccountId())) {
-                                                    account = accountMap.get(t!!.getAccountId())
-                                                }
-                                                val accountName =
-                                                    if (account != null) account.getName() else null
-                                                if (accountName == null || accountName != selectedAccount) {
-                                                    match = false
-                                                }
-                                            }
-
-                                            if (match) {
-                                                filtered.add(t)
-                                                totalAmount += t!!.getAmount()
-                                            }
-                                        }
-
-
-                                        // تحديث الإحصائيات والقائمة
-                                        // binding!!.totalTransactionsText.setText(filtered.size.toString())
-                                        // binding!!.totalAmountText.setText(
-                                        //     String.format(
-                                        //         Locale.ENGLISH,
-                                        //         "%.2f",
-                                        //         totalAmount
-                                        //     )
-                                        // )
-                                        // adapter!!.submitList(filtered)
-                                        // binding!!.transactionsRecyclerView.setVisibility(if (filtered.isEmpty()) View.GONE else View.VISIBLE)
-                                        // binding!!.emptyView.setVisibility(if (filtered.isEmpty()) View.VISIBLE else View.GONE)
-                                    }
+                                    searchResults = results?.filterNotNull() // فقط اعرض النتائج كما هي
                                 })
                     }
                     return true
