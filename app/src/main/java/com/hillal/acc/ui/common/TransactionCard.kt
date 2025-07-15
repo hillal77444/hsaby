@@ -47,165 +47,200 @@ fun TransactionCard(
     onEdit: () -> Unit,
     onWhatsApp: () -> Unit,
     onSms: () -> Unit,
+    index: Int,
     modifier: Modifier = Modifier,
     searchQuery: String = ""
 ) {
-    val isDebit = transaction.getType()?.lowercase() == "debit" || transaction.getType() == "عليه"
-    val gradient = if (isDebit) {
-        Brush.linearGradient(
-            colors = listOf(Color(0xFFFF5252).copy(alpha = 0.18f), Color(0xFFFF8A80).copy(alpha = 0.18f)),
-            start = Offset(0f, 0f),
-            end = Offset(400f, 400f)
-        )
-    } else {
-        Brush.linearGradient(
-            colors = listOf(Color(0xFF43EA7D).copy(alpha = 0.18f), Color(0xFF1CBF4F).copy(alpha = 0.18f)),
-            start = Offset(0f, 0f),
-            end = Offset(400f, 400f)
-        )
-    }
-    val accountName = accounts.find { it.getId() == transaction.getAccountId() }?.getName() ?: "--"
     val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
-    val dimens = com.hillal.acc.ui.theme.LocalAppDimensions.current
-    val buttonSize = screenHeight * 0.045f
-    val iconSize = screenHeight * 0.03f
-    val cardHeight = screenHeight * 0.13f // بطاقة مضغوطة
+
+    val isDebit = transaction.getType()?.lowercase() == "debit" || transaction.getType() == "عليه"
+    val typeText = if (isDebit) "عليه" else "له"
+    val typeColor = if (isDebit) Color(0xFFD32F2F) else Color(0xFF388E3C)
+    val typeBgColor = if (isDebit) Color(0xFFFFEBEE) else Color(0xFFE8F5E9)
+    val accountName = accounts.find { it.getId() == transaction.getAccountId() }?.getName() ?: "--"
+    val description = transaction.getDescription() ?: ""
+    val dateString = transaction.getDateString()
+    val cardBgColor = if (index % 2 == 0) Color.White else Color(0xFFE3F6FB)
+
+    // مقاسات نسبية
+    val cardHeight = screenHeight * 0.15f
+    val cardCorner = screenHeight * 0.025f
+    val cardElevation = screenHeight * 0.008f
+    val cardPaddingH = screenWidth * 0.02f
+    val cardPaddingV = screenHeight * 0.008f
+    val contentPadding = screenHeight * 0.012f
+    val typeBoxWidth = screenWidth * 0.16f
+    val typeBoxHeight = screenHeight * 0.05f
+    val typeBoxCorner = screenHeight * 0.012f
+    val typeFontSize = (screenHeight.value * 0.022f).sp
+    val accountFontSize = (screenHeight.value * 0.024f).sp
+    val dateFontSize = (screenHeight.value * 0.018f).sp
+    val descFontSize = (screenHeight.value * 0.019f).sp
+    val buttonSize = screenHeight * 0.06f
+    val iconSize = screenHeight * 0.035f
+    val buttonTextSize = (screenHeight.value * 0.017f).sp
+    val buttonWidth = screenWidth * 0.18f
+    val buttonSpacing = screenWidth * 0.01f
+    val rowSpacing = screenHeight * 0.008f
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(cardHeight)
-            .shadow(12.dp, RoundedCornerShape(22.dp)), // ظل أقوى وحواف أعرض
-        shape = RoundedCornerShape(22.dp),
-        elevation = CardDefaults.cardElevation(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.70f)) // خلفية زجاجية أقوى
+            .padding(vertical = cardPaddingV, horizontal = cardPaddingH),
+        shape = RoundedCornerShape(cardCorner),
+        elevation = CardDefaults.cardElevation(cardElevation),
+        colors = CardDefaults.cardColors(containerColor = cardBgColor)
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(contentPadding)
         ) {
-            // طبقة الخلفية الزجاجية فقط
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(gradient)
-                    .blur(14.dp) // blur أقوى
-            )
-            // طبقة المحتوى الأمامي (النصوص والأزرار)
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 14.dp, vertical = 10.dp) // padding أكبر
+            // الصف العلوي: نوع العملية | اسم الحساب | التاريخ
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // الصف الأول: أيقونة + اسم الحساب + المبلغ
-                Row(
-                    Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                // مربع نوع العملية
+                Box(
+                    modifier = Modifier
+                        .width(typeBoxWidth)
+                        .height(typeBoxHeight)
+                        .background(typeBgColor, shape = RoundedCornerShape(typeBoxCorner))
+                        .border(1.dp, typeColor, shape = RoundedCornerShape(typeBoxCorner)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    // دائرة أيقونة أو أول حرف من اسم الحساب
-                    Box(
-                        modifier = Modifier
-                            .size(30.dp)
-                            .background(
-                                if (isDebit) Color(0xFFFF5252) else Color(0xFF43EA7D),
-                                shape = CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = accountName.take(1),
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 17.sp
-                        )
-                    }
-                    Spacer(Modifier.width(10.dp))
                     Text(
-                        text = accountName,
+                        text = typeText,
+                        color = typeColor,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = Color(0xFF222222),
-                        maxLines = 1,
-                        modifier = Modifier.weight(1f)
+                        fontSize = typeFontSize
                     )
-                    val amountColor = if (isDebit) Color(0xFFD32F2F) else Color(0xFF388E3C)
-                    // المبلغ مع ظل أنيق وخلفية شفافة خفيفة
-                    Box(
-                        modifier = Modifier
-                            .shadow(4.dp, shape = RoundedCornerShape(8.dp))
-                            .background(Color.White.copy(alpha = 0.65f), shape = RoundedCornerShape(8.dp))
-                            .padding(horizontal = 10.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = "${transaction.getAmount()} ${transaction.getCurrency()}",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = amountColor,
-                        )
-                    }
                 }
-                Spacer(Modifier.height(4.dp))
-                // الصف الثاني: الوصف (سطرين) + التاريخ
-                Row(
-                    Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    HighlightedDescription(
-                        description = transaction.getDescription() ?: "",
-                        searchQuery = searchQuery,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(Modifier.width(10.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.AccessTime, contentDescription = null, tint = Color(0xFF888888), modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(2.dp))
-                        Text(
-                            text = transaction.getDateString(),
-                            fontSize = 13.sp,
-                            color = Color(0xFF888888)
-                        )
-                    }
-                }
-                Spacer(Modifier.height(6.dp))
-                // الصف الثالث: الأزرار في الأسفل موزعة أفقيًا
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 2.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    ActionCircleButton(painter = painterResource(id = com.hillal.acc.R.drawable.ic_whatsapp), borderColor = Color(0xFF25D366), onClick = onWhatsApp, size = 34.dp, iconSize = 20.dp)
-                    ActionCircleButton(painter = painterResource(id = com.hillal.acc.R.drawable.ic_sms), borderColor = Color(0xFF1976D2), onClick = onSms, size = 34.dp, iconSize = 20.dp)
-                    ActionCircleButton(icon = Icons.Default.Delete, borderColor = Color.Red, onClick = onDelete, size = 34.dp, iconSize = 20.dp)
-                    ActionCircleButton(icon = Icons.Default.Edit, borderColor = Color(0xFF1976D2), onClick = onEdit, size = 34.dp, iconSize = 20.dp)
-                }
+                Spacer(Modifier.width(buttonSpacing))
+                // اسم الحساب
+                Text(
+                    text = accountName,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = accountFontSize,
+                    color = Color(0xFF222222),
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f)
+                )
+                // التاريخ
+                Text(
+                    text = dateString,
+                    fontSize = dateFontSize,
+                    color = Color(0xFF888888),
+                    modifier = Modifier.padding(start = buttonSpacing)
+                )
+            }
+            Spacer(Modifier.height(rowSpacing))
+            // الوصف
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                HighlightedDescription(
+                    description = description,
+                    searchQuery = searchQuery,
+                    modifier = Modifier.weight(1f),
+                    fontSize = descFontSize
+                )
+            }
+            Spacer(Modifier.height(rowSpacing * 2))
+            // الأزرار الأربعة
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ActionButton(
+                    painter = painterResource(id = com.hillal.acc.R.drawable.ic_whatsapp),
+                    label = "واتساب",
+                    onClick = onWhatsApp,
+                    color = Color(0xFF25D366),
+                    size = buttonSize,
+                    iconSize = iconSize,
+                    textSize = buttonTextSize,
+                    width = buttonWidth
+                )
+                ActionButton(
+                    painter = painterResource(id = com.hillal.acc.R.drawable.ic_sms),
+                    label = "SMS",
+                    onClick = onSms,
+                    color = Color(0xFF1976D2),
+                    size = buttonSize,
+                    iconSize = iconSize,
+                    textSize = buttonTextSize,
+                    width = buttonWidth
+                )
+                ActionButton(
+                    icon = Icons.Default.Edit,
+                    label = "تعديل",
+                    onClick = onEdit,
+                    color = Color(0xFF1976D2),
+                    size = buttonSize,
+                    iconSize = iconSize,
+                    textSize = buttonTextSize,
+                    width = buttonWidth
+                )
+                ActionButton(
+                    icon = Icons.Default.Delete,
+                    label = "حذف",
+                    onClick = onDelete,
+                    color = Color(0xFFD32F2F),
+                    size = buttonSize,
+                    iconSize = iconSize,
+                    textSize = buttonTextSize,
+                    width = buttonWidth
+                )
             }
         }
     }
 }
 
 @Composable
-fun ActionCircleButton(
+fun ActionButton(
     icon: ImageVector? = null,
     painter: Painter? = null,
-    borderColor: Color,
+    label: String,
     onClick: () -> Unit,
-    size: Dp = 40.dp,
-    iconSize: Dp = 22.dp
+    color: Color,
+    size: Dp = 38.dp,
+    iconSize: Dp = 22.dp,
+    textSize: TextUnit = 12.sp,
+    width: Dp = 64.dp
 ) {
-    Box(
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .size(size)
-            .border(2.dp, borderColor, CircleShape)
-            .background(Color.White, CircleShape)
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
+            .width(width)
+            .clickable { onClick() }
     ) {
-        if (icon != null) {
-            Icon(icon, contentDescription = null, tint = borderColor, modifier = Modifier.size(iconSize))
-        } else if (painter != null) {
-            Icon(painter = painter, contentDescription = null, tint = borderColor, modifier = Modifier.size(iconSize))
+        Box(
+            modifier = Modifier
+                .size(size)
+                .background(Color.White, CircleShape)
+                .border(2.dp, color, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            if (icon != null) {
+                Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(iconSize))
+            } else if (painter != null) {
+                Icon(painter = painter, contentDescription = null, tint = color, modifier = Modifier.size(iconSize))
+            }
         }
+        Spacer(Modifier.height(size * 0.08f))
+        Text(
+            text = label,
+            fontSize = textSize,
+            color = color,
+            maxLines = 1
+        )
     }
 }
 
@@ -218,10 +253,10 @@ fun Transaction.getDateString(): String {
 fun HighlightedDescription(
     description: String,
     searchQuery: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    fontSize: TextUnit = 14.sp
 ) {
     val maxChars = 80 // تقريباً ما يعادل سطرين بالعربي
-    val fontSize = 14.sp
     if (searchQuery.isBlank()) {
         Text(
             text = description,
@@ -243,7 +278,6 @@ fun HighlightedDescription(
                 modifier = modifier
             )
         } else {
-            // حدد بداية ونهاية الجزء المعروض بحيث يظهر التطابق في المنتصف تقريباً
             val contextLength = maxChars - searchQuery.length
             val beforeLen = contextLength / 2
             val afterLen = contextLength - beforeLen

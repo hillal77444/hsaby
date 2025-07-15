@@ -288,10 +288,11 @@ fun TransactionsScreen(
                             onDelete = { onDelete(transaction) },
                             onEdit = { onEdit(transaction) },
                             onWhatsApp = { onWhatsApp(transaction) },
-                            onSms = { onSms(transaction) }, // <-- Fix: pass transaction
+                            onSms = { onSms(transaction) },
+                            index = idx, // مرر الفهرس هنا
                             modifier = Modifier
                                 .height(screenHeight * 0.18f),
-                            searchQuery = searchQuery // تمرير البحث
+                            searchQuery = searchQuery
                         )
                         if (idx < transactions.lastIndex) {
                             Divider(modifier = Modifier.padding(horizontal = 8.dp), color = Color(0xFFE0E0E0))
