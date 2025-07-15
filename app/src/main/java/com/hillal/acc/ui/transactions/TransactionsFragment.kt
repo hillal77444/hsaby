@@ -240,8 +240,8 @@ class TransactionsFragment : Fragment() {
                                                     transactionToDelete = null
                                                     // إعادة تحميل المعاملات بعد الحذف مباشرة
                                                     viewModel!!.loadTransactionsByDateRange(
-                                                        startDate!!.timeInMillis,
-                                                        endDate!!.timeInMillis
+                                                        startDate,
+                                                        endDate
                                                     )
                                                 } else {
                                                     Toast.makeText(context, "فشل في حذف القيد من السيرفر", Toast.LENGTH_SHORT).show()
