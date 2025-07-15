@@ -168,14 +168,14 @@ class TransactionsFragment : Fragment() {
 
                 // تصفية المعاملات حسب الفلاتر (تُستخدم فقط إذا لم يكن هناك بحث)
                 val startOfDay = Calendar.getInstance().apply {
-                    timeInMillis = startDate!!.timeInMillis
+                    timeInMillis = startDate?.timeInMillis ?: 0L
                     set(Calendar.HOUR_OF_DAY, 0)
                     set(Calendar.MINUTE, 0)
                     set(Calendar.SECOND, 0)
                     set(Calendar.MILLISECOND, 0)
                 }.timeInMillis
                 val endOfDay = Calendar.getInstance().apply {
-                    timeInMillis = endDate!!.timeInMillis
+                    timeInMillis = endDate?.timeInMillis ?: 0L
                     set(Calendar.HOUR_OF_DAY, 23)
                     set(Calendar.MINUTE, 59)
                     set(Calendar.SECOND, 59)
@@ -288,7 +288,6 @@ class TransactionsFragment : Fragment() {
                     onWhatsApp = { transaction ->
                         val account = accounts.find { it.getId() == transaction.getAccountId() }
                         val phone = account?.getPhoneNumber()
-                        val currency = transaction.getCurrency() ?: "يمني"
                         if (!phone.isNullOrBlank()) {
                             val balance = 0.0 // يمكنك حساب الرصيد بدقة إذا أردت
                             val msg = NotificationUtils.buildWhatsAppMessage(
@@ -306,7 +305,6 @@ class TransactionsFragment : Fragment() {
                     onSms = { transaction ->
                         val account = accounts.find { it.getId() == transaction.getAccountId() }
                         val phone = account?.getPhoneNumber()
-                        val currency = transaction.getCurrency() ?: "يمني"
                         if (!phone.isNullOrBlank()) {
                             val msg = "حسابكم لدينا: ${transaction.getAmount()} ${transaction.getCurrency()}\n${transaction.getDescription()}"
                             NotificationUtils.sendSmsMessage(context, phone, msg)
@@ -346,8 +344,8 @@ class TransactionsFragment : Fragment() {
                     if (query.isEmpty()) {
                         // عند إفراغ البحث، نعود للسلوك القديم
                         viewModel!!.loadTransactionsByDateRange(
-                            startDate!!.getTimeInMillis(),
-                            endDate!!.getTimeInMillis()
+                            startDate!!.timeInMillis,
+                            endDate!!.timeInMillis
                         )
                     } else {
                         // عند البحث، نبحث في قاعدة البيانات مباشرة بالوصف
@@ -411,8 +409,8 @@ class TransactionsFragment : Fragment() {
                 currentSearchText = "" // إفراغ نص البحث
                 // إعادة تحميل البيانات بالتواريخ المحددة (السلوك القديم)
                 viewModel!!.loadTransactionsByDateRange(
-                    startDate!!.getTimeInMillis(),
-                    endDate!!.getTimeInMillis()
+                    startDate!!.timeInMillis,
+                    endDate!!.timeInMillis
                 )
                 false
             })
@@ -588,8 +586,8 @@ class TransactionsFragment : Fragment() {
                 applyAllFilters()
             } else {
                 viewModel!!.loadTransactionsByDateRange(
-                    startDate!!.getTimeInMillis(),
-                    endDate!!.getTimeInMillis()
+                    startDate!!.timeInMillis,
+                    endDate!!.timeInMillis
                 )
             }
             dialog.dismiss()
@@ -683,8 +681,8 @@ class TransactionsFragment : Fragment() {
 
                     // تحميل المعاملات مع التصفية الافتراضية
                     viewModel!!.loadTransactionsByDateRange(
-                        startDate!!.getTimeInMillis(),
-                        endDate!!.getTimeInMillis()
+                        startDate!!.timeInMillis,
+                        endDate!!.timeInMillis
                     )
                 }
             })
@@ -738,14 +736,14 @@ class TransactionsFragment : Fragment() {
 
         // تحويل التواريخ إلى بداية اليوم ونهاية اليوم للمقارنة
         val startCal = Calendar.getInstance()
-        startCal.setTimeInMillis(startDate!!.getTimeInMillis())
+        startCal.setTimeInMillis(startDate?.timeInMillis ?: 0L)
         startCal.set(Calendar.HOUR_OF_DAY, 0)
         startCal.set(Calendar.MINUTE, 0)
         startCal.set(Calendar.SECOND, 0)
         startCal.set(Calendar.MILLISECOND, 0)
 
         val endCal = Calendar.getInstance()
-        endCal.setTimeInMillis(endDate!!.getTimeInMillis())
+        endCal.setTimeInMillis(endDate?.timeInMillis ?: 0L)
         endCal.set(Calendar.HOUR_OF_DAY, 23)
         endCal.set(Calendar.MINUTE, 59)
         endCal.set(Calendar.SECOND, 59)
