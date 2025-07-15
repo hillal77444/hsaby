@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.graphicsLayer
 
 @Composable
 fun TransactionCard(
@@ -92,13 +93,48 @@ fun TransactionCard(
         val dateString = transaction.getDateString()
         val cardBgColor = if (index % 2 == 0) Color.White else Color(0xFFE3F6FB)
 
+        // تحديد إصدار النظام لدعم تأثير الزجاج الحقيقي فقط في أندرويد 12+
+        val isAndroid12OrAbove = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S
+
         Card(
+            // ==== Glassmorphism Effect Start ====
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = cardPaddingV, horizontal = cardPaddingH),
+                .padding(vertical = cardPaddingV, horizontal = cardPaddingH)
+                // دعم تأثير الزجاج الحقيقي فقط في أندرويد 12+
+                .then(
+                    if (isAndroid12OrAbove) {
+                        Modifier.graphicsLayer {
+                            clip = true
+                            shape = RoundedCornerShape(cardCorner)
+                            shadowElevation = 16f
+                            renderEffect = androidx.compose.ui.graphics.RenderEffect
+                                .createBlurEffect(24f, 24f, android.graphics.Shader.TileMode.CLAMP)
+                        }
+                    } else {
+                        Modifier.blur(16.dp)
+                    }
+                )
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.25f),
+                            Color.White.copy(alpha = 0.10f)
+                        ),
+                        start = Offset.Zero,
+                        end = Offset.Infinite
+                    ),
+                    shape = RoundedCornerShape(cardCorner)
+                )
+                .border(
+                    width = 1.5.dp,
+                    color = Color.White.copy(alpha = 0.35f),
+                    shape = RoundedCornerShape(cardCorner)
+                ),
             shape = RoundedCornerShape(cardCorner),
-            elevation = CardDefaults.cardElevation(2.dp),
-            colors = CardDefaults.cardColors(containerColor = cardBgColor)
+            elevation = CardDefaults.cardElevation(0.dp), // الظل من graphicsLayer
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+            // ==== Glassmorphism Effect End ====
         ) {
             Column(
                 modifier = Modifier
