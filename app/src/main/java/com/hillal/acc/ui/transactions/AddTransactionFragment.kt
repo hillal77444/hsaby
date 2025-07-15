@@ -10,6 +10,7 @@ import com.hillal.acc.ui.transactions.AddTransactionScreen
 import com.hillal.acc.ui.transactions.TransactionsViewModel
 import com.hillal.acc.App
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.ViewModelProvider
 
 class AddTransactionFragment : Fragment() {
     override fun onCreateView(
@@ -18,15 +19,21 @@ class AddTransactionFragment : Fragment() {
         savedInstanceState: Bundle?
     ): android.view.View? {
         val app = requireActivity().application as App
-        val transactionRepository = TransactionRepository(app.getDatabase())
+        val accountRepository = app.getAccountRepository()
+        val transactionRepository = app.getTransactionRepository()
         val userPreferences = UserPreferences(requireContext())
+        val transactionsViewModel = ViewModelProvider(this, TransactionViewModelFactory(accountRepository, transactionRepository)).get(TransactionsViewModel::class.java)
+        // إذا كان لديك AccountViewModelFactory أو CashboxViewModelFactory، أنشئهم هنا بنفس الطريقة
+        // مثال:
+        // val accountViewModel = ViewModelProvider(this, AccountViewModelFactory(accountRepository)).get(AccountViewModel::class.java)
+        // val cashboxViewModel = ViewModelProvider(this, CashboxViewModelFactory(...)).get(CashboxViewModel::class.java)
         return ComposeView(requireContext()).apply {
             setContent {
                 AddTransactionScreen(
                     navController = findNavController(),
-                    transactionsViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
-                    accountViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
-                    cashboxViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+                    transactionsViewModel = transactionsViewModel,
+                    // accountViewModel = accountViewModel, // مررهم إذا أنشأتهم
+                    // cashboxViewModel = cashboxViewModel, // مررهم إذا أنشأتهم
                     transactionRepository = transactionRepository,
                     userPreferences = userPreferences
                 )

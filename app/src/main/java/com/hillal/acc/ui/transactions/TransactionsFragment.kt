@@ -262,15 +262,19 @@ class TransactionsFragment : Fragment() {
                     transactions = filteredTransactions ?: emptyList(),
                     accounts = accounts,
                     balancesMap = (balancesMap ?: emptyMap())
-                        .filterKeys { it != null }
-                        .mapKeys { accountMap[it.key]!! } // تحويل المفتاح من Long إلى Account
-                        .mapValues { entry ->
-                            (entry.value as? Map<String?, Double?>)
-                                ?.filterKeys { it != null }
-                                ?.mapKeys { it.key!! }
-                                ?.filterValues { it != null }
-                                ?.mapValues { it.value!! } ?: emptyMap()
-                        },
+                        .mapNotNull { (key, value) ->
+                            val account = accountMap[key]
+                            if (account != null) {
+                                account to (
+                                    (value as? Map<String?, Double?>)
+                                        ?.filterKeys { it != null }
+                                        ?.mapKeys { it.key!! }
+                                        ?.filterValues { it != null }
+                                        ?.mapValues { it.value!! } ?: emptyMap()
+                                )
+                            } else null
+                        }
+                        .toMap(),
                     selectedAccount = selectedAccount,
                     onAccountFilter = { selectedAccount = it },
                     startDate = startDate,
