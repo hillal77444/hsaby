@@ -261,7 +261,7 @@ class TransactionsFragment : Fragment() {
                 }
 
                 TransactionsScreen(
-                    transactions = filteredTransactions,
+                    transactions = filteredTransactions ?: emptyList(),
                     accounts = accounts,
                     balancesMap = (balancesMap ?: emptyMap())
                         .filterKeys { it != null }
