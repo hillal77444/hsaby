@@ -74,7 +74,7 @@ fun TransactionCard(
         val rowSpacing = 2.dp
         val amountBoxPaddingH = 2.dp
         val amountBoxPaddingV = 2.dp
-        val cardCorner = 6.dp
+        val cardCorner = 18.dp // حواف ناعمة أكثر
 
         // خطوط صغيرة جداً (70% من القيم السابقة تقريباً)
         val accountFontSize = 22.sp
@@ -95,45 +95,27 @@ fun TransactionCard(
         val dateString = transaction.getDateString()
         val cardBgColor = if (index % 2 == 0) Color.White else Color(0xFFE3F6FB)
 
-        // تحديد إصدار النظام لدعم تأثير الزجاج الحقيقي فقط في أندرويد 12+
-        val isAndroid12OrAbove = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S
-
+        // خلفية زجاجية خفيفة (اختيارية)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .matchParentSize()
-                .blur(16.dp)
+                .blur(8.dp)
                 .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.25f),
-                            Color.White.copy(alpha = 0.10f)
-                        ),
-                        start = Offset.Zero,
-                        end = Offset.Infinite
-                    ),
+                    Color.White.copy(alpha = 0.10f),
                     shape = RoundedCornerShape(cardCorner)
                 )
         )
 
         Card(
-            // ==== Glassmorphism Effect Start ====
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = cardPaddingV, horizontal = cardPaddingH)
-                .background(
-                    Color.White.copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(cardCorner)
-                )
-                .border(
-                    width = 1.5.dp,
-                    color = Color.White.copy(alpha = 0.35f),
-                    shape = RoundedCornerShape(cardCorner)
-                ),
+                .padding(vertical = 8.dp, horizontal = 10.dp)
+                .shadow(12.dp, RoundedCornerShape(cardCorner)), // ظل واضح وناعم
             shape = RoundedCornerShape(cardCorner),
-            elevation = CardDefaults.cardElevation(0.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-            // ==== Glassmorphism Effect End ====
+            elevation = CardDefaults.cardElevation(8.dp), // ظل إضافي من Card
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.25f)), // حدود خفيفة
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.88f)) // لون أبيض شبه شفاف
         ) {
             Column(
                 modifier = Modifier
