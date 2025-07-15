@@ -65,25 +65,25 @@ fun TransactionCard(
     val dateString = transaction.getDateString()
     val cardBgColor = if (index % 2 == 0) Color.White else Color(0xFFE3F6FB)
 
-    // مقاسات نسبية
-    val cardHeight = screenHeight * 0.15f
-    val cardCorner = screenHeight * 0.025f
+    // مقاسات نسبية دقيقة
+    val cardHeight = screenHeight * 0.16f
+    val cardCorner = screenHeight * 0.022f
     val cardElevation = screenHeight * 0.008f
-    val cardPaddingH = screenWidth * 0.02f
-    val cardPaddingV = screenHeight * 0.008f
+    val cardPaddingH = screenWidth * 0.025f
+    val cardPaddingV = screenHeight * 0.012f
     val contentPadding = screenHeight * 0.012f
-    val typeBoxWidth = screenWidth * 0.16f
-    val typeBoxHeight = screenHeight * 0.05f
+    val typeBoxWidth = screenWidth * 0.17f
+    val typeBoxHeight = screenHeight * 0.052f
     val typeBoxCorner = screenHeight * 0.012f
-    val typeFontSize = (screenHeight.value * 0.022f).sp
-    val accountFontSize = (screenHeight.value * 0.024f).sp
-    val dateFontSize = (screenHeight.value * 0.018f).sp
-    val descFontSize = (screenHeight.value * 0.019f).sp
-    val buttonSize = screenHeight * 0.06f
-    val iconSize = screenHeight * 0.035f
-    val buttonTextSize = (screenHeight.value * 0.017f).sp
-    val buttonWidth = screenWidth * 0.18f
-    val buttonSpacing = screenWidth * 0.01f
+    val typeFontSize = (screenHeight.value * 0.021f).sp
+    val accountFontSize = (screenHeight.value * 0.023f).sp
+    val dateFontSize = (screenHeight.value * 0.017f).sp
+    val descFontSize = (screenHeight.value * 0.018f).sp
+    val buttonWidth = screenWidth * 0.21f
+    val buttonHeight = screenHeight * 0.07f
+    val iconSize = screenHeight * 0.028f
+    val buttonTextSize = (screenHeight.value * 0.018f).sp
+    val buttonSpacing = screenWidth * 0.012f
     val rowSpacing = screenHeight * 0.008f
 
     Card(
@@ -140,10 +140,13 @@ fun TransactionCard(
                 )
             }
             Spacer(Modifier.height(rowSpacing))
-            // الوصف
+            // الوصف في المنتصف
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
                 HighlightedDescription(
                     description = description,
@@ -152,10 +155,12 @@ fun TransactionCard(
                     fontSize = descFontSize
                 )
             }
-            Spacer(Modifier.height(rowSpacing * 2))
+            Spacer(Modifier.height(rowSpacing))
             // الأزرار الأربعة
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = rowSpacing),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -164,40 +169,43 @@ fun TransactionCard(
                     label = "واتساب",
                     onClick = onWhatsApp,
                     color = Color(0xFF25D366),
-                    size = buttonSize,
+                    width = buttonWidth,
+                    height = buttonHeight,
                     iconSize = iconSize,
-                    textSize = buttonTextSize,
-                    width = buttonWidth
+                    textSize = buttonTextSize
                 )
+                Spacer(Modifier.width(buttonSpacing))
                 ActionButton(
                     painter = painterResource(id = com.hillal.acc.R.drawable.ic_sms),
                     label = "SMS",
                     onClick = onSms,
                     color = Color(0xFF1976D2),
-                    size = buttonSize,
+                    width = buttonWidth,
+                    height = buttonHeight,
                     iconSize = iconSize,
-                    textSize = buttonTextSize,
-                    width = buttonWidth
+                    textSize = buttonTextSize
                 )
+                Spacer(Modifier.width(buttonSpacing))
                 ActionButton(
                     icon = Icons.Default.Edit,
                     label = "تعديل",
                     onClick = onEdit,
                     color = Color(0xFF1976D2),
-                    size = buttonSize,
+                    width = buttonWidth,
+                    height = buttonHeight,
                     iconSize = iconSize,
-                    textSize = buttonTextSize,
-                    width = buttonWidth
+                    textSize = buttonTextSize
                 )
+                Spacer(Modifier.width(buttonSpacing))
                 ActionButton(
                     icon = Icons.Default.Delete,
                     label = "حذف",
                     onClick = onDelete,
                     color = Color(0xFFD32F2F),
-                    size = buttonSize,
+                    width = buttonWidth,
+                    height = buttonHeight,
                     iconSize = iconSize,
-                    textSize = buttonTextSize,
-                    width = buttonWidth
+                    textSize = buttonTextSize
                 )
             }
         }
@@ -211,37 +219,42 @@ fun ActionButton(
     label: String,
     onClick: () -> Unit,
     color: Color,
-    size: Dp = 38.dp,
-    iconSize: Dp = 22.dp,
-    textSize: TextUnit = 12.sp,
-    width: Dp = 64.dp
+    width: Dp,
+    height: Dp,
+    iconSize: Dp,
+    textSize: TextUnit
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Surface(
         modifier = Modifier
             .width(width)
-            .clickable { onClick() }
+            .height(height)
+            .padding(horizontal = 1.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        color = Color.White,
+        border = BorderStroke(1.2.dp, color),
+        shadowElevation = 2.dp
     ) {
-        Box(
+        Column(
             modifier = Modifier
-                .size(size)
-                .background(Color.White, CircleShape)
-                .border(2.dp, color, CircleShape),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .padding(vertical = height * 0.10f),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (icon != null) {
                 Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(iconSize))
             } else if (painter != null) {
                 Icon(painter = painter, contentDescription = null, tint = color, modifier = Modifier.size(iconSize))
             }
+            Spacer(Modifier.height(height * 0.10f))
+            Text(
+                text = label,
+                fontSize = textSize,
+                color = color,
+                maxLines = 1
+            )
         }
-        Spacer(Modifier.height(size * 0.08f))
-        Text(
-            text = label,
-            fontSize = textSize,
-            color = color,
-            maxLines = 1
-        )
     }
 }
 
@@ -250,14 +263,15 @@ fun Transaction.getDateString(): String {
     return dateFormat.format(Date(this.getTransactionDate()))
 }
 
+// حسّن الوصف ليكون أوضح
 @Composable
 fun HighlightedDescription(
     description: String,
     searchQuery: String,
     modifier: Modifier = Modifier,
-    fontSize: TextUnit = 14.sp
+    fontSize: TextUnit = 15.sp
 ) {
-    val maxChars = 80 // تقريباً ما يعادل سطرين بالعربي
+    val maxChars = 80
     if (searchQuery.isBlank()) {
         Text(
             text = description,
@@ -265,7 +279,7 @@ fun HighlightedDescription(
             color = Color(0xFF444444),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = modifier
+            modifier = modifier.padding(horizontal = 6.dp)
         )
     } else {
         val index = description.indexOf(searchQuery, ignoreCase = true)
@@ -276,7 +290,7 @@ fun HighlightedDescription(
                 color = Color(0xFF444444),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = modifier
+                modifier = modifier.padding(horizontal = 6.dp)
             )
         } else {
             val contextLength = maxChars - searchQuery.length
@@ -302,7 +316,7 @@ fun HighlightedDescription(
                 color = Color(0xFF444444),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = modifier
+                modifier = modifier.padding(horizontal = 6.dp)
             )
         }
     }
