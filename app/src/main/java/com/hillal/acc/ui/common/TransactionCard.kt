@@ -163,18 +163,17 @@ fun TransactionCard(
                     }
                 }
                 Spacer(Modifier.height(rowSpacing))
-                // الوصف في المنتصف
-                Row(
+                // الوصف في منتصف البطاقة
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                        .padding(vertical = rowSpacing),
+                    contentAlignment = Alignment.Center
                 ) {
                     HighlightedDescription(
                         description = description,
                         searchQuery = searchQuery,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                         fontSize = descFontSize
                     )
                 }
