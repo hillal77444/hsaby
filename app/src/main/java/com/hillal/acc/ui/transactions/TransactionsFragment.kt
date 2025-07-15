@@ -149,13 +149,9 @@ class TransactionsFragment : Fragment() {
                 val balancesMap by viewModel.accountBalancesMap.observeAsState(emptyMap())
 
                 // State للفلاتر
-                var selectedAccount by remember { mutableStateOf<Account?>(null) }
-                val today = remember { Calendar.getInstance() }
-                val fourDaysAgo = remember {
-                    Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -4); set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }
-                }
-                var startDate by remember { mutableStateOf(fourDaysAgo.timeInMillis) }
-                var endDate by remember { mutableStateOf(today.timeInMillis) }
+                var selectedAccount: Account? by remember { mutableStateOf(null) }
+                var startDate: Calendar? by remember { mutableStateOf(Calendar.getInstance()) }
+                var endDate: Calendar? by remember { mutableStateOf(Calendar.getInstance()) }
                 var searchQuery by remember { mutableStateOf("") }
                 var searchResults by remember { mutableStateOf<List<Transaction>?>(null) }
 
@@ -172,14 +168,14 @@ class TransactionsFragment : Fragment() {
 
                 // تصفية المعاملات حسب الفلاتر (تُستخدم فقط إذا لم يكن هناك بحث)
                 val startOfDay = Calendar.getInstance().apply {
-                    timeInMillis = startDate
+                    timeInMillis = startDate!!.timeInMillis
                     set(Calendar.HOUR_OF_DAY, 0)
                     set(Calendar.MINUTE, 0)
                     set(Calendar.SECOND, 0)
                     set(Calendar.MILLISECOND, 0)
                 }.timeInMillis
                 val endOfDay = Calendar.getInstance().apply {
-                    timeInMillis = endDate
+                    timeInMillis = endDate!!.timeInMillis
                     set(Calendar.HOUR_OF_DAY, 23)
                     set(Calendar.MINUTE, 59)
                     set(Calendar.SECOND, 59)
