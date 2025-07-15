@@ -38,6 +38,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import android.net.ConnectivityManager
 import android.content.Context
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun AccountDetailsScreen(
@@ -73,8 +74,10 @@ fun AccountDetailsScreen(
         color = Color(0xFFF6F8FB) // خلفية ناعمة
     ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 0.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .navigationBarsPadding(),
+            contentPadding = PaddingValues(bottom = 48.dp) // مسافة إضافية أكبر فوق أزرار النظام
         ) {
             // شريط علوي ثابت
             item {
