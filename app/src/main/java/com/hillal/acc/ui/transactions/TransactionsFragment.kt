@@ -102,6 +102,7 @@ class TransactionsFragment : Fragment() {
     private val accountMap: MutableMap<Long?, Account?> = HashMap<Long?, Account?>()
     private var isSearchActive = false // متغير لتتبع حالة البحث
     private var currentSearchText = "" // متغير لتخزين نص البحث الحالي
+    private var searchResults: List<Transaction>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -343,13 +344,13 @@ class TransactionsFragment : Fragment() {
                         query.lowercase(Locale.getDefault()) // تحديث نص البحث الحالي
                     if (query.isEmpty()) {
                         // عند إفراغ البحث، نعود للسلوك القديم
-                        viewModel!!.loadTransactionsByDateRange(
+                        viewModel?.loadTransactionsByDateRange(
                             startDate!!.timeInMillis,
                             endDate!!.timeInMillis
                         )
                     } else {
                         // عند البحث، نبحث في قاعدة البيانات مباشرة بالوصف
-                        viewModel!!.searchTransactionsByDescription("%" + query + "%")!!
+                        viewModel?.searchTransactionsByDescription("%" + query + "%")!!
                             .observe(
                                 getViewLifecycleOwner(),
                                 Observer { results: MutableList<Transaction?>? ->
@@ -366,7 +367,7 @@ class TransactionsFragment : Fragment() {
                 isSearchActive = false // إعادة تعيين حالة البحث
                 currentSearchText = "" // إفراغ نص البحث
                 // إعادة تحميل البيانات بالتواريخ المحددة (السلوك القديم)
-                viewModel!!.loadTransactionsByDateRange(
+                viewModel?.loadTransactionsByDateRange(
                     startDate!!.timeInMillis,
                     endDate!!.timeInMillis
                 )
@@ -543,7 +544,7 @@ class TransactionsFragment : Fragment() {
             if (isSearchActive) {
                 applyAllFilters()
             } else {
-                viewModel!!.loadTransactionsByDateRange(
+                viewModel?.loadTransactionsByDateRange(
                     startDate!!.timeInMillis,
                     endDate!!.timeInMillis
                 )
@@ -638,7 +639,7 @@ class TransactionsFragment : Fragment() {
 
 
                     // تحميل المعاملات مع التصفية الافتراضية
-                    viewModel!!.loadTransactionsByDateRange(
+                    viewModel?.loadTransactionsByDateRange(
                         startDate!!.timeInMillis,
                         endDate!!.timeInMillis
                     )
@@ -647,7 +648,7 @@ class TransactionsFragment : Fragment() {
 
 
         // مراقبة المعاملات
-        viewModel!!.getTransactions()
+        viewModel?.getTransactions()
             .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
                 // إخفاء مؤشر التحميل
                 // binding!!.progressBar.setVisibility(View.GONE)
@@ -661,7 +662,7 @@ class TransactionsFragment : Fragment() {
             })
 
         // مراقبة أرصدة الحسابات
-        viewModel!!.accountBalancesMap.observe(
+        viewModel?.accountBalancesMap?.observe(
             getViewLifecycleOwner(),
             Observer { balancesMap: MutableMap<Long?, MutableMap<String?, Double?>?>? ->
                 if (balancesMap != null) {
@@ -677,7 +678,7 @@ class TransactionsFragment : Fragment() {
             .setPositiveButton(
                 R.string.yes,
                 DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int ->
-                    viewModel!!.deleteTransaction(transaction)
+                    viewModel?.deleteTransaction(transaction)
                     Toast.makeText(
                         requireContext(),
                         R.string.transaction_deleted,
@@ -796,7 +797,7 @@ class TransactionsFragment : Fragment() {
 
 
         // تحميل البيانات من قاعدة البيانات المحلية
-        viewModel!!.getTransactions()
+        viewModel?.getTransactions()
             .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
                 // إخفاء مؤشر التحميل
                 // binding!!.progressBar.setVisibility(View.GONE)
@@ -867,7 +868,7 @@ class TransactionsFragment : Fragment() {
                 .enqueue(object : Callback<Void?> {
                     override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
                         if (response.isSuccessful) {
-                            viewModel.deleteTransaction(transaction)
+                            viewModel?.deleteTransaction(transaction)
                             cont.resume(true) {}
                         } else {
                             cont.resume(false) {}
