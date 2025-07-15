@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun TransactionCard(
@@ -302,7 +303,8 @@ fun HighlightedDescription(
             color = Color(0xFF444444),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = modifier
+            modifier = modifier,
+            textAlign = TextAlign.Center
         )
     } else {
         val index = description.indexOf(searchQuery, ignoreCase = true)
@@ -313,7 +315,8 @@ fun HighlightedDescription(
                 color = Color(0xFF444444),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = modifier
+                modifier = modifier,
+                textAlign = TextAlign.Center
             )
         } else {
             val contextLength = maxChars - searchQuery.length
@@ -339,7 +342,8 @@ fun HighlightedDescription(
                 color = Color(0xFF444444),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = modifier
+                modifier = modifier,
+                textAlign = TextAlign.Center
             )
         }
     }
