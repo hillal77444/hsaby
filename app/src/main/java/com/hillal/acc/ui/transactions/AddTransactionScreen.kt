@@ -411,11 +411,14 @@ fun AddTransactionScreen(
                     lastSavedTransaction = transaction
                     lastSavedAccount = account
                     // Get balance
-                    transactionRepository.getBalanceUntilTransaction(selectedAccountId, transaction.getTransactionDate(), transaction.getId(), currency)
-                        .observe(lifecycleOwner) { balance ->
-                            lastSavedBalance = balance ?: 0.0
-                            isDialogShown = true
-                        }
+                    val balance = transactionsViewModel.getBalanceUntilTransaction(
+                        accountId = transaction.getAccountId(),
+                        transactionDate = transaction.getTransactionDate(),
+                        transactionId = transaction.getId(),
+                        currency = transaction.getCurrency() ?: "يمني"
+                    ).observeAsState(0.0).value
+                    lastSavedBalance = balance ?: 0.0
+                    isDialogShown = true
                     // Save suggestion
                     val desc = description.trim()
                     if (desc.isNotEmpty()) {

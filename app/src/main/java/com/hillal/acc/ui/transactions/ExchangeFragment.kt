@@ -240,8 +240,9 @@ class ExchangeFragment : Fragment() {
         }
         val currency = this.selectedFromCurrency
         val accountId = selectedAccount!!.getId()
-        transactionsViewModel?.getTransactionsByAccount(accountId)?.observe(getViewLifecycleOwner()) { transactions ->
-            val lastTx = transactions?.filter { it.getCurrency() == currency }?.maxWithOrNull(compareBy<Transaction>({ it.getTransactionDate() }, { it.getId() }))
+        val transactionsLiveData = transactionsViewModel?.getTransactionsForAccount(accountId)
+        transactionsLiveData?.observe(getViewLifecycleOwner()) { transactions ->
+            val lastTx = transactions?.filter { it?.getCurrency() == currency }?.maxWithOrNull(compareBy<Transaction>({ it?.getTransactionDate() ?: 0L }, { it?.getId() ?: 0L }))
             if (lastTx != null) {
                 transactionRepository!!.getBalanceUntilTransaction(accountId, lastTx.getTransactionDate(), lastTx.getId(), currency)
                     .observe(getViewLifecycleOwner(), Observer { balance: Double? ->

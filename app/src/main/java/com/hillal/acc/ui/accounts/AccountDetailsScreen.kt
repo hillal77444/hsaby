@@ -142,11 +142,7 @@ fun AccountDetailsScreen(
                             val acc = listOfNotNull(account).find { it.getId() == transaction.getAccountId() }
                             val phone = acc?.getPhoneNumber()
                             if (!phone.isNullOrBlank()) {
-                                val balance = transactionViewModel.getBalanceUntilTransaction(
-                                    accountId = transaction.getAccountId().toString(),
-                                    transactionId = transaction.getId().toString(),
-                                    currency = transaction.getCurrency() ?: "يمني"
-                                ) ?: 0.0
+                                val balance = balance
                                 val message = NotificationUtils.buildWhatsAppMessage(
                                     context = context,
                                     accountName = acc.getName() ?: "--",
@@ -163,11 +159,7 @@ fun AccountDetailsScreen(
                             val acc = listOfNotNull(account).find { it.getId() == transaction.getAccountId() }
                             val phone = acc?.getPhoneNumber()
                             if (!phone.isNullOrBlank()) {
-                                val balance = transactionViewModel.getBalanceUntilTransaction(
-                                    accountId = transaction.getAccountId().toString(),
-                                    transactionId = transaction.getId().toString(),
-                                    currency = transaction.getCurrency() ?: "يمني"
-                                ) ?: 0.0
+                                val balance = balance
                                 val type = transaction.getType()
                                 val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
                                 val balanceStr = String.format(Locale.US, "%.0f", abs(balance))
