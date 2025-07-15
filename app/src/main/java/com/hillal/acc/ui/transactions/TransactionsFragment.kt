@@ -185,9 +185,9 @@ class TransactionsFragment : Fragment() {
                     set(Calendar.MILLISECOND, 999)
                 }.timeInMillis
                 val filteredTransactions = if (searchQuery.isNotBlank() && searchResults != null) {
-                    searchResults!!
+                    searchResults
                 } else {
-                    transactions.filter { tx ->
+                    (transactions ?: emptyList()).filter { tx ->
                         val accountMatch = selectedAccount == null || tx.getAccountId() == selectedAccount?.getId()
                         val dateMatch = tx.getTransactionDate() in startOfDay..endOfDay
                         accountMatch && dateMatch
