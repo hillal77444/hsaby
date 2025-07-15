@@ -236,6 +236,8 @@ class TransactionsFragment : Fragment() {
                                                 if (response.isSuccessful) {
                                                     viewModel.deleteTransaction(transaction)
                                                     Toast.makeText(context, "تم حذف القيد بنجاح", Toast.LENGTH_SHORT).show()
+                                                    showDeleteDialog = false
+                                                    transactionToDelete = null
                                                 } else {
                                                     Toast.makeText(context, "فشل في حذف القيد من السيرفر", Toast.LENGTH_SHORT).show()
                                                 }

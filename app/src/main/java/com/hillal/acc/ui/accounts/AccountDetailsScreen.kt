@@ -32,6 +32,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.hillal.acc.ui.transactions.NotificationUtils
 import java.util.Locale
 import kotlin.math.abs
+import com.hillal.acc.data.remote.RetrofitClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import android.net.ConnectivityManager
+import android.content.Context
 
 @Composable
 fun AccountDetailsScreen(
@@ -58,6 +64,9 @@ fun AccountDetailsScreen(
     } else {
         transactions.filter { it.getDescription()?.contains(searchQuery, ignoreCase = true) == true }
     }
+
+    val coroutineScope = rememberCoroutineScope()
+    var showProgress by remember { mutableStateOf(false) }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -199,13 +208,41 @@ fun AccountDetailsScreen(
                 text = { Text("هل أنت متأكد أنك تريد حذف هذا القيد؟") },
                 confirmButton = {
                     TextButton(onClick = {
-                        transactionViewModel.deleteTransaction(transactionToDelete)
-                        android.widget.Toast.makeText(context, "تم حذف القيد بنجاح", android.widget.Toast.LENGTH_SHORT).show()
-                        showDeleteDialog = false
-                        transactionToDelete = null
-                    }) {
-                        Text("نعم")
-                    }
+                        val transaction = transactionToDelete
+                        if (transaction != null) {
+                            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
+                            val isNetworkAvailable = connectivityManager?.activeNetworkInfo?.isConnected == true
+                            if (!isNetworkAvailable) {
+                                android.widget.Toast.makeText(context, "يرجى الاتصال بالإنترنت لحذف القيد", android.widget.Toast.LENGTH_SHORT).show()
+                                return@TextButton
+                            }
+                            val token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE).getString("token", null)
+                            if (token == null) {
+                                android.widget.Toast.makeText(context, "يرجى تسجيل الدخول أولاً", android.widget.Toast.LENGTH_SHORT).show()
+                                return@TextButton
+                            }
+                            showProgress = true
+                            RetrofitClient.getApiService()
+                                .deleteTransaction("Bearer $token", transaction.getServerId())
+                                .enqueue(object : Callback<Void?> {
+                                    override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
+                                        showProgress = false
+                                        if (response.isSuccessful) {
+                                            transactionViewModel.deleteTransaction(transaction)
+                                            android.widget.Toast.makeText(context, "تم حذف القيد بنجاح", android.widget.Toast.LENGTH_SHORT).show()
+                                            showDeleteDialog = false
+                                            transactionToDelete = null
+                                        } else {
+                                            android.widget.Toast.makeText(context, "فشل في حذف القيد من السيرفر", android.widget.Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                    override fun onFailure(call: Call<Void?>, t: Throwable) {
+                                        showProgress = false
+                                        android.widget.Toast.makeText(context, "خطأ في الاتصال بالسيرفر", android.widget.Toast.LENGTH_SHORT).show()
+                                    }
+                                })
+                        }
+                    }) { Text("نعم") }
                 },
                 dismissButton = {
                     TextButton(onClick = {
@@ -215,6 +252,15 @@ fun AccountDetailsScreen(
                         Text("لا")
                     }
                 }
+            )
+        }
+        if (showProgress) {
+            AlertDialog(
+                onDismissRequest = {},
+                title = { Text("جاري حذف القيد...") },
+                text = { Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator() } },
+                confirmButton = {},
+                dismissButton = {}
             )
         }
     }
