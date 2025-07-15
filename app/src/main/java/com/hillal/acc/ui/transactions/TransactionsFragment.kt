@@ -263,7 +263,7 @@ class TransactionsFragment : Fragment() {
                     accounts = accounts,
                     balancesMap = (balancesMap ?: emptyMap())
                         .filterKeys { it != null }
-                        .mapKeys { it.key!! }
+                        .mapKeys { accountMap[it.key]!! } // تحويل المفتاح من Long إلى Account
                         .mapValues { entry ->
                             (entry.value as? Map<String?, Double?>)
                                 ?.filterKeys { it != null }
@@ -648,8 +648,7 @@ class TransactionsFragment : Fragment() {
 
 
         // مراقبة المعاملات
-        viewModel?.getTransactions()
-            .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
+        viewModel?.getTransactions()?.observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
                 // إخفاء مؤشر التحميل
                 // binding!!.progressBar.setVisibility(View.GONE)
                 if (transactions != null) {
