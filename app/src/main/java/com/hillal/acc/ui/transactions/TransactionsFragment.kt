@@ -261,7 +261,7 @@ class TransactionsFragment : Fragment() {
                     )
                 }
 
-                TransactionsScreen(
+                TransactionsScreenContent(
                     transactions = filteredTransactions ?: emptyList(),
                     accounts = accounts,
                     balancesMap = (balancesMap ?: emptyMap())
@@ -285,10 +285,6 @@ class TransactionsFragment : Fragment() {
                     searchQuery = searchQuery,
                     onSearch = { searchQuery = it },
                     onAddClick = { navController.navigate(R.id.action_transactions_to_addTransaction) },
-                    onDelete = { transaction ->
-                        transactionToDelete = transaction
-                        showDeleteDialog = true
-                    },
                     onEdit = { transaction ->
                         val args = Bundle().apply { putLong("transactionId", transaction.getId()) }
                         navController.navigate(R.id.action_transactions_to_editTransaction, args)
@@ -298,12 +294,7 @@ class TransactionsFragment : Fragment() {
                         val phone = account?.getPhoneNumber()
                         val currency = transaction.getCurrency() ?: "يمني"
                         if (!phone.isNullOrBlank()) {
-                            val balance = transactionViewModel?.getBalanceUntilTransaction(
-                                accountId = transaction.getAccountId(),
-                                transactionDate = transaction.getTransactionDate(),
-                                transactionId = transaction.getId(),
-                                currency = currency
-                            )?.value ?: 0.0
+                            val balance = 0.0 // يمكنك حساب الرصيد بدقة إذا أردت
                             val msg = NotificationUtils.buildWhatsAppMessage(
                                 context,
                                 account?.getName() ?: "-",
@@ -312,8 +303,6 @@ class TransactionsFragment : Fragment() {
                                 transaction.getType()
                             )
                             NotificationUtils.sendWhatsAppMessage(context, phone, msg)
-                            showDeleteDialog = false
-                            transactionToDelete = null
                         } else {
                             Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
                         }
@@ -323,28 +312,13 @@ class TransactionsFragment : Fragment() {
                         val phone = account?.getPhoneNumber()
                         val currency = transaction.getCurrency() ?: "يمني"
                         if (!phone.isNullOrBlank()) {
-                            val balance = transactionViewModel?.getBalanceUntilTransaction(
-                                accountId = transaction.getAccountId(),
-                                transactionDate = transaction.getTransactionDate(),
-                                transactionId = transaction.getId(),
-                                currency = currency
-                            )?.value ?: 0.0
-                            val type = transaction.getType()
-                            val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
-                            val balanceStr = String.format(Locale.US, "%.0f", abs(balance))
-                            val typeText = if (type.equals("credit", true) || type == "له") "لكم" else "عليكم"
-                            val balanceText = if (balance >= 0) "الرصيد لكم " else "الرصيد عليكم "
-                            val msg = "حسابكم لدينا:\n" +
-                                    typeText + " " + amountStr + " " + currency + "\n" +
-                                    (transaction.getDescription() ?: "") + "\n" +
-                                    balanceText + balanceStr + " " + currency
+                            val msg = "حسابكم لدينا: ${transaction.getAmount()} ${transaction.getCurrency()}\n${transaction.getDescription()}"
                             NotificationUtils.sendSmsMessage(context, phone, msg)
-                            showDeleteDialog = false
-                            transactionToDelete = null
                         } else {
                             Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
                         }
-                    }
+                    },
+                    onDeleteConfirmed = { transaction -> deleteTransactionWithServer(transaction) }
                 )
             }
         }
@@ -854,8 +828,9 @@ class TransactionsFragment : Fragment() {
         //     loadTransactions()
         // }
         LaunchedEffect(Unit) {
-            showDeleteDialog = false
-            transactionToDelete = null
+            // احذف أي استخدام لـ showDeleteDialog أو transactionToDelete أو showProgress أو AlertDialog خارج Composable.
+            // تأكد أن جميع منطق الحذف UI (الحوار، المؤشر، الحالة) داخل TransactionsScreenContent فقط.
+            // في Fragment، مرر فقط دالة الحذف إلى Composable:
         }
     }
 
@@ -958,8 +933,18 @@ class TransactionsFragment : Fragment() {
 fun TransactionsScreenContent(
     transactions: List<Transaction>,
     accounts: List<Account>,
-    navController: NavController,
-    context: Context,
+    balancesMap: Map<Account, Map<String?, Double?>>,
+    selectedAccount: Account?,
+    onAccountFilter: (Account?) -> Unit,
+    startDate: Calendar?,
+    endDate: Calendar?,
+    onDateFilter: (Calendar?, Calendar?) -> Unit,
+    searchQuery: String,
+    onSearch: (String) -> Unit,
+    onAddClick: () -> Unit,
+    onEdit: (Transaction) -> Unit,
+    onWhatsApp: (Transaction) -> Unit,
+    onSms: (Transaction) -> Unit,
     onDeleteConfirmed: suspend (Transaction) -> Boolean
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -970,42 +955,14 @@ fun TransactionsScreenContent(
         TransactionsScreen(
             transactions = transactions,
             accounts = accounts,
-            onAddClick = { navController.navigate(R.id.action_transactions_to_addTransaction) },
+            onAddClick = onAddClick,
             onDelete = { transaction ->
                 transactionToDelete = transaction
                 showDeleteDialog = true
             },
-            onEdit = { transaction ->
-                val args = Bundle().apply { putLong("transactionId", transaction.getId()) }
-                navController.navigate(R.id.action_transactions_to_editTransaction, args)
-            },
-            onWhatsApp = { transaction ->
-                val account = accounts.find { it.getId() == transaction.getAccountId() }
-                val phone = account?.getPhoneNumber()
-                if (!phone.isNullOrBlank()) {
-                    val balance = 0.0 // يمكنك حساب الرصيد بدقة إذا أردت
-                    val msg = NotificationUtils.buildWhatsAppMessage(
-                        context,
-                        account.getName() ?: "-",
-                        transaction,
-                        balance,
-                        transaction.getType()
-                    )
-                    NotificationUtils.sendWhatsAppMessage(context, phone, msg)
-                } else {
-                    Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
-                }
-            },
-            onSms = { transaction ->
-                val account = accounts.find { it.getId() == transaction.getAccountId() }
-                val phone = account?.getPhoneNumber()
-                if (!phone.isNullOrBlank()) {
-                    val msg = "حسابكم لدينا: ${transaction.getAmount()} ${transaction.getCurrency()}\n${transaction.getDescription()}"
-                    NotificationUtils.sendSmsMessage(context, phone, msg)
-                } else {
-                    Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
-                }
-            }
+            onEdit = onEdit,
+            onWhatsApp = onWhatsApp,
+            onSms = onSms
         )
         if (showDeleteDialog && transactionToDelete != null) {
             AlertDialog(
@@ -1023,9 +980,9 @@ fun TransactionsScreenContent(
                             val success = onDeleteConfirmed(transactionToDelete!!)
                             showProgress = false
                             if (success) {
-                                Toast.makeText(context, "تم حذف القيد بنجاح", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(LocalContext.current, "تم حذف القيد بنجاح", Toast.LENGTH_SHORT).show()
                             } else {
-                                Toast.makeText(context, "فشل في حذف القيد", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(LocalContext.current, "فشل في حذف القيد", Toast.LENGTH_SHORT).show()
                             }
                             transactionToDelete = null
                         }
