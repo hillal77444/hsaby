@@ -56,9 +56,31 @@ fun TransactionCard(
     BoxWithConstraints(
         modifier = modifier.fillMaxWidth()
     ) {
-        val configuration = LocalConfiguration.current
         val screenWidth = maxWidth
         val screenHeight = maxHeight
+
+        // هوامش صغيرة جداً
+        val cardPaddingH = 4.dp
+        val cardPaddingV = 3.dp
+        val contentPadding = 3.dp
+        val typeBoxWidth = screenWidth * 0.10f
+        val typeBoxHeight = screenHeight * 0.18f
+        val typeBoxCorner = screenHeight * 0.04f
+        val buttonSpacing = 3.dp
+        val rowSpacing = 3.dp
+        val amountBoxPaddingH = 4.dp
+        val amountBoxPaddingV = 2.dp
+        val cardCorner = 6.dp
+
+        // خطوط صغيرة جداً (70% من القيم السابقة تقريباً)
+        val accountFontSize = 10.sp
+        val typeFontSize = 9.sp
+        val dateFontSize = 9.sp
+        val descFontSize = 9.sp
+        val buttonTextSize = 8.sp
+        val iconSize = 14.dp
+        val buttonWidth = screenWidth * 0.13f
+        val buttonHeight = 28.dp
 
         val isDebit = transaction.getType()?.lowercase() == "debit" || transaction.getType() == "عليه"
         val typeText = if (isDebit) "عليه" else "له"
@@ -69,47 +91,18 @@ fun TransactionCard(
         val dateString = transaction.getDateString()
         val cardBgColor = if (index % 2 == 0) Color.White else Color(0xFFE3F6FB)
 
-        // تكيف ديناميكي حسب طول اسم الحساب
-        val accountNameLength = accountName.length
-        val dynamicAccountFontSize = when {
-            accountNameLength > 22 -> screenHeight.value * 0.11f
-            accountNameLength > 16 -> screenHeight.value * 0.13f
-            accountNameLength > 12 -> screenHeight.value * 0.15f
-            else -> screenHeight.value * 0.18f
-        }.sp
-        val dynamicTypeFontSize = (screenHeight.value * 0.13f).sp
-        val dynamicDateFontSize = (screenHeight.value * 0.11f).sp
-        val dynamicDescFontSize = (screenHeight.value * 0.12f).sp
-        val dynamicButtonTextSize = (screenHeight.value * 0.10f).sp
-        val dynamicIconSize = screenHeight * 0.22f
-        val dynamicButtonWidth = screenWidth * 0.22f
-        val dynamicButtonHeight = screenHeight * 0.62f
-        val dynamicTypeBoxWidth = screenWidth * 0.18f
-        val dynamicTypeBoxHeight = screenHeight * 0.38f
-        val dynamicTypeBoxCorner = screenHeight * 0.09f
-        val dynamicAmountFontSize = (screenHeight.value * 0.13f).sp
-        val dynamicAmountBoxPaddingH = screenWidth * 0.04f
-        val dynamicAmountBoxPaddingV = screenHeight * 0.04f
-        val dynamicRowSpacing = screenHeight * 0.08f
-        val dynamicCardCorner = screenHeight * 0.13f
-        val dynamicCardPaddingH = screenWidth * 0.04f
-        val dynamicCardPaddingV = screenHeight * 0.04f
-        val dynamicContentPadding = screenHeight * 0.04f
-        val dynamicButtonSpacing = screenWidth * 0.01f
-
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 80.dp, max = 350.dp)
-                .padding(vertical = dynamicCardPaddingV, horizontal = dynamicCardPaddingH),
-            shape = RoundedCornerShape(dynamicCardCorner),
+                .padding(vertical = cardPaddingV, horizontal = cardPaddingH),
+            shape = RoundedCornerShape(cardCorner),
             elevation = CardDefaults.cardElevation(2.dp),
             colors = CardDefaults.cardColors(containerColor = cardBgColor)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(dynamicContentPadding)
+                    .padding(contentPadding)
             ) {
                 // الصف العلوي: نوع العملية | اسم الحساب | التاريخ | المبلغ
                 Row(
@@ -119,25 +112,25 @@ fun TransactionCard(
                     // مربع نوع العملية
                     Box(
                         modifier = Modifier
-                            .width(dynamicTypeBoxWidth)
-                            .height(dynamicTypeBoxHeight)
-                            .background(typeBgColor, shape = RoundedCornerShape(dynamicTypeBoxCorner))
-                            .border(1.dp, typeColor, shape = RoundedCornerShape(dynamicTypeBoxCorner)),
+                            .width(typeBoxWidth)
+                            .height(typeBoxHeight)
+                            .background(typeBgColor, shape = RoundedCornerShape(typeBoxCorner))
+                            .border(1.dp, typeColor, shape = RoundedCornerShape(typeBoxCorner)),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = typeText,
                             color = typeColor,
                             fontWeight = FontWeight.Bold,
-                            fontSize = dynamicTypeFontSize
+                            fontSize = typeFontSize
                         )
                     }
-                    Spacer(Modifier.width(dynamicButtonSpacing))
+                    Spacer(Modifier.width(buttonSpacing))
                     // اسم الحساب
                     Text(
                         text = accountName,
                         fontWeight = FontWeight.Bold,
-                        fontSize = dynamicAccountFontSize,
+                        fontSize = accountFontSize,
                         color = Color(0xFF222222),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -146,30 +139,30 @@ fun TransactionCard(
                     // التاريخ
                     Text(
                         text = dateString,
-                        fontSize = dynamicDateFontSize,
+                        fontSize = dateFontSize,
                         color = Color(0xFF888888),
-                        modifier = Modifier.padding(start = dynamicButtonSpacing)
+                        modifier = Modifier.padding(start = buttonSpacing)
                     )
-                    Spacer(Modifier.width(dynamicButtonSpacing))
+                    Spacer(Modifier.width(buttonSpacing))
                     // المبلغ مع العملة بخلفية مميزة
                     val amountColor = if (isDebit) Color(0xFFD32F2F) else Color(0xFF388E3C)
                     val amountBg = if (isDebit) Color(0xFFFFEBEE) else Color(0xFFE8F5E9)
                     Box(
                         modifier = Modifier
-                            .background(amountBg.copy(alpha = 0.85f), shape = RoundedCornerShape(dynamicTypeBoxCorner))
-                            .border(1.dp, amountColor.copy(alpha = 0.5f), shape = RoundedCornerShape(dynamicTypeBoxCorner))
-                            .padding(horizontal = dynamicAmountBoxPaddingH, vertical = dynamicAmountBoxPaddingV),
+                            .background(amountBg.copy(alpha = 0.85f), shape = RoundedCornerShape(typeBoxCorner))
+                            .border(1.dp, amountColor.copy(alpha = 0.5f), shape = RoundedCornerShape(typeBoxCorner))
+                            .padding(horizontal = amountBoxPaddingH, vertical = amountBoxPaddingV),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "${transaction.getAmount()} ${transaction.getCurrency()}",
                             fontWeight = FontWeight.Bold,
-                            fontSize = dynamicAmountFontSize,
+                            fontSize = typeFontSize,
                             color = amountColor
                         )
                     }
                 }
-                Spacer(Modifier.height(dynamicRowSpacing))
+                Spacer(Modifier.height(rowSpacing))
                 // الوصف في المنتصف
                 Row(
                     modifier = Modifier
@@ -178,19 +171,21 @@ fun TransactionCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    HighlightedDescription(
-                        description = description,
-                        searchQuery = searchQuery,
-                        modifier = Modifier.weight(1f),
-                        fontSize = dynamicDescFontSize
+                    Text(
+                        text = description,
+                        fontSize = descFontSize,
+                        color = Color(0xFF444444),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
                     )
                 }
-                Spacer(Modifier.height(dynamicRowSpacing))
+                Spacer(Modifier.height(rowSpacing))
                 // الأزرار الأربعة
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = dynamicRowSpacing),
+                        .padding(top = rowSpacing),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -199,43 +194,43 @@ fun TransactionCard(
                         label = "واتساب",
                         onClick = onWhatsApp,
                         color = Color(0xFF25D366),
-                        width = dynamicButtonWidth,
-                        height = dynamicButtonHeight,
-                        iconSize = dynamicIconSize,
-                        textSize = dynamicButtonTextSize
+                        width = buttonWidth,
+                        height = buttonHeight,
+                        iconSize = iconSize,
+                        textSize = buttonTextSize
                     )
-                    Spacer(Modifier.width(dynamicButtonSpacing))
+                    Spacer(Modifier.width(buttonSpacing))
                     ActionButton(
                         painter = painterResource(id = com.hillal.acc.R.drawable.ic_sms),
                         label = "SMS",
                         onClick = onSms,
                         color = Color(0xFF1976D2),
-                        width = dynamicButtonWidth,
-                        height = dynamicButtonHeight,
-                        iconSize = dynamicIconSize,
-                        textSize = dynamicButtonTextSize
+                        width = buttonWidth,
+                        height = buttonHeight,
+                        iconSize = iconSize,
+                        textSize = buttonTextSize
                     )
-                    Spacer(Modifier.width(dynamicButtonSpacing))
+                    Spacer(Modifier.width(buttonSpacing))
                     ActionButton(
                         icon = Icons.Default.Edit,
                         label = "تعديل",
                         onClick = onEdit,
                         color = Color(0xFF1976D2),
-                        width = dynamicButtonWidth,
-                        height = dynamicButtonHeight,
-                        iconSize = dynamicIconSize,
-                        textSize = dynamicButtonTextSize
+                        width = buttonWidth,
+                        height = buttonHeight,
+                        iconSize = iconSize,
+                        textSize = buttonTextSize
                     )
-                    Spacer(Modifier.width(dynamicButtonSpacing))
+                    Spacer(Modifier.width(buttonSpacing))
                     ActionButton(
                         icon = Icons.Default.Delete,
                         label = "حذف",
                         onClick = onDelete,
                         color = Color(0xFFD32F2F),
-                        width = dynamicButtonWidth,
-                        height = dynamicButtonHeight,
-                        iconSize = dynamicIconSize,
-                        textSize = dynamicButtonTextSize
+                        width = buttonWidth,
+                        height = buttonHeight,
+                        iconSize = iconSize,
+                        textSize = buttonTextSize
                     )
                 }
             }
