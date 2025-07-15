@@ -75,6 +75,7 @@ import androidx.compose.material.icons.filled.Star
 import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
 import com.hillal.acc.ui.theme.AppDimensions
+import com.hillal.acc.ui.transactions.TransactionViewModel
 
 // دوال مساعدة لتحويل الأرقام إلى كلمات
 private fun wholeNumberToWords(number: Long): String {
@@ -411,7 +412,7 @@ fun AddTransactionScreen(
                     lastSavedTransaction = transaction
                     lastSavedAccount = account
                     // Get balance
-                    val balance = transactionsViewModel.getBalanceUntilTransaction(
+                    val balance = transactionViewModel.getBalanceUntilTransaction(
                         accountId = transaction.getAccountId(),
                         transactionDate = transaction.getTransactionDate(),
                         transactionId = transaction.getId(),
@@ -863,9 +864,10 @@ fun AddTransactionScreen(
                                     lastSavedTransaction?.let { transaction ->
                                         val phone = account.getPhoneNumber()
                                         if (!phone.isNullOrEmpty()) {
-                                            val balance = transactionsViewModel.getBalanceUntilTransaction(
-                                                accountId = transaction.getAccountId().toString(),
-                                                transactionId = transaction.getId().toString(),
+                                            val balance = transactionViewModel.getBalanceUntilTransaction(
+                                                accountId = transaction.getAccountId(),
+                                                transactionDate = transaction.getTransactionDate(),
+                                                transactionId = transaction.getId(),
                                                 currency = transaction.getCurrency() ?: "يمني"
                                             ) ?: 0.0
                                             val msg = NotificationUtils.buildWhatsAppMessage(
@@ -901,9 +903,10 @@ fun AddTransactionScreen(
                                 lastSavedTransaction?.let { transaction ->
                                     val phone = account.getPhoneNumber()
                                     if (!phone.isNullOrEmpty()) {
-                                        val balance = transactionsViewModel.getBalanceUntilTransaction(
-                                            accountId = transaction.getAccountId().toString(),
-                                            transactionId = transaction.getId().toString(),
+                                        val balance = transactionViewModel.getBalanceUntilTransaction(
+                                            accountId = transaction.getAccountId(),
+                                            transactionDate = transaction.getTransactionDate(),
+                                            transactionId = transaction.getId(),
                                             currency = transaction.getCurrency() ?: "يمني"
                                         ) ?: 0.0
                                         val type = transaction.getType()

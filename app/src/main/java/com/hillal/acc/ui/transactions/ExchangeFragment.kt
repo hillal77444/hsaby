@@ -240,21 +240,29 @@ class ExchangeFragment : Fragment() {
         }
         val currency = this.selectedFromCurrency
         val accountId = selectedAccount!!.getId()
-        val transactionsLiveData = transactionsViewModel?.getTransactionsForAccount(accountId)
+        val transactionsLiveData = transactionViewModel?.getTransactionsForAccount(accountId)
         transactionsLiveData?.observe(getViewLifecycleOwner()) { transactions: List<Transaction>? ->
             val lastTx = transactions?.filter { it.getCurrency() == currency }?.maxWithOrNull(compareBy({ it.getTransactionDate() }, { it.getId() }))
             if (lastTx != null) {
-                transactionRepository!!.getBalanceUntilTransaction(accountId, lastTx.getTransactionDate(), lastTx.getId(), currency)
-                    .observe(getViewLifecycleOwner(), Observer { balance: Double? ->
-                        val bal = balance ?: 0.0
-                        accountBalanceText!!.setText("الرصيد: " + bal + " " + currency)
-                    })
+                transactionViewModel.getBalanceUntilTransaction(
+                    accountId,
+                    lastTx.getTransactionDate(),
+                    lastTx.getId(),
+                    currency
+                ).observe(getViewLifecycleOwner(), Observer { balance: Double? ->
+                    val bal = balance ?: 0.0
+                    accountBalanceText!!.setText("الرصيد: " + bal + " " + currency)
+                })
             } else {
-                transactionRepository!!.getBalanceUntilTransaction(accountId, System.currentTimeMillis(), -1, currency)
-                    .observe(getViewLifecycleOwner(), Observer { balance: Double? ->
-                        val bal = balance ?: 0.0
-                        accountBalanceText!!.setText("الرصيد: " + bal + " " + currency)
-                    })
+                transactionViewModel.getBalanceUntilTransaction(
+                    accountId,
+                    System.currentTimeMillis(),
+                    -1,
+                    currency
+                ).observe(getViewLifecycleOwner(), Observer { balance: Double? ->
+                    val bal = balance ?: 0.0
+                    accountBalanceText!!.setText("الرصيد: " + bal + " " + currency)
+                })
             }
         }
     }
