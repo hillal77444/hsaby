@@ -103,19 +103,7 @@ fun TransactionCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = cardPaddingV, horizontal = cardPaddingH)
-                // دعم تأثير الزجاج الحقيقي فقط في أندرويد 12+
-                .then(
-                    if (isAndroid12OrAbove) {
-                        Modifier.graphicsLayer {
-                            clip = true
-                            shape = RoundedCornerShape(cardCorner)
-                            shadowElevation = 16f
-                            renderEffect = RenderEffect.createBlurEffect(24f, 24f, Shader.TileMode.CLAMP)
-                        }
-                    } else {
-                        Modifier.blur(16.dp)
-                    }
-                )
+                .blur(16.dp)
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
@@ -133,7 +121,7 @@ fun TransactionCard(
                     shape = RoundedCornerShape(cardCorner)
                 ),
             shape = RoundedCornerShape(cardCorner),
-            elevation = CardDefaults.cardElevation(0.dp), // الظل من graphicsLayer
+            elevation = CardDefaults.cardElevation(0.dp),
             colors = CardDefaults.cardColors(containerColor = Color.Transparent)
             // ==== Glassmorphism Effect End ====
         ) {
