@@ -14,6 +14,10 @@ class TransactionViewModel(private val accountRepository: AccountRepository) : V
         return accountRepository.getAccountBalance(accountId)
     }
 
+    fun getBalanceUntilTransaction(accountId: Long, transactionDate: Long, transactionId: Long, currency: String): LiveData<Double> {
+        return accountRepository.database.transactionDao().getBalanceUntilTransaction(accountId, transactionDate, transactionId, currency)
+    }
+
     fun insertTransaction(transaction: Transaction?) {
         accountRepository.insertTransaction(transaction)
     }

@@ -27,6 +27,9 @@ import android.os.Bundle
 import com.hillal.acc.R
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextOverflow
+import com.hillal.acc.ui.transactions.NotificationUtils
+import java.util.Locale
+import kotlin.math.abs
 
 @Composable
 fun AccountDetailsScreen(
@@ -40,6 +43,10 @@ fun AccountDetailsScreen(
     val transactionsLive = transactionViewModel.getTransactionsForAccount(accountId)
     val transactions: List<Transaction> = transactionsLive?.observeAsState(emptyList())?.value?.filterNotNull() ?: emptyList()
     var searchQuery by remember { mutableStateOf("") }
+
+    // متغيرات حالة الحذف
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var transactionToDelete by remember { mutableStateOf<Transaction?>(null) }
 
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
@@ -108,34 +115,53 @@ fun AccountDetailsScreen(
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     itemsIndexed(filteredTransactions) { idx, transaction ->
+                        val balanceLive = transactionViewModel.getBalanceUntilTransaction(
+                            accountId = transaction.getAccountId(),
+                            transactionDate = transaction.getTransactionDate(),
+                            transactionId = transaction.getId(),
+                            currency = transaction.getCurrency() ?: "يمني"
+                        )
+                        val balance by balanceLive.observeAsState(0.0)
                         TransactionCard(
                             transaction = transaction,
-                            accounts = account?.let { listOf(it) } ?: emptyList(),
+                            accounts = listOfNotNull(account),
                             onDelete = {
-                                transactionViewModel.deleteTransaction(transaction)
-                                // يمكنك إضافة Toast أو Snackbar هنا
+                                transactionToDelete = transaction
+                                showDeleteDialog = true
                             },
                             onEdit = {
-                                // انتقل إلى شاشة تعديل المعاملة
                                 val args = Bundle().apply { putLong("transactionId", transaction.getId()) }
                                 navController.navigate(R.id.editTransactionFragment, args)
                             },
                             onWhatsApp = {
-                                // أرسل رسالة واتساب
-                                val phone = account?.getPhoneNumber()
+                                val acc = listOfNotNull(account).find { it.getId() == transaction.getAccountId() }
+                                val phone = acc?.getPhoneNumber()
                                 if (!phone.isNullOrBlank()) {
-                                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
-                                    intent.data = android.net.Uri.parse("https://wa.me/$phone")
-                                    context.startActivity(intent)
+                                    val message = NotificationUtils.buildWhatsAppMessage(
+                                        context = context,
+                                        accountName = acc.getName() ?: "--",
+                                        transaction = transaction,
+                                        balance = balance ?: 0.0,
+                                        type = transaction.getType()
+                                    )
+                                    NotificationUtils.sendWhatsAppMessage(context, phone, message)
                                 }
                             },
                             onSms = {
-                                // أرسل SMS
-                                val phone = account?.getPhoneNumber()
+                                val acc = listOfNotNull(account).find { it.getId() == transaction.getAccountId() }
+                                val phone = acc?.getPhoneNumber()
                                 if (!phone.isNullOrBlank()) {
-                                    val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO)
-                                    intent.data = android.net.Uri.parse("smsto:$phone")
-                                    context.startActivity(intent)
+                                    val type = transaction.getType()
+                                    val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
+                                    val balanceStr = String.format(Locale.US, "%.0f", abs(balance ?: 0.0))
+                                    val currency = transaction.getCurrency() ?: "يمني"
+                                    val typeText = if (type.equals("credit", true) || type == "له") "لكم" else "عليكم"
+                                    val balanceText = if ((balance ?: 0.0) >= 0) "الرصيد لكم " else "الرصيد عليكم "
+                                    val message = "حسابكم لدينا:\n" +
+                                            typeText + " " + amountStr + " " + currency + "\n" +
+                                            (transaction.getDescription() ?: "") + "\n" +
+                                            balanceText + balanceStr + " " + currency
+                                    NotificationUtils.sendSmsMessage(context, phone, message)
                                 }
                             },
                             index = idx,
@@ -150,6 +176,35 @@ fun AccountDetailsScreen(
                         Spacer(modifier = Modifier.height(32.dp)) // مسافة أسفل القائمة
                     }
                 }
+            }
+            // مربع حوار الحذف
+            if (showDeleteDialog && transactionToDelete != null) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showDeleteDialog = false
+                        transactionToDelete = null
+                    },
+                    title = { Text("حذف القيد") },
+                    text = { Text("هل أنت متأكد أنك تريد حذف هذا القيد؟") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            transactionViewModel.deleteTransaction(transactionToDelete)
+                            android.widget.Toast.makeText(context, "تم حذف القيد بنجاح", android.widget.Toast.LENGTH_SHORT).show()
+                            showDeleteDialog = false
+                            transactionToDelete = null
+                        }) {
+                            Text("نعم")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
+                            showDeleteDialog = false
+                            transactionToDelete = null
+                        }) {
+                            Text("لا")
+                        }
+                    }
+                )
             }
         }
     }
