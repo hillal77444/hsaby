@@ -70,7 +70,7 @@ fun TransactionCard(
         val rowSpacing = 1.dp
         val amountBoxPaddingH = 2.dp
         val amountBoxPaddingV = 2.dp
-        val cardCorner = 4.dp
+        val cardCorner = 6.dp
 
         // خطوط صغيرة جداً (70% من القيم السابقة تقريباً)
         val accountFontSize = 22.sp
@@ -80,7 +80,7 @@ fun TransactionCard(
         val buttonTextSize = 16.sp
         val iconSize = 13.dp
         val buttonWidth = screenWidth * 0.2f
-        val buttonHeight = 42.dp
+        val buttonHeight = 45.dp
 
         val isDebit = transaction.getType()?.lowercase() == "debit" || transaction.getType() == "عليه"
         val typeText = if (isDebit) "عليه" else "له"
