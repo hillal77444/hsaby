@@ -75,16 +75,13 @@ fun AccountDetailsScreen(
                         .padding(horizontal = 8.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "رجوع", tint = Color.White)
-                    }
-                    Spacer(Modifier.width(8.dp))
                     Text(
                         text = account?.getName() ?: "تفاصيل الحساب",
                         color = Color.White,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(vertical = 2.dp, horizontal = 8.dp)
                     )
                 }
             }
