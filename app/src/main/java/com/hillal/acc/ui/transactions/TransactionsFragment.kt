@@ -240,8 +240,8 @@ class TransactionsFragment : Fragment() {
                                                     transactionToDelete = null
                                                     // إعادة تحميل المعاملات بعد الحذف مباشرة
                                                     viewModel!!.loadTransactionsByDateRange(
-                                                        startDate!!.getTimeInMillis(),
-                                                        endDate!!.getTimeInMillis()
+                                                        startDate!!.timeInMillis,
+                                                        endDate!!.timeInMillis
                                                     )
                                                 } else {
                                                     Toast.makeText(context, "فشل في حذف القيد من السيرفر", Toast.LENGTH_SHORT).show()
@@ -376,8 +376,8 @@ class TransactionsFragment : Fragment() {
                     if (query.isEmpty()) {
                         // عند إفراغ البحث، نعود للسلوك القديم
                         viewModel!!.loadTransactionsByDateRange(
-                            startDate!!.getTimeInMillis(),
-                            endDate!!.getTimeInMillis()
+                            startDate!!.timeInMillis,
+                            endDate!!.timeInMillis
                         )
                     } else {
                         // عند البحث، نبحث في قاعدة البيانات مباشرة بالوصف
@@ -441,8 +441,8 @@ class TransactionsFragment : Fragment() {
                 currentSearchText = "" // إفراغ نص البحث
                 // إعادة تحميل البيانات بالتواريخ المحددة (السلوك القديم)
                 viewModel!!.loadTransactionsByDateRange(
-                    startDate!!.getTimeInMillis(),
-                    endDate!!.getTimeInMillis()
+                    startDate!!.timeInMillis,
+                    endDate!!.timeInMillis
                 )
                 false
             })
@@ -618,8 +618,8 @@ class TransactionsFragment : Fragment() {
                 applyAllFilters()
             } else {
                 viewModel!!.loadTransactionsByDateRange(
-                    startDate!!.getTimeInMillis(),
-                    endDate!!.getTimeInMillis()
+                    startDate!!.timeInMillis,
+                    endDate!!.timeInMillis
                 )
             }
             dialog.dismiss()
@@ -713,8 +713,8 @@ class TransactionsFragment : Fragment() {
 
                     // تحميل المعاملات مع التصفية الافتراضية
                     viewModel!!.loadTransactionsByDateRange(
-                        startDate!!.getTimeInMillis(),
-                        endDate!!.getTimeInMillis()
+                        startDate!!.timeInMillis,
+                        endDate!!.timeInMillis
                     )
                 }
             })
@@ -768,14 +768,14 @@ class TransactionsFragment : Fragment() {
 
         // تحويل التواريخ إلى بداية اليوم ونهاية اليوم للمقارنة
         val startCal = Calendar.getInstance()
-        startCal.setTimeInMillis(startDate!!.getTimeInMillis())
+        startCal.setTimeInMillis(startDate!!.timeInMillis)
         startCal.set(Calendar.HOUR_OF_DAY, 0)
         startCal.set(Calendar.MINUTE, 0)
         startCal.set(Calendar.SECOND, 0)
         startCal.set(Calendar.MILLISECOND, 0)
 
         val endCal = Calendar.getInstance()
-        endCal.setTimeInMillis(endDate!!.getTimeInMillis())
+        endCal.setTimeInMillis(endDate!!.timeInMillis)
         endCal.set(Calendar.HOUR_OF_DAY, 23)
         endCal.set(Calendar.MINUTE, 59)
         endCal.set(Calendar.SECOND, 59)

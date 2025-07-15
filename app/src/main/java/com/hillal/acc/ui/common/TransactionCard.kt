@@ -42,6 +42,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.graphicsLayer
+import android.graphics.RenderEffect
+import android.graphics.Shader
 
 @Composable
 fun TransactionCard(
@@ -108,8 +110,7 @@ fun TransactionCard(
                             clip = true
                             shape = RoundedCornerShape(cardCorner)
                             shadowElevation = 16f
-                            renderEffect = androidx.compose.ui.graphics.RenderEffect
-                                .createBlurEffect(24f, 24f, android.graphics.Shader.TileMode.CLAMP)
+                            renderEffect = RenderEffect.createBlurEffect(24f, 24f, Shader.TileMode.CLAMP)
                         }
                     } else {
                         Modifier.blur(16.dp)
