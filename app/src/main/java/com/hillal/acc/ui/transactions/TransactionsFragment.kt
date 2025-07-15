@@ -82,7 +82,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.Alignment
-import kotlinx.coroutines.suspendCancellableCoroutine
 
 class TransactionsFragment : Fragment() {
     private var viewModel: TransactionsViewModel? = null
@@ -91,7 +90,7 @@ class TransactionsFragment : Fragment() {
     private var transactionRepository: TransactionRepository? = null
     private var startDate: Calendar? = null
     private var endDate: Calendar? = null
-    private var selectedAccount: Account? = null
+    private var selectedAccount: String? = null
     private var allTransactions: MutableList<Transaction> = ArrayList<Transaction>()
     private var allAccounts: MutableList<Account>? = ArrayList<Account>()
     private var accountBalancesMap: MutableMap<Long?, MutableMap<String?, Double?>?> =
@@ -102,7 +101,6 @@ class TransactionsFragment : Fragment() {
     private val accountMap: MutableMap<Long?, Account?> = HashMap<Long?, Account?>()
     private var isSearchActive = false // متغير لتتبع حالة البحث
     private var currentSearchText = "" // متغير لتخزين نص البحث الحالي
-    private var searchResults: List<Transaction>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -144,15 +142,21 @@ class TransactionsFragment : Fragment() {
         val context = requireContext()
         return ComposeView(requireContext()).apply {
             setContent {
-                // ربط القائمة مباشرة بـ LiveData من ViewModel
-                val transactions by viewModel.getTransactions().observeAsState(emptyList())
-                val accounts by accountViewModel.getAllAccounts().observeAsState(emptyList())
-                val balancesMap by viewModel.accountBalancesMap.observeAsState(emptyMap())
+                val transactionsNullable by viewModel.getTransactions().observeAsState(emptyList())
+                val accountsNullable by accountViewModel.getAllAccounts().observeAsState(emptyList())
+                val balancesMapNullable by viewModel.accountBalancesMap.observeAsState(emptyMap())
+                val transactions = transactionsNullable ?: emptyList()
+                val accounts = accountsNullable ?: emptyList()
+                val balancesMap = balancesMapNullable ?: emptyMap<Long?, Map<String?, Double?>>()
 
                 // State للفلاتر
-                var selectedAccount: Account? by remember { mutableStateOf(null) }
-                var startDate: Calendar? by remember { mutableStateOf(Calendar.getInstance()) }
-                var endDate: Calendar? by remember { mutableStateOf(Calendar.getInstance()) }
+                var selectedAccount by remember { mutableStateOf<Account?>(null) }
+                val today = remember { Calendar.getInstance() }
+                val fourDaysAgo = remember {
+                    Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -4); set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }
+                }
+                var startDate by remember { mutableStateOf(fourDaysAgo.timeInMillis) }
+                var endDate by remember { mutableStateOf(today.timeInMillis) }
                 var searchQuery by remember { mutableStateOf("") }
                 var searchResults by remember { mutableStateOf<List<Transaction>?>(null) }
 
@@ -168,24 +172,25 @@ class TransactionsFragment : Fragment() {
                 }
 
                 // تصفية المعاملات حسب الفلاتر (تُستخدم فقط إذا لم يكن هناك بحث)
+                // تأكد من أن الفلترة تتجاهل الوقت (من بداية اليوم إلى نهاية اليوم)
                 val startOfDay = Calendar.getInstance().apply {
-                    timeInMillis = startDate?.timeInMillis ?: 0L
+                    timeInMillis = startDate
                     set(Calendar.HOUR_OF_DAY, 0)
                     set(Calendar.MINUTE, 0)
                     set(Calendar.SECOND, 0)
                     set(Calendar.MILLISECOND, 0)
                 }.timeInMillis
                 val endOfDay = Calendar.getInstance().apply {
-                    timeInMillis = endDate?.timeInMillis ?: 0L
+                    timeInMillis = endDate
                     set(Calendar.HOUR_OF_DAY, 23)
                     set(Calendar.MINUTE, 59)
                     set(Calendar.SECOND, 59)
                     set(Calendar.MILLISECOND, 999)
                 }.timeInMillis
                 val filteredTransactions = if (searchQuery.isNotBlank() && searchResults != null) {
-                    searchResults // لا تطبق أي فلترة إضافية على نتائج البحث
+                    searchResults!!
                 } else {
-                    (transactions ?: emptyList()).filter { tx ->
+                    transactions.filter { tx ->
                         val accountMatch = selectedAccount == null || tx.getAccountId() == selectedAccount?.getId()
                         val dateMatch = tx.getTransactionDate() in startOfDay..endOfDay
                         accountMatch && dateMatch
@@ -249,6 +254,7 @@ class TransactionsFragment : Fragment() {
                     )
                 }
                 if (showProgress) {
+                    // يمكنك استبداله بـ Dialog مخصص أو CircularProgressIndicator
                     AlertDialog(
                         onDismissRequest = {},
                         title = { Text("جاري حذف القيد...") },
@@ -258,24 +264,19 @@ class TransactionsFragment : Fragment() {
                     )
                 }
 
-                TransactionsScreenContent(
-                    transactions = filteredTransactions ?: emptyList(),
+                TransactionsScreen(
+                    transactions = filteredTransactions,
                     accounts = accounts,
-                    balancesMap = (balancesMap ?: emptyMap())
-                        .mapNotNull { (key, value) ->
-                            val account = accountMap[key]
-                            if (account != null) {
-                                account to (
-                                    (value as? Map<String?, Double?>)
-                                        ?.filterKeys { it != null }
-                                        ?.mapKeys { it.key!! as String? }
-                                        ?.filterValues { it != null }
-                                        ?.mapValues { it.value as Double? }
-                                        ?: emptyMap()
-                                )
-                            } else null
-                        }
-                        .toMap(),
+                    balancesMap = (balancesMapNullable ?: emptyMap())
+                        .filterKeys { it != null }
+                        .mapKeys { it.key!! }
+                        .mapValues { entry ->
+                            (entry.value as? Map<String?, Double?>)
+                                ?.filterKeys { it != null }
+                                ?.mapKeys { it.key!! }
+                                ?.filterValues { it != null }
+                                ?.mapValues { it.value!! } ?: emptyMap()
+                        },
                     selectedAccount = selectedAccount,
                     onAccountFilter = { selectedAccount = it },
                     startDate = startDate,
@@ -287,6 +288,10 @@ class TransactionsFragment : Fragment() {
                     searchQuery = searchQuery,
                     onSearch = { searchQuery = it },
                     onAddClick = { navController.navigate(R.id.action_transactions_to_addTransaction) },
+                    onDelete = { transaction ->
+                        transactionToDelete = transaction
+                        showDeleteDialog = true
+                    },
                     onEdit = { transaction ->
                         val args = Bundle().apply { putLong("transactionId", transaction.getId()) }
                         navController.navigate(R.id.action_transactions_to_editTransaction, args)
@@ -294,16 +299,23 @@ class TransactionsFragment : Fragment() {
                     onWhatsApp = { transaction ->
                         val account = accounts.find { it.getId() == transaction.getAccountId() }
                         val phone = account?.getPhoneNumber()
+                        val currency = transaction.getCurrency()
                         if (!phone.isNullOrBlank()) {
-                            val balance = 0.0 // يمكنك حساب الرصيد بدقة إذا أردت
-                            val msg = NotificationUtils.buildWhatsAppMessage(
-                                context,
-                                account?.getName() ?: "-",
-                                transaction,
-                                balance,
-                                transaction.getType()
-                            )
-                            NotificationUtils.sendWhatsAppMessage(context, phone, msg)
+                            transactionRepository?.getBalanceUntilTransaction(
+                                transaction.getAccountId(),
+                                transaction.getTransactionDate(),
+                                transaction.getId(),
+                                currency
+                            )?.observe(viewLifecycleOwner) { balance ->
+                                val msg = NotificationUtils.buildWhatsAppMessage(
+                                    context,
+                                    account?.getName() ?: "-",
+                                    transaction,
+                                    balance ?: 0.0,
+                                    transaction.getType()
+                                )
+                                NotificationUtils.sendWhatsAppMessage(context, phone, msg)
+                            }
                         } else {
                             Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
                         }
@@ -311,14 +323,21 @@ class TransactionsFragment : Fragment() {
                     onSms = { transaction ->
                         val account = accounts.find { it.getId() == transaction.getAccountId() }
                         val phone = account?.getPhoneNumber()
+                        val currency = transaction.getCurrency()
                         if (!phone.isNullOrBlank()) {
-                            val msg = "حسابكم لدينا: ${transaction.getAmount()} ${transaction.getCurrency()}\n${transaction.getDescription()}"
-                            NotificationUtils.sendSmsMessage(context, phone, msg)
+                            transactionRepository?.getBalanceUntilTransaction(
+                                transaction.getAccountId(),
+                                transaction.getTransactionDate(),
+                                transaction.getId(),
+                                currency
+                            )?.observe(viewLifecycleOwner) { balance ->
+                                val msg = "حسابكم لدينا: ${transaction.getAmount()} ${transaction.getCurrency()}\n${transaction.getDescription()}\nالرصيد: ${balance ?: 0.0} ${transaction.getCurrency()}"
+                                NotificationUtils.sendSmsMessage(context, phone, msg)
+                            }
                         } else {
                             Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
                         }
-                    },
-                    onDeleteConfirmed = { transaction -> deleteTransactionWithServer(transaction) }
+                    }
                 )
             }
         }
@@ -349,17 +368,59 @@ class TransactionsFragment : Fragment() {
                         query.lowercase(Locale.getDefault()) // تحديث نص البحث الحالي
                     if (query.isEmpty()) {
                         // عند إفراغ البحث، نعود للسلوك القديم
-                        viewModel?.loadTransactionsByDateRange(
-                            startDate!!.timeInMillis,
-                            endDate!!.timeInMillis
+                        viewModel!!.loadTransactionsByDateRange(
+                            startDate!!.getTimeInMillis(),
+                            endDate!!.getTimeInMillis()
                         )
                     } else {
                         // عند البحث، نبحث في قاعدة البيانات مباشرة بالوصف
-                        viewModel?.searchTransactionsByDescription("%" + query + "%")!!
+                        viewModel!!.searchTransactionsByDescription("%" + query + "%")!!
                             .observe(
                                 getViewLifecycleOwner(),
                                 Observer { results: MutableList<Transaction?>? ->
-                                    searchResults = results?.filterNotNull() // فقط اعرض النتائج كما هي
+                                    if (results != null) {
+                                        // تطبيق فلتر الحساب فقط على النتائج
+                                        val filtered: MutableList<Transaction?> =
+                                            ArrayList<Transaction?>()
+                                        var totalAmount = 0.0
+
+                                        for (t in results) {
+                                            var match = true
+
+
+                                            // فلترة الحساب فقط
+                                            if (selectedAccount != null && !selectedAccount!!.isEmpty()) {
+                                                var account: Account? = null
+                                                if (accountMap.containsKey(t!!.getAccountId())) {
+                                                    account = accountMap.get(t!!.getAccountId())
+                                                }
+                                                val accountName =
+                                                    if (account != null) account.getName() else null
+                                                if (accountName == null || accountName != selectedAccount) {
+                                                    match = false
+                                                }
+                                            }
+
+                                            if (match) {
+                                                filtered.add(t)
+                                                totalAmount += t!!.getAmount()
+                                            }
+                                        }
+
+
+                                        // تحديث الإحصائيات والقائمة
+                                        // binding!!.totalTransactionsText.setText(filtered.size.toString())
+                                        // binding!!.totalAmountText.setText(
+                                        //     String.format(
+                                        //         Locale.ENGLISH,
+                                        //         "%.2f",
+                                        //         totalAmount
+                                        //     )
+                                        // )
+                                        // adapter!!.submitList(filtered)
+                                        // binding!!.transactionsRecyclerView.setVisibility(if (filtered.isEmpty()) View.GONE else View.VISIBLE)
+                                        // binding!!.emptyView.setVisibility(if (filtered.isEmpty()) View.VISIBLE else View.GONE)
+                                    }
                                 })
                     }
                     return true
@@ -372,9 +433,9 @@ class TransactionsFragment : Fragment() {
                 isSearchActive = false // إعادة تعيين حالة البحث
                 currentSearchText = "" // إفراغ نص البحث
                 // إعادة تحميل البيانات بالتواريخ المحددة (السلوك القديم)
-                viewModel?.loadTransactionsByDateRange(
-                    startDate!!.timeInMillis,
-                    endDate!!.timeInMillis
+                viewModel!!.loadTransactionsByDateRange(
+                    startDate!!.getTimeInMillis(),
+                    endDate!!.getTimeInMillis()
                 )
                 false
             })
@@ -429,7 +490,7 @@ class TransactionsFragment : Fragment() {
             allTransactions,
             accountBalancesMap,
             AccountPickerBottomSheet.OnAccountSelectedListener { account: Account? ->
-                selectedAccount = account!!
+                selectedAccount = account!!.getName()
                 // binding!!.accountFilterDropdown.setText(account.getName())
                 applyAllFilters()
             }
@@ -549,9 +610,9 @@ class TransactionsFragment : Fragment() {
             if (isSearchActive) {
                 applyAllFilters()
             } else {
-                viewModel?.loadTransactionsByDateRange(
-                    startDate!!.timeInMillis,
-                    endDate!!.timeInMillis
+                viewModel!!.loadTransactionsByDateRange(
+                    startDate!!.getTimeInMillis(),
+                    endDate!!.getTimeInMillis()
                 )
             }
             dialog.dismiss()
@@ -644,16 +705,17 @@ class TransactionsFragment : Fragment() {
 
 
                     // تحميل المعاملات مع التصفية الافتراضية
-                    viewModel?.loadTransactionsByDateRange(
-                        startDate!!.timeInMillis,
-                        endDate!!.timeInMillis
+                    viewModel!!.loadTransactionsByDateRange(
+                        startDate!!.getTimeInMillis(),
+                        endDate!!.getTimeInMillis()
                     )
                 }
             })
 
 
         // مراقبة المعاملات
-        viewModel?.getTransactions()?.observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
+        viewModel!!.getTransactions()
+            .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
                 // إخفاء مؤشر التحميل
                 // binding!!.progressBar.setVisibility(View.GONE)
                 if (transactions != null) {
@@ -666,7 +728,7 @@ class TransactionsFragment : Fragment() {
             })
 
         // مراقبة أرصدة الحسابات
-        viewModel?.accountBalancesMap?.observe(
+        viewModel!!.accountBalancesMap.observe(
             getViewLifecycleOwner(),
             Observer { balancesMap: MutableMap<Long?, MutableMap<String?, Double?>?>? ->
                 if (balancesMap != null) {
@@ -682,7 +744,7 @@ class TransactionsFragment : Fragment() {
             .setPositiveButton(
                 R.string.yes,
                 DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int ->
-                    viewModel?.deleteTransaction(transaction)
+                    viewModel!!.deleteTransaction(transaction)
                     Toast.makeText(
                         requireContext(),
                         R.string.transaction_deleted,
@@ -699,14 +761,14 @@ class TransactionsFragment : Fragment() {
 
         // تحويل التواريخ إلى بداية اليوم ونهاية اليوم للمقارنة
         val startCal = Calendar.getInstance()
-        startCal.setTimeInMillis(startDate?.timeInMillis ?: 0L)
+        startCal.setTimeInMillis(startDate!!.getTimeInMillis())
         startCal.set(Calendar.HOUR_OF_DAY, 0)
         startCal.set(Calendar.MINUTE, 0)
         startCal.set(Calendar.SECOND, 0)
         startCal.set(Calendar.MILLISECOND, 0)
 
         val endCal = Calendar.getInstance()
-        endCal.setTimeInMillis(endDate?.timeInMillis ?: 0L)
+        endCal.setTimeInMillis(endDate!!.getTimeInMillis())
         endCal.set(Calendar.HOUR_OF_DAY, 23)
         endCal.set(Calendar.MINUTE, 59)
         endCal.set(Calendar.SECOND, 59)
@@ -722,13 +784,13 @@ class TransactionsFragment : Fragment() {
 
 
             // فلترة الحساب
-            if (selectedAccount != null && !selectedAccount!!.getName().isEmpty()) {
+            if (selectedAccount != null && !selectedAccount!!.isEmpty()) {
                 var account: Account? = null
                 if (accountMap.containsKey(t.getAccountId())) {
                     account = accountMap.get(t.getAccountId())
                 }
                 val accountName = if (account != null) account.getName() else null
-                if (accountName == null || accountName != selectedAccount!!.getName()) match = false
+                if (accountName == null || accountName != selectedAccount) match = false
             }
 
 
@@ -778,14 +840,12 @@ class TransactionsFragment : Fragment() {
             }
         }
 
-    // لا داعي لاستخدام LaunchedEffect هنا في onResume، يجب أن يكون كل منطق Composable داخل Composable فقط
     override fun onResume() {
         super.onResume()
         // تحديث القائمة فقط إذا كانت فارغة
         // if (adapter!!.getItemCount() == 0) {
         //     loadTransactions()
         // }
-        // لا تستدعي أي Composable هنا
     }
 
     override fun onPause() {
@@ -796,19 +856,21 @@ class TransactionsFragment : Fragment() {
         // عرض مؤشر التحميل
         // binding!!.progressBar.setVisibility(View.VISIBLE)
 
+
         // تحميل البيانات من قاعدة البيانات المحلية
-        viewModel?.getTransactions()?.observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
-            // إخفاء مؤشر التحميل
-            // binding!!.progressBar.setVisibility(View.GONE)
-            if (transactions != null && !transactions.isEmpty()) {
-                // تحديث القائمة
-                allTransactions = transactions
-                applyAllFilters()
-            } else {
-                // عرض رسالة عدم وجود بيانات
-                // binding!!.emptyView.setVisibility(View.VISIBLE)
-            }
-        })
+        viewModel!!.getTransactions()
+            .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
+                // إخفاء مؤشر التحميل
+                // binding!!.progressBar.setVisibility(View.GONE)
+                if (transactions != null && !transactions.isEmpty()) {
+                    // تحديث القائمة
+                    allTransactions = transactions
+                    applyAllFilters()
+                } else {
+                    // عرض رسالة عدم وجود بيانات
+                    // binding!!.emptyView.setVisibility(View.VISIBLE)
+                }
+            })
     }
 
     private fun loadAccounts() {
@@ -853,69 +915,58 @@ class TransactionsFragment : Fragment() {
             }
             return false
         }
-
-    private suspend fun deleteTransactionWithServer(transaction: Transaction): Boolean {
-        // تحقق من الاتصال بالإنترنت وجلب التوكن
-        val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
-        val isNetworkAvailable = connectivityManager?.activeNetworkInfo?.isConnected == true
-        if (!isNetworkAvailable) return false
-        val token = requireContext().getSharedPreferences("auth_prefs", Context.MODE_PRIVATE).getString("token", null)
-        if (token == null) return false
-        return suspendCancellableCoroutine { cont ->
-            RetrofitClient.getApiService()
-                .deleteTransaction("Bearer $token", transaction.getServerId())
-                .enqueue(object : Callback<Void?> {
-                    override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
-                        if (response.isSuccessful) {
-                            viewModel?.deleteTransaction(transaction)
-                            cont.resume(true) {}
-                        } else {
-                            cont.resume(false) {}
-                        }
-                    }
-                    override fun onFailure(call: Call<Void?>, t: Throwable) {
-                        cont.resume(false) {}
-                    }
-                })
-        }
-    }
 }
 
 @Composable
 fun TransactionsScreenContent(
     transactions: List<Transaction>,
     accounts: List<Account>,
-    balancesMap: Map<Account, Map<String?, Double?>>, // المفتاح الآن Account
-    selectedAccount: Account?,
-    onAccountFilter: (Account?) -> Unit,
-    startDate: Calendar?,
-    endDate: Calendar?,
-    onDateFilter: (Calendar?, Calendar?) -> Unit,
-    searchQuery: String,
-    onSearch: (String) -> Unit,
-    onAddClick: () -> Unit,
-    onEdit: (Transaction) -> Unit,
-    onWhatsApp: (Transaction) -> Unit,
-    onSms: (Transaction) -> Unit,
-    onDeleteConfirmed: suspend (Transaction) -> Boolean
+    navController: NavController,
+    context: Context,
+    onDeleteConfirmed: (Transaction) -> Unit
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var transactionToDelete by remember { mutableStateOf<Transaction?>(null) }
-    var showProgress by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
     Box {
         TransactionsScreen(
             transactions = transactions,
             accounts = accounts,
-            onAddClick = onAddClick,
+            onAddClick = { navController.navigate(R.id.action_transactions_to_addTransaction) },
             onDelete = { transaction ->
                 transactionToDelete = transaction
                 showDeleteDialog = true
             },
-            onEdit = onEdit,
-            onWhatsApp = onWhatsApp,
-            onSms = onSms
+            onEdit = { transaction ->
+                val args = Bundle().apply { putLong("transactionId", transaction.getId()) }
+                navController.navigate(R.id.action_transactions_to_editTransaction, args)
+            },
+            onWhatsApp = { transaction ->
+                val account = accounts.find { it.getId() == transaction.getAccountId() }
+                val phone = account?.getPhoneNumber()
+                if (!phone.isNullOrBlank()) {
+                    val balance = 0.0 // يمكنك حساب الرصيد بدقة إذا أردت
+                    val msg = NotificationUtils.buildWhatsAppMessage(
+                        context,
+                        account.getName() ?: "-",
+                        transaction,
+                        balance,
+                        transaction.getType()
+                    )
+                    NotificationUtils.sendWhatsAppMessage(context, phone, msg)
+                } else {
+                    Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                }
+            },
+            onSms = { transaction ->
+                val account = accounts.find { it.getId() == transaction.getAccountId() }
+                val phone = account?.getPhoneNumber()
+                if (!phone.isNullOrBlank()) {
+                    val msg = "حسابكم لدينا: ${transaction.getAmount()} ${transaction.getCurrency()}\n${transaction.getDescription()}"
+                    NotificationUtils.sendSmsMessage(context, phone, msg)
+                } else {
+                    Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                }
+            }
         )
         if (showDeleteDialog && transactionToDelete != null) {
             AlertDialog(
@@ -927,18 +978,10 @@ fun TransactionsScreenContent(
                 text = { Text("هل أنت متأكد أنك تريد حذف هذا القيد؟") },
                 confirmButton = {
                     TextButton(onClick = {
+                        onDeleteConfirmed(transactionToDelete!!)
+                        Toast.makeText(context, "تم حذف القيد بنجاح", Toast.LENGTH_SHORT).show()
                         showDeleteDialog = false
-                        showProgress = true
-                        coroutineScope.launch {
-                            val success = onDeleteConfirmed(transactionToDelete!!)
-                            showProgress = false
-                            if (success) {
-                                Toast.makeText(context, "تم حذف القيد بنجاح", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(context, "فشل في حذف القيد", Toast.LENGTH_SHORT).show()
-                            }
-                            transactionToDelete = null
-                        }
+                        transactionToDelete = null
                     }) {
                         Text("نعم")
                     }
@@ -951,15 +994,6 @@ fun TransactionsScreenContent(
                         Text("لا")
                     }
                 }
-            )
-        }
-        if (showProgress) {
-            AlertDialog(
-                onDismissRequest = {},
-                title = { Text("جاري حذف القيد...") },
-                text = { Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator() } },
-                confirmButton = {},
-                dismissButton = {}
             )
         }
     }

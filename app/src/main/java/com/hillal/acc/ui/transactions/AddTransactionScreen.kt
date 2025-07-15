@@ -75,7 +75,6 @@ import androidx.compose.material.icons.filled.Star
 import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
 import com.hillal.acc.ui.theme.AppDimensions
-import com.hillal.acc.ui.transactions.TransactionViewModel
 
 // دوال مساعدة لتحويل الأرقام إلى كلمات
 private fun wholeNumberToWords(number: Long): String {
@@ -217,7 +216,6 @@ fun AddTransactionScreen(
     transactionRepository: TransactionRepository,
     userPreferences: UserPreferences = UserPreferences(LocalContext.current)
 ) {
-    val transactionViewModel: TransactionViewModel = viewModel()
     AppTheme {
         val context = LocalContext.current
         val lifecycleOwner = LocalLifecycleOwner.current
@@ -413,16 +411,11 @@ fun AddTransactionScreen(
                     lastSavedTransaction = transaction
                     lastSavedAccount = account
                     // Get balance
-                    transactionViewModel.getBalanceUntilTransaction(
-                        accountId = transaction.getAccountId(),
-                        transactionDate = transaction.getTransactionDate(),
-                        transactionId = transaction.getId(),
-                        currency = transaction.getCurrency() ?: "يمني"
-                    ).observe(lifecycleOwner) { balance ->
-                        val safeBalance = balance ?: 0.0
-                        lastSavedBalance = safeBalance
-                        isDialogShown = true
-                    }
+                    transactionRepository.getBalanceUntilDate(selectedAccountId, transaction.getTransactionDate(), currency)
+                        .observe(lifecycleOwner) { balance ->
+                            lastSavedBalance = balance ?: 0.0
+                            isDialogShown = true
+                        }
                     // Save suggestion
                     val desc = description.trim()
                     if (desc.isNotEmpty()) {
@@ -867,23 +860,14 @@ fun AddTransactionScreen(
                                     lastSavedTransaction?.let { transaction ->
                                         val phone = account.getPhoneNumber()
                                         if (!phone.isNullOrEmpty()) {
-                                            transactionViewModel.getBalanceUntilTransaction(
-                                                accountId = transaction.getAccountId(),
-                                                transactionDate = transaction.getTransactionDate(),
-                                                transactionId = transaction.getId(),
-                                                currency = transaction.getCurrency() ?: "يمني"
-                                            ).observe(lifecycleOwner) { balance ->
-                                                val safeBalance = balance ?: 0.0
-                                                val absBalance = abs(safeBalance)
-                                                val msg = NotificationUtils.buildWhatsAppMessage(
-                                                    context,
-                                                    account.getName() ?: "-",
-                                                    transaction,
-                                                    absBalance,
-                                                    transaction.getType()
-                                                )
-                                                NotificationUtils.sendWhatsAppMessage(context, phone, msg)
-                                            }
+                                            val msg = NotificationUtils.buildWhatsAppMessage(
+                                                context,
+                                                account.getName(),
+                                                transaction,
+                                                lastSavedBalance,
+                                                transaction.getType()
+                                            )
+                                            NotificationUtils.sendWhatsAppMessage(context, phone, msg)
                                         } else {
                                             Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
                                         }
@@ -909,26 +893,17 @@ fun AddTransactionScreen(
                                 lastSavedTransaction?.let { transaction ->
                                     val phone = account.getPhoneNumber()
                                     if (!phone.isNullOrEmpty()) {
-                                        transactionViewModel.getBalanceUntilTransaction(
-                                            accountId = transaction.getAccountId(),
-                                            transactionDate = transaction.getTransactionDate(),
-                                            transactionId = transaction.getId(),
-                                            currency = transaction.getCurrency() ?: "يمني"
-                                        ).observe(lifecycleOwner) { balance ->
-                                            val safeBalance = balance ?: 0.0
-                                            val absBalance = abs(safeBalance)
-                                            val type = transaction.getType()
-                                            val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
-                                            val balanceStr = String.format(Locale.US, "%.0f", absBalance)
-                                            val currency = transaction.getCurrency() ?: "يمني"
-                                            val typeText = if (type.equals("credit", true) || type == "له") "لكم" else "عليكم"
-                                            val balanceText = if (safeBalance >= 0) "الرصيد لكم " else "الرصيد عليكم "
-                                            val message = "حسابكم لدينا:\n" +
-                                                    typeText + " " + amountStr + " " + currency + "\n" +
-                                                    (transaction.getDescription() ?: "") + "\n" +
-                                                    balanceText + balanceStr + " " + currency
-                                            NotificationUtils.sendSmsMessage(context, phone, message)
-                                        }
+                                        val type = transaction.getType()
+                                        val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
+                                        val balanceStr = String.format(Locale.US, "%.0f", abs(lastSavedBalance))
+                                        val currency = transaction.getCurrency()
+                                        val typeText = if (type.equals("credit", true) || type == "له") "لكم" else "عليكم"
+                                        val balanceText = if (lastSavedBalance >= 0) "الرصيد لكم " else "الرصيد عليكم "
+                                        val message = "حسابكم لدينا:\n" +
+                                                typeText + " " + amountStr + " " + currency + "\n" +
+                                                transaction.getDescription() + "\n" +
+                                                balanceText + balanceStr + " " + currency
+                                        NotificationUtils.sendSmsMessage(context, phone, message)
                                     } else {
                                         Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
                                     }
