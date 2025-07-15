@@ -298,10 +298,11 @@ class TransactionsFragment : Fragment() {
                         val currency = transaction.getCurrency() ?: "يمني"
                         if (!phone.isNullOrBlank()) {
                             val balance = transactionViewModel?.getBalanceUntilTransaction(
-                                accountId = transaction.getAccountId().toString(),
-                                transactionId = transaction.getId().toString(),
+                                accountId = transaction.getAccountId(),
+                                transactionDate = transaction.getTransactionDate(),
+                                transactionId = transaction.getId(),
                                 currency = currency
-                            ) ?: 0.0
+                            )?.value ?: 0.0
                             val msg = NotificationUtils.buildWhatsAppMessage(
                                 context,
                                 account?.getName() ?: "-",
@@ -322,10 +323,11 @@ class TransactionsFragment : Fragment() {
                         val currency = transaction.getCurrency() ?: "يمني"
                         if (!phone.isNullOrBlank()) {
                             val balance = transactionViewModel?.getBalanceUntilTransaction(
-                                accountId = transaction.getAccountId().toString(),
-                                transactionId = transaction.getId().toString(),
+                                accountId = transaction.getAccountId(),
+                                transactionDate = transaction.getTransactionDate(),
+                                transactionId = transaction.getId(),
                                 currency = currency
-                            ) ?: 0.0
+                            )?.value ?: 0.0
                             val type = transaction.getType()
                             val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
                             val balanceStr = String.format(Locale.US, "%.0f", abs(balance))
