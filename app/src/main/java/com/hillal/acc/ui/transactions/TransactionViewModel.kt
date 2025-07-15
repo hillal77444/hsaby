@@ -4,8 +4,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.hillal.acc.data.model.Transaction
 import com.hillal.acc.data.repository.AccountRepository
+import com.hillal.acc.data.repository.TransactionRepository
 
-class TransactionViewModel(private val accountRepository: AccountRepository) : ViewModel() {
+class TransactionViewModel(private val accountRepository: AccountRepository, private val transactionRepository: TransactionRepository) : ViewModel() {
     fun getTransactionsForAccount(accountId: Long): LiveData<MutableList<Transaction?>?>? {
         return accountRepository.getTransactionsForAccount(accountId)
     }
@@ -15,7 +16,7 @@ class TransactionViewModel(private val accountRepository: AccountRepository) : V
     }
 
     fun getBalanceUntilTransaction(accountId: Long, transactionDate: Long, transactionId: Long, currency: String): LiveData<Double> {
-        return accountRepository.database.transactionDao().getBalanceUntilTransaction(accountId, transactionDate, transactionId, currency)
+        return transactionRepository.getBalanceUntilTransaction(accountId, transactionDate, transactionId, currency)
     }
 
     fun insertTransaction(transaction: Transaction?) {

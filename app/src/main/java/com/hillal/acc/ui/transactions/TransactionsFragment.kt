@@ -110,11 +110,11 @@ class TransactionsFragment : Fragment() {
         accountViewModel =
             ViewModelProvider(this).get<AccountViewModel>(AccountViewModel::class.java)
         val accountRepository = app.getAccountRepository()
-        val factory = TransactionViewModelFactory(accountRepository)
+        transactionRepository = TransactionRepository(app.getDatabase())
+        val factory = TransactionViewModelFactory(accountRepository, transactionRepository!!)
         transactionViewModel = ViewModelProvider(this, factory).get<TransactionViewModel>(
             TransactionViewModel::class.java
         )
-        transactionRepository = TransactionRepository(app.getDatabase())
         setHasOptionsMenu(true)
 
 

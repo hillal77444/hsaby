@@ -81,13 +81,12 @@ class ExchangeFragment : Fragment() {
         cashboxViewModel =
             ViewModelProvider(this).get<CashboxViewModel>(CashboxViewModel::class.java)
         val accountRepository = (requireActivity().getApplication() as App).getAccountRepository()
-        val transactionFactory = TransactionViewModelFactory(accountRepository)
+        transactionRepository = (requireActivity().getApplication() as App).getTransactionRepository()
+        val transactionFactory = TransactionViewModelFactory(accountRepository, transactionRepository!!)
         transactionViewModel =
             ViewModelProvider(this, transactionFactory).get<TransactionViewModel>(
                 TransactionViewModel::class.java
             )
-        transactionRepository =
-            (requireActivity().getApplication() as App).getTransactionRepository()
         currencies = getResources().getStringArray(R.array.currencies_array)
         currencyAdapter = ArrayAdapter<String?>(
             requireContext(),

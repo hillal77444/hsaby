@@ -21,8 +21,9 @@ class AccountDetailsComposeFragment : Fragment() {
                 val context = requireContext().applicationContext
                 val db = AppDatabase.getInstance(context)
                 val accountRepository = com.hillal.acc.data.repository.AccountRepository(db.accountDao(), db)
+                val transactionRepository = com.hillal.acc.data.repository.TransactionRepository(db)
                 val accountViewModel: AccountViewModel = viewModel(factory = AccountViewModelFactory(accountRepository))
-                val transactionViewModel: com.hillal.acc.ui.transactions.TransactionViewModel = viewModel(factory = TransactionViewModelFactory(accountRepository))
+                val transactionViewModel: com.hillal.acc.ui.transactions.TransactionViewModel = viewModel(factory = TransactionViewModelFactory(accountRepository, transactionRepository))
                 com.hillal.acc.ui.accounts.AccountDetailsScreen(
                     accountId = accountId,
                     navController = findNavController(),
