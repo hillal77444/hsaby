@@ -73,14 +73,14 @@ fun TransactionCard(
         val cardCorner = 6.dp
 
         // خطوط صغيرة جداً (70% من القيم السابقة تقريباً)
-        val accountFontSize = 10.sp
-        val typeFontSize = 9.sp
-        val dateFontSize = 9.sp
-        val descFontSize = 9.sp
-        val buttonTextSize = 8.sp
-        val iconSize = 14.dp
-        val buttonWidth = screenWidth * 0.13f
-        val buttonHeight = 28.dp
+        val accountFontSize = 25.sp
+        val typeFontSize = 18.sp
+        val dateFontSize = 15.sp
+        val descFontSize = 18.sp
+        val buttonTextSize = 16.sp
+        val iconSize = 13.dp
+        val buttonWidth = screenWidth * 0.2f
+        val buttonHeight = 38.dp
 
         val isDebit = transaction.getType()?.lowercase() == "debit" || transaction.getType() == "عليه"
         val typeText = if (isDebit) "عليه" else "له"
@@ -171,13 +171,11 @@ fun TransactionCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(
-                        text = description,
-                        fontSize = descFontSize,
-                        color = Color(0xFF444444),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
+                    HighlightedDescription(
+                        description = description,
+                        searchQuery = searchQuery,
+                        modifier = Modifier.weight(1f),
+                        fontSize = descFontSize
                     )
                 }
                 Spacer(Modifier.height(rowSpacing))
@@ -295,9 +293,9 @@ fun HighlightedDescription(
     description: String,
     searchQuery: String,
     modifier: Modifier = Modifier,
-    fontSize: TextUnit = 15.sp
+    fontSize: TextUnit = 9.sp
 ) {
-    val maxChars = 80
+    val maxChars = 60 // أصغر قليلاً لتناسب التصميم الصغير
     if (searchQuery.isBlank()) {
         Text(
             text = description,
@@ -305,7 +303,7 @@ fun HighlightedDescription(
             color = Color(0xFF444444),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = modifier.padding(horizontal = 6.dp)
+            modifier = modifier
         )
     } else {
         val index = description.indexOf(searchQuery, ignoreCase = true)
@@ -316,7 +314,7 @@ fun HighlightedDescription(
                 color = Color(0xFF444444),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = modifier.padding(horizontal = 6.dp)
+                modifier = modifier
             )
         } else {
             val contextLength = maxChars - searchQuery.length
@@ -342,7 +340,7 @@ fun HighlightedDescription(
                 color = Color(0xFF444444),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = modifier.padding(horizontal = 6.dp)
+                modifier = modifier
             )
         }
     }
