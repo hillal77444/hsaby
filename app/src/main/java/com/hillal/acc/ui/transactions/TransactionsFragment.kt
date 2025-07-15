@@ -773,17 +773,14 @@ class TransactionsFragment : Fragment() {
             }
         }
 
+    // لا داعي لاستخدام LaunchedEffect هنا في onResume، يجب أن يكون كل منطق Composable داخل Composable فقط
     override fun onResume() {
         super.onResume()
         // تحديث القائمة فقط إذا كانت فارغة
         // if (adapter!!.getItemCount() == 0) {
         //     loadTransactions()
         // }
-        LaunchedEffect(Unit) {
-            // احذف أي استخدام لـ showDeleteDialog أو transactionToDelete أو showProgress أو AlertDialog خارج Composable.
-            // تأكد أن جميع منطق الحذف UI (الحوار، المؤشر، الحالة) داخل TransactionsScreenContent فقط.
-            // في Fragment، مرر فقط دالة الحذف إلى Composable:
-        }
+        // لا تستدعي أي Composable هنا
     }
 
     override fun onPause() {
@@ -794,21 +791,19 @@ class TransactionsFragment : Fragment() {
         // عرض مؤشر التحميل
         // binding!!.progressBar.setVisibility(View.VISIBLE)
 
-
         // تحميل البيانات من قاعدة البيانات المحلية
-        viewModel?.getTransactions()
-            .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
-                // إخفاء مؤشر التحميل
-                // binding!!.progressBar.setVisibility(View.GONE)
-                if (transactions != null && !transactions.isEmpty()) {
-                    // تحديث القائمة
-                    allTransactions = transactions
-                    applyAllFilters()
-                } else {
-                    // عرض رسالة عدم وجود بيانات
-                    // binding!!.emptyView.setVisibility(View.VISIBLE)
-                }
-            })
+        viewModel?.getTransactions()?.observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
+            // إخفاء مؤشر التحميل
+            // binding!!.progressBar.setVisibility(View.GONE)
+            if (transactions != null && !transactions.isEmpty()) {
+                // تحديث القائمة
+                allTransactions = transactions
+                applyAllFilters()
+            } else {
+                // عرض رسالة عدم وجود بيانات
+                // binding!!.emptyView.setVisibility(View.VISIBLE)
+            }
+        })
     }
 
     private fun loadAccounts() {
@@ -885,7 +880,7 @@ class TransactionsFragment : Fragment() {
 fun TransactionsScreenContent(
     transactions: List<Transaction>,
     accounts: List<Account>,
-    balancesMap: Map<Account, Map<String?, Double?>>,
+    balancesMap: Map<Account, Map<String?, Double?>>, // المفتاح الآن Account
     selectedAccount: Account?,
     onAccountFilter: (Account?) -> Unit,
     startDate: Calendar?,
@@ -903,6 +898,7 @@ fun TransactionsScreenContent(
     var transactionToDelete by remember { mutableStateOf<Transaction?>(null) }
     var showProgress by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     Box {
         TransactionsScreen(
             transactions = transactions,
@@ -932,9 +928,9 @@ fun TransactionsScreenContent(
                             val success = onDeleteConfirmed(transactionToDelete!!)
                             showProgress = false
                             if (success) {
-                                Toast.makeText(LocalContext.current, "تم حذف القيد بنجاح", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "تم حذف القيد بنجاح", Toast.LENGTH_SHORT).show()
                             } else {
-                                Toast.makeText(LocalContext.current, "فشل في حذف القيد", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "فشل في حذف القيد", Toast.LENGTH_SHORT).show()
                             }
                             transactionToDelete = null
                         }
