@@ -268,9 +268,10 @@ class TransactionsFragment : Fragment() {
                                 account to (
                                     (value as? Map<String?, Double?>)
                                         ?.filterKeys { it != null }
-                                        ?.mapKeys { it.key!! }
+                                        ?.mapKeys { it.key!! as String? }
                                         ?.filterValues { it != null }
-                                        ?.mapValues { it.value!! } ?: emptyMap()
+                                        ?.mapValues { it.value as Double? }
+                                        ?: emptyMap()
                                 )
                             } else null
                         }
