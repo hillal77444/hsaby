@@ -53,7 +53,7 @@ class ExchangeFragment : Fragment() {
         HashMap<Long?, MutableMap<String?, Double?>?>()
     private var cashboxViewModel: CashboxViewModel? = null
     private var accountViewModel: AccountViewModel? = null
-    private var transactionViewModel: TransactionViewModel? = null
+    private lateinit var transactionViewModel: TransactionViewModel
     private var transactionRepository: TransactionRepository? = null
     private var transactionsViewModel: TransactionsViewModel? = null
     private var binding: FragmentExchangeBinding? = null
@@ -240,9 +240,9 @@ class ExchangeFragment : Fragment() {
         }
         val currency = this.selectedFromCurrency
         val accountId = selectedAccount!!.getId()
-        val transactionsLiveData = transactionViewModel?.getTransactionsForAccount(accountId)
-        transactionsLiveData?.observe(getViewLifecycleOwner()) { transactions: List<Transaction>? ->
-            val lastTx = transactions?.filter { it.getCurrency() == currency }?.maxWithOrNull(compareBy({ it.getTransactionDate() }, { it.getId() }))
+        val transactionsLiveData = transactionViewModel.getTransactionsForAccount(accountId)
+        transactionsLiveData?.observe(getViewLifecycleOwner()) { transactions: MutableList<Transaction?>? ->
+            val lastTx = transactions?.filter { it?.getCurrency() == currency }?.maxWithOrNull(compareBy({ it?.getTransactionDate() ?: 0L }, { it?.getId() ?: 0L }))
             if (lastTx != null) {
                 transactionViewModel.getBalanceUntilTransaction(
                     accountId,
@@ -338,8 +338,8 @@ class ExchangeFragment : Fragment() {
         creditTx.setDescription(desc)
         creditTx.setWhatsappEnabled(whatsappEnabled)
         creditTx.setCashboxId(selectedCashboxId)
-        transactionViewModel!!.insertTransaction(debitTx)
-        transactionViewModel!!.insertTransaction(creditTx)
+        transactionViewModel.insertTransaction(debitTx)
+        transactionViewModel.insertTransaction(creditTx)
         Toast.makeText(getContext(), "تمت عملية الصرف بنجاح", Toast.LENGTH_LONG).show()
         amountEditText!!.setText("")
         rateEditText!!.setText("")

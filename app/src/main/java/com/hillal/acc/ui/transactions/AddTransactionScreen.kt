@@ -217,6 +217,7 @@ fun AddTransactionScreen(
     transactionRepository: TransactionRepository,
     userPreferences: UserPreferences = UserPreferences(LocalContext.current)
 ) {
+    val transactionViewModel: TransactionViewModel = viewModel()
     AppTheme {
         val context = LocalContext.current
         val lifecycleOwner = LocalLifecycleOwner.current
