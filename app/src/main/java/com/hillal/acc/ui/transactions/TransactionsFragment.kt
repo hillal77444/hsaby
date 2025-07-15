@@ -82,6 +82,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 class TransactionsFragment : Fragment() {
     private var viewModel: TransactionsViewModel? = null
@@ -925,6 +926,32 @@ class TransactionsFragment : Fragment() {
             }
             return false
         }
+
+    private suspend fun deleteTransactionWithServer(transaction: Transaction): Boolean {
+        // تحقق من الاتصال بالإنترنت وجلب التوكن
+        val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
+        val isNetworkAvailable = connectivityManager?.activeNetworkInfo?.isConnected == true
+        if (!isNetworkAvailable) return false
+        val token = requireContext().getSharedPreferences("auth_prefs", Context.MODE_PRIVATE).getString("token", null)
+        if (token == null) return false
+        return suspendCancellableCoroutine { cont ->
+            RetrofitClient.getApiService()
+                .deleteTransaction("Bearer $token", transaction.getServerId())
+                .enqueue(object : Callback<Void?> {
+                    override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
+                        if (response.isSuccessful) {
+                            viewModel.deleteTransaction(transaction)
+                            cont.resume(true) {}
+                        } else {
+                            cont.resume(false) {}
+                        }
+                    }
+                    override fun onFailure(call: Call<Void?>, t: Throwable) {
+                        cont.resume(false) {}
+                    }
+                })
+        }
+    }
 }
 
 @Composable
@@ -933,10 +960,12 @@ fun TransactionsScreenContent(
     accounts: List<Account>,
     navController: NavController,
     context: Context,
-    onDeleteConfirmed: (Transaction) -> Unit
+    onDeleteConfirmed: suspend (Transaction) -> Boolean
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var transactionToDelete by remember { mutableStateOf<Transaction?>(null) }
+    var showProgress by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
     Box {
         TransactionsScreen(
             transactions = transactions,
@@ -988,10 +1017,18 @@ fun TransactionsScreenContent(
                 text = { Text("هل أنت متأكد أنك تريد حذف هذا القيد؟") },
                 confirmButton = {
                     TextButton(onClick = {
-                        onDeleteConfirmed(transactionToDelete!!)
-                        Toast.makeText(context, "تم حذف القيد بنجاح", Toast.LENGTH_SHORT).show()
                         showDeleteDialog = false
-                        transactionToDelete = null
+                        showProgress = true
+                        coroutineScope.launch {
+                            val success = onDeleteConfirmed(transactionToDelete!!)
+                            showProgress = false
+                            if (success) {
+                                Toast.makeText(context, "تم حذف القيد بنجاح", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "فشل في حذف القيد", Toast.LENGTH_SHORT).show()
+                            }
+                            transactionToDelete = null
+                        }
                     }) {
                         Text("نعم")
                     }
@@ -1004,6 +1041,15 @@ fun TransactionsScreenContent(
                         Text("لا")
                     }
                 }
+            )
+        }
+        if (showProgress) {
+            AlertDialog(
+                onDismissRequest = {},
+                title = { Text("جاري حذف القيد...") },
+                text = { Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator() } },
+                confirmButton = {},
+                dismissButton = {}
             )
         }
     }
