@@ -91,4 +91,19 @@ interface TransactionDao {
     
     @Query("SELECT * FROM transactions WHERE isSynced = 0 AND userId = :userId")
     suspend fun getUnsyncedTransactions(userId: String): List<TransactionEntity>
+
+    @Query("""
+        SELECT SUM(CASE WHEN type = 'credit' THEN amount ELSE -amount END)
+        FROM transactions
+        WHERE accountId = :accountId
+          AND currency = :currency
+          AND (date < (
+                SELECT date FROM transactions WHERE id = :transactionId
+              )
+              OR (date = (
+                    SELECT date FROM transactions WHERE id = :transactionId
+                  ) AND id <= :transactionId)
+              )
+    """)
+    fun getBalanceUntilTransaction(accountId: String, transactionId: String, currency: String): Double?
 } 

@@ -388,13 +388,31 @@ public class AccountStatementActivity extends AppCompatActivity {
         prevDayCal.set(Calendar.MINUTE, 59);
         prevDayCal.set(Calendar.SECOND, 59);
         prevDayCal.set(Calendar.MILLISECOND, 999);
-        
-        LiveData<Double> prevBalanceLive = transactionRepository.getBalanceUntilDate(
-            lastSelectedAccount.getId(), 
-            prevDayCal.getTimeInMillis(), 
-            selectedCurrency
-        );
-        
+        // جلب آخر معاملة قبل بداية الفترة
+        Transaction lastTxBefore = null;
+        for (Transaction t : filtered) {
+            if (t.getTransactionDate() <= prevDayCal.getTimeInMillis()) {
+                if (lastTxBefore == null || t.getTransactionDate() > lastTxBefore.getTransactionDate() || (t.getTransactionDate() == lastTxBefore.getTransactionDate() && t.getId() > lastTxBefore.getId())) {
+                    lastTxBefore = t;
+                }
+            }
+        }
+        LiveData<Double> prevBalanceLive;
+        if (lastTxBefore != null) {
+            prevBalanceLive = transactionRepository.getBalanceUntilTransaction(
+                lastSelectedAccount.getId(),
+                lastTxBefore.getTransactionDate(),
+                lastTxBefore.getId(),
+                selectedCurrency
+            );
+        } else {
+            prevBalanceLive = transactionRepository.getBalanceUntilTransaction(
+                lastSelectedAccount.getId(),
+                prevDayCal.getTimeInMillis(),
+                -1,
+                selectedCurrency
+            );
+        }
         prevBalanceLive.observe(this, prevBalance -> {
             Map<String, Double> previousBalances = new HashMap<>();
             previousBalances.put(selectedCurrency, prevBalance != null ? prevBalance : 0.0);

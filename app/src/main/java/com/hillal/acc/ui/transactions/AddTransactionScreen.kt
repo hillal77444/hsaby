@@ -411,7 +411,7 @@ fun AddTransactionScreen(
                     lastSavedTransaction = transaction
                     lastSavedAccount = account
                     // Get balance
-                    transactionRepository.getBalanceUntilDate(selectedAccountId, transaction.getTransactionDate(), currency)
+                    transactionRepository.getBalanceUntilTransaction(selectedAccountId, transaction.getTransactionDate(), transaction.getId(), currency)
                         .observe(lifecycleOwner) { balance ->
                             lastSavedBalance = balance ?: 0.0
                             isDialogShown = true
@@ -860,11 +860,16 @@ fun AddTransactionScreen(
                                     lastSavedTransaction?.let { transaction ->
                                         val phone = account.getPhoneNumber()
                                         if (!phone.isNullOrEmpty()) {
+                                            val balance = transactionsViewModel.getBalanceUntilTransaction(
+                                                accountId = transaction.getAccountId().toString(),
+                                                transactionId = transaction.getId().toString(),
+                                                currency = transaction.getCurrency() ?: "يمني"
+                                            ) ?: 0.0
                                             val msg = NotificationUtils.buildWhatsAppMessage(
                                                 context,
-                                                account.getName(),
+                                                account.getName() ?: "-",
                                                 transaction,
-                                                lastSavedBalance,
+                                                balance,
                                                 transaction.getType()
                                             )
                                             NotificationUtils.sendWhatsAppMessage(context, phone, msg)
@@ -893,15 +898,20 @@ fun AddTransactionScreen(
                                 lastSavedTransaction?.let { transaction ->
                                     val phone = account.getPhoneNumber()
                                     if (!phone.isNullOrEmpty()) {
+                                        val balance = transactionsViewModel.getBalanceUntilTransaction(
+                                            accountId = transaction.getAccountId().toString(),
+                                            transactionId = transaction.getId().toString(),
+                                            currency = transaction.getCurrency() ?: "يمني"
+                                        ) ?: 0.0
                                         val type = transaction.getType()
                                         val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
-                                        val balanceStr = String.format(Locale.US, "%.0f", abs(lastSavedBalance))
-                                        val currency = transaction.getCurrency()
+                                        val balanceStr = String.format(Locale.US, "%.0f", abs(balance))
+                                        val currency = transaction.getCurrency() ?: "يمني"
                                         val typeText = if (type.equals("credit", true) || type == "له") "لكم" else "عليكم"
-                                        val balanceText = if (lastSavedBalance >= 0) "الرصيد لكم " else "الرصيد عليكم "
+                                        val balanceText = if (balance >= 0) "الرصيد لكم " else "الرصيد عليكم "
                                         val message = "حسابكم لدينا:\n" +
                                                 typeText + " " + amountStr + " " + currency + "\n" +
-                                                transaction.getDescription() + "\n" +
+                                                (transaction.getDescription() ?: "") + "\n" +
                                                 balanceText + balanceStr + " " + currency
                                         NotificationUtils.sendSmsMessage(context, phone, message)
                                     } else {

@@ -98,4 +98,8 @@ class TransactionRepository @Inject constructor(
             throw e
         }
     }
+
+    fun getBalanceUntilTransaction(accountId: String, transactionId: String, currency: String): Double? {
+        return transactionDao.getBalanceUntilTransaction(accountId, transactionId, currency)
+    }
 } 

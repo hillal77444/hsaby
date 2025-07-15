@@ -240,12 +240,22 @@ class ExchangeFragment : Fragment() {
         }
         val currency = this.selectedFromCurrency
         val accountId = selectedAccount!!.getId()
-        val now = System.currentTimeMillis()
-        transactionRepository!!.getBalanceUntilDate(accountId, now, currency)
-            .observe(getViewLifecycleOwner(), Observer { balance: Double? ->
-                val bal = if (balance != null) balance else 0.0
-                accountBalanceText!!.setText("الرصيد: " + bal + " " + currency)
-            })
+        transactionsViewModel?.getTransactionsByAccount(accountId)?.observe(getViewLifecycleOwner()) { transactions ->
+            val lastTx = transactions?.filter { it.getCurrency() == currency }?.maxWithOrNull(compareBy<Transaction>({ it.getTransactionDate() }, { it.getId() }))
+            if (lastTx != null) {
+                transactionRepository!!.getBalanceUntilTransaction(accountId, lastTx.getTransactionDate(), lastTx.getId(), currency)
+                    .observe(getViewLifecycleOwner(), Observer { balance: Double? ->
+                        val bal = balance ?: 0.0
+                        accountBalanceText!!.setText("الرصيد: " + bal + " " + currency)
+                    })
+            } else {
+                transactionRepository!!.getBalanceUntilTransaction(accountId, System.currentTimeMillis(), -1, currency)
+                    .observe(getViewLifecycleOwner(), Observer { balance: Double? ->
+                        val bal = balance ?: 0.0
+                        accountBalanceText!!.setText("الرصيد: " + bal + " " + currency)
+                    })
+            }
+        }
     }
 
     private fun updateExchangeAmount() {

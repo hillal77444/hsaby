@@ -142,31 +142,45 @@ fun AccountDetailsScreen(
                             val acc = listOfNotNull(account).find { it.getId() == transaction.getAccountId() }
                             val phone = acc?.getPhoneNumber()
                             if (!phone.isNullOrBlank()) {
+                                val balance = transactionViewModel.getBalanceUntilTransaction(
+                                    accountId = transaction.getAccountId().toString(),
+                                    transactionId = transaction.getId().toString(),
+                                    currency = transaction.getCurrency() ?: "يمني"
+                                ) ?: 0.0
                                 val message = NotificationUtils.buildWhatsAppMessage(
                                     context = context,
                                     accountName = acc.getName() ?: "--",
                                     transaction = transaction,
-                                    balance = balance ?: 0.0,
+                                    balance = balance,
                                     type = transaction.getType()
                                 )
                                 NotificationUtils.sendWhatsAppMessage(context, phone, message)
+                                showDeleteDialog = false
+                                transactionToDelete = null
                             }
                         },
                         onSms = {
                             val acc = listOfNotNull(account).find { it.getId() == transaction.getAccountId() }
                             val phone = acc?.getPhoneNumber()
                             if (!phone.isNullOrBlank()) {
+                                val balance = transactionViewModel.getBalanceUntilTransaction(
+                                    accountId = transaction.getAccountId().toString(),
+                                    transactionId = transaction.getId().toString(),
+                                    currency = transaction.getCurrency() ?: "يمني"
+                                ) ?: 0.0
                                 val type = transaction.getType()
                                 val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
-                                val balanceStr = String.format(Locale.US, "%.0f", abs(balance ?: 0.0))
+                                val balanceStr = String.format(Locale.US, "%.0f", abs(balance))
                                 val currency = transaction.getCurrency() ?: "يمني"
                                 val typeText = if (type.equals("credit", true) || type == "له") "لكم" else "عليكم"
-                                val balanceText = if ((balance ?: 0.0) >= 0) "الرصيد لكم " else "الرصيد عليكم "
+                                val balanceText = if (balance >= 0) "الرصيد لكم " else "الرصيد عليكم "
                                 val message = "حسابكم لدينا:\n" +
                                         typeText + " " + amountStr + " " + currency + "\n" +
                                         (transaction.getDescription() ?: "") + "\n" +
                                         balanceText + balanceStr + " " + currency
                                 NotificationUtils.sendSmsMessage(context, phone, message)
+                                showDeleteDialog = false
+                                transactionToDelete = null
                             }
                         },
                         index = idx,
@@ -211,5 +225,10 @@ fun AccountDetailsScreen(
                 }
             )
         }
+    }
+    // عند إعادة بناء الشاشة
+    LaunchedEffect(Unit) {
+        showDeleteDialog = false
+        transactionToDelete = null
     }
 } 

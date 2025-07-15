@@ -142,12 +142,10 @@ class TransactionsFragment : Fragment() {
         val context = requireContext()
         return ComposeView(requireContext()).apply {
             setContent {
-                val transactionsNullable by viewModel.getTransactions().observeAsState(emptyList())
-                val accountsNullable by accountViewModel.getAllAccounts().observeAsState(emptyList())
-                val balancesMapNullable by viewModel.accountBalancesMap.observeAsState(emptyMap())
-                val transactions = transactionsNullable ?: emptyList()
-                val accounts = accountsNullable ?: emptyList()
-                val balancesMap = balancesMapNullable ?: emptyMap<Long?, Map<String?, Double?>>()
+                // ربط القائمة مباشرة بـ LiveData من ViewModel
+                val transactions by viewModel.getTransactions().observeAsState(emptyList())
+                val accounts by accountViewModel.getAllAccounts().observeAsState(emptyList())
+                val balancesMap by viewModel.accountBalancesMap.observeAsState(emptyMap())
 
                 // State للفلاتر
                 var selectedAccount by remember { mutableStateOf<Account?>(null) }
@@ -172,7 +170,6 @@ class TransactionsFragment : Fragment() {
                 }
 
                 // تصفية المعاملات حسب الفلاتر (تُستخدم فقط إذا لم يكن هناك بحث)
-                // تأكد من أن الفلترة تتجاهل الوقت (من بداية اليوم إلى نهاية اليوم)
                 val startOfDay = Calendar.getInstance().apply {
                     timeInMillis = startDate
                     set(Calendar.HOUR_OF_DAY, 0)
@@ -254,7 +251,6 @@ class TransactionsFragment : Fragment() {
                     )
                 }
                 if (showProgress) {
-                    // يمكنك استبداله بـ Dialog مخصص أو CircularProgressIndicator
                     AlertDialog(
                         onDismissRequest = {},
                         title = { Text("جاري حذف القيد...") },
@@ -267,7 +263,7 @@ class TransactionsFragment : Fragment() {
                 TransactionsScreen(
                     transactions = filteredTransactions,
                     accounts = accounts,
-                    balancesMap = (balancesMapNullable ?: emptyMap())
+                    balancesMap = (balancesMap ?: emptyMap())
                         .filterKeys { it != null }
                         .mapKeys { it.key!! }
                         .mapValues { entry ->
@@ -299,23 +295,23 @@ class TransactionsFragment : Fragment() {
                     onWhatsApp = { transaction ->
                         val account = accounts.find { it.getId() == transaction.getAccountId() }
                         val phone = account?.getPhoneNumber()
-                        val currency = transaction.getCurrency()
+                        val currency = transaction.getCurrency() ?: "يمني"
                         if (!phone.isNullOrBlank()) {
-                            transactionRepository?.getBalanceUntilTransaction(
-                                transaction.getAccountId(),
-                                transaction.getTransactionDate(),
-                                transaction.getId(),
-                                currency
-                            )?.observe(viewLifecycleOwner) { balance ->
-                                val msg = NotificationUtils.buildWhatsAppMessage(
-                                    context,
-                                    account?.getName() ?: "-",
-                                    transaction,
-                                    balance ?: 0.0,
-                                    transaction.getType()
-                                )
-                                NotificationUtils.sendWhatsAppMessage(context, phone, msg)
-                            }
+                            val balance = transactionViewModel?.getBalanceUntilTransaction(
+                                accountId = transaction.getAccountId().toString(),
+                                transactionId = transaction.getId().toString(),
+                                currency = currency
+                            ) ?: 0.0
+                            val msg = NotificationUtils.buildWhatsAppMessage(
+                                context,
+                                account?.getName() ?: "-",
+                                transaction,
+                                balance,
+                                transaction.getType()
+                            )
+                            NotificationUtils.sendWhatsAppMessage(context, phone, msg)
+                            showDeleteDialog = false
+                            transactionToDelete = null
                         } else {
                             Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
                         }
@@ -323,17 +319,25 @@ class TransactionsFragment : Fragment() {
                     onSms = { transaction ->
                         val account = accounts.find { it.getId() == transaction.getAccountId() }
                         val phone = account?.getPhoneNumber()
-                        val currency = transaction.getCurrency()
+                        val currency = transaction.getCurrency() ?: "يمني"
                         if (!phone.isNullOrBlank()) {
-                            transactionRepository?.getBalanceUntilTransaction(
-                                transaction.getAccountId(),
-                                transaction.getTransactionDate(),
-                                transaction.getId(),
-                                currency
-                            )?.observe(viewLifecycleOwner) { balance ->
-                                val msg = "حسابكم لدينا: ${transaction.getAmount()} ${transaction.getCurrency()}\n${transaction.getDescription()}\nالرصيد: ${balance ?: 0.0} ${transaction.getCurrency()}"
-                                NotificationUtils.sendSmsMessage(context, phone, msg)
-                            }
+                            val balance = transactionViewModel?.getBalanceUntilTransaction(
+                                accountId = transaction.getAccountId().toString(),
+                                transactionId = transaction.getId().toString(),
+                                currency = currency
+                            ) ?: 0.0
+                            val type = transaction.getType()
+                            val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
+                            val balanceStr = String.format(Locale.US, "%.0f", abs(balance))
+                            val typeText = if (type.equals("credit", true) || type == "له") "لكم" else "عليكم"
+                            val balanceText = if (balance >= 0) "الرصيد لكم " else "الرصيد عليكم "
+                            val msg = "حسابكم لدينا:\n" +
+                                    typeText + " " + amountStr + " " + currency + "\n" +
+                                    (transaction.getDescription() ?: "") + "\n" +
+                                    balanceText + balanceStr + " " + currency
+                            NotificationUtils.sendSmsMessage(context, phone, msg)
+                            showDeleteDialog = false
+                            transactionToDelete = null
                         } else {
                             Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
                         }
@@ -846,6 +850,10 @@ class TransactionsFragment : Fragment() {
         // if (adapter!!.getItemCount() == 0) {
         //     loadTransactions()
         // }
+        LaunchedEffect(Unit) {
+            showDeleteDialog = false
+            transactionToDelete = null
+        }
     }
 
     override fun onPause() {
