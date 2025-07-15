@@ -3,6 +3,8 @@ package com.hillal.acc.ui.accounts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
@@ -61,7 +63,11 @@ fun AccountDetailsScreen(
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFF6F8FB) // خلفية ناعمة
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
             // شريط علوي ثابت
             Surface(
                 tonalElevation = 2.dp,
@@ -110,7 +116,10 @@ fun AccountDetailsScreen(
                     Text("لا توجد معاملات لهذا الحساب", color = Color.Gray)
                 }
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 0.dp)
+                ) {
                     itemsIndexed(filteredTransactions) { idx, transaction ->
                         val balanceLive = transactionViewModel.getBalanceUntilTransaction(
                             accountId = transaction.getAccountId(),
