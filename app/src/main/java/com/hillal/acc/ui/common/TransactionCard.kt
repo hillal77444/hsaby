@@ -98,11 +98,10 @@ fun TransactionCard(
         // تحديد إصدار النظام لدعم تأثير الزجاج الحقيقي فقط في أندرويد 12+
         val isAndroid12OrAbove = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S
 
-        Card(
-            // ==== Glassmorphism Effect Start ====
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = cardPaddingV, horizontal = cardPaddingH)
+                .matchParentSize()
                 .blur(16.dp)
                 .background(
                     brush = Brush.linearGradient(
@@ -113,6 +112,17 @@ fun TransactionCard(
                         start = Offset.Zero,
                         end = Offset.Infinite
                     ),
+                    shape = RoundedCornerShape(cardCorner)
+                )
+        )
+
+        Card(
+            // ==== Glassmorphism Effect Start ====
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = cardPaddingV, horizontal = cardPaddingH)
+                .background(
+                    Color.White.copy(alpha = 0.15f),
                     shape = RoundedCornerShape(cardCorner)
                 )
                 .border(
