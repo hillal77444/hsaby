@@ -91,7 +91,7 @@ class TransactionsFragment : Fragment() {
     private var transactionRepository: TransactionRepository? = null
     private var startDate: Calendar? = null
     private var endDate: Calendar? = null
-    private var selectedAccount: String? = null
+    private var selectedAccount: Account? = null
     private var allTransactions: MutableList<Transaction> = ArrayList<Transaction>()
     private var allAccounts: MutableList<Account>? = ArrayList<Account>()
     private var accountBalancesMap: MutableMap<Long?, MutableMap<String?, Double?>?> =
@@ -423,7 +423,7 @@ class TransactionsFragment : Fragment() {
             allTransactions,
             accountBalancesMap,
             AccountPickerBottomSheet.OnAccountSelectedListener { account: Account? ->
-                selectedAccount = account!!.getName()
+                selectedAccount = account!!
                 // binding!!.accountFilterDropdown.setText(account.getName())
                 applyAllFilters()
             }
@@ -717,13 +717,13 @@ class TransactionsFragment : Fragment() {
 
 
             // فلترة الحساب
-            if (selectedAccount != null && !selectedAccount!!.isEmpty()) {
+            if (selectedAccount != null && !selectedAccount!!.getName().isEmpty()) {
                 var account: Account? = null
                 if (accountMap.containsKey(t.getAccountId())) {
                     account = accountMap.get(t.getAccountId())
                 }
                 val accountName = if (account != null) account.getName() else null
-                if (accountName == null || accountName != selectedAccount) match = false
+                if (accountName == null || accountName != selectedAccount!!.getName()) match = false
             }
 
 
