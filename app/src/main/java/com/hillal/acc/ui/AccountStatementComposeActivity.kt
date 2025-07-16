@@ -901,156 +901,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val fontDebit = com.itextpdf.text.Font(cairoBaseFont, 13f, Font.NORMAL, BaseColor(0xD3, 0x2F, 0x2F))
         val fontCredit = com.itextpdf.text.Font(cairoBaseFont, 13f, Font.NORMAL, BaseColor(0x38, 0x8E, 0x3C))
 
-        // عنوان التقرير
-        val titleCell = PdfPCell(Paragraph(ArabicUtilities.reshape("كشف الحساب التفصيلي"), fontCairoBold))
-        titleCell.horizontalAlignment = Element.ALIGN_CENTER
-        titleCell.border = Rectangle.NO_BORDER
-        titleCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-        val titleTable = PdfPTable(1)
-        titleTable.widthPercentage = 100f
-        titleTable.addCell(titleCell)
-        document.add(titleTable)
-        document.add(Paragraph(" "))
-
-        // معلومات الحساب
-        val info = "اسم الحساب: " + ArabicUtilities.reshape(account.name) + "   |   رقم الهاتف: " + account.phoneNumber + "   |   الفترة: من " + startDate + " إلى " + displayDateFormat.format(endDate) +
-            (if (selectedCurrency != null) "   |   العملة: " + ArabicUtilities.reshape(selectedCurrency) else "")
-        val infoCell = PdfPCell(Paragraph(info, fontCairo))
-        infoCell.horizontalAlignment = Element.ALIGN_RIGHT
-        infoCell.border = Rectangle.NO_BORDER
-        infoCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-        val infoTable = PdfPTable(1)
-        infoTable.widthPercentage = 100f
-        infoTable.addCell(infoCell)
-        document.add(infoTable)
-        document.add(Paragraph(" "))
-
-        // إنشاء الجدول مع تحديد عدد الأعمدة ونسب العرض
-        val table = PdfPTable(5)
-        table.widthPercentage = 100f
-        table.setWidths(floatArrayOf(2f, 5f, 2f, 2f, 2f))
-
-        // رؤوس الجدول مع ألوان (PDF)
-        val headers = listOf("الرصيد", "تفاصيل", "عليه", "له", "التاريخ")
-        for (h in headers) {
-            val cell = PdfPCell(Paragraph(ArabicUtilities.reshape(h), fontHeader))
-            cell.horizontalAlignment = Element.ALIGN_CENTER
-            cell.backgroundColor = BaseColor(0x19, 0x76, 0xD2) // أزرق
-            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL // أضف هذا السطر
-            table.addCell(cell)
-        }
-
-        // حساب الرصيد السابق من كل العمليات
-        val previousBalance = allTransactions
-            .filter { 
-                it.accountId == account.id &&
-                (selectedCurrency == null || it.currency == selectedCurrency) &&
-                Date(it.transactionDate).before(startDateObj)
-            }
-            .fold(0.0) { acc, tx ->
-                when (tx.type) {
-                    "debit" -> acc - tx.amount
-                    "credit" -> acc + tx.amount
-                    else -> acc
-                }
-            }
-        var balance = previousBalance
-        var totalDebit = 0.0
-        var totalCredit = 0.0
-
-        // صف الرصيد السابق (قبل التكرار على المعاملات)
-        val prevRow = listOf(
-            PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", previousBalance), fontCairo)), // الرصيد
-            PdfPCell(Paragraph(ArabicUtilities.reshape("الرصيد السابق"), fontCairo)), // تفاصيل
-            PdfPCell(Paragraph("", fontCairo)), // عليه
-            PdfPCell(Paragraph("", fontCairo)), // له
-            PdfPCell(Paragraph("", fontCairo)) // التاريخ
-        )
-        for (cell in prevRow) {
-            cell.horizontalAlignment = Element.ALIGN_CENTER
-            cell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
-            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL // أضف هذا السطر
-            table.addCell(cell)
-        }
-
-        // المعاملات
-        val filteredTxs = transactions.filter { tx ->
-            val txDay = Date(tx.transactionDate)
-            val startDay = startDateObj
-            val endDay = endDateObj
-            isSameDayOrInRange(txDay, startDay, endDay) && (selectedCurrency == null || tx.currency == selectedCurrency)
-        }.sortedBy { it.transactionDate }
-
-        for (tx in filteredTxs) {
-            val dateStr = displayDateFormat.format(Date(tx.transactionDate))
-            val desc = tx.description ?: ""
-            val debit = if (tx.type == "debit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
-            val credit = if (tx.type == "credit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
-            if (tx.type == "debit") {
-                balance -= tx.amount
-                totalDebit += tx.amount
-            } else if (tx.type == "credit") {
-                balance += tx.amount
-                totalCredit += tx.amount
-            }
-            val row = listOf(
-                PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", balance), fontCairo)), // الرصيد
-                PdfPCell(Paragraph(ArabicUtilities.reshape(desc), fontCairo)), // تفاصيل (الوصف)
-                PdfPCell(Paragraph(debit, fontDebit)), // عليه
-                PdfPCell(Paragraph(credit, fontCredit)), // له
-                PdfPCell(Paragraph(dateStr, fontCairo)) // التاريخ
-            )
-            for (cell in row) {
-                cell.horizontalAlignment = Element.ALIGN_CENTER
-                cell.runDirection = PdfWriter.RUN_DIRECTION_RTL // أضف هذا السطر
-                table.addCell(cell)
-            }
-        }
-
-        // صف الإجمالي
-        val summaryRow = listOf(
-            PdfPCell(Paragraph("", fontCairo)), // الرصيد
-            PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", totalCredit), fontCredit)), // له
-            PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", totalDebit), fontDebit)), // عليه
-            PdfPCell(Paragraph(ArabicUtilities.reshape("الإجمالي"), fontCairoBold)), // البيان
-            PdfPCell(Paragraph("", fontCairo)) // التاريخ
-        )
-        for (cell in summaryRow) {
-            cell.horizontalAlignment = Element.ALIGN_CENTER
-            cell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
-            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-            table.addCell(cell)
-        }
-        // صف الرصيد النهائي
-        val balanceRow = listOf(
-            PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", balance), fontCairoBold)), // الرصيد
-            PdfPCell(Paragraph("", fontCairo)), // له
-            PdfPCell(Paragraph("", fontCairo)), // عليه
-            PdfPCell(Paragraph(ArabicUtilities.reshape("الرصيد"), fontCairoBold)), // البيان
-            PdfPCell(Paragraph("", fontCairo)) // التاريخ
-        )
-        for (cell in balanceRow) {
-            cell.horizontalAlignment = Element.ALIGN_CENTER
-            cell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
-            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-            table.addCell(cell)
-        }
-
-        document.add(table)
-        document.add(Paragraph(" "))
-
-        // ملخص الحساب
-        val summary = listOf(
-            ArabicUtilities.reshape("إجمالي عليه: ") + String.format(Locale.ENGLISH, "%.2f", totalDebit),
-            ArabicUtilities.reshape("إجمالي له: ") + String.format(Locale.ENGLISH, "%.2f", totalCredit),
-            ArabicUtilities.reshape("الرصيد النهائي: ") + String.format(Locale.ENGLISH, "%.2f", balance)
-        )
-        for (s in summary) {
-            val para = Paragraph(s, fontHeader)
-            para.alignment = Element.ALIGN_RIGHT
-            document.add(para)
-        }
-
         // جلب الترويسة والشعار
         val (rightHeader, leftHeader, logoBitmap) = getReportHeaderData(context)
         // صف الترويسة والشعار
@@ -1101,6 +951,135 @@ class AccountStatementComposeActivity : ComponentActivity() {
         headerTable.addCell(leftCell)
         document.add(headerTable)
         document.add(Paragraph(" "))
+
+        // حذف إضافة العنوان ومعلومات الحساب من الأعلى
+        // (تم حذف الكود الخاص بـ titleTable و infoTable)
+
+        // إنشاء الجدول مع تحديد عدد الأعمدة ونسب العرض
+        val table = PdfPTable(5)
+        table.widthPercentage = 100f
+        table.setWidths(floatArrayOf(2f, 5f, 2f, 2f, 2f))
+
+        // رؤوس الجدول مع ألوان (PDF)
+        val headers = listOf("الرصيد", "عليه", "له", "تفاصيل", "التاريخ")
+        for (h in headers) {
+            val cell = PdfPCell(Paragraph(ArabicUtilities.reshape(h), fontHeader))
+            cell.horizontalAlignment = Element.ALIGN_CENTER
+            cell.backgroundColor = BaseColor(0x19, 0x76, 0xD2) // أزرق
+            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL // أضف هذا السطر
+            table.addCell(cell)
+        }
+
+        // حساب الرصيد السابق من كل العمليات
+        val previousBalance = allTransactions
+            .filter { 
+                it.accountId == account.id &&
+                (selectedCurrency == null || it.currency == selectedCurrency) &&
+                Date(it.transactionDate).before(startDateObj)
+            }
+            .fold(0.0) { acc, tx ->
+                when (tx.type) {
+                    "debit" -> acc - tx.amount
+                    "credit" -> acc + tx.amount
+                    else -> acc
+                }
+            }
+        var balance = previousBalance
+        var totalDebit = 0.0
+        var totalCredit = 0.0
+
+        // صف الرصيد السابق (قبل التكرار على المعاملات)
+        val prevRow = listOf(
+            PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", previousBalance), fontCairo)), // الرصيد
+            PdfPCell(Paragraph("", fontCairo)), // عليه
+            PdfPCell(Paragraph("", fontCairo)), // له
+            PdfPCell(Paragraph(ArabicUtilities.reshape("الرصيد السابق"), fontCairo)), // تفاصيل
+            PdfPCell(Paragraph("", fontCairo)) // التاريخ
+        )
+        for (cell in prevRow) {
+            cell.horizontalAlignment = Element.ALIGN_CENTER
+            cell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
+            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL // أضف هذا السطر
+            table.addCell(cell)
+        }
+
+        // المعاملات
+        val filteredTxs = transactions.filter { tx ->
+            val txDay = Date(tx.transactionDate)
+            val startDay = startDateObj
+            val endDay = endDateObj
+            isSameDayOrInRange(txDay, startDay, endDay) && (selectedCurrency == null || tx.currency == selectedCurrency)
+        }.sortedBy { it.transactionDate }
+
+        for (tx in filteredTxs) {
+            val dateStr = displayDateFormat.format(Date(tx.transactionDate))
+            val desc = tx.description ?: ""
+            val debit = if (tx.type == "debit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
+            val credit = if (tx.type == "credit") String.format(Locale.ENGLISH, "%.2f", tx.amount) else ""
+            if (tx.type == "debit") {
+                balance -= tx.amount
+                totalDebit += tx.amount
+            } else if (tx.type == "credit") {
+                balance += tx.amount
+                totalCredit += tx.amount
+            }
+            val row = listOf(
+                PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", balance), fontCairo)), // الرصيد
+                PdfPCell(Paragraph(debit, fontDebit)), // عليه
+                PdfPCell(Paragraph(credit, fontCredit)), // له
+                PdfPCell(Paragraph(ArabicUtilities.reshape(desc), fontCairo)), // تفاصيل (الوصف)
+                PdfPCell(Paragraph(dateStr, fontCairo)) // التاريخ
+            )
+            for (cell in row) {
+                cell.horizontalAlignment = Element.ALIGN_CENTER
+                cell.runDirection = PdfWriter.RUN_DIRECTION_RTL // أضف هذا السطر
+                table.addCell(cell)
+            }
+        }
+
+        // صف الإجمالي
+        val summaryRow = listOf(
+            PdfPCell(Paragraph("", fontCairo)), // الرصيد
+            PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", totalDebit), fontDebit)), // عليه
+            PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", totalCredit), fontCredit)), // له
+            PdfPCell(Paragraph(ArabicUtilities.reshape("الإجمالي"), fontCairoBold)), // تفاصيل
+            PdfPCell(Paragraph("", fontCairo)) // التاريخ
+        )
+        for (cell in summaryRow) {
+            cell.horizontalAlignment = Element.ALIGN_CENTER
+            cell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
+            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+            table.addCell(cell)
+        }
+        // صف الرصيد النهائي
+        val balanceRow = listOf(
+            PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", balance), fontCairoBold)), // الرصيد
+            PdfPCell(Paragraph("", fontCairo)), // عليه
+            PdfPCell(Paragraph("", fontCairo)), // له
+            PdfPCell(Paragraph(ArabicUtilities.reshape("الرصيد"), fontCairoBold)), // تفاصيل
+            PdfPCell(Paragraph("", fontCairo)) // التاريخ
+        )
+        for (cell in balanceRow) {
+            cell.horizontalAlignment = Element.ALIGN_CENTER
+            cell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
+            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+            table.addCell(cell)
+        }
+
+        document.add(table)
+        document.add(Paragraph(" "))
+
+        // ملخص الحساب
+        val summary = listOf(
+            ArabicUtilities.reshape("إجمالي عليه: ") + String.format(Locale.ENGLISH, "%.2f", totalDebit),
+            ArabicUtilities.reshape("إجمالي له: ") + String.format(Locale.ENGLISH, "%.2f", totalCredit),
+            ArabicUtilities.reshape("الرصيد النهائي: ") + String.format(Locale.ENGLISH, "%.2f", balance)
+        )
+        for (s in summary) {
+            val para = Paragraph(s, fontHeader)
+            para.alignment = Element.ALIGN_RIGHT
+            document.add(para)
+        }
 
         document.close()
         writer.close()
