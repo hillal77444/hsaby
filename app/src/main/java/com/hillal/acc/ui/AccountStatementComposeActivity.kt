@@ -931,56 +931,16 @@ class AccountStatementComposeActivity : ComponentActivity() {
         logoCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
         // الشعار (إذا كان موجودًا وصالحًا)
         if (logoBitmap != null && logoBitmap.width > 0 && logoBitmap.height > 0) {
-            var imageAdded = false
             try {
-                val safeBitmap = logoBitmap.copy(Bitmap.Config.ARGB_8888, true)
-                android.util.Log.d("PDF_LOGO_ERROR", "أبعاد الشعار: ${safeBitmap.width}x${safeBitmap.height}, config=${safeBitmap.config}")
-                val scaledBitmap = Bitmap.createScaledBitmap(safeBitmap, 100, 100, true)
-                android.util.Log.d("PDF_LOGO_ERROR", "أبعاد الشعار بعد التحجيم: ${scaledBitmap.width}x${scaledBitmap.height}, config=${scaledBitmap.config}")
-                // 1. جرب حفظ الصورة كملف مؤقت PNG
-                val tempPngFile = java.io.File.createTempFile("pdf_logo", ".png", context.cacheDir)
-                val pngOut = java.io.FileOutputStream(tempPngFile)
-                scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, pngOut)
-                pngOut.flush()
-                pngOut.close()
-                android.util.Log.d("PDF_LOGO_ERROR", "تم حفظ شعار PDF مؤقت كـ PNG: ${tempPngFile.absolutePath}")
-                try {
-                    val image = com.itextpdf.text.Image.getInstance(tempPngFile.absolutePath)
+                val logoFile = prepareLogoForPdf(context, logoBitmap, 120)
+                if (logoFile != null && logoFile.exists()) {
+                    val image = com.itextpdf.text.Image.getInstance(logoFile.absolutePath)
                     image.scaleAbsolute(60f, 60f)
                     image.alignment = Element.ALIGN_CENTER
                     logoCell.addElement(image)
-                    imageAdded = true
-                    android.util.Log.d("PDF_LOGO_ERROR", "تمت إضافة شعار PDF (PNG ملف) بنجاح.")
-                } catch (e: Exception) {
-                    android.util.Log.e("PDF_LOGO_ERROR", "خطأ في إضافة شعار PDF (PNG ملف): ${e.message}")
                 }
-                // 2. إذا فشل PNG، جرب JPG بدون شفافية
-                if (!imageAdded) {
-                    val rgbBitmap = Bitmap.createBitmap(scaledBitmap.width, scaledBitmap.height, Bitmap.Config.RGB_565)
-                    val canvas = android.graphics.Canvas(rgbBitmap)
-                    canvas.drawBitmap(scaledBitmap, 0f, 0f, null)
-                    val tempJpgFile = java.io.File.createTempFile("pdf_logo", ".jpg", context.cacheDir)
-                    val jpgOut = java.io.FileOutputStream(tempJpgFile)
-                    rgbBitmap.compress(Bitmap.CompressFormat.JPEG, 90, jpgOut)
-                    jpgOut.flush()
-                    jpgOut.close()
-                    android.util.Log.d("PDF_LOGO_ERROR", "تم حفظ شعار PDF مؤقت كـ JPG: ${tempJpgFile.absolutePath}")
-                    try {
-                        val image = com.itextpdf.text.Image.getInstance(tempJpgFile.absolutePath)
-                        image.scaleAbsolute(60f, 60f)
-                        image.alignment = Element.ALIGN_CENTER
-                        logoCell.addElement(image)
-                        imageAdded = true
-                        android.util.Log.d("PDF_LOGO_ERROR", "تمت إضافة شعار PDF (JPG ملف) بنجاح.")
-                    } catch (e: Exception) {
-                        android.util.Log.e("PDF_LOGO_ERROR", "خطأ في إضافة شعار PDF (JPG ملف): ${e.message}")
-                    }
-                }
-                // حذف الملفات المؤقتة بعد الاستخدام
-                try { tempPngFile.delete() } catch (_: Exception) {}
-                try { /* قد يكون tempJpgFile غير معرف إذا لم يُستخدم */ } catch (_: Exception) {}
             } catch (e: Exception) {
-                android.util.Log.e("PDF_LOGO_ERROR", "خطأ عام في معالجة شعار PDF: ${e.message}")
+                android.util.Log.e("PDF_LOGO_ERROR", "خطأ في معالجة شعار PDF: ", e)
             }
         }
         // اسم المستخدم في الأعلى
@@ -1202,5 +1162,28 @@ class AccountStatementComposeActivity : ComponentActivity() {
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         context.startActivity(Intent.createChooser(shareIntent, "مشاركة كشف الحساب"))
+    }
+
+    // دالة مساعدة لتحويل أي Bitmap إلى JPEG RGB بمقاس ثابت (120x120)
+    private fun prepareLogoForPdf(context: Context, bitmap: Bitmap?, targetSize: Int = 120): File? {
+        if (bitmap == null) return null
+        // احسب الأبعاد مع الحفاظ على النسبة
+        val aspectRatio = bitmap.width.toFloat() / bitmap.height
+        val width: Int
+        val height: Int
+        if (aspectRatio > 1) {
+            width = targetSize
+            height = (targetSize / aspectRatio).toInt()
+        } else {
+            width = (targetSize * aspectRatio).toInt()
+            height = targetSize
+        }
+        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, width, height, true)
+        val rgbBitmap = scaledBitmap.copy(Bitmap.Config.RGB_565, false)
+        val tempFile = File(context.cacheDir, "logo_temp_pdf.jpg")
+        FileOutputStream(tempFile).use { out ->
+            rgbBitmap.compress(Bitmap.CompressFormat.JPEG, 92, out)
+        }
+        return tempFile
     }
 } 
