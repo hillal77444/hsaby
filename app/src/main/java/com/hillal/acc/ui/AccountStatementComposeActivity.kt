@@ -923,17 +923,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
         logoCell.horizontalAlignment = Element.ALIGN_CENTER
         logoCell.verticalAlignment = Element.ALIGN_MIDDLE
         logoCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-        // تعليق تمرير الشعار مؤقتاً للتجربة
-        // if (logoBitmap != null && logoBitmap.width > 0 && logoBitmap.height > 0) {
-        //     try {
-        //         val stream = java.io.ByteArrayOutputStream()
-        //         logoBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        //         val image = com.itextpdf.text.Image.getInstance(stream.toByteArray())
-        //         image.scaleAbsolute(50f, 50f)
-        //         image.alignment = Element.ALIGN_CENTER
-        //         logoCell.addElement(image)
-        //     } catch (e: Exception) {}
-        // }
         // اسم المستخدم تحت الشعار
         val userNamePara = Paragraph(ArabicUtilities.reshape(account.name), fontCairoBold)
         userNamePara.alignment = Element.ALIGN_CENTER
@@ -952,13 +941,48 @@ class AccountStatementComposeActivity : ComponentActivity() {
         document.add(headerTable)
         document.add(Paragraph(" "))
 
+        // --- بطاقة معلومات الحساب (بعد الهيدر مباشرة) ---
+        val infoTable = PdfPTable(4)
+        infoTable.widthPercentage = 100f
+        infoTable.setWidths(floatArrayOf(3f, 3f, 3f, 3f))
+        // اسم الحساب
+        val accountNameCell = PdfPCell(Paragraph(ArabicUtilities.reshape("الحساب: ${account.name}"), fontCairo))
+        accountNameCell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
+        accountNameCell.border = Rectangle.BOX
+        accountNameCell.horizontalAlignment = Element.ALIGN_CENTER
+        accountNameCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        infoTable.addCell(accountNameCell)
+        // رقم الهاتف
+        val phoneCell = PdfPCell(Paragraph(ArabicUtilities.reshape("الهاتف: ${account.phoneNumber ?: "-"}"), fontCairo))
+        phoneCell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
+        phoneCell.border = Rectangle.BOX
+        phoneCell.horizontalAlignment = Element.ALIGN_CENTER
+        phoneCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        infoTable.addCell(phoneCell)
+        // الفترة
+        val periodCell = PdfPCell(Paragraph(ArabicUtilities.reshape("الفترة: من $startDate إلى ${displayDateFormat.format(endDate)}"), fontCairo))
+        periodCell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
+        periodCell.border = Rectangle.BOX
+        periodCell.horizontalAlignment = Element.ALIGN_CENTER
+        periodCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        infoTable.addCell(periodCell)
+        // العملة
+        val currencyCell = PdfPCell(Paragraph(ArabicUtilities.reshape("العملة: ${selectedCurrency ?: "-"}"), fontCairo))
+        currencyCell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
+        currencyCell.border = Rectangle.BOX
+        currencyCell.horizontalAlignment = Element.ALIGN_CENTER
+        currencyCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        infoTable.addCell(currencyCell)
+        document.add(infoTable)
+        document.add(Paragraph(" "))
+
         // حذف إضافة العنوان ومعلومات الحساب من الأعلى
         // (تم حذف الكود الخاص بـ titleTable و infoTable)
 
         // إنشاء الجدول مع تحديد عدد الأعمدة ونسب العرض
         val table = PdfPTable(5)
         table.widthPercentage = 100f
-        table.setWidths(floatArrayOf(2f, 5f, 2f, 2f, 2f))
+        table.setWidths(floatArrayOf(2f, 2f, 2f, 5f, 2f))
 
         // رؤوس الجدول مع ألوان (PDF)
         val headers = listOf("الرصيد", "عليه", "له", "تفاصيل", "التاريخ")
@@ -1069,14 +1093,14 @@ class AccountStatementComposeActivity : ComponentActivity() {
         document.add(table)
         document.add(Paragraph(" "))
 
-        // ملخص الحساب
+        // --- ملخص الحساب أسفل الجدول (إجمالي عليه، إجمالي له، الرصيد النهائي) ---
         val summary = listOf(
             ArabicUtilities.reshape("إجمالي عليه: ") + String.format(Locale.ENGLISH, "%.2f", totalDebit),
             ArabicUtilities.reshape("إجمالي له: ") + String.format(Locale.ENGLISH, "%.2f", totalCredit),
             ArabicUtilities.reshape("الرصيد النهائي: ") + String.format(Locale.ENGLISH, "%.2f", balance)
         )
         for (s in summary) {
-            val para = Paragraph(s, fontHeader)
+            val para = Paragraph(s, fontCairoBold)
             para.alignment = Element.ALIGN_RIGHT
             document.add(para)
         }
