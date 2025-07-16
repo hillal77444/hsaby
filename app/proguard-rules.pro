@@ -134,3 +134,11 @@
 -keepattributes *Annotation*
 -keepattributes Signature
 -keepattributes Exceptions
+
+# --- iTextG & BouncyCastle PDF Support ---
+-keep class com.itextpdf.** { *; }
+-keep class com.lowagie.** { *; }
+-keep class org.bouncycastle.** { *; }
+-dontwarn com.itextpdf.**
+-dontwarn com.lowagie.**
+-dontwarn org.bouncycastle.**
