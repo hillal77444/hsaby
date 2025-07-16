@@ -565,7 +565,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
     // دوال مساعدة لجلب الترويسة والشعار
     private fun getReportHeaderData(context: Context): Triple<String, String, Bitmap?> {
         val prefs = context.getSharedPreferences("report_header_prefs", Context.MODE_PRIVATE)
-        val rightHeader = prefs.getString("right_header", null) ?: "مؤسسة حسابي"
+        val rightHeader = prefs.getString("right_header", null) ?: "تطبيق مالي برو"
         val leftHeader = prefs.getString("left_header", null) ?: "رقم التواصل: 0500000000"
         val logoUriString = prefs.getString("logo_uri", null)
         var logoBitmap: Bitmap? = null
