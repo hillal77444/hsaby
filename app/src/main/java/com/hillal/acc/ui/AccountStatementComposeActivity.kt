@@ -1048,11 +1048,14 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val headerTable = PdfPTable(3)
         headerTable.widthPercentage = 100f
         headerTable.setWidths(floatArrayOf(2f, 1f, 2f))
-        // الترويسة اليمنى
-        val rightCell = PdfPCell(Paragraph(ArabicUtilities.reshape(rightHeader), fontCairoBold))
+        // الترويسة اليمنى (دعم السطر الجديد)
+        val rightCell = PdfPCell()
         rightCell.horizontalAlignment = Element.ALIGN_RIGHT
         rightCell.border = Rectangle.NO_BORDER
         rightCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        rightHeader.split("\n").forEach { line ->
+            rightCell.addElement(Paragraph(ArabicUtilities.reshape(line), fontCairoBold))
+        }
         headerTable.addCell(rightCell)
         // الشعار مع اسم المستخدم تحته
         val logoCell = PdfPCell()
@@ -1072,11 +1075,14 @@ class AccountStatementComposeActivity : ComponentActivity() {
         userNamePara.alignment = Element.ALIGN_CENTER
         logoCell.addElement(userNamePara)
         headerTable.addCell(logoCell)
-        // الترويسة اليسرى
-        val leftCell = PdfPCell(Paragraph(ArabicUtilities.reshape(leftHeader), fontCairoBold))
+        // الترويسة اليسرى (دعم السطر الجديد)
+        val leftCell = PdfPCell()
         leftCell.horizontalAlignment = Element.ALIGN_LEFT
         leftCell.border = Rectangle.NO_BORDER
         leftCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        leftHeader.split("\n").forEach { line ->
+            leftCell.addElement(Paragraph(ArabicUtilities.reshape(line), fontCairoBold))
+        }
         headerTable.addCell(leftCell)
         document.add(headerTable)
         document.add(Paragraph(" "))

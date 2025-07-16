@@ -224,11 +224,11 @@ fun ReportHeaderSettingsScreen() {
                     Button(
                         onClick = {
                             isSaving = true
-                            sharedPreferences.edit {
-                                putString("right_header", rightHeader)
-                                putString("left_header", leftHeader)
-                                putString("logo_uri", logoUri?.toString())
-                            }
+                            val editor = sharedPreferences.edit()
+                            editor.putString("right_header", rightHeader)
+                            editor.putString("left_header", leftHeader)
+                            editor.putString("logo_uri", logoUri?.toString())
+                            editor.apply()
                             isSaving = false
                             showSavedMessage = true
                         },
@@ -251,6 +251,8 @@ fun ReportHeaderSettingsScreen() {
                         LaunchedEffect(showSavedMessage) {
                             snackbarHostState.showSnackbar("تم حفظ الإعدادات بنجاح")
                             showSavedMessage = false
+                            // إغلاق الصفحة بعد الحفظ
+                            (context as? Activity)?.finish()
                         }
                     }
                 }
