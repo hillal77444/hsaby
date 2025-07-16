@@ -410,7 +410,7 @@ public class DataManager {
     }
 
     private void fetchTransactionsPaged(String token, int retryCount, DataCallback callback) {
-        int limit = 100;
+        int limit = 250;  // زيادة من 100 إلى 250 لتحسين الأداء
         int offset = 0;
         serverTransactionIds.clear(); // تأكد من تفريغ القائمة قبل البدء
         fetchBatch(token, limit, offset, retryCount, callback);
