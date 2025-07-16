@@ -69,6 +69,13 @@ fun LoginScreen(
         var password by remember { mutableStateOf("") }
         var passwordVisible by remember { mutableStateOf(false) }
         var isLoading by remember { mutableStateOf(false) }
+        
+        // عند ظهور رسالة الخطأ، أعد isLoading إلى false
+        LaunchedEffect(errorMessage) {
+            if (errorMessage != null) {
+                isLoading = false
+            }
+        }
 
         val screenWidth = configuration.screenWidthDp.toFloat().dp
         val screenHeight = configuration.screenHeightDp.toFloat().dp
