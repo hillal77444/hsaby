@@ -269,5 +269,8 @@
 
         <!-- زر تنفيذ الصرف -->
         <Button android:id="@+id/exchangeButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="تنفيذ الصرف" android:layout_marginBottom="32dp" style="@style/Widget.MaterialComponents.Button"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="80dp" />
     </LinearLayout>
 </ScrollView> 
