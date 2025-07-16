@@ -40,6 +40,7 @@ import com.hillal.acc.ui.accounts.ResponsiveAccountsTheme
 import com.hillal.acc.ui.theme.ProvideResponsiveDimensions
 import java.io.InputStream
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.rememberScrollState
 
 class ReportHeaderSettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -161,9 +162,11 @@ fun ReportHeaderSettingsScreen() {
                 elevation = CardDefaults.cardElevation(6.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
+                val scrollState = rememberScrollState()
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .verticalScroll(scrollState)
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -262,7 +265,7 @@ fun ReportHeaderSettingsScreen() {
                     }
                     if (showSavedMessage) {
                         LaunchedEffect(showSavedMessage) {
-                            snackbarHostState.showSnackbar("تم حفظ الإعدادات بنجاح")
+                            Toast.makeText(context, "تم حفظ الإعدادات بنجاح", Toast.LENGTH_SHORT).show()
                             showSavedMessage = false
                             // إغلاق الصفحة بعد الحفظ
                             (context as? Activity)?.finish()
