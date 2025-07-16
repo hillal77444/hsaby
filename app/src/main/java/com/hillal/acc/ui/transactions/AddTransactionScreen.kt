@@ -75,9 +75,12 @@ import androidx.compose.material.icons.filled.Star
 import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
 import com.hillal.acc.ui.theme.AppDimensions
-import com.hillal.acc.util.NotificationUtils
+import com.hillal.acc.ui.transactions.NotificationUtils
 import java.util.Locale
 import kotlin.math.abs
+import androidx.compose.ui.window.Dialog
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.foundation.rememberScrollState
 
 // دوال مساعدة لتحويل الأرقام إلى كلمات
 private fun wholeNumberToWords(number: Long): String {
