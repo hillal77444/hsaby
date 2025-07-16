@@ -933,43 +933,51 @@ class AccountStatementComposeActivity : ComponentActivity() {
         if (logoBitmap != null && logoBitmap.width > 0 && logoBitmap.height > 0) {
             var imageAdded = false
             try {
-                // إعادة تحجيم الصورة لتقليل المشاكل
-                val scaledBitmap = Bitmap.createScaledBitmap(logoBitmap, 100, 100, true)
+                val safeBitmap = logoBitmap.copy(Bitmap.Config.ARGB_8888, true)
+                android.util.Log.d("PDF_LOGO_ERROR", "أبعاد الشعار: ${safeBitmap.width}x${safeBitmap.height}, config=${safeBitmap.config}")
+                val scaledBitmap = Bitmap.createScaledBitmap(safeBitmap, 100, 100, true)
+                android.util.Log.d("PDF_LOGO_ERROR", "أبعاد الشعار بعد التحجيم: ${scaledBitmap.width}x${scaledBitmap.height}, config=${scaledBitmap.config}")
                 val stream = java.io.ByteArrayOutputStream()
                 scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
                 val byteArray = stream.toByteArray()
-                if (byteArray.isNotEmpty()) {
+                android.util.Log.d("PDF_LOGO_ERROR", "حجم PNG bytes: ${byteArray.size}")
+                if (byteArray.isNotEmpty() && byteArray.size > 1000) {
                     try {
                         val image = com.itextpdf.text.Image.getInstance(byteArray)
                         image.scaleAbsolute(60f, 60f)
                         image.alignment = Element.ALIGN_CENTER
                         logoCell.addElement(image)
                         imageAdded = true
+                        android.util.Log.d("PDF_LOGO_ERROR", "تمت إضافة شعار PDF (PNG) بنجاح.")
                     } catch (e: Exception) {
-                        android.util.Log.e("PDF_LOGO", "PNG فشل: ${e.message}", e)
+                        android.util.Log.e("PDF_LOGO_ERROR", "خطأ في إضافة شعار PDF (PNG): ${e.message}")
                     }
+                } else {
+                    android.util.Log.e("PDF_LOGO_ERROR", "PNG ByteArray فارغ أو صغير جدًا! (الشعار غير صالح)")
                 }
-                // إذا فشل PNG، جرب JPG
                 if (!imageAdded) {
                     val jpgStream = java.io.ByteArrayOutputStream()
                     scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 90, jpgStream)
                     val jpgByteArray = jpgStream.toByteArray()
-                    if (jpgByteArray.isNotEmpty()) {
+                    android.util.Log.d("PDF_LOGO_ERROR", "حجم JPG bytes: ${jpgByteArray.size}")
+                    if (jpgByteArray.isNotEmpty() && jpgByteArray.size > 1000) {
                         try {
                             val image = com.itextpdf.text.Image.getInstance(jpgByteArray)
                             image.scaleAbsolute(60f, 60f)
                             image.alignment = Element.ALIGN_CENTER
                             logoCell.addElement(image)
                             imageAdded = true
+                            android.util.Log.d("PDF_LOGO_ERROR", "تمت إضافة شعار PDF (JPG) بنجاح.")
                         } catch (e: Exception) {
-                            android.util.Log.e("PDF_LOGO", "JPG فشل: ${e.message}", e)
+                            android.util.Log.e("PDF_LOGO_ERROR", "خطأ في إضافة شعار PDF (JPG): ${e.message}")
                         }
+                    } else {
+                        android.util.Log.e("PDF_LOGO_ERROR", "JPG ByteArray فارغ أو صغير جدًا! (الشعار غير صالح)")
                     }
                 }
             } catch (e: Exception) {
-                android.util.Log.e("PDF_LOGO", "فشل معالجة الشعار: ${e.message}", e)
+                android.util.Log.e("PDF_LOGO_ERROR", "خطأ عام في معالجة شعار PDF: ${e.message}")
             }
-            // إذا فشلت كل المحاولات، تجاهل الشعار بدون كراش
         }
         // اسم المستخدم في الأعلى
         val userNamePara = Paragraph(ArabicUtilities.reshape(userName), fontCairoBold)
