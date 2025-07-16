@@ -394,7 +394,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
                                         null
                                     )
                                 },
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .navigationBarsPadding()
                             )
                         }
                     }
