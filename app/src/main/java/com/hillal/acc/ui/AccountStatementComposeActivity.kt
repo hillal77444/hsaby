@@ -937,44 +937,48 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 android.util.Log.d("PDF_LOGO_ERROR", "أبعاد الشعار: ${safeBitmap.width}x${safeBitmap.height}, config=${safeBitmap.config}")
                 val scaledBitmap = Bitmap.createScaledBitmap(safeBitmap, 100, 100, true)
                 android.util.Log.d("PDF_LOGO_ERROR", "أبعاد الشعار بعد التحجيم: ${scaledBitmap.width}x${scaledBitmap.height}, config=${scaledBitmap.config}")
-                val stream = java.io.ByteArrayOutputStream()
-                scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                val byteArray = stream.toByteArray()
-                android.util.Log.d("PDF_LOGO_ERROR", "حجم PNG bytes: ${byteArray.size}")
-                if (byteArray.isNotEmpty() && byteArray.size > 1000) {
+                // 1. جرب حفظ الصورة كملف مؤقت PNG
+                val tempPngFile = java.io.File.createTempFile("pdf_logo", ".png", context.cacheDir)
+                val pngOut = java.io.FileOutputStream(tempPngFile)
+                scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, pngOut)
+                pngOut.flush()
+                pngOut.close()
+                android.util.Log.d("PDF_LOGO_ERROR", "تم حفظ شعار PDF مؤقت كـ PNG: ${tempPngFile.absolutePath}")
+                try {
+                    val image = com.itextpdf.text.Image.getInstance(tempPngFile.absolutePath)
+                    image.scaleAbsolute(60f, 60f)
+                    image.alignment = Element.ALIGN_CENTER
+                    logoCell.addElement(image)
+                    imageAdded = true
+                    android.util.Log.d("PDF_LOGO_ERROR", "تمت إضافة شعار PDF (PNG ملف) بنجاح.")
+                } catch (e: Exception) {
+                    android.util.Log.e("PDF_LOGO_ERROR", "خطأ في إضافة شعار PDF (PNG ملف): ${e.message}")
+                }
+                // 2. إذا فشل PNG، جرب JPG بدون شفافية
+                if (!imageAdded) {
+                    val rgbBitmap = Bitmap.createBitmap(scaledBitmap.width, scaledBitmap.height, Bitmap.Config.RGB_565)
+                    val canvas = android.graphics.Canvas(rgbBitmap)
+                    canvas.drawBitmap(scaledBitmap, 0f, 0f, null)
+                    val tempJpgFile = java.io.File.createTempFile("pdf_logo", ".jpg", context.cacheDir)
+                    val jpgOut = java.io.FileOutputStream(tempJpgFile)
+                    rgbBitmap.compress(Bitmap.CompressFormat.JPEG, 90, jpgOut)
+                    jpgOut.flush()
+                    jpgOut.close()
+                    android.util.Log.d("PDF_LOGO_ERROR", "تم حفظ شعار PDF مؤقت كـ JPG: ${tempJpgFile.absolutePath}")
                     try {
-                        val image = com.itextpdf.text.Image.getInstance(byteArray)
+                        val image = com.itextpdf.text.Image.getInstance(tempJpgFile.absolutePath)
                         image.scaleAbsolute(60f, 60f)
                         image.alignment = Element.ALIGN_CENTER
                         logoCell.addElement(image)
                         imageAdded = true
-                        android.util.Log.d("PDF_LOGO_ERROR", "تمت إضافة شعار PDF (PNG) بنجاح.")
+                        android.util.Log.d("PDF_LOGO_ERROR", "تمت إضافة شعار PDF (JPG ملف) بنجاح.")
                     } catch (e: Exception) {
-                        android.util.Log.e("PDF_LOGO_ERROR", "خطأ في إضافة شعار PDF (PNG): ${e.message}")
-                    }
-                } else {
-                    android.util.Log.e("PDF_LOGO_ERROR", "PNG ByteArray فارغ أو صغير جدًا! (الشعار غير صالح)")
-                }
-                if (!imageAdded) {
-                    val jpgStream = java.io.ByteArrayOutputStream()
-                    scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 90, jpgStream)
-                    val jpgByteArray = jpgStream.toByteArray()
-                    android.util.Log.d("PDF_LOGO_ERROR", "حجم JPG bytes: ${jpgByteArray.size}")
-                    if (jpgByteArray.isNotEmpty() && jpgByteArray.size > 1000) {
-                        try {
-                            val image = com.itextpdf.text.Image.getInstance(jpgByteArray)
-                            image.scaleAbsolute(60f, 60f)
-                            image.alignment = Element.ALIGN_CENTER
-                            logoCell.addElement(image)
-                            imageAdded = true
-                            android.util.Log.d("PDF_LOGO_ERROR", "تمت إضافة شعار PDF (JPG) بنجاح.")
-                        } catch (e: Exception) {
-                            android.util.Log.e("PDF_LOGO_ERROR", "خطأ في إضافة شعار PDF (JPG): ${e.message}")
-                        }
-                    } else {
-                        android.util.Log.e("PDF_LOGO_ERROR", "JPG ByteArray فارغ أو صغير جدًا! (الشعار غير صالح)")
+                        android.util.Log.e("PDF_LOGO_ERROR", "خطأ في إضافة شعار PDF (JPG ملف): ${e.message}")
                     }
                 }
+                // حذف الملفات المؤقتة بعد الاستخدام
+                try { tempPngFile.delete() } catch (_: Exception) {}
+                try { /* قد يكون tempJpgFile غير معرف إذا لم يُستخدم */ } catch (_: Exception) {}
             } catch (e: Exception) {
                 android.util.Log.e("PDF_LOGO_ERROR", "خطأ عام في معالجة شعار PDF: ${e.message}")
             }
