@@ -535,7 +535,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
             onHtmlGenerated(html)
             
         } catch (e: Exception) {
-            Toast.makeText(context, "خطأ في تحديث التقرير", Toast.LENGTH_SHORT).show()
+            android.util.Log.e("UPDATE_REPORT", "خطأ في تحديث التقرير", e)
         }
     }
 
