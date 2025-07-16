@@ -56,7 +56,7 @@ fun AllServicesScreen(navController: NavController) {
         // بطاقة إعدادات الترويسة والشعار
         ServiceItem(
             "إعدادات ترويسة التقرير والشعار",
-            R.drawable.ic_settings, // استخدم أيقونة الإعدادات أو أيقونة مناسبة متوفرة لديك
+            R.drawable.ic_reports, // أيقونة تقارير
             onClick = {
                 context.startActivity(Intent(context, ReportHeaderSettingsActivity::class.java))
             }
@@ -152,7 +152,7 @@ fun ServiceCard(service: ServiceItem, modifier: Modifier = Modifier) {
             Spacer(Modifier.height(dimens.spacingSmall))
             Text(
                 text = service.label,
-                style = typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = colors.onSurface, fontSize = dimens.bodyFont / 2),
+                style = typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = colors.onSurface, fontSize = dimens.bodyFont / 1.5),
                 maxLines = 2
             )
         }
