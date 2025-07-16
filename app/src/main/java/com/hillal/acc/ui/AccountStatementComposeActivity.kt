@@ -832,15 +832,17 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     (selectedCurrency == null || tx.currency == selectedCurrency) &&
                     Date(tx.transactionDate) >= startDateObj && Date(tx.transactionDate) <= endDate
                 }.sortedBy { it.transactionDate }
+                val userPreferences = UserPreferences(this)
+                val userName = userPreferences.userName ?: "اسم المستخدم"
                 val pdfFile = generateAccountStatementPdfWithITextG(
                     context = this,
                     account = selectedAccount,
-                    userName = "اسم المستخدم", // Placeholder, will be updated in generateAccountStatementPdfWithITextG
+                    userName = userName,
                     startDate = startDate,
                     endDate = endDate,
                     selectedCurrency = selectedCurrency,
                     transactions = filteredTransactions,
-                    allTransactions = transactions // Pass all transactions for previous balance calculation
+                    allTransactions = transactions
                 )
                 sharePdfFile(pdfFile)
             } catch (e: Exception) {
@@ -909,23 +911,24 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val headerTable = PdfPTable(3)
         headerTable.widthPercentage = 100f
         headerTable.setWidths(floatArrayOf(2f, 1f, 2f))
-        // الترويسة اليمنى (دعم السطر الجديد)
-        val rightCell = PdfPCell()
-        rightCell.horizontalAlignment = Element.ALIGN_RIGHT
-        rightCell.verticalAlignment = Element.ALIGN_TOP
-        rightCell.border = Rectangle.NO_BORDER
-        rightCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-        rightHeader.split("\n").forEach { line ->
-            rightCell.addElement(Paragraph(ArabicUtilities.reshape(line), fontCairoBold))
+        // الترويسة اليسرى (في أقصى اليمين)
+        val leftCell = PdfPCell()
+        leftCell.horizontalAlignment = Element.ALIGN_CENTER
+        leftCell.verticalAlignment = Element.ALIGN_MIDDLE // <-- اجعل النص في وسط الخلية عموديًا
+        leftCell.border = Rectangle.NO_BORDER
+        leftCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        leftHeader.split("\n").forEach { line ->
+            val para = Paragraph(ArabicUtilities.reshape(line), fontCairoBold)
+            para.alignment = Element.ALIGN_CENTER // محاذاة النص أفقيًا في الوسط
+            leftCell.addElement(para)
         }
-        headerTable.addCell(rightCell)
-        // الشعار مع اسم المستخدم واسم الحساب تحته
+        headerTable.addCell(leftCell)
+        // الشعار واسم المستخدم واسم الحساب في الوسط (كما هو)
         val logoCell = PdfPCell()
         logoCell.border = Rectangle.NO_BORDER
         logoCell.horizontalAlignment = Element.ALIGN_CENTER
         logoCell.verticalAlignment = Element.ALIGN_MIDDLE
         logoCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-        // الشعار (إذا كان موجودًا وصالحًا)
         if (logoBitmap != null && logoBitmap.width > 0 && logoBitmap.height > 0) {
             try {
                 val stream = java.io.ByteArrayOutputStream()
@@ -938,25 +941,25 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 // تجاهل الشعار إذا حدث خطأ
             }
         }
-        // اسم المستخدم في الأعلى
         val userNamePara = Paragraph(ArabicUtilities.reshape(userName), fontCairoBold)
         userNamePara.alignment = Element.ALIGN_CENTER
         logoCell.addElement(userNamePara)
-        // اسم الحساب تحته
         val accountNamePara = Paragraph(ArabicUtilities.reshape(account.name), fontCairo)
         accountNamePara.alignment = Element.ALIGN_CENTER
         logoCell.addElement(accountNamePara)
         headerTable.addCell(logoCell)
-        // الترويسة اليسرى (دعم السطر الجديد)
-        val leftCell = PdfPCell()
-        leftCell.horizontalAlignment = Element.ALIGN_LEFT
-        leftCell.verticalAlignment = Element.ALIGN_TOP
-        leftCell.border = Rectangle.NO_BORDER
-        leftCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-        leftHeader.split("\n").forEach { line ->
-            leftCell.addElement(Paragraph(ArabicUtilities.reshape(line), fontCairoBold))
+        // الترويسة اليمنى (في أقصى اليسار)
+        val rightCell = PdfPCell()
+        rightCell.horizontalAlignment = Element.ALIGN_CENTER
+        rightCell.verticalAlignment = Element.ALIGN_MIDDLE // <-- اجعل النص في وسط الخلية عموديًا
+        rightCell.border = Rectangle.NO_BORDER
+        rightCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        rightHeader.split("\n").forEach { line ->
+            val para = Paragraph(ArabicUtilities.reshape(line), fontCairoBold)
+            para.alignment = Element.ALIGN_CENTER // محاذاة النص أفقيًا في الوسط
+            rightCell.addElement(para)
         }
-        headerTable.addCell(leftCell)
+        headerTable.addCell(rightCell)
         document.add(headerTable)
         document.add(Paragraph(" "))
 
