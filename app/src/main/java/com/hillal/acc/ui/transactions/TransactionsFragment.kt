@@ -338,8 +338,16 @@ class TransactionsFragment : Fragment() {
                                 transaction.getId(),
                                 currency
                             )?.observe(viewLifecycleOwner) { balance ->
-                                val msg = "حسابكم لدينا: ${transaction.getAmount()} ${transaction.getCurrency()}\n${transaction.getDescription()}\nالرصيد: ${balance ?: 0.0} ${transaction.getCurrency()}"
-                                NotificationUtils.sendSmsMessage(context, phone, msg)
+                                val type = transaction.getType()
+                                val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
+                                val balanceStr = String.format(Locale.US, "%.0f", abs(balance ?: 0.0))
+                                val typeText = if (type.equals("credit", true) || type == "له") "لكم" else "عليكم"
+                                val balanceText = if ((balance ?: 0.0) >= 0) "الرصيد لكم " else "الرصيد عليكم "
+                                val message = "حسابكم لدينا:\n" +
+                                        typeText + " " + amountStr + " " + currency + "\n" +
+                                        transaction.getDescription() + "\n" +
+                                        balanceText + balanceStr + " " + currency
+                                NotificationUtils.sendSmsMessage(context, phone, message)
                             }
                         } else {
                             Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
