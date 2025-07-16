@@ -228,7 +228,7 @@ fun AddAccountComposeScreen(
                 colors = colors,
                 typography = typography
             )
-            Spacer(modifier = Modifier.height(dimens.spacingMedium))
+            Spacer(modifier = Modifier.height(80.dp)) // مساحة إضافية فوق الأزرار المتنقلة
         }
     }
 }
