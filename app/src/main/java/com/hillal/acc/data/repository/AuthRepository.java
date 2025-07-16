@@ -99,13 +99,23 @@ public class AuthRepository {
                     saveUserData(user);
                     callback.onSuccess(user);
                 } else {
-                    String errorMessage = "فشل التسجيل: " + response.code();
+                    String errorMessage = null;
                     if (response.errorBody() != null) {
                         try {
-                            errorMessage += " - " + response.errorBody().string();
+                            String errorBody = response.errorBody().string();
+                            Log.d(TAG, "Error response from server: " + errorBody);
+                            org.json.JSONObject jsonObject = new org.json.JSONObject(errorBody);
+                            if (jsonObject.has("error")) {
+                                errorMessage = jsonObject.getString("error");
+                            } else {
+                                errorMessage = errorBody;
+                            }
                         } catch (Exception e) {
                             Log.e(TAG, "Error reading error body", e);
+                            errorMessage = "حدث خطأ أثناء إنشاء الحساب";
                         }
+                    } else {
+                        errorMessage = "حدث خطأ أثناء إنشاء الحساب";
                     }
                     Log.e(TAG, "Registration failed: " + errorMessage);
                     callback.onError(errorMessage);

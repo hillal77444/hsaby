@@ -44,6 +44,22 @@ import com.hillal.acc.ui.theme.backgroundVariant
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 
+// دالة ترجمة رسائل الخطأ القادمة من الخادم
+fun translateErrorMessage(serverMessage: String?): String {
+    return when (serverMessage) {
+        "اسم المستخدم موجود مسبقاً" -> "اسم المستخدم مستخدم بالفعل"
+        "رقم الهاتف مسجل مسبقاً" -> "رقم الهاتف مستخدم بالفعل"
+        "كلمة المرور غير متطابقة مع التأكيد" -> "تأكد من كتابة كلمة المرور بشكل صحيح"
+        "كلمة المرور يجب أن تكون 6 أحرف على الأقل" -> "كلمة المرور قصيرة جداً"
+        "الرجاء إدخال اسم المستخدم" -> "يرجى إدخال اسم المستخدم"
+        "الرجاء إدخال رقم الهاتف" -> "يرجى إدخال رقم الهاتف"
+        "الرجاء إدخال كلمة المرور" -> "يرجى إدخال كلمة المرور"
+        "الرجاء إدخال تأكيد كلمة المرور" -> "يرجى تأكيد كلمة المرور"
+        "حدث خطأ أثناء إنشاء الحساب" -> "حدث خطأ أثناء إنشاء الحساب، حاول لاحقاً"
+        else -> serverMessage ?: "حدث خطأ غير متوقع"
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
@@ -236,6 +252,25 @@ fun RegisterScreen(
                         )
                     }
                 }
+                // بعد البطاقة البيضاء وقبل زر التسجيل
+                if (localError != null) {
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
+                        shape = RoundedCornerShape(cardCorner),
+                        modifier = Modifier.fillMaxWidth(0.97f).padding(vertical = 2.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(marginSmall)) {
+                            Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(iconSizeSmall))
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = localError ?: "",
+                                color = colors.error,
+                                fontSize = fontSmall,
+                                style = typography.bodyMedium
+                            )
+                        }
+                    }
+                }
                 if (errorMessage != null) {
                     Card(
                         colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
@@ -246,7 +281,7 @@ fun RegisterScreen(
                             Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(iconSizeSmall))
                             Spacer(Modifier.width(4.dp))
                             Text(
-                                text = errorMessage ?: "",
+                                text = translateErrorMessage(errorMessage),
                                 color = colors.error,
                                 fontSize = fontSmall,
                                 style = typography.bodyMedium
@@ -264,6 +299,7 @@ fun RegisterScreen(
                             phone.isEmpty() -> "الرجاء إدخال رقم الهاتف"
                             password.isEmpty() -> "الرجاء إدخال كلمة المرور"
                             confirmPassword.isEmpty() -> "الرجاء تأكيد كلمة المرور"
+                            password.length < 6 -> "كلمة المرور يجب أن تكون 6 أحرف على الأقل"
                             password != confirmPassword -> "كلمة المرور غير متطابقة"
                             else -> null
                         }
