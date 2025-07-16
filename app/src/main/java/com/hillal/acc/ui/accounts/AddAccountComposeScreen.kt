@@ -89,7 +89,7 @@ fun AddAccountComposeScreen(
                             if (cursor.moveToFirst()) {
                                 val phoneNumber = cursor.getString(0)
                                 val contactName = cursor.getString(1)
-                                val cleanPhone = phoneNumber.replace(Regex("[^0-9+]"), "")
+                                val cleanPhone = phoneNumber.replace(Regex("[^0-9+]") , "")
                                 name = contactName
                                 phone = cleanPhone
                                 nameError = null
@@ -190,49 +190,45 @@ fun AddAccountComposeScreen(
             onNavigateBack()
         }
 
-        Box(
+        // كل المحتوى داخل Column واحدة فقط مع التمرير
+        Column(
             modifier = modifier
                 .fillMaxSize()
                 .background(colors.background)
+                .verticalScroll(rememberScrollState())
+                .imePadding()
+                .padding(dimens.spacingMedium),
+            verticalArrangement = Arrangement.spacedBy(dimens.spacingMedium)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(dimens.spacingMedium)
-                    .imePadding(),
-                verticalArrangement = Arrangement.spacedBy(dimens.spacingMedium)
-            ) {
-                // Header Section
-                HeaderSection(dimens, colors, typography)
-                // Form Section
-                FormSection(
-                    name = name,
-                    onNameChange = { name = it },
-                    nameError = nameError,
-                    phone = phone,
-                    onPhoneChange = { phone = it },
-                    phoneError = phoneError,
-                    notes = notes,
-                    onNotesChange = { notes = it },
-                    whatsappEnabled = whatsappEnabled,
-                    onWhatsappEnabledChange = { whatsappEnabled = it },
-                    onPickContact = pickContact,
-                    dimens = dimens,
-                    colors = colors,
-                    typography = typography
-                )
-                // Buttons Section
-                ButtonsSection(
-                    onSave = saveAccount,
-                    onCancel = onNavigateBack,
-                    isSaving = isSaving,
-                    dimens = dimens,
-                    colors = colors,
-                    typography = typography
-                )
-                Spacer(modifier = Modifier.height(dimens.spacingMedium))
-            }
+            // Header Section
+            HeaderSection(dimens, colors, typography)
+            // Form Section
+            FormSection(
+                name = name,
+                onNameChange = { name = it },
+                nameError = nameError,
+                phone = phone,
+                onPhoneChange = { phone = it },
+                phoneError = phoneError,
+                notes = notes,
+                onNotesChange = { notes = it },
+                whatsappEnabled = whatsappEnabled,
+                onWhatsappEnabledChange = { whatsappEnabled = it },
+                onPickContact = pickContact,
+                dimens = dimens,
+                colors = colors,
+                typography = typography
+            )
+            // Buttons Section
+            ButtonsSection(
+                onSave = saveAccount,
+                onCancel = onNavigateBack,
+                isSaving = isSaving,
+                dimens = dimens,
+                colors = colors,
+                typography = typography
+            )
+            Spacer(modifier = Modifier.height(dimens.spacingMedium))
         }
     }
 }
