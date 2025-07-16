@@ -710,7 +710,7 @@ fun AddTransactionScreen(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(80.dp)) // مساحة إضافية فوق الأزرار المتنقلة
+                Spacer(modifier = Modifier.height(dimens.spacingMedium)) // مسافة بسيطة فوق الأزرار
                 // Action Buttons في الأسفل
                 Row(
                     modifier = Modifier
