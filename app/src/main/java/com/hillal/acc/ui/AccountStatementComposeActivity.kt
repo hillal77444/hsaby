@@ -872,7 +872,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val startDateObj = dateFormat.parse(startDate)
         val endDateObj = endDate
         val safeAccountName = account.name.replace(Regex("[^\u0600-\u06FFa-zA-Z0-9_]"), "_")
-        val fileName = "كشف_حساب_${safeAccountName}_${startDate}_${endDate}_itextg.pdf"
+        val fileName = "كشف_حساب_${safeAccountName}_${startDate}_${endDate}_m.pdf"
         val pdfFile = File(context.cacheDir, fileName)
 
         val document = Document()
