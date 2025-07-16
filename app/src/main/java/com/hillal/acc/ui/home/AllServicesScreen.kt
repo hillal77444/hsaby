@@ -30,7 +30,7 @@ import com.hillal.acc.R
 import androidx.compose.foundation.background
 import android.content.Intent
 import com.hillal.acc.ui.ReportHeaderSettingsActivity
-import androidx.compose.material3.Dialog
+import androidx.compose.material.Dialog
 
 // نموذج للصفحات المتوفرة
 // يمكنك تعديل القائمة حسب الصفحات الفعلية
