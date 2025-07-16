@@ -971,12 +971,11 @@ class AccountStatementComposeActivity : ComponentActivity() {
             }
             // إذا فشلت كل المحاولات، تجاهل الشعار بدون كراش
         }
+        // اسم المستخدم في الأعلى
         val userNamePara = Paragraph(ArabicUtilities.reshape(userName), fontCairoBold)
         userNamePara.alignment = Element.ALIGN_CENTER
         logoCell.addElement(userNamePara)
-        val accountNamePara = Paragraph(ArabicUtilities.reshape(account.name), fontCairo)
-        accountNamePara.alignment = Element.ALIGN_CENTER
-        logoCell.addElement(accountNamePara)
+        // (تم حذف اسم الحساب من هنا)
         headerTable.addCell(logoCell)
         // الترويسة اليمنى (في أقصى اليسار)
         val rightCell = PdfPCell()
