@@ -69,17 +69,20 @@ fun ReportHeaderSettingsScreen() {
     var showPermissionDenied by remember { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
     var showSavedMessage by remember { mutableStateOf(false) }
+    var logoPath by remember { mutableStateOf<String?>(null) }
 
     // استرجاع البيانات المحفوظة عند أول تشغيل
     LaunchedEffect(Unit) {
         rightHeader = sharedPreferences.getString("right_header", "") ?: ""
         leftHeader = sharedPreferences.getString("left_header", "") ?: ""
-        val logoUriString = sharedPreferences.getString("logo_uri", null)
-        if (logoUriString != null) {
-            logoUri = Uri.parse(logoUriString)
+        val savedLogoPath = sharedPreferences.getString("logo_path", null)
+        logoPath = savedLogoPath
+        if (!savedLogoPath.isNullOrEmpty()) {
             try {
-                val inputStream: InputStream? = context.contentResolver.openInputStream(logoUri!!)
-                logoBitmap = inputStream?.use { BitmapFactory.decodeStream(it) }
+                val file = java.io.File(context.filesDir, savedLogoPath)
+                if (file.exists()) {
+                    logoBitmap = BitmapFactory.decodeFile(file.absolutePath)
+                }
             } catch (_: Exception) {}
         }
     }
@@ -90,7 +93,17 @@ fun ReportHeaderSettingsScreen() {
             logoUri = uri
             try {
                 val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
-                logoBitmap = inputStream?.use { BitmapFactory.decodeStream(it) }
+                val bitmap = inputStream?.use { BitmapFactory.decodeStream(it) }
+                logoBitmap = bitmap
+                // حفظ الصورة في internal storage
+                if (bitmap != null) {
+                    val file = java.io.File(context.filesDir, "logo.png")
+                    val out = java.io.FileOutputStream(file)
+                    bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
+                    out.flush()
+                    out.close()
+                    logoPath = "logo.png"
+                }
             } catch (_: Exception) {}
         }
     }
@@ -227,7 +240,7 @@ fun ReportHeaderSettingsScreen() {
                             val editor = sharedPreferences.edit()
                             editor.putString("right_header", rightHeader)
                             editor.putString("left_header", leftHeader)
-                            editor.putString("logo_uri", logoUri?.toString())
+                            editor.putString("logo_path", logoPath)
                             editor.apply()
                             isSaving = false
                             showSavedMessage = true

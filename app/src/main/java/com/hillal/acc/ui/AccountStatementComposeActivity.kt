@@ -97,6 +97,10 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 }
             }
         }
+        webView.settings.builtInZoomControls = true
+        webView.settings.displayZoomControls = false
+        webView.settings.useWideViewPort = true
+        webView.settings.loadWithOverviewMode = true
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -567,13 +571,14 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val prefs = context.getSharedPreferences("report_header_prefs", Context.MODE_PRIVATE)
         val rightHeader = prefs.getString("right_header", null) ?: "تطبيق مالي برو"
         val leftHeader = prefs.getString("left_header", null) ?: "رقم التواصل: 0500000000"
-        val logoUriString = prefs.getString("logo_uri", null)
+        val logoPath = prefs.getString("logo_path", null)
         var logoBitmap: Bitmap? = null
-        if (logoUriString != null) {
+        if (!logoPath.isNullOrEmpty()) {
             try {
-                val uri = Uri.parse(logoUriString)
-                val inputStream = context.contentResolver.openInputStream(uri)
-                logoBitmap = inputStream?.use { BitmapFactory.decodeStream(it) }
+                val file = java.io.File(context.filesDir, logoPath)
+                if (file.exists()) {
+                    logoBitmap = BitmapFactory.decodeFile(file.absolutePath)
+                }
             } catch (_: Exception) {}
         }
         if (logoBitmap == null) {
@@ -644,13 +649,13 @@ class AccountStatementComposeActivity : ComponentActivity() {
             <tr class="summary-row">
                 <td></td>
                 <td style="font-weight:bold;">الإجمالي</td>
-                <td></td>
-                <td></td>
+                <td class="debit">${String.format(Locale.ENGLISH, "%.2f", totalDebit)}</td>
+                <td class="credit">${String.format(Locale.ENGLISH, "%.2f", totalCredit)}</td>
                 <td></td>
             </tr>
             <tr class="summary-row">
-                <td style="font-weight:bold;">الرصيد</td>
                 <td></td>
+                <td style="font-weight:bold;">الرصيد</td>
                 <td></td>
                 <td></td>
                 <td style="font-weight:bold;">${String.format(Locale.ENGLISH, "%.2f", balance)}</td>
@@ -675,13 +680,13 @@ class AccountStatementComposeActivity : ComponentActivity() {
             // ترويسة علوية (يمين ويسار)
             headerHtml = """
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0;">
-                <div style="font-weight:bold;font-size:1.1em;color:#1976d2;">$rightHeaderHtml</div>
-                <div style="font-weight:bold;font-size:1.1em;color:#1976d2;">$leftHeaderHtml</div>
+                <div style="font-weight:bold;font-size:1.1em;color:#1976d2;white-space:pre-line;text-align:right;flex:2;">$rightHeaderHtml</div>
+                <div style="flex:1;text-align:center;">
+                    $logoImgTag
+                    <div style="font-size:1.15em;font-weight:bold;color:#1976d2;margin-top:4px;letter-spacing:0.5px;">$userName</div>
+                </div>
+                <div style="font-weight:bold;font-size:1.1em;color:#1976d2;white-space:pre-line;text-align:left;flex:2;">$leftHeaderHtml</div>
             </div>
-            <div style="width:100%;text-align:center;margin-top:8px;margin-bottom:0;">
-                $logoImgTag
-            </div>
-            <div style="width:100%;text-align:center;font-size:1.15em;font-weight:bold;color:#1976d2;margin-top:4px;margin-bottom:8px;letter-spacing:0.5px;">$userName</div>
             """
             // بطاقة بيانات العميل
             clientCardHtml = """
@@ -700,7 +705,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         <html dir="rtl">
         <head>
             <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
             <style>
                 @font-face {
                     font-family: 'Cairo';
@@ -720,7 +725,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     box-sizing: border-box;
                     width: 100vw;
                     max-width: 100vw;
-                    overflow-x: hidden;
+                    overflow-x: auto;
+                    /* السماح بالتمرير الأفقي عند التكبير */
+                    touch-action: pan-x pan-y;
                 }
                 .table-container {
                     background: white;
@@ -791,6 +798,10 @@ class AccountStatementComposeActivity : ComponentActivity() {
 
     private fun printReport() {
         if (webView != null) {
+            webView.settings.builtInZoomControls = true
+            webView.settings.displayZoomControls = false
+            webView.settings.useWideViewPort = true
+            webView.settings.loadWithOverviewMode = true
             val printManager = getSystemService(Context.PRINT_SERVICE) as android.print.PrintManager
             val printAdapter = webView.createPrintDocumentAdapter("كشف الحساب")
             printManager.print("كشف الحساب", printAdapter, null)
@@ -1051,6 +1062,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         // الترويسة اليمنى (دعم السطر الجديد)
         val rightCell = PdfPCell()
         rightCell.horizontalAlignment = Element.ALIGN_RIGHT
+        rightCell.verticalAlignment = Element.ALIGN_TOP
         rightCell.border = Rectangle.NO_BORDER
         rightCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
         rightHeader.split("\n").forEach { line ->
@@ -1061,6 +1073,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val logoCell = PdfPCell()
         logoCell.border = Rectangle.NO_BORDER
         logoCell.horizontalAlignment = Element.ALIGN_CENTER
+        logoCell.verticalAlignment = Element.ALIGN_MIDDLE
         logoCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
         if (logoBitmap != null) {
             val stream = java.io.ByteArrayOutputStream()
@@ -1078,6 +1091,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         // الترويسة اليسرى (دعم السطر الجديد)
         val leftCell = PdfPCell()
         leftCell.horizontalAlignment = Element.ALIGN_LEFT
+        leftCell.verticalAlignment = Element.ALIGN_TOP
         leftCell.border = Rectangle.NO_BORDER
         leftCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
         leftHeader.split("\n").forEach { line ->
