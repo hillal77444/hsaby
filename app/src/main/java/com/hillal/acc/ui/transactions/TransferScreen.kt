@@ -343,44 +343,53 @@ fun TransferScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .graphicsLayer(scaleX = headerScale, scaleY = headerScale),
-                    shape = RoundedCornerShape(dimens.cardCorner),
+                        .graphicsLayer(scaleX = headerScale, scaleY = headerScale)
+                        .padding(top = 4.dp, bottom = 4.dp), // تصغير الهوامش الخارجية
+                    shape = RoundedCornerShape(dimens.cardCorner * 0.7f),
                     colors = CardDefaults.cardColors(
                         containerColor = Color.Transparent
                     ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp) // elevation بسيط
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(
-                                        colors.primary.copy(alpha = 0.1f),
-                                        colors.primary.copy(alpha = 0.05f)
+                    Column(Modifier.fillMaxWidth()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(
+                                            colors.primary.copy(alpha = 0.09f),
+                                            colors.primary.copy(alpha = 0.03f)
+                                        )
                                     )
                                 )
-                            )
-                            .padding(dimens.spacingSmall) // Reduced padding
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
+                                .padding(vertical = 8.dp, horizontal = 8.dp) // padding داخلي متوسط
                         ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_accounts),
-                                contentDescription = null,
-                                modifier = Modifier.size(dimens.iconSize),
-                                tint = colors.primary
-                            )
-                            Spacer(Modifier.width(dimens.spacingSmall))
-                            Text(
-                                text = "تحويل بين الحسابات",
-                                style = typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = colors.primary
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_accounts),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(dimens.iconSize * 0.8f), // أيقونة أوضح قليلاً
+                                    tint = colors.primary
+                                )
+                                Spacer(Modifier.width(8.dp)) // مسافة مناسبة
+                                Text(
+                                    text = "تحويل بين الحسابات",
+                                    style = typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold, fontSize = 20.sp), // نص أكبر وأكثر بروزًا
+                                    color = colors.primary // لون واضح
+                                )
+                            }
                         }
+                        // Divider أسفل العنوان
+                        androidx.compose.material3.Divider(
+                            color = colors.primary.copy(alpha = 0.25f),
+                            thickness = 1.dp,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
                     }
                 }
                 
