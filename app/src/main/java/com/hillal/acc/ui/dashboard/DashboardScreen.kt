@@ -422,7 +422,7 @@ fun GridCardOld(
                 text = title,
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                 color = Color(0xFF1976D2),
-                fontSize = (iconSize * 0.9f).value.sp,
+                fontSize = (iconSize * 0.8f).value.sp,
                 modifier = Modifier.padding(top = 2.dp)
             )
         }
