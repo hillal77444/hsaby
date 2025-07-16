@@ -925,6 +925,19 @@ class AccountStatementComposeActivity : ComponentActivity() {
         logoCell.horizontalAlignment = Element.ALIGN_CENTER
         logoCell.verticalAlignment = Element.ALIGN_MIDDLE
         logoCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        // الشعار (إذا كان موجودًا وصالحًا)
+        if (logoBitmap != null && logoBitmap.width > 0 && logoBitmap.height > 0) {
+            try {
+                val stream = java.io.ByteArrayOutputStream()
+                logoBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                val image = com.itextpdf.text.Image.getInstance(stream.toByteArray())
+                image.scaleAbsolute(60f, 60f)
+                image.alignment = Element.ALIGN_CENTER
+                logoCell.addElement(image)
+            } catch (e: Exception) {
+                // تجاهل الشعار إذا حدث خطأ
+            }
+        }
         // اسم المستخدم في الأعلى
         val userNamePara = Paragraph(ArabicUtilities.reshape(userName), fontCairoBold)
         userNamePara.alignment = Element.ALIGN_CENTER
@@ -933,7 +946,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val accountNamePara = Paragraph(ArabicUtilities.reshape(account.name), fontCairo)
         accountNamePara.alignment = Element.ALIGN_CENTER
         logoCell.addElement(accountNamePara)
-        // (يمكنك تفعيل الشعار هنا إذا رغبت)
         headerTable.addCell(logoCell)
         // الترويسة اليسرى (دعم السطر الجديد)
         val leftCell = PdfPCell()
