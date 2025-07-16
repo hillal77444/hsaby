@@ -97,10 +97,6 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 }
             }
         }
-        webView.settings.builtInZoomControls = true
-        webView.settings.displayZoomControls = false
-        webView.settings.useWideViewPort = true
-        webView.settings.loadWithOverviewMode = true
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
