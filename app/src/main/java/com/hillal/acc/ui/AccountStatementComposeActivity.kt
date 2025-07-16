@@ -69,7 +69,6 @@ import androidx.core.content.ContextCompat
 import android.content.res.Resources
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import com.hillal.acc.R
 import com.hillal.acc.data.preferences.UserPreferences
 
 class AccountStatementComposeActivity : ComponentActivity() {

@@ -38,6 +38,7 @@ import com.hillal.acc.R
 import com.hillal.acc.ui.accounts.ResponsiveAccountsTheme
 import com.hillal.acc.ui.theme.ProvideResponsiveDimensions
 import java.io.InputStream
+import androidx.activity.compose.rememberLauncherForActivityResult
 
 class ReportHeaderSettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,7 +119,7 @@ fun ReportHeaderSettingsScreen() {
                 },
                 navigationIcon = {
                     IconButton(onClick = { (context as? Activity)?.finish() }) {
-                        Icon(painterResource(id = R.drawable.ic_arrow_back), contentDescription = "رجوع")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "رجوع")
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
