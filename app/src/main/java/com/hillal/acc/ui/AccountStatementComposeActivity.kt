@@ -61,6 +61,16 @@ import com.itextpdf.text.BaseColor
 import com.hillal.acc.util.ArabicReshaper
 import com.hillal.acc.util.arabic.ArabicUtilities
 import com.itextpdf.text.Rectangle
+import android.content.SharedPreferences
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import androidx.core.content.ContextCompat
+import android.content.res.Resources
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import com.hillal.acc.R
+import com.hillal.acc.data.preferences.UserPreferences
 
 class AccountStatementComposeActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -520,7 +530,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
             }
 
             // إنشاء HTML للتقرير
-            val html = generateReportHtml(account, startDate, endDate, filteredTransactions, previousBalance)
+            val html = generateReportHtml(account, startDate, endDate, filteredTransactions, previousBalance, context)
             onHtmlGenerated(html)
             
         } catch (e: Exception) {
@@ -553,20 +563,52 @@ class AccountStatementComposeActivity : ComponentActivity() {
         return !calTx.before(calStart) && !calTx.after(calEnd)
     }
 
+    // دوال مساعدة لجلب الترويسة والشعار
+    private fun getReportHeaderData(context: Context): Triple<String, String, Bitmap?> {
+        val prefs = context.getSharedPreferences("report_header_prefs", Context.MODE_PRIVATE)
+        val rightHeader = prefs.getString("right_header", null) ?: "مؤسسة حسابي"
+        val leftHeader = prefs.getString("left_header", null) ?: "رقم التواصل: 0500000000"
+        val logoUriString = prefs.getString("logo_uri", null)
+        var logoBitmap: Bitmap? = null
+        if (logoUriString != null) {
+            try {
+                val uri = Uri.parse(logoUriString)
+                val inputStream = context.contentResolver.openInputStream(uri)
+                logoBitmap = inputStream?.use { BitmapFactory.decodeStream(it) }
+            } catch (_: Exception) {}
+        }
+        if (logoBitmap == null) {
+            // استخدم شعار التطبيق الافتراضي
+            val drawable: Drawable? = ContextCompat.getDrawable(context, R.mipmap.ic_launcher)
+            if (drawable is BitmapDrawable) {
+                logoBitmap = drawable.bitmap
+            }
+        }
+        return Triple(rightHeader, leftHeader, logoBitmap)
+    }
+
+    // دالة لتحويل Bitmap إلى Base64 (لاستخدامها في HTML img src)
+    private fun bitmapToBase64(bitmap: Bitmap?): String? {
+        if (bitmap == null) return null
+        val outputStream = java.io.ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        val byteArray = outputStream.toByteArray()
+        return Base64.encodeToString(byteArray, Base64.DEFAULT)
+    }
+
     private fun generateReportHtml(
         account: Account,
         startDate: Date,
         endDate: Date,
         transactions: List<Transaction>,
-        previousBalance: Double
+        previousBalance: Double,
+        context: Context? = null
     ): String {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
         val displayDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
-        
         var totalDebit = 0.0
         var totalCredit = 0.0
         var balance = previousBalance
-        
         val transactionRows = transactions.joinToString("") { transaction ->
             when (transaction.type) {
                 "debit" -> {
@@ -574,11 +616,11 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     balance -= transaction.amount
                     """
                     <tr>
-                        <td>${displayDateFormat.format(Date(transaction.transactionDate))}</td>
+                        <td>${String.format(Locale.ENGLISH, "%.2f", balance)}</td>
                         <td></td>
                         <td class="debit">${String.format(Locale.ENGLISH, "%.2f", transaction.amount)}</td>
                         <td>${transaction.description}</td>
-                        <td>${String.format(Locale.ENGLISH, "%.2f", balance)}</td>
+                        <td>${displayDateFormat.format(Date(transaction.transactionDate))}</td>
                     </tr>
                     """
                 }
@@ -587,23 +629,76 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     balance += transaction.amount
                     """
                     <tr>
-                        <td>${displayDateFormat.format(Date(transaction.transactionDate))}</td>
+                        <td>${String.format(Locale.ENGLISH, "%.2f", balance)}</td>
                         <td class="credit">${String.format(Locale.ENGLISH, "%.2f", transaction.amount)}</td>
                         <td></td>
                         <td>${transaction.description}</td>
-                        <td>${String.format(Locale.ENGLISH, "%.2f", balance)}</td>
+                        <td>${displayDateFormat.format(Date(transaction.transactionDate))}</td>
                     </tr>
                     """
                 }
                 else -> ""
             }
         }
-        
+        // صف الإجمالي وصف الرصيد النهائي
+        val summaryRows = """
+            <tr class="summary-row">
+                <td></td>
+                <td class="credit">${String.format(Locale.ENGLISH, "%.2f", totalCredit)}</td>
+                <td class="debit">${String.format(Locale.ENGLISH, "%.2f", totalDebit)}</td>
+                <td style="font-weight:bold;">الإجمالي</td>
+                <td></td>
+            </tr>
+            <tr class="summary-row">
+                <td style="font-weight:bold;">${String.format(Locale.ENGLISH, "%.2f", balance)}</td>
+                <td></td>
+                <td></td>
+                <td style="font-weight:bold;">الرصيد</td>
+                <td></td>
+            </tr>
+        """
+        // جلب الترويسة والشعار واسم المستخدم
+        var headerHtml = ""
+        var clientCardHtml = ""
+        if (context != null) {
+            val (rightHeader, leftHeader, logoBitmap) = getReportHeaderData(context)
+            val logoBase64 = bitmapToBase64(logoBitmap)
+            val logoImgTag = if (logoBase64 != null) {
+                "<img src=\"data:image/png;base64,$logoBase64\" style=\"width:80px;height:80px;border-radius:50%;object-fit:cover;display:block;margin:0 auto;\" alt=\"logo\" />"
+            } else {
+                ""
+            }
+            val userPreferences = UserPreferences(context)
+            val userName = userPreferences.userName ?: "اسم المستخدم"
+            // ترويسة علوية (يمين ويسار)
+            headerHtml = """
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0;">
+                <div style="font-weight:bold;font-size:1.1em;color:#1976d2;">$rightHeader</div>
+                <div style="font-weight:bold;font-size:1.1em;color:#1976d2;">$leftHeader</div>
+            </div>
+            <div style="width:100%;text-align:center;margin-top:8px;margin-bottom:0;">
+                $logoImgTag
+            </div>
+            <div style="width:100%;text-align:center;font-size:1.15em;font-weight:bold;color:#1976d2;margin-top:4px;margin-bottom:8px;letter-spacing:0.5px;">$userName</div>
+            """
+            // بطاقة بيانات العميل
+            clientCardHtml = """
+            <div style="border:1px solid #1976d2;border-radius:8px;padding:10px 0 10px 0;margin-bottom:10px;background:#f9f9f9;">
+                <div style="font-size:1.1em;font-weight:bold;text-align:center;margin-bottom:4px;">كشف حساب : ${account.name}</div>
+                <div style="text-align:center;font-size:0.98em;color:#333;">
+                    من تاريخ: ${displayDateFormat.format(startDate)}
+                    &nbsp; إلى تاريخ: ${displayDateFormat.format(endDate)}
+                    ${if (transactions.firstOrNull()?.currency != null) "&nbsp; العملة: ${transactions.firstOrNull()?.currency}" else ""}
+                </div>
+            </div>
+            """
+        }
         return """
         <!DOCTYPE html>
         <html dir="rtl">
         <head>
             <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <style>
                 @font-face {
                     font-family: 'Cairo';
@@ -615,73 +710,70 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     src: url('file:///android_asset/fonts/Cairo/static/Cairo-Bold.ttf');
                     font-weight: bold;
                 }
-                body { font-family: 'Cairo', Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
-                .header, .account-info-row, .transactions-table, .summary {
+                html, body {
+                    font-family: 'Cairo', Arial, sans-serif;
+                    margin: 0; padding: 0;
+                    background-color: #f5f5f5;
+                    font-size: 13px;
+                    box-sizing: border-box;
+                    width: 100vw;
+                    max-width: 100vw;
+                    overflow-x: hidden;
+                }
+                .table-container {
+                    background: white;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 8px #eee;
+                    padding: 0;
+                    margin-bottom: 10px;
+                    width: 100vw;
+                    max-width: 100vw;
+                    overflow-x: auto;
+                }
+                table {
                     width: 100%;
                     max-width: 100vw;
-                    box-sizing: border-box;
-                    margin: 0 auto 10px auto;
+                    table-layout: auto;
+                    border-collapse: collapse;
                 }
-                .header { background-color: #1976d2; color: white; padding: 16px; border-radius: 10px; margin-bottom: 10px; font-weight: bold; }
-                .account-info-row { background-color: white; padding: 8px 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.88em; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 10px; color: #333; }
-                .account-info-row span { font-weight: bold; color: #1976d2; font-size: 0.88em; }
-                .account-info-row .divider { color: #aaa; font-weight: normal; margin: 0 4px; }
-                .transactions-table { width: 100%; max-width: 100vw; border-collapse: collapse; background-color: white; border-radius: 10px; overflow-x: auto; table-layout: fixed; }
-                .transactions-table th { background-color: #1976d2; color: white; padding: 10px; text-align: center; font-size: 0.75em; font-weight: bold; }
-                .transactions-table td { padding: 8px; text-align: center; border-bottom: 1px solid #eee; word-break: break-word; font-size: 0.75em; }
-                /* جعل عمود الوصف أعرض */
-                .transactions-table td:nth-child(4), .transactions-table th:nth-child(4) { width: 32%; }
-                .transactions-table td:nth-child(1), .transactions-table th:nth-child(1),
-                .transactions-table td:nth-child(2), .transactions-table th:nth-child(2),
-                .transactions-table td:nth-child(3), .transactions-table th:nth-child(3),
-                .transactions-table td:nth-child(5), .transactions-table th:nth-child(5) { width: 17%; }
+                th, td {
+                    border: 1px solid #bbb;
+                    padding: 6px 4px;
+                    text-align: center;
+                    font-size: 0.80em;
+                    word-break: break-word;
+                }
+                th {
+                    background: #1976d2;
+                    color: white;
+                    font-weight: bold;
+                }
                 .debit { color: #d32f2f; font-weight: bold; }
                 .credit { color: #388e3c; font-weight: bold; }
-                .summary { background-color: white; padding: 10px; border-radius: 10px; margin-top: 10px; width: 100%; }
-                .summary-row { display: flex; justify-content: space-between; margin: 6px 0; }
-                .summary-label { font-weight: bold; color: #666; }
-                .summary-value { font-weight: bold; color: #1976d2; }
+                .summary-row { background: #f5f5f5; font-weight: bold; }
+                /* تحسين التباعد بين العناصر */
+                .client-card, .header-section { margin-bottom: 8px; }
             </style>
         </head>
         <body>
-            <div class="header">
-                <h1 style="font-size:1.1em; margin:0 0 8px 0;">كشف الحساب التفصيلي</h1>
-            </div>
-            <div class="account-info-row">
-                <span>اسم الحساب: ${account.name}</span>
-                <span class="divider">|</span>
-                <span>رقم الهاتف: ${account.phoneNumber}</span>
-                <span class="divider">|</span>
-                <span>الفترة: من ${displayDateFormat.format(startDate)} إلى ${displayDateFormat.format(endDate)}</span>
-            </div>
-            <table class="transactions-table">
+            $headerHtml
+            $clientCardHtml
+            <div class="table-container">
+            <table>
                 <thead>
                     <tr>
-                        <th>التاريخ</th>
+                        <th>الرصيد</th>
                         <th>له</th>
                         <th>عليه</th>
-                        <th>الوصف</th>
-                        <th>الرصيد</th>
+                        <th>البيان</th>
+                        <th>التاريخ</th>
                     </tr>
                 </thead>
                 <tbody>
                     $transactionRows
+                    $summaryRows
                 </tbody>
             </table>
-            <div class="summary">
-                <h3 style="font-size:0.95em; margin-bottom:8px;">ملخص الحساب</h3>
-                <div class="summary-row">
-                    <span class="summary-label">إجمالي عليه:</span>
-                    <span class="summary-value debit">${String.format(Locale.ENGLISH, "%.2f", totalDebit)}</span>
-                </div>
-                <div class="summary-row">
-                    <span class="summary-label">إجمالي له:</span>
-                    <span class="summary-value credit">${String.format(Locale.ENGLISH, "%.2f", totalCredit)}</span>
-                </div>
-                <div class="summary-row">
-                    <span class="summary-label">الرصيد النهائي:</span>
-                    <span class="summary-value">${String.format(Locale.ENGLISH, "%.2f", balance)}</span>
-                </div>
             </div>
         </body>
         </html>
@@ -897,6 +989,35 @@ class AccountStatementComposeActivity : ComponentActivity() {
             }
         }
 
+        // صف الإجمالي
+        val summaryRow = listOf(
+            PdfPCell(Paragraph("", fontCairo)), // الرصيد
+            PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", totalCredit), fontCredit)), // له
+            PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", totalDebit), fontDebit)), // عليه
+            PdfPCell(Paragraph(ArabicUtilities.reshape("الإجمالي"), fontCairoBold)), // البيان
+            PdfPCell(Paragraph("", fontCairo)) // التاريخ
+        )
+        for (cell in summaryRow) {
+            cell.horizontalAlignment = Element.ALIGN_CENTER
+            cell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
+            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+            table.addCell(cell)
+        }
+        // صف الرصيد النهائي
+        val balanceRow = listOf(
+            PdfPCell(Paragraph(String.format(Locale.ENGLISH, "%.2f", balance), fontCairoBold)), // الرصيد
+            PdfPCell(Paragraph("", fontCairo)), // له
+            PdfPCell(Paragraph("", fontCairo)), // عليه
+            PdfPCell(Paragraph(ArabicUtilities.reshape("الرصيد"), fontCairoBold)), // البيان
+            PdfPCell(Paragraph("", fontCairo)) // التاريخ
+        )
+        for (cell in balanceRow) {
+            cell.horizontalAlignment = Element.ALIGN_CENTER
+            cell.backgroundColor = BaseColor(0xF5, 0xF5, 0xF5)
+            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+            table.addCell(cell)
+        }
+
         document.add(table)
         document.add(Paragraph(" "))
 
@@ -911,6 +1032,45 @@ class AccountStatementComposeActivity : ComponentActivity() {
             para.alignment = Element.ALIGN_RIGHT
             document.add(para)
         }
+
+        // جلب الترويسة والشعار
+        val (rightHeader, leftHeader, logoBitmap) = getReportHeaderData(context)
+        // صف الترويسة والشعار
+        val headerTable = PdfPTable(3)
+        headerTable.widthPercentage = 100f
+        headerTable.setWidths(floatArrayOf(2f, 1f, 2f))
+        // الترويسة اليمنى
+        val rightCell = PdfPCell(Paragraph(ArabicUtilities.reshape(rightHeader), fontCairoBold))
+        rightCell.horizontalAlignment = Element.ALIGN_RIGHT
+        rightCell.border = Rectangle.NO_BORDER
+        rightCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        headerTable.addCell(rightCell)
+        // الشعار مع اسم المستخدم تحته
+        val logoCell = PdfPCell()
+        logoCell.border = Rectangle.NO_BORDER
+        logoCell.horizontalAlignment = Element.ALIGN_CENTER
+        logoCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        if (logoBitmap != null) {
+            val stream = java.io.ByteArrayOutputStream()
+            logoBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            val image = com.itextpdf.text.Image.getInstance(stream.toByteArray())
+            image.scaleAbsolute(50f, 50f)
+            image.alignment = Element.ALIGN_CENTER
+            logoCell.addElement(image)
+        }
+        // اسم المستخدم تحت الشعار
+        val userNamePara = Paragraph(ArabicUtilities.reshape(account.name), fontCairoBold)
+        userNamePara.alignment = Element.ALIGN_CENTER
+        logoCell.addElement(userNamePara)
+        headerTable.addCell(logoCell)
+        // الترويسة اليسرى
+        val leftCell = PdfPCell(Paragraph(ArabicUtilities.reshape(leftHeader), fontCairoBold))
+        leftCell.horizontalAlignment = Element.ALIGN_LEFT
+        leftCell.border = Rectangle.NO_BORDER
+        leftCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        headerTable.addCell(leftCell)
+        document.add(headerTable)
+        document.add(Paragraph(" "))
 
         document.close()
         writer.close()

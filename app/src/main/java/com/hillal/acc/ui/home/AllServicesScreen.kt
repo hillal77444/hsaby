@@ -28,6 +28,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.res.painterResource
 import com.hillal.acc.R
 import androidx.compose.foundation.background
+import android.content.Intent
+import com.hillal.acc.ui.ReportHeaderSettingsActivity
 
 // نموذج للصفحات المتوفرة
 // يمكنك تعديل القائمة حسب الصفحات الفعلية
@@ -40,6 +42,7 @@ fun AllServicesScreen(navController: NavController) {
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
     val columns = if (LocalConfiguration.current.screenWidthDp < 600) 3 else 4
+    val context = LocalContext.current
 
     // نقل تعريف allServices إلى هنا ليكون navController متاحًا
     val allServices = listOf(
@@ -49,7 +52,15 @@ fun AllServicesScreen(navController: NavController) {
         ServiceItem("متابعة الديون", R.drawable.ic_arrow_downward, onClick = { navController.navigate(R.id.nav_summary) }),
         ServiceItem("صرف العملات", R.drawable.ic_currency_exchange, onClick = { navController.navigate(R.id.action_dashboard_to_exchange) }),
         ServiceItem("تحويل بين الحسابات", R.drawable.ic_sync_alt, onClick = { navController.navigate(R.id.transferFragment) }),
-        ServiceItem("إعدادات واتساب", R.drawable.ic_whatsapp, onClick = { navController.navigate(R.id.whatsappSettingsFragment) })
+        ServiceItem("إعدادات واتساب", R.drawable.ic_whatsapp, onClick = { navController.navigate(R.id.whatsappSettingsFragment) }),
+        // بطاقة إعدادات الترويسة والشعار
+        ServiceItem(
+            "إعدادات ترويسة التقرير والشعار",
+            R.drawable.ic_settings, // استخدم أيقونة الإعدادات أو أيقونة مناسبة متوفرة لديك
+            onClick = {
+                context.startActivity(Intent(context, ReportHeaderSettingsActivity::class.java))
+            }
+        )
     )
 
     Surface(
