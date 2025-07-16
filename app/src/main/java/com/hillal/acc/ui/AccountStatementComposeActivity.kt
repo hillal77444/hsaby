@@ -615,11 +615,11 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     balance -= transaction.amount
                     """
                     <tr>
-                        <td>${String.format(Locale.ENGLISH, "%.2f", balance)}</td>
-                        <td></td>
-                        <td class="debit">${String.format(Locale.ENGLISH, "%.2f", transaction.amount)}</td>
-                        <td>${transaction.description}</td>
                         <td>${displayDateFormat.format(Date(transaction.transactionDate))}</td>
+                        <td>${transaction.description}</td>
+                        <td class="debit">${String.format(Locale.ENGLISH, "%.2f", transaction.amount)}</td>
+                        <td></td>
+                        <td>${String.format(Locale.ENGLISH, "%.2f", balance)}</td>
                     </tr>
                     """
                 }
@@ -628,11 +628,11 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     balance += transaction.amount
                     """
                     <tr>
-                        <td>${String.format(Locale.ENGLISH, "%.2f", balance)}</td>
-                        <td class="credit">${String.format(Locale.ENGLISH, "%.2f", transaction.amount)}</td>
-                        <td></td>
-                        <td>${transaction.description}</td>
                         <td>${displayDateFormat.format(Date(transaction.transactionDate))}</td>
+                        <td>${transaction.description}</td>
+                        <td></td>
+                        <td class="credit">${String.format(Locale.ENGLISH, "%.2f", transaction.amount)}</td>
+                        <td>${String.format(Locale.ENGLISH, "%.2f", balance)}</td>
                     </tr>
                     """
                 }
@@ -643,17 +643,17 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val summaryRows = """
             <tr class="summary-row">
                 <td></td>
-                <td class="credit">${String.format(Locale.ENGLISH, "%.2f", totalCredit)}</td>
-                <td class="debit">${String.format(Locale.ENGLISH, "%.2f", totalDebit)}</td>
                 <td style="font-weight:bold;">الإجمالي</td>
+                <td></td>
+                <td></td>
                 <td></td>
             </tr>
             <tr class="summary-row">
-                <td style="font-weight:bold;">${String.format(Locale.ENGLISH, "%.2f", balance)}</td>
-                <td></td>
-                <td></td>
                 <td style="font-weight:bold;">الرصيد</td>
                 <td></td>
+                <td></td>
+                <td></td>
+                <td style="font-weight:bold;">${String.format(Locale.ENGLISH, "%.2f", balance)}</td>
             </tr>
         """
         // جلب الترويسة والشعار واسم المستخدم
@@ -661,6 +661,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
         var clientCardHtml = ""
         if (context != null) {
             val (rightHeader, leftHeader, logoBitmap) = getReportHeaderData(context)
+            // دعم السطر الجديد في الترويسة
+            val rightHeaderHtml = rightHeader.replace("\n", "<br>")
+            val leftHeaderHtml = leftHeader.replace("\n", "<br>")
             val logoBase64 = bitmapToBase64(logoBitmap)
             val logoImgTag = if (logoBase64 != null) {
                 "<img src=\"data:image/png;base64,$logoBase64\" style=\"width:80px;height:80px;border-radius:50%;object-fit:cover;display:block;margin:0 auto;\" alt=\"logo\" />"
@@ -672,8 +675,8 @@ class AccountStatementComposeActivity : ComponentActivity() {
             // ترويسة علوية (يمين ويسار)
             headerHtml = """
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0;">
-                <div style="font-weight:bold;font-size:1.1em;color:#1976d2;">$rightHeader</div>
-                <div style="font-weight:bold;font-size:1.1em;color:#1976d2;">$leftHeader</div>
+                <div style="font-weight:bold;font-size:1.1em;color:#1976d2;">$rightHeaderHtml</div>
+                <div style="font-weight:bold;font-size:1.1em;color:#1976d2;">$leftHeaderHtml</div>
             </div>
             <div style="width:100%;text-align:center;margin-top:8px;margin-bottom:0;">
                 $logoImgTag
@@ -750,9 +753,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 }
                 /* توزيع الأعمدة بدقة */
                 th:nth-child(1), td:nth-child(1) { width: 18%; }
-                th:nth-child(2), td:nth-child(2) { width: 14%; }
+                th:nth-child(2), td:nth-child(2) { width: 36%; text-align: right; }
                 th:nth-child(3), td:nth-child(3) { width: 14%; }
-                th:nth-child(4), td:nth-child(4) { width: 36%; text-align: right; }
+                th:nth-child(4), td:nth-child(4) { width: 14%; }
                 th:nth-child(5), td:nth-child(5) { width: 18%; }
                 .debit { color: #d32f2f; font-weight: bold; }
                 .credit { color: #388e3c; font-weight: bold; }
@@ -768,11 +771,11 @@ class AccountStatementComposeActivity : ComponentActivity() {
             <table>
                 <thead>
                     <tr>
-                        <th>الرصيد</th>
-                        <th>له</th>
-                        <th>عليه</th>
-                        <th>البيان</th>
                         <th>التاريخ</th>
+                        <th>البيان</th>
+                        <th>عليه</th>
+                        <th>له</th>
+                        <th>الرصيد</th>
                     </tr>
                 </thead>
                 <tbody>
