@@ -75,6 +75,9 @@ import androidx.compose.material.icons.filled.Star
 import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
 import com.hillal.acc.ui.theme.AppDimensions
+import com.hillal.acc.util.NotificationUtils
+import java.util.Locale
+import kotlin.math.abs
 
 // دوال مساعدة لتحويل الأرقام إلى كلمات
 private fun wholeNumberToWords(number: Long): String {
@@ -818,141 +821,200 @@ fun AddTransactionScreen(
 
         // Success Dialog
         if (isDialogShown) {
-            AlertDialog(
-                onDismissRequest = { isDialogShown = false },
-                title = null, // تصميم مخصص
-                text = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Dialog(onDismissRequest = { isDialogShown = false }) {
+                Card(
+                    shape = RoundedCornerShape(18.dp),
+                    elevation = CardDefaults.cardElevation(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f))
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .defaultMinSize(minHeight = 200.dp)
+                            .verticalScroll(rememberScrollState())
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         // أيقونة نجاح
-                        Box(
-                            modifier = Modifier
-                                .size(dimens.successIconSize)
-                                .clip(MaterialTheme.shapes.extraLarge)
-                                .background(colors.primary),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                tint = colors.onPrimary,
-                                modifier = Modifier.size(dimens.successIconSize)
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(dimens.spacingMedium))
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_wallet),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(56.dp)
+                        )
+                        Spacer(Modifier.height(12.dp))
                         Text(
                             text = "تمت إضافة المعاملة بنجاح!",
-                            style = typography.titleLarge,
-                            color = colors.primary,
+                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary
                         )
-                        Spacer(modifier = Modifier.height(dimens.spacingSmall))
+                        Spacer(Modifier.height(4.dp))
                         Text(
                             text = "هل ترغب بإرسال إشعار؟",
-                            style = typography.bodyMedium,
-                            color = colors.onSurfaceVariant
+                            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Medium)
                         )
-                    }
-                },
-                confirmButton = {
-                    Row(horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)) {
-                        if (lastSavedAccount?.isWhatsappEnabled() == false) {
-                            Button(onClick = {
-                                // إرسال واتساب
-                                lastSavedAccount?.let { account ->
-                                    lastSavedTransaction?.let { transaction ->
-                                        val phone = account.getPhoneNumber()
-                                        if (!phone.isNullOrEmpty()) {
-                                            val msg = NotificationUtils.buildWhatsAppMessage(
-                                                context,
-                                                account.getName(),
-                                                transaction,
-                                                lastSavedBalance,
-                                                transaction.getType()
-                                            )
-                                            NotificationUtils.sendWhatsAppMessage(context, phone, msg)
-                                        } else {
-                                            Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                        Spacer(Modifier.height(8.dp))
+                        Divider(modifier = Modifier.padding(vertical = 8.dp))
+                        Text(
+                            text = "تفاصيل المعاملة:",
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.Start
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text("الحساب: ${lastSavedAccount?.getName() ?: ""}", style = MaterialTheme.typography.bodyMedium)
+                            }
+                            Spacer(Modifier.height(4.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.AttachMoney, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text("المبلغ: ${lastSavedTransaction?.getAmount() ?: 0.0} ${lastSavedTransaction?.getCurrency() ?: ""}", style = MaterialTheme.typography.bodyMedium)
+                            }
+                            Spacer(Modifier.height(4.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Notes, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text("البيان: ${lastSavedTransaction?.getDescription() ?: ""}", style = MaterialTheme.typography.bodyMedium)
+                            }
+                            Spacer(Modifier.height(4.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text("الرصيد الجديد: $lastSavedBalance ${lastSavedTransaction?.getCurrency() ?: ""}", style = MaterialTheme.typography.bodyMedium)
+                            }
+                        }
+                        Spacer(Modifier.height(16.dp))
+                        Divider(modifier = Modifier.padding(vertical = 8.dp))
+                        Text(
+                            text = "اختر الإجراء المطلوب:",
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(Modifier.height(24.dp))
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Button(
+                                onClick = {
+                                    // إرسال إشعار واتساب
+                                    lastSavedAccount?.let { account ->
+                                        lastSavedTransaction?.let { transaction ->
+                                            val phone = account.getPhoneNumber()
+                                            if (!phone.isNullOrEmpty()) {
+                                                val msg = NotificationUtils.buildWhatsAppMessage(
+                                                    context,
+                                                    account.getName(),
+                                                    transaction,
+                                                    lastSavedBalance,
+                                                    transaction.getType()
+                                                )
+                                                NotificationUtils.sendWhatsAppMessage(context, phone, msg)
+                                            } else {
+                                                Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                                            }
                                         }
                                     }
-                                }
-                            }, colors = ButtonDefaults.buttonColors(
-                                containerColor = colors.secondary,
-                                contentColor = colors.onSecondary
-                            )) {
+                                    isDialogShown = false
+                                    // إعادة تعيين الحقول
+                                    amount = ""
+                                    description = ""
+                                    date = System.currentTimeMillis()
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_whatsapp),
                                     contentDescription = null,
-                                    tint = colors.onSecondary,
-                                    modifier = Modifier.size(dimens.whatsappIconSize)
+                                    tint = colors.onPrimary,
+                                    modifier = Modifier.size(dimens.smsIconSize)
                                 )
-                                Spacer(modifier = Modifier.width(dimens.spacingSmall))
-                                Text("واتساب")
+                                Spacer(Modifier.width(8.dp))
+                                Text("إرسال واتساب", fontWeight = FontWeight.Bold)
                             }
-                        }
-                        Button(onClick = {
-                            // إرسال SMS
-                            lastSavedAccount?.let { account ->
-                                lastSavedTransaction?.let { transaction ->
-                                    val phone = account.getPhoneNumber()
-                                    if (!phone.isNullOrEmpty()) {
-                                        val type = transaction.getType()
-                                        val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
-                                        val balanceStr = String.format(Locale.US, "%.0f", abs(lastSavedBalance))
-                                        val currency = transaction.getCurrency()
-                                        val typeText = if (type.equals("credit", true) || type == "له") "لكم" else "عليكم"
-                                        val balanceText = if (lastSavedBalance >= 0) "الرصيد لكم " else "الرصيد عليكم "
-                                        val message = "حسابكم لدينا:\n" +
-                                                typeText + " " + amountStr + " " + currency + "\n" +
-                                                transaction.getDescription() + "\n" +
-                                                balanceText + balanceStr + " " + currency
-                                        NotificationUtils.sendSmsMessage(context, phone, message)
-                                    } else {
-                                        Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                            Button(
+                                onClick = {
+                                    // إرسال SMS
+                                    lastSavedAccount?.let { account ->
+                                        lastSavedTransaction?.let { transaction ->
+                                            val phone = account.getPhoneNumber()
+                                            if (!phone.isNullOrEmpty()) {
+                                                val type = transaction.getType()
+                                                val amountStr = String.format(Locale.US, "%.0f", transaction.getAmount())
+                                                val balanceStr = String.format(Locale.US, "%.0f", abs(lastSavedBalance))
+                                                val currency = transaction.getCurrency()
+                                                val typeText = if (type.equals("credit", true) || type == "له") "لكم" else "عليكم"
+                                                val balanceText = if (lastSavedBalance >= 0) "الرصيد لكم " else "الرصيد عليكم "
+                                                val message = "حسابكم لدينا:\n" +
+                                                        typeText + " " + amountStr + " " + currency + "\n" +
+                                                        transaction.getDescription() + "\n" +
+                                                        balanceText + balanceStr + " " + currency
+                                                NotificationUtils.sendSmsMessage(context, phone, message)
+                                            } else {
+                                                Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
                                     }
+                                    isDialogShown = false
+                                    // إعادة تعيين الحقول
+                                    amount = ""
+                                    description = ""
+                                    date = System.currentTimeMillis()
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_sms),
+                                    contentDescription = null,
+                                    tint = colors.onPrimary,
+                                    modifier = Modifier.size(dimens.smsIconSize)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text("إرسال SMS", fontWeight = FontWeight.Bold)
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                OutlinedButton(
+                                    onClick = {
+                                        isDialogShown = false
+                                        // إعادة تعيين الحقول
+                                        amount = ""
+                                        description = ""
+                                        date = System.currentTimeMillis()
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(10.dp)
+                                ) {
+                                    Text("إضافة قيد آخر", fontWeight = FontWeight.Bold)
+                                }
+                                OutlinedButton(
+                                    onClick = {
+                                        isDialogShown = false
+                                        navController.navigateUp()
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(10.dp)
+                                ) {
+                                    Text("خروج", fontWeight = FontWeight.Bold)
                                 }
                             }
-                        }, colors = ButtonDefaults.buttonColors(
-                            containerColor = colors.primary,
-                            contentColor = colors.onPrimary
-                        )) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_sms),
-                                contentDescription = null,
-                                tint = colors.onPrimary,
-                                modifier = Modifier.size(dimens.smsIconSize)
-                            )
-                            Spacer(modifier = Modifier.width(dimens.spacingSmall))
-                            Text("SMS")
                         }
                     }
-                },
-                dismissButton = {
-                    Row(horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)) {
-                        Button(onClick = {
-                            isDialogShown = false
-                            // إعادة تعيين الحقول
-                            amount = ""
-                            description = ""
-                            date = System.currentTimeMillis()
-                        }, colors = ButtonDefaults.buttonColors(
-                            containerColor = colors.secondaryContainer,
-                            contentColor = colors.onSecondaryContainer
-                        )) {
-                            Text("إضافة قيد آخر")
-                        }
-                        Button(onClick = {
-                            isDialogShown = false
-                            navController.navigateUp()
-                        }, colors = ButtonDefaults.buttonColors(
-                            containerColor = colors.error,
-                            contentColor = colors.onError
-                        )) {
-                            Text("خروج")
-                        }
-                    }
-                },
-                shape = MaterialTheme.shapes.large,
-                containerColor = colors.background
-            )
+                }
+            }
         }
     }
 }
