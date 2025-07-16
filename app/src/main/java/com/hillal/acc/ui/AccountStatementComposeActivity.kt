@@ -795,15 +795,17 @@ class AccountStatementComposeActivity : ComponentActivity() {
     }
 
     private fun printReport() {
-        if (webView != null) {
-            webView.settings.builtInZoomControls = true
-            webView.settings.displayZoomControls = false
-            webView.settings.useWideViewPort = true
-            webView.settings.loadWithOverviewMode = true
-            val printManager = getSystemService(Context.PRINT_SERVICE) as android.print.PrintManager
-            val printAdapter = webView.createPrintDocumentAdapter("كشف الحساب")
-            printManager.print("كشف الحساب", printAdapter, null)
+        if (webView == null || selectedAccount == null || (webView.contentHeight == 0)) {
+            Toast.makeText(this, "يرجى عرض التقرير أولاً", Toast.LENGTH_SHORT).show()
+            return
         }
+        webView.settings.builtInZoomControls = true
+        webView.settings.displayZoomControls = false
+        webView.settings.useWideViewPort = true
+        webView.settings.loadWithOverviewMode = true
+        val printManager = getSystemService(Context.PRINT_SERVICE) as android.print.PrintManager
+        val printAdapter = webView.createPrintDocumentAdapter("كشف الحساب")
+        printManager.print("كشف الحساب", printAdapter, null)
     }
 
     private fun shareReportAsPdf(
@@ -813,47 +815,47 @@ class AccountStatementComposeActivity : ComponentActivity() {
         selectedCurrency: String?,
         transactions: List<Transaction>
     ) {
-        if (selectedAccount != null) {
-            try {
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
-                val startDateObj = dateFormat.parse(startDate)
-                val endDateRaw = dateFormat.parse(endDate)
-                // ضبط نهاية اليوم لـ endDate
-                val endCal = Calendar.getInstance().apply {
-                    time = endDateRaw
-                    set(Calendar.HOUR_OF_DAY, 23)
-                    set(Calendar.MINUTE, 59)
-                    set(Calendar.SECOND, 59)
-                    set(Calendar.MILLISECOND, 999)
-                }
-                val endDate = endCal.time
-                val filteredTransactions = transactions.filter { tx ->
-                    tx.accountId == selectedAccount.id &&
-                    (selectedCurrency == null || tx.currency == selectedCurrency) &&
-                    Date(tx.transactionDate) >= startDateObj && Date(tx.transactionDate) <= endDate
-                }.sortedBy { it.transactionDate }
-                val userPreferences = UserPreferences(this)
-                val userName = userPreferences.userName ?: "اسم المستخدم"
-                val pdfFile = generateAccountStatementPdfWithITextG(
-                    context = this,
-                    account = selectedAccount,
-                    userName = userName,
-                    startDate = startDate,
-                    endDate = endDate,
-                    selectedCurrency = selectedCurrency,
-                    transactions = filteredTransactions,
-                    allTransactions = transactions
-                )
-                sharePdfFile(pdfFile)
-            } catch (e: Exception) {
-                val errorMsg = "خطأ في مشاركة التقرير: ${e.message}\n${e.stackTraceToString()}"
-                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                val clip = android.content.ClipData.newPlainText("Error", errorMsg)
-                clipboard.setPrimaryClip(clip)
-                Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show()
+        if (selectedAccount == null || transactions.isEmpty() || startDate.isEmpty() || endDate.isEmpty()) {
+            Toast.makeText(this, "يرجى عرض التقرير أولاً", Toast.LENGTH_SHORT).show()
+            return
+        }
+        try {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+            val startDateObj = dateFormat.parse(startDate)
+            val endDateRaw = dateFormat.parse(endDate)
+            // ضبط نهاية اليوم لـ endDate
+            val endCal = Calendar.getInstance().apply {
+                time = endDateRaw
+                set(Calendar.HOUR_OF_DAY, 23)
+                set(Calendar.MINUTE, 59)
+                set(Calendar.SECOND, 59)
+                set(Calendar.MILLISECOND, 999)
             }
-        } else {
-            Toast.makeText(this, "يرجى اختيار حساب أولاً", Toast.LENGTH_SHORT).show()
+            val endDate = endCal.time
+            val filteredTransactions = transactions.filter { tx ->
+                tx.accountId == selectedAccount.id &&
+                (selectedCurrency == null || tx.currency == selectedCurrency) &&
+                Date(tx.transactionDate) >= startDateObj && Date(tx.transactionDate) <= endDate
+            }.sortedBy { it.transactionDate }
+            val userPreferences = UserPreferences(this)
+            val userName = userPreferences.userName ?: "اسم المستخدم"
+            val pdfFile = generateAccountStatementPdfWithITextG(
+                context = this,
+                account = selectedAccount,
+                userName = userName,
+                startDate = startDate,
+                endDate = endDate,
+                selectedCurrency = selectedCurrency,
+                transactions = filteredTransactions,
+                allTransactions = transactions
+            )
+            sharePdfFile(pdfFile)
+        } catch (e: Exception) {
+            val errorMsg = "خطأ في مشاركة التقرير: ${e.message}\n${e.stackTraceToString()}"
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            val clip = android.content.ClipData.newPlainText("Error", errorMsg)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show()
         }
     }
 
