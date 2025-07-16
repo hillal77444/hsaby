@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -67,6 +68,7 @@ fun ReportHeaderSettingsScreen() {
     var logoBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
     var showPermissionDenied by remember { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
+    var showSavedMessage by remember { mutableStateOf(false) }
 
     // استرجاع البيانات المحفوظة عند أول تشغيل
     LaunchedEffect(Unit) {
@@ -228,9 +230,7 @@ fun ReportHeaderSettingsScreen() {
                                 putString("logo_uri", logoUri?.toString())
                             }
                             isSaving = false
-                            LaunchedEffect(snackbarHostState) {
-                                snackbarHostState.showSnackbar("تم حفظ الإعدادات بنجاح")
-                            }
+                            showSavedMessage = true
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -245,6 +245,12 @@ fun ReportHeaderSettingsScreen() {
                             )
                         } else {
                             Text("حفظ الإعدادات", color = Color.White, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                    if (showSavedMessage) {
+                        LaunchedEffect(showSavedMessage) {
+                            snackbarHostState.showSnackbar("تم حفظ الإعدادات بنجاح")
+                            showSavedMessage = false
                         }
                     }
                 }
