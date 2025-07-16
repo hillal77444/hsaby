@@ -929,17 +929,47 @@ class AccountStatementComposeActivity : ComponentActivity() {
         logoCell.horizontalAlignment = Element.ALIGN_CENTER
         logoCell.verticalAlignment = Element.ALIGN_MIDDLE
         logoCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+        // الشعار (إذا كان موجودًا وصالحًا)
         if (logoBitmap != null && logoBitmap.width > 0 && logoBitmap.height > 0) {
+            var imageAdded = false
             try {
+                // إعادة تحجيم الصورة لتقليل المشاكل
+                val scaledBitmap = Bitmap.createScaledBitmap(logoBitmap, 100, 100, true)
                 val stream = java.io.ByteArrayOutputStream()
-                logoBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                val image = com.itextpdf.text.Image.getInstance(stream.toByteArray())
-                image.scaleAbsolute(60f, 60f)
-                image.alignment = Element.ALIGN_CENTER
-                logoCell.addElement(image)
+                scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                val byteArray = stream.toByteArray()
+                if (byteArray.isNotEmpty()) {
+                    try {
+                        val image = com.itextpdf.text.Image.getInstance(byteArray)
+                        image.scaleAbsolute(60f, 60f)
+                        image.alignment = Element.ALIGN_CENTER
+                        logoCell.addElement(image)
+                        imageAdded = true
+                    } catch (e: Exception) {
+                        android.util.Log.e("PDF_LOGO", "PNG فشل: ${e.message}", e)
+                    }
+                }
+                // إذا فشل PNG، جرب JPG
+                if (!imageAdded) {
+                    val jpgStream = java.io.ByteArrayOutputStream()
+                    scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 90, jpgStream)
+                    val jpgByteArray = jpgStream.toByteArray()
+                    if (jpgByteArray.isNotEmpty()) {
+                        try {
+                            val image = com.itextpdf.text.Image.getInstance(jpgByteArray)
+                            image.scaleAbsolute(60f, 60f)
+                            image.alignment = Element.ALIGN_CENTER
+                            logoCell.addElement(image)
+                            imageAdded = true
+                        } catch (e: Exception) {
+                            android.util.Log.e("PDF_LOGO", "JPG فشل: ${e.message}", e)
+                        }
+                    }
+                }
             } catch (e: Exception) {
-                // تجاهل الشعار إذا حدث خطأ
+                android.util.Log.e("PDF_LOGO", "فشل معالجة الشعار: ${e.message}", e)
             }
+            // إذا فشلت كل المحاولات، تجاهل الشعار بدون كراش
         }
         val userNamePara = Paragraph(ArabicUtilities.reshape(userName), fontCairoBold)
         userNamePara.alignment = Element.ALIGN_CENTER
