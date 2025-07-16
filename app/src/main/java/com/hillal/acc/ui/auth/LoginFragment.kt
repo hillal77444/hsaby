@@ -84,7 +84,6 @@ class LoginFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 LoginScreen(
-                    isLoading = isLoading,
                     errorMessage = errorMessage,
                     onLoginClick = { phone, password ->
                         handleLogin(phone, password)

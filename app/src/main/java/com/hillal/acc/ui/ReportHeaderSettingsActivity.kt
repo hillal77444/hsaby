@@ -41,6 +41,7 @@ import com.hillal.acc.ui.theme.ProvideResponsiveDimensions
 import java.io.InputStream
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 class ReportHeaderSettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

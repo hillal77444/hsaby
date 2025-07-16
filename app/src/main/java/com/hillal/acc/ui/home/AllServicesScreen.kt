@@ -8,7 +8,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -30,8 +30,7 @@ import com.hillal.acc.R
 import androidx.compose.foundation.background
 import android.content.Intent
 import com.hillal.acc.ui.ReportHeaderSettingsActivity
-import androidx.compose.ui.state.MutableState
-import androidx.compose.ui.state.remember
+import androidx.compose.material3.Dialog
 
 // نموذج للصفحات المتوفرة
 // يمكنك تعديل القائمة حسب الصفحات الفعلية

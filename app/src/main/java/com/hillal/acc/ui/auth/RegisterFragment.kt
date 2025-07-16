@@ -59,7 +59,6 @@ class RegisterFragment : Fragment() {
                         NavHostFragment.findNavController(this@RegisterFragment)
                             .navigate(R.id.action_registerFragment_to_loginFragment)
                     },
-                    isLoading = isLoading,
                     errorMessage = errorMessage
                 )
             }
