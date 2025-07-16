@@ -713,7 +713,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     font-family: 'Cairo', Arial, sans-serif;
                     margin: 0; padding: 0;
                     background-color: #f5f5f5;
-                    font-size: 13px;
+                    font-size: 12px;
                     box-sizing: border-box;
                     width: 100vw;
                     max-width: 100vw;
@@ -732,21 +732,28 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 table {
                     width: 100%;
                     max-width: 100vw;
-                    table-layout: auto;
+                    table-layout: fixed;
                     border-collapse: collapse;
                 }
                 th, td {
                     border: 1px solid #bbb;
-                    padding: 6px 4px;
+                    padding: 4px 2px;
                     text-align: center;
-                    font-size: 0.80em;
+                    font-size: 0.78em;
                     word-break: break-word;
                 }
                 th {
                     background: #1976d2;
                     color: white;
                     font-weight: bold;
+                    font-size: 0.85em;
                 }
+                /* توزيع الأعمدة بدقة */
+                th:nth-child(1), td:nth-child(1) { width: 18%; }
+                th:nth-child(2), td:nth-child(2) { width: 14%; }
+                th:nth-child(3), td:nth-child(3) { width: 14%; }
+                th:nth-child(4), td:nth-child(4) { width: 36%; text-align: right; }
+                th:nth-child(5), td:nth-child(5) { width: 18%; }
                 .debit { color: #d32f2f; font-weight: bold; }
                 .credit { color: #388e3c; font-weight: bold; }
                 .summary-row { background: #f5f5f5; font-weight: bold; }
@@ -1093,11 +1100,12 @@ class AccountStatementComposeActivity : ComponentActivity() {
             }
             startActivity(Intent.createChooser(shareIntent, "مشاركة كشف الحساب"))
         } catch (e: Exception) {
+            // معالجة أخطاء المشاركة بشكل واضح
             val errorMsg = "خطأ في مشاركة الملف: ${e.message}\n${e.stackTraceToString()}"
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
             val clip = android.content.ClipData.newPlainText("Error", errorMsg)
             clipboard.setPrimaryClip(clip)
-            Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "تعذر مشاركة التقرير. يرجى التأكد من الصلاحيات أو إعادة المحاولة.", Toast.LENGTH_LONG).show()
         }
     }
 
