@@ -31,11 +31,12 @@ import androidx.compose.foundation.background
 import android.content.Intent
 import com.hillal.acc.ui.ReportHeaderSettingsActivity
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.graphics.Color
 
 // نموذج للصفحات المتوفرة
 // يمكنك تعديل القائمة حسب الصفحات الفعلية
 
-data class ServiceItem(val label: String, val iconRes: Int, val onClick: () -> Unit)
+data class ServiceItem(val label: String, val iconRes: Int, val onClick: () -> Unit, val iconTint: Color? = null)
 
 @Composable
 fun AllServicesScreen(navController: NavController) {
@@ -68,7 +69,8 @@ fun AllServicesScreen(navController: NavController) {
             R.drawable.ic_wallet, // أيقونة محفظة أو اشتراك
             onClick = {
                 showSubscriptionDialog = true
-            }
+            },
+            iconTint = colors.primary // لون أزرق
         )
     )
 
@@ -242,7 +244,8 @@ fun ServiceCard(service: ServiceItem, modifier: Modifier = Modifier) {
             Image(
                 painter = painterResource(id = service.iconRes),
                 contentDescription = service.label,
-                modifier = Modifier.size(dimens.iconSize * 2)
+                modifier = Modifier.size(dimens.iconSize * 2),
+                colorFilter = service.iconTint?.let { androidx.compose.ui.graphics.ColorFilter.tint(it) }
             )
             Spacer(Modifier.height(dimens.spacingSmall))
             Text(
