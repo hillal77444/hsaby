@@ -1092,18 +1092,8 @@ class AccountStatementComposeActivity : ComponentActivity() {
 
         document.add(table)
         document.add(Paragraph(" "))
-
-        // --- ملخص الحساب أسفل الجدول (إجمالي عليه، إجمالي له، الرصيد النهائي) ---
-        val summary = listOf(
-            ArabicUtilities.reshape("إجمالي عليه: ") + String.format(Locale.ENGLISH, "%.2f", totalDebit),
-            ArabicUtilities.reshape("إجمالي له: ") + String.format(Locale.ENGLISH, "%.2f", totalCredit),
-            ArabicUtilities.reshape("الرصيد النهائي: ") + String.format(Locale.ENGLISH, "%.2f", balance)
-        )
-        for (s in summary) {
-            val para = Paragraph(s, fontCairoBold)
-            para.alignment = Element.ALIGN_RIGHT
-            document.add(para)
-        }
+        // --- احذف كود الملخص النصي (summary) بعد الجدول ---
+        // (تم حذف الكود الذي يضيف summary خارج الجدول)
 
         document.close()
         writer.close()
