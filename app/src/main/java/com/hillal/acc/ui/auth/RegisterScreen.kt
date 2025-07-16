@@ -83,6 +83,13 @@ fun RegisterScreen(
         var localError by remember { mutableStateOf<String?>(null) }
         var isLoading by remember { mutableStateOf(false) }
 
+        // عند ظهور رسالة الخطأ، أعد isLoading إلى false
+        LaunchedEffect(errorMessage) {
+            if (errorMessage != null) {
+                isLoading = false
+            }
+        }
+
         val logoSize = dimens.logoSize
         val cardCorner = dimens.cardCorner
         val cardPadding = dimens.spacingMedium
