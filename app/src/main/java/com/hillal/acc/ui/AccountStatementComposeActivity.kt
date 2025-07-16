@@ -1073,14 +1073,17 @@ class AccountStatementComposeActivity : ComponentActivity() {
         logoCell.horizontalAlignment = Element.ALIGN_CENTER
         logoCell.verticalAlignment = Element.ALIGN_MIDDLE
         logoCell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-        if (logoBitmap != null) {
-            val stream = java.io.ByteArrayOutputStream()
-            logoBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-            val image = com.itextpdf.text.Image.getInstance(stream.toByteArray())
-            image.scaleAbsolute(50f, 50f)
-            image.alignment = Element.ALIGN_CENTER
-            logoCell.addElement(image)
-        }
+        // تعليق تمرير الشعار مؤقتاً للتجربة
+        // if (logoBitmap != null && logoBitmap.width > 0 && logoBitmap.height > 0) {
+        //     try {
+        //         val stream = java.io.ByteArrayOutputStream()
+        //         logoBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        //         val image = com.itextpdf.text.Image.getInstance(stream.toByteArray())
+        //         image.scaleAbsolute(50f, 50f)
+        //         image.alignment = Element.ALIGN_CENTER
+        //         logoCell.addElement(image)
+        //     } catch (e: Exception) {}
+        // }
         // اسم المستخدم تحت الشعار
         val userNamePara = Paragraph(ArabicUtilities.reshape(account.name), fontCairoBold)
         userNamePara.alignment = Element.ALIGN_CENTER
