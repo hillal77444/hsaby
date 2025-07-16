@@ -49,7 +49,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 fun RegisterScreen(
     onRegister: (displayName: String, phone: String, password: String, confirmPassword: String) -> Unit,
     onBackToLogin: () -> Unit,
-    isLoading: Boolean = false,
     errorMessage: String? = null
 ) {
     AppTheme {
@@ -66,6 +65,7 @@ fun RegisterScreen(
         var passwordVisible by remember { mutableStateOf(false) }
         var confirmPasswordVisible by remember { mutableStateOf(false) }
         var localError by remember { mutableStateOf<String?>(null) }
+        var isLoading by remember { mutableStateOf(false) }
 
         val logoSize = dimens.logoSize
         val cardCorner = dimens.cardCorner
@@ -268,6 +268,7 @@ fun RegisterScreen(
                             else -> null
                         }
                         if (localError == null) {
+                            isLoading = true
                             onRegister(displayName, phone, password, confirmPassword)
                         }
                         registerPressed = false
@@ -286,6 +287,8 @@ fun RegisterScreen(
                 ) {
                     if (isLoading) {
                         CircularProgressIndicator(color = colors.onPrimary, modifier = Modifier.size(fontButton.value.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("جاري التسجيل...", color = colors.onPrimary, fontSize = fontButton, style = typography.bodyLarge)
                     } else {
                         Text("تسجيل", color = colors.onPrimary, fontSize = fontButton, style = typography.bodyLarge)
                     }
