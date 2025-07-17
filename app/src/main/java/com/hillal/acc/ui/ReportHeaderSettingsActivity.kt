@@ -2,17 +2,13 @@ package com.hillal.acc.ui
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.Manifest
-import android.os.Build
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,13 +27,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.edit
-import com.hillal.acc.R
-import com.hillal.acc.ui.accounts.ResponsiveAccountsTheme
 import com.hillal.acc.ui.theme.ProvideResponsiveDimensions
+import com.hillal.acc.ui.accounts.ResponsiveAccountsTheme
 import java.io.InputStream
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.rememberScrollState
@@ -68,7 +61,6 @@ fun ReportHeaderSettingsScreen() {
     var leftHeader by remember { mutableStateOf("") }
     var logoUri by remember { mutableStateOf<Uri?>(null) }
     var logoBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
-    var showPermissionDenied by remember { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
     var showSavedMessage by remember { mutableStateOf(false) }
     var logoPath by remember { mutableStateOf<String?>(null) }
@@ -89,7 +81,7 @@ fun ReportHeaderSettingsScreen() {
         }
     }
 
-    // لاختيار صورة الشعار
+    // اختيار صورة الشعار بدون صلاحيات
     val pickLogoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
             logoUri = uri
@@ -97,7 +89,6 @@ fun ReportHeaderSettingsScreen() {
                 val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
                 val bitmap = inputStream?.use { BitmapFactory.decodeStream(it) }
                 logoBitmap = bitmap
-                // حفظ الصورة في internal storage
                 if (bitmap != null) {
                     val file = java.io.File(context.filesDir, "logo.png")
                     val out = java.io.FileOutputStream(file)
@@ -107,20 +98,6 @@ fun ReportHeaderSettingsScreen() {
                     logoPath = "logo.png"
                 }
             } catch (_: Exception) {}
-        }
-    }
-
-    // منطق الصلاحيات
-    val permissionToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        Manifest.permission.READ_MEDIA_IMAGES
-    } else {
-        Manifest.permission.READ_EXTERNAL_STORAGE
-    }
-    val permissionLauncher = rememberLauncherForActivityResult(RequestPermission()) { isGranted ->
-        if (isGranted) {
-            pickLogoLauncher.launch("image/*")
-        } else {
-            showPermissionDenied = true
         }
     }
 
@@ -201,7 +178,8 @@ fun ReportHeaderSettingsScreen() {
                             .background(Color(0xFFF5F5F5))
                             .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
                             .clickable {
-                                permissionLauncher.launch(permissionToRequest)
+                                // مباشرة اختيار الصورة بدون صلاحية
+                                pickLogoLauncher.launch("image/*")
                             },
                         contentAlignment = Alignment.Center
                     ) {
@@ -227,15 +205,6 @@ fun ReportHeaderSettingsScreen() {
                                 )
                             }
                         }
-                    }
-                    if (showPermissionDenied) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            "يجب منح صلاحية الوصول للصور لاختيار الشعار",
-                            color = Color.Red,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = dimensions.bodyFont * 0.9f
-                        )
                     }
                     Spacer(modifier = Modifier.height(32.dp))
                     Button(
@@ -276,4 +245,4 @@ fun ReportHeaderSettingsScreen() {
             }
         }
     }
-} 
+}
