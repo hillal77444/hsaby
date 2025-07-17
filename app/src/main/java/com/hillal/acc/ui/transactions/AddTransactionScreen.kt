@@ -439,26 +439,47 @@ fun AddTransactionScreen(
 
         // UI
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val screenWidth = maxWidth
-            val scrollState = rememberScrollState()
-            val cardShape = RoundedCornerShape(dimens.cardCorner)
-            val cardMaxHeight = this@BoxWithConstraints.maxHeight * 0.18f
+            val base = minOf(maxWidth, maxHeight)
+            val spacingSmall = base * 0.022f
+            val spacingMedium = base * 0.035f
+            val cardCorner = base * 0.025f
+            val buttonCorner = cardCorner
+            val buttonHeight = maxOf((maxHeight * 0.06f).coerceAtLeast(44.dp), 44.dp)
+            val cardMaxHeight = (maxHeight * 0.18f).coerceAtMost(160.dp)
+            val iconSize = base * 0.07f
+            val fontSizeLarge = base * 0.038f
+            val fontSizeMedium = base * 0.032f
+            val fontSizeSmall = base * 0.027f
+            val smsIconSize = base * 0.07f
+            val dialogCorner = base * 0.025f
+            val dialogPadding = base * 0.045f
+            val dialogIconSize = base * 0.11f
+            val dividerPadding = base * 0.015f
+            val minDialogHeight = (maxHeight * 0.22f).coerceAtMost(180.dp)
+            val searchFieldHeight = maxOf((maxHeight * 0.055f).coerceAtLeast(40.dp), 40.dp)
+            val cardElevation = base * 0.009f
+            val cardElevationSmall = base * 0.004f
+            val rowSpacing = base * 0.018f
+            val menuIconSize = base * 0.055f
+            val textFieldHeight = maxOf((maxHeight * 0.055f).coerceAtLeast(40.dp), 40.dp)
+            val radioButtonSize = base * 0.045f
+            val verticalScrollState = rememberScrollState()
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(scrollState)
+                    .verticalScroll(verticalScrollState)
                     .imePadding()
                     .background(colors.background),
-                verticalArrangement = Arrangement.spacedBy(dimens.spacingSmall)
+                verticalArrangement = Arrangement.spacedBy(spacingSmall)
             ) {
                 // بطاقة العنوان في الأعلى
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = dimens.spacingMedium, vertical = dimens.spacingSmall),
-                    shape = cardShape,
+                        .padding(horizontal = spacingMedium, vertical = spacingSmall),
+                    shape = RoundedCornerShape(cardCorner),
                     colors = CardDefaults.cardColors(containerColor = colors.primaryContainer),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = cardElevation)
                 ) {
                     Box(
                         modifier = Modifier
@@ -481,7 +502,7 @@ fun AddTransactionScreen(
                             modifier = Modifier
                                 .size(cardMaxHeight * 1.1f)
                                 .align(Alignment.CenterEnd)
-                                .offset(x = dimens.spacingMedium, y = 0.dp)
+                                .offset(x = spacingMedium, y = 0.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.AttachMoney,
@@ -502,25 +523,25 @@ fun AddTransactionScreen(
                         // نص العنوان في المقدمة
                         Text(
                             text = "إضافة معاملة جديدة",
-                            style = typography.headlineSmall,
+                            style = typography.headlineSmall.copy(fontSize = fontSizeLarge),
                             color = colors.onPrimaryContainer,
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(dimens.spacingSmall))
+                Spacer(modifier = Modifier.height(spacingSmall))
                 // Main Card
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = dimens.spacingMedium, end = dimens.spacingMedium, bottom = dimens.spacingSmall)
-                        .shadow(4.dp, cardShape),
-                    shape = cardShape,
+                        .padding(start = spacingMedium, end = spacingMedium, bottom = spacingSmall)
+                        .shadow(cardElevation, RoundedCornerShape(cardCorner)),
+                    shape = RoundedCornerShape(cardCorner),
                     colors = CardDefaults.cardColors(containerColor = colors.surface)
                 ) {
-                    Column(modifier = Modifier.padding(dimens.spacingSmall)) {
+                    Column(modifier = Modifier.padding(spacingSmall)) {
                         // Row: حساب وصندوق
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(rowSpacing)) {
                             Box(Modifier.weight(1f)) {
                                 AccountPickerField(
                                     accounts = allAccounts,
@@ -557,9 +578,9 @@ fun AddTransactionScreen(
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(dimens.spacingSmall))
+                        Spacer(modifier = Modifier.height(spacingSmall))
                         // Row: مبلغ وتاريخ
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(rowSpacing)) {
                             Column(modifier = Modifier.weight(1f)) {
                                 OutlinedTextField(
                                     value = amount,
@@ -569,10 +590,10 @@ fun AddTransactionScreen(
                                             lastAmountUpdate = amount // تحديث للكتابة التلقائية
                                         }
                                     },
-                                    label = { Text("المبلغ", fontSize = typography.bodyLarge.fontSize) },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
-                                    textStyle = typography.bodyLarge,
+                                    label = { Text("المبلغ", fontSize = fontSizeMedium) },
+                                    modifier = Modifier.fillMaxWidth().height(textFieldHeight),
+                                    leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null, modifier = Modifier.size(iconSize)) },
+                                    textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge),
                                     singleLine = true,
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                                 )
@@ -584,11 +605,11 @@ fun AddTransactionScreen(
                                         Text(
                                             text = arabicWords,
                                             style = typography.bodySmall.copy(
-                                                fontSize = 14.sp,
+                                                fontSize = fontSizeSmall,
                                                 fontWeight = FontWeight.Normal
                                             ),
                                             color = colors.primary.copy(alpha = 0.7f),
-                                            modifier = Modifier.padding(top = 4.dp, start = 4.dp),
+                                            modifier = Modifier.padding(top = spacingSmall, start = spacingSmall),
                                             maxLines = 2,
                                             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                         )
@@ -598,12 +619,12 @@ fun AddTransactionScreen(
                             OutlinedTextField(
                                 value = dateFormat.format(Date(date)),
                                 onValueChange = {},
-                                label = { Text("التاريخ", fontSize = typography.bodyLarge.fontSize) },
-                                modifier = Modifier.weight(1f).clickable { showDatePicker = true },
+                                label = { Text("التاريخ", fontSize = fontSizeMedium) },
+                                modifier = Modifier.weight(1f).clickable { showDatePicker = true }.height(textFieldHeight),
                                 enabled = true,
                                 readOnly = true,
-                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
-                                textStyle = typography.bodyLarge,
+                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
+                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge),
                                 colors = TextFieldDefaults.outlinedTextFieldColors(
                                     containerColor = colors.surface,
                                     focusedBorderColor = colors.primary,
@@ -613,7 +634,7 @@ fun AddTransactionScreen(
                                 )
                             )
                         }
-                        Spacer(modifier = Modifier.height(dimens.spacingSmall))
+                        Spacer(modifier = Modifier.height(spacingSmall))
                         // Description with suggestions (ExposedDropdownMenuBox)
                         var expandedSuggestions by remember { mutableStateOf(false) }
                         var showAllSuggestions by remember { mutableStateOf(false) }
@@ -630,19 +651,20 @@ fun AddTransactionScreen(
                                     showAllSuggestions = false
                                     expandedSuggestions = it.text.isNotEmpty() && suggestions.any { s -> s.startsWith(it.text) && s != it.text }
                                 },
-                                label = { Text("البيان", fontSize = typography.bodyLarge.fontSize) },
+                                label = { Text("البيان", fontSize = fontSizeMedium) },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .menuAnchor(),
-                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
-                                textStyle = typography.bodyLarge,
+                                    .menuAnchor()
+                                    .height(textFieldHeight),
+                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
+                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge),
                                 trailingIcon = {
                                     if (suggestions.isNotEmpty()) {
                                         IconButton(onClick = {
                                             showAllSuggestions = true
                                             expandedSuggestions = true
                                         }) {
-                                            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                                            Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(menuIconSize))
                                         }
                                     }
                                 }
@@ -662,7 +684,7 @@ fun AddTransactionScreen(
                                     emptyList()
                                 filtered.forEach { suggestion ->
                                     DropdownMenuItem(
-                                        text = { Text(suggestion, fontSize = typography.bodyLarge.fontSize) },
+                                        text = { Text(suggestion, fontSize = fontSizeMedium) },
                                         onClick = {
                                             descriptionState = TextFieldValue(
                                                 suggestion,
@@ -676,7 +698,7 @@ fun AddTransactionScreen(
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(dimens.spacingSmall))
+                        Spacer(modifier = Modifier.height(spacingSmall))
                         // Currency Radio Buttons
                         Row(
                             modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -684,81 +706,84 @@ fun AddTransactionScreen(
                         ) {
                             RadioButton(
                                 selected = currency == context.getString(R.string.currency_yer),
-                                onClick = { currency = context.getString(R.string.currency_yer) }
+                                onClick = { currency = context.getString(R.string.currency_yer) },
+                                modifier = Modifier.size(radioButtonSize)
                             )
-                            Text("يمني", fontSize = typography.bodyLarge.fontSize)
-                            Spacer(modifier = Modifier.width(dimens.spacingSmall))
+                            Text("يمني", fontSize = fontSizeMedium)
+                            Spacer(modifier = Modifier.width(spacingSmall))
                             RadioButton(
                                 selected = currency == context.getString(R.string.currency_sar),
-                                onClick = { currency = context.getString(R.string.currency_sar) }
+                                onClick = { currency = context.getString(R.string.currency_sar) },
+                                modifier = Modifier.size(radioButtonSize)
                             )
-                            Text("سعودي", fontSize = typography.bodyLarge.fontSize)
-                            Spacer(modifier = Modifier.width(dimens.spacingSmall))
+                            Text("سعودي", fontSize = fontSizeMedium)
+                            Spacer(modifier = Modifier.width(spacingSmall))
                             RadioButton(
                                 selected = currency == context.getString(R.string.currency_usd),
-                                onClick = { currency = context.getString(R.string.currency_usd) }
+                                onClick = { currency = context.getString(R.string.currency_usd) },
+                                modifier = Modifier.size(radioButtonSize)
                             )
-                            Text("دولار", fontSize = typography.bodyLarge.fontSize)
+                            Text("دولار", fontSize = fontSizeMedium)
                         }
-                        Spacer(modifier = Modifier.height(dimens.spacingSmall))
+                        Spacer(modifier = Modifier.height(spacingSmall))
                         // Notes (hidden by default)
                         val showNotes = false
                         if (showNotes) {
                             OutlinedTextField(
                                 value = notes,
                                 onValueChange = { notes = it },
-                                label = { Text("ملاحظات", fontSize = typography.bodyLarge.fontSize) },
-                                modifier = Modifier.fillMaxWidth(),
-                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null) },
-                                textStyle = typography.bodyLarge
+                                label = { Text("ملاحظات", fontSize = fontSizeMedium) },
+                                modifier = Modifier.fillMaxWidth().height(textFieldHeight),
+                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
+                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge)
                             )
-                            Spacer(modifier = Modifier.height(dimens.spacingSmall))
+                            Spacer(modifier = Modifier.height(spacingSmall))
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(dimens.spacingMedium)) // مسافة بسيطة فوق الأزرار
+                Spacer(modifier = Modifier.height(spacingMedium)) // مسافة بسيطة فوق الأزرار
                 // Action Buttons في الأسفل
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = dimens.spacingMedium, vertical = dimens.spacingSmall),
-                    horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)
+                        .padding(horizontal = spacingMedium, vertical = spacingSmall),
+                    horizontalArrangement = Arrangement.spacedBy(rowSpacing)
                 ) {
                     Button(
                         onClick = { saveTransaction(false) },
                         modifier = Modifier
                             .weight(1f)
-                            .height(dimens.buttonHeight),
-                        shape = RoundedCornerShape(dimens.buttonCorner),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50), contentColor = Color.White)
+                            .height(buttonHeight),
+                        shape = RoundedCornerShape(buttonCorner),
+                        colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.onPrimary)
                     ) {
-                        Icon(Icons.Default.ArrowDownward, contentDescription = null)
-                        Spacer(Modifier.width(dimens.spacingSmall))
-                        Text("له", fontSize = typography.bodyLarge.fontSize)
+                        Icon(Icons.Default.ArrowDownward, contentDescription = null, modifier = Modifier.size(iconSize))
+                        Spacer(Modifier.width(spacingSmall))
+                        Text("له", fontSize = fontSizeLarge)
                     }
                     Button(
                         onClick = { saveTransaction(true) },
                         modifier = Modifier
                             .weight(1f)
-                            .height(dimens.buttonHeight),
-                        shape = RoundedCornerShape(dimens.buttonCorner),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF44336), contentColor = Color.White)
+                            .height(buttonHeight),
+                        shape = RoundedCornerShape(buttonCorner),
+                        colors = ButtonDefaults.buttonColors(containerColor = colors.error, contentColor = colors.onError)
                     ) {
-                        Icon(Icons.Default.ArrowUpward, contentDescription = null)
-                        Spacer(Modifier.width(dimens.spacingSmall))
-                        Text("عليه", fontSize = typography.bodyLarge.fontSize)
+                        Icon(Icons.Default.ArrowUpward, contentDescription = null, modifier = Modifier.size(iconSize))
+                        Spacer(Modifier.width(spacingSmall))
+                        Text("عليه", fontSize = fontSizeLarge)
                     }
                     Button(
                         onClick = { navController.navigateUp() },
                         modifier = Modifier
                             .weight(1f)
-                            .height(dimens.buttonHeight),
-                        shape = RoundedCornerShape(dimens.buttonCorner)
+                            .height(buttonHeight),
+                        shape = RoundedCornerShape(buttonCorner)
                     ) {
-                        Text("إلغاء", fontSize = typography.bodyLarge.fontSize)
+                        Text("إلغاء", fontSize = fontSizeLarge)
                     }
                 }
-                Spacer(modifier = Modifier.height(dimens.spacingMedium))
+                Spacer(modifier = Modifier.height(spacingMedium))
             }
         }
 
@@ -826,19 +851,19 @@ fun AddTransactionScreen(
         if (isDialogShown) {
             Dialog(onDismissRequest = { isDialogShown = false }) {
                 Card(
-                    shape = RoundedCornerShape(18.dp),
+                    shape = RoundedCornerShape(dialogCorner),
                     elevation = CardDefaults.cardElevation(12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(24.dp),
+                        .padding(dialogPadding),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f))
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .defaultMinSize(minHeight = 200.dp)
+                            .defaultMinSize(minHeight = minDialogHeight)
                             .verticalScroll(rememberScrollState())
-                            .padding(24.dp),
+                            .padding(dialogPadding),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         // أيقونة نجاح
@@ -846,7 +871,7 @@ fun AddTransactionScreen(
                             painter = painterResource(id = R.drawable.ic_wallet),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(56.dp)
+                            modifier = Modifier.size(dialogIconSize)
                         )
                         Spacer(Modifier.height(12.dp))
                         Text(
@@ -860,7 +885,7 @@ fun AddTransactionScreen(
                             style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Medium)
                         )
                         Spacer(Modifier.height(8.dp))
-                        Divider(modifier = Modifier.padding(vertical = 8.dp))
+                        Divider(modifier = Modifier.padding(vertical = dividerPadding))
                         Text(
                             text = "تفاصيل المعاملة:",
                             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
@@ -896,7 +921,7 @@ fun AddTransactionScreen(
                             }
                         }
                         Spacer(Modifier.height(16.dp))
-                        Divider(modifier = Modifier.padding(vertical = 8.dp))
+                        Divider(modifier = Modifier.padding(vertical = dividerPadding))
                         Text(
                             text = "اختر الإجراء المطلوب:",
                             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
@@ -944,7 +969,7 @@ fun AddTransactionScreen(
                                     painter = painterResource(id = R.drawable.ic_sms),
                                     contentDescription = null,
                                     tint = colors.onPrimary,
-                                    modifier = Modifier.size(dimens.smsIconSize)
+                                    modifier = Modifier.size(smsIconSize)
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text("إرسال SMS", fontWeight = FontWeight.Bold)
