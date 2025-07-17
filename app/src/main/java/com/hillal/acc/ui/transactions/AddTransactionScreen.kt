@@ -907,44 +907,7 @@ fun AddTransactionScreen(
                             modifier = Modifier.fillMaxWidth(),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Button(
-                                onClick = {
-                                    // إرسال إشعار واتساب
-                                    lastSavedAccount?.let { account ->
-                                        lastSavedTransaction?.let { transaction ->
-                                            val phone = account.getPhoneNumber()
-                                            if (!phone.isNullOrEmpty()) {
-                                                val msg = NotificationUtils.buildWhatsAppMessage(
-                                                    context,
-                                                    account.getName(),
-                                                    transaction,
-                                                    lastSavedBalance,
-                                                    transaction.getType()
-                                                )
-                                                NotificationUtils.sendWhatsAppMessage(context, phone, msg)
-                                            } else {
-                                                Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
-                                            }
-                                        }
-                                    }
-                                    isDialogShown = false
-                                    // إعادة تعيين الحقول
-                                    amount = ""
-                                    description = ""
-                                    date = System.currentTimeMillis()
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_whatsapp),
-                                    contentDescription = null,
-                                    tint = colors.onPrimary,
-                                    modifier = Modifier.size(dimens.smsIconSize)
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                Text("إرسال واتساب", fontWeight = FontWeight.Bold)
-                            }
+                            
                             Button(
                                 onClick = {
                                     // إرسال SMS
