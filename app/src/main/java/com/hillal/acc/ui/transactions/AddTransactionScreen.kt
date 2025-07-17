@@ -254,7 +254,7 @@ fun AddTransactionScreen(
         var lastSavedBalance by remember { mutableStateOf(0.0) }
         var suggestions by remember { mutableStateOf(listOf<String>()) }
         var lastAmountUpdate by remember { mutableStateOf("") }
-        val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale("ar")) }
+        val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH) }
         
         // دالة للتحقق من صحة إدخال المبلغ (أرقام إنجليزية وفواصل فقط)
         fun isValidAmount(input: String): Boolean {
