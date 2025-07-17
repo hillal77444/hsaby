@@ -105,6 +105,7 @@ fun ReportsScreen(
             .fillMaxSize()
             .background(colors.background)
             .verticalScroll(scrollState)
+            .navigationBarsPadding() // أضفت هذه لجعل التمرير خلف أو فوق الأزرار السفلية
     ) {
         // بطاقة الاشتراك المميزة
         Card(
