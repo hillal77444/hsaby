@@ -383,7 +383,7 @@ fun ActionButton(
             tint = Color.White,
             modifier = Modifier.size(iconSize)
         )
-        Spacer(modifier = Modifier.width(4.dp)) // تصغير المسافة بين الأيقونة والنص
+        Spacer(modifier = Modifier.width(3.dp)) // تصغير المسافة بين الأيقونة والنص
         Text(text = text, color = Color.White, fontSize = fontSize)
     }
 }
@@ -422,7 +422,7 @@ fun GridCardOld(
                 text = title,
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                 color = Color(0xFF1976D2),
-                fontSize = (iconSize * 0.8f).value.sp,
+                fontSize = (iconSize * 0.7f).value.sp,
                 modifier = Modifier.padding(top = 2.dp)
             )
         }
