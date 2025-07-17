@@ -79,7 +79,7 @@ fun DashboardScreen(
         val cardPadding = dimens.spacingMedium
         val fontTitle = typography.headlineMedium.fontSize
         val fontField = typography.bodyLarge.fontSize
-        val fontSmall = typography.bodyMedium.fontSize
+        val fontSmall = dimens.fontSmall
         val iconSize = dimens.iconSize
         val marginSmall = dimens.spacingSmall
         val marginMedium = dimens.spacingMedium / 2 // نصف القيمة السابقة
