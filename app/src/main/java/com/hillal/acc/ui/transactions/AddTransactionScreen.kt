@@ -849,21 +849,28 @@ fun AddTransactionScreen(
 
         // Success Dialog
         if (isDialogShown) {
+            // إعادة تعريف القيم النسبية داخل Dialog إذا لزم الأمر
+            val dialogCornerLocal = dialogCorner
+            val dialogPaddingLocal = dialogPadding
+            val dialogIconSizeLocal = dialogIconSize
+            val dividerPaddingLocal = dividerPadding
+            val minDialogHeightLocal = minDialogHeight
+            val smsIconSizeLocal = smsIconSize
             Dialog(onDismissRequest = { isDialogShown = false }) {
                 Card(
-                    shape = RoundedCornerShape(dialogCorner),
+                    shape = RoundedCornerShape(dialogCornerLocal),
                     elevation = CardDefaults.cardElevation(12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(dialogPadding),
+                        .padding(dialogPaddingLocal),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f))
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .defaultMinSize(minHeight = minDialogHeight)
+                            .defaultMinSize(minHeight = minDialogHeightLocal)
                             .verticalScroll(rememberScrollState())
-                            .padding(dialogPadding),
+                            .padding(dialogPaddingLocal),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         // أيقونة نجاح
@@ -871,24 +878,24 @@ fun AddTransactionScreen(
                             painter = painterResource(id = R.drawable.ic_wallet),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(dialogIconSize)
+                            modifier = Modifier.size(dialogIconSizeLocal)
                         )
                         Spacer(Modifier.height(12.dp))
                         Text(
                             text = "تمت إضافة المعاملة بنجاح!",
-                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold, fontSize = fontSizeLarge),
                             color = MaterialTheme.colorScheme.primary
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
                             text = "هل ترغب بإرسال إشعار؟",
-                            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Medium)
+                            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Medium, fontSize = fontSizeMedium)
                         )
                         Spacer(Modifier.height(8.dp))
-                        Divider(modifier = Modifier.padding(vertical = dividerPadding))
+                        Divider(modifier = Modifier.padding(vertical = dividerPaddingLocal))
                         Text(
                             text = "تفاصيل المعاملة:",
-                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, fontSize = fontSizeMedium),
                             color = MaterialTheme.colorScheme.secondary
                         )
                         Spacer(Modifier.height(8.dp))
@@ -899,32 +906,32 @@ fun AddTransactionScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                                 Spacer(Modifier.width(6.dp))
-                                Text("الحساب: ${lastSavedAccount?.getName() ?: ""}", style = MaterialTheme.typography.bodyMedium)
+                                Text("الحساب: ${lastSavedAccount?.getName() ?: ""}", style = MaterialTheme.typography.bodyMedium.copy(fontSize = fontSizeSmall))
                             }
                             Spacer(Modifier.height(4.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.AttachMoney, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                                 Spacer(Modifier.width(6.dp))
-                                Text("المبلغ: ${lastSavedTransaction?.getAmount() ?: 0.0} ${lastSavedTransaction?.getCurrency() ?: ""}", style = MaterialTheme.typography.bodyMedium)
+                                Text("المبلغ: ${lastSavedTransaction?.getAmount() ?: 0.0} ${lastSavedTransaction?.getCurrency() ?: ""}", style = MaterialTheme.typography.bodyMedium.copy(fontSize = fontSizeSmall))
                             }
                             Spacer(Modifier.height(4.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.Notes, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                                 Spacer(Modifier.width(6.dp))
-                                Text("البيان: ${lastSavedTransaction?.getDescription() ?: ""}", style = MaterialTheme.typography.bodyMedium)
+                                Text("البيان: ${lastSavedTransaction?.getDescription() ?: ""}", style = MaterialTheme.typography.bodyMedium.copy(fontSize = fontSizeSmall))
                             }
                             Spacer(Modifier.height(4.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                                 Spacer(Modifier.width(6.dp))
-                                Text("الرصيد الجديد: $lastSavedBalance ${lastSavedTransaction?.getCurrency() ?: ""}", style = MaterialTheme.typography.bodyMedium)
+                                Text("الرصيد الجديد: $lastSavedBalance ${lastSavedTransaction?.getCurrency() ?: ""}", style = MaterialTheme.typography.bodyMedium.copy(fontSize = fontSizeSmall))
                             }
                         }
                         Spacer(Modifier.height(16.dp))
-                        Divider(modifier = Modifier.padding(vertical = dividerPadding))
+                        Divider(modifier = Modifier.padding(vertical = dividerPaddingLocal))
                         Text(
                             text = "اختر الإجراء المطلوب:",
-                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, fontSize = fontSizeMedium),
                             color = MaterialTheme.colorScheme.primary
                         )
                         Spacer(Modifier.height(24.dp))
@@ -969,10 +976,10 @@ fun AddTransactionScreen(
                                     painter = painterResource(id = R.drawable.ic_sms),
                                     contentDescription = null,
                                     tint = colors.onPrimary,
-                                    modifier = Modifier.size(smsIconSize)
+                                    modifier = Modifier.size(smsIconSizeLocal)
                                 )
                                 Spacer(Modifier.width(8.dp))
-                                Text("إرسال SMS", fontWeight = FontWeight.Bold)
+                                Text("إرسال SMS", fontWeight = FontWeight.Bold, fontSize = fontSizeMedium)
                             }
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -989,7 +996,7 @@ fun AddTransactionScreen(
                                     modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(10.dp)
                                 ) {
-                                    Text(" قيد جديد", fontWeight = FontWeight.Bold)
+                                    Text(" قيد جديد", fontWeight = FontWeight.Bold, fontSize = fontSizeMedium)
                                 }
                                 OutlinedButton(
                                     onClick = {
@@ -999,7 +1006,7 @@ fun AddTransactionScreen(
                                     modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(10.dp)
                                 ) {
-                                    Text("خروج", fontWeight = FontWeight.Bold)
+                                    Text("خروج", fontWeight = FontWeight.Bold, fontSize = fontSizeMedium)
                                 }
                             }
                         }
