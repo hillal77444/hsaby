@@ -150,7 +150,7 @@ fun calculateAppDimensions(): AppDimensions {
         fieldHeight = screenHeight * 0.081f, // ارتفاع حقل الإدخال متجاوب
         cardElevation = screenWidth * 0.012f, // ظل البطاقة متجاوب (مثلاً 4-8dp)
         iconSizeSmall = screenWidth * 0.042f, // أيقونة صغيرة (مثلاً 14-18dp)
-        fontSmall = (screenWidth.value * 0.032f).sp // خط صغير (مثلاً 11-13sp)
+        fontSmall = (screenWidth.value * 0.029f).sp // خط صغير (مثلاً 11-13sp)
     )
 }
 
