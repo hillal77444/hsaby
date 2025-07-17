@@ -447,9 +447,9 @@ fun AddTransactionScreen(
             val buttonHeight = maxOf((maxHeight * 0.06f).coerceAtLeast(44.dp), 44.dp)
             val cardMaxHeight = (maxHeight * 0.18f).coerceAtMost(160.dp)
             val iconSize = base * 0.07f
-            val fontSizeLarge = base * 0.038f
-            val fontSizeMedium = base * 0.032f
-            val fontSizeSmall = base * 0.027f
+            val fontSizeLarge = (base.value * 0.038f).sp
+            val fontSizeMedium = (base.value * 0.032f).sp
+            val fontSizeSmall = (base.value * 0.027f).sp
             val smsIconSize = base * 0.07f
             val dialogCorner = base * 0.025f
             val dialogPadding = base * 0.045f
