@@ -964,7 +964,7 @@ fun AddTransactionScreen(
                                     modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(10.dp)
                                 ) {
-                                    Text("إضافة قيد آخر", fontWeight = FontWeight.Bold)
+                                    Text(" قيد جديد", fontWeight = FontWeight.Bold)
                                 }
                                 OutlinedButton(
                                     onClick = {
