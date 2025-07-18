@@ -108,7 +108,25 @@ data class AppDimensions(
     val fieldHeight: Dp,        // ارتفاع حقول الإدخال
     val cardElevation: Dp,      // ظل البطاقات
     val iconSizeSmall: Dp,      // أيقونات صغيرة (مثل أيقونة كلمة السر)
-    val fontSmall: TextUnit     // حجم خط صغير (روابط، نصوص مساعدة)
+    val fontSmall: TextUnit,     // حجم خط صغير (روابط، نصوص مساعدة)
+    val spacingTiny: Dp = 4.dp, // جديد
+    val iconSpacing: Dp = 8.dp, // جديد
+    val cardWidthRatio: Float = 0.97f, // جديد
+    val logoScaleIn: Float = 0.7f, // جديد
+    val logoContentScale: Float = 0.8f, // جديد
+    val buttonSpacing: Dp = 8.dp, // جديد
+    val errorCardVerticalPadding: Dp = 2.dp, // جديد
+    val textFieldHeight: Dp = 56.dp, // جديد
+    val rowSpacing: Dp = 8.dp, // جديد
+    val menuIconSize: Dp = 24.dp, // جديد
+    val cardMaxHeight: Dp = 160.dp, // جديد
+    val cardElevationSmall: Dp = 2.dp, // جديد
+    val smsIconSize: Dp = 24.dp, // جديد
+    val dialogCorner: Dp = 16.dp, // جديد
+    val dialogPadding: Dp = 24.dp, // جديد
+    val dialogIconSize: Dp = 48.dp, // جديد
+    val dividerPadding: Dp = 8.dp, // جديد
+    val minDialogHeight: Dp = 120.dp // جديد
 )
 
 // ألوان جمالية إضافية (يمكن استخدامها في الخلفيات أو التدرجات أو العناصر الثانوية)
@@ -128,6 +146,7 @@ fun calculateAppDimensions(): AppDimensions {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
+    val base = if (screenWidth < screenHeight) screenWidth else screenHeight
     val cardCorner = screenWidth * 0.04f
     return AppDimensions(
         spacingSmall = screenWidth * 0.02f,   // 2% من العرض
@@ -150,7 +169,25 @@ fun calculateAppDimensions(): AppDimensions {
         fieldHeight = screenHeight * 0.081f, // ارتفاع حقل الإدخال متجاوب
         cardElevation = screenWidth * 0.012f, // ظل البطاقة متجاوب (مثلاً 4-8dp)
         iconSizeSmall = screenWidth * 0.042f, // أيقونة صغيرة (مثلاً 14-18dp)
-        fontSmall = (screenWidth.value * 0.025f).sp // خط صغير (مثلاً 11-13sp)
+        fontSmall = (screenWidth.value * 0.025f).sp, // خط صغير (مثلاً 11-13sp)
+        spacingTiny = screenWidth * 0.008f, // 0.8% من العرض
+        iconSpacing = screenWidth * 0.012f, // 1.2% من العرض
+        cardWidthRatio = 0.97f, // نفس النسبة المستخدمة في fillMaxWidth
+        logoScaleIn = 0.7f, // نفس النسبة المستخدمة في scaleIn
+        logoContentScale = 0.8f, // نفس النسبة المستخدمة في logo size
+        buttonSpacing = screenWidth * 0.02f, // 2% من العرض
+        errorCardVerticalPadding = screenHeight * 0.003f, // 0.3% من الارتفاع
+        textFieldHeight = (screenHeight * 0.09f).coerceAtLeast(54.dp),
+        rowSpacing = base * 0.018f,
+        menuIconSize = base * 0.055f,
+        cardMaxHeight = (screenHeight * 0.18f).coerceAtMost(160.dp),
+        cardElevationSmall = base * 0.004f,
+        smsIconSize = base * 0.07f,
+        dialogCorner = base * 0.025f,
+        dialogPadding = base * 0.045f,
+        dialogIconSize = base * 0.11f,
+        dividerPadding = base * 0.015f,
+        minDialogHeight = (screenHeight * 0.22f).coerceAtMost(180.dp)
     )
 }
 

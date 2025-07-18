@@ -441,51 +441,27 @@ fun AddTransactionScreen(
         // UI
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             val base = minOf(maxWidth, maxHeight)
-            val spacingSmall = base * 0.022f
-            val spacingMedium = base * 0.035f
-            val cardCorner = base * 0.025f
-            val buttonCorner = cardCorner
-            val buttonHeight = maxOf((maxHeight * 0.06f).coerceAtLeast(44.dp), 44.dp)
-            val cardMaxHeight = (maxHeight * 0.18f).coerceAtMost(160.dp)
-            val iconSize = base * 0.07f
-            val fontSizeLarge = maxOf((base.value * 0.040f), 18f).sp
-            val fontSizeMedium = maxOf((base.value * 0.038f), 16f).sp
-            val fontSizeSmall = maxOf((base.value * 0.028f), 13f).sp
-            val smsIconSize = base * 0.07f
-            val dialogCorner = base * 0.025f
-            val dialogPadding = base * 0.045f
-            val dialogIconSize = base * 0.11f
-            val dividerPadding = base * 0.015f
-            val minDialogHeight = (maxHeight * 0.22f).coerceAtMost(180.dp)
-            val searchFieldHeight = maxOf((maxHeight * 0.055f).coerceAtLeast(40.dp), 40.dp)
-            val cardElevation = base * 0.009f
-            val cardElevationSmall = base * 0.004f
-            val rowSpacing = base * 0.018f
-            val menuIconSize = base * 0.055f
-            val textFieldHeight = maxOf((maxHeight * 0.09f).coerceAtLeast(56.dp), 54.dp)
-            val radioButtonSize = base * 0.045f
-            val verticalScrollState = rememberScrollState()
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(verticalScrollState)
+                    .verticalScroll(rememberScrollState())
                     .imePadding()
                     .background(colors.background),
-                verticalArrangement = Arrangement.spacedBy(spacingSmall)
+                verticalArrangement = Arrangement.spacedBy(dimens.spacingSmall)
             ) {
                 // بطاقة العنوان في الأعلى
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = spacingMedium, vertical = spacingSmall),
-                    shape = RoundedCornerShape(cardCorner),
+                        .padding(horizontal = dimens.spacingMedium, vertical = dimens.spacingSmall),
+                    shape = RoundedCornerShape(dimens.cardCorner),
                     colors = CardDefaults.cardColors(containerColor = colors.primaryContainer),
-                    elevation = CardDefaults.cardElevation(defaultElevation = cardElevation)
+                    elevation = CardDefaults.cardElevation(defaultElevation = dimens.cardElevation)
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(cardMaxHeight)
+                            .height(dimens.cardMaxHeight)
                             .background(
                                 Brush.linearGradient(
                                     colors = listOf(
@@ -501,15 +477,15 @@ fun AddTransactionScreen(
                         // رسم ديكوري في الخلفية
                         Box(
                             modifier = Modifier
-                                .size(cardMaxHeight * 1.1f)
+                                .size(dimens.cardMaxHeight * 1.1f)
                                 .align(Alignment.CenterEnd)
-                                .offset(x = spacingMedium, y = 0.dp)
+                                .offset(x = dimens.spacingMedium, y = 0.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.AttachMoney,
                                 contentDescription = null,
                                 tint = colors.primary.copy(alpha = 0.10f),
-                                modifier = Modifier.size(cardMaxHeight * 1.1f)
+                                modifier = Modifier.size(dimens.cardMaxHeight * 1.1f)
                             )
                         }
                         // أيقونة جميلة فوق العنوان
@@ -518,31 +494,30 @@ fun AddTransactionScreen(
                             contentDescription = null,
                             tint = colors.secondary,
                             modifier = Modifier
-                                .size(cardMaxHeight * 0.4f)
+                                .size(dimens.cardMaxHeight * 0.4f)
                                 .align(Alignment.Center)
                         )
                         // نص العنوان في المقدمة
                         Text(
                             text = "إضافة معاملة جديدة",
-                            style = typography.headlineSmall.copy(fontSize = fontSizeLarge),
+                            style = typography.headlineSmall.copy(fontSize = dimens.bodyFont),
                             color = colors.onPrimaryContainer,
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(spacingSmall))
+                Spacer(modifier = Modifier.height(dimens.spacingSmall))
                 // Main Card
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = spacingMedium, end = spacingMedium, bottom = spacingSmall)
-                        .shadow(cardElevation, RoundedCornerShape(cardCorner)),
-                    shape = RoundedCornerShape(cardCorner),
+                        .padding(start = dimens.spacingMedium, end = dimens.spacingMedium, bottom = dimens.spacingSmall),
+                    shape = RoundedCornerShape(dimens.cardCorner),
                     colors = CardDefaults.cardColors(containerColor = colors.surface)
                 ) {
-                    Column(modifier = Modifier.padding(spacingSmall)) {
+                    Column(modifier = Modifier.padding(dimens.spacingSmall)) {
                         // Row: حساب وصندوق
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(rowSpacing)) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimens.rowSpacing)) {
                             Box(Modifier.weight(1f)) {
                                 AccountPickerField(
                                     accounts = allAccounts,
@@ -579,9 +554,9 @@ fun AddTransactionScreen(
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(spacingSmall))
+                        Spacer(modifier = Modifier.height(dimens.spacingSmall))
                         // Row: مبلغ وتاريخ
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(rowSpacing)) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimens.rowSpacing)) {
                             Column(modifier = Modifier.weight(1f)) {
                                 OutlinedTextField(
                                     value = amount,
@@ -591,10 +566,10 @@ fun AddTransactionScreen(
                                             lastAmountUpdate = amount // تحديث للكتابة التلقائية
                                         }
                                     },
-                                    label = { Text("المبلغ", fontSize = fontSizeMedium) },
-                                    modifier = Modifier.fillMaxWidth().height(textFieldHeight),
-                                    leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null, modifier = Modifier.size(iconSize)) },
-                                    textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge),
+                                    label = { Text("المبلغ", fontSize = dimens.bodyFont) },
+                                    modifier = Modifier.fillMaxWidth().height(dimens.textFieldHeight),
+                                    leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null, modifier = Modifier.size(dimens.iconSize)) },
+                                    textStyle = typography.bodyLarge.copy(fontSize = dimens.bodyFont),
                                     singleLine = true,
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                                 )
@@ -606,11 +581,11 @@ fun AddTransactionScreen(
                                         Text(
                                             text = arabicWords,
                                             style = typography.bodySmall.copy(
-                                                fontSize = fontSizeSmall,
+                                                fontSize = dimens.fontSmall,
                                                 fontWeight = FontWeight.Normal
                                             ),
                                             color = colors.primary.copy(alpha = 0.7f),
-                                            modifier = Modifier.padding(top = spacingSmall, start = spacingSmall),
+                                            modifier = Modifier.padding(top = dimens.spacingSmall, start = dimens.spacingSmall),
                                             maxLines = 2,
                                             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                         )
@@ -620,12 +595,12 @@ fun AddTransactionScreen(
                             OutlinedTextField(
                                 value = dateFormat.format(Date(date)),
                                 onValueChange = {},
-                                label = { Text("التاريخ", fontSize = fontSizeMedium) },
-                                modifier = Modifier.weight(1f).clickable { showDatePicker = true }.height(textFieldHeight),
+                                label = { Text("التاريخ", fontSize = dimens.bodyFont) },
+                                modifier = Modifier.weight(1f).clickable { showDatePicker = true }.height(dimens.textFieldHeight),
                                 enabled = false,
                                 readOnly = true,
-                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
-                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge),
+                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(dimens.iconSize)) },
+                                textStyle = typography.bodyLarge.copy(fontSize = dimens.bodyFont),
                                 colors = TextFieldDefaults.outlinedTextFieldColors(
                                     containerColor = colors.surface,
                                     focusedBorderColor = colors.primary,
@@ -635,7 +610,7 @@ fun AddTransactionScreen(
                                 )
                             )
                         }
-                        Spacer(modifier = Modifier.height(spacingSmall))
+                        Spacer(modifier = Modifier.height(dimens.spacingSmall))
                         // Description with suggestions (ExposedDropdownMenuBox)
                         var expandedSuggestions by remember { mutableStateOf(false) }
                         var showAllSuggestions by remember { mutableStateOf(false) }
@@ -652,20 +627,20 @@ fun AddTransactionScreen(
                                     showAllSuggestions = false
                                     expandedSuggestions = it.text.isNotEmpty() && suggestions.any { s -> s.startsWith(it.text) && s != it.text }
                                 },
-                                label = { Text("البيان", fontSize = fontSizeMedium) },
+                                label = { Text("البيان", fontSize = dimens.bodyFont) },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .menuAnchor()
-                                    .height(textFieldHeight),
-                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
-                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge),
+                                    .height(dimens.textFieldHeight),
+                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(dimens.iconSize)) },
+                                textStyle = typography.bodyLarge.copy(fontSize = dimens.bodyFont),
                                 trailingIcon = {
                                     if (suggestions.isNotEmpty()) {
                                         IconButton(onClick = {
                                             showAllSuggestions = true
                                             expandedSuggestions = true
                                         }) {
-                                            Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(menuIconSize))
+                                            Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(dimens.menuIconSize))
                                         }
                                     }
                                 }
@@ -685,7 +660,7 @@ fun AddTransactionScreen(
                                     emptyList()
                                 filtered.forEach { suggestion ->
                                     DropdownMenuItem(
-                                        text = { Text(suggestion, fontSize = fontSizeMedium) },
+                                        text = { Text(suggestion, fontSize = dimens.bodyFont) },
                                         onClick = {
                                             descriptionState = TextFieldValue(
                                                 suggestion,
@@ -699,7 +674,7 @@ fun AddTransactionScreen(
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(spacingSmall))
+                        Spacer(modifier = Modifier.height(dimens.spacingSmall))
                         // Currency Radio Buttons
                         Row(
                             modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -708,83 +683,83 @@ fun AddTransactionScreen(
                             RadioButton(
                                 selected = currency == context.getString(R.string.currency_yer),
                                 onClick = { currency = context.getString(R.string.currency_yer) },
-                                modifier = Modifier.size(radioButtonSize)
+                                modifier = Modifier.size(dimens.radioButtonSize)
                             )
-                            Text("يمني", fontSize = fontSizeMedium)
-                            Spacer(modifier = Modifier.width(spacingSmall))
+                            Text("يمني", fontSize = dimens.bodyFont)
+                            Spacer(modifier = Modifier.width(dimens.spacingSmall))
                             RadioButton(
                                 selected = currency == context.getString(R.string.currency_sar),
                                 onClick = { currency = context.getString(R.string.currency_sar) },
-                                modifier = Modifier.size(radioButtonSize)
+                                modifier = Modifier.size(dimens.radioButtonSize)
                             )
-                            Text("سعودي", fontSize = fontSizeMedium)
-                            Spacer(modifier = Modifier.width(spacingSmall))
+                            Text("سعودي", fontSize = dimens.bodyFont)
+                            Spacer(modifier = Modifier.width(dimens.spacingSmall))
                             RadioButton(
                                 selected = currency == context.getString(R.string.currency_usd),
                                 onClick = { currency = context.getString(R.string.currency_usd) },
-                                modifier = Modifier.size(radioButtonSize)
+                                modifier = Modifier.size(dimens.radioButtonSize)
                             )
-                            Text("دولار", fontSize = fontSizeMedium)
+                            Text("دولار", fontSize = dimens.bodyFont)
                         }
-                        Spacer(modifier = Modifier.height(spacingSmall))
+                        Spacer(modifier = Modifier.height(dimens.spacingSmall))
                         // Notes (hidden by default)
                         val showNotes = false
                         if (showNotes) {
                             OutlinedTextField(
                                 value = notes,
                                 onValueChange = { notes = it },
-                                label = { Text("ملاحظات", fontSize = fontSizeMedium) },
-                                modifier = Modifier.fillMaxWidth().height(textFieldHeight),
-                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
-                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge)
+                                label = { Text("ملاحظات", fontSize = dimens.bodyFont) },
+                                modifier = Modifier.fillMaxWidth().height(dimens.textFieldHeight),
+                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(dimens.iconSize)) },
+                                textStyle = typography.bodyLarge.copy(fontSize = dimens.bodyFont)
                             )
-                            Spacer(modifier = Modifier.height(spacingSmall))
+                            Spacer(modifier = Modifier.height(dimens.spacingSmall))
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(spacingMedium)) // مسافة بسيطة فوق الأزرار
+                Spacer(modifier = Modifier.height(dimens.spacingMedium)) // مسافة بسيطة فوق الأزرار
                 // Action Buttons في الأسفل
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = spacingMedium, vertical = spacingSmall),
-                    horizontalArrangement = Arrangement.spacedBy(rowSpacing)
+                        .padding(horizontal = dimens.spacingMedium, vertical = dimens.spacingSmall),
+                    horizontalArrangement = Arrangement.spacedBy(dimens.rowSpacing)
                 ) {
                     Button(
                         onClick = { saveTransaction(false) },
                         modifier = Modifier
                             .weight(1f)
-                            .height(buttonHeight),
-                        shape = RoundedCornerShape(buttonCorner),
+                            .height(dimens.buttonHeight),
+                        shape = RoundedCornerShape(dimens.buttonCorner),
                         colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.onPrimary)
                     ) {
-                        Icon(Icons.Default.ArrowDownward, contentDescription = null, modifier = Modifier.size(iconSize))
-                        Spacer(Modifier.width(spacingSmall))
-                        Text("له", fontSize = fontSizeLarge)
+                        Icon(Icons.Default.ArrowDownward, contentDescription = null, modifier = Modifier.size(dimens.iconSize))
+                        Spacer(Modifier.width(dimens.spacingSmall))
+                        Text("له", fontSize = dimens.bodyFont)
                     }
                     Button(
                         onClick = { saveTransaction(true) },
                         modifier = Modifier
                             .weight(1f)
-                            .height(buttonHeight),
-                        shape = RoundedCornerShape(buttonCorner),
+                            .height(dimens.buttonHeight),
+                        shape = RoundedCornerShape(dimens.buttonCorner),
                         colors = ButtonDefaults.buttonColors(containerColor = colors.error, contentColor = colors.onError)
                     ) {
-                        Icon(Icons.Default.ArrowUpward, contentDescription = null, modifier = Modifier.size(iconSize))
-                        Spacer(Modifier.width(spacingSmall))
-                        Text("عليه", fontSize = fontSizeSmall)
+                        Icon(Icons.Default.ArrowUpward, contentDescription = null, modifier = Modifier.size(dimens.iconSize))
+                        Spacer(Modifier.width(dimens.spacingSmall))
+                        Text("عليه", fontSize = dimens.fontSmall)
                     }
                     Button(
                         onClick = { navController.navigateUp() },
                         modifier = Modifier
                             .weight(1f)
-                            .height(buttonHeight),
-                        shape = RoundedCornerShape(buttonCorner)
+                            .height(dimens.buttonHeight),
+                        shape = RoundedCornerShape(dimens.buttonCorner)
                     ) {
-                        Text("إلغاء", fontSize = fontSizeLarge)
+                        Text("إلغاء", fontSize = dimens.bodyFont)
                     }
                 }
-                Spacer(modifier = Modifier.height(spacingMedium))
+                Spacer(modifier = Modifier.height(dimens.spacingMedium))
             }
         }
 
@@ -852,30 +827,21 @@ fun AddTransactionScreen(
         if (isDialogShown) {
             BoxWithConstraints {
                 val base = minOf(maxWidth, maxHeight)
-                val dialogCorner = base * 0.025f
-                val dialogPadding = base * 0.045f
-                val dialogIconSize = base * 0.11f
-                val dividerPadding = base * 0.015f
-                val minDialogHeight = (maxHeight * 0.22f).coerceAtMost(180.dp)
-                val smsIconSize = base * 0.07f
-                val fontSizeLarge = (base.value * 0.038f).sp
-                val fontSizeMedium = (base.value * 0.032f).sp
-                val fontSizeSmall = (base.value * 0.027f).sp
                 Dialog(onDismissRequest = { isDialogShown = false }) {
                     Card(
-                        shape = RoundedCornerShape(dialogCorner),
-                        elevation = CardDefaults.cardElevation(12.dp),
+                        shape = RoundedCornerShape(dimens.dialogCorner),
+                        elevation = CardDefaults.cardElevation(dimens.minDialogHeight),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(dialogPadding),
+                            .padding(dimens.dialogPadding),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f))
                     ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .defaultMinSize(minHeight = minDialogHeight)
+                                .defaultMinSize(minHeight = dimens.minDialogHeight)
                                 .verticalScroll(rememberScrollState())
-                                .padding(dialogPadding),
+                                .padding(dimens.dialogPadding),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             // أيقونة نجاح
@@ -883,66 +849,66 @@ fun AddTransactionScreen(
                                 painter = painterResource(id = R.drawable.ic_wallet),
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(dialogIconSize)
+                                modifier = Modifier.size(dimens.dialogIconSize)
                             )
-                            Spacer(Modifier.height(12.dp))
+                            Spacer(Modifier.height(dimens.spacingSmall))
                             Text(
                                 text = "تمت إضافة المعاملة بنجاح!",
-                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold, fontSize = fontSizeLarge),
+                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold, fontSize = dimens.bodyFont),
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            Spacer(Modifier.height(4.dp))
+                            Spacer(Modifier.height(dimens.spacingSmall))
                             Text(
                                 text = "هل ترغب بإرسال إشعار؟",
-                                style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Medium, fontSize = fontSizeMedium)
+                                style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Medium, fontSize = dimens.bodyFont)
                             )
-                            Spacer(Modifier.height(8.dp))
-                            Divider(modifier = Modifier.padding(vertical = dividerPadding))
+                            Spacer(Modifier.height(dimens.spacingSmall))
+                            Divider(modifier = Modifier.padding(vertical = dimens.dividerPadding))
                             Text(
                                 text = "تفاصيل المعاملة:",
-                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, fontSize = fontSizeMedium),
+                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, fontSize = dimens.bodyFont),
                                 color = MaterialTheme.colorScheme.secondary
                             )
-                            Spacer(Modifier.height(8.dp))
+                            Spacer(Modifier.height(dimens.spacingSmall))
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.Start
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                                    Spacer(Modifier.width(6.dp))
-                                    Text("الحساب: ${lastSavedAccount?.getName() ?: ""}", style = MaterialTheme.typography.bodyMedium.copy(fontSize = fontSizeSmall))
+                                    Spacer(Modifier.width(dimens.spacingSmall))
+                                    Text("الحساب: ${lastSavedAccount?.getName() ?: ""}", style = MaterialTheme.typography.bodyMedium.copy(fontSize = dimens.fontSmall))
                                 }
-                                Spacer(Modifier.height(4.dp))
+                                Spacer(Modifier.height(dimens.spacingSmall))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.AttachMoney, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                                    Spacer(Modifier.width(6.dp))
-                                    Text("المبلغ: ${lastSavedTransaction?.getAmount() ?: 0.0} ${lastSavedTransaction?.getCurrency() ?: ""}", style = MaterialTheme.typography.bodyMedium.copy(fontSize = fontSizeSmall))
+                                    Spacer(Modifier.width(dimens.spacingSmall))
+                                    Text("المبلغ: ${lastSavedTransaction?.getAmount() ?: 0.0} ${lastSavedTransaction?.getCurrency() ?: ""}", style = MaterialTheme.typography.bodyMedium.copy(fontSize = dimens.fontSmall))
                                 }
-                                Spacer(Modifier.height(4.dp))
+                                Spacer(Modifier.height(dimens.spacingSmall))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.Notes, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                                    Spacer(Modifier.width(6.dp))
-                                    Text("البيان: ${lastSavedTransaction?.getDescription() ?: ""}", style = MaterialTheme.typography.bodyMedium.copy(fontSize = fontSizeSmall))
+                                    Spacer(Modifier.width(dimens.spacingSmall))
+                                    Text("البيان: ${lastSavedTransaction?.getDescription() ?: ""}", style = MaterialTheme.typography.bodyMedium.copy(fontSize = dimens.fontSmall))
                                 }
-                                Spacer(Modifier.height(4.dp))
+                                Spacer(Modifier.height(dimens.spacingSmall))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                                    Spacer(Modifier.width(6.dp))
-                                    Text("الرصيد الجديد: $lastSavedBalance ${lastSavedTransaction?.getCurrency() ?: ""}", style = MaterialTheme.typography.bodyMedium.copy(fontSize = fontSizeSmall))
+                                    Spacer(Modifier.width(dimens.spacingSmall))
+                                    Text("الرصيد الجديد: $lastSavedBalance ${lastSavedTransaction?.getCurrency() ?: ""}", style = MaterialTheme.typography.bodyMedium.copy(fontSize = dimens.fontSmall))
                                 }
                             }
-                            Spacer(Modifier.height(16.dp))
-                            Divider(modifier = Modifier.padding(vertical = dividerPadding))
+                            Spacer(Modifier.height(dimens.spacingSmall))
+                            Divider(modifier = Modifier.padding(vertical = dimens.dividerPadding))
                             Text(
                                 text = "اختر الإجراء المطلوب:",
-                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, fontSize = fontSizeMedium),
+                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, fontSize = dimens.bodyFont),
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            Spacer(Modifier.height(24.dp))
+                            Spacer(Modifier.height(dimens.spacingSmall))
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                                verticalArrangement = Arrangement.spacedBy(dimens.spacingSmall)
                             ) {
                                 Button(
                                     onClick = {
@@ -974,20 +940,20 @@ fun AddTransactionScreen(
                                         date = System.currentTimeMillis()
                                     },
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(10.dp)
+                                    shape = RoundedCornerShape(dimens.buttonCorner)
                                 ) {
                                     Icon(
                                         painter = painterResource(id = R.drawable.ic_sms),
                                         contentDescription = null,
                                         tint = colors.onPrimary,
-                                        modifier = Modifier.size(smsIconSize)
+                                        modifier = Modifier.size(dimens.smsIconSize)
                                     )
-                                    Spacer(Modifier.width(8.dp))
-                                    Text("إرسال SMS", fontWeight = FontWeight.Bold, fontSize = fontSizeMedium)
+                                    Spacer(Modifier.width(dimens.spacingSmall))
+                                    Text("إرسال SMS", fontWeight = FontWeight.Bold, fontSize = dimens.bodyFont)
                                 }
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(dimens.spacingSmall)
                                 ) {
                                     OutlinedButton(
                                         onClick = {
@@ -998,9 +964,9 @@ fun AddTransactionScreen(
                                             date = System.currentTimeMillis()
                                         },
                                         modifier = Modifier.weight(1f),
-                                        shape = RoundedCornerShape(10.dp)
+                                        shape = RoundedCornerShape(dimens.buttonCorner)
                                     ) {
-                                        Text(" قيد جديد", fontWeight = FontWeight.Bold, fontSize = fontSizeMedium)
+                                        Text(" قيد جديد", fontWeight = FontWeight.Bold, fontSize = dimens.bodyFont)
                                     }
                                     OutlinedButton(
                                         onClick = {
@@ -1008,9 +974,9 @@ fun AddTransactionScreen(
                                             navController.navigateUp()
                                         },
                                         modifier = Modifier.weight(1f),
-                                        shape = RoundedCornerShape(10.dp)
+                                        shape = RoundedCornerShape(dimens.buttonCorner)
                                     ) {
-                                        Text("خروج", fontWeight = FontWeight.Bold, fontSize = fontSizeMedium)
+                                        Text("خروج", fontWeight = FontWeight.Bold, fontSize = dimens.bodyFont)
                                     }
                                 }
                             }
@@ -1038,7 +1004,7 @@ fun AccountPickerBottomSheetCompose(
     if (show) {
         ModalBottomSheet(onDismissRequest = onDismiss) {
             Column(Modifier.fillMaxWidth().padding(dimens.spacingMedium)) {
-                Text(text = "اختر الحساب", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text(text = "اختر الحساب", fontWeight = FontWeight.Bold, fontSize = dimens.bodyFont)
                 Spacer(Modifier.height(dimens.spacingSmall))
                 OutlinedTextField(
                     value = search,
@@ -1063,7 +1029,7 @@ fun AccountPickerBottomSheetCompose(
                             Column(Modifier.padding(dimens.spacingSmall)) {
                                 Text(account.getName() ?: "", fontWeight = FontWeight.Bold)
                                 val balance = balancesMap[account.getId()]?.values?.sum() ?: 0.0
-                                Text("الرصيد: ${balance}", fontSize = 13.sp)
+                                Text("الرصيد: ${balance}", fontSize = dimens.fontSmall)
                             }
                         }
                     }

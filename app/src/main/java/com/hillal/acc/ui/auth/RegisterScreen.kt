@@ -129,7 +129,7 @@ fun RegisterScreen(
                 // الشعار مع أنيميشن دخول خفيف (ScaleIn + FadeIn)
                 androidx.compose.animation.AnimatedVisibility(
                     visible = true,
-                    enter = scaleIn(initialScale = 0.7f, animationSpec = tween(600)) + fadeIn(animationSpec = tween(600))
+                    enter = scaleIn(initialScale = dimens.logoScaleIn, animationSpec = tween(600)) + fadeIn(animationSpec = tween(600))
                 ) {
                     Box(
                         modifier = Modifier
@@ -142,7 +142,7 @@ fun RegisterScreen(
                             painter = painterResource(id = R.mipmap.ic_launcher),
                             contentDescription = "Logo",
                             contentScale = ContentScale.Inside,
-                            modifier = Modifier.size(logoSize * 0.8f)
+                            modifier = Modifier.size(logoSize * dimens.logoContentScale)
                         )
                     }
                 }
@@ -153,13 +153,13 @@ fun RegisterScreen(
                     elevation = CardDefaults.cardElevation(cardElevation),
                     colors = CardDefaults.cardColors(containerColor = colors.surface),
                     modifier = Modifier
-                        .fillMaxWidth(0.97f)
+                        .fillMaxWidth(dimens.cardWidthRatio)
                         .wrapContentHeight()
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(all = dimens.spacingSmall / 4), // تقليل الهامش الداخلي للبطاقة ليكون ربع القيمة
+                            .padding(all = dimens.spacingTiny), // تقليل الهامش الداخلي للبطاقة ليكون ربع القيمة
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(marginSmall)
                     ) {
@@ -168,7 +168,7 @@ fun RegisterScreen(
                             color = colors.primary,
                             fontWeight = FontWeight.Bold,
                             fontSize = fontTitle,
-                            modifier = Modifier.padding(bottom = 2.dp),
+                            modifier = Modifier.padding(bottom = dimens.spacingTiny),
                             style = typography.headlineMedium,
                             textAlign = TextAlign.Center
                         )
@@ -264,11 +264,11 @@ fun RegisterScreen(
                     Card(
                         colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
                         shape = RoundedCornerShape(cardCorner),
-                        modifier = Modifier.fillMaxWidth(0.97f).padding(vertical = 2.dp)
+                        modifier = Modifier.fillMaxWidth(dimens.cardWidthRatio).padding(vertical = dimens.errorCardVerticalPadding)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(marginSmall)) {
                             Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(iconSizeSmall))
-                            Spacer(Modifier.width(4.dp))
+                            Spacer(Modifier.width(dimens.iconSpacing))
                             Text(
                                 text = localError ?: "",
                                 color = colors.error,
@@ -282,11 +282,11 @@ fun RegisterScreen(
                     Card(
                         colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
                         shape = RoundedCornerShape(cardCorner),
-                        modifier = Modifier.fillMaxWidth(0.97f).padding(vertical = 2.dp)
+                        modifier = Modifier.fillMaxWidth(dimens.cardWidthRatio).padding(vertical = dimens.errorCardVerticalPadding)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(marginSmall)) {
                             Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(iconSizeSmall))
-                            Spacer(Modifier.width(4.dp))
+                            Spacer(Modifier.width(dimens.iconSpacing))
                             Text(
                                 text = translateErrorMessage(errorMessage),
                                 color = colors.error,
@@ -318,19 +318,19 @@ fun RegisterScreen(
                     },
                     enabled = !isLoading,
                     modifier = Modifier
-                        .fillMaxWidth(0.97f)
+                        .fillMaxWidth(dimens.cardWidthRatio)
                         .padding(top = marginMedium)
                         .height(buttonHeight)
                         .graphicsLayer {
-                            scaleX = if (registerPressed) 0.97f else 1f
-                            scaleY = if (registerPressed) 0.97f else 1f
+                            scaleX = if (registerPressed) dimens.cardWidthRatio else 1f
+                            scaleY = if (registerPressed) dimens.cardWidthRatio else 1f
                         },
                     shape = RoundedCornerShape(cardCorner),
                     colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(color = colors.onPrimary, modifier = Modifier.size(fontButton.value.dp))
-                        Spacer(Modifier.width(8.dp))
+                        CircularProgressIndicator(color = colors.onPrimary, modifier = Modifier.size(dimens.iconSizeSmall.dp))
+                        Spacer(Modifier.width(dimens.buttonSpacing))
                         Text("جاري التسجيل...", color = colors.onPrimary, fontSize = fontButton, style = typography.bodyLarge)
                     } else {
                         Text("تسجيل", color = colors.onPrimary, fontSize = fontButton, style = typography.bodyLarge)
@@ -339,7 +339,7 @@ fun RegisterScreen(
                 OutlinedButton(
                     onClick = onBackToLogin,
                     modifier = Modifier
-                        .fillMaxWidth(0.97f)
+                        .fillMaxWidth(dimens.cardWidthRatio)
                         .padding(top = marginSmall)
                         .height(buttonHeight),
                     shape = RoundedCornerShape(cardCorner),
@@ -347,7 +347,7 @@ fun RegisterScreen(
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.primary)
                 ) {
                     Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(iconSizeSmall), tint = colors.primary)
-                    Spacer(Modifier.width(4.dp))
+                    Spacer(Modifier.width(dimens.iconSpacing))
                     Text("العودة لتسجيل الدخول", fontWeight = FontWeight.Bold, fontSize = fontButton, style = typography.bodyLarge)
                 }
                 Spacer(modifier = Modifier.height(marginSmall))

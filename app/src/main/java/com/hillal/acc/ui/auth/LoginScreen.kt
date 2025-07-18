@@ -116,7 +116,7 @@ fun LoginScreen(
                 // الشعار مع أنيميشن دخول خفيف (ScaleIn + FadeIn)
                 androidx.compose.animation.AnimatedVisibility(
                     visible = true,
-                    enter = scaleIn(initialScale = 0.7f, animationSpec = tween(600)) + fadeIn(animationSpec = tween(600))
+                    enter = scaleIn(initialScale = dimens.logoScaleIn, animationSpec = tween(600)) + fadeIn(animationSpec = tween(600))
                 ) {
                     Box(
                         modifier = Modifier
@@ -129,7 +129,7 @@ fun LoginScreen(
                             painter = painterResource(id = R.mipmap.ic_launcher),
                             contentDescription = "Logo",
                             contentScale = ContentScale.Inside,
-                            modifier = Modifier.size(logoSize * 0.8f)
+                            modifier = Modifier.size(logoSize * dimens.logoContentScale)
                         )
                     }
                 }
@@ -140,13 +140,13 @@ fun LoginScreen(
                     elevation = CardDefaults.cardElevation(dimens.cardElevation),
                     colors = CardDefaults.cardColors(containerColor = colors.surface),
                     modifier = Modifier
-                        .fillMaxWidth(0.97f)
+                        .fillMaxWidth(dimens.cardWidthRatio)
                         .wrapContentHeight()
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(all = dimens.spacingSmall / 4), // تقليل الهامش الداخلي للبطاقة
+                            .padding(all = dimens.spacingTiny), // تقليل الهامش الداخلي للبطاقة
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(marginSmall)
                     ) {
@@ -155,7 +155,7 @@ fun LoginScreen(
                             color = colors.primary,
                             fontWeight = FontWeight.Bold,
                             fontSize = fontTitle,
-                            modifier = Modifier.padding(bottom = 2.dp),
+                            modifier = Modifier.padding(bottom = dimens.spacingTiny),
                             style = typography.headlineMedium,
                             textAlign = TextAlign.Center
                         )
@@ -222,7 +222,7 @@ fun LoginScreen(
                         ) {
                             TextButton(onClick = onForgotPasswordClick) {
                                 Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(dimens.iconSizeSmall), tint = colors.primary)
-                                Spacer(Modifier.width(2.dp))
+                                Spacer(Modifier.width(dimens.iconSpacing))
                                 Text(
                                     text = "نسيت كلمة السر؟",
                                     color = colors.primary,
@@ -238,11 +238,11 @@ fun LoginScreen(
                                 shape = RoundedCornerShape(dimens.cardCorner),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 2.dp)
+                                    .padding(vertical = dimens.errorCardVerticalPadding)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(dimens.spacingSmall)) {
                                     Icon(Icons.Default.Error, contentDescription = null, tint = colors.error, modifier = Modifier.size(dimens.iconSizeSmall))
-                                    Spacer(Modifier.width(4.dp))
+                                    Spacer(Modifier.width(dimens.iconSpacing))
                                     Text(
                                         text = errorMessage ?: "",
                                         color = colors.error,
@@ -267,7 +267,7 @@ fun LoginScreen(
                         ) {
                             if (isLoading) {
                                 CircularProgressIndicator(color = colors.onPrimary, modifier = Modifier.size(dimens.iconSizeSmall))
-                                Spacer(Modifier.width(8.dp))
+                                Spacer(Modifier.width(dimens.buttonSpacing))
                                 Text("جاري تسجيل الدخول...", color = colors.onPrimary)
                             } else {
                                 Text("دخول", color = colors.onPrimary)
@@ -283,7 +283,7 @@ fun LoginScreen(
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.primary)
                         ) {
                             Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(dimens.iconSizeSmall), tint = colors.primary)
-                            Spacer(Modifier.width(4.dp))
+                            Spacer(Modifier.width(dimens.iconSpacing))
                             Text("إنشاء حساب جديد", fontWeight = FontWeight.Bold, fontSize = fontButton, style = typography.bodyLarge)
                         }
                     }
@@ -301,7 +301,7 @@ fun LoginScreen(
                         modifier = Modifier.weight(1f)
                     ) {
                         Icon(Icons.Default.Info, contentDescription = null, tint = colors.primary, modifier = Modifier.size(dimens.iconSizeSmall))
-                        Spacer(Modifier.width(4.dp))
+                        Spacer(Modifier.width(dimens.iconSpacing))
                         Text("سياسة الخصوصية", fontSize = dimens.fontSmall, color = colors.primary, fontWeight = FontWeight.Medium)
                     }
                     OutlinedButton(
@@ -309,7 +309,7 @@ fun LoginScreen(
                         modifier = Modifier.weight(1f)
                     ) {
                         Icon(Icons.Default.Phone, contentDescription = null, tint = colors.primary, modifier = Modifier.size(dimens.iconSizeSmall))
-                        Spacer(Modifier.width(4.dp))
+                        Spacer(Modifier.width(dimens.iconSpacing))
                         Text("تواصل معنا", fontSize = dimens.fontSmall, color = colors.primary, fontWeight = FontWeight.Medium)
                     }
                     OutlinedButton(
@@ -317,7 +317,7 @@ fun LoginScreen(
                         modifier = Modifier.weight(1f)
                     ) {
                         Icon(Icons.Default.Info, contentDescription = null, tint = colors.primary, modifier = Modifier.size(dimens.iconSizeSmall))
-                        Spacer(Modifier.width(4.dp))
+                        Spacer(Modifier.width(dimens.iconSpacing))
                         Text("حول التطبيق", fontSize = dimens.fontSmall, color = colors.primary, fontWeight = FontWeight.Medium)
                     }
                 }
