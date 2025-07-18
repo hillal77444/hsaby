@@ -69,7 +69,14 @@ fun RegisterScreen(
 ) {
     AppTheme {
         val configuration = LocalConfiguration.current
-        val dimens = LocalAppDimensions.current
+        val screenWidth = configuration.screenWidthDp.dp
+        val screenHeight = configuration.screenHeightDp.dp
+        val screenWidthValue = configuration.screenWidthDp.toFloat()
+        val fontField = (screenWidthValue * 0.045f).sp // 4.5% من العرض
+        val textFieldHeight = screenHeight * 0.08f // 8% من الارتفاع
+        val iconSize = screenWidth * 0.065f // 6.5% من العرض
+        val iconPadding = screenWidth * 0.02f // 2% من العرض
+        val cardCorner = screenWidth * 0.04f // 4% من العرض
         val colors = MaterialTheme.colorScheme
         val typography = MaterialTheme.typography
         val scrollState = rememberScrollState()
@@ -90,24 +97,11 @@ fun RegisterScreen(
             }
         }
 
-        val logoSize = dimens.logoSize
-        val cardCorner = dimens.cardCorner
-        val cardPadding = dimens.spacingMedium
-        val fieldHeight = dimens.fieldHeight
-        val buttonHeight = dimens.buttonHeight
-        val fontTitle = typography.headlineMedium.fontSize
-        val fontField = typography.bodyLarge.fontSize
-        val fontButton = typography.bodyLarge.fontSize
-        val fontSmall = dimens.fontSmall
-        val iconSizeSmall = dimens.iconSizeSmall
-        val marginSmall = dimens.spacingSmall
-        val marginMedium = dimens.spacingMedium
-        val marginLarge = dimens.spacingLarge
-        val cardElevation = dimens.cardElevation
-
-        val fontFieldPx = fontField.value
-        val textFieldHeight = maxOf((fontFieldPx * 2.2f).dp, 56.dp)
-        val iconSize = (fontFieldPx * 1.2f).dp
+        val logoSize = LocalAppDimensions.current.logoSize
+        val marginSmall = LocalAppDimensions.current.spacingSmall
+        val marginMedium = LocalAppDimensions.current.spacingMedium
+        val marginLarge = LocalAppDimensions.current.spacingLarge
+        val cardElevation = LocalAppDimensions.current.cardElevation
 
         Box(
             modifier = Modifier
@@ -162,7 +156,7 @@ fun RegisterScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(all = dimens.spacingSmall / 4), // تقليل الهامش الداخلي للبطاقة ليكون ربع القيمة
+                            .padding(all = LocalAppDimensions.current.spacingSmall / 4), // تقليل الهامش الداخلي للبطاقة ليكون ربع القيمة
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(marginSmall)
                     ) {
@@ -170,103 +164,174 @@ fun RegisterScreen(
                             text = "إنشاء حساب جديد",
                             color = colors.primary,
                             fontWeight = FontWeight.Bold,
-                            fontSize = fontTitle,
+                            fontSize = typography.headlineMedium.fontSize,
                             modifier = Modifier.padding(bottom = 2.dp),
                             style = typography.headlineMedium,
                             textAlign = TextAlign.Center
                         )
-                        OutlinedTextField(
+                        // Label يدوي لحقل الاسم
+                        Text(
+                            text = "الاسم",
+                            fontSize = fontField,
+                            color = colors.primary,
+                            modifier = Modifier.align(Alignment.Start)
+                        )
+                        BasicTextField(
                             value = displayName,
                             onValueChange = { displayName = it },
-                            label = { Text("الاسم", fontSize = fontField) },
-                            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(iconSize), tint = colors.primary) },
-                            singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(textFieldHeight),
-                            shape = RoundedCornerShape(cardCorner),
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                containerColor = colors.backgroundVariant,
-                                focusedBorderColor = colors.primary,
-                                unfocusedBorderColor = colors.outline,
-                                cursorColor = colors.primary
-                            ),
-                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2),
-                            contentPadding = PaddingValues(0.dp)
+                                .height(textFieldHeight)
+                                .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
+                                .background(colors.backgroundVariant, RoundedCornerShape(cardCorner)),
+                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2, color = colors.onSurface),
+                            singleLine = true,
+                            decorationBox = { innerTextField ->
+                                Box(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .padding(0.dp)
+                                        .padding(start = iconSize + iconPadding, end = iconPadding),
+                                    contentAlignment = Alignment.CenterStart
+                                ) {
+                                    Icon(
+                                        Icons.Default.Person,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
+                                        tint = colors.primary
+                                    )
+                                    innerTextField()
+                                }
+                            }
                         )
-                        OutlinedTextField(
+                        // Label يدوي لحقل رقم الهاتف
+                        Text(
+                            text = "رقم الهاتف",
+                            fontSize = fontField,
+                            color = colors.primary,
+                            modifier = Modifier.align(Alignment.Start).padding(top = marginSmall)
+                        )
+                        BasicTextField(
                             value = phone,
                             onValueChange = { phone = it },
-                            label = { Text("رقم الهاتف", fontSize = fontField) },
-                            leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, modifier = Modifier.size(iconSize), tint = colors.primary) },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(textFieldHeight),
-                            shape = RoundedCornerShape(cardCorner),
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                containerColor = colors.backgroundVariant,
-                                focusedBorderColor = colors.primary,
-                                unfocusedBorderColor = colors.outline,
-                                cursorColor = colors.primary
-                            ),
-                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2),
-                            contentPadding = PaddingValues(0.dp)
+                                .height(textFieldHeight)
+                                .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
+                                .background(colors.backgroundVariant, RoundedCornerShape(cardCorner)),
+                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2, color = colors.onSurface),
+                            singleLine = true,
+                            decorationBox = { innerTextField ->
+                                Box(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .padding(0.dp)
+                                        .padding(start = iconSize + iconPadding, end = iconPadding),
+                                    contentAlignment = Alignment.CenterStart
+                                ) {
+                                    Icon(
+                                        Icons.Default.Phone,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
+                                        tint = colors.primary
+                                    )
+                                    innerTextField()
+                                }
+                            }
                         )
-                        OutlinedTextField(
+                        // Label يدوي لحقل كلمة السر
+                        Text(
+                            text = "كلمة السر",
+                            fontSize = fontField,
+                            color = colors.primary,
+                            modifier = Modifier.align(Alignment.Start).padding(top = marginSmall)
+                        )
+                        BasicTextField(
                             value = password,
                             onValueChange = { password = it },
-                            label = { Text("كلمة السر", fontSize = fontField) },
-                            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(iconSize), tint = colors.primary) },
-                            singleLine = true,
-                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                            trailingIcon = {
-                                val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                                val desc = if (passwordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر"
-                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                    Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSize), tint = colors.primary)
-                                }
-                            },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(textFieldHeight),
-                            shape = RoundedCornerShape(cardCorner),
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                containerColor = colors.backgroundVariant,
-                                focusedBorderColor = colors.primary,
-                                unfocusedBorderColor = colors.outline,
-                                cursorColor = colors.primary
-                            ),
-                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2),
-                            contentPadding = PaddingValues(0.dp)
+                                .height(textFieldHeight)
+                                .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
+                                .background(colors.backgroundVariant, RoundedCornerShape(cardCorner)),
+                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2, color = colors.onSurface),
+                            singleLine = true,
+                            decorationBox = { innerTextField ->
+                                Box(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .padding(0.dp)
+                                        .padding(start = iconSize + iconPadding, end = iconSize + iconPadding),
+                                    contentAlignment = Alignment.CenterStart
+                                ) {
+                                    Icon(
+                                        Icons.Default.Lock,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
+                                        tint = colors.primary
+                                    )
+                                    innerTextField()
+                                    IconButton(
+                                        onClick = { passwordVisible = !passwordVisible },
+                                        modifier = Modifier.align(Alignment.CenterEnd)
+                                    ) {
+                                        Icon(
+                                            imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                            contentDescription = if (passwordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر",
+                                            modifier = Modifier.size(iconSize),
+                                            tint = colors.primary
+                                        )
+                                    }
+                                }
+                            },
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
                         )
-                        OutlinedTextField(
+                        // Label يدوي لحقل تأكيد كلمة السر
+                        Text(
+                            text = "تأكيد كلمة السر",
+                            fontSize = fontField,
+                            color = colors.primary,
+                            modifier = Modifier.align(Alignment.Start).padding(top = marginSmall)
+                        )
+                        BasicTextField(
                             value = confirmPassword,
                             onValueChange = { confirmPassword = it },
-                            label = { Text("تأكيد كلمة السر", fontSize = fontField) },
-                            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(iconSize), tint = colors.primary) },
-                            singleLine = true,
-                            visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                            trailingIcon = {
-                                val image = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                                val desc = if (confirmPasswordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر"
-                                IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                                    Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSize), tint = colors.primary)
-                                }
-                            },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(textFieldHeight),
-                            shape = RoundedCornerShape(cardCorner),
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                containerColor = colors.backgroundVariant,
-                                focusedBorderColor = colors.primary,
-                                unfocusedBorderColor = colors.outline,
-                                cursorColor = colors.primary
-                            ),
-                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2),
-                            contentPadding = PaddingValues(0.dp)
+                                .height(textFieldHeight)
+                                .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
+                                .background(colors.backgroundVariant, RoundedCornerShape(cardCorner)),
+                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2, color = colors.onSurface),
+                            singleLine = true,
+                            decorationBox = { innerTextField ->
+                                Box(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .padding(0.dp)
+                                        .padding(start = iconSize + iconPadding, end = iconSize + iconPadding),
+                                    contentAlignment = Alignment.CenterStart
+                                ) {
+                                    Icon(
+                                        Icons.Default.Lock,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
+                                        tint = colors.primary
+                                    )
+                                    innerTextField()
+                                    IconButton(
+                                        onClick = { confirmPasswordVisible = !confirmPasswordVisible },
+                                        modifier = Modifier.align(Alignment.CenterEnd)
+                                    ) {
+                                        Icon(
+                                            imageVector = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                            contentDescription = if (confirmPasswordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر",
+                                            modifier = Modifier.size(iconSize),
+                                            tint = colors.primary
+                                        )
+                                    }
+                                }
+                            },
+                            visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation()
                         )
                     }
                 }
@@ -278,12 +343,12 @@ fun RegisterScreen(
                         modifier = Modifier.fillMaxWidth(0.97f).padding(vertical = 2.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(marginSmall)) {
-                            Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(iconSizeSmall))
+                            Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(iconSize.value.dp))
                             Spacer(Modifier.width(4.dp))
                             Text(
                                 text = localError ?: "",
                                 color = colors.error,
-                                fontSize = fontSmall,
+                                fontSize = (screenWidthValue * 0.03f).sp, // 3% من العرض
                                 style = typography.bodyMedium
                             )
                         }
@@ -296,12 +361,12 @@ fun RegisterScreen(
                         modifier = Modifier.fillMaxWidth(0.97f).padding(vertical = 2.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(marginSmall)) {
-                            Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(iconSizeSmall))
+                            Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(iconSize.value.dp))
                             Spacer(Modifier.width(4.dp))
                             Text(
                                 text = translateErrorMessage(errorMessage),
                                 color = colors.error,
-                                fontSize = fontSmall,
+                                fontSize = (screenWidthValue * 0.03f).sp, // 3% من العرض
                                 style = typography.bodyMedium
                             )
                         }
@@ -331,7 +396,7 @@ fun RegisterScreen(
                     modifier = Modifier
                         .fillMaxWidth(0.97f)
                         .padding(top = marginMedium)
-                        .height(buttonHeight)
+                        .height(LocalAppDimensions.current.buttonHeight)
                         .graphicsLayer {
                             scaleX = if (registerPressed) 0.97f else 1f
                             scaleY = if (registerPressed) 0.97f else 1f
@@ -340,11 +405,11 @@ fun RegisterScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(color = colors.onPrimary, modifier = Modifier.size(fontButton.value.dp))
+                        CircularProgressIndicator(color = colors.onPrimary, modifier = Modifier.size((fontField * 1.2f).dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("جاري التسجيل...", color = colors.onPrimary, fontSize = fontButton, style = typography.bodyLarge)
+                        Text("جاري التسجيل...", color = colors.onPrimary, fontSize = (fontField * 1.2f).sp, style = typography.bodyLarge)
                     } else {
-                        Text("تسجيل", color = colors.onPrimary, fontSize = fontButton, style = typography.bodyLarge)
+                        Text("تسجيل", color = colors.onPrimary, fontSize = (fontField * 1.2f).sp, style = typography.bodyLarge)
                     }
                 }
                 OutlinedButton(
@@ -352,14 +417,14 @@ fun RegisterScreen(
                     modifier = Modifier
                         .fillMaxWidth(0.97f)
                         .padding(top = marginSmall)
-                        .height(buttonHeight),
+                        .height(LocalAppDimensions.current.buttonHeight),
                     shape = RoundedCornerShape(cardCorner),
                     border = ButtonDefaults.outlinedButtonBorder,
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.primary)
                 ) {
-                    Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(iconSizeSmall), tint = colors.primary)
+                    Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(iconSize.value.dp), tint = colors.primary)
                     Spacer(Modifier.width(4.dp))
-                    Text("العودة لتسجيل الدخول", fontWeight = FontWeight.Bold, fontSize = fontButton, style = typography.bodyLarge)
+                    Text("العودة لتسجيل الدخول", fontWeight = FontWeight.Bold, fontSize = (fontField * 1.2f).sp, style = typography.bodyLarge)
                 }
                 Spacer(modifier = Modifier.height(marginSmall))
             }

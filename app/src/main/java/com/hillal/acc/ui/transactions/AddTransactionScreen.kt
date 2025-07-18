@@ -464,6 +464,7 @@ fun AddTransactionScreen(
             // تعديل ارتفاع الحقل وحجم الأيقونة
             val textFieldHeight = maxOf((fontSizeLarge.value * 2.2f).dp, 56.dp)
             val iconSize = (fontSizeLarge.value * 1.2f).dp
+            val iconPadding = base * 0.02f
             val radioButtonSize = base * 0.045f
             val verticalScrollState = rememberScrollState()
             Column(
@@ -584,21 +585,45 @@ fun AddTransactionScreen(
                         // Row: مبلغ وتاريخ
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(rowSpacing)) {
                             Column(modifier = Modifier.weight(1f)) {
-                                OutlinedTextField(
+                                // Label يدوي لحقل المبلغ
+                                Text(
+                                    text = "المبلغ",
+                                    fontSize = fontSizeMedium,
+                                    color = colors.primary,
+                                    modifier = Modifier.align(Alignment.Start)
+                                )
+                                BasicTextField(
                                     value = amount,
                                     onValueChange = { newValue ->
                                         if (isValidAmount(newValue)) {
-                                            amount = newValue // بدون تنسيق فواصل
-                                            lastAmountUpdate = amount // تحديث للكتابة التلقائية
+                                            amount = newValue
+                                            lastAmountUpdate = amount
                                         }
                                     },
-                                    label = { Text("المبلغ", fontSize = fontSizeMedium) },
-                                    modifier = Modifier.fillMaxWidth().height(textFieldHeight),
-                                    leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null, modifier = Modifier.size(iconSize)) },
-                                    textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(textFieldHeight)
+                                        .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
+                                        .background(colors.surface, RoundedCornerShape(cardCorner)),
+                                    textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2, color = colors.onSurface),
                                     singleLine = true,
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                    contentPadding = PaddingValues(0.dp)
+                                    decorationBox = { innerTextField ->
+                                        Box(
+                                            Modifier
+                                                .fillMaxSize()
+                                                .padding(0.dp)
+                                                .padding(start = iconSize + iconPadding, end = iconPadding),
+                                            contentAlignment = Alignment.CenterStart
+                                        ) {
+                                            Icon(
+                                                Icons.Default.AttachMoney,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
+                                                tint = colors.primary
+                                            )
+                                            innerTextField()
+                                        }
+                                    }
                                 )
                                 
                                 // عرض المبلغ بالكلمات العربية
@@ -619,23 +644,42 @@ fun AddTransactionScreen(
                                     }
                                 }
                             }
-                            OutlinedTextField(
+                            // Label يدوي لحقل التاريخ
+                            Text(
+                                text = "التاريخ",
+                                fontSize = fontSizeMedium,
+                                color = colors.primary,
+                                modifier = Modifier.align(Alignment.Start).padding(top = spacingSmall)
+                            )
+                            BasicTextField(
                                 value = dateFormat.format(Date(date)),
                                 onValueChange = {},
-                                label = { Text("التاريخ", fontSize = fontSizeMedium) },
-                                modifier = Modifier.weight(1f).clickable { showDatePicker = true }.height(textFieldHeight),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(textFieldHeight)
+                                    .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
+                                    .background(colors.surface, RoundedCornerShape(cardCorner)),
+                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2, color = colors.onSurface),
+                                singleLine = true,
                                 enabled = false,
                                 readOnly = true,
-                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
-                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2),
-                                colors = TextFieldDefaults.outlinedTextFieldColors(
-                                    containerColor = colors.surface,
-                                    focusedBorderColor = colors.primary,
-                                    unfocusedBorderColor = colors.onSurface,
-                                    disabledBorderColor = colors.surfaceVariant,
-                                    disabledTextColor = colors.onSurface
-                                ),
-                                contentPadding = PaddingValues(0.dp)
+                                decorationBox = { innerTextField ->
+                                    Box(
+                                        Modifier
+                                            .fillMaxSize()
+                                            .padding(0.dp)
+                                            .padding(start = iconSize + iconPadding, end = iconPadding),
+                                        contentAlignment = Alignment.CenterStart
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Notes,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
+                                            tint = colors.primary
+                                        )
+                                        innerTextField()
+                                    }
+                                }
                             )
                         }
                         Spacer(modifier = Modifier.height(spacingSmall))
@@ -647,7 +691,14 @@ fun AddTransactionScreen(
                             expanded = expandedSuggestions,
                             onExpandedChange = { /* لا تفعل شيء هنا */ }
                         ) {
-                            OutlinedTextField(
+                            // Label يدوي لحقل البيان
+                            Text(
+                                text = "البيان",
+                                fontSize = fontSizeMedium,
+                                color = colors.primary,
+                                modifier = Modifier.align(Alignment.Start).padding(top = spacingSmall)
+                            )
+                            BasicTextField(
                                 value = descriptionState,
                                 onValueChange = {
                                     descriptionState = it
@@ -655,13 +706,13 @@ fun AddTransactionScreen(
                                     showAllSuggestions = false
                                     expandedSuggestions = it.text.isNotEmpty() && suggestions.any { s -> s.startsWith(it.text) && s != it.text }
                                 },
-                                label = { Text("البيان", fontSize = fontSizeMedium) },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .menuAnchor()
-                                    .height(textFieldHeight),
-                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
-                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2),
+                                    .height(textFieldHeight)
+                                    .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
+                                    .background(colors.surface, RoundedCornerShape(cardCorner)),
+                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2, color = colors.onSurface),
                                 trailingIcon = {
                                     if (suggestions.isNotEmpty()) {
                                         IconButton(onClick = {
@@ -672,7 +723,23 @@ fun AddTransactionScreen(
                                         }
                                     }
                                 },
-                                contentPadding = PaddingValues(0.dp)
+                                decorationBox = { innerTextField ->
+                                    Box(
+                                        Modifier
+                                            .fillMaxSize()
+                                            .padding(0.dp)
+                                            .padding(start = iconSize + iconPadding, end = iconPadding),
+                                        contentAlignment = Alignment.CenterStart
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Notes,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
+                                            tint = colors.primary
+                                        )
+                                        innerTextField()
+                                    }
+                                }
                             )
                             ExposedDropdownMenu(
                                 expanded = expandedSuggestions,
@@ -734,14 +801,40 @@ fun AddTransactionScreen(
                         // Notes (hidden by default)
                         val showNotes = false
                         if (showNotes) {
-                            OutlinedTextField(
+                            // Label يدوي لحقل الملاحظات (إذا كان ظاهر)
+                            Text(
+                                text = "ملاحظات",
+                                fontSize = fontSizeMedium,
+                                color = colors.primary,
+                                modifier = Modifier.align(Alignment.Start).padding(top = spacingSmall)
+                            )
+                            BasicTextField(
                                 value = notes,
                                 onValueChange = { notes = it },
-                                label = { Text("ملاحظات", fontSize = fontSizeMedium) },
-                                modifier = Modifier.fillMaxWidth().height(textFieldHeight),
-                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
-                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2),
-                                contentPadding = PaddingValues(0.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(textFieldHeight)
+                                    .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
+                                    .background(colors.surface, RoundedCornerShape(cardCorner)),
+                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2, color = colors.onSurface),
+                                singleLine = true,
+                                decorationBox = { innerTextField ->
+                                    Box(
+                                        Modifier
+                                            .fillMaxSize()
+                                            .padding(0.dp)
+                                            .padding(start = iconSize + iconPadding, end = iconPadding),
+                                        contentAlignment = Alignment.CenterStart
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Notes,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
+                                            tint = colors.primary
+                                        )
+                                        innerTextField()
+                                    }
+                                }
                             )
                             Spacer(modifier = Modifier.height(spacingSmall))
                         }
