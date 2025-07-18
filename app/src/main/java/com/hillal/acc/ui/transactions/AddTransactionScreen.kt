@@ -772,7 +772,7 @@ fun AddTransactionScreen(
                     ) {
                         Icon(Icons.Default.ArrowUpward, contentDescription = null, modifier = Modifier.size(iconSize))
                         Spacer(Modifier.width(spacingSmall))
-                        Text("عليه", fontSize = fontSizeLarge)
+                        Text("عليه", fontSize = fontSizeSmall)
                     }
                     Button(
                         onClick = { navController.navigateUp() },
