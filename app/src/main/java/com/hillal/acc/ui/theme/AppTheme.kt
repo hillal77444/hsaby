@@ -93,16 +93,16 @@ data class AppDimensions(
     val spacingLarge: Dp,
     val cardCorner: Dp,
     val iconSize: Dp,
-    val buttonHeight: Dp = 48.dp,
-    val buttonCorner: Dp = 16.dp,
-    val successIconSize: Dp = 48.dp,
+    val buttonHeight: Dp = 42.dp,
+    val buttonCorner: Dp = 14.dp,
+    val successIconSize: Dp = 44.dp,
     val whatsappIconSize: Dp = 32.dp,
-    val smsIconSize: Dp = 28.dp,
+    val smsIconSize: Dp = 22.dp,
     val fieldHorizontalPadding: Dp = 2.dp, // جديد
     val cardHeight: Dp = 120.dp, // جديد
-    val bodyFont: TextUnit = 14.sp, // جديد
-    val statFont: TextUnit = 18.sp, // جديد
-    val statLabelFont: TextUnit = 13.sp, // جديد
+    val bodyFont: TextUnit = 13.sp, // جديد
+    val statFont: TextUnit = 15.sp, // جديد
+    val statLabelFont: TextUnit = 10.sp, // جديد
     // --- إضافات جمالية ---
     val logoSize: Dp,           // حجم الشعار العلوي
     val fieldHeight: Dp,        // ارتفاع حقول الإدخال
@@ -150,7 +150,7 @@ fun calculateAppDimensions(): AppDimensions {
         fieldHeight = screenHeight * 0.081f, // ارتفاع حقل الإدخال متجاوب
         cardElevation = screenWidth * 0.012f, // ظل البطاقة متجاوب (مثلاً 4-8dp)
         iconSizeSmall = screenWidth * 0.042f, // أيقونة صغيرة (مثلاً 14-18dp)
-        fontSmall = (screenWidth.value * 0.029f).sp // خط صغير (مثلاً 11-13sp)
+        fontSmall = (screenWidth.value * 0.025f).sp // خط صغير (مثلاً 11-13sp)
     )
 }
 
