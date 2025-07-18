@@ -637,7 +637,7 @@ fun AddTransactionScreen(
                                 text = "التاريخ",
                                 fontSize = fontSizeMedium,
                                 color = colors.primary,
-                                modifier = Modifier.align(Alignment.Start).padding(top = spacingSmall)
+                                modifier = Modifier.padding(top = spacingSmall)
                             )
                             BasicTextField(
                                 value = dateFormat.format(Date(date)),
@@ -687,12 +687,12 @@ fun AddTransactionScreen(
                                 modifier = Modifier.align(Alignment.Start).padding(top = spacingSmall)
                             )
                             BasicTextField(
-                                value = descriptionState,
-                                onValueChange = { it: TextFieldValue ->
-                                    descriptionState = it
-                                    description = it.text
+                                value = descriptionState.text,
+                                onValueChange = { newText: String ->
+                                    descriptionState = TextFieldValue(newText)
+                                    description = newText
                                     showAllSuggestions = false
-                                    expandedSuggestions = it.text.isNotEmpty() && suggestions.any { s -> s.startsWith(it.text) && s != it.text }
+                                    expandedSuggestions = newText.isNotEmpty() && suggestions.any { s -> s.startsWith(newText) && s != newText }
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -742,7 +742,7 @@ fun AddTransactionScreen(
                                     suggestions.filter { s -> s.startsWith(descriptionState.text) && s != descriptionState.text }.take(10)
                                 else
                                     emptyList()
-                                filtered.forEach { suggestion ->
+                                filtered.forEach { suggestion: String ->
                                     DropdownMenuItem(
                                         text = { Text(suggestion, fontSize = fontSizeMedium) },
                                         onClick = {
