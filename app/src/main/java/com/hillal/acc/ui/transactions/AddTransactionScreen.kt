@@ -597,7 +597,8 @@ fun AddTransactionScreen(
                                     leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null, modifier = Modifier.size(iconSize)) },
                                     textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2),
                                     singleLine = true,
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    contentPadding = PaddingValues(0.dp)
                                 )
                                 
                                 // عرض المبلغ بالكلمات العربية
@@ -633,7 +634,8 @@ fun AddTransactionScreen(
                                     unfocusedBorderColor = colors.onSurface,
                                     disabledBorderColor = colors.surfaceVariant,
                                     disabledTextColor = colors.onSurface
-                                )
+                                ),
+                                contentPadding = PaddingValues(0.dp)
                             )
                         }
                         Spacer(modifier = Modifier.height(spacingSmall))
@@ -669,7 +671,8 @@ fun AddTransactionScreen(
                                             Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(menuIconSize))
                                         }
                                     }
-                                }
+                                },
+                                contentPadding = PaddingValues(0.dp)
                             )
                             ExposedDropdownMenu(
                                 expanded = expandedSuggestions,
@@ -737,7 +740,8 @@ fun AddTransactionScreen(
                                 label = { Text("ملاحظات", fontSize = fontSizeMedium) },
                                 modifier = Modifier.fillMaxWidth().height(textFieldHeight),
                                 leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
-                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2)
+                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2),
+                                contentPadding = PaddingValues(0.dp)
                             )
                             Spacer(modifier = Modifier.height(spacingSmall))
                         }

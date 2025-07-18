@@ -191,7 +191,8 @@ fun RegisterScreen(
                                 unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
-                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2)
+                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2),
+                            contentPadding = PaddingValues(0.dp)
                         )
                         OutlinedTextField(
                             value = phone,
@@ -210,7 +211,8 @@ fun RegisterScreen(
                                 unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
-                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2)
+                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2),
+                            contentPadding = PaddingValues(0.dp)
                         )
                         OutlinedTextField(
                             value = password,
@@ -236,7 +238,8 @@ fun RegisterScreen(
                                 unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
-                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2)
+                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2),
+                            contentPadding = PaddingValues(0.dp)
                         )
                         OutlinedTextField(
                             value = confirmPassword,
@@ -262,7 +265,8 @@ fun RegisterScreen(
                                 unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
-                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2)
+                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2),
+                            contentPadding = PaddingValues(0.dp)
                         )
                     }
                 }
