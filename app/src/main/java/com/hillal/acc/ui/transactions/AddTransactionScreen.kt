@@ -447,9 +447,9 @@ fun AddTransactionScreen(
             val buttonHeight = maxOf((maxHeight * 0.06f).coerceAtLeast(44.dp), 44.dp)
             val cardMaxHeight = (maxHeight * 0.18f).coerceAtMost(160.dp)
             val iconSize = base * 0.07f
-            val fontSizeLarge = maxOf((base.value * 0.045f), 18f).sp
-            val fontSizeMedium = maxOf((base.value * 0.038f), 16f).sp
-            val fontSizeSmall = maxOf((base.value * 0.027f), 13f).sp
+            val fontSizeLarge = maxOf((base.value * 0.055f), 20f).sp
+            val fontSizeMedium = maxOf((base.value * 0.045f), 18f).sp
+            val fontSizeSmall = maxOf((base.value * 0.034f), 14f).sp
             val smsIconSize = base * 0.07f
             val dialogCorner = base * 0.025f
             val dialogPadding = base * 0.045f
@@ -461,7 +461,7 @@ fun AddTransactionScreen(
             val cardElevationSmall = base * 0.004f
             val rowSpacing = base * 0.018f
             val menuIconSize = base * 0.055f
-            val textFieldHeight = maxOf((maxHeight * 0.07f).coerceAtLeast(52.dp), 52.dp)
+            val textFieldHeight = maxOf((maxHeight * 0.09f).coerceAtLeast(56.dp), 54.dp)
             val radioButtonSize = base * 0.045f
             val verticalScrollState = rememberScrollState()
             Column(
