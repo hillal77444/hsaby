@@ -1134,7 +1134,7 @@ fun AccountPickerBottomSheetCompose(
                 )
                 Spacer(Modifier.height(dimens.spacingSmall))
                 Divider()
-                LazyColumn(Modifier.heightIn(max = maxHeight * 0.5f)) {
+                LazyColumn(Modifier.heightIn(max = dimens.dialogMaxHeight)) {
                     items(filteredAccounts) { account ->
                         Card(
                             modifier = Modifier
