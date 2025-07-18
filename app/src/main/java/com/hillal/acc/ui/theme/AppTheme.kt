@@ -97,7 +97,7 @@ data class AppDimensions(
     val buttonCorner: Dp = 14.dp,
     val successIconSize: Dp = 44.dp,
     val whatsappIconSize: Dp = 32.dp,
-    val smsIconSize: Dp = 22.dp,
+    val smsIconSize: Dp = 24.dp, // يجب أن يكون معرف مرة واحدة فقط
     val fieldHorizontalPadding: Dp = 2.dp, // جديد
     val cardHeight: Dp = 120.dp, // جديد
     val bodyFont: TextUnit = 13.sp, // جديد
@@ -126,7 +126,8 @@ data class AppDimensions(
     val dialogPadding: Dp = 24.dp, // جديد
     val dialogIconSize: Dp = 48.dp, // جديد
     val dividerPadding: Dp = 8.dp, // جديد
-    val minDialogHeight: Dp = 120.dp // جديد
+    val minDialogHeight: Dp = 120.dp, // جديد
+    val radioButtonSize: Dp = 24.dp // جديد
 )
 
 // ألوان جمالية إضافية (يمكن استخدامها في الخلفيات أو التدرجات أو العناصر الثانوية)
@@ -158,7 +159,7 @@ fun calculateAppDimensions(): AppDimensions {
         buttonCorner = cardCorner,
         successIconSize = screenWidth * 0.13f,    // 13% من العرض
         whatsappIconSize = screenWidth * 0.09f,   // 9% من العرض
-        smsIconSize = screenWidth * 0.08f,        // 8% من العرض
+        smsIconSize = base * 0.07f,
         fieldHorizontalPadding = screenWidth * 0.006f, // 0.6% من العرض
         cardHeight = screenHeight * 0.15f, // 15% من الارتفاع
         bodyFont = (screenWidth.value * 0.045f).sp, // ديناميكي
@@ -187,7 +188,8 @@ fun calculateAppDimensions(): AppDimensions {
         dialogPadding = base * 0.045f,
         dialogIconSize = base * 0.11f,
         dividerPadding = base * 0.015f,
-        minDialogHeight = (screenHeight * 0.22f).coerceAtMost(180.dp)
+        minDialogHeight = (screenHeight * 0.22f).coerceAtMost(180.dp),
+        radioButtonSize = base * 0.045f
     )
 }
 
