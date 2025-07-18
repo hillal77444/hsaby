@@ -82,13 +82,13 @@ fun LoginScreen(
         val logoSize = dimens.logoSize
         val cardCorner = dimens.cardCorner
         val cardPadding = dimens.spacingMedium
-        val fieldHeight = dimens.fieldHeight
-        val buttonHeight = dimens.buttonHeight
         val fontTitle = typography.headlineMedium.fontSize
         val fontField = typography.bodyLarge.fontSize
         val fontButton = typography.bodyLarge.fontSize
         val fontSmall = typography.bodyMedium.fontSize
-        val iconSize = dimens.iconSize
+        val fontFieldPx = fontField.value
+        val textFieldHeight = maxOf((fontFieldPx * 2.2f).dp, 56.dp)
+        val iconSize = (fontFieldPx * 1.2f).dp
         val marginSmall = dimens.spacingSmall
         val marginMedium = dimens.spacingMedium
         val marginLarge = dimens.spacingLarge
@@ -172,10 +172,10 @@ fun LoginScreen(
                                 )
                             },
                             singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), // يقبل أرقام فقط
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(fieldHeight),
+                                .height(textFieldHeight),
                             shape = RoundedCornerShape(dimens.cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.background,
@@ -183,6 +183,7 @@ fun LoginScreen(
                                 unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
+                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2)
                         )
                         OutlinedTextField(
                             value = password,
@@ -207,7 +208,7 @@ fun LoginScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(fieldHeight),
+                                .height(textFieldHeight),
                             shape = RoundedCornerShape(dimens.cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.background,
@@ -215,6 +216,7 @@ fun LoginScreen(
                                 unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
+                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2)
                         )
                         Row(
                             modifier = Modifier.fillMaxWidth(),

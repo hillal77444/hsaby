@@ -106,6 +106,10 @@ fun RegisterScreen(
         val marginLarge = dimens.spacingLarge
         val cardElevation = dimens.cardElevation
 
+        val fontFieldPx = fontField.value
+        val textFieldHeight = maxOf((fontFieldPx * 2.2f).dp, 56.dp)
+        val iconSize = (fontFieldPx * 1.2f).dp
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -180,7 +184,7 @@ fun RegisterScreen(
                             singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(fieldHeight),
+                                .height(textFieldHeight),
                             shape = RoundedCornerShape(cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.backgroundVariant,
@@ -188,6 +192,7 @@ fun RegisterScreen(
                                 unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
+                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2)
                         )
                         OutlinedTextField(
                             value = phone,
@@ -195,10 +200,10 @@ fun RegisterScreen(
                             label = { Text("رقم الهاتف", fontSize = fontField) },
                             leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, modifier = Modifier.size(iconSize), tint = colors.primary) },
                             singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), // يقبل أرقام فقط
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(fieldHeight),
+                                .height(textFieldHeight),
                             shape = RoundedCornerShape(cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.backgroundVariant,
@@ -206,6 +211,7 @@ fun RegisterScreen(
                                 unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
+                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2)
                         )
                         OutlinedTextField(
                             value = password,
@@ -218,12 +224,12 @@ fun RegisterScreen(
                                 val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                                 val desc = if (passwordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر"
                                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                    Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSizeSmall), tint = colors.primary)
+                                    Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSize), tint = colors.primary)
                                 }
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(fieldHeight),
+                                .height(textFieldHeight),
                             shape = RoundedCornerShape(cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.backgroundVariant,
@@ -231,6 +237,7 @@ fun RegisterScreen(
                                 unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
+                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2)
                         )
                         OutlinedTextField(
                             value = confirmPassword,
@@ -243,12 +250,12 @@ fun RegisterScreen(
                                 val image = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                                 val desc = if (confirmPasswordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر"
                                 IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                                    Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSizeSmall), tint = colors.primary)
+                                    Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSize), tint = colors.primary)
                                 }
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(fieldHeight),
+                                .height(textFieldHeight),
                             shape = RoundedCornerShape(cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.backgroundVariant,
@@ -256,6 +263,7 @@ fun RegisterScreen(
                                 unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
+                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2)
                         )
                     }
                 }

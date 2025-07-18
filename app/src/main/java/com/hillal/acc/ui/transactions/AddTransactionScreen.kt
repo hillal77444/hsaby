@@ -447,7 +447,6 @@ fun AddTransactionScreen(
             val buttonCorner = cardCorner
             val buttonHeight = maxOf((maxHeight * 0.06f).coerceAtLeast(44.dp), 44.dp)
             val cardMaxHeight = (maxHeight * 0.18f).coerceAtMost(160.dp)
-            val iconSize = base * 0.07f
             val fontSizeLarge = maxOf((base.value * 0.040f), 18f).sp
             val fontSizeMedium = maxOf((base.value * 0.038f), 16f).sp
             val fontSizeSmall = maxOf((base.value * 0.028f), 13f).sp
@@ -462,7 +461,9 @@ fun AddTransactionScreen(
             val cardElevationSmall = base * 0.004f
             val rowSpacing = base * 0.018f
             val menuIconSize = base * 0.055f
-            val textFieldHeight = maxOf((maxHeight * 0.09f).coerceAtLeast(56.dp), 54.dp)
+            // تعديل ارتفاع الحقل وحجم الأيقونة
+            val textFieldHeight = maxOf((fontSizeLarge.value * 2.2f).dp, 56.dp)
+            val iconSize = (fontSizeLarge.value * 1.2f).dp
             val radioButtonSize = base * 0.045f
             val verticalScrollState = rememberScrollState()
             Column(
@@ -594,7 +595,7 @@ fun AddTransactionScreen(
                                     label = { Text("المبلغ", fontSize = fontSizeMedium) },
                                     modifier = Modifier.fillMaxWidth().height(textFieldHeight),
                                     leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null, modifier = Modifier.size(iconSize)) },
-                                    textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge),
+                                    textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2),
                                     singleLine = true,
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                                 )
@@ -625,7 +626,7 @@ fun AddTransactionScreen(
                                 enabled = false,
                                 readOnly = true,
                                 leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
-                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge),
+                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2),
                                 colors = TextFieldDefaults.outlinedTextFieldColors(
                                     containerColor = colors.surface,
                                     focusedBorderColor = colors.primary,
@@ -658,7 +659,7 @@ fun AddTransactionScreen(
                                     .menuAnchor()
                                     .height(textFieldHeight),
                                 leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
-                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge),
+                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2),
                                 trailingIcon = {
                                     if (suggestions.isNotEmpty()) {
                                         IconButton(onClick = {
@@ -736,7 +737,7 @@ fun AddTransactionScreen(
                                 label = { Text("ملاحظات", fontSize = fontSizeMedium) },
                                 modifier = Modifier.fillMaxWidth().height(textFieldHeight),
                                 leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
-                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge)
+                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2)
                             )
                             Spacer(modifier = Modifier.height(spacingSmall))
                         }
