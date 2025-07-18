@@ -254,11 +254,7 @@ fun AddTransactionScreen(
         var lastSavedBalance by remember { mutableStateOf(0.0) }
         var suggestions by remember { mutableStateOf(listOf<String>()) }
         var lastAmountUpdate by remember { mutableStateOf("") }
-        var showDatePicker by remember { mutableStateOf(false) }
-        val datePickerState = rememberDatePickerState()
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH())
-        val date = datePickerState.selectedDateMillis ?: System.currentTimeMillis()
-
+        val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH) }
 
 
         // دالة للتحقق من صحة إدخال المبلغ (أرقام إنجليزية وفواصل فقط)
@@ -638,6 +634,7 @@ fun AddTransactionScreen(
                                     disabledTextColor = colors.onSurface
                                 )
                             )
+                            if (showDatePicker) {
                         }
                         Spacer(modifier = Modifier.height(spacingSmall))
                         // Description with suggestions (ExposedDropdownMenuBox)
