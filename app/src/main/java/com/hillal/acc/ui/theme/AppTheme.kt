@@ -149,11 +149,11 @@ fun calculateAppDimensions(): AppDimensions {
     val base = if (screenWidth < screenHeight) screenWidth else screenHeight
     val cardCorner = screenWidth * 0.04f
 
-    val fieldHeight = (screenHeight * 0.08f).coerceIn(48.dp, 64.dp)
-    val bodyFont = ((screenWidth.value * 0.045f).sp).coerceIn(14.sp, 18.sp)
-    val fontSmall = ((screenWidth.value * 0.03f).sp).coerceIn(11.sp, 14.sp)
-    val statFont = ((screenWidth.value * 0.048f).sp).coerceIn(14.sp, 18.sp)
-    val statLabelFont = ((screenWidth.value * 0.035f).sp).coerceIn(10.sp, 13.sp)
+    val fieldHeight = (screenHeight.value * 0.08f).coerceIn(48f, 64f).dp
+    val bodyFont = (screenWidth.value * 0.045f).coerceIn(14f, 18f).sp
+    val fontSmall = (screenWidth.value * 0.03f).coerceIn(11f, 14f).sp
+    val statFont = (screenWidth.value * 0.048f).coerceIn(14f, 18f).sp
+    val statLabelFont = (screenWidth.value * 0.035f).coerceIn(10f, 13f).sp
 
     return AppDimensions(
         spacingSmall = screenWidth * 0.02f,   // 2% من العرض
