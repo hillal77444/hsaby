@@ -1,16 +1,11 @@
 package com.hillal.acc.ui.auth
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
@@ -22,8 +17,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -31,19 +25,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hillal.acc.R
 import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
-import com.hillal.acc.ui.theme.backgroundVariant
-import com.hillal.acc.ui.theme.gradient1
-import com.hillal.acc.ui.theme.gradient2
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.shadow
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
 import androidx.compose.ui.graphics.graphicsLayer
+import com.hillal.acc.ui.theme.gradient1
+import com.hillal.acc.ui.theme.gradient2
+import com.hillal.acc.ui.theme.backgroundVariant
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
 
 // دالة ترجمة رسائل الخطأ القادمة من الخادم
 fun translateErrorMessage(serverMessage: String?): String {
@@ -70,13 +69,7 @@ fun RegisterScreen(
 ) {
     AppTheme {
         val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp.dp
-        val screenWidthValue = configuration.screenWidthDp.toFloat()
-        val fontField = (screenWidthValue * 0.045f).sp // 4.5% من العرض
-        val textFieldHeight = screenWidth * 0.08f // 8% من الارتفاع
-        val iconSize = screenWidth * 0.065f // 6.5% من العرض
-        val iconPadding = screenWidth * 0.02f // 2% من العرض
-        val cardCorner = screenWidth * 0.04f // 4% من العرض
+        val dimens = LocalAppDimensions.current
         val colors = MaterialTheme.colorScheme
         val typography = MaterialTheme.typography
         val scrollState = rememberScrollState()
@@ -97,13 +90,6 @@ fun RegisterScreen(
             }
         }
 
-<<<<<<< HEAD
-        val logoSize = LocalAppDimensions.current.logoSize
-        val marginSmall = LocalAppDimensions.current.spacingSmall
-        val marginMedium = LocalAppDimensions.current.spacingMedium
-        val marginLarge = LocalAppDimensions.current.spacingLarge
-        val cardElevation = LocalAppDimensions.current.cardElevation
-=======
         val logoSize = dimens.logoSize
         val cardCorner = dimens.cardCorner
         val cardPadding = dimens.spacingMedium
@@ -119,7 +105,6 @@ fun RegisterScreen(
         val marginMedium = dimens.spacingMedium
         val marginLarge = dimens.spacingLarge
         val cardElevation = dimens.cardElevation
->>>>>>> parent of 3170ef2a7 (ؤرر)
 
         Box(
             modifier = Modifier
@@ -174,7 +159,7 @@ fun RegisterScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(all = LocalAppDimensions.current.spacingSmall / 4), // تقليل الهامش الداخلي للبطاقة ليكون ربع القيمة
+                            .padding(all = dimens.spacingSmall / 4), // تقليل الهامش الداخلي للبطاقة ليكون ربع القيمة
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(marginSmall)
                     ) {
@@ -182,47 +167,19 @@ fun RegisterScreen(
                             text = "إنشاء حساب جديد",
                             color = colors.primary,
                             fontWeight = FontWeight.Bold,
-                            fontSize = typography.headlineMedium.fontSize,
+                            fontSize = fontTitle,
                             modifier = Modifier.padding(bottom = 2.dp),
                             style = typography.headlineMedium,
                             textAlign = TextAlign.Center
                         )
-                        // Label يدوي لحقل الاسم
-                        Text(
-                            text = "الاسم",
-                            fontSize = fontField,
-                            color = colors.primary,
-                            modifier = Modifier.align(Alignment.Start)
-                        )
-                        BasicTextField(
+                        OutlinedTextField(
                             value = displayName,
                             onValueChange = { displayName = it },
+                            label = { Text("الاسم", fontSize = fontField) },
+                            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(iconSize), tint = colors.primary) },
+                            singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-<<<<<<< HEAD
-                                .height(textFieldHeight)
-                                .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
-                                .background(colors.backgroundVariant, RoundedCornerShape(cardCorner)),
-                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2, color = colors.onSurface),
-                            singleLine = true,
-                            decorationBox = { innerTextField ->
-                                Box(
-                                    Modifier
-                                        .fillMaxSize()
-                                        .padding(0.dp)
-                                        .padding(start = iconSize + iconPadding, end = iconPadding),
-                                    contentAlignment = Alignment.CenterStart
-                                ) {
-                                    Icon(
-                                        Icons.Default.Person,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
-                                        tint = colors.primary
-                                    )
-                                    innerTextField()
-                                }
-                            }
-=======
                                 .height(fieldHeight),
                             shape = RoundedCornerShape(cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -231,44 +188,10 @@ fun RegisterScreen(
                                 unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
->>>>>>> parent of 3170ef2a7 (ؤرر)
                         )
-                        // Label يدوي لحقل رقم الهاتف
-                        Text(
-                            text = "رقم الهاتف",
-                            fontSize = fontField,
-                            color = colors.primary,
-                            modifier = Modifier.align(Alignment.Start).padding(top = marginSmall)
-                        )
-                        BasicTextField(
+                        OutlinedTextField(
                             value = phone,
                             onValueChange = { phone = it },
-<<<<<<< HEAD
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(textFieldHeight)
-                                .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
-                                .background(colors.backgroundVariant, RoundedCornerShape(cardCorner)),
-                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2, color = colors.onSurface),
-                            singleLine = true,
-                            decorationBox = { innerTextField ->
-                                Box(
-                                    Modifier
-                                        .fillMaxSize()
-                                        .padding(0.dp)
-                                        .padding(start = iconSize + iconPadding, end = iconPadding),
-                                    contentAlignment = Alignment.CenterStart
-                                ) {
-                                    Icon(
-                                        Icons.Default.Phone,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
-                                        tint = colors.primary
-                                    )
-                                    innerTextField()
-                                }
-                            }
-=======
                             label = { Text("رقم الهاتف", fontSize = fontField) },
                             leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, modifier = Modifier.size(iconSize), tint = colors.primary) },
                             singleLine = true,
@@ -283,56 +206,10 @@ fun RegisterScreen(
                                 unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
->>>>>>> parent of 3170ef2a7 (ؤرر)
                         )
-                        // Label يدوي لحقل كلمة السر
-                        Text(
-                            text = "كلمة السر",
-                            fontSize = fontField,
-                            color = colors.primary,
-                            modifier = Modifier.align(Alignment.Start).padding(top = marginSmall)
-                        )
-                        BasicTextField(
+                        OutlinedTextField(
                             value = password,
                             onValueChange = { password = it },
-<<<<<<< HEAD
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(textFieldHeight)
-                                .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
-                                .background(colors.backgroundVariant, RoundedCornerShape(cardCorner)),
-                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2, color = colors.onSurface),
-                            singleLine = true,
-                            decorationBox = { innerTextField ->
-                                Box(
-                                    Modifier
-                                        .fillMaxSize()
-                                        .padding(0.dp)
-                                        .padding(start = iconSize + iconPadding, end = iconSize + iconPadding),
-                                    contentAlignment = Alignment.CenterStart
-                                ) {
-                                    Icon(
-                                        Icons.Default.Lock,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
-                                        tint = colors.primary
-                                    )
-                                    innerTextField()
-                                    IconButton(
-                                        onClick = { passwordVisible = !passwordVisible },
-                                        modifier = Modifier.align(Alignment.CenterEnd)
-                                    ) {
-                                        Icon(
-                                            imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                                            contentDescription = if (passwordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر",
-                                            modifier = Modifier.size(iconSize),
-                                            tint = colors.primary
-                                        )
-                                    }
-                                }
-                            },
-                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
-=======
                             label = { Text("كلمة السر", fontSize = fontField) },
                             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(iconSize), tint = colors.primary) },
                             singleLine = true,
@@ -354,56 +231,10 @@ fun RegisterScreen(
                                 unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
->>>>>>> parent of 3170ef2a7 (ؤرر)
                         )
-                        // Label يدوي لحقل تأكيد كلمة السر
-                        Text(
-                            text = "تأكيد كلمة السر",
-                            fontSize = fontField,
-                            color = colors.primary,
-                            modifier = Modifier.align(Alignment.Start).padding(top = marginSmall)
-                        )
-                        BasicTextField(
+                        OutlinedTextField(
                             value = confirmPassword,
                             onValueChange = { confirmPassword = it },
-<<<<<<< HEAD
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(textFieldHeight)
-                                .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
-                                .background(colors.backgroundVariant, RoundedCornerShape(cardCorner)),
-                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2, color = colors.onSurface),
-                            singleLine = true,
-                            decorationBox = { innerTextField ->
-                                Box(
-                                    Modifier
-                                        .fillMaxSize()
-                                        .padding(0.dp)
-                                        .padding(start = iconSize + iconPadding, end = iconSize + iconPadding),
-                                    contentAlignment = Alignment.CenterStart
-                                ) {
-                                    Icon(
-                                        Icons.Default.Lock,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
-                                        tint = colors.primary
-                                    )
-                                    innerTextField()
-                                    IconButton(
-                                        onClick = { confirmPasswordVisible = !confirmPasswordVisible },
-                                        modifier = Modifier.align(Alignment.CenterEnd)
-                                    ) {
-                                        Icon(
-                                            imageVector = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                                            contentDescription = if (confirmPasswordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر",
-                                            modifier = Modifier.size(iconSize),
-                                            tint = colors.primary
-                                        )
-                                    }
-                                }
-                            },
-                            visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation()
-=======
                             label = { Text("تأكيد كلمة السر", fontSize = fontField) },
                             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(iconSize), tint = colors.primary) },
                             singleLine = true,
@@ -425,7 +256,6 @@ fun RegisterScreen(
                                 unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
->>>>>>> parent of 3170ef2a7 (ؤرر)
                         )
                     }
                 }
@@ -434,15 +264,15 @@ fun RegisterScreen(
                     Card(
                         colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
                         shape = RoundedCornerShape(cardCorner),
-                        modifier = Modifier.fillMaxWidth(0.97f).padding(vertical = marginSmall)
+                        modifier = Modifier.fillMaxWidth(0.97f).padding(vertical = 2.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(marginSmall)) {
-                            Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(iconSize.value.dp))
+                            Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(iconSizeSmall))
                             Spacer(Modifier.width(4.dp))
                             Text(
                                 text = localError ?: "",
                                 color = colors.error,
-                                fontSize = (screenWidthValue * 0.03f).sp, // 3% من العرض
+                                fontSize = fontSmall,
                                 style = typography.bodyMedium
                             )
                         }
@@ -452,15 +282,15 @@ fun RegisterScreen(
                     Card(
                         colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
                         shape = RoundedCornerShape(cardCorner),
-                        modifier = Modifier.fillMaxWidth(0.97f).padding(vertical = marginSmall)
+                        modifier = Modifier.fillMaxWidth(0.97f).padding(vertical = 2.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(marginSmall)) {
-                            Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(iconSize.value.dp))
+                            Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(iconSizeSmall))
                             Spacer(Modifier.width(4.dp))
                             Text(
                                 text = translateErrorMessage(errorMessage),
                                 color = colors.error,
-                                fontSize = (screenWidthValue * 0.03f).sp, // 3% من العرض
+                                fontSize = fontSmall,
                                 style = typography.bodyMedium
                             )
                         }
@@ -490,7 +320,7 @@ fun RegisterScreen(
                     modifier = Modifier
                         .fillMaxWidth(0.97f)
                         .padding(top = marginMedium)
-                        .height(LocalAppDimensions.current.buttonHeight)
+                        .height(buttonHeight)
                         .graphicsLayer {
                             scaleX = if (registerPressed) 0.97f else 1f
                             scaleY = if (registerPressed) 0.97f else 1f
@@ -499,11 +329,11 @@ fun RegisterScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(color = colors.onPrimary, modifier = Modifier.size((fontField.value * 1.2f).dp))
+                        CircularProgressIndicator(color = colors.onPrimary, modifier = Modifier.size(fontButton.value.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("جاري التسجيل...", color = colors.onPrimary, fontSize = (fontField.value * 1.2f).sp, style = typography.bodyLarge)
+                        Text("جاري التسجيل...", color = colors.onPrimary, fontSize = fontButton, style = typography.bodyLarge)
                     } else {
-                        Text("تسجيل", color = colors.onPrimary, fontSize = (fontField.value * 1.2f).sp, style = typography.bodyLarge)
+                        Text("تسجيل", color = colors.onPrimary, fontSize = fontButton, style = typography.bodyLarge)
                     }
                 }
                 OutlinedButton(
@@ -511,14 +341,14 @@ fun RegisterScreen(
                     modifier = Modifier
                         .fillMaxWidth(0.97f)
                         .padding(top = marginSmall)
-                        .height(LocalAppDimensions.current.buttonHeight),
+                        .height(buttonHeight),
                     shape = RoundedCornerShape(cardCorner),
                     border = ButtonDefaults.outlinedButtonBorder,
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.primary)
                 ) {
-                    Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(iconSize.value.dp), tint = colors.primary)
+                    Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(iconSizeSmall), tint = colors.primary)
                     Spacer(Modifier.width(4.dp))
-                    Text("العودة لتسجيل الدخول", fontWeight = FontWeight.Bold, fontSize = (fontField.value * 1.2f).sp, style = typography.bodyLarge)
+                    Text("العودة لتسجيل الدخول", fontWeight = FontWeight.Bold, fontSize = fontButton, style = typography.bodyLarge)
                 }
                 Spacer(modifier = Modifier.height(marginSmall))
             }

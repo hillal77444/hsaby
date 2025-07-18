@@ -1,20 +1,13 @@
 package com.hillal.acc.ui.auth
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Visibility
@@ -23,8 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -32,18 +24,28 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hillal.acc.R
 import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
-import com.hillal.acc.ui.theme.backgroundVariant
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.ui.draw.shadow
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
+import androidx.compose.ui.graphics.graphicsLayer
 import com.hillal.acc.ui.theme.gradient1
 import com.hillal.acc.ui.theme.gradient2
-import androidx.compose.ui.ExperimentalComposeUiApi
+import com.hillal.acc.ui.theme.backgroundVariant
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -75,30 +77,18 @@ fun LoginScreen(
             }
         }
 
-        val screenWidth = configuration.screenWidthDp.dp
-        val screenWidthValue = configuration.screenWidthDp.toFloat()
+        val screenWidth = configuration.screenWidthDp.toFloat().dp
         val screenHeight = configuration.screenHeightDp.toFloat().dp
         val logoSize = dimens.logoSize
-<<<<<<< HEAD
-=======
         val cardCorner = dimens.cardCorner
         val cardPadding = dimens.spacingMedium
         val fieldHeight = dimens.fieldHeight
         val buttonHeight = dimens.buttonHeight
->>>>>>> parent of 3170ef2a7 (ؤرر)
         val fontTitle = typography.headlineMedium.fontSize
-        val fontField = (screenWidthValue * 0.045f).sp // 4.5% من العرض
-        val textFieldHeight = screenHeight * 0.08f // 8% من الارتفاع
-        val iconSize = screenWidth * 0.065f // 6.5% من العرض
-        val iconPadding = screenWidth * 0.02f // 2% من العرض
-        val cardCorner = screenWidth * 0.04f // 4% من العرض
+        val fontField = typography.bodyLarge.fontSize
         val fontButton = typography.bodyLarge.fontSize
         val fontSmall = typography.bodyMedium.fontSize
-<<<<<<< HEAD
-        val fontFieldPx = fontField.value
-=======
         val iconSize = dimens.iconSize
->>>>>>> parent of 3170ef2a7 (ؤرر)
         val marginSmall = dimens.spacingSmall
         val marginMedium = dimens.spacingMedium
         val marginLarge = dimens.spacingLarge
@@ -169,42 +159,9 @@ fun LoginScreen(
                             style = typography.headlineMedium,
                             textAlign = TextAlign.Center
                         )
-                        // Label يدوي لحقل رقم التلفون
-                        Text(
-                            text = "رقم التلفون",
-                            fontSize = fontField,
-                            color = colors.primary,
-                            modifier = Modifier.align(Alignment.Start)
-                        )
-                        BasicTextField(
+                        OutlinedTextField(
                             value = phone,
                             onValueChange = { phone = it },
-<<<<<<< HEAD
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(textFieldHeight)
-                                .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
-                                .background(colors.background, RoundedCornerShape(cardCorner)),
-                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2, color = colors.onSurface),
-                            singleLine = true,
-                            decorationBox = { innerTextField ->
-                                Box(
-                                    Modifier
-                                        .fillMaxSize()
-                                        .padding(0.dp)
-                                        .padding(start = iconSize + iconPadding, end = iconPadding),
-                                    contentAlignment = Alignment.CenterStart
-                                ) {
-                                    Icon(
-                                        Icons.Default.Phone,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
-                                        tint = colors.primary
-                                    )
-                                    innerTextField()
-                                }
-                            }
-=======
                             label = { Text("رقم التلفون", fontSize = fontField) },
                             leadingIcon = {
                                 Icon(
@@ -226,56 +183,30 @@ fun LoginScreen(
                                 unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
->>>>>>> parent of 3170ef2a7 (ؤرر)
                         )
-                        // Label يدوي لحقل كلمة السر
-                        Text(
-                            text = "كلمة السر",
-                            fontSize = fontField,
-                            color = colors.primary,
-                            modifier = Modifier.align(Alignment.Start).padding(top = marginSmall)
-                        )
-                        BasicTextField(
+                        OutlinedTextField(
                             value = password,
                             onValueChange = { password = it },
-                            modifier = Modifier
-                                .fillMaxWidth()
-<<<<<<< HEAD
-                                .height(textFieldHeight)
-                                .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
-                                .background(colors.background, RoundedCornerShape(cardCorner)),
-                            textStyle = typography.bodyLarge.copy(fontSize = fontField, lineHeight = fontField * 1.2, color = colors.onSurface),
+                            label = { Text("كلمة السر", fontSize = fontField) },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Lock,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(iconSize),
+                                    tint = colors.primary
+                                )
+                            },
                             singleLine = true,
-                            decorationBox = { innerTextField ->
-                                Box(
-                                    Modifier
-                                        .fillMaxSize()
-                                        .padding(0.dp)
-                                        .padding(start = iconSize + iconPadding, end = iconSize + iconPadding),
-                                    contentAlignment = Alignment.CenterStart
-                                ) {
-                                    Icon(
-                                        Icons.Default.Lock,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
-                                        tint = colors.primary
-                                    )
-                                    innerTextField()
-                                    IconButton(
-                                        onClick = { passwordVisible = !passwordVisible },
-                                        modifier = Modifier.align(Alignment.CenterEnd)
-                                    ) {
-                                        Icon(
-                                            imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                                            contentDescription = if (passwordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر",
-                                            modifier = Modifier.size(iconSize),
-                                            tint = colors.primary
-                                        )
-                                    }
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            trailingIcon = {
+                                val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                                val desc = if (passwordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر"
+                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                    Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSize), tint = colors.primary)
                                 }
                             },
-                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
-=======
+                            modifier = Modifier
+                                .fillMaxWidth()
                                 .height(fieldHeight),
                             shape = RoundedCornerShape(dimens.cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -284,7 +215,6 @@ fun LoginScreen(
                                 unfocusedBorderColor = colors.outline,
                                 cursorColor = colors.primary
                             ),
->>>>>>> parent of 3170ef2a7 (ؤرر)
                         )
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -331,8 +261,8 @@ fun LoginScreen(
                             enabled = !isLoading,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(screenWidth * 0.13f), // مثال: 13% من العرض
-                            shape = RoundedCornerShape(dimens.buttonCorner),
+                                .height(buttonHeight),
+                            shape = RoundedCornerShape(cardCorner),
                             colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
                         ) {
                             if (isLoading) {
@@ -347,7 +277,7 @@ fun LoginScreen(
                             onClick = onRegisterClick,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(screenWidth * 0.13f), // مثال: 13% من العرض
+                                .height(buttonHeight),
                             shape = RoundedCornerShape(dimens.buttonCorner),
                             border = ButtonDefaults.outlinedButtonBorder,
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.primary)

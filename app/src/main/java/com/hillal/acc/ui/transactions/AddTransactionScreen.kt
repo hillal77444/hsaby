@@ -3,49 +3,23 @@ package com.hillal.acc.ui.transactions
 import android.app.DatePickerDialog
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.TextRange
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.navigation.NavController
 import com.hillal.acc.R
 import com.hillal.acc.data.entities.Cashbox
@@ -56,19 +30,57 @@ import com.hillal.acc.data.repository.TransactionRepository
 import com.hillal.acc.ui.cashbox.AddCashboxDialog
 import com.hillal.acc.ui.common.AccountPickerField
 import com.hillal.acc.ui.common.CashboxPickerField
-import com.hillal.acc.ui.theme.AppTheme
-import com.hillal.acc.ui.theme.AppDimensions
-import com.hillal.acc.ui.theme.LocalAppDimensions
-import com.hillal.acc.ui.theme.backgroundVariant
-import com.hillal.acc.ui.theme.gradient1
-import com.hillal.acc.ui.theme.gradient2
-import com.hillal.acc.ui.transactions.NotificationUtils
-import java.text.SimpleDateFormat
-import java.util.*
-import java.util.Locale
-import kotlin.math.abs
+import com.hillal.acc.ui.transactions.TransactionsViewModel
 import com.hillal.acc.viewmodel.AccountViewModel
 import com.hillal.acc.viewmodel.CashboxViewModel
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.math.abs
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.Notes
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.material.icons.filled.Star
+import com.hillal.acc.ui.theme.AppTheme
+import com.hillal.acc.ui.theme.LocalAppDimensions
+import com.hillal.acc.ui.theme.AppDimensions
+import com.hillal.acc.ui.transactions.NotificationUtils
+import java.util.Locale
+import kotlin.math.abs
+import androidx.compose.ui.window.Dialog
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.foundation.rememberScrollState
 
 // دوال مساعدة لتحويل الأرقام إلى كلمات
 private fun wholeNumberToWords(number: Long): String {
@@ -450,14 +462,7 @@ fun AddTransactionScreen(
             val cardElevationSmall = base * 0.004f
             val rowSpacing = base * 0.018f
             val menuIconSize = base * 0.055f
-<<<<<<< HEAD
-            // تعديل ارتفاع الحقل وحجم الأيقونة
-            val textFieldHeight = maxOf((fontSizeLarge.value * 2.2f).dp, 56.dp)
-            val iconSize = (fontSizeLarge.value * 1.2f).dp
-            val iconPadding = base * 0.02f
-=======
             val textFieldHeight = maxOf((maxHeight * 0.09f).coerceAtLeast(56.dp), 54.dp)
->>>>>>> parent of 3170ef2a7 (ؤرر)
             val radioButtonSize = base * 0.045f
             val verticalScrollState = rememberScrollState()
             Column(
@@ -578,52 +583,20 @@ fun AddTransactionScreen(
                         // Row: مبلغ وتاريخ
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(rowSpacing)) {
                             Column(modifier = Modifier.weight(1f)) {
-                                // Label يدوي لحقل المبلغ
-                                Text(
-                                    text = "المبلغ",
-                                    fontSize = fontSizeMedium,
-                                    color = colors.primary,
-                                    modifier = Modifier.align(Alignment.Start)
-                                )
-                                BasicTextField(
+                                OutlinedTextField(
                                     value = amount,
                                     onValueChange = { newValue ->
                                         if (isValidAmount(newValue)) {
-                                            amount = newValue
-                                            lastAmountUpdate = amount
+                                            amount = newValue // بدون تنسيق فواصل
+                                            lastAmountUpdate = amount // تحديث للكتابة التلقائية
                                         }
                                     },
-<<<<<<< HEAD
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(textFieldHeight)
-                                        .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
-                                        .background(colors.surface, RoundedCornerShape(cardCorner)),
-                                    textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2, color = colors.onSurface),
-=======
                                     label = { Text("المبلغ", fontSize = fontSizeMedium) },
                                     modifier = Modifier.fillMaxWidth().height(textFieldHeight),
                                     leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null, modifier = Modifier.size(iconSize)) },
                                     textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge),
->>>>>>> parent of 3170ef2a7 (ؤرر)
                                     singleLine = true,
-                                    decorationBox = { innerTextField ->
-                                        Box(
-                                            Modifier
-                                                .fillMaxSize()
-                                                .padding(0.dp)
-                                                .padding(start = iconSize + iconPadding, end = iconPadding),
-                                            contentAlignment = Alignment.CenterStart
-                                        ) {
-                                            Icon(
-                                                Icons.Default.AttachMoney,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
-                                                tint = colors.primary
-                                            )
-                                            innerTextField()
-                                        }
-                                    }
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                                 )
                                 
                                 // عرض المبلغ بالكلمات العربية
@@ -644,44 +617,13 @@ fun AddTransactionScreen(
                                     }
                                 }
                             }
-                            // Label يدوي لحقل التاريخ
-                            Text(
-                                text = "التاريخ",
-                                fontSize = fontSizeMedium,
-                                color = colors.primary,
-                                modifier = Modifier.padding(top = spacingSmall)
-                            )
-                            BasicTextField(
+                            OutlinedTextField(
                                 value = dateFormat.format(Date(date)),
                                 onValueChange = {},
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(textFieldHeight)
-                                    .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
-                                    .background(colors.surface, RoundedCornerShape(cardCorner)),
-                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2, color = colors.onSurface),
-                                singleLine = true,
+                                label = { Text("التاريخ", fontSize = fontSizeMedium) },
+                                modifier = Modifier.weight(1f).clickable { showDatePicker = true }.height(textFieldHeight),
                                 enabled = false,
                                 readOnly = true,
-<<<<<<< HEAD
-                                decorationBox = { innerTextField ->
-                                    Box(
-                                        Modifier
-                                            .fillMaxSize()
-                                            .padding(0.dp)
-                                            .padding(start = iconSize + iconPadding, end = iconPadding),
-                                        contentAlignment = Alignment.CenterStart
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Notes,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
-                                            tint = colors.primary
-                                        )
-                                        innerTextField()
-                                    }
-                                }
-=======
                                 leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
                                 textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge),
                                 colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -691,7 +633,6 @@ fun AddTransactionScreen(
                                     disabledBorderColor = colors.surfaceVariant,
                                     disabledTextColor = colors.onSurface
                                 )
->>>>>>> parent of 3170ef2a7 (ؤرر)
                             )
                         }
                         Spacer(modifier = Modifier.height(spacingSmall))
@@ -703,52 +644,18 @@ fun AddTransactionScreen(
                             expanded = expandedSuggestions,
                             onExpandedChange = { /* لا تفعل شيء هنا */ }
                         ) {
-                            // Label يدوي لحقل البيان
-                            Text(
-                                text = "البيان",
-                                fontSize = fontSizeMedium,
-                                color = colors.primary,
-                                modifier = Modifier.align(Alignment.Start).padding(top = spacingSmall)
-                            )
-                            // استبدل TextField بـ BasicTextField بدون أي padding داخلي في حقل البيان
-                            BasicTextField(
-                                value = descriptionState.text,
-                                onValueChange = { newText: String ->
-                                    descriptionState = TextFieldValue(newText)
-                                    description = newText
+                            OutlinedTextField(
+                                value = descriptionState,
+                                onValueChange = {
+                                    descriptionState = it
+                                    description = it.text
                                     showAllSuggestions = false
-                                    expandedSuggestions = newText.isNotEmpty() && suggestions.any { s -> s.startsWith(newText) && s != newText }
+                                    expandedSuggestions = it.text.isNotEmpty() && suggestions.any { s -> s.startsWith(it.text) && s != it.text }
                                 },
+                                label = { Text("البيان", fontSize = fontSizeMedium) },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .menuAnchor()
-<<<<<<< HEAD
-                                    .height(textFieldHeight)
-                                    .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
-                                    .background(colors.surface, RoundedCornerShape(cardCorner)),
-                                textStyle = typography.bodyLarge.copy(
-                                    fontSize = fontSizeLarge,
-                                    lineHeight = fontSizeLarge * 1.2,
-                                    color = colors.onSurface
-                                ),
-                                singleLine = true,
-                                decorationBox = { innerTextField ->
-                                    Box(
-                                        Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.CenterStart
-                                    ) {
-                                        // أيقونة السهم للاقتراحات (اختياري)
-                                        if (suggestions.isNotEmpty()) {
-                                            IconButton(
-                                                onClick = {
-                                                    showAllSuggestions = true
-                                                    expandedSuggestions = true
-                                                },
-                                                modifier = Modifier.align(Alignment.CenterEnd)
-                                            ) {
-                                                Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(menuIconSize))
-                                            }
-=======
                                     .height(textFieldHeight),
                                 leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
                                 textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge),
@@ -759,9 +666,7 @@ fun AddTransactionScreen(
                                             expandedSuggestions = true
                                         }) {
                                             Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(menuIconSize))
->>>>>>> parent of 3170ef2a7 (ؤرر)
                                         }
-                                        innerTextField()
                                     }
                                 }
                             )
@@ -775,10 +680,10 @@ fun AddTransactionScreen(
                                 val filtered = if (showAllSuggestions)
                                     suggestions.take(10)
                                 else if (descriptionState.text.isNotEmpty())
-                                    suggestions.filter { s -> s.startsWith(descriptionState.text) && s != descriptionState.text }.take(10)
+                                    suggestions.filter { it.startsWith(descriptionState.text) && it != descriptionState.text }.take(10)
                                 else
                                     emptyList()
-                                filtered.forEach { suggestion: String ->
+                                filtered.forEach { suggestion ->
                                     DropdownMenuItem(
                                         text = { Text(suggestion, fontSize = fontSizeMedium) },
                                         onClick = {
@@ -825,47 +730,13 @@ fun AddTransactionScreen(
                         // Notes (hidden by default)
                         val showNotes = false
                         if (showNotes) {
-                            // Label يدوي لحقل الملاحظات (إذا كان ظاهر)
-                            Text(
-                                text = "ملاحظات",
-                                fontSize = fontSizeMedium,
-                                color = colors.primary,
-                                modifier = Modifier.align(Alignment.Start).padding(top = spacingSmall)
-                            )
-                            BasicTextField(
+                            OutlinedTextField(
                                 value = notes,
                                 onValueChange = { notes = it },
-<<<<<<< HEAD
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(textFieldHeight)
-                                    .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
-                                    .background(colors.surface, RoundedCornerShape(cardCorner)),
-                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2, color = colors.onSurface),
-                                singleLine = true,
-                                decorationBox = { innerTextField ->
-                                    Box(
-                                        Modifier
-                                            .fillMaxSize()
-                                            .padding(0.dp)
-                                            .padding(start = iconSize + iconPadding, end = iconPadding),
-                                        contentAlignment = Alignment.CenterStart
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Notes,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
-                                            tint = colors.primary
-                                        )
-                                        innerTextField()
-                                    }
-                                }
-=======
                                 label = { Text("ملاحظات", fontSize = fontSizeMedium) },
                                 modifier = Modifier.fillMaxWidth().height(textFieldHeight),
                                 leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
                                 textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge)
->>>>>>> parent of 3170ef2a7 (ؤرر)
                             )
                             Spacer(modifier = Modifier.height(spacingSmall))
                         }
@@ -1177,7 +1048,7 @@ fun AccountPickerBottomSheetCompose(
                 )
                 Spacer(Modifier.height(dimens.spacingSmall))
                 Divider()
-                LazyColumn(Modifier.heightIn(max = 300.dp)) {
+                LazyColumn(Modifier.heightIn(max = 400.dp)) {
                     items(filteredAccounts) { account ->
                         Card(
                             modifier = Modifier
