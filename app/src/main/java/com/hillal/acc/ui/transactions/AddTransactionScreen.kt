@@ -617,17 +617,11 @@ fun AddTransactionScreen(
                                     }
                                 }
                             }
-                            Box(
-                                modifier = Modifier
-                                .weight(1f)
-                                .height(textFieldHeight)
-                                .clickable { showDatePicker = true }
-                            ) {
                             OutlinedTextField(
                                 value = dateFormat.format(Date(date)),
                                 onValueChange = {},
                                 label = { Text("التاريخ", fontSize = fontSizeMedium) },
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier.weight(1f).clickable { showDatePicker = true }.height(textFieldHeight),
                                 enabled = false,
                                 readOnly = true,
                                 leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
@@ -640,7 +634,6 @@ fun AddTransactionScreen(
                                     disabledTextColor = colors.onSurface
                                 )
                             )
-                            
                         }
                         Spacer(modifier = Modifier.height(spacingSmall))
                         // Description with suggestions (ExposedDropdownMenuBox)
