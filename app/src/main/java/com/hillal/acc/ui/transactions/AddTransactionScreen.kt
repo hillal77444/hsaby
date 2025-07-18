@@ -617,6 +617,12 @@ fun AddTransactionScreen(
                                     }
                                 }
                             }
+                            Box(
+                                modifier = Modifier
+                                .weight(1f)
+                                .height(textFieldHeight)
+                                .clickable { showDatePicker = true }
+                            ) {
                             OutlinedTextField(
                                 value = dateFormat.format(Date(date)),
                                 onValueChange = {},
@@ -634,7 +640,7 @@ fun AddTransactionScreen(
                                     disabledTextColor = colors.onSurface
                                 )
                             )
-                            if (showDatePicker) {
+                            
                         }
                         Spacer(modifier = Modifier.height(spacingSmall))
                         // Description with suggestions (ExposedDropdownMenuBox)
