@@ -686,6 +686,7 @@ fun AddTransactionScreen(
                                 color = colors.primary,
                                 modifier = Modifier.align(Alignment.Start).padding(top = spacingSmall)
                             )
+                            // استبدل TextField بـ BasicTextField بدون أي padding داخلي في حقل البيان
                             BasicTextField(
                                 value = descriptionState.text,
                                 onValueChange = { newText: String ->
@@ -700,31 +701,29 @@ fun AddTransactionScreen(
                                     .height(textFieldHeight)
                                     .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
                                     .background(colors.surface, RoundedCornerShape(cardCorner)),
-                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2, color = colors.onSurface),
-                                trailingIcon = {
-                                    if (suggestions.isNotEmpty()) {
-                                        IconButton(onClick = {
-                                            showAllSuggestions = true
-                                            expandedSuggestions = true
-                                        }) {
-                                            Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(menuIconSize))
-                                        }
-                                    }
-                                },
+                                textStyle = typography.bodyLarge.copy(
+                                    fontSize = fontSizeLarge,
+                                    lineHeight = fontSizeLarge * 1.2,
+                                    color = colors.onSurface
+                                ),
+                                singleLine = true,
                                 decorationBox = { innerTextField ->
                                     Box(
-                                        Modifier
-                                            .fillMaxSize()
-                                            .padding(0.dp)
-                                            .padding(start = iconSize + iconPadding, end = iconPadding),
+                                        Modifier.fillMaxSize(),
                                         contentAlignment = Alignment.CenterStart
                                     ) {
-                                        Icon(
-                                            Icons.Default.Notes,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(iconSize).align(Alignment.CenterStart),
-                                            tint = colors.primary
-                                        )
+                                        // أيقونة السهم للاقتراحات (اختياري)
+                                        if (suggestions.isNotEmpty()) {
+                                            IconButton(
+                                                onClick = {
+                                                    showAllSuggestions = true
+                                                    expandedSuggestions = true
+                                                },
+                                                modifier = Modifier.align(Alignment.CenterEnd)
+                                            ) {
+                                                Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(menuIconSize))
+                                            }
+                                        }
                                         innerTextField()
                                     }
                                 }
