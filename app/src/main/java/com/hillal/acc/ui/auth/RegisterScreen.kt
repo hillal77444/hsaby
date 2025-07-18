@@ -405,11 +405,11 @@ fun RegisterScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(color = colors.onPrimary, modifier = Modifier.size((fontField * 1.2f).dp))
+                        CircularProgressIndicator(color = colors.onPrimary, modifier = Modifier.size((fontField.value * 1.2f).dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("جاري التسجيل...", color = colors.onPrimary, fontSize = (fontField * 1.2f).sp, style = typography.bodyLarge)
+                        Text("جاري التسجيل...", color = colors.onPrimary, fontSize = (fontField.value * 1.2f).sp, style = typography.bodyLarge)
                     } else {
-                        Text("تسجيل", color = colors.onPrimary, fontSize = (fontField * 1.2f).sp, style = typography.bodyLarge)
+                        Text("تسجيل", color = colors.onPrimary, fontSize = (fontField.value * 1.2f).sp, style = typography.bodyLarge)
                     }
                 }
                 OutlinedButton(
@@ -424,7 +424,7 @@ fun RegisterScreen(
                 ) {
                     Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(iconSize.value.dp), tint = colors.primary)
                     Spacer(Modifier.width(4.dp))
-                    Text("العودة لتسجيل الدخول", fontWeight = FontWeight.Bold, fontSize = (fontField * 1.2f).sp, style = typography.bodyLarge)
+                    Text("العودة لتسجيل الدخول", fontWeight = FontWeight.Bold, fontSize = (fontField.value * 1.2f).sp, style = typography.bodyLarge)
                 }
                 Spacer(modifier = Modifier.height(marginSmall))
             }

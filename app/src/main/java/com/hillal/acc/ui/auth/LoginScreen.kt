@@ -43,6 +43,7 @@ import com.hillal.acc.ui.theme.LocalAppDimensions
 import com.hillal.acc.ui.theme.backgroundVariant
 import com.hillal.acc.ui.theme.gradient1
 import com.hillal.acc.ui.theme.gradient2
+import androidx.compose.ui.ExperimentalComposeUiApi
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
