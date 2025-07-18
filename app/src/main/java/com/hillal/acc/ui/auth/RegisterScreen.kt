@@ -97,11 +97,29 @@ fun RegisterScreen(
             }
         }
 
+<<<<<<< HEAD
         val logoSize = LocalAppDimensions.current.logoSize
         val marginSmall = LocalAppDimensions.current.spacingSmall
         val marginMedium = LocalAppDimensions.current.spacingMedium
         val marginLarge = LocalAppDimensions.current.spacingLarge
         val cardElevation = LocalAppDimensions.current.cardElevation
+=======
+        val logoSize = dimens.logoSize
+        val cardCorner = dimens.cardCorner
+        val cardPadding = dimens.spacingMedium
+        val fieldHeight = dimens.fieldHeight
+        val buttonHeight = dimens.buttonHeight
+        val fontTitle = typography.headlineMedium.fontSize
+        val fontField = typography.bodyLarge.fontSize
+        val fontButton = typography.bodyLarge.fontSize
+        val fontSmall = dimens.fontSmall
+        val iconSize = dimens.iconSize
+        val iconSizeSmall = dimens.iconSizeSmall
+        val marginSmall = dimens.spacingSmall
+        val marginMedium = dimens.spacingMedium
+        val marginLarge = dimens.spacingLarge
+        val cardElevation = dimens.cardElevation
+>>>>>>> parent of 3170ef2a7 (ؤرر)
 
         Box(
             modifier = Modifier
@@ -181,6 +199,7 @@ fun RegisterScreen(
                             onValueChange = { displayName = it },
                             modifier = Modifier
                                 .fillMaxWidth()
+<<<<<<< HEAD
                                 .height(textFieldHeight)
                                 .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
                                 .background(colors.backgroundVariant, RoundedCornerShape(cardCorner)),
@@ -203,6 +222,16 @@ fun RegisterScreen(
                                     innerTextField()
                                 }
                             }
+=======
+                                .height(fieldHeight),
+                            shape = RoundedCornerShape(cardCorner),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                containerColor = colors.backgroundVariant,
+                                focusedBorderColor = colors.primary,
+                                unfocusedBorderColor = colors.outline,
+                                cursorColor = colors.primary
+                            ),
+>>>>>>> parent of 3170ef2a7 (ؤرر)
                         )
                         // Label يدوي لحقل رقم الهاتف
                         Text(
@@ -214,6 +243,7 @@ fun RegisterScreen(
                         BasicTextField(
                             value = phone,
                             onValueChange = { phone = it },
+<<<<<<< HEAD
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(textFieldHeight)
@@ -238,6 +268,22 @@ fun RegisterScreen(
                                     innerTextField()
                                 }
                             }
+=======
+                            label = { Text("رقم الهاتف", fontSize = fontField) },
+                            leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, modifier = Modifier.size(iconSize), tint = colors.primary) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), // يقبل أرقام فقط
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(fieldHeight),
+                            shape = RoundedCornerShape(cardCorner),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                containerColor = colors.backgroundVariant,
+                                focusedBorderColor = colors.primary,
+                                unfocusedBorderColor = colors.outline,
+                                cursorColor = colors.primary
+                            ),
+>>>>>>> parent of 3170ef2a7 (ؤرر)
                         )
                         // Label يدوي لحقل كلمة السر
                         Text(
@@ -249,6 +295,7 @@ fun RegisterScreen(
                         BasicTextField(
                             value = password,
                             onValueChange = { password = it },
+<<<<<<< HEAD
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(textFieldHeight)
@@ -285,6 +332,29 @@ fun RegisterScreen(
                                 }
                             },
                             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
+=======
+                            label = { Text("كلمة السر", fontSize = fontField) },
+                            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(iconSize), tint = colors.primary) },
+                            singleLine = true,
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            trailingIcon = {
+                                val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                                val desc = if (passwordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر"
+                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                    Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSizeSmall), tint = colors.primary)
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(fieldHeight),
+                            shape = RoundedCornerShape(cardCorner),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                containerColor = colors.backgroundVariant,
+                                focusedBorderColor = colors.primary,
+                                unfocusedBorderColor = colors.outline,
+                                cursorColor = colors.primary
+                            ),
+>>>>>>> parent of 3170ef2a7 (ؤرر)
                         )
                         // Label يدوي لحقل تأكيد كلمة السر
                         Text(
@@ -296,6 +366,7 @@ fun RegisterScreen(
                         BasicTextField(
                             value = confirmPassword,
                             onValueChange = { confirmPassword = it },
+<<<<<<< HEAD
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(textFieldHeight)
@@ -332,6 +403,29 @@ fun RegisterScreen(
                                 }
                             },
                             visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation()
+=======
+                            label = { Text("تأكيد كلمة السر", fontSize = fontField) },
+                            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(iconSize), tint = colors.primary) },
+                            singleLine = true,
+                            visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            trailingIcon = {
+                                val image = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                                val desc = if (confirmPasswordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر"
+                                IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                                    Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSizeSmall), tint = colors.primary)
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(fieldHeight),
+                            shape = RoundedCornerShape(cardCorner),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                containerColor = colors.backgroundVariant,
+                                focusedBorderColor = colors.primary,
+                                unfocusedBorderColor = colors.outline,
+                                cursorColor = colors.primary
+                            ),
+>>>>>>> parent of 3170ef2a7 (ؤرر)
                         )
                     }
                 }

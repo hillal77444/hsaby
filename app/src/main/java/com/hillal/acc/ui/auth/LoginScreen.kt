@@ -79,6 +79,13 @@ fun LoginScreen(
         val screenWidthValue = configuration.screenWidthDp.toFloat()
         val screenHeight = configuration.screenHeightDp.toFloat().dp
         val logoSize = dimens.logoSize
+<<<<<<< HEAD
+=======
+        val cardCorner = dimens.cardCorner
+        val cardPadding = dimens.spacingMedium
+        val fieldHeight = dimens.fieldHeight
+        val buttonHeight = dimens.buttonHeight
+>>>>>>> parent of 3170ef2a7 (ؤرر)
         val fontTitle = typography.headlineMedium.fontSize
         val fontField = (screenWidthValue * 0.045f).sp // 4.5% من العرض
         val textFieldHeight = screenHeight * 0.08f // 8% من الارتفاع
@@ -87,7 +94,11 @@ fun LoginScreen(
         val cardCorner = screenWidth * 0.04f // 4% من العرض
         val fontButton = typography.bodyLarge.fontSize
         val fontSmall = typography.bodyMedium.fontSize
+<<<<<<< HEAD
         val fontFieldPx = fontField.value
+=======
+        val iconSize = dimens.iconSize
+>>>>>>> parent of 3170ef2a7 (ؤرر)
         val marginSmall = dimens.spacingSmall
         val marginMedium = dimens.spacingMedium
         val marginLarge = dimens.spacingLarge
@@ -168,6 +179,7 @@ fun LoginScreen(
                         BasicTextField(
                             value = phone,
                             onValueChange = { phone = it },
+<<<<<<< HEAD
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(textFieldHeight)
@@ -192,6 +204,29 @@ fun LoginScreen(
                                     innerTextField()
                                 }
                             }
+=======
+                            label = { Text("رقم التلفون", fontSize = fontField) },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Phone,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(iconSize),
+                                    tint = colors.primary
+                                )
+                            },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), // يقبل أرقام فقط
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(fieldHeight),
+                            shape = RoundedCornerShape(dimens.cardCorner),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                containerColor = colors.background,
+                                focusedBorderColor = colors.primary,
+                                unfocusedBorderColor = colors.outline,
+                                cursorColor = colors.primary
+                            ),
+>>>>>>> parent of 3170ef2a7 (ؤرر)
                         )
                         // Label يدوي لحقل كلمة السر
                         Text(
@@ -205,6 +240,7 @@ fun LoginScreen(
                             onValueChange = { password = it },
                             modifier = Modifier
                                 .fillMaxWidth()
+<<<<<<< HEAD
                                 .height(textFieldHeight)
                                 .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
                                 .background(colors.background, RoundedCornerShape(cardCorner)),
@@ -239,6 +275,16 @@ fun LoginScreen(
                                 }
                             },
                             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
+=======
+                                .height(fieldHeight),
+                            shape = RoundedCornerShape(dimens.cardCorner),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                containerColor = colors.background,
+                                focusedBorderColor = colors.primary,
+                                unfocusedBorderColor = colors.outline,
+                                cursorColor = colors.primary
+                            ),
+>>>>>>> parent of 3170ef2a7 (ؤرر)
                         )
                         Row(
                             modifier = Modifier.fillMaxWidth(),

@@ -435,6 +435,7 @@ fun AddTransactionScreen(
             val buttonCorner = cardCorner
             val buttonHeight = maxOf((maxHeight * 0.06f).coerceAtLeast(44.dp), 44.dp)
             val cardMaxHeight = (maxHeight * 0.18f).coerceAtMost(160.dp)
+            val iconSize = base * 0.07f
             val fontSizeLarge = maxOf((base.value * 0.040f), 18f).sp
             val fontSizeMedium = maxOf((base.value * 0.038f), 16f).sp
             val fontSizeSmall = maxOf((base.value * 0.028f), 13f).sp
@@ -449,10 +450,14 @@ fun AddTransactionScreen(
             val cardElevationSmall = base * 0.004f
             val rowSpacing = base * 0.018f
             val menuIconSize = base * 0.055f
+<<<<<<< HEAD
             // تعديل ارتفاع الحقل وحجم الأيقونة
             val textFieldHeight = maxOf((fontSizeLarge.value * 2.2f).dp, 56.dp)
             val iconSize = (fontSizeLarge.value * 1.2f).dp
             val iconPadding = base * 0.02f
+=======
+            val textFieldHeight = maxOf((maxHeight * 0.09f).coerceAtLeast(56.dp), 54.dp)
+>>>>>>> parent of 3170ef2a7 (ؤرر)
             val radioButtonSize = base * 0.045f
             val verticalScrollState = rememberScrollState()
             Column(
@@ -588,12 +593,19 @@ fun AddTransactionScreen(
                                             lastAmountUpdate = amount
                                         }
                                     },
+<<<<<<< HEAD
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(textFieldHeight)
                                         .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
                                         .background(colors.surface, RoundedCornerShape(cardCorner)),
                                     textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge, lineHeight = fontSizeLarge * 1.2, color = colors.onSurface),
+=======
+                                    label = { Text("المبلغ", fontSize = fontSizeMedium) },
+                                    modifier = Modifier.fillMaxWidth().height(textFieldHeight),
+                                    leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null, modifier = Modifier.size(iconSize)) },
+                                    textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge),
+>>>>>>> parent of 3170ef2a7 (ؤرر)
                                     singleLine = true,
                                     decorationBox = { innerTextField ->
                                         Box(
@@ -651,6 +663,7 @@ fun AddTransactionScreen(
                                 singleLine = true,
                                 enabled = false,
                                 readOnly = true,
+<<<<<<< HEAD
                                 decorationBox = { innerTextField ->
                                     Box(
                                         Modifier
@@ -668,6 +681,17 @@ fun AddTransactionScreen(
                                         innerTextField()
                                     }
                                 }
+=======
+                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
+                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge),
+                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                    containerColor = colors.surface,
+                                    focusedBorderColor = colors.primary,
+                                    unfocusedBorderColor = colors.onSurface,
+                                    disabledBorderColor = colors.surfaceVariant,
+                                    disabledTextColor = colors.onSurface
+                                )
+>>>>>>> parent of 3170ef2a7 (ؤرر)
                             )
                         }
                         Spacer(modifier = Modifier.height(spacingSmall))
@@ -698,6 +722,7 @@ fun AddTransactionScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .menuAnchor()
+<<<<<<< HEAD
                                     .height(textFieldHeight)
                                     .border(1.dp, colors.primary, RoundedCornerShape(cardCorner))
                                     .background(colors.surface, RoundedCornerShape(cardCorner)),
@@ -723,6 +748,18 @@ fun AddTransactionScreen(
                                             ) {
                                                 Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(menuIconSize))
                                             }
+=======
+                                    .height(textFieldHeight),
+                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
+                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge),
+                                trailingIcon = {
+                                    if (suggestions.isNotEmpty()) {
+                                        IconButton(onClick = {
+                                            showAllSuggestions = true
+                                            expandedSuggestions = true
+                                        }) {
+                                            Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(menuIconSize))
+>>>>>>> parent of 3170ef2a7 (ؤرر)
                                         }
                                         innerTextField()
                                     }
@@ -798,6 +835,7 @@ fun AddTransactionScreen(
                             BasicTextField(
                                 value = notes,
                                 onValueChange = { notes = it },
+<<<<<<< HEAD
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(textFieldHeight)
@@ -822,6 +860,12 @@ fun AddTransactionScreen(
                                         innerTextField()
                                     }
                                 }
+=======
+                                label = { Text("ملاحظات", fontSize = fontSizeMedium) },
+                                modifier = Modifier.fillMaxWidth().height(textFieldHeight),
+                                leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(iconSize)) },
+                                textStyle = typography.bodyLarge.copy(fontSize = fontSizeLarge)
+>>>>>>> parent of 3170ef2a7 (ؤرر)
                             )
                             Spacer(modifier = Modifier.height(spacingSmall))
                         }
