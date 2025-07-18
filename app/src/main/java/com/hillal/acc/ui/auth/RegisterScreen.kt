@@ -99,7 +99,6 @@ fun RegisterScreen(
         val fontField = typography.bodyLarge.fontSize
         val fontButton = typography.bodyLarge.fontSize
         val fontSmall = dimens.fontSmall
-        val iconSize = dimens.iconSize
         val iconSizeSmall = dimens.iconSizeSmall
         val marginSmall = dimens.spacingSmall
         val marginMedium = dimens.spacingMedium

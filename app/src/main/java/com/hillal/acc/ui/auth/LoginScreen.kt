@@ -89,6 +89,7 @@ fun LoginScreen(
         val fontFieldPx = fontField.value
         val textFieldHeight = maxOf((fontFieldPx * 2.2f).dp, 56.dp)
         val iconSize = (fontFieldPx * 1.2f).dp
+        val buttonHeight = maxOf((fontFieldPx * 2.2f).dp, 56.dp)
         val marginSmall = dimens.spacingSmall
         val marginMedium = dimens.spacingMedium
         val marginLarge = dimens.spacingLarge
@@ -264,7 +265,7 @@ fun LoginScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(buttonHeight),
-                            shape = RoundedCornerShape(cardCorner),
+                            shape = RoundedCornerShape(dimens.buttonCorner),
                             colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
                         ) {
                             if (isLoading) {
