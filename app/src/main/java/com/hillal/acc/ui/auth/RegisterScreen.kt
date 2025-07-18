@@ -43,6 +43,12 @@ import com.hillal.acc.ui.theme.gradient2
 import com.hillal.acc.ui.theme.backgroundVariant
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.*
 
 // دالة ترجمة رسائل الخطأ القادمة من الخادم
 fun translateErrorMessage(serverMessage: String?): String {
@@ -70,10 +76,9 @@ fun RegisterScreen(
     AppTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp.dp
-        val screenHeight = configuration.screenHeightDp.dp
         val screenWidthValue = configuration.screenWidthDp.toFloat()
         val fontField = (screenWidthValue * 0.045f).sp // 4.5% من العرض
-        val textFieldHeight = screenHeight * 0.08f // 8% من الارتفاع
+        val textFieldHeight = screenWidth * 0.08f // 8% من الارتفاع
         val iconSize = screenWidth * 0.065f // 6.5% من العرض
         val iconPadding = screenWidth * 0.02f // 2% من العرض
         val cardCorner = screenWidth * 0.04f // 4% من العرض
