@@ -148,6 +148,13 @@ fun calculateAppDimensions(): AppDimensions {
     val screenHeight = configuration.screenHeightDp.dp
     val base = if (screenWidth < screenHeight) screenWidth else screenHeight
     val cardCorner = screenWidth * 0.04f
+
+    val fieldHeight = (screenHeight * 0.08f).coerceIn(48.dp, 64.dp)
+    val bodyFont = ((screenWidth.value * 0.045f).sp).coerceIn(14.sp, 18.sp)
+    val fontSmall = ((screenWidth.value * 0.03f).sp).coerceIn(11.sp, 14.sp)
+    val statFont = ((screenWidth.value * 0.048f).sp).coerceIn(14.sp, 18.sp)
+    val statLabelFont = ((screenWidth.value * 0.035f).sp).coerceIn(10.sp, 13.sp)
+
     return AppDimensions(
         spacingSmall = screenWidth * 0.02f,   // 2% من العرض
         spacingMedium = screenWidth * 0.04f,  // 4% من العرض
@@ -161,15 +168,15 @@ fun calculateAppDimensions(): AppDimensions {
         smsIconSize = base * 0.07f,
         fieldHorizontalPadding = screenWidth * 0.006f, // 0.6% من العرض
         cardHeight = screenHeight * 0.15f, // 15% من الارتفاع
-        bodyFont = (screenWidth.value * 0.045f).sp, // ديناميكي
-        statFont = (screenWidth.value * 0.048f).sp, // ديناميكي
-        statLabelFont = (screenWidth.value * 0.035f).sp, // ديناميكي
+        bodyFont = bodyFont, // ديناميكي
+        statFont = statFont, // ديناميكي
+        statLabelFont = statLabelFont, // ديناميكي
         // --- إضافات جمالية ---
         logoSize = screenWidth * 0.18f, // شعار كبير نسبيًا
-        fieldHeight = screenHeight * 0.081f, // ارتفاع حقل الإدخال متجاوب
+        fieldHeight = fieldHeight, // ارتفاع حقل الإدخال متجاوب
         cardElevation = screenWidth * 0.012f, // ظل البطاقة متجاوب (مثلاً 4-8dp)
         iconSizeSmall = screenWidth * 0.042f, // أيقونة صغيرة (مثلاً 14-18dp)
-        fontSmall = (screenWidth.value * 0.025f).sp, // خط صغير (مثلاً 11-13sp)
+        fontSmall = fontSmall, // خط صغير (مثلاً 11-13sp)
         spacingTiny = screenWidth * 0.008f, // 0.8% من العرض
         iconSpacing = screenWidth * 0.012f, // 1.2% من العرض
         cardWidthRatio = 0.97f, // نفس النسبة المستخدمة في fillMaxWidth
