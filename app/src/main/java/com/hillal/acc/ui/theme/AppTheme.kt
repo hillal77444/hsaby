@@ -121,7 +121,6 @@ data class AppDimensions(
     val menuIconSize: Dp = 24.dp, // جديد
     val cardMaxHeight: Dp = 160.dp, // جديد
     val cardElevationSmall: Dp = 2.dp, // جديد
-    val smsIconSize: Dp = 24.dp, // جديد
     val dialogCorner: Dp = 16.dp, // جديد
     val dialogPadding: Dp = 24.dp, // جديد
     val dialogIconSize: Dp = 48.dp, // جديد
@@ -183,7 +182,6 @@ fun calculateAppDimensions(): AppDimensions {
         menuIconSize = base * 0.055f,
         cardMaxHeight = (screenHeight * 0.18f).coerceAtMost(160.dp),
         cardElevationSmall = base * 0.004f,
-        smsIconSize = base * 0.07f,
         dialogCorner = base * 0.025f,
         dialogPadding = base * 0.045f,
         dialogIconSize = base * 0.11f,

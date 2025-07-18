@@ -329,7 +329,7 @@ fun RegisterScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(color = colors.onPrimary, modifier = Modifier.size(dimens.iconSizeSmall.dp))
+                        CircularProgressIndicator(color = colors.onPrimary, modifier = Modifier.size(dimens.iconSizeSmall))
                         Spacer(Modifier.width(dimens.buttonSpacing))
                         Text("جاري التسجيل...", color = colors.onPrimary, fontSize = fontButton, style = typography.bodyLarge)
                     } else {
