@@ -688,7 +688,7 @@ fun AddTransactionScreen(
                             )
                             BasicTextField(
                                 value = descriptionState,
-                                onValueChange = {
+                                onValueChange = { it: TextFieldValue ->
                                     descriptionState = it
                                     description = it.text
                                     showAllSuggestions = false
@@ -739,7 +739,7 @@ fun AddTransactionScreen(
                                 val filtered = if (showAllSuggestions)
                                     suggestions.take(10)
                                 else if (descriptionState.text.isNotEmpty())
-                                    suggestions.filter { it.startsWith(descriptionState.text) && it != descriptionState.text }.take(10)
+                                    suggestions.filter { s -> s.startsWith(descriptionState.text) && s != descriptionState.text }.take(10)
                                 else
                                     emptyList()
                                 filtered.forEach { suggestion ->
@@ -1134,7 +1134,7 @@ fun AccountPickerBottomSheetCompose(
                 )
                 Spacer(Modifier.height(dimens.spacingSmall))
                 Divider()
-                LazyColumn(Modifier.heightIn(max = dimens.dialogMaxHeight)) {
+                LazyColumn(Modifier.heightIn(max = 300.dp)) {
                     items(filteredAccounts) { account ->
                         Card(
                             modifier = Modifier
