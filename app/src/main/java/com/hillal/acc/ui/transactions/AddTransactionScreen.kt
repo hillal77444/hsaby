@@ -67,6 +67,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.Locale
 import kotlin.math.abs
+import com.hillal.acc.viewmodel.AccountViewModel
+import com.hillal.acc.viewmodel.CashboxViewModel
 
 // دوال مساعدة لتحويل الأرقام إلى كلمات
 private fun wholeNumberToWords(number: Long): String {
@@ -1132,7 +1134,7 @@ fun AccountPickerBottomSheetCompose(
                 )
                 Spacer(Modifier.height(dimens.spacingSmall))
                 Divider()
-                LazyColumn(Modifier.heightIn(max = 400.dp)) {
+                LazyColumn(Modifier.heightIn(max = maxHeight * 0.5f)) {
                     items(filteredAccounts) { account ->
                         Card(
                             modifier = Modifier

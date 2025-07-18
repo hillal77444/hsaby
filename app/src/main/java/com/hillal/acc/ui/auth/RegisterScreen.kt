@@ -43,6 +43,7 @@ import com.hillal.acc.ui.theme.gradient1
 import com.hillal.acc.ui.theme.gradient2
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.ui.graphics.graphicsLayer
 
 // دالة ترجمة رسائل الخطأ القادمة من الخادم
 fun translateErrorMessage(serverMessage: String?): String {
@@ -339,7 +340,7 @@ fun RegisterScreen(
                     Card(
                         colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
                         shape = RoundedCornerShape(cardCorner),
-                        modifier = Modifier.fillMaxWidth(0.97f).padding(vertical = 2.dp)
+                        modifier = Modifier.fillMaxWidth(0.97f).padding(vertical = marginSmall)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(marginSmall)) {
                             Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(iconSize.value.dp))
@@ -357,7 +358,7 @@ fun RegisterScreen(
                     Card(
                         colors = CardDefaults.cardColors(containerColor = colors.errorContainer),
                         shape = RoundedCornerShape(cardCorner),
-                        modifier = Modifier.fillMaxWidth(0.97f).padding(vertical = 2.dp)
+                        modifier = Modifier.fillMaxWidth(0.97f).padding(vertical = marginSmall)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(marginSmall)) {
                             Icon(Icons.Default.Lock, contentDescription = null, tint = colors.error, modifier = Modifier.size(iconSize.value.dp))
