@@ -209,10 +209,7 @@ fun TransactionCard(
                         label = "واتساب",
                         onClick = onWhatsApp,
                         color = Color(0xFF25D366),
-                        width = buttonWidth,
-                        height = buttonHeight,
-                        iconSize = iconSize,
-                        textSize = buttonTextSize
+                        modifier = Modifier
                     )
                     Spacer(Modifier.width(buttonSpacing))
                     ActionButton(
@@ -220,10 +217,7 @@ fun TransactionCard(
                         label = "SMS",
                         onClick = onSms,
                         color = Color(0xFF1976D2),
-                        width = buttonWidth,
-                        height = buttonHeight,
-                        iconSize = iconSize,
-                        textSize = buttonTextSize
+                        modifier = Modifier
                     )
                     Spacer(Modifier.width(buttonSpacing))
                     ActionButton(
@@ -231,10 +225,7 @@ fun TransactionCard(
                         label = "تعديل",
                         onClick = onEdit,
                         color = Color(0xFF1976D2),
-                        width = buttonWidth,
-                        height = buttonHeight,
-                        iconSize = iconSize,
-                        textSize = buttonTextSize
+                        modifier = Modifier
                     )
                     Spacer(Modifier.width(buttonSpacing))
                     ActionButton(
@@ -242,10 +233,7 @@ fun TransactionCard(
                         label = "حذف",
                         onClick = onDelete,
                         color = Color(0xFFD32F2F),
-                        width = buttonWidth,
-                        height = buttonHeight,
-                        iconSize = iconSize,
-                        textSize = buttonTextSize
+                        modifier = Modifier
                     )
                 }
             }
@@ -260,15 +248,21 @@ fun ActionButton(
     label: String,
     onClick: () -> Unit,
     color: Color,
-    width: Dp,
-    height: Dp,
-    iconSize: Dp,
-    textSize: TextUnit
+    modifier: Modifier = Modifier
 ) {
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
+    val screenHeight = configuration.screenHeightDp
+
+    val buttonHeight = (screenHeight * 0.06f).coerceIn(38f, 56f).dp
+    val buttonWidth = (screenWidth * 0.2f).coerceIn(60f, 100f).dp
+    val iconSize = (screenWidth * 0.045f).coerceIn(12f, 22f).dp
+    val textSize = (screenWidth * 0.035f).coerceIn(10f, 16f).sp
+
     Surface(
-        modifier = Modifier
-            .width(width)
-            .height(height)
+        modifier = modifier
+            .width(buttonWidth)
+            .height(buttonHeight)
             .padding(horizontal = 1.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
@@ -279,7 +273,7 @@ fun ActionButton(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(vertical = height * 0.10f),
+                .padding(vertical = buttonHeight * 0.10f),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -288,7 +282,7 @@ fun ActionButton(
             } else if (painter != null) {
                 Icon(painter = painter, contentDescription = null, tint = color, modifier = Modifier.size(iconSize))
             }
-            Spacer(Modifier.height(height * 0.10f))
+            Spacer(Modifier.height(buttonHeight * 0.10f))
             Text(
                 text = label,
                 fontSize = textSize,
