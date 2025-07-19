@@ -69,6 +69,8 @@ class Transaction(db.Model):
             'amount', 'type', 'description', 'date', 'account_id', 'user_id',
             name='unique_transaction_per_account'
         ),
+        db.Index('ix_account_currency_type', 'account_id', 'currency', 'type'),
+        db.Index('ix_user_currency_type', 'user_id', 'currency', 'type'),
     )
 
 class AppUpdate(db.Model):
