@@ -1628,11 +1628,10 @@ def send_whatsapp_to_users():
 
         count = 0
         for user in users:
-            # جلب رقم الهاتف من الحسابات المرتبطة
-            account = Account.query.filter_by(user_id=user.id).filter(Account.phone_number != None).first()
-            if not account or not account.phone_number:
+            # جلب رقم الهاتف من المستخدم مباشرة
+            if not user.phone:
                 continue
-            phone = ''.join(filter(str.isdigit, account.phone_number))
+            phone = ''.join(filter(str.isdigit, user.phone))
             if phone.startswith('966'):
                 pass
             elif phone.startswith('0'):
