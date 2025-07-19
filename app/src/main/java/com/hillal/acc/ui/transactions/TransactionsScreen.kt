@@ -290,7 +290,7 @@ fun TransactionsScreen(
                             onSms = { onSms(transaction) },
                             index = idx, // مرر الفهرس هنا
                             modifier = Modifier
-                                .height(screenHeight * 0.18f),
+                                .height(screenHeight * 0.21f),
                             searchQuery = searchQuery
                         )
                         if (idx < transactions.lastIndex) {

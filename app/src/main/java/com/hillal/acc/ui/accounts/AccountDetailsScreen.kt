@@ -188,7 +188,7 @@ fun AccountDetailsScreen(
                             }
                         },
                         index = idx,
-                        modifier = Modifier.height(screenHeight * 0.18f),
+                        modifier = Modifier.height(screenHeight * 0.20f),
                         searchQuery = searchQuery
                     )
                     if (idx < filteredTransactions.lastIndex) {
