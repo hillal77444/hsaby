@@ -162,20 +162,20 @@ fun LoginScreen(
                         OutlinedTextField(
                             value = phone,
                             onValueChange = { phone = it },
-                            label = { Text("رقم التلفون", fontSize = fontField) },
+                            label = { Text("رقم التلفون") }, // بدون تخصيص حجم خط
                             leadingIcon = {
                                 Icon(
                                     Icons.Default.Phone,
                                     contentDescription = null,
-                                    modifier = Modifier.size(iconSize),
+                                    modifier = Modifier.size(20.dp), // حجم أيقونة افتراضي
                                     tint = colors.primary
                                 )
                             },
                             singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), // يقبل أرقام فقط
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(56.dp), // ارتفاع ثابت
+                                .height(56.dp), // ارتفاع افتراضي
                             shape = RoundedCornerShape(dimens.cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.background,
@@ -187,12 +187,12 @@ fun LoginScreen(
                         OutlinedTextField(
                             value = password,
                             onValueChange = { password = it },
-                            label = { Text("كلمة السر", fontSize = fontField) },
+                            label = { Text("كلمة السر") }, // بدون تخصيص حجم خط
                             leadingIcon = {
                                 Icon(
                                     Icons.Default.Lock,
                                     contentDescription = null,
-                                    modifier = Modifier.size(iconSize),
+                                    modifier = Modifier.size(20.dp), // حجم أيقونة افتراضي
                                     tint = colors.primary
                                 )
                             },
@@ -202,12 +202,12 @@ fun LoginScreen(
                                 val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                                 val desc = if (passwordVisible) "إخفاء كلمة السر" else "إظهار كلمة السر"
                                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                    Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(iconSize), tint = colors.primary)
+                                    Icon(imageVector = image, contentDescription = desc, modifier = Modifier.size(20.dp), tint = colors.primary)
                                 }
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(56.dp), // ارتفاع ثابت
+                                .height(56.dp), // ارتفاع افتراضي
                             shape = RoundedCornerShape(dimens.cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.background,
