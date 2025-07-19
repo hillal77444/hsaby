@@ -15,7 +15,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// السماح بعرض الصفحات داخل iframe
 app.use((req, res, next) => {
     res.removeHeader && res.removeHeader('X-Frame-Options');
     res.setHeader('X-Frame-Options', 'ALLOWALL');
@@ -49,6 +48,9 @@ function enqueue(sessionId, task) {
     sessionQueues[sessionId] = sessionQueues[sessionId].then(() => task()).catch(() => {});
     return sessionQueues[sessionId];
 }
+
+
+
 
 // دالة إنشاء جلسة واتساب
 async function createWhatsAppSession(sessionId) {
@@ -432,8 +434,8 @@ app.get('/qr/:sessionId', async (req, res) => {
                         <div id="info">
                             <p style="color: #128C7E; font-weight: bold;">📱 امسح الباركود بهاتفك لربط WhatsApp</p>
                         </div>
-                        <button id="connectBtn" class="btn" onclick="startNewSession()">ربط WhatsApp جديد</button>
-                        <button id="fixBtn" class="btn" onclick="fixPairing()" style="background: #e74c3c;">إصلاح مشاكل الربط</button>
+                        <button id="connectBtn" class="btn hidden" onclick="startNewSession()">ربط WhatsApp جديد</button>
+                        <button id="fixBtn" class="btn" onclick="fixPairing()" style="background: #410ae4ff;"> عرض الباركود</button>
                         <div id="qrcode" class="hidden"></div>
                         <div id="success" class="hidden">
                             <h3>✅ تم الاتصال بنجاح!</h3>
@@ -555,7 +557,7 @@ app.get('/qr/:sessionId', async (req, res) => {
                         }
 
                         async function fixPairing() {
-                            showError('جاري إصلاح مشاكل الربط...');
+                            showError('جاري إنشاء جلسة جديدة...');
                             document.getElementById('qrcode').classList.add('hidden');
                             document.getElementById('success').classList.add('hidden');
                             
@@ -711,8 +713,12 @@ app.get('/check_connection/:sessionId', async (req, res) => {
 });
 
 // Add new endpoint to delete session
+
 app.post('/delete_session/:sessionId', async (req, res) => {
     const { sessionId } = req.params;
+    if (!sessionId || typeof sessionId !== 'string' || sessionId.trim() === '') {
+        return res.status(400).json({ error: 'Session ID is required' });
+    }
     try {
         console.log(`🗑️ Deleting session ${sessionId}...`);
         
@@ -857,7 +863,7 @@ app.post('/fix_pairing/:sessionId', async (req, res) => {
         
         res.json({ 
             success: true, 
-            message: 'Pairing issues fixed, new session created. Please scan the QR code again.' 
+            message: 'تم إنشاء جلسة جديدة. يرجى مسح رمز الاستجابة السريعة QR .' 
         });
     } catch (error) {
         console.error(`Error fixing pairing for session ${sessionId}:`, error);
@@ -1354,6 +1360,8 @@ app.get('/sessions_dashboard', async (req, res) => {
                     <div class="modal-content">
                         <h2>حذف الجلسة</h2>
                         <p>هل أنت متأكد من رغبتك في حذف هذه الجلسة؟</p>
+                        <p id="sessionIdLabel" style="color:#128C7E;font-weight:bold;"></p>
+                        <input type="hidden" id="sessionIdToDelete" />
                         <div class="modal-buttons">
                             <button class="confirm-btn modal-btn" onclick="confirmDelete()">تأكيد</button>
                             <button class="cancel-btn modal-btn" onclick="closeDeleteModal()">إلغاء</button>
@@ -1388,9 +1396,8 @@ app.get('/sessions_dashboard', async (req, res) => {
                     }
 
                     function deleteSession(sessionId) {
-                        // تخزين معرف الجلسة المراد حذفها
                         document.getElementById('sessionIdToDelete').value = sessionId;
-                        // عرض النموذج للحذف
+                        document.getElementById('sessionIdLabel').innerText = 'معرف الجلسة: ' + sessionId;
                         document.getElementById('deleteModal').style.display = 'block';
                     }
 
