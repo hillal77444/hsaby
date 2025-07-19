@@ -256,7 +256,7 @@ fun AccountsComposeScreen(
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = onNavigateToAddAccount,
-                    modifier = Modifier.padding(dimens.spacingLarge),
+                    modifier = Modifier.padding(bottom = 80.dp, end = dimens.spacingLarge), // رفع الزر للأعلى
                     containerColor = colors.primary,
                     contentColor = colors.onPrimary
                 ) {
