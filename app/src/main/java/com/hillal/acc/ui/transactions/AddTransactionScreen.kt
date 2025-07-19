@@ -567,7 +567,7 @@ fun AddTransactionScreen(
                                         }
                                     },
                                     label = { Text("المبلغ", fontSize = dimens.bodyFont) },
-                                    modifier = Modifier.fillMaxWidth().height(dimens.textFieldHeight),
+                                    modifier = Modifier.fillMaxWidth().height(66.dp),
                                     leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null, modifier = Modifier.size(dimens.iconSize)) },
                                     textStyle = typography.bodyLarge.copy(fontSize = dimens.bodyFont),
                                     singleLine = true,
@@ -596,7 +596,7 @@ fun AddTransactionScreen(
                                 value = dateFormat.format(Date(date)),
                                 onValueChange = {},
                                 label = { Text("التاريخ", fontSize = dimens.bodyFont) },
-                                modifier = Modifier.weight(1f).clickable { showDatePicker = true }.height(dimens.textFieldHeight),
+                                modifier = Modifier.weight(1f).clickable { showDatePicker = true }.height(66.dp),
                                 enabled = false,
                                 readOnly = true,
                                 leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(dimens.iconSize)) },
@@ -631,7 +631,7 @@ fun AddTransactionScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .menuAnchor()
-                                    .height(dimens.textFieldHeight),
+                                    .height(66.dp),
                                 leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(dimens.iconSize)) },
                                 textStyle = typography.bodyLarge.copy(fontSize = dimens.bodyFont),
                                 trailingIcon = {

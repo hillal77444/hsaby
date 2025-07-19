@@ -180,7 +180,7 @@ fun RegisterScreen(
                             singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(fieldHeight),
+                                .height(66.dp),
                             shape = RoundedCornerShape(cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.backgroundVariant,
@@ -198,7 +198,7 @@ fun RegisterScreen(
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), // يقبل أرقام فقط
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(fieldHeight),
+                                .height(66.dp),
                             shape = RoundedCornerShape(cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.backgroundVariant,
@@ -223,7 +223,7 @@ fun RegisterScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(fieldHeight),
+                                .height(66.dp),
                             shape = RoundedCornerShape(cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.backgroundVariant,
@@ -248,7 +248,7 @@ fun RegisterScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(fieldHeight),
+                                .height(66.dp),
                             shape = RoundedCornerShape(cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.backgroundVariant,
