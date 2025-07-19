@@ -546,16 +546,17 @@ def start_whatsapp_session():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
-
-@admin.route('/api/admin/whatsapp/qr/<session_id>')
+@admin.route('/api/whatsapp/qr/<session_id>')
 def get_whatsapp_qr(session_id):
     from .models import User
     user = User.query.filter_by(session_name=session_id).first()
     if user:
         qr_url = f"/qr/{session_id}"
-        return render_template('admin/whatsapp_qr.html', qr_url=qr_url)
+        user_name = user.username
+        return render_template('admin/whatsapp_qr.html', qr_url=qr_url, user_name=user_name)
     else:
         return '<h2 style="color:red;text-align:center;margin-top:40px">الجلسة غير موجودة في قاعدة البيانات</h2>', 404
+
 
 
 @admin.route('/api/admin/whatsapp/send', methods=['POST'])
