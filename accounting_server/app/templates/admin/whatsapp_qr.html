@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>رمز واتساب{% if user_name %} ({{ user_name }}){% endif %}</title>
+    <title>رمز واتساب{% if user_name %} (اسم المستخدم: {{ user_name }}){% endif %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         html, body {
@@ -50,7 +50,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>رمز واتساب{% if user_name %} ({{ user_name }}){% endif %}</h2>
+        <h2>رمز واتساب{% if user_name %} (اسم المستخدم: {{ user_name }}){% endif %}</h2>
         <iframe src="{{ qr_url }}" allowfullscreen></iframe>
     </div>
 </body>
