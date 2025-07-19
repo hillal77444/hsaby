@@ -175,7 +175,7 @@ fun LoginScreen(
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(56.dp), // ارتفاع افتراضي
+                                .height(76.dp), // ارتفاع افتراضي
                             shape = RoundedCornerShape(dimens.cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.background,
@@ -207,7 +207,7 @@ fun LoginScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(56.dp), // ارتفاع افتراضي
+                                .height(76.dp), // ارتفاع افتراضي
                             shape = RoundedCornerShape(dimens.cardCorner),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 containerColor = colors.background,
