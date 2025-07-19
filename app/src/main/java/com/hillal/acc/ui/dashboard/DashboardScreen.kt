@@ -175,8 +175,8 @@ fun DashboardScreen(
                         label = "عدد الحسابات",
                         iconTint = Color(0xFF1976D2),
                         valueColor = Color(0xFF1976D2),
-                        valueFontSize = fontSmall * 0.8f,
-                        labelFontSize = fontSmall * 0.85f,
+                        valueFontSize = fontSmall * 0.7f,
+                        labelFontSize = fontSmall * 0.7f,
                         modifier = Modifier.weight(1f).height(statCardHeight)
                     )
                     GlassStatCard(
@@ -186,7 +186,7 @@ fun DashboardScreen(
                         iconTint = Color(0xFF4CAF50),
                         valueColor = Color(0xFF4CAF50),
                         valueFontSize = fontSmall * 0.7f,
-                        labelFontSize = fontSmall * 0.85f,
+                        labelFontSize = fontSmall * 0.7f,
                         modifier = Modifier.weight(1f).height(statCardHeight)
                     )
                     GlassStatCard(
@@ -196,7 +196,7 @@ fun DashboardScreen(
                         iconTint = Color(0xFFFF9800),
                         valueColor = Color(0xFFFF9800),
                         valueFontSize = fontSmall * 0.7f,
-                        labelFontSize = fontSmall * 0.85f,
+                        labelFontSize = fontSmall * 0.7f,
                         modifier = Modifier.weight(1f).height(statCardHeight)
                     )
                     GlassStatCard(
@@ -206,7 +206,7 @@ fun DashboardScreen(
                         iconTint = Color(0xFF009688),
                         valueColor = Color(0xFF009688),
                         valueFontSize = fontSmall * 0.7f,
-                        labelFontSize = fontSmall * 0.85f,
+                        labelFontSize = fontSmall * 0.7f,
                         modifier = Modifier.weight(1f).height(statCardHeight)
                     )
                 }
