@@ -147,19 +147,19 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
 
     implementation 'com.github.florent37:singledateandtimepicker:2.2.7'
-    implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
+    // implementation 'com.wdullaer:materialdatetimepicker:4.2.3' // <== غير مستخدمة
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     
     // Test helpers
     testImplementation "androidx.room:room-testing:$room_version"
 
     // Responsive Design Libraries
-    implementation 'com.google.android.flexbox:flexbox:3.0.0'
-    implementation 'androidx.percentlayout:percentlayout:1.0.0'
-    implementation 'com.intuit.sdp:sdp-android:1.1.0'
-    implementation 'com.intuit.ssp:ssp-android:1.1.0'
+    // implementation 'com.google.android.flexbox:flexbox:3.0.0' // <== غير مستخدمة
+    // implementation 'androidx.percentlayout:percentlayout:1.0.0' // <== غير مستخدمة
+    // implementation 'com.intuit.sdp:sdp-android:1.1.0' // <== غير مستخدمة
+    // implementation 'com.intuit.ssp:ssp-android:1.1.0' // <== غير مستخدمة
 
     implementation 'androidx.annotation:annotation:1.7.1'
     implementation 'com.itextpdf:itextg:5.5.10'
-    implementation 'io.github.seen-arabic:arabic-services:1.0.1'
+    // implementation 'io.github.seen-arabic:arabic-services:1.0.1' // <== غير مستخدمة
 } 
