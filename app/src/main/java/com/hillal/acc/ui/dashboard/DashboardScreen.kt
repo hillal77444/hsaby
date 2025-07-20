@@ -436,12 +436,17 @@ fun GlassStatCard(
     label: String,
     iconTint: Color,
     valueColor: Color,
-    valueFontSize: TextUnit,
-    labelFontSize: TextUnit,
+    valueFontSize: TextUnit? = null, // اجعلها اختيارية
+    labelFontSize: TextUnit? = null, // اجعلها اختيارية
     modifier: Modifier = Modifier
 ) {
     val dimens = LocalAppDimensions.current
     val iconSize = dimens.iconSize
+    // احسب الحجم تلقائياً إذا لم يتم تمريره
+    val autoValueFontSize = (iconSize.value * 0.7f).sp
+    val autoLabelFontSize = (iconSize.value * 0.5f).sp
+    val usedValueFontSize = valueFontSize ?: autoValueFontSize
+    val usedLabelFontSize = labelFontSize ?: autoLabelFontSize
     Card(
         shape = RoundedCornerShape(24.dp),
         modifier = modifier,
@@ -466,13 +471,13 @@ fun GlassStatCard(
                 text = value,
                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                 color = valueColor,
-                fontSize = dimens.statFont // من الثيم
+                fontSize = usedValueFontSize // استخدم الحجم المحسوب أو المرسل
             )
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
                 color = valueColor,
-                fontSize = dimens.statLabelFont, // من الثيم
+                fontSize = usedLabelFontSize, // استخدم الحجم المحسوب أو المرسل
                 modifier = Modifier.padding(top = 1.dp)
             )
         }
