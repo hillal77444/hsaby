@@ -443,8 +443,8 @@ fun GlassStatCard(
     val dimens = LocalAppDimensions.current
     val iconSize = dimens.iconSize
     // احسب الحجم تلقائياً إذا لم يتم تمريره
-    val autoValueFontSize = (iconSize.value * 0.7f).sp
-    val autoLabelFontSize = (iconSize.value * 0.5f).sp
+    val autoValueFontSize = (iconSize.value * 0.9f).sp
+    val autoLabelFontSize = (iconSize.value * 0.7f).sp
     val usedValueFontSize = valueFontSize ?: autoValueFontSize
     val usedLabelFontSize = labelFontSize ?: autoLabelFontSize
     Card(
