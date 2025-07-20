@@ -559,6 +559,7 @@ def get_whatsapp_qr(session_id):
 
 
 
+
 @admin.route('/api/admin/whatsapp/send', methods=['POST'])
 @admin_required
 def send_whatsapp_message():
@@ -719,6 +720,12 @@ def send_transaction_notification():
             'details': str(e)
         }), 500
 
+def format_number(num):
+    if num == int(num):
+        return f"{int(num):,}"
+    else:
+        return f"{num:,.2f}"
+
 def calculate_and_notify_transaction(transaction_id):
     try:
         from dateutil.parser import parse as date_parse
@@ -767,7 +774,7 @@ def calculate_and_notify_transaction(transaction_id):
 
         # تنسيق الرسالة مع الرابط المؤقت
         transaction_type = "قيدنا الى حسابكم" if transaction.type == 'credit' else "قيدنا على حسابكم"
-        balance_text = f"الرصيد لكم: {balance:g} {transaction.currency or 'ريال'}" if balance >= 0 else f"الرصيد عليكم: {abs(balance):g} {transaction.currency or 'ريال'}"
+        balance_text = f"الرصيد لكم: {format_number(balance)} {transaction.currency or 'ريال'}" if balance >= 0 else f"الرصيد عليكم: {format_number(abs(balance))} {transaction.currency or 'ريال'}"
         account_name_clean = account.account_name.strip() if account.account_name else ''
         message = f"""
 🏦 إشعار قيد جديد
@@ -777,7 +784,7 @@ def calculate_and_notify_transaction(transaction_id):
 
 💰 تفاصيل القيد :
 •  {transaction_type}
-• المبلغ: {transaction.amount:g} {transaction.currency or 'ريال'}
+• المبلغ: {format_number(transaction.amount)} {transaction.currency or 'ريال'}
 • الوصف: {transaction.description or 'لا يوجد وصف'}
 • التاريخ: {transaction_dt.strftime('%Y-%m-%d')}
 
@@ -1018,7 +1025,7 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
 
         # تنسيق الرسالة
         transaction_type = "قيدنا الى حسابكم" if transaction.type == 'credit' else "قيدنا على حسابكم"
-        balance_text = f"الرصيد لكم: {balance} {transaction.currency or 'ريال'}" if balance >= 0 else f"الرصيد عليكم: {abs(balance)} {transaction.currency or 'ريال'}"
+        balance_text = f"الرصيد لكم: {format_number(balance)} {transaction.currency or 'ريال'}" if balance >= 0 else f"الرصيد عليكم: {format_number(abs(balance))} {transaction.currency or 'ريال'}"
         
         # تنسيق التاريخ القديم والجديد
         old_date_str = old_date_dt.strftime('%Y-%m-%d')
@@ -1027,7 +1034,7 @@ def send_transaction_update_notification(transaction_id, old_amount, old_date):
         # تحديد نوع التغيير
         changes = []
         if old_amount != transaction.amount:
-            changes.append(f"• المبلغ: من {old_amount} الى {transaction.amount} {transaction.currency or 'ريال'}")
+            changes.append(f"• المبلغ: من {format_number(old_amount)} الى {format_number(transaction.amount)} {transaction.currency or 'ريال'}")
         if old_date_dt != transaction_dt:
             changes.append(f"• التاريخ: من {old_date_str} الى {new_date_str}")
         
@@ -1107,7 +1114,7 @@ def send_transaction_delete_notification(transaction, final_balance):
 
         # تنسيق الرسالة
         transaction_type = "قيدنا الى حسابكم" if transaction.type == 'credit' else "قيدنا على حسابكم"
-        balance_text = f"الرصيد لكم: {final_balance} {transaction.currency or 'ريال'}" if final_balance >= 0 else f"الرصيد عليكم: {abs(final_balance)} {transaction.currency or 'ريال'}"
+        balance_text = f"الرصيد لكم: {format_number(final_balance)} {transaction.currency or 'ريال'}" if final_balance >= 0 else f"الرصيد عليكم: {format_number(abs(final_balance))} {transaction.currency or 'ريال'}"
         
         message = f"""
 🏦 إشعار حذف قيد
@@ -1118,7 +1125,7 @@ def send_transaction_delete_notification(transaction, final_balance):
 
 💰 تفاصيل القيد المحذوف:
 • نوع القيد: {transaction_type}
-• المبلغ: {transaction.amount} {transaction.currency or 'ريال'}
+• المبلغ: {format_number(transaction.amount)} {transaction.currency or 'ريال'}
 • الوصف: {transaction.description or 'لا يوجد وصف'}
 • التاريخ: {transaction_dt.strftime('%Y-%m-%d')}
 
@@ -1159,7 +1166,7 @@ def send_transaction_delete_notification(transaction, final_balance):
     except Exception as e:
         logger.error(f"Error in send_transaction_delete_notification: {str(e)}")
         return {'status': 'error', 'message': str(e)}
-
+        
 @admin.route('/api/admin/updates/')
 @admin_required
 def updates():
@@ -1593,6 +1600,7 @@ def version_compare_simple(v1, v2, op):
         return a > b
     else:
         return False
+
 
 @admin.route('/api/admin/whatsapp/send_to_users', methods=['POST'])
 @admin_required
