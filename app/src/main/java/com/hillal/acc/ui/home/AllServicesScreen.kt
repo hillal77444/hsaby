@@ -67,6 +67,17 @@ fun AllServicesScreen(navController: NavController) {
                 context.startActivity(Intent(context, ReportHeaderSettingsActivity::class.java))
             }
         ),
+        // بطاقة خدمة العملاء
+        ServiceItem(
+            "خدمة العملاء",
+            R.drawable.ic_whatsapp, // استخدم أيقونة واتساب أو أيقونة دعم مناسبة
+            onClick = {
+                val url = "https://wa.me/967712490831?text=دعم تطبيق مالي برو"
+                val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url))
+                context.startActivity(intent)
+            },
+            iconTint = Color(0xFF25D366) // لون واتساب
+        ),
         // بطاقة تجديد الاشتراك فقط
         ServiceItem(
             "تجديد الاشتراك",
@@ -201,7 +212,7 @@ fun AllServicesScreen(navController: NavController) {
                     ) {
                         Button(
                             onClick = {
-                                val url = "https://wa.me/967774447251?text=اشتراك تطبيق مالي برو"
+                                val url = "https://wa.me/967712490831?text=اشتراك تطبيق مالي برو"
                                 val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url))
                                 context.startActivity(intent)
                                 showSubscriptionDialog = false
