@@ -53,6 +53,16 @@ fun AccountDetailsScreen(
     val transactions: List<Transaction> = transactionsLive?.observeAsState(emptyList())?.value?.filterNotNull() ?: emptyList()
     var searchQuery by remember { mutableStateOf("") }
 
+    // العملات المتوفرة
+    val currencies = remember(transactions) {
+        transactions.map { it.getCurrency()?.trim() ?: "يمني" }.distinct().ifEmpty { listOf("يمني") }
+    }
+    var selectedCurrency by remember { mutableStateOf("") }
+    // عند أول بناء للشاشة، اختر "يمني" إذا موجود، أو أول عملة
+    LaunchedEffect(currencies) {
+        selectedCurrency = currencies.find { it == "يمني" } ?: currencies.firstOrNull() ?: "يمني"
+    }
+
     // متغيرات حالة الحذف
     var showDeleteDialog by remember { mutableStateOf(false) }
     var transactionToDelete by remember { mutableStateOf<Transaction?>(null) }
@@ -60,11 +70,10 @@ fun AccountDetailsScreen(
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
 
-    val filteredTransactions = if (searchQuery.isBlank()) {
-        transactions
-    } else {
-        transactions.filter { it.getDescription()?.contains(searchQuery, ignoreCase = true) == true }
-    }
+    // الفلترة حسب العملة والبحث
+    val filteredTransactions = transactions
+        .filter { (it.getCurrency()?.trim() ?: "يمني") == selectedCurrency }
+        .filter { it.getDescription()?.contains(searchQuery, ignoreCase = true) == true || searchQuery.isBlank() }
 
     val coroutineScope = rememberCoroutineScope()
     var showProgress by remember { mutableStateOf(false) }
@@ -77,7 +86,7 @@ fun AccountDetailsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .navigationBarsPadding(),
-            contentPadding = PaddingValues(bottom = 0.dp) // لا تضف أي مسافة ثابتة
+            contentPadding = PaddingValues(bottom = 0.dp)
         ) {
             // شريط علوي ثابت
             item {
@@ -104,7 +113,34 @@ fun AccountDetailsScreen(
                     }
                 }
             }
-            // شريط البحث
+            // أزرار العملات
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 2.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    currencies.forEach { currency ->
+                        val isSelected = selectedCurrency == currency
+                        Button(
+                            onClick = { selectedCurrency = currency },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isSelected) MaterialTheme.colorScheme.primary else Color(0xFFF0F0F0),
+                                contentColor = if (isSelected) Color.White else Color.Black
+                            ),
+                            shape = MaterialTheme.shapes.small,
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = if (isSelected) 2.dp else 0.dp),
+                            modifier = Modifier
+                                .padding(horizontal = 2.dp)
+                                .height(34.dp)
+                        ) {
+                            Text(currency, style = MaterialTheme.typography.labelLarge)
+                        }
+                    }
+                }
+            }
+            // شريط البحث بهامش خفيف جداً
             item {
                 OutlinedTextField(
                     value = searchQuery,
@@ -120,7 +156,7 @@ fun AccountDetailsScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(12.dp)
+                        .padding(horizontal = 4.dp, vertical = 0.dp)
                 )
             }
             // قائمة المعاملات أو رسالة عدم وجود معاملات
