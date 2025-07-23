@@ -290,11 +290,7 @@ public class MigrationManager {
 
         final String finalErrorMessage = errorMessage;
         new Handler(Looper.getMainLooper()).post(() -> {
-            new AlertDialog.Builder(context)
-                .setTitle("خطأ في المزامنة")
-                .setMessage(finalErrorMessage)
-                .setPositiveButton("حسناً", null)
-                .show();
+            Toast.makeText(context, finalErrorMessage, Toast.LENGTH_LONG).show();
         });
     }
 
