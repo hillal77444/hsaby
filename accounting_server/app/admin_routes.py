@@ -881,7 +881,7 @@ def account_statement(account_id):
 
     # إذا لم يتم تحديد عملة، اختر أول عملة تلقائيًا (إن وجدت)
     if selected_currency == 'all' and currencies:
-        selected_currency = currencies[0]
+        selected_currency = currencies[-1]
 
     # فلتر العملة
     currency_filter = []

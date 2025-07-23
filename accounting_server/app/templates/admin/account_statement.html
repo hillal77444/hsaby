@@ -5,716 +5,361 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>كشف حساب - {{ account.account_name }}</title>
     <!-- Bootstrap RTL CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
     <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <style>
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-            .print-only {
-                display: block !important;
-            }
-            .card,
-            .card-body {
-                border: none !important;
-                box-shadow: none !important;
-                padding: 0 !important;
-            }
-            @page {
-                size: A4;
-                margin: 1cm;
-            }
-            .table {
-                box-shadow: none !important;
-            }
-            .table thead th {
-                background-color: #f8f9fc !important;
-                color: #000 !important;
-            }
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap'  );
+
         body {
-            background-color: #f8f9fc;
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            color: #2d3748;
-            margin: 0;
-            padding: 0;
-        }
-        .print-only {
-            display: none;
-        }
-        .statement-header,
-        .statement-info,
-        .summary-card {
-            background-color: #fff;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.1rem 0.5rem rgba(58, 59, 69, 0.1);
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-        .statement-info p,
-        .summary-card p {
-            font-size: 1rem;
-            color: #4a5568;
-            margin-bottom: 0.5rem;
-        }
-        .statement-info strong,
-        .summary-card strong {
-            color: #2d3748;
+            background-color: #f4f7f9;
+            font-family: 'Cairo', sans-serif;
+            color: #333;
             font-weight: 600;
         }
-        .transaction-row:hover {
-            background-color: #f8f9fc;
+
+        .container-fluid {
+            max-width: 1200px;
+            padding-left: 15px;
+            padding-right: 15px;
         }
-        .balance-positive {
-            color: #1a237e !important;
-            font-weight: bold !important;
+
+        .header-card {
+            background: linear-gradient(135deg, #4e73df, #1cc88a);
+            color: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
-        .balance-negative {
-            color: #e53e3e !important;
-            font-weight: bold !important;
+
+        .header-card h1 {
+            font-weight: 700;
+            font-size: 1.8rem;
         }
-        .table {
-            background-color: #fff;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.05rem 0.2rem rgba(58, 59, 69, 0.05);
+
+        .account-info p {
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .filter-card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .table-card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             overflow: hidden;
         }
-        .table thead th,
+
+        /* --- تعديلات رأس الجدول --- */
+        .table thead th {
+            background: linear-gradient(135deg, #6f42c1, #4e73df); /* خلفية متدرجة وجذابة */
+            color: #ffffff; /* لون نص أبيض */
+            font-weight: 700;
+            text-align: center;
+            vertical-align: middle;
+            border-bottom: 2px solid #4e73df; /* خط سفلي بلون أغمق */
+            border-left: 1px solid #6f86e9; /* خط فاصل بين الأعمدة */
+            padding: 1rem 0.75rem; /* زيادة المساحة الداخلية */
+            text-transform: uppercase; /* يمكن إزالتها إذا لم تعجبك */
+            letter-spacing: 0.5px; /* تباعد بسيط بين الحروف */
+        }
+
+        .table thead th:first-child {
+            border-top-right-radius: 0.75rem; /* زاوية دائرية للخلية الأولى */
+        }
+        .table thead th:last-child {
+            border-top-left-radius: 0.75rem; /* زاوية دائرية للخلية الأخيرة */
+            border-left: 0; /* إزالة الخط الفاصل الأخير */
+        }
+        /* --- نهاية تعديلات رأس الجدول --- */
+        
+        /* إعطاء مساحة أكبر لعمود الوصف */
+        .table .description-col {
+            width: 35%; /* تم التغيير إلى 35% */
+        }
+        .table .date-col {
+            width: 20%; /* تم التغيير إلى 20% */
+        }
+
         .table tbody td {
             text-align: center;
-            padding: 0.5rem 0.3rem;
-            font-size: 0.9rem;
-        }
-        .amount-cell {
-            font-family: "Courier New", monospace;
+            vertical-align: middle;
+            font-size: 1rem;
             font-weight: 600;
-            color: #1a237e;
+            padding: 0.75rem 0.5rem;
+            border-left: 1px solid #95b3d5; /* خط فاصل رأسي بين الخلايا */
         }
-        .credit-amount {
-            color: #2e7d32 !important;
-            font-weight: bold !important;
+        
+        .table td:last-child, .table th:last-child {
+            border-left: 0; /* إزالة الخط الفاصل للعمود الأخير */
         }
-        .debit-amount {
-            color: #c62828 !important;
-            font-weight: bold !important;
+
+        .transaction-row:hover {
+            background-color: #eef2ff;
         }
-        .balance-amount {
-            color: #1565c0 !important;
-            font-weight: bold !important;
+
+        .amount-cell {
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
         }
-        .balance-amount.balance-positive {
-            color: #1a237e !important;
-            font-weight: bold !important;
+
+        .credit-amount { color: #28a745 !important; }
+        .debit-amount { color: #dc3545 !important; }
+        .balance-positive { color: #1a237e; font-weight: 700; }
+        .balance-negative { color: #e53e3e; font-weight: 700; }
+
+        .final-balance-card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
         }
-        .balance-amount.balance-negative {
-            color: #e53e3e !important;
-            font-weight: bold !important;
-        }
-        .currency-filter select {
-            min-width: 200px;
-            padding: 0.5rem;
-            border-radius: 0.3rem;
-            font-size: 0.9rem;
-        }
-        .btn-primary {
-            background-color: #4e73df;
-            border-color: #4e73df;
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-            border-radius: 0.3rem;
-        }
-        .btn-primary:hover {
-            background-color: #2e59d9;
-            border-color: #2e59d9;
-        }
-        .info-cards-row {
-            gap: 0.25rem;
-            display: flex;
-            flex-wrap: wrap;
-        }
-        .info-card {
-            background: #fff;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.05rem 0.2rem rgba(58, 59, 69, 0.05);
-            padding: 0.5rem 0.75rem;
-            flex: 1 1 0;
-            min-width: 120px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .info-card strong {
-            font-size: 0.9rem;
-            color: #2d3748;
-        }
-        .info-card .icon {
-            font-size: 1rem;
-            color: #4e73df;
-            margin-left: 0.3rem;
-        }
-        /* وضع اختيار العملة في نفس بطاقة التاجر */
-        .currency-filter {
-            width: 100%;
-            margin-top: 0.5rem;
-        }
-        .filter-card {
-            background: #fff;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.05rem 0.2rem rgba(58, 59, 69, 0.05);
-            padding: 0.5rem;
+
+        .final-balance-card h5 {
+            font-weight: 700;
+            color: #555;
             margin-bottom: 0.5rem;
         }
-        .note {
-            font-size: 0.85rem;
-            color: #888;
-            margin-top: 0.2rem;
+
+        .final-balance-amount {
+            font-size: 2.8rem;
+            font-weight: 700;
         }
-        /* تنسيق التاريخ والأزرار في صف واحد بحجم صغير */
-        .date-buttons-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.3rem;
-            align-items: flex-end;
-            margin-bottom: 0.5rem;
-        }
-        .date-buttons-row > div {
-            flex: 1 1 auto;
-            min-width: 120px;
-        }
-        .date-buttons-row label {
+
+        .print-info {
             font-size: 0.8rem;
+            color: #888;
+            text-align: center;
+            margin-top: 1rem;
         }
-        .date-buttons-row input[type="date"],
-        .date-buttons-row button {
-            width: 100%;
-            padding: 0.3rem 0.4rem;
-            font-size: 0.85rem;
-            border-radius: 0.3rem;
+        
+        .currency-buttons .btn {
+            margin: 0.25rem;
+            flex-grow: 1;
         }
-        .single-row-info {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
+
+        .print-header {
+            display: none;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 1rem;
         }
-        .merged-info-card.single-row-info {
-            padding: 0.5rem 0.3rem;
-            margin-bottom: 0.2rem;
-        }
-        .merged-info-card.single-row-info .icon {
-            font-size: 1rem;
-            color: #4e73df;
-            margin-left: 0.2rem;
-        }
-        .merged-info-card.single-row-info strong {
-            font-size: 0.9rem;
-            color: #2d3748;
-        }
-        .merged-info-card.single-row-info label {
-            font-size: 0.85rem;
-            margin-bottom: 0;
-        }
-        .merged-info-card.single-row-info .form-select {
-            min-width: 80px;
-            max-width: 120px;
-            font-size: 0.85rem;
-        }
-        .vr {
-            border-left: 1px solid #e0e0e0;
-            height: 18px;
-        }
-        @media (max-width: 768px) {
+        .print-header h4 { font-weight: 700; margin-bottom: 0.5rem; }
+        .print-header p { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; }
+
+        @media (max-width: 767.98px) {
             .container-fluid {
-                padding: 0.5rem;
+                padding-left: 5px;
+                padding-right: 5px;
             }
-            .statement-header,
-            .statement-info,
-            .summary-card {
-                padding: 0.5rem;
+
+            .header-card, .filter-card, .final-balance-card {
+                padding: 0.75rem;
                 margin-bottom: 0.5rem;
+                border-radius: 0.5rem;
             }
-            .statement-info p,
-            .summary-card p,
-            .table thead th,
-            .table tbody td {
-                font-size: 0.8rem;
-            }
-            .amount-cell {
-                font-size: 0.8rem;
-            }
-            .currency-filter select,
-            .currency-filter,
-            #currencyFilter,
-            #fromDate,
-            #toDate {
-                min-width: 90px;
-                max-width: 100%;
-                width: 100%;
-                padding: 0.18rem 0.3rem;
-                font-size: 0.75rem;
-                border-radius: 0.22rem;
-                margin-bottom: 0.2rem;
-            }
-            .date-buttons-row {
-                flex-direction: row !important;
-                gap: 0.2rem;
-                align-items: stretch;
-                flex-wrap: wrap;
-            }
-            .date-buttons-row .form-group-fields {
-                display: flex;
-                flex-direction: row;
-                gap: 0.2rem;
-                width: 100%;
-            }
-            .date-buttons-row .form-group-fields > div {
-                flex: 1 1 0;
-                min-width: 0;
-                margin-bottom: 0;
-            }
-            .date-buttons-row .form-group-buttons {
-                display: flex;
-                flex-direction: row;
-                gap: 0.2rem;
-                width: 100%;
-                margin-top: 0.1rem;
-            }
-            .date-buttons-row .form-group-buttons > div {
-                flex: 1 1 0;
-                min-width: 0;
-            }
-            .btn-primary, .btn-outline-secondary {
-                padding: 0.22rem 0.4rem;
-                font-size: 0.75rem;
-                border-radius: 0.22rem;
-            }
-            .filter-card .btn {
-                width: 100%;
-                font-size: 0.75rem;
-                padding: 0.22rem 0.4rem;
-            }
-            .info-cards-row {
-                flex-direction: column;
-                gap: 0.2rem;
-            }
-            .info-card {
-                padding: 0.3rem 0.4rem;
-                font-size: 0.8rem;
-                border-radius: 0.3rem;
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .info-card strong {
-                font-size: 0.8rem;
-            }
-            .filter-card .row.g-2 {
-                flex-wrap: wrap !important;
-                flex-direction: row !important;
-                gap: 0.3rem !important;
-                justify-content: space-between;
-            }
-            .filter-card .col-md-3,
-            .filter-card .col-6,
-            .filter-card .col-12 {
-                flex: 1 1 calc(50% - 0.3rem);
-                min-width: auto;
-                width: auto !important;
-                max-width: 100% !important;
-            }
-            .merged-info-card.single-row-info {
-                padding: 0.2rem 0.1rem;
-                margin-bottom: 0.1rem;
-            }
-            .single-row-info {
-                gap: 0.2rem;
-            }
-            .merged-info-card.single-row-info strong {
-                font-size: 0.8rem;
-            }
-            .merged-info-card.single-row-info label {
-                font-size: 0.75rem;
-            }
-            .merged-info-card.single-row-info .form-select {
-                min-width: 50px;
-                max-width: 80px;
-                font-size: 0.75rem;
-                padding: 0.1rem 0.2rem;
-            }
-            .vr {
-                margin: 0 0.1rem !important;
-                height: 15px;
-            }
-        }
-        /* دمج البطاقات العلوية وتنسيقها */
-        .merged-info-card {
-            background: #fff;
-            border-radius: 1rem;
-            box-shadow: 0 0.15rem 1.75rem rgba(58, 59, 69, 0.15);
-            padding: 1.5rem 1.2rem;
-            margin-bottom: 2rem;
-        }
-        .merged-info-card .icon {
-            font-size: 1.2rem;
-            color: #4e73df;
-            margin-left: 0.3rem;
-        }
-        .merged-info-card strong {
-            font-size: 1.05rem;
-            color: #2d3748;
-        }
-        .merged-info-card label {
-            font-size: 0.98rem;
-        }
-        @media (max-width: 768px) {
-            .merged-info-card {
-                padding: 0.8rem 0.5rem;
-                margin-bottom: 1rem;
-            }
-            .merged-info-card .row {
-                flex-direction: column !important;
-            }
-            .merged-info-card .col-12 {
-                margin-bottom: 0.7rem;
-            }
-            .merged-info-card strong {
-                font-size: 0.95rem;
-            }
-            .merged-info-card label {
-                font-size: 0.9rem;
-            }
-            .currency-filter select, .currency-filter {
-                min-width: 100px;
-                padding: 0.3rem;
+
+            .header-card h1 { font-size: 1.4rem; }
+            .account-info p { font-size: 0.9rem; }
+            .filter-card .form-label { font-size: 0.85rem; }
+            .filter-card .row > div { padding-left: 5px; padding-right: 5px; }
+
+            .final-balance-card { margin-top: 0.5rem; }
+            .final-balance-amount { font-size: 2rem; }
+            .final-balance-card h5 { font-size: 1rem; }
+
+            .table tbody td, .table thead th {
+                padding: 0.5rem 0.25rem;
                 font-size: 0.85rem;
             }
+            .amount-cell { font-size: 0.9rem; }
         }
-        .merged-info-card.always-column {
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            padding: 1.2rem 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .merged-info-card.always-column .icon {
-            font-size: 1.1rem;
-            color: #4e73df;
-            margin-left: 0.3rem;
-        }
-        .merged-info-card.always-column strong {
-            font-size: 1.01rem;
-            color: #2d3748;
-        }
-        .merged-info-card.always-column label {
-            font-size: 0.97rem;
-            margin-bottom: 0;
-        }
-        .merged-info-card.always-column .form-select {
-            min-width: 110px;
-            max-width: 160px;
-            font-size: 0.97rem;
-        }
-        @media (max-width: 768px) {
-            .merged-info-card.always-column {
-                padding: 0.6rem 0.4rem;
-                margin-bottom: 1rem;
+
+        @media print {
+            body { background-color: #fff; }
+            .no-print { display: none !important; }
+            .print-header { display: block !important; }
+            .header-card, .table-card, .final-balance-card { box-shadow: none !important; border: 1px solid #ddd; }
+            .header-card { display: none; }
+            .final-balance-amount { color: #000 !important; }
+            .table thead th {
+                background: #f8f9fa !important; /* إعادة رأس الجدول للون بسيط عند الطباعة */
+                color: #333 !important;
+                border: 1px solid #dee2e6 !important;
             }
-            .merged-info-card.always-column strong {
-                font-size: 0.93rem;
+            .table td {
+                 border: 1px solid #dee2e6 !important;
             }
-            .merged-info-card.always-column label {
-                font-size: 0.89rem;
-            }
-            .merged-info-card.always-column .form-select {
-                min-width: 80px;
-                max-width: 120px;
-                font-size: 0.89rem;
-                padding: 0.2rem 0.4rem;
-            }
-        }
-        .merged-info-card.responsive-row {
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            padding: 1.2rem 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .info-row-responsive {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: stretch;
-            gap: 2rem;
-        }
-        .info-row-responsive.flex-column {
-            flex-direction: column;
-            gap: 1rem;
-        }
-        .info-line {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .merged-info-card.responsive-row .icon {
-            font-size: 1.1rem;
-            color: #4e73df;
-            margin-left: 0.3rem;
-        }
-        .merged-info-card.responsive-row strong {
-            font-size: 1.01rem;
-            color: #2d3748;
-        }
-        .merged-info-card.responsive-row label {
-            font-size: 0.97rem;
-            margin-bottom: 0;
-        }
-        .merged-info-card.responsive-row .form-select {
-            min-width: 110px;
-            max-width: 160px;
-            font-size: 0.97rem;
-        }
-        .vr {
-            border-left: 1.5px solid #e0e0e0;
-            height: 22px;
-        }
-        @media (max-width: 768px) {
-            .info-row-responsive {
-                flex-direction: column !important;
-                gap: 0.7rem;
-            }
-            .info-row-responsive.flex-column {
-                gap: 0.5rem;
-            }
-            .merged-info-card.responsive-row {
-                padding: 0.6rem 0.4rem;
-                margin-bottom: 1rem;
-            }
-            .merged-info-card.responsive-row strong {
-                font-size: 0.93rem;
-            }
-            .merged-info-card.responsive-row label {
-                font-size: 0.89rem;
-            }
-            .merged-info-card.responsive-row .form-select {
-                min-width: 80px;
-                max-width: 120px;
-                font-size: 0.89rem;
-                padding: 0.2rem 0.4rem;
-            }
-            .vr {
-                display: none !important;
-            }
-        }
-        .transaction-row {
-            background-color: #f7f7fa;
-            transition: background 0.2s;
-        }
-        .transaction-row:nth-child(even) {
-            background-color: #e9e9f3;
-        }
-        .transaction-row:hover {
-            background-color: #dbeafe !important;
+            @page { size: A4; margin: 1cm; }
         }
     </style>
 </head>
 <body>
+    <!-- تم تقليل الهامش العلوي والسفلي هنا من py-4 إلى py-2 -->
     <div class="container-fluid py-2">
-        <!-- فلاتر البحث -->
-        <div class="card filter-card p-3 mb-4">
-            <form class="date-buttons-row" method="get" action="">
-                <div class="form-group-fields">
-                    <div>
-                        <label for="fromDate" class="form-label mb-1"><i class="fas fa-calendar-alt"></i> من تاريخ</label>
-                        <input
-                            type="date"
-                            class="form-control"
-                            id="fromDate"
-                            name="from_date"
-                            value="{{ request.args.get('from_date', default_from_date) }}"
-                        />
+        
+        <div class="print-header">
+            <h4>كشف حساب</h4>
+            <p><strong>العميل:</strong> {{ account.account_name }}</p>
+            <p><strong>التاجر:</strong> {{ user.username }}</p>
+            <p><strong>الفترة:</strong> من {{ request.args.get('from_date', default_from_date) }} إلى {{ request.args.get('to_date', default_to_date) }}</p>
+            <p><strong>العملة:</strong> 
+                <span id="print-currency">
+                    {% if selected_currency == 'all' %} جميع العملات {% else %} {{ selected_currency }} {% endif %}
+                </span>
+            </p>
+        </div>
+
+        <div class="header-card text-center no-print">
+            <h1>كشف حساب</h1>
+            <div class="account-info mt-3">
+                <p><strong><i class="fas fa-user me-2"></i>اسم الحساب:</strong> {{ account.account_name }}</p>
+                <p><strong><i class="fas fa-phone me-2"></i>رقم الهاتف:</strong> {{ account.phone_number }}</p>
+                <p><strong><i class="fas fa-store me-2"></i>التاجر:</strong> {{ user.username }}</p>
+            </div>
+        </div>
+
+        <div class="filter-card no-print">
+            <form method="get" action="" id="filterForm">
+                <div class="row g-2 align-items-end">
+                    <div class="col-6 col-md-4">
+                        <label for="fromDate" class="form-label fw-bold"><i class="fas fa-calendar-alt me-1"></i> من</label>
+                        <input type="date" class="form-control" id="fromDate" name="from_date" value="{{ request.args.get('from_date', default_from_date) }}">
                     </div>
-                    <div>
-                        <label for="toDate" class="form-label mb-1"><i class="fas fa-calendar-day"></i> إلى تاريخ</label>
-                        <input
-                            type="date"
-                            class="form-control"
-                            id="toDate"
-                            name="to_date"
-                            value="{{ request.args.get('to_date', default_to_date) }}"
-                        />
+                    <div class="col-6 col-md-4">
+                        <label for="toDate" class="form-label fw-bold"><i class="fas fa-calendar-day me-1"></i> إلى</label>
+                        <input type="date" class="form-control" id="toDate" name="to_date" value="{{ request.args.get('to_date', default_to_date) }}">
                     </div>
-                    <div>
-                        <label for="currencyFilter" class="form-label mb-0">
-                            <i class="fas fa-coins"></i> اختيار العملة
-                        </label>
-                        <select class="form-select currency-filter ms-2" id="currencyFilter" name="currency" onchange="this.form.submit()">
-                            <option value="all" {% if selected_currency == 'all' %}selected{% endif %}>جميع العملات</option>
-                            {% for currency in currencies %}
-                            <option value="{{ currency }}" {% if selected_currency == currency %}selected{% endif %}>{{ currency }}</option>
-                            {% endfor %}
-                        </select>
+                    <div class="col-12 col-md-4 d-flex align-items-center gap-2 mt-2 mt-md-0">
+                        <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="fas fa-search me-1"></i></button>
+                        <button type="button" onclick="window.print()" class="btn btn-outline-secondary w-100 fw-bold"><i class="fas fa-print me-1"></i></button>
                     </div>
                 </div>
-                <div class="form-group-buttons">
-                    <div>
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search"></i> تقرير
-                        </button>
-                    </div>
-                    <div>
-                        <button type="button" onclick="window.print()" class="btn btn-outline-secondary w-100">
-                            <i class="fas fa-print"></i> طباعة
-                        </button>
+                <hr class="my-2">
+                <div class="row mt-2">
+                    <div class="col-12">
+                         <label class="form-label fw-bold"><i class="fas fa-coins me-1"></i> العملة</label>
+                         <div id="currencyButtons" class="d-flex flex-wrap currency-buttons">
+                            <input type="hidden" name="currency" id="currencyInput" value="{{ selected_currency }}">
+                            <!-- تم تغيير لون الزر النشط إلى btn-primary -->
+                            <button type="button" class="btn btn-sm {% if selected_currency == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %}" data-currency="all">الكل</button>
+                            {% for currency in currencies %}
+                            <button type="button" class="btn btn-sm {% if selected_currency == currency %}btn-primary{% else %}btn-outline-primary{% endif %}" data-currency="{{ currency }}">{{ currency }}</button>
+                            {% endfor %}
+                         </div>
                     </div>
                 </div>
             </form>
         </div>
 
-        <!-- البطاقات العلوية (كل العناصر في صف أفقي واحد دائمًا) -->
-        <div class="info-card mb-1 merged-info-card single-row-info">
-            <div class="d-flex flex-row align-items-center flex-wrap gap-2 gap-md-3 info-single-row">
-                <span class="icon"><i class="fas fa-user"></i></span>
-                <strong>اسم الحساب:</strong>
-                <span>{{ account.account_name }}</span>
-                <span class="vr mx-2"></span>
-                <strong>رقم الهاتف:</strong>
-                <span>{{ account.phone_number }}</span>
-                <span class="vr mx-2"></span>
-                <span class="icon"><i class="fas fa-user-tie"></i></span>
-                <strong>التاجر:</strong>
-                <span>{{ user.username }}</span>
-            </div>
-        </div>
-
-        <!-- جدول المعاملات -->
-        <div class="card shadow mb-4">
-            <div class="card-body">
+        <div class="table-card">
+            <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-bordered" width="100%" cellspacing="0">
+                    <table class="table table-striped table-hover mb-0" width="100%">
                         <thead>
                             <tr>
                                 <th>التاريخ</th>
-                                <th>العملة</th>
-                                <th>دائن</th>
-                                <th>مدين</th>
-                                <th>الوصف</th>
-                                <th>الرصيد التراكمي</th>
+                                <!-- تم حذف عمود العملة من هنا -->
+                                <th>له (دائن)</th>
+                                <th>عليه (مدين)</th>
+                                <th class="description-col">الوصف</th>
+                                <th>الرصيد</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="table-secondary">
+                            <tr class="table-light">
                                 <td>{{ request.args.get('from_date', default_from_date) }}</td>
-                                <td>{% if selected_currency != 'all' %}{{ selected_currency }}{% else %}-{% endif %}</td>
                                 <td class="amount-cell">-</td>
                                 <td class="amount-cell">-</td>
-                                <td><strong>الرصيد السابق حتى هذا اليوم</strong></td>
-                                <td class="amount-cell balance-amount"><strong>{{ previous_balance }}</strong></td>
+                                <td class="text-start fw-bold">الرصيد السابق</td>
+                                <td class="amount-cell balance-positive"><strong>{{ "%.2f"|format(previous_balance|float) }}</strong></td>
                             </tr>
                             {% for transaction in transactions %}
-                            <tr class="transaction-row" data-currency="{{ transaction.currency }}">
-                                <td>{{ transaction.date|datetimeformat('%Y-%m-%d %H:%M:%S') }}</td>
-                                <td>{{ transaction.currency }}</td>
-                                <td class="amount-cell {% if transaction.type == 'credit' %}credit-amount{% endif %}">
-                                    {% if transaction.type == 'credit' %}
-                                    {{ transaction.amount }}
-                                    {% else %}
-                                    -
-                                    {% endif %}
+                            <tr class="transaction-row">
+                                <td>{{ transaction.date|datetimeformat('%Y-%m-%d %H:%M') }}</td>
+                                <!-- تم حذف خلية العملة من هنا -->
+                                <td class="amount-cell credit-amount">
+                                    {% if transaction.type == 'credit' %}{{ "%.2f"|format(transaction.amount|float) }}{% else %}0{% endif %}
                                 </td>
-                                <td class="amount-cell {% if transaction.type == 'debit' %}debit-amount{% endif %}">
-                                    {% if transaction.type == 'debit' %}
-                                    {{ transaction.amount }}
-                                    {% else %}
-                                    -
-                                    {% endif %}
+                                <td class="amount-cell debit-amount">
+                                    {% if transaction.type == 'debit' %}{{ "%.2f"|format(transaction.amount|float) }}{% else %}0{% endif %}
                                 </td>
-                                <td>{{ transaction.description or '-' }}</td>
-                                <td class="amount-cell balance-amount {% if transaction.balance >= 0 %}balance-positive{% else %}balance-negative{% endif %}">
-                                    {{ transaction.balance }}
+                                <td class="text-start">{{ transaction.description or '-' }}</td>
+                                <td class="amount-cell {% if transaction.balance >= 0 %}balance-positive{% else %}balance-negative{% endif %}">
+                                    {{ "%.2f"|format(transaction.balance|float) }}
                                 </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
-                <div class="note">تاريخ الطباعة: <span id="print-date"></span></div>
             </div>
+        </div>
+
+        <div class="final-balance-card">
+            {% set final_balance = transactions[-1].balance if transactions else previous_balance %}
+            
+            <!-- التعديل هنا: تغيير العنوان بناءً على قيمة الرصيد -->
+            {% if final_balance|float >= 0 %}
+                <h5 class="fw-bold" style="color: #28a745;">الرصيد لكم</h5>
+            {% else %}
+                <h5 class="fw-bold" style="color: #dc3545;">الرصيد عليكم</h5>
+            {% endif %}
+
+            <div class="final-balance-amount {% if final_balance|float >= 0 %}balance-positive{% else %}balance-negative{% endif %}">
+                <!-- استخدام فلتر abs لعرض القيمة المطلقة (بدون إشارة سالب) -->
+                {{ "%.2f"|format(final_balance|float|abs) }}
+                <span style="font-size: 1.5rem;">{% if selected_currency != 'all' %}{{ selected_currency }}{% endif %}</span>
+            </div>
+        </div>
+        <div class="print-info">
+            تاريخ الطباعة: <span id="print-date"></span>
         </div>
     </div>
 
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // تحديث تاريخ الطباعة
-        function updatePrintDate() {
-            try {
+        document.addEventListener('DOMContentLoaded', function(  ) {
+            function formatAmount(element) {
+                const originalText = element.textContent.trim();
+                if (originalText === '-' || isNaN(parseFloat(originalText))) { return; }
+                const number = parseFloat(originalText);
+                let formattedNumber = (number % 1 === 0) ? number.toString() : number.toFixed(2);
+                const currencySpan = element.querySelector('span');
+                const currencyHTML = currencySpan ? ' ' + currencySpan.outerHTML : '';
+                element.innerHTML = formattedNumber + currencyHTML;
+            }
+            document.querySelectorAll('.amount-cell, .final-balance-amount').forEach(formatAmount);
+
+            document.getElementById('currencyButtons').addEventListener('click', function(e) {
+                if (e.target.tagName === 'BUTTON') {
+                    document.getElementById('currencyInput').value = e.target.getAttribute('data-currency');
+                    document.getElementById('filterForm').submit();
+                }
+            });
+
+            function updatePrintDate() {
                 const now = new Date();
-                // تنسيق التاريخ الميلادي بالإنجليزي
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
-                const dateStr = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                const dateStr = now.toLocaleString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                 const printDateElement = document.getElementById("print-date");
-                if (printDateElement) {
-                    printDateElement.textContent = dateStr;
-                } else {
-                    console.error("عنصر print-date غير موجود");
-                }
-            } catch (error) {
-                console.error("خطأ في تحديث التاريخ:", error);
+                if (printDateElement) { printDateElement.textContent = dateStr; }
             }
-        }
-
-        // تحديث التاريخ عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
             updatePrintDate();
+            window.addEventListener('beforeprint', updatePrintDate);
         });
-
-        // تحديث التاريخ عند الطباعة
-        window.addEventListener('beforeprint', function() {
-            updatePrintDate();
-        });
-
-        function formatDate(data) {
-            if (!data) return '';
-            // إذا كانت سترينج رقمية (timestamp)
-            if (typeof data === 'string') {
-                data = data.trim();
-                // إذا كانت رقمية فقط
-                if (/^\d+$/.test(data)) {
-                    data = parseInt(data, 10);
-                    return formatDateFromDateObj(new Date(data));
-                }
-                // إذا كانت بصيغة 'YYYY-MM-DD HH:mm:ss'
-                if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(data)) {
-                    // حولها إلى صيغة ISO
-                    data = data.replace(' ', 'T');
-                    return formatDateFromDateObj(new Date(data));
-                }
-            }
-            // إذا كانت Date أو رقم timestamp
-            return formatDateFromDateObj(new Date(data));
-        }
-        function formatDateFromDateObj(d) {
-            if (isNaN(d)) return '';
-            var year = d.getFullYear();
-            var month = String(d.getMonth() + 1).padStart(2, '0');
-            var day = String(d.getDate()).padStart(2, '0');
-            var hours = String(d.getHours()).padStart(2, '0');
-            var minutes = String(d.getMinutes()).padStart(2, '0');
-            var seconds = String(d.getSeconds()).padStart(2, '0');
-            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-        }
     </script>
 </body>
 </html>
