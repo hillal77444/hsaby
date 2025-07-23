@@ -243,7 +243,7 @@ fun AddTransactionScreen(
         var amount by remember { mutableStateOf("") }
         var description by remember { mutableStateOf("") }
         var notes by remember { mutableStateOf(userPreferences.getUserName()) }
-        var currency by remember { mutableStateOf(context.getString(R.string.currency_yer)) }
+        var currency by remember { mutableStateOf(context.getString(R.string.currency_yer).trim().replace("\n", "").replace("\r", "")) }
         var date by remember { mutableStateOf(Calendar.getInstance().timeInMillis) }
         var showDatePicker by remember { mutableStateOf(false) }
         var showAccountPicker by remember { mutableStateOf(false) }
@@ -398,7 +398,7 @@ fun AddTransactionScreen(
                         amountDouble,
                         if (isDebit) "debit" else "credit",
                         description,
-                        currency
+                        currency.trim().replace("\n", "").replace("\r", "")
                     )
                     transaction.id = System.currentTimeMillis()
                     transaction.setNotes(notes)
@@ -418,7 +418,7 @@ fun AddTransactionScreen(
                     lastSavedTransaction = transaction
                     lastSavedAccount = account
                     // Get balance
-                    transactionRepository.getBalanceUntilDate(selectedAccountId, transaction.getTransactionDate(), currency)
+                    transactionRepository.getBalanceUntilDate(selectedAccountId, transaction.getTransactionDate(), currency.trim().replace("\n", "").replace("\r", ""))
                         .observe(lifecycleOwner) { balance ->
                             lastSavedBalance = balance ?: 0.0
                             isDialogShown = true
@@ -681,22 +681,22 @@ fun AddTransactionScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
-                                selected = currency == context.getString(R.string.currency_yer),
-                                onClick = { currency = context.getString(R.string.currency_yer) },
+                                selected = currency.trim().replace("\n", "").replace("\r", "") == context.getString(R.string.currency_yer).trim().replace("\n", "").replace("\r", ""),
+                                onClick = { currency = context.getString(R.string.currency_yer).trim().replace("\n", "").replace("\r", "") },
                                 modifier = Modifier.size(dimens.radioButtonSize)
                             )
                             Text("يمني", fontSize = dimens.bodyFont)
                             Spacer(modifier = Modifier.width(dimens.spacingSmall))
                             RadioButton(
-                                selected = currency == context.getString(R.string.currency_sar),
-                                onClick = { currency = context.getString(R.string.currency_sar) },
+                                selected = currency.trim().replace("\n", "").replace("\r", "") == context.getString(R.string.currency_sar).trim().replace("\n", "").replace("\r", ""),
+                                onClick = { currency = context.getString(R.string.currency_sar).trim().replace("\n", "").replace("\r", "") },
                                 modifier = Modifier.size(dimens.radioButtonSize)
                             )
                             Text("سعودي", fontSize = dimens.bodyFont)
                             Spacer(modifier = Modifier.width(dimens.spacingSmall))
                             RadioButton(
-                                selected = currency == context.getString(R.string.currency_usd),
-                                onClick = { currency = context.getString(R.string.currency_usd) },
+                                selected = currency.trim().replace("\n", "").replace("\r", "") == context.getString(R.string.currency_usd).trim().replace("\n", "").replace("\r", ""),
+                                onClick = { currency = context.getString(R.string.currency_usd).trim().replace("\n", "").replace("\r", "") },
                                 modifier = Modifier.size(dimens.radioButtonSize)
                             )
                             Text("دولار", fontSize = dimens.bodyFont)
@@ -924,9 +924,9 @@ fun AddTransactionScreen(
                                                     val typeText = if (type.equals("credit", true) || type == "له") "لكم" else "عليكم"
                                                     val balanceText = if (lastSavedBalance >= 0) "الرصيد لكم " else "الرصيد عليكم "
                                                     val message = "حسابكم لدينا:\n" +
-                                                            typeText + " " + amountStr + " " + currency + "\n" +
+                                                            typeText + " " + amountStr + " " + currency.trim().replace("\n", "").replace("\r", "") + "\n" +
                                                             transaction.getDescription() + "\n" +
-                                                            balanceText + balanceStr + " " + currency
+                                                            balanceText + balanceStr + " " + currency.trim().replace("\n", "").replace("\r", "")
                                                     NotificationUtils.sendSmsMessage(context, phone, message)
                                                 } else {
                                                     Toast.makeText(context, "رقم الهاتف غير متوفر", Toast.LENGTH_SHORT).show()
