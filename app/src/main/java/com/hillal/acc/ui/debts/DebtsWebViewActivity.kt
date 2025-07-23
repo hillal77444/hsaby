@@ -6,11 +6,14 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
+import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import com.hillal.acc.data.preferences.UserPreferences
+import android.util.TypedValue
+import android.widget.FrameLayout
 
 class DebtsWebViewActivity : AppCompatActivity() {
     private var progressDialog: ProgressDialog? = null
@@ -50,7 +53,19 @@ class DebtsWebViewActivity : AppCompatActivity() {
             webView.loadDataWithBaseURL(null, errorHtml, "text/html", "UTF-8", null)
             progressDialog?.dismiss()
         }
-        setContentView(webView)
+        // أضف هامش من الأسفل
+        val marginBottomPx = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, 24f, resources.displayMetrics
+        ).toInt()
+        val params = FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+        params.setMargins(0, 0, 0, marginBottomPx)
+        webView.layoutParams = params
+        val frame = FrameLayout(this)
+        frame.addView(webView)
+        setContentView(frame)
     }
 
     override fun onDestroy() {
