@@ -17,10 +17,11 @@ import android.widget.FrameLayout
 
 class DebtsWebViewActivity : AppCompatActivity() {
     private var progressDialog: ProgressDialog? = null
+    private lateinit var webView: WebView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val phone = UserPreferences(this).phoneNumber ?: UserPreferences(this).getPhoneNumber()
-        val webView = WebView(this)
+        webView = WebView(this)
         webView.settings.javaScriptEnabled = true
         webView.settings.builtInZoomControls = true
         webView.settings.displayZoomControls = false
@@ -66,6 +67,14 @@ class DebtsWebViewActivity : AppCompatActivity() {
         val frame = FrameLayout(this)
         frame.addView(webView)
         setContentView(frame)
+    }
+
+    override fun onBackPressed() {
+        if (this::webView.isInitialized && webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            super.onBackPressed()
+        }
     }
 
     override fun onDestroy() {

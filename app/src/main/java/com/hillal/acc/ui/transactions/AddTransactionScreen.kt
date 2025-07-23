@@ -631,7 +631,7 @@ fun AddTransactionScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .menuAnchor()
-                                    .height(150.dp),
+                                    .height(80.dp),
                                 leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, modifier = Modifier.size(dimens.iconSize)) },
                                 textStyle = typography.bodyLarge.copy(fontSize = dimens.bodyFont),
                                 trailingIcon = {
