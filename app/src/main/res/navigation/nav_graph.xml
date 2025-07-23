@@ -212,4 +212,9 @@
         android:label="إعدادات واتساب"
         tools:layout="@layout/fragment_whatsapp_settings" />
 
+    <fragment
+        android:id="@+id/debtsWebViewFragment"
+        android:name="com.hillal.acc.ui.debts.DebtsWebViewFragment"
+        android:label="متابعة الديون" />
+
 </navigation>

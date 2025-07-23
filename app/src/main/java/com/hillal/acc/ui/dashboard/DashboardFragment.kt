@@ -95,7 +95,7 @@ class DashboardFragment : Fragment() {
                     onAccounts = { Navigation.findNavController(requireView()).navigate(R.id.navigation_accounts) },
                     onTransactions = { Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment) },
                     onReports = { Navigation.findNavController(requireView()).navigate(R.id.navigation_reports) },
-                    onDebts = { Navigation.findNavController(requireView()).navigate(R.id.nav_summary) },
+                    onDebts = { Navigation.findNavController(requireView()).navigate(R.id.debtsWebViewFragment) },
                     onTransfer = {
                         Navigation.findNavController(requireView()).navigate(R.id.allServicesFragment)
                     },
