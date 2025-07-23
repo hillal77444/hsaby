@@ -118,7 +118,7 @@ fun AccountDetailsScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 2.dp),
+                        .padding(vertical = 1.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     currencies.forEach { currency ->
@@ -132,7 +132,7 @@ fun AccountDetailsScreen(
                             shape = MaterialTheme.shapes.small,
                             elevation = ButtonDefaults.buttonElevation(defaultElevation = if (isSelected) 2.dp else 0.dp),
                             modifier = Modifier
-                                .padding(horizontal = 2.dp)
+                                .padding(horizontal = 2.dp, vertical = 1.dp)
                                 .height(34.dp)
                         ) {
                             Text(currency, style = MaterialTheme.typography.labelLarge)
@@ -156,7 +156,7 @@ fun AccountDetailsScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 4.dp, vertical = 0.dp)
+                        .padding(horizontal = 4.dp, vertical = 1.dp)
                 )
             }
             // قائمة المعاملات أو رسالة عدم وجود معاملات
