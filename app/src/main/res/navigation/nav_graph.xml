@@ -162,12 +162,6 @@
 
     <!-- ملخص الحسابات -->
     <fragment
-        android:id="@+id/nav_summary"
-        android:name="com.hillal.acc.ui.summary.AccountSummaryFragment"
-        android:label="ملخص الحسابات"
-        tools:layout="@layout/fragment_account_summary" />
-
-    <fragment
         android:id="@+id/accountsSummaryReportFragment"
         android:name="com.hillal.acc.ui.reports.AccountsSummaryReportFragment"
         android:label="تقرير ملخص الحسابات"
