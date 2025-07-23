@@ -114,7 +114,9 @@ class LoginFragment : Fragment() {
                             .show()
                     },
                     onForgotPasswordClick = {
-                        Toast.makeText(requireContext(), "يرجى التواصل مع الدعم لاستعادة كلمة المرور", Toast.LENGTH_LONG).show()
+                        val url = "https://wa.me/967712490831?text=استعادة_كلمه_المرور"
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                        startActivity(intent)
                     }
                 )
             }
