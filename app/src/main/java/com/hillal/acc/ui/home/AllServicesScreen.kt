@@ -54,7 +54,6 @@ fun AllServicesScreen(navController: NavController) {
         ServiceItem("المعاملات", R.drawable.ic_transactions, onClick = { navController.navigate(R.id.transactionsFragment) }),
         ServiceItem("التقارير", R.drawable.ic_reports, onClick = { navController.navigate(R.id.navigation_reports) }),
         ServiceItem("متابعة الديون", R.drawable.ic_arrow_downward, onClick = {
-            val context = LocalContext.current
             val intent = Intent(context, DebtsWebViewActivity::class.java)
             context.startActivity(intent)
         }),
