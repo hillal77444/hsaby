@@ -1753,3 +1753,73 @@ def to_millis(dt):
     if dt is None:
         return None
     return int(dt.timestamp() * 1000)
+
+
+@admin.route('/api/account_summary/<phone>')
+def account_summary_html(phone):
+    try:
+        # جلب جميع الحسابات المرتبطة برقم الهاتف
+        accounts = Account.query.filter_by(phone_number=phone).all()
+        if not accounts:
+            return render_template('admin/account_summary.html', phone=phone, accounts=[], currency_summary=[])
+
+        # حساب الأرصدة والمجاميع حسب العملة مباشرة في قاعدة البيانات
+        account_ids = [a.id for a in accounts]
+        from sqlalchemy import case, func
+        # جلب جميع العملات المستخدمة
+        currencies = db.session.query(Transaction.currency).filter(Transaction.account_id.in_(account_ids)).distinct().all()
+        currencies = [c[0] for c in currencies if c[0]]
+
+        # جلب المجاميع لكل حساب ولكل عملة
+        account_summaries = []
+        for account in accounts:
+            for currency in currencies:
+                debits = db.session.query(func.coalesce(func.sum(Transaction.amount), 0)).filter(
+                    Transaction.account_id == account.id,
+                    Transaction.type == 'debit',
+                    Transaction.currency == currency
+                ).scalar() or 0
+                credits = db.session.query(func.coalesce(func.sum(Transaction.amount), 0)).filter(
+                    Transaction.account_id == account.id,
+                    Transaction.type == 'credit',
+                    Transaction.currency == currency
+                ).scalar() or 0
+                balance = credits - debits
+                if debits == 0 and credits == 0:
+                    continue  # تجاهل العملات التي ليس لها معاملات
+                account_summaries.append({
+                    'account_id': account.id,
+                    'account_name': account.account_name,
+                    'user_name': account.user.username,
+                    'currency': currency,
+                    'total_debits': debits,
+                    'total_credits': credits,
+                    'balance': balance
+                })
+
+        # جلب المجاميع الكلية لكل عملة عبر جميع الحسابات
+        currency_summary = []
+        for currency in currencies:
+            total_debits = db.session.query(func.coalesce(func.sum(Transaction.amount), 0)).filter(
+                Transaction.account_id.in_(account_ids),
+                Transaction.type == 'debit',
+                Transaction.currency == currency
+            ).scalar() or 0
+            total_credits = db.session.query(func.coalesce(func.sum(Transaction.amount), 0)).filter(
+                Transaction.account_id.in_(account_ids),
+                Transaction.type == 'credit',
+                Transaction.currency == currency
+            ).scalar() or 0
+            total_balance = total_credits - total_debits
+            if total_debits == 0 and total_credits == 0:
+                continue
+            currency_summary.append({
+                'currency': currency,
+                'total_debits': total_debits,
+                'total_credits': total_credits,
+                'total_balance': total_balance
+            })
+
+        return render_template('admin/account_summary.html', phone=phone, accounts=account_summaries, currency_summary=currency_summary)
+    except Exception as e:
+        return render_template('admin/account_summary.html', phone=phone, accounts=[], currency_summary=[], error=str(e))
