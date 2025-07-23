@@ -50,9 +50,9 @@ fun AllServicesScreen(navController: NavController) {
     var showSubscriptionDialog by remember { mutableStateOf(false) }
     // نقل تعريف allServices إلى هنا ليكون navController متاحًا
     val allServices = listOf(
-        ServiceItem("الحسابات", R.drawable.ic_accounts, onClick = { navController.navigate(R.id.navigation_accounts) }),
-        ServiceItem("المعاملات", R.drawable.ic_transactions, onClick = { navController.navigate(R.id.transactionsFragment) }),
-        ServiceItem("التقارير", R.drawable.ic_reports, onClick = { navController.navigate(R.id.navigation_reports) }),
+        ServiceItem("الحسابات", R.drawable.ic_accounts, onClick = { navController.navigate(R.id.navigation_accounts) }, iconTint = colors.primary),
+        ServiceItem("المعاملات", R.drawable.ic_transactions, onClick = { navController.navigate(R.id.transactionsFragment) }, iconTint = colors.primary),
+        ServiceItem("التقارير", R.drawable.ic_reports, onClick = { navController.navigate(R.id.navigation_reports) }, iconTint = colors.primary),
         ServiceItem("متابعة الديون", R.drawable.ic_arrow_downward, onClick = {
             val intent = Intent(context, DebtsWebViewActivity::class.java)
             context.startActivity(intent)
@@ -65,7 +65,8 @@ fun AllServicesScreen(navController: NavController) {
             R.drawable.ic_reports, // أيقونة تقارير
             onClick = {
                 context.startActivity(Intent(context, ReportHeaderSettingsActivity::class.java))
-            }
+            },
+            iconTint = colors.primary
         ),
         // بطاقة خدمة العملاء
         ServiceItem(
