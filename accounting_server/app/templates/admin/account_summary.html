@@ -45,7 +45,7 @@
 </head>
 <body style="background: #f8f9fc;">
 <div class="container mt-4">
-    <h2 class="mb-4 text-center text-primary">ملخص الحسابات المرتبطة بالهاتف: <span>{{ phone }}</span></h2>
+    <h2 class="mb-4 text-center text-primary">الديون المسجلة عليا عند الاخرين</h2>
     {% if error %}
         <div class="alert alert-danger">{{ error }}</div>
     {% endif %}
@@ -82,8 +82,8 @@
                                 <thead class="thead-light">
                                     <tr>
                                         <th>العملة</th>
-                                        <th>الدائن</th>
-                                        <th>المدين</th>
+                                        <th>لك (دائن)</th>
+                                        <th>عليك (مدين)</th>
                                         <th>الرصيد</th>
                                     </tr>
                                 </thead>
