@@ -95,7 +95,10 @@ class DashboardFragment : Fragment() {
                     onAccounts = { Navigation.findNavController(requireView()).navigate(R.id.navigation_accounts) },
                     onTransactions = { Navigation.findNavController(requireView()).navigate(R.id.transactionsFragment) },
                     onReports = { Navigation.findNavController(requireView()).navigate(R.id.navigation_reports) },
-                    onDebts = { Navigation.findNavController(requireView()).navigate(R.id.debtsWebViewFragment) },
+                    onDebts = {
+                        val intent = Intent(requireContext(), com.hillal.acc.ui.debts.DebtsWebViewActivity::class.java)
+                        startActivity(intent)
+                    },
                     onTransfer = {
                         Navigation.findNavController(requireView()).navigate(R.id.allServicesFragment)
                     },
