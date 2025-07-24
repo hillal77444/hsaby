@@ -35,11 +35,8 @@ import java.io.InputStream
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import com.canhub.cropper.CropImage
-import com.canhub.cropper.CropImageContract
-import com.canhub.cropper.CropImageContractOptions
-import com.canhub.cropper.CropImageOptions
-import com.canhub.cropper.CropImageView
+import com.yalantis.ucrop.UCrop
+import java.io.File
 
 
 class ReportHeaderSettingsActivity : ComponentActivity() {
@@ -87,17 +84,17 @@ fun ReportHeaderSettingsScreen() {
         }
     }
 
-    // Launcher للاقتصاص الدائري
-    val cropImageLauncher = rememberLauncherForActivityResult(CropImageContract()) { result ->
-        if (result.isSuccessful) {
-            val croppedUri = result.uriContent
-            croppedUri?.let { uri ->
+    // Launcher لاستقبال نتيجة الاقتصاص من uCrop
+    val cropLogoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val resultUri = UCrop.getOutput(result.data!!)
+            resultUri?.let { uri ->
                 try {
                     val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
                     val bitmap = inputStream?.use { BitmapFactory.decodeStream(it) }
                     logoBitmap = bitmap
                     if (bitmap != null) {
-                        val file = java.io.File(context.filesDir, "logo.png")
+                        val file = File(context.filesDir, "logo.png")
                         val out = java.io.FileOutputStream(file)
                         bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
                         out.flush()
@@ -109,21 +106,18 @@ fun ReportHeaderSettingsScreen() {
         }
     }
 
-    // Launcher لاختيار الصورة من المعرض ثم إرسالها للاقتصاص الدائري
+    // Launcher لاختيار الصورة من المعرض ثم إرسالها للاقتصاص الدائري عبر uCrop
     val pickLogoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            cropImageLauncher.launch(
-                CropImageContractOptions(
-                    it,
-                    CropImageOptions().apply {
-                        cropShape = CropImageView.CropShape.OVAL // اقتصاص دائري
-                        aspectRatioX = 1
-                        aspectRatioY = 1
-                        fixAspectRatio = true
-                        guidelines = CropImageView.Guidelines.ON
-                    }
-                )
-            )
+            val destUri = Uri.fromFile(File(context.cacheDir, "cropped_logo_${System.currentTimeMillis()}.png"))
+            val uCrop = UCrop.of(it, destUri)
+                .withAspectRatio(1f, 1f)
+                .withOptions(UCrop.Options().apply {
+                    setCircleDimmedLayer(true) // اقتصاص دائري
+                    setShowCropFrame(false)
+                    setShowCropGrid(false)
+                })
+            cropLogoLauncher.launch(uCrop.getIntent(context))
         }
     }
 
