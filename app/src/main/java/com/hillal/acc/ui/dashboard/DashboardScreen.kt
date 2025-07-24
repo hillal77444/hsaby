@@ -105,21 +105,44 @@ fun DashboardScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(blueHeight * 0.5f))
-                // الشعار دائري مع ظل
+                // الشعار دائري مع ظل ويمكن النقر عليه لتغيير الشعار
+                val context = LocalContext.current
+                val sharedPreferences = context.getSharedPreferences("report_header_prefs", android.content.Context.MODE_PRIVATE)
+                val logoPath = sharedPreferences.getString("logo_path", null)
+                var logoBitmap: android.graphics.Bitmap? = null
+                if (!logoPath.isNullOrEmpty()) {
+                    val file = java.io.File(context.filesDir, logoPath)
+                    if (file.exists()) {
+                        logoBitmap = android.graphics.BitmapFactory.decodeFile(file.absolutePath)
+                    }
+                }
                 Box(
                     modifier = Modifier
                         .size(logoSize)
                         .offset(y = -logoSize / 2.5f)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.85f))
-                        .shadow(12.dp, CircleShape),
+                        .shadow(12.dp, CircleShape)
+                        .clickable {
+                            // عند النقر، افتح صفحة إعداد الشعار
+                            val intent = android.content.Intent(context, com.hillal.acc.ui.ReportHeaderSettingsActivity::class.java)
+                            context.startActivity(intent)
+                        },
                     contentAlignment = Alignment.Center
                 ) {
-                    Image(
-                        painter = painterResource(id = R.mipmap.ic_launcher),
-                        contentDescription = "Logo",
-                        modifier = Modifier.size(logoSize * 0.8f)
-                    )
+                    if (logoBitmap != null) {
+                        Image(
+                            bitmap = logoBitmap.asImageBitmap(),
+                            contentDescription = "Logo",
+                            modifier = Modifier.size(logoSize * 0.8f)
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(id = R.mipmap.ic_launcher),
+                            contentDescription = "Logo",
+                            modifier = Modifier.size(logoSize * 0.8f)
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 // عبارة ترحيب
