@@ -1403,6 +1403,7 @@ def transactions_data():
     for t, a, u in results:
         data.append({
             'date': t.date,  # عرض التاريخ كما هو في قاعدة البيانات
+            'created_at': t.created_at,  # إضافة تاريخ الإنشاء
             'account_name': a.account_name,
             'type': t.type,
             'amount': t.amount,

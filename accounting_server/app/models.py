@@ -63,8 +63,8 @@ class Transaction(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
     account_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False, index=True)
     cashbox_id = db.Column(db.Integer, db.ForeignKey('cashbox.id'), nullable=True, index=True)  # الصندوق المرتبط بالمعاملة
-    created_at = db.Column(db.DateTime, default=get_yemen_time)
-    updated_at = db.Column(db.DateTime, default=get_yemen_time, onupdate=get_yemen_time)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     __table_args__ = (
         db.UniqueConstraint(
             'amount', 'type', 'description', 'date', 'account_id', 'user_id',

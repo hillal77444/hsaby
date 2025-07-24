@@ -89,6 +89,7 @@
                     <thead>
                         <tr>
                             <th>التاريخ</th>
+                            <th>تاريخ الإنشاء</th>
                             <th>اسم الحساب</th>
                             <th>نوع المعاملة</th>
                             <th>المبلغ</th>
@@ -173,6 +174,7 @@ $(document).ready(function() {
         "lengthMenu": [[30, 50, 100, -1], [30, 50, 100, "الكل"]],
         "columns": [
             { "data": "date", "render": function(data, type, row) { return formatDate(data); } },
+            { "data": "created_at", "render": function(data, type, row) { return formatDate(data); } },
             { "data": "account_name" },
             { "data": "type", "render": function(data, type, row) {
                 if(data === 'credit') return '<span class="badge bg-success">دائن</span>';
