@@ -94,7 +94,7 @@ fun TransactionsScreen(
 
     // مقاسات نسبية
     val cardCorner = screenWidth * 0.045f
-    val cardPadding = screenWidth * 0.025f
+    val cardPadding = screenWidth * 0.012f // قلل الهوامش
     val buttonHeight = screenHeight * 0.045f
     val buttonMinWidth = screenWidth * 0.15f
     val iconSize = screenWidth * 0.07f
@@ -108,6 +108,44 @@ fun TransactionsScreen(
 
     var isSearchActive by remember { mutableStateOf(false) }
 
+    // نوع التصفية
+    val filterOptions = listOf("الجميع", "سنوي", "شهري", "أسبوعي", "يومي")
+    var filterType by rememberSaveable { mutableStateOf("أسبوعي") }
+
+    // دالة لحساب التواريخ حسب نوع التصفية
+    fun getDateRangeForFilter(type: String): Pair<Long?, Long?> {
+        val now = Calendar.getInstance()
+        return when (type) {
+            "يومي" -> {
+                val start = now.apply { set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }.timeInMillis
+                val end = Calendar.getInstance().timeInMillis
+                Pair(start, end)
+            }
+            "أسبوعي" -> {
+                val start = now.apply { set(Calendar.DAY_OF_WEEK, now.firstDayOfWeek); set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }.timeInMillis
+                val end = Calendar.getInstance().timeInMillis
+                Pair(start, end)
+            }
+            "شهري" -> {
+                val start = now.apply { set(Calendar.DAY_OF_MONTH, 1); set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }.timeInMillis
+                val end = Calendar.getInstance().timeInMillis
+                Pair(start, end)
+            }
+            "سنوي" -> {
+                val start = now.apply { set(Calendar.MONTH, 0); set(Calendar.DAY_OF_MONTH, 1); set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }.timeInMillis
+                val end = Calendar.getInstance().timeInMillis
+                Pair(start, end)
+            }
+            else -> Pair(null, null)
+        }
+    }
+
+    // عند تغيير نوع التصفية، حدث التواريخ تلقائياً
+    LaunchedEffect(filterType) {
+        val (start, end) = getDateRangeForFilter(filterType)
+        onDateFilter(start, end)
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -117,7 +155,7 @@ fun TransactionsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(bottom = screenHeight * 0.09f, start = 8.dp, end = 8.dp)
+                .padding(bottom = screenHeight * 0.09f, start = 4.dp, end = 4.dp) // قلل الهوامش
         ) {
             // البطاقة العلوية الجديدة
             Card(
@@ -129,6 +167,34 @@ fun TransactionsScreen(
                 colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
                 Column(Modifier.padding(cardPadding)) {
+                    // شريط التصفية
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = cardPadding),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        filterOptions.forEach { option ->
+                            val selected = filterType == option
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clickable { filterType = option }
+                            ) {
+                                RadioButton(
+                                    selected = selected,
+                                    onClick = { filterType = option },
+                                    colors = RadioButtonDefaults.colors(
+                                        selectedColor = MaterialTheme.colorScheme.primary,
+                                        unselectedColor = Color.Gray
+                                    )
+                                )
+                                Text(option, color = if (selected) MaterialTheme.colorScheme.primary else Color(0xFF1A237E), fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, fontSize = textFieldFont)
+                            }
+                        }
+                    }
                     // السطر الأول: اختيار الحساب أو البحث
                     Row(
                         Modifier.fillMaxWidth(),
