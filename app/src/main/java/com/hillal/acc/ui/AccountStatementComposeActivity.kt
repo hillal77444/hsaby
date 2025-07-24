@@ -124,7 +124,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         var showEndDatePicker by remember { mutableStateOf(false) }
         var reportHtml by remember { mutableStateOf("") }
         var filterType by rememberSaveable { mutableStateOf("أسبوعي") }
-        val filterOptions = listOf("يومي", "أسبوعي", "شهري", "سنوي", "الجميع")
+        val filterOptions = listOf("يومي", "أسبوعي", "شهري", "سنوي")
         val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH) }
 
         // دالة لحساب التواريخ حسب نوع التصفية
@@ -287,7 +287,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                             Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = dimensions.spacingSmall),
-                            horizontalArrangement = Arrangement.SpaceBetween,
+                            horizontalArrangement = Arrangement.SpaceEvenly,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             filterOptions.forEach { option ->
@@ -309,12 +309,11 @@ class AccountStatementComposeActivity : ComponentActivity() {
                                     )
                                     Text(
                                         option,
-                                        color = if (selected) MaterialTheme.colorScheme.primary else Color(0xFF1A237E),
+                                        color = if (selected) MaterialTheme.colorScheme.primary else Color(0xFF444444),
                                         fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                        fontSize = dimensions.bodyFont * 0.75f,
+                                        fontSize = dimensions.bodyFont * 0.85f,
                                         maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.defaultMinSize(minWidth = 36.dp)
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }

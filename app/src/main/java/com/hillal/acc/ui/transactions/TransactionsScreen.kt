@@ -110,7 +110,7 @@ fun TransactionsScreen(
     var isSearchActive by remember { mutableStateOf(false) }
 
     // نوع التصفية
-    val filterOptions = listOf("يومي", "أسبوعي", "شهري", "سنوي", "الجميع") // عكس الترتيب
+    val filterOptions = listOf("يومي", "أسبوعي", "شهري", "سنوي")
     var filterType by rememberSaveable { mutableStateOf("أسبوعي") }
 
     // دالة لحساب التواريخ حسب نوع التصفية
@@ -173,7 +173,7 @@ fun TransactionsScreen(
                         Modifier
                             .fillMaxWidth()
                             .padding(bottom = cardPadding),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         filterOptions.forEach { option ->
@@ -195,13 +195,11 @@ fun TransactionsScreen(
                                 )
                                 Text(
                                     option,
-                                    color = if (selected) MaterialTheme.colorScheme.primary else Color(0xFF1A237E),
+                                    color = if (selected) MaterialTheme.colorScheme.primary else Color(0xFF444444),
                                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                    fontSize = textFieldFont * 0.75f,
+                                    fontSize = textFieldFont * 0.85f,
                                     maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier
-                                        .defaultMinSize(minWidth = 36.dp)
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
