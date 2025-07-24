@@ -103,6 +103,7 @@
                             <th>التاريخ</th>
                             <th>عدد الحسابات</th>
                             <th>عدد المعاملات</th>
+                            <th>المستخدمون الجدد</th>
                             <th>إجمالي المدين</th>
                             <th>إجمالي الدائن</th>
                             <th>صافي المعاملات</th>
@@ -114,6 +115,7 @@
                             <td>{{ stat.date|datetimeformat('%Y-%m-%d') }}</td>
                             <td>{{ stat.accounts_count or 0 }}</td>
                             <td>{{ stat.transactions_count or 0 }}</td>
+                            <td>{{ stat.users_count or 0 }}</td>
                             <td class="text-danger">{{ stat.debits or 0 }}</td>
                             <td class="text-success">{{ stat.credits or 0 }}</td>
                             <td class="{% if (stat.credits or 0) - (stat.debits or 0) >= 0 %}text-success{% else %}text-danger{% endif %}">

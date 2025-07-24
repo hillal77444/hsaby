@@ -33,7 +33,15 @@
 
 <!-- Today's Statistics -->
 <div class="row mb-4">
-    <div class="col-md-6">
+    <div class="col-md-4">
+        <div class="card stat-card bg-warning text-dark">
+            <div class="card-body">
+                <h5 class="card-title">المستخدمون الجدد اليوم</h5>
+                <h2 class="card-text">{{ today_users }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
         <div class="card stat-card">
             <div class="card-body">
                 <h5 class="card-title">معاملات اليوم</h5>
@@ -41,7 +49,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card stat-card">
             <div class="card-body">
                 <h5 class="card-title">معاملات الأسبوع</h5>

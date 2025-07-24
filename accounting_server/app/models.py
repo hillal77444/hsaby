@@ -20,6 +20,7 @@ class User(db.Model):
     device_name = db.Column(db.String(100), default='Unknown Device')
     session_name = db.Column(db.String(100), default='admin_main')  # اسم جلسة الواتساب
     session_expiry = db.Column(db.DateTime, nullable=True, default=default_session_expiry)  # تاريخ انتهاء الجلسة
+    created_at = db.Column(db.DateTime, default=get_yemen_time)  # تاريخ التسجيل
     accounts = db.relationship('Account', backref='user', lazy=True)
     transactions = db.relationship('Transaction', backref='user', lazy=True)
 

@@ -161,7 +161,10 @@ fun LoginScreen(
                         )
                         OutlinedTextField(
                             value = phone,
-                            onValueChange = { phone = it },
+                            // عند كل تغيير، نقبل فقط الأرقام ونحذف أي رموز أو فراغات
+                            onValueChange = { input ->
+                                phone = input.filter { it.isDigit() } // يسمح فقط بالأرقام
+                            },
                             label = { Text("رقم التلفون") }, // بدون تخصيص حجم خط
                             leadingIcon = {
                                 Icon(

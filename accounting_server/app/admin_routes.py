@@ -235,13 +235,19 @@ def dashboard():
         func.sum(case((Transaction.type == 'debit', Transaction.amount), else_=0)).label('debits')
     ).group_by(Transaction.currency).all()
 
+    # إحصائيات المستخدمين الجدد اليوم
+    today_users = db.session.query(func.count(User.id)).filter(
+        func.date(User.created_at) == today_str
+    ).scalar()
+
     return render_template('admin/dashboard.html',
                          total_users=total_users,
                          total_accounts=total_accounts,
                          total_transactions=total_transactions,
                          today_transactions=today_transactions,
                          weekly_transactions=weekly_transactions,
-                         currency_stats=currency_stats)
+                         currency_stats=currency_stats,
+                         today_users=today_users)
 
 @admin.route('/api/admin/users')
 @admin_required
@@ -397,26 +403,56 @@ def statistics():
         func.sum(case((Transaction.type == 'debit', Transaction.amount), else_=0)).label('debits')
     ).filter(txn_date_group >= week_ago_str).group_by(txn_date_group).subquery()
 
-    # دمج النتائج في SQL (FULL OUTER JOIN محاكى)
+    # استعلام فرعي لإحصائيات المستخدمين الجدد
+    user_date_group = case(
+        (func.typeof(User.created_at) == 'integer', func.date(func.datetime(User.created_at / 1000, 'unixepoch'))),
+        (func.typeof(User.created_at) == 'text', func.date(User.created_at)),
+        else_=func.date(User.created_at)
+    )
+    users_subq = db.session.query(
+        user_date_group.label('date'),
+        func.count(User.id).label('users_count')
+    ).filter(user_date_group >= week_ago_str).group_by(user_date_group).subquery()
+
+    date_col = func.coalesce(account_subq.c.date, txn_subq.c.date, users_subq.c.date).label('date')
     merged_query = db.session.query(
-        func.coalesce(account_subq.c.date, txn_subq.c.date).label('date'),
+        date_col,
         account_subq.c.accounts_count,
         txn_subq.c.transactions_count,
         txn_subq.c.credits,
-        txn_subq.c.debits
+        txn_subq.c.debits,
+        users_subq.c.users_count
     ).outerjoin(
         txn_subq, account_subq.c.date == txn_subq.c.date
+    ).outerjoin(
+        users_subq, func.coalesce(account_subq.c.date, txn_subq.c.date) == users_subq.c.date
     ).union_all(
         db.session.query(
-            func.coalesce(account_subq.c.date, txn_subq.c.date).label('date'),
+            date_col,
             account_subq.c.accounts_count,
             txn_subq.c.transactions_count,
             txn_subq.c.credits,
-            txn_subq.c.debits
+            txn_subq.c.debits,
+            users_subq.c.users_count
         ).outerjoin(
             account_subq, txn_subq.c.date == account_subq.c.date
+        ).outerjoin(
+            users_subq, txn_subq.c.date == users_subq.c.date
         ).filter(account_subq.c.date == None)
-    ).order_by('date')
+    ).union_all(
+        db.session.query(
+            date_col,
+            account_subq.c.accounts_count,
+            txn_subq.c.transactions_count,
+            txn_subq.c.credits,
+            txn_subq.c.debits,
+            users_subq.c.users_count
+        ).outerjoin(
+            txn_subq, users_subq.c.date == txn_subq.c.date
+        ).outerjoin(
+            account_subq, users_subq.c.date == account_subq.c.date
+        ).filter(account_subq.c.date == None, txn_subq.c.date == None)
+    ).order_by(date_col)
 
     merged_stats = []
     for row in merged_query:
@@ -425,7 +461,8 @@ def statistics():
             'accounts_count': row.accounts_count or 0,
             'transactions_count': row.transactions_count or 0,
             'credits': row.credits or 0,
-            'debits': row.debits or 0
+            'debits': row.debits or 0,
+            'users_count': row.users_count or 0
         })
 
     # إحصائيات العملات كما هي

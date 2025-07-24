@@ -215,7 +215,7 @@ async function createWhatsAppSession(sessionId) {
             console.error(`❌ Error creating session ${sessionId}:`, error);
             if (sock) {
                 try {
-                    await sock.close();
+                    await sock.end();
                 } catch (closeError) {
                     console.error(`❌ Error closing failed session ${sessionId}:`, closeError);
                 }
@@ -732,7 +732,6 @@ app.post('/delete_session/:sessionId', async (req, res) => {
                 
                 // إغلاق الجلسة
                 await sock.logout();
-                await sock.close();
                 await sock.end();
                 
                 console.log(`✅ Session ${sessionId} stopped successfully`);
@@ -781,7 +780,6 @@ app.post('/create_session/:sessionId', async (req, res) => {
                 
                 // إغلاق الجلسة
                 await sock.logout();
-                await sock.close();
                 await sock.end();
                 
                 console.log(`✅ Existing session stopped for ${sessionId}`);
@@ -828,7 +826,6 @@ app.post('/fix_pairing/:sessionId', async (req, res) => {
                 
                 // إغلاق الجلسة
                 await sock.logout();
-                await sock.close();
                 await sock.end();
                 
                 console.log(`✅ Existing session stopped for ${sessionId}`);
