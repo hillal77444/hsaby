@@ -183,7 +183,7 @@ fun TransactionsScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .clickable { filterType = option }
-                                    .padding(horizontal = 2.dp)
+                                    .padding(horizontal = 1.dp)
                             ) {
                                 RadioButton(
                                     selected = selected,
@@ -197,7 +197,7 @@ fun TransactionsScreen(
                                     option,
                                     color = if (selected) MaterialTheme.colorScheme.primary else Color(0xFF444444),
                                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                    fontSize = textFieldFont * 0.85f,
+                                    fontSize = textFieldFont * 0.95f,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )

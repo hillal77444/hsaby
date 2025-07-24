@@ -297,7 +297,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                                     modifier = Modifier
                                         .weight(1f)
                                         .clickable { filterType = option }
-                                        .padding(horizontal = 2.dp)
+                                        .padding(horizontal = 0.5.dp)
                                 ) {
                                     RadioButton(
                                         selected = selected,
