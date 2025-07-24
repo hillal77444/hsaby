@@ -88,7 +88,7 @@ fun TransactionsScreen(
     val scrollState = rememberScrollState()
     var showStartPicker by remember { mutableStateOf(false) }
     var showEndPicker by remember { mutableStateOf(false) }
-    val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale("ar")) }
+    val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH) }
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp

@@ -46,7 +46,7 @@ class EditTransactionFragment : Fragment(), OnCashboxAddedListener {
     private var selectedAccountId: Long = -1
     private val calendar: Calendar = Calendar.getInstance()
     private var oldTransaction: Transaction? = null
-    private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale("ar"))
+    private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
     private var selectedCashboxId: Long = -1
     private var mainCashboxId: Long = -1
     private var allCashboxes: MutableList<Cashbox> = ArrayList<Cashbox>()

@@ -311,7 +311,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                                         option,
                                         color = if (selected) MaterialTheme.colorScheme.primary else Color(0xFF444444),
                                         fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                        fontSize = dimensions.bodyFont * 0.85f,
+                                        fontSize = dimensions.bodyFont * 0.8f,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
