@@ -41,6 +41,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.asImageBitmap
 
 @Composable
 fun DashboardScreen(
