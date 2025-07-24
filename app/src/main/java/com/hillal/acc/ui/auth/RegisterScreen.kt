@@ -191,7 +191,10 @@ fun RegisterScreen(
                         )
                         OutlinedTextField(
                             value = phone,
-                            onValueChange = { phone = it },
+                            // عند كل تغيير، نقبل فقط الأرقام ونحذف أي رموز أو فراغات
+                            onValueChange = { input ->
+                                phone = input.filter { it.isDigit() } // يسمح فقط بالأرقام
+                            },
                             label = { Text("رقم الهاتف", fontSize = fontField) },
                             leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, modifier = Modifier.size(iconSize), tint = colors.primary) },
                             singleLine = true,

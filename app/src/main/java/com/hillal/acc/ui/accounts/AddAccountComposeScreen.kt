@@ -354,7 +354,10 @@ private fun FormSection(
             ) {
                 OutlinedTextField(
                     value = phone,
-                    onValueChange = onPhoneChange,
+                    // عند كل تغيير، نقبل فقط الأرقام ونحذف أي رموز أو فراغات
+                    onValueChange = { input ->
+                        onPhoneChange(input.filter { it.isDigit() }) // يسمح فقط بالأرقام
+                    },
                     label = { Text("رقم الهاتف", fontSize = typography.bodyLarge.fontSize) },
                     leadingIcon = {
                         Icon(
