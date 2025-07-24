@@ -196,8 +196,7 @@ fun TransactionsScreen(
                                     option,
                                     color = if (selected) MaterialTheme.colorScheme.primary else Color(0xFF1A237E),
                                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                    fontSize = textFieldFont,
-                                    modifier = Modifier.padding(start = 2.dp, end = 2.dp)
+                                    fontSize = textFieldFont * 0.75f
                                 )
                             }
                         }
