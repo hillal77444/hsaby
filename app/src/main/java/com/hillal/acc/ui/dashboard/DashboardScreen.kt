@@ -43,6 +43,7 @@ import com.hillal.acc.ui.theme.LocalAppDimensions
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale // لعرض الشعار بشكل أنيق داخل الدائرة
+import androidx.compose.foundation.border
 
 @Composable
 fun DashboardScreen(
@@ -121,31 +122,36 @@ fun DashboardScreen(
                 Box(
                     modifier = Modifier
                         .size(logoSize)
-                        .offset(y = -logoSize / 2.5f)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.85f))
                         .shadow(12.dp, CircleShape)
                         .clickable {
-                            // عند النقر، افتح صفحة إعداد الشعار
                             val intent = android.content.Intent(context, com.hillal.acc.ui.ReportHeaderSettingsActivity::class.java)
                             context.startActivity(intent)
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    if (logoBitmap != null) {
-                        Image(
-                            bitmap = logoBitmap.asImageBitmap(),
-                            contentDescription = "Logo",
-                            modifier = Modifier.size(logoSize * 0.8f),
-                            contentScale = ContentScale.Crop // يجعل الشعار يملأ الدائرة بشكل جميل
-                        )
-                    } else {
-                        Image(
-                            painter = painterResource(id = R.mipmap.ic_launcher),
-                            contentDescription = "Logo",
-                            modifier = Modifier.size(logoSize * 0.8f),
-                            contentScale = ContentScale.Crop
-                        )
+                    // إطار حول الدائرة (اختياري)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .border(4.dp, Color.LightGray, CircleShape)
+                    ) {
+                        if (logoBitmap != null) {
+                            Image(
+                                bitmap = logoBitmap.asImageBitmap(),
+                                contentDescription = "Logo",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Image(
+                                painter = painterResource(id = R.mipmap.ic_launcher),
+                                contentDescription = "Logo",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
