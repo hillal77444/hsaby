@@ -35,6 +35,12 @@ import java.io.InputStream
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import com.canhub.cropper.CropImage
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
+import com.canhub.cropper.CropImageView
+
 
 class ReportHeaderSettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,23 +87,43 @@ fun ReportHeaderSettingsScreen() {
         }
     }
 
-    // اختيار صورة الشعار بدون صلاحيات
+    // Launcher للاقتصاص الدائري
+    val cropImageLauncher = rememberLauncherForActivityResult(CropImageContract()) { result ->
+        if (result.isSuccessful) {
+            val croppedUri = result.uriContent
+            croppedUri?.let { uri ->
+                try {
+                    val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+                    val bitmap = inputStream?.use { BitmapFactory.decodeStream(it) }
+                    logoBitmap = bitmap
+                    if (bitmap != null) {
+                        val file = java.io.File(context.filesDir, "logo.png")
+                        val out = java.io.FileOutputStream(file)
+                        bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
+                        out.flush()
+                        out.close()
+                        logoPath = "logo.png"
+                    }
+                } catch (_: Exception) {}
+            }
+        }
+    }
+
+    // Launcher لاختيار الصورة من المعرض ثم إرسالها للاقتصاص الدائري
     val pickLogoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        if (uri != null) {
-            logoUri = uri
-            try {
-                val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
-                val bitmap = inputStream?.use { BitmapFactory.decodeStream(it) }
-                logoBitmap = bitmap
-                if (bitmap != null) {
-                    val file = java.io.File(context.filesDir, "logo.png")
-                    val out = java.io.FileOutputStream(file)
-                    bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
-                    out.flush()
-                    out.close()
-                    logoPath = "logo.png"
-                }
-            } catch (_: Exception) {}
+        uri?.let {
+            cropImageLauncher.launch(
+                CropImageContractOptions(
+                    it,
+                    CropImageOptions().apply {
+                        cropShape = CropImageView.CropShape.OVAL // اقتصاص دائري
+                        aspectRatioX = 1
+                        aspectRatioY = 1
+                        fixAspectRatio = true
+                        guidelines = CropImageView.Guidelines.ON
+                    }
+                )
+            )
         }
     }
 
