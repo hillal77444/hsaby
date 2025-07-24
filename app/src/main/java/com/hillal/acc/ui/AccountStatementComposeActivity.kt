@@ -109,7 +109,10 @@ class AccountStatementComposeActivity : ComponentActivity() {
         val dimensions = LocalResponsiveDimensions.current
         val context = LocalContext.current
         val accountStatementViewModel: AccountStatementViewModel = viewModel()
-        val accounts by accountStatementViewModel.getAllAccounts().observeAsState(initial = emptyList())
+        val transactionViewModel: TransactionViewModel = viewModel()
+        
+        val accounts by accountStatementViewModel.allAccounts.observeAsState(initial = emptyList())
+        val transactions by transactionViewModel.getAllTransactions().observeAsState(initial = emptyList())
         var selectedAccountState by remember { mutableStateOf<Account?>(null) }
         var startDateState by remember { mutableStateOf("") }
         var endDateState by remember { mutableStateOf("") }
@@ -160,19 +163,22 @@ class AccountStatementComposeActivity : ComponentActivity() {
             }
         }
 
-        // جلب المعاملات والرصيد فقط عند اختيار الحساب والفترة
-        val selectedAccountId = selectedAccountState?.id ?: -1L
-        val startMillis = remember(startDateState) { try { dateFormat.parse(startDateState)?.time ?: 0L } catch (_: Exception) { 0L } }
-        val endMillis = remember(endDateState) { try { dateFormat.parse(endDateState)?.time ?: 0L } catch (_: Exception) { 0L } }
-        val transactions = if (selectedAccountId != -1L && startMillis > 0 && endMillis > 0) {
-            accountStatementViewModel.getTransactionsForAccountInDateRange(selectedAccountId, startMillis, endMillis).observeAsState(emptyList()).value
-        } else emptyList()
-        val totalCredits = if (selectedAccountId != -1L && startMillis > 0 && endMillis > 0) {
-            accountStatementViewModel.getTotalCreditsForAccount(selectedAccountId).observeAsState(0.0).value ?: 0.0
-        } else 0.0
-        val totalDebits = if (selectedAccountId != -1L && startMillis > 0 && endMillis > 0) {
-            accountStatementViewModel.getTotalDebitsForAccount(selectedAccountId).observeAsState(0.0).value ?: 0.0
-        } else 0.0
+        // حساب أرصدة العملات لكل حساب
+        val balancesMap = remember(transactions) {
+            accounts.associate { account ->
+                val txs = transactions.filter { it.accountId == account.id }
+                val currencyMap = txs.groupBy { it.currency ?: "" }.mapValues { (_, txs) ->
+                    txs.fold(0.0) { acc, tx ->
+                        when (tx.type) {
+                            "debit" -> acc - tx.amount
+                            "credit" -> acc + tx.amount
+                            else -> acc
+                        }
+                    }
+                }
+                account.id to currencyMap
+            }
+        }
 
         // تحديث التقرير عند تغيير البيانات
         LaunchedEffect(selectedAccountState, startDateState, endDateState, selectedCurrencyState, transactions) {
@@ -185,7 +191,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
             }
         }
 
-        // عند اختيار الحساب، عيّن التواريخ والعملات
+        // 2. عند فتح الصفحة أو اختيار الحساب، عيّن التواريخ والعملات
         LaunchedEffect(selectedAccountState) {
             if (selectedAccountState != null) {
                 val calendar = Calendar.getInstance()
@@ -195,9 +201,9 @@ class AccountStatementComposeActivity : ComponentActivity() {
                 val threeDaysAgo = calendar.time
                 startDateState = dateFormat.format(threeDaysAgo)
                 endDateState = dateFormat.format(today)
-                // استخراج العملات من معاملات الحساب (من قاعدة البيانات)
-                // هنا يمكن جلب العملات من transactions مباشرة
-                val currencies = transactions.mapNotNull { it.currency }.distinct()
+                // استخراج العملات من معاملات الحساب
+                val accountTxs = transactions.filter { it.accountId == selectedAccountState!!.id }
+                val currencies = accountTxs.mapNotNull { it.currency }.distinct()
                 availableCurrencies = currencies
                 selectedCurrencyState = currencies.firstOrNull()
             }
@@ -315,7 +321,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                             label = "الحساب",
                             accounts = accounts,
                             transactions = transactions,
-                            balancesMap = emptyMap(), // balancesMap is no longer needed here
+                            balancesMap = balancesMap,
                             selectedAccount = selectedAccountState,
                             onAccountSelected = { selectedAccountState = it },
                             modifier = Modifier.fillMaxWidth()
