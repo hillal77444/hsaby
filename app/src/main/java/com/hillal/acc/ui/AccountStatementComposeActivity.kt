@@ -812,7 +812,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     max-width: 100vw;
                     overflow-x: auto;
                     /* السماح بالتمرير الأفقي عند التكبير */
-                    touch-action: pan-x pan-y;
+                    /* touch-action: pan-x pan-y; */
                 }
                 .table-container {
                     background: white;
