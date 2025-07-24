@@ -37,6 +37,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import com.yalantis.ucrop.UCrop
 import java.io.File
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import android.graphics.Rect
+import android.graphics.RectF
 
 
 class ReportHeaderSettingsActivity : ComponentActivity() {
@@ -50,6 +56,21 @@ class ReportHeaderSettingsActivity : ComponentActivity() {
             }
         }
     }
+}
+
+// دالة اقتصاص Bitmap إلى دائرة شفافة
+fun cropToCircle(bitmap: android.graphics.Bitmap): android.graphics.Bitmap {
+    val size = minOf(bitmap.width, bitmap.height)
+    val output = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(output)
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    val rect = Rect(0, 0, size, size)
+    val rectF = RectF(rect)
+    canvas.drawARGB(0, 0, 0, 0)
+    canvas.drawOval(rectF, paint)
+    paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
+    canvas.drawBitmap(bitmap, null, rect, paint)
+    return output
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,11 +113,12 @@ fun ReportHeaderSettingsScreen() {
                 try {
                     val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
                     val bitmap = inputStream?.use { BitmapFactory.decodeStream(it) }
-                    logoBitmap = bitmap
                     if (bitmap != null) {
+                        val croppedBitmap = cropToCircle(bitmap)
+                        logoBitmap = croppedBitmap
                         val file = File(context.filesDir, "logo.png")
                         val out = java.io.FileOutputStream(file)
-                        bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
+                        croppedBitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
                         out.flush()
                         out.close()
                         logoPath = "logo.png"
