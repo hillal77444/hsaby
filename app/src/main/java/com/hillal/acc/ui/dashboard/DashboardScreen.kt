@@ -42,6 +42,7 @@ import com.hillal.acc.ui.theme.AppTheme
 import com.hillal.acc.ui.theme.LocalAppDimensions
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale // لعرض الشعار بشكل أنيق داخل الدائرة
 
 @Composable
 fun DashboardScreen(
@@ -135,13 +136,15 @@ fun DashboardScreen(
                         Image(
                             bitmap = logoBitmap.asImageBitmap(),
                             contentDescription = "Logo",
-                            modifier = Modifier.size(logoSize * 0.8f)
+                            modifier = Modifier.size(logoSize * 0.8f),
+                            contentScale = ContentScale.Crop // يجعل الشعار يملأ الدائرة بشكل جميل
                         )
                     } else {
                         Image(
                             painter = painterResource(id = R.mipmap.ic_launcher),
                             contentDescription = "Logo",
-                            modifier = Modifier.size(logoSize * 0.8f)
+                            modifier = Modifier.size(logoSize * 0.8f),
+                            contentScale = ContentScale.Crop
                         )
                     }
                 }
