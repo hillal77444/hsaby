@@ -109,7 +109,7 @@ fun TransactionsScreen(
     var isSearchActive by remember { mutableStateOf(false) }
 
     // نوع التصفية
-    val filterOptions = listOf("الجميع", "سنوي", "شهري", "أسبوعي", "يومي")
+    val filterOptions = listOf("يومي", "أسبوعي", "شهري", "سنوي", "الجميع") // عكس الترتيب
     var filterType by rememberSaveable { mutableStateOf("أسبوعي") }
 
     // دالة لحساب التواريخ حسب نوع التصفية
@@ -177,11 +177,12 @@ fun TransactionsScreen(
                     ) {
                         filterOptions.forEach { option ->
                             val selected = filterType == option
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
                                     .weight(1f)
                                     .clickable { filterType = option }
+                                    .padding(horizontal = 2.dp)
                             ) {
                                 RadioButton(
                                     selected = selected,
@@ -191,7 +192,13 @@ fun TransactionsScreen(
                                         unselectedColor = Color.Gray
                                     )
                                 )
-                                Text(option, color = if (selected) MaterialTheme.colorScheme.primary else Color(0xFF1A237E), fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, fontSize = textFieldFont)
+                                Text(
+                                    option,
+                                    color = if (selected) MaterialTheme.colorScheme.primary else Color(0xFF1A237E),
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                    fontSize = textFieldFont,
+                                    modifier = Modifier.padding(start = 2.dp, end = 2.dp)
+                                )
                             }
                         }
                     }

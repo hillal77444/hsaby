@@ -121,7 +121,47 @@ class AccountStatementComposeActivity : ComponentActivity() {
         var showStartDatePicker by remember { mutableStateOf(false) }
         var showEndDatePicker by remember { mutableStateOf(false) }
         var reportHtml by remember { mutableStateOf("") }
-        
+        var filterType by rememberSaveable { mutableStateOf("أسبوعي") }
+        val filterOptions = listOf("يومي", "أسبوعي", "شهري", "سنوي", "الجميع")
+        val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH) }
+
+        // دالة لحساب التواريخ حسب نوع التصفية
+        fun getDateRangeForFilter(type: String): Pair<String, String> {
+            val now = Calendar.getInstance()
+            return when (type) {
+                "يومي" -> {
+                    val start = now.apply { set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }.time
+                    val end = Date()
+                    Pair(dateFormat.format(start), dateFormat.format(end))
+                }
+                "أسبوعي" -> {
+                    val start = now.apply { set(Calendar.DAY_OF_WEEK, now.firstDayOfWeek); set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }.time
+                    val end = Date()
+                    Pair(dateFormat.format(start), dateFormat.format(end))
+                }
+                "شهري" -> {
+                    val start = now.apply { set(Calendar.DAY_OF_MONTH, 1); set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }.time
+                    val end = Date()
+                    Pair(dateFormat.format(start), dateFormat.format(end))
+                }
+                "سنوي" -> {
+                    val start = now.apply { set(Calendar.MONTH, 0); set(Calendar.DAY_OF_MONTH, 1); set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }.time
+                    val end = Date()
+                    Pair(dateFormat.format(start), dateFormat.format(end))
+                }
+                else -> Pair("", "")
+            }
+        }
+
+        // عند تغيير نوع التصفية، حدث التواريخ تلقائياً
+        LaunchedEffect(filterType) {
+            val (start, end) = getDateRangeForFilter(filterType)
+            if (start.isNotBlank() && end.isNotBlank()) {
+                startDateState = start
+                endDateState = end
+            }
+        }
+
         // حساب أرصدة العملات لكل حساب
         val balancesMap = remember(transactions) {
             accounts.associate { account ->
@@ -238,8 +278,43 @@ class AccountStatementComposeActivity : ComponentActivity() {
                     colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
                     Column(
-                        modifier = Modifier.padding(dimensions.spacingMedium)
+                        modifier = Modifier.padding(dimensions.spacingSmall)
                     ) {
+                        // شريط التصفية
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = dimensions.spacingSmall),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            filterOptions.forEach { option ->
+                                val selected = filterType == option
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clickable { filterType = option }
+                                        .padding(horizontal = 2.dp)
+                                ) {
+                                    RadioButton(
+                                        selected = selected,
+                                        onClick = { filterType = option },
+                                        colors = RadioButtonDefaults.colors(
+                                            selectedColor = MaterialTheme.colorScheme.primary,
+                                            unselectedColor = Color.Gray
+                                        )
+                                    )
+                                    Text(
+                                        option,
+                                        color = if (selected) MaterialTheme.colorScheme.primary else Color(0xFF1A237E),
+                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                        fontSize = dimensions.bodyFont * 0.85f,
+                                        modifier = Modifier.padding(start = 2.dp, end = 2.dp)
+                                    )
+                                }
+                            }
+                        }
                         // اختيار الحساب
                         AccountPickerField(
                             label = "الحساب",
