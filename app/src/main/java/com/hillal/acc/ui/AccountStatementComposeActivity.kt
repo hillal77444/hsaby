@@ -71,6 +71,7 @@ import android.content.res.Resources
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import com.hillal.acc.data.preferences.UserPreferences
+import androidx.compose.ui.text.style.TextOverflow
 
 class AccountStatementComposeActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -310,7 +311,10 @@ class AccountStatementComposeActivity : ComponentActivity() {
                                         option,
                                         color = if (selected) MaterialTheme.colorScheme.primary else Color(0xFF1A237E),
                                         fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                        fontSize = dimensions.bodyFont * 0.75f
+                                        fontSize = dimensions.bodyFont * 0.75f,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.defaultMinSize(minWidth = 36.dp)
                                     )
                                 }
                             }

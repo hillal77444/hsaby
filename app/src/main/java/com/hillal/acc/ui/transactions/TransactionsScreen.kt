@@ -54,6 +54,7 @@ import com.hillal.acc.ui.common.TransactionCard
 import com.hillal.acc.ui.common.getDateString
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.text.style.TextOverflow
 
 // Extension functions for Transaction
 fun Transaction.getAccountName(accountMap: Map<Long, Account>? = null): String? {
@@ -196,7 +197,11 @@ fun TransactionsScreen(
                                     option,
                                     color = if (selected) MaterialTheme.colorScheme.primary else Color(0xFF1A237E),
                                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                    fontSize = textFieldFont * 0.75f
+                                    fontSize = textFieldFont * 0.75f,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier
+                                        .defaultMinSize(minWidth = 36.dp)
                                 )
                             }
                         }
