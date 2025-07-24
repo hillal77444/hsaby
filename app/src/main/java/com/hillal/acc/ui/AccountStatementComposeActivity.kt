@@ -445,42 +445,33 @@ class AccountStatementComposeActivity : ComponentActivity() {
                                     }
                                 }
                             }
-                            // ضع WebView في Box منفصلة بدون verticalScroll
-                            Box(
+                            AndroidView(
+                                factory = { context ->
+                                    WebView(context).apply {
+                                        settings.javaScriptEnabled = true
+                                        settings.domStorageEnabled = true
+                                        settings.setSupportZoom(true)
+                                        settings.builtInZoomControls = true
+                                        settings.displayZoomControls = false
+                                        isVerticalScrollBarEnabled = true
+                                        isHorizontalScrollBarEnabled = true
+                                        overScrollMode = WebView.OVER_SCROLL_IF_CONTENT_SCROLLS
+                                        webView = this
+                                    }
+                                },
+                                update = { webView ->
+                                    webView.loadDataWithBaseURL(
+                                        null,
+                                        reportHtml,
+                                        "text/html",
+                                        "UTF-8",
+                                        null
+                                    )
+                                },
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(min = 300.dp, max = 600.dp) // أو height = 400.dp حسب رغبتك
-                            ) {
-                                AndroidView(
-                                    factory = { context ->
-                                        WebView(context).apply {
-                                            settings.javaScriptEnabled = true
-                                            settings.domStorageEnabled = true
-                                            settings.setSupportZoom(true)
-                                            settings.builtInZoomControls = false // لا أزرار زوم
-                                            settings.displayZoomControls = false
-                                            settings.useWideViewPort = true
-                                            settings.loadWithOverviewMode = true
-                                            isVerticalScrollBarEnabled = true
-                                            isHorizontalScrollBarEnabled = true
-                                            overScrollMode = WebView.OVER_SCROLL_IF_CONTENT_SCROLLS
-                                            webView = this
-                                        }
-                                    },
-                                    update = { webView ->
-                                        webView.loadDataWithBaseURL(
-                                            null,
-                                            reportHtml,
-                                            "text/html",
-                                            "UTF-8",
-                                            null
-                                        )
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .navigationBarsPadding()
-                                )
-                            }
+                                    .fillMaxSize()
+                                    .navigationBarsPadding()
+                            )
                         }
                     }
                 } else if (selectedAccountState == null) {
