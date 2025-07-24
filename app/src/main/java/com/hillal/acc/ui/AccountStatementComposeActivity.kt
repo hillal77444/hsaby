@@ -449,8 +449,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .heightIn(min = 300.dp)
-                                    .weight(1f, fill = false)
+                                    .heightIn(min = 300.dp, max = 600.dp) // أو height = 400.dp حسب رغبتك
                             ) {
                                 AndroidView(
                                     factory = { context ->
