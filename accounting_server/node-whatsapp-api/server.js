@@ -83,7 +83,11 @@ async function createWhatsAppSession(sessionId) {
                 markOnlineOnConnect: false,
                 // إضافة خيارات للاستقرار
                 retryRequestDelayMs: 2000,
-                maxRetries: 3
+                maxRetries: 3,
+                // إضافة خيارات للروابط والصور المصغرة
+                generateHighQualityLinkPreview: true,
+                linkPreviewImageThumbnailWidth: 192,
+                linkPreviewImageThumbnailHeight: 192
             });
 
             let isReconnecting = false;
@@ -109,7 +113,13 @@ async function createWhatsAppSession(sessionId) {
                                 ? formattedNumber
                                 : `967${formattedNumber}`;
                             console.log(`[SEND][QUEUE] Sending pending message to ${fullNumber} from session ${sessionId}: "${message}"`);
-                            await sock.sendMessage(`${fullNumber}@s.whatsapp.net`, { text: message, linkPreview: true });
+                            await sock.sendMessage(`${fullNumber}@s.whatsapp.net`, {
+                                text: message,
+                                linkPreview: {
+                                    generate: true,
+                                    fetch: true
+                                }
+                            });
                             console.log(`[SEND][QUEUE] Message sent successfully to ${fullNumber}`);
                             // جدولة الإغلاق بعد إرسال كل رسالة من قائمة الانتظار
                             scheduleSessionClose(sessionId, 3);
@@ -322,7 +332,13 @@ app.post('/send/:sessionId', async (req, res) => {
             if (!result || !result.exists) {
                 return res.status(400).json({ success: false, error: 'الرقم غير مسجل في واتساب' });
             }
-            await sock.sendMessage(waId, { text: message, linkPreview: true });
+            await sock.sendMessage(waId, {
+                text: message,
+                linkPreview: {
+                    generate: true,
+                    fetch: true
+                }
+            });
             scheduleSessionClose(sessionId, 3);
             lastMessageSentAt.set(sessionId, Date.now());
             return res.json({ success: true });
@@ -356,7 +372,13 @@ app.post('/send_bulk/:sessionId', async (req, res) => {
                         results.push({ number, success: false, error: 'الرقم غير مسجل في واتساب' });
                         continue;
                     }
-                    await sock.sendMessage(waId, { text: message, linkPreview: true });
+                    await sock.sendMessage(waId, {
+                        text: message,
+                        linkPreview: {
+                            generate: true,
+                            fetch: true
+                        }
+                    });
                     results.push({ number, success: true });
                     await new Promise(resolve => setTimeout(resolve, delay));
                 } catch (error) {
