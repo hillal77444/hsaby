@@ -109,7 +109,7 @@ async function createWhatsAppSession(sessionId) {
                                 ? formattedNumber
                                 : `967${formattedNumber}`;
                             console.log(`[SEND][QUEUE] Sending pending message to ${fullNumber} from session ${sessionId}: "${message}"`);
-                            await sock.sendMessage(`${fullNumber}@s.whatsapp.net`, { text: message });
+                            await sock.sendMessage(`${fullNumber}@s.whatsapp.net`, { text: message, linkPreview: true });
                             console.log(`[SEND][QUEUE] Message sent successfully to ${fullNumber}`);
                             // جدولة الإغلاق بعد إرسال كل رسالة من قائمة الانتظار
                             scheduleSessionClose(sessionId, 3);
@@ -322,7 +322,7 @@ app.post('/send/:sessionId', async (req, res) => {
             if (!result || !result.exists) {
                 return res.status(400).json({ success: false, error: 'الرقم غير مسجل في واتساب' });
             }
-            await sock.sendMessage(waId, { text: message });
+            await sock.sendMessage(waId, { text: message, linkPreview: true });
             scheduleSessionClose(sessionId, 3);
             lastMessageSentAt.set(sessionId, Date.now());
             return res.json({ success: true });
@@ -356,7 +356,7 @@ app.post('/send_bulk/:sessionId', async (req, res) => {
                         results.push({ number, success: false, error: 'الرقم غير مسجل في واتساب' });
                         continue;
                     }
-                    await sock.sendMessage(waId, { text: message });
+                    await sock.sendMessage(waId, { text: message, linkPreview: true });
                     results.push({ number, success: true });
                     await new Promise(resolve => setTimeout(resolve, delay));
                 } catch (error) {
@@ -1156,7 +1156,7 @@ app.get('/sessions_dashboard', async (req, res) => {
                         hasQR: !!lastQRCodes[sessionId],
                         sessionSizeMB: (sessionSize / (1024 * 1024)).toFixed(2),
                         lastModified: lastModifiedStr,
-                        lastModifiedRaw: lastModified, // أضف التاريخ الخام للترتيب
+                        lastModifiedRaw: lastModified,
                         reconnectAttempts: reconnectAttempts.get(sessionId) || 0,
                         pendingMessages: (pendingMessages.get(sessionId) || []).length
                     });
@@ -1178,9 +1178,8 @@ app.get('/sessions_dashboard', async (req, res) => {
             }
         }
         
-        // رتب الجلسات حسب آخر تعديل (الأحدث أولاً)
         sessionsInfo.sort((a, b) => b.lastModifiedRaw - a.lastModifiedRaw);
-
+        
         const totalSessions = sessionsInfo.length;
         const activeSessionsCount = sessionsInfo.filter(s => s.isActive).length;
         const connectedSessions = sessionsInfo.filter(s => s.isConnected).length;
