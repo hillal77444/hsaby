@@ -139,7 +139,7 @@ fun RegisterScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
-                            painter = painterResource(id = R.mipmap.ic_launcher),
+                            painter = painterResource(id = R.drawable.ic_launcher),
                             contentDescription = "Logo",
                             contentScale = ContentScale.Inside,
                             modifier = Modifier.size(logoSize * dimens.logoContentScale)
