@@ -55,7 +55,7 @@ def whatsapp_worker():
             # يمكن إضافة منطق تسجيل أو معالجة الرد هنا إذا لزم
         except Exception as e:
             logger.error(f"WhatsApp send error: {e}")
-        time.sleep(1)  # انتظر ثانية بين كل رسالة
+        time.sleep(3)  # انتظر ثانية بين كل رسالة
         whatsapp_queue.task_done()
 
 # شغّل الـ worker في Thread منفصل عند بدء التطبيق (مرة واحدة فقط)
@@ -1403,7 +1403,7 @@ def transactions_data():
     for t, a, u in results:
         data.append({
             'date': t.date,  # عرض التاريخ كما هو في قاعدة البيانات
-            'created_at': t.created_at,  # إضافة تاريخ الإنشاء
+            'created_at': t.created_at,
             'account_name': a.account_name,
             'type': t.type,
             'amount': t.amount,
@@ -1861,3 +1861,38 @@ def account_summary_html(phone):
         return render_template('admin/account_summary.html', phone=phone, accounts=account_summaries, currency_summary=currency_summary)
     except Exception as e:
         return render_template('admin/account_summary.html', phone=phone, accounts=[], currency_summary=[], error=str(e))
+
+
+def send_welcome_whatsapp(user):
+    try:
+        # تأكد من وجود رقم الهاتف
+        phone = user.phone
+        if not phone:
+            return {'status': 'error', 'message': 'رقم الهاتف غير متوفر'}
+        phone = ''.join(filter(str.isdigit, phone))
+        if phone.startswith('966'):
+            pass
+        elif phone.startswith('0'):
+            phone = '967' + phone[1:]
+        elif not phone.startswith('967'):
+            phone = '967' + phone
+
+        # اسم الجلسة ثابت دائماً
+        session_name = 'admin_main'
+
+        # نص الرسالة الترحيبية مع دعوة لمتابعة القناة
+        message = f"""
+🎉 مرحباً {user.username} 👋\n\nتم إنشاء حسابك بنجاح في نظام *مالي برو*.\nنتمنى لك تجربة موفقة ومميزة معنا!\n\n📢 لمتابعة التعليمات وكل جديد، انضم إلى قناتنا الرسمية على واتساب:\nhttps://whatsapp.com/channel/0029VbBIGipEQIat7hhrGx40\n\nإذا احتجت لأي مساعدة أو استفسار، لا تتردد في التواصل معنا.\n""".strip()
+
+        # أضف الرسالة للطابور
+        whatsapp_queue.put({
+            'url': f"{WHATSAPP_API}/send/{session_name}",
+            'json': {
+                'number': phone,
+                'message': message
+            }
+        })
+        return {'status': 'success', 'message': 'تمت إضافة رسالة الترحيب للطابور'}
+    except Exception as e:
+        logger.error(f"Error in send_welcome_whatsapp: {str(e)}")
+        return {'status': 'error', 'message': str(e)}

@@ -9,7 +9,7 @@ import json
 from sqlalchemy import func
 from sqlalchemy import case
 import requests
-from app.admin_routes import send_transaction_notification, calculate_and_notify_transaction, send_transaction_update_notification, send_transaction_delete_notification
+from app.admin_routes import send_transaction_notification, calculate_and_notify_transaction, send_transaction_update_notification, send_transaction_delete_notification, send_welcome_whatsapp
 import traceback
 from sqlalchemy.exc import IntegrityError
 
@@ -87,7 +87,7 @@ def register():
         
         # إنشاء توكن للمستخدم الجديد
         access_token = create_access_token(identity=user.id)
-        
+        send_welcome_whatsapp(user)
         return jsonify({
             'message': 'تم إنشاء الحساب بنجاح',
             'token': access_token,
@@ -366,7 +366,7 @@ def sync_data():
                         amount=trans_data.get('amount'),
                         type=trans_data.get('type'),
                         description=trans_data.get('description'),
-                        notes=trans_data.get('notes'),
+                        notes=trans_data.get('id'),
                         date=date,
                         currency=trans_data.get('currency'),
                         whatsapp_enabled=trans_data.get('whatsapp_enabled', False),
@@ -1243,28 +1243,6 @@ def update_user_details():
         db.session.rollback()
         return json_response({'error': f'حدث خطأ أثناء تحديث بيانات المستخدم: {str(e)}'}, 500)
 
-@main.route('/api/update_session_name', methods=['POST'])
-@jwt_required()
-def update_session_name():
-    try:
-        current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
-        if not user:
-            return json_response({'error': 'المستخدم غير موجود'}, 404)
-
-        data = request.get_json()
-        new_session_name = data.get('session_name')
-        if not new_session_name:
-            return json_response({'error': 'يرجى إدخال اسم الجلسة الجديد'}, 400)
-
-        user.session_name = new_session_name
-        db.session.commit()
-
-        return json_response({'message': 'تم تحديث اسم الجلسة بنجاح', 'session_name': user.session_name}, 200)
-    except Exception as e:
-        db.session.rollback()
-        return json_response({'error': f'حدث خطأ أثناء تحديث اسم الجلسة: {str(e)}'}, 500)
-
 @main.route('/api/app/updates/check', methods=['GET'])
 @jwt_required()
 def check_for_updates():
@@ -1400,3 +1378,26 @@ def delete_cashbox(cashbox_id):
     db.session.delete(cashbox)
     db.session.commit()
     return jsonify({'success': True})
+
+
+@main.route('/api/update_session_name', methods=['POST'])
+@jwt_required()
+def update_session_name():
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        if not user:
+            return json_response({'error': 'المستخدم غير موجود'}, 404)
+
+        data = request.get_json()
+        new_session_name = data.get('session_name')
+        if not new_session_name:
+            return json_response({'error': 'يرجى إدخال اسم الجلسة الجديد'}, 400)
+
+        user.session_name = new_session_name
+        db.session.commit()
+
+        return json_response({'message': 'تم تحديث اسم الجلسة بنجاح', 'session_name': user.session_name}, 200)
+    except Exception as e:
+        db.session.rollback()
+        return json_response({'error': f'حدث خطأ أثناء تحديث اسم الجلسة: {str(e)}'}, 500)
