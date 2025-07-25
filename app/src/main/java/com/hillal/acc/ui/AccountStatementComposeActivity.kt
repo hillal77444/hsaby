@@ -659,7 +659,7 @@ class AccountStatementComposeActivity : ComponentActivity() {
         }
         if (logoBitmap == null) {
             // استخدم شعار التطبيق الافتراضي
-            val drawable: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_launcher)
+            val drawable: Drawable? = ContextCompat.getDrawable(context, R.mipmap.ic_launcher_round)
             if (drawable is BitmapDrawable) {
                 logoBitmap = drawable.bitmap
             }

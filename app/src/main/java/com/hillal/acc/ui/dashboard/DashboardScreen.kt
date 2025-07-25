@@ -146,7 +146,7 @@ fun DashboardScreen(
                             )
                         } else {
                             Image(
-                                painter = painterResource(id = R.drawable.ic_launcher),
+                                painter = painterResource(id = R.mipmap.ic_launcher_round),
                                 contentDescription = "Logo",
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
