@@ -1156,6 +1156,7 @@ app.get('/sessions_dashboard', async (req, res) => {
                         hasQR: !!lastQRCodes[sessionId],
                         sessionSizeMB: (sessionSize / (1024 * 1024)).toFixed(2),
                         lastModified: lastModifiedStr,
+                        lastModifiedRaw: lastModified, // أضف التاريخ الخام للترتيب
                         reconnectAttempts: reconnectAttempts.get(sessionId) || 0,
                         pendingMessages: (pendingMessages.get(sessionId) || []).length
                     });
@@ -1177,6 +1178,9 @@ app.get('/sessions_dashboard', async (req, res) => {
             }
         }
         
+        // رتب الجلسات حسب آخر تعديل (الأحدث أولاً)
+        sessionsInfo.sort((a, b) => b.lastModifiedRaw - a.lastModifiedRaw);
+
         const totalSessions = sessionsInfo.length;
         const activeSessionsCount = sessionsInfo.filter(s => s.isActive).length;
         const connectedSessions = sessionsInfo.filter(s => s.isConnected).length;
