@@ -129,7 +129,7 @@ class CashboxStatementFragment : Fragment() {
             OnApplyWindowInsetsListener { v: View?, insets: WindowInsetsCompat? ->
                 val bottom = insets!!.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
                 // إضافة padding إضافي أسفل WebView لتجنب تغطية الأزرار السفلية
-                val extraBottomPadding = 80 // 80dp إضافية أسفل المحتوى
+                val extraBottomPadding = 120 // 120dp إضافية أسفل المحتوى
                 v!!.setPadding(
                     v.getPaddingLeft(),
                     v.getPaddingTop(),
@@ -158,6 +158,10 @@ class CashboxStatementFragment : Fragment() {
         webView!!.setVerticalFadingEdgeEnabled(false)
         webView!!.setHorizontalFadingEdgeEnabled(false)
         webView!!.setFadingEdgeLength(0)
+        // إعدادات إضافية لضمان عدم وجود محتوى تحت الأزرار
+        webView!!.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY)
+        webView!!.setVerticalScrollBarEnabled(true)
+        webView!!.setHorizontalScrollBarEnabled(false)
         btnPrint!!.setOnClickListener(View.OnClickListener { v: View? -> printReport() })
         cashboxDropdown!!.setFocusable(false)
         cashboxDropdown!!.setOnClickListener(View.OnClickListener { v: View? -> cashboxDropdown!!.showDropDown() })
@@ -503,6 +507,7 @@ class CashboxStatementFragment : Fragment() {
             .append(formatAmount(totalCredit)).append("</td><td>").append(formatAmount(totalDebit))
             .append("</td><td>").append(formatAmount(balance)).append("</td></tr>")
         html.append("</table>")
+        html.append("<div class='bottom-spacer'></div>")
         html.append("</body></html>")
         return html.toString()
     }
@@ -712,7 +717,9 @@ class CashboxStatementFragment : Fragment() {
         html.append("<td><strong>").append(formatAmount(totalBalance)).append("</strong></td>")
         html.append("</tr>")
         
-        html.append("</table></body></html>")
+        html.append("</table>")
+        html.append("<div class='bottom-spacer'></div>")
+        html.append("</body></html>")
         return html.toString()
     }
 
@@ -722,7 +729,7 @@ class CashboxStatementFragment : Fragment() {
                 font-family: 'Cairo', Arial, sans-serif; 
                 margin: 0; 
                 padding: 8px; 
-                padding-bottom: 100px; 
+                padding-bottom: 150px; 
                 background: #f5f7fa; 
                 max-width: 100%; 
                 overflow-x: hidden; 
@@ -813,6 +820,7 @@ class CashboxStatementFragment : Fragment() {
             @media screen and (max-width: 600px) { 
                 body { 
                     padding: 4px; 
+                    padding-bottom: 120px; 
                 } 
                 table { 
                     font-size: 0.7em; 
@@ -820,6 +828,11 @@ class CashboxStatementFragment : Fragment() {
                 th, td { 
                     padding: 4px 2px; 
                 } 
+            }
+            /* إضافة مساحة إضافية أسفل المحتوى */
+            .bottom-spacer {
+                height: 150px;
+                width: 100%;
             }
         """.trimIndent()
     }
