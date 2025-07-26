@@ -137,4 +137,18 @@ public interface TransactionDao {
     // دالة محسنة للحصول على المعاملات حسب الصندوق
     @Query("SELECT * FROM transactions WHERE cashbox_id = :cashboxId ORDER BY transaction_date DESC")
     LiveData<List<Transaction>> getTransactionsByCashbox(long cashboxId);
+
+    // دالة محسنة لجلب ملخص الصناديق مع العملات
+    @Query("SELECT cashbox_id, currency, " +
+           "SUM(CASE WHEN type = 'credit' OR type = 'له' THEN amount ELSE 0 END) as total_credit, " +
+           "SUM(CASE WHEN type = 'debit' OR type = 'عليه' THEN amount ELSE 0 END) as total_debit, " +
+           "SUM(CASE WHEN type = 'credit' OR type = 'له' THEN amount ELSE -amount END) as balance " +
+           "FROM transactions " +
+           "WHERE cashbox_id IS NOT NULL " +
+           "GROUP BY cashbox_id, currency")
+    LiveData<List<CashboxSummary>> getCashboxesSummary();
+
+    // دالة محسنة لجلب العملات المتوفرة في الصناديق
+    @Query("SELECT DISTINCT currency FROM transactions WHERE cashbox_id IS NOT NULL AND currency IS NOT NULL AND currency != ''")
+    LiveData<List<String>> getAvailableCurrenciesInCashboxes();
 } 

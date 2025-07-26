@@ -6,6 +6,7 @@ import com.hillal.acc.data.room.AppDatabase;
 import com.hillal.acc.data.room.TransactionDao;
 import com.hillal.acc.data.room.AccountTransactionCount;
 import com.hillal.acc.data.room.AccountBalanceByCurrency;
+import com.hillal.acc.data.room.CashboxSummary;
 import com.hillal.acc.data.model.Transaction;
 import java.util.Date;
 import java.util.List;
@@ -138,5 +139,13 @@ public class TransactionRepository {
     // دالة محسنة للحصول على المعاملات حسب الصندوق
     public LiveData<List<Transaction>> getTransactionsByCashbox(long cashboxId) {
         return transactionDao.getTransactionsByCashbox(cashboxId);
+    }
+
+    public LiveData<List<CashboxSummary>> getCashboxesSummary() {
+        return transactionDao.getCashboxesSummary();
+    }
+
+    public LiveData<List<String>> getAvailableCurrenciesInCashboxes() {
+        return transactionDao.getAvailableCurrenciesInCashboxes();
     }
 }

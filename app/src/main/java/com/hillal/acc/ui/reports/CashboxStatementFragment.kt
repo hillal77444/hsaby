@@ -33,6 +33,7 @@ import com.hillal.acc.data.entities.Cashbox
 import com.hillal.acc.data.model.Account
 import com.hillal.acc.data.model.Transaction
 import com.hillal.acc.data.repository.TransactionRepository
+import com.hillal.acc.data.room.CashboxSummary
 import com.hillal.acc.viewmodel.AccountViewModel
 import com.hillal.acc.viewmodel.CashboxViewModel
 import java.text.SimpleDateFormat
@@ -246,19 +247,10 @@ class CashboxStatementFragment : Fragment() {
             }
         })
 
-        // استخدام استعلام محسن بدلاً من جلب جميع المعاملات
-        // transactionRepository!!.getAllTransactions()
-        //     .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
-        //         if (transactions != null) {
-        //             allTransactions = transactions.filterNotNull().toMutableList()
-        //             if (isSummaryMode) {
-        //                 showSummaryWithCurrencies()
-        //             }
-        //         }
-        //     })
-        
-        // لا نحتاج لجلب جميع المعاملات هنا - سيتم جلبها عند اختيار الصندوق
-        // allTransactions سيتم ملؤها في onCashboxSelected
+        // استخدام استعلامات محسنة لجلب ملخص الصناديق والعملات
+        if (isSummaryMode) {
+            loadSummaryWithOptimizedQueries()
+        }
     }
 
     private fun loadAccountsMap() {
@@ -543,67 +535,45 @@ class CashboxStatementFragment : Fragment() {
         return balance
     }
 
-    private fun generateCashboxesSummaryHtml(
-        cashboxes: MutableList<Cashbox>,
-        transactions: MutableList<Transaction>,
-        currency: String
-    ): String {
-        val html = StringBuilder()
-        html.append("<!DOCTYPE html>")
-        html.append("<html dir='rtl' lang='ar'><head><meta charset='UTF-8'>")
-        html.append("<style>")
-        html.append("body { font-family: 'Cairo', Arial, sans-serif; background: #f5f7fa; }")
-        html.append("table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.08); }")
-        html.append("th, td { border: 1px solid #e8eaed; padding: 6px 4px; text-align: right; font-size: 0.9em; }")
-        html.append("th { background: #e9ecef; color: #495057; font-weight: 600; }")
-        html.append("tr:nth-child(even) { background: #f8f9fa; }")
-        html.append("</style></head><body>")
-        html.append("<h3 style='text-align:center'>ملخص الصناديق للعملة: ").append(currency)
-            .append("</h3>")
-        html.append("<table>")
-        html.append("<tr><th>اسم الصندوق</th><th>إجمالي الدائن (له)</th><th>إجمالي المدين (عليه)</th><th>الرصيد التراكمي</th></tr>")
-        for (c in cashboxes) {
-            var totalCredit = 0.0
-            var totalDebit = 0.0
-            for (t in transactions) {
-                if (t.getCashboxId() == c.id && t.getCurrency()
-                        .trim { it <= ' ' } == currency.trim { it <= ' ' }
-                ) {
-                    if (t.getType().equals("credit", ignoreCase = true) || t.getType() == "له") {
-                        totalCredit += t.getAmount()
-                    } else {
-                        totalDebit += t.getAmount()
-                    }
-                }
-            }
-            val balance = totalCredit - totalDebit
-            html.append("<tr>")
-            html.append("<td>").append(c.name).append("</td>")
-            html.append("<td>").append(formatAmount(totalCredit)).append("</td>")
-            html.append("<td>").append(formatAmount(totalDebit)).append("</td>")
-            html.append("<td>").append(formatAmount(balance)).append("</td>")
-            html.append("</tr>")
+
+
+
+
+    private fun setSummarySelectedCurrency(currency: String?) {
+        selectedCurrency = currency
+        for (i in 0 until currencyButtonsLayout!!.getChildCount()) {
+            val btn = currencyButtonsLayout!!.getChildAt(i) as MaterialButton
+            val isSelected = btn.getText().toString() == currency
+            btn.setChecked(isSelected)
+            btn.setBackgroundColor(
+                if (isSelected) Color.parseColor("#1976d2") else Color.parseColor(
+                    "#e3f0ff"
+                )
+            )
+            btn.setTextColor(if (isSelected) Color.WHITE else Color.parseColor("#1976d2"))
         }
-        html.append("</table></body></html>")
-        return html.toString()
+        updateSummaryReport()
     }
 
-    private fun showSummaryWithCurrencies() {
-        val currenciesSet = LinkedHashSet<String>()
-        for (t in allTransactions) {
-            if (t.getCurrency() != null && !t.getCurrency().trim { it <= ' ' }.isEmpty()) {
-                currenciesSet.add(t.getCurrency().trim { it <= ' ' })
-            }
-        }
-        allCurrencies = ArrayList<String>(currenciesSet)
-        if (allCurrencies.isEmpty()) {
-            webView!!.loadDataWithBaseURL(null, "<p>لا توجد بيانات</p>", "text/html", "UTF-8", null)
-            currencyButtonsLayout!!.setVisibility(View.GONE)
-            return
-        }
-        if (selectedCurrency == null || !allCurrencies.contains(selectedCurrency)) {
-            selectedCurrency = allCurrencies.get(0)
-        }
+    private fun loadSummaryWithOptimizedQueries() {
+        // جلب العملات المتوفرة
+        transactionRepository!!.getAvailableCurrenciesInCashboxes()
+            .observe(getViewLifecycleOwner(), Observer { currencies: List<String>? ->
+                if (currencies != null && currencies.isNotEmpty()) {
+                    allCurrencies = currencies.toMutableList()
+                    if (selectedCurrency == null || !allCurrencies.contains(selectedCurrency)) {
+                        selectedCurrency = allCurrencies[0]
+                    }
+                    setupCurrencyButtons()
+                    updateSummaryReport()
+                } else {
+                    webView!!.loadDataWithBaseURL(null, "<p>لا توجد بيانات</p>", "text/html", "UTF-8", null)
+                    currencyButtonsLayout!!.setVisibility(View.GONE)
+                }
+            })
+    }
+
+    private fun setupCurrencyButtons() {
         currencyButtonsLayout!!.removeAllViews()
         for (currency in allCurrencies) {
             val btn = MaterialButton(
@@ -634,24 +604,89 @@ class CashboxStatementFragment : Fragment() {
             currencyButtonsLayout!!.addView(btn)
         }
         currencyButtonsLayout!!.setVisibility(View.VISIBLE)
-        val html = generateCashboxesSummaryHtml(allCashboxes, allTransactions, selectedCurrency!!)
-        webView!!.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
     }
 
-    private fun setSummarySelectedCurrency(currency: String?) {
-        selectedCurrency = currency
-        for (i in 0 until currencyButtonsLayout!!.getChildCount()) {
-            val btn = currencyButtonsLayout!!.getChildAt(i) as MaterialButton
-            val isSelected = btn.getText().toString() == currency
-            btn.setChecked(isSelected)
-            btn.setBackgroundColor(
-                if (isSelected) Color.parseColor("#1976d2") else Color.parseColor(
-                    "#e3f0ff"
-                )
-            )
-            btn.setTextColor(if (isSelected) Color.WHITE else Color.parseColor("#1976d2"))
+    private fun updateSummaryReport() {
+        if (selectedCurrency == null) return
+        
+        // جلب ملخص الصناديق للعملة المحددة
+        transactionRepository!!.getCashboxesSummary()
+            .observe(getViewLifecycleOwner(), Observer { summaries: List<CashboxSummary>? ->
+                if (summaries != null) {
+                    val filteredSummaries = summaries.filter { it.currency == selectedCurrency }
+                    if (filteredSummaries.isNotEmpty()) {
+                        val html = generateOptimizedCashboxesSummaryHtml(allCashboxes, filteredSummaries, selectedCurrency!!)
+                        webView!!.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
+                    } else {
+                        webView!!.loadDataWithBaseURL(null, "<p>لا توجد بيانات لهذه العملة</p>", "text/html", "UTF-8", null)
+                    }
+                }
+            })
+    }
+
+    private fun generateOptimizedCashboxesSummaryHtml(
+        cashboxes: MutableList<Cashbox>,
+        summaries: List<CashboxSummary>,
+        currency: String
+    ): String {
+        val html = StringBuilder()
+        html.append("<!DOCTYPE html>")
+        html.append("<html dir='rtl' lang='ar'>")
+        html.append("<head>")
+        html.append("<meta charset='UTF-8'>")
+        html.append("<style>")
+        html.append("body { font-family: 'Cairo', Arial, sans-serif; margin: 0; background: #f5f7fa; }")
+        html.append(".report-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 8px 6px 6px 6px; margin: 4px; text-align: center; color: white; }")
+        html.append(".report-header p { color: #fff; margin: 1px 0; font-size: 0.8em; font-weight: 500; }")
+        html.append(".report-header .account-info { font-size: 1em; font-weight: bold; margin-bottom: 3px; }")
+        html.append(".report-header .period { font-size: 0.75em; opacity: 0.9; }")
+        html.append("table { width: calc(100% - 8px); border-collapse: collapse; margin: 4px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.08); }")
+        html.append("th, td { border: 1px solid #e8eaed; padding: 6px 4px; text-align: right; font-size: 0.8em; }")
+        html.append("th { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); color: #495057; font-weight: 600; font-size: 0.75em; }")
+        html.append("tr:nth-child(even) { background: #f8f9fa; }")
+        html.append("tr:hover { background: #e3f2fd; transition: background 0.2s; }")
+        html.append(".balance-row { background: #e8f5e8 !important; font-weight: 500; }")
+        html.append(".total-row { background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%) !important; font-weight: bold; color: #2c3e50; }")
+        html.append("@media print { .report-header { box-shadow: none; background: #f0f0f0 !important; color: #333 !important; border: 1px solid #ccc; } .report-header p { color: #333 !important; } table { box-shadow: none; } body { background: #fff; } }")
+        html.append("</style>")
+        html.append("</head>")
+        html.append("<body>")
+        html.append("<div class='report-header'>")
+        html.append("<p class='account-info'>ملخص الصناديق - العملة: ").append(currency).append("</p>")
+        html.append("<p class='period'>تاريخ التقرير: ").append(SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(Date())).append("</p>")
+        html.append("</div>")
+        html.append("<table>")
+        html.append("<tr><th>اسم الصندوق</th><th>إجمالي الدائن (له)</th><th>إجمالي المدين (عليه)</th><th>الرصيد التراكمي</th></tr>")
+        
+        var totalCredit = 0.0
+        var totalDebit = 0.0
+        var totalBalance = 0.0
+        
+        for (cashbox in cashboxes) {
+            val summary = summaries.find { it.cashboxId == cashbox.id }
+            if (summary != null) {
+                html.append("<tr>")
+                html.append("<td>").append(cashbox.name).append("</td>")
+                html.append("<td>").append(formatAmount(summary.totalCredit)).append("</td>")
+                html.append("<td>").append(formatAmount(summary.totalDebit)).append("</td>")
+                html.append("<td>").append(formatAmount(summary.balance)).append("</td>")
+                html.append("</tr>")
+                
+                totalCredit += summary.totalCredit
+                totalDebit += summary.totalDebit
+                totalBalance += summary.balance
+            }
         }
-        val html = generateCashboxesSummaryHtml(allCashboxes, allTransactions, selectedCurrency!!)
-        webView!!.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
+        
+        // إضافة صف الإجمالي
+        html.append("<tr class='total-row'>")
+        html.append("<td><strong>الإجمالي</strong></td>")
+        html.append("<td><strong>").append(formatAmount(totalCredit)).append("</strong></td>")
+        html.append("<td><strong>").append(formatAmount(totalDebit)).append("</strong></td>")
+        html.append("<td><strong>").append(formatAmount(totalBalance)).append("</strong></td>")
+        html.append("</tr>")
+        
+        html.append("</table></body></html>")
+        return html.toString()
     }
 }
