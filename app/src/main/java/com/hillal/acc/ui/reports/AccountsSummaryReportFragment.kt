@@ -81,17 +81,17 @@ class AccountsSummaryReportFragment : Fragment() {
         btnFilterYER!!.setOnClickListener(View.OnClickListener { v: View? ->
             selectedCurrency = "يمني"
             updateFilterButtons()
-            updateReport()
+            loadData() // إعادة تحميل البيانات حسب العملة الجديدة
         })
         btnFilterSAR!!.setOnClickListener(View.OnClickListener { v: View? ->
             selectedCurrency = "سعودي"
             updateFilterButtons()
-            updateReport()
+            loadData() // إعادة تحميل البيانات حسب العملة الجديدة
         })
         btnFilterUSD!!.setOnClickListener(View.OnClickListener { v: View? ->
             selectedCurrency = "دولار"
             updateFilterButtons()
-            updateReport()
+            loadData() // إعادة تحميل البيانات حسب العملة الجديدة
         })
         updateFilterButtons()
     }
@@ -151,10 +151,6 @@ class AccountsSummaryReportFragment : Fragment() {
                 allAccounts = accounts.toMutableList()
                 updateReport()
             })
-        
-        // استخدام الاستعلامات المحسنة بدلاً من جلب جميع المعاملات
-        // إزالة loadAllTransactions() - غير محسن
-        // transactionsViewModel.loadAllTransactions()
         
         // استخدام استعلام محسن للحصول على المعاملات حسب العملة المحددة
         transactionsViewModel.loadTransactionsByCurrency(selectedCurrency)
