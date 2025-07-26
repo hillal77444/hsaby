@@ -1099,5 +1099,4 @@ fun AddCashboxDialogCompose(
             }
         )
     }
-} 
-} 
+}
