@@ -238,7 +238,6 @@ fun AddTransactionScreen(
         var mainCashboxId by remember { mutableStateOf(-1L) }
         var allAccounts by remember { mutableStateOf(listOf<Account>()) }
         var allCashboxes by remember { mutableStateOf(listOf<Cashbox>()) }
-        var allTransactions by remember { mutableStateOf(listOf<Transaction>()) }
         var accountBalancesMap by remember { mutableStateOf(mapOf<Long, Map<String, Double>>()) }
         var amount by remember { mutableStateOf("") }
         var description by remember { mutableStateOf("") }
@@ -521,7 +520,7 @@ fun AddTransactionScreen(
                             Box(Modifier.weight(1f)) {
                                 AccountPickerField(
                                     accounts = allAccounts,
-                                    transactions = allTransactions,
+                                    transactions = emptyList(),
                                     balancesMap = accountBalancesMap,
                                     selectedAccount = selectedAccount,
                                     onAccountSelected = { account ->
@@ -784,7 +783,7 @@ fun AddTransactionScreen(
             AccountPickerBottomSheetCompose(
                 show = showAccountPicker,
                 accounts = allAccounts,
-                transactions = allTransactions,
+                transactions = emptyList(),
                 balancesMap = accountBalancesMap,
                 onAccountSelected = { account ->
                     selectedAccount = account
