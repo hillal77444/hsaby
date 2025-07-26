@@ -129,4 +129,12 @@ public interface TransactionDao {
     // دالة تعيد جميع أرصدة الحسابات لكل عملة دفعة واحدة
     @Query("SELECT account_id, currency, SUM(CASE WHEN type = 'credit' OR type = 'له' THEN amount ELSE -amount END) as balance FROM transactions GROUP BY account_id, currency")
     LiveData<List<AccountBalanceByCurrency>> getAllAccountsBalancesByCurrency();
+
+    // دالة محسنة للحصول على المعاملات حسب العملة
+    @Query("SELECT * FROM transactions WHERE currency = :currency ORDER BY transaction_date DESC")
+    LiveData<List<Transaction>> getTransactionsByCurrency(String currency);
+
+    // دالة محسنة للحصول على المعاملات حسب الصندوق
+    @Query("SELECT * FROM transactions WHERE cashbox_id = :cashboxId ORDER BY transaction_date DESC")
+    LiveData<List<Transaction>> getTransactionsByCashbox(long cashboxId);
 } 

@@ -246,15 +246,19 @@ class CashboxStatementFragment : Fragment() {
             }
         })
 
-        transactionRepository!!.getAllTransactions()
-            .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
-                if (transactions != null) {
-                    allTransactions = transactions.filterNotNull().toMutableList()
-                    if (isSummaryMode) {
-                        showSummaryWithCurrencies()
-                    }
-                }
-            })
+        // استخدام استعلام محسن بدلاً من جلب جميع المعاملات
+        // transactionRepository!!.getAllTransactions()
+        //     .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
+        //         if (transactions != null) {
+        //             allTransactions = transactions.filterNotNull().toMutableList()
+        //             if (isSummaryMode) {
+        //                 showSummaryWithCurrencies()
+        //             }
+        //         }
+        //     })
+        
+        // لا نحتاج لجلب جميع المعاملات هنا - سيتم جلبها عند اختيار الصندوق
+        // allTransactions سيتم ملؤها في onCashboxSelected
     }
 
     private fun loadAccountsMap() {
@@ -270,56 +274,60 @@ class CashboxStatementFragment : Fragment() {
 
     private fun onCashboxSelected(cashbox: Cashbox) {
         isSummaryMode = false
-        val cashboxTransactions: MutableList<Transaction> = ArrayList<Transaction>()
-        for (t in allTransactions) {
-            if (t.getCashboxId() == cashbox.id) {
-                cashboxTransactions.add(t)
-            }
-        }
-        lastCashboxTransactions = cashboxTransactions
-        if (lastCashboxTransactions.isEmpty()) {
-            currencyButtonsLayout!!.setVisibility(View.GONE)
-            webView!!.loadDataWithBaseURL(null, "<p>لا توجد بيانات</p>", "text/html", "UTF-8", null)
-            return
-        }
-        val currencies = LinkedHashSet<String>()
-        for (t in lastCashboxTransactions) {
-            currencies.add(t.getCurrency().trim { it <= ' ' })
-        }
-        currencyButtonsLayout!!.removeAllViews()
-        for (currency in currencies) {
-            val btn = MaterialButton(
-                requireContext(),
-                null,
-                com.google.android.material.R.attr.materialButtonOutlinedStyle
-            )
-            btn.setText(currency)
-            btn.setCheckable(true)
-            val isSelected =
-                currency == selectedCurrency || (selectedCurrency == null && currencies.iterator()
-                    .next() == currency)
-            btn.setChecked(isSelected)
-            btn.setTextColor(if (isSelected) Color.WHITE else Color.parseColor("#1976d2"))
-            btn.setBackgroundColor(
-                if (isSelected) Color.parseColor("#1976d2") else Color.parseColor(
-                    "#e3f0ff"
-                )
-            )
-            btn.setCornerRadius(40)
-            btn.setTextSize(16f)
-            val params = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            params.setMarginEnd(16)
-            btn.setLayoutParams(params)
-            btn.setOnClickListener(View.OnClickListener { v: View? -> setSelectedCurrency(currency) })
-            currencyButtonsLayout!!.addView(btn)
-        }
-        currencyButtonsLayout!!.setVisibility(View.VISIBLE)
-        if (selectedCurrency == null || !currencies.contains(selectedCurrency)) {
-            selectedCurrency = currencies.iterator().next()
-        }
-        setSelectedCurrency(selectedCurrency)
+        
+        // استخدام استعلام محسن بدلاً من فلترة جميع المعاملات
+        transactionRepository!!.getTransactionsByCashbox(cashbox.id ?: -1L)
+            .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
+                if (transactions != null) {
+                    allTransactions = transactions.filterNotNull().toMutableList()
+                    lastCashboxTransactions = allTransactions
+                    
+                    if (lastCashboxTransactions.isEmpty()) {
+                        currencyButtonsLayout!!.setVisibility(View.GONE)
+                        webView!!.loadDataWithBaseURL(null, "<p>لا توجد بيانات</p>", "text/html", "UTF-8", null)
+                        return@Observer
+                    }
+                    
+                    val currencies = LinkedHashSet<String>()
+                    for (t in lastCashboxTransactions) {
+                        currencies.add(t.getCurrency().trim { it <= ' ' })
+                    }
+                    currencyButtonsLayout!!.removeAllViews()
+                    for (currency in currencies) {
+                        val btn = MaterialButton(
+                            requireContext(),
+                            null,
+                            com.google.android.material.R.attr.materialButtonOutlinedStyle
+                        )
+                        btn.setText(currency)
+                        btn.setCheckable(true)
+                        val isSelected =
+                            currency == selectedCurrency || (selectedCurrency == null && currencies.iterator()
+                                .next() == currency)
+                        btn.setChecked(isSelected)
+                        btn.setTextColor(if (isSelected) Color.WHITE else Color.parseColor("#1976d2"))
+                        btn.setBackgroundColor(
+                            if (isSelected) Color.parseColor("#1976d2") else Color.parseColor(
+                                "#e3f0ff"
+                            )
+                        )
+                        btn.setCornerRadius(40)
+                        btn.setTextSize(16f)
+                        val params = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+                        )
+                        params.setMarginEnd(16)
+                        btn.setLayoutParams(params)
+                        btn.setOnClickListener(View.OnClickListener { v: View? -> setSelectedCurrency(currency) })
+                        currencyButtonsLayout!!.addView(btn)
+                    }
+                    currencyButtonsLayout!!.setVisibility(View.VISIBLE)
+                    if (selectedCurrency == null || !currencies.contains(selectedCurrency)) {
+                        selectedCurrency = currencies.iterator().next()
+                    }
+                    setSelectedCurrency(selectedCurrency)
+                }
+            })
     }
 
     private fun setSelectedCurrency(currency: String?) {

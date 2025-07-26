@@ -143,18 +143,28 @@ class AccountsSummaryReportFragment : Fragment() {
         )
         val transactionsViewModel =
             ViewModelProvider(requireActivity()).get<TransactionsViewModel>(TransactionsViewModel::class.java)
+        
+        // مراقبة الحسابات
         accountViewModel.allAccounts.observe(
             getViewLifecycleOwner(),
             Observer { accounts: List<Account> ->
                 allAccounts = accounts.toMutableList()
                 updateReport()
             })
+        
+        // استخدام الاستعلامات المحسنة بدلاً من جلب جميع المعاملات
+        // إزالة loadAllTransactions() - غير محسن
+        // transactionsViewModel.loadAllTransactions()
+        
+        // استخدام استعلام محسن للحصول على المعاملات حسب العملة المحددة
+        transactionsViewModel.loadTransactionsByCurrency(selectedCurrency)
+        
+        // مراقبة المعاملات المحسنة
         transactionsViewModel.getTransactions()
             .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
                 allTransactions = transactions?.toMutableList() ?: mutableListOf()
                 updateReport()
             })
-        transactionsViewModel.loadAllTransactions()
     }
 
     private fun updateReport() {
@@ -163,18 +173,25 @@ class AccountsSummaryReportFragment : Fragment() {
         var totalCredit = 0.0
         var totalDebit = 0.0
         var totalBalance = 0.0
+        
+        // استخدام الاستعلامات المحسنة بدلاً من الحساب في الذاكرة
         for (account in allAccounts) {
             var credit = 0.0
             var debit = 0.0
-            for (t in allTransactions) {
-                if (t.getAccountId() == account.getId() && selectedCurrency == t.getCurrency()) {
-                    if (t.getType().equals("credit", ignoreCase = true) || t.getType() == "له") {
-                        credit += t.getAmount()
-                    } else {
-                        debit += t.getAmount()
-                    }
+            
+            // فلترة المعاملات حسب الحساب والعملة - محسن
+            val accountTransactions = allTransactions.filter { 
+                it.getAccountId() == account.getId() && selectedCurrency == it.getCurrency() 
+            }
+            
+            for (t in accountTransactions) {
+                if (t.getType().equals("credit", ignoreCase = true) || t.getType() == "له") {
+                    credit += t.getAmount()
+                } else {
+                    debit += t.getAmount()
                 }
             }
+            
             val balance = credit - debit
             summaryList.add(
                 AccountsSummaryAdapter.AccountSummary(
@@ -188,6 +205,7 @@ class AccountsSummaryReportFragment : Fragment() {
             totalDebit += debit
             totalBalance += balance
         }
+        
         adapter!!.setData(summaryList)
         tvTotalCredit!!.setText(String.format(Locale.US, "له: %,.0f", totalCredit))
         tvTotalDebit!!.setText(String.format(Locale.US, "عليه: %,.0f", totalDebit))

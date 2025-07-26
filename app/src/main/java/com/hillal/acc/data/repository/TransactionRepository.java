@@ -129,4 +129,14 @@ public class TransactionRepository {
     public LiveData<List<AccountBalanceByCurrency>> getAllAccountsBalancesByCurrency() {
         return transactionDao.getAllAccountsBalancesByCurrency();
     }
+
+    // دالة محسنة للحصول على المعاملات حسب العملة
+    public LiveData<List<Transaction>> getTransactionsByCurrency(String currency) {
+        return transactionDao.getTransactionsByCurrency(currency);
+    }
+
+    // دالة محسنة للحصول على المعاملات حسب الصندوق
+    public LiveData<List<Transaction>> getTransactionsByCashbox(long cashboxId) {
+        return transactionDao.getTransactionsByCashbox(cashboxId);
+    }
 }

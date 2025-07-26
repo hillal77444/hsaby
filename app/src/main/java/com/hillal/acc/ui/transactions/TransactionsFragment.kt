@@ -702,7 +702,6 @@ class TransactionsFragment : Fragment() {
         // عرض مؤشر التحميل
         // binding!!.progressBar.setVisibility(View.VISIBLE)
 
-
         // مراقبة الحسابات
         accountViewModel!!.getAllAccounts()
             .observe(getViewLifecycleOwner(), Observer { accounts: MutableList<Account>? ->
@@ -714,12 +713,7 @@ class TransactionsFragment : Fragment() {
                         accountMap.put(account.getId(), account)
                     }
 
-
-                    // تحديث المحول بالحسابات
-                    // adapter!!.setAccountMap(accountMap)
-
-
-                    // تحميل المعاملات مع التصفية الافتراضية
+                    // تحميل المعاملات مع التصفية الافتراضية - محسن
                     viewModel!!.loadTransactionsByDateRange(
                         startDate!!.timeInMillis,
                         endDate!!.timeInMillis
@@ -727,8 +721,7 @@ class TransactionsFragment : Fragment() {
                 }
             })
 
-
-        // مراقبة المعاملات
+        // مراقبة المعاملات - محسن (يستخدم loadTransactionsByDateRange بدلاً من getAllTransactions)
         viewModel!!.getTransactions()
             .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
                 // إخفاء مؤشر التحميل
@@ -742,7 +735,7 @@ class TransactionsFragment : Fragment() {
                 }
             })
 
-        // مراقبة أرصدة الحسابات
+        // مراقبة أرصدة الحسابات - محسن
         viewModel!!.accountBalancesMap.observe(
             getViewLifecycleOwner(),
             Observer { balancesMap: MutableMap<Long?, MutableMap<String?, Double?>?>? ->
@@ -871,8 +864,14 @@ class TransactionsFragment : Fragment() {
         // عرض مؤشر التحميل
         // binding!!.progressBar.setVisibility(View.VISIBLE)
 
-
-        // تحميل البيانات من قاعدة البيانات المحلية
+        // تحميل البيانات من قاعدة البيانات المحلية - محسن
+        // يستخدم loadTransactionsByDateRange بدلاً من getAllTransactions
+        viewModel!!.loadTransactionsByDateRange(
+            startDate!!.timeInMillis,
+            endDate!!.timeInMillis
+        )
+        
+        // مراقبة النتائج
         viewModel!!.getTransactions()
             .observe(getViewLifecycleOwner(), Observer { transactions: MutableList<Transaction>? ->
                 // إخفاء مؤشر التحميل

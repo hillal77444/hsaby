@@ -20,35 +20,30 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
 
     init {
         repository = (application as App).getTransactionRepository()
-        loadAllTransactions()
+        // إزالة loadAllTransactions() - لا نحتاج لجلب جميع المعاملات
     }
 
     fun getTransactions(): LiveData<MutableList<Transaction>?> {
         return transactions
     }
 
-    fun loadAllTransactions() {
-        repository.getAllTransactions()
+    // إزالة loadAllTransactions() - غير محسن
+    // fun loadAllTransactions() {
+    //     repository.getAllTransactions()
+    //         .observeForever(Observer { value: MutableList<Transaction?>? ->
+    //             transactions.setValue(value?.filterNotNull()?.toMutableList())
+    //         })
+    // }
+
+    // تحسين loadTransactionsByAccount لاستخدام استعلام محسن
+    fun loadTransactionsByAccount(accountId: Long) {
+        repository.getTransactionsByAccount(accountId)
             .observeForever(Observer { value: MutableList<Transaction?>? ->
                 transactions.setValue(value?.filterNotNull()?.toMutableList())
             })
     }
 
-    fun loadTransactionsByAccount(accountName: String) {
-        repository.getAllTransactions()
-            .observeForever(Observer { transactionList: MutableList<Transaction>? ->
-                if (transactionList != null) {
-                    val filteredTransactions: MutableList<Transaction> = ArrayList<Transaction>()
-                    for (t in transactionList) {
-                        if (accountName == t.getAccountId().toString()) {
-                            filteredTransactions.add(t)
-                        }
-                    }
-                    transactions.setValue(filteredTransactions)
-                }
-            })
-    }
-
+    // تحسين loadTransactionsByDateRange - محسن بالفعل
     fun loadTransactionsByDateRange(startDate: Long, endDate: Long) {
         this.startDate = startDate
         this.endDate = endDate
@@ -58,61 +53,59 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
             })
     }
 
+    // تحسين loadTransactionsByCurrency لاستخدام استعلام محسن
     fun loadTransactionsByCurrency(currency: String) {
-        repository.getAllTransactions()
-            .observeForever(Observer { transactionList: MutableList<Transaction>? ->
-                if (transactionList != null) {
-                    val filteredTransactions: MutableList<Transaction> = ArrayList<Transaction>()
-                    for (t in transactionList) {
-                        if (currency == t.getCurrency()) {
-                            filteredTransactions.add(t)
-                        }
-                    }
-                    transactions.setValue(filteredTransactions)
-                }
+        // استخدام استعلام محسن بدلاً من جلب جميع المعاملات
+        repository.getTransactionsByCurrency(currency)
+            .observeForever(Observer { value: MutableList<Transaction?>? ->
+                transactions.setValue(value?.filterNotNull()?.toMutableList())
+            })
+    }
+
+    // دالة محسنة للحصول على المعاملات حسب الصندوق
+    fun loadTransactionsByCashbox(cashboxId: Long) {
+        repository.getTransactionsByCashbox(cashboxId)
+            .observeForever(Observer { value: MutableList<Transaction?>? ->
+                transactions.setValue(value?.filterNotNull()?.toMutableList())
             })
     }
 
     fun deleteTransaction(transaction: Transaction?) {
         repository.delete(transaction)
-        loadTransactionsByDateRange(startDate, endDate)
+        // إعادة تحميل المعاملات حسب النطاق الحالي
+        if (startDate > 0 && endDate > 0) {
+            loadTransactionsByDateRange(startDate, endDate)
+        }
     }
 
     fun updateTransaction(transaction: Transaction?) {
         repository.update(transaction)
+        // إعادة تحميل المعاملات حسب النطاق الحالي
+        if (startDate > 0 && endDate > 0) {
+            loadTransactionsByDateRange(startDate, endDate)
+        }
     }
 
     fun insertTransaction(transaction: Transaction?) {
         repository.insert(transaction)
-        loadTransactionsByDateRange(startDate, endDate)
+        // إعادة تحميل المعاملات حسب النطاق الحالي
+        if (startDate > 0 && endDate > 0) {
+            loadTransactionsByDateRange(startDate, endDate)
+        }
     }
 
     fun getTransactionById(id: Long): LiveData<Transaction?>? {
         return repository.getTransactionById(id)
     }
 
+    // تحسين filterTransactionsByCurrency لاستخدام استعلام محسن
     fun filterTransactionsByCurrency(currency: String) {
-        val currentList = transactions.getValue()
-        if (currentList != null) {
-            val filteredList = currentList.stream()
-                .filter { t: Transaction? ->
-                    t!!.getCurrency() != null &&
-                            t.getCurrency().trim { it <= ' ' }
-                                .equals(currency.trim { it <= ' ' }, ignoreCase = true)
-                }
-                .collect(Collectors.toList())
-            transactions.setValue(ArrayList(filteredList ?: emptyList()))
-        }
+        // استخدام استعلام محسن بدلاً من الفلترة في الذاكرة
+        loadTransactionsByCurrency(currency)
     }
 
-    fun filterTransactionsByAccount(accountId: Long) {
-        val currentList = transactions.getValue()
-        if (currentList != null) {
-            val filteredList = currentList.stream()
-                .filter { t: Transaction? -> t!!.getAccountId() == accountId }
-                .collect(Collectors.toList())
-            transactions.setValue(ArrayList(filteredList ?: emptyList()))
-        }
+    fun searchTransactionsByDescription(query: String?): LiveData<MutableList<Transaction?>?>? {
+        return repository.searchTransactionsByDescription(query)
     }
 
     // إضافة دوال محسنة

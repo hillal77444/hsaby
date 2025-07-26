@@ -65,4 +65,21 @@ public class TransactionViewModel extends AndroidViewModel {
     public LiveData<Double> getAccountBalance(long accountId) {
         return repository.getAccountBalance(accountId);
     }
+
+    // دوال محسنة للإحصائيات
+    public LiveData<Double> getTotalDebtors() {
+        return repository.getTotalDebtors();
+    }
+
+    public LiveData<Double> getTotalCreditors() {
+        return repository.getTotalCreditors();
+    }
+
+    public LiveData<Double> getBalanceUntilDate(long accountId, long transactionDate, String currency) {
+        return repository.getBalanceUntilDate(accountId, transactionDate, currency);
+    }
+
+    public LiveData<Double> getBalanceUntilTransaction(long accountId, long transactionDate, long transactionId, String currency) {
+        return repository.getBalanceUntilTransaction(accountId, transactionDate, transactionId, currency);
+    }
 } 

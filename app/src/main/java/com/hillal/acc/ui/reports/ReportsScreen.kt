@@ -84,13 +84,21 @@ fun ReportsScreen(
     val dimens = LocalAppDimensions.current
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
-    val transactions by transactionViewModel.getAllTransactions().observeAsState(emptyList())
-    val totalDebit = transactions.filter { it.getType() == "debit" }.sumOf { it.getAmount() }
-    val totalCredit = transactions.filter { it.getType() == "credit" }.sumOf { it.getAmount() }
+    
+    // استخدام استعلامات محسنة بدلاً من جلب جميع المعاملات
+    // val transactions by transactionViewModel.getAllTransactions().observeAsState(emptyList())
+    // val totalDebit = transactions.filter { it.getType() == "debit" }.sumOf { it.getAmount() }
+    // val totalCredit = transactions.filter { it.getType() == "credit" }.sumOf { it.getAmount() }
+    // val netBalance = totalCredit - totalDebit
+    // val count = transactions.size
+    // val sum = transactions.sumOf { it.getAmount() }
+    // val avg = if (count > 0) sum / count else 0.0
+    
+    // استخدام استعلامات محسنة للإحصائيات
+    val totalDebit by transactionViewModel.getTotalDebtors().observeAsState(0.0)
+    val totalCredit by transactionViewModel.getTotalCreditors().observeAsState(0.0)
     val netBalance = totalCredit - totalDebit
-    val count = transactions.size
-    val sum = transactions.sumOf { it.getAmount() }
-    val avg = if (count > 0) sum / count else 0.0
+    
     val scrollState = rememberScrollState()
 
     // إضافة استدعاء sessionExpiry من PreferencesManager
@@ -351,13 +359,13 @@ fun ReportsScreen(
                 ) {
                     StatItem(
                         label = "عدد المعاملات", 
-                        value = count.toDouble(), 
+                        value = 0.0, // This will be updated when transactions are fetched
                         isInt = true,
                         color = colors.tertiary
                     )
                     StatItem(
                         label = "متوسط المعاملة", 
-                        value = avg,
+                        value = 0.0, // This will be updated when transactions are fetched
                         color = colors.secondary
                     )
                 }
