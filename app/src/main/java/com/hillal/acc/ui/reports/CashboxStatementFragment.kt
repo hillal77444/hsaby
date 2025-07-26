@@ -103,6 +103,20 @@ class CashboxStatementFragment : Fragment() {
         webView!!.getSettings().setBuiltInZoomControls(true)
         webView!!.getSettings().setDisplayZoomControls(false)
         webView!!.getSettings().setSupportZoom(true)
+        // إعدادات إضافية لضمان العرض الصحيح
+        webView!!.getSettings().setLoadWithOverviewMode(true)
+        webView!!.getSettings().setUseWideViewPort(true)
+        webView!!.getSettings().setJavaScriptEnabled(true)
+        webView!!.getSettings().setDomStorageEnabled(true)
+        // ضبط العرض ليتناسب مع الشاشة
+        webView!!.getSettings().setLayoutAlgorithm(android.webkit.WebSettings.LayoutAlgorithm.SINGLE_COLUMN)
+        // إعدادات إضافية لضمان العرض الصحيح
+        webView!!.getSettings().setDefaultTextEncodingName("UTF-8")
+        webView!!.getSettings().setAllowFileAccess(true)
+        webView!!.getSettings().setAllowContentAccess(true)
+        // ضبط العرض ليتناسب مع الشاشة
+        webView!!.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY)
+        webView!!.setHorizontalScrollBarEnabled(false)
         loadCashboxes()
         return view
     }
@@ -114,11 +128,13 @@ class CashboxStatementFragment : Fragment() {
             webView!!,
             OnApplyWindowInsetsListener { v: View?, insets: WindowInsetsCompat? ->
                 val bottom = insets!!.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
+                // إضافة padding إضافي أسفل WebView لتجنب تغطية الأزرار السفلية
+                val extraBottomPadding = 80 // 80dp إضافية أسفل المحتوى
                 v!!.setPadding(
                     v.getPaddingLeft(),
                     v.getPaddingTop(),
                     v.getPaddingRight(),
-                    bottom
+                    bottom + extraBottomPadding
                 )
                 insets
             })
@@ -132,6 +148,16 @@ class CashboxStatementFragment : Fragment() {
         btnPrint = view.findViewById<ImageButton>(R.id.btnPrintInCard)
         currencyButtonsLayout = view.findViewById<LinearLayout>(R.id.currencyButtonsLayout)
         currencyButtonsLayout!!.setVisibility(View.GONE)
+        
+        // إعدادات إضافية لضمان العرض الصحيح للـ WebView
+        webView!!.setHorizontalScrollBarEnabled(false)
+        webView!!.setVerticalScrollBarEnabled(true)
+        webView!!.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY)
+        webView!!.setOverScrollMode(View.OVER_SCROLL_NEVER)
+        // إعدادات إضافية للتمرير السلس
+        webView!!.setVerticalFadingEdgeEnabled(false)
+        webView!!.setHorizontalFadingEdgeEnabled(false)
+        webView!!.setFadingEdgeLength(0)
         btnPrint!!.setOnClickListener(View.OnClickListener { v: View? -> printReport() })
         cashboxDropdown!!.setFocusable(false)
         cashboxDropdown!!.setOnClickListener(View.OnClickListener { v: View? -> cashboxDropdown!!.showDropDown() })
@@ -688,5 +714,113 @@ class CashboxStatementFragment : Fragment() {
         
         html.append("</table></body></html>")
         return html.toString()
+    }
+
+    private fun getOptimizedCSS(): String {
+        return """
+            body { 
+                font-family: 'Cairo', Arial, sans-serif; 
+                margin: 0; 
+                padding: 8px; 
+                padding-bottom: 100px; 
+                background: #f5f7fa; 
+                max-width: 100%; 
+                overflow-x: hidden; 
+                word-wrap: break-word;
+            }
+            .report-header { 
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                border-radius: 8px; 
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+                padding: 8px 6px 6px 6px; 
+                margin: 4px; 
+                text-align: center; 
+                color: white; 
+            }
+            .report-header p { 
+                color: #fff; 
+                margin: 1px 0; 
+                font-size: 0.8em; 
+                font-weight: 500; 
+            }
+            .report-header .account-info { 
+                font-size: 1em; 
+                font-weight: bold; 
+                margin-bottom: 3px; 
+            }
+            .report-header .period { 
+                font-size: 0.75em; 
+                opacity: 0.9; 
+            }
+            table { 
+                width: 100%; 
+                max-width: 100%; 
+                border-collapse: collapse; 
+                margin: 4px 0; 
+                background: #fff; 
+                border-radius: 8px; 
+                overflow: hidden; 
+                box-shadow: 0 1px 6px rgba(0,0,0,0.08); 
+                table-layout: fixed; 
+            }
+            th, td { 
+                border: 1px solid #e8eaed; 
+                padding: 6px 4px; 
+                text-align: right; 
+                font-size: 0.8em; 
+                word-wrap: break-word; 
+                overflow-wrap: break-word; 
+            }
+            th { 
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
+                color: #495057; 
+                font-weight: 600; 
+                font-size: 0.75em; 
+            }
+            tr:nth-child(even) { 
+                background: #f8f9fa; 
+            }
+            tr:hover { 
+                background: #e3f2fd; 
+                transition: background 0.2s; 
+            }
+            .balance-row { 
+                background: #e8f5e8 !important; 
+                font-weight: 500; 
+            }
+            .total-row { 
+                background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%) !important; 
+                font-weight: bold; 
+                color: #2c3e50; 
+            }
+            @media print { 
+                .report-header { 
+                    box-shadow: none; 
+                    background: #f0f0f0 !important; 
+                    color: #333 !important; 
+                    border: 1px solid #ccc; 
+                } 
+                .report-header p { 
+                    color: #333 !important; 
+                } 
+                table { 
+                    box-shadow: none; 
+                } 
+                body { 
+                    background: #fff; 
+                } 
+            }
+            @media screen and (max-width: 600px) { 
+                body { 
+                    padding: 4px; 
+                } 
+                table { 
+                    font-size: 0.7em; 
+                } 
+                th, td { 
+                    padding: 4px 2px; 
+                } 
+            }
+        """.trimIndent()
     }
 }
