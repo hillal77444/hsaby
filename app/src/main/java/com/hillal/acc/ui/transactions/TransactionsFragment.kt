@@ -389,8 +389,7 @@ class TransactionsFragment : Fragment() {
                         )
                     } else {
                         // عند البحث، نبحث في قاعدة البيانات مباشرة بالوصف
-                        viewModel!!.searchTransactionsByDescription("%" + query + "%")!!
-                            .observe(
+                        viewModel!!.searchTransactionsByDescription("%" + query + "%")?.observe(
                                 getViewLifecycleOwner(),
                                 Observer { results: MutableList<Transaction?>? ->
                                     if (results != null) {

@@ -150,8 +150,4 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
             }
             return balancesLiveData
         }
-
-    fun searchTransactionsByDescription(query: String?): LiveData<MutableList<Transaction?>?>? {
-        return repository.searchTransactionsByDescription(query)
-    }
 }
