@@ -43,13 +43,13 @@ public class DashboardViewModel extends ViewModel {
             recentAccounts.setValue(accounts);
         });
 
-        // Load totals from transactions - محسن للعملة اليمنية فقط
-        transactionRepository.getTotalDebtors().observeForever(debtors -> {
+        // Load totals from transactions - للعملة اليمنية فقط
+        transactionRepository.getTotalDebtorsYemeni().observeForever(debtors -> {
             totalDebtors.setValue(debtors != null ? debtors : 0.0);
             updateNetBalance();
         });
 
-        transactionRepository.getTotalCreditors().observeForever(creditors -> {
+        transactionRepository.getTotalCreditorsYemeni().observeForever(creditors -> {
             totalCreditors.setValue(creditors != null ? creditors : 0.0);
             updateNetBalance();
         });

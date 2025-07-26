@@ -82,4 +82,20 @@ public class TransactionViewModel extends AndroidViewModel {
     public LiveData<Double> getBalanceUntilTransaction(long accountId, long transactionDate, long transactionId, String currency) {
         return repository.getBalanceUntilTransaction(accountId, transactionDate, transactionId, currency);
     }
+
+    public LiveData<Integer> getTotalTransactionsCount() {
+        return repository.getTotalTransactionsCount();
+    }
+
+    public LiveData<Integer> getTotalAccountsCount() {
+        return repository.getTotalAccountsCount();
+    }
+
+    public LiveData<Double> getTotalDebtorsYemeni() {
+        return repository.getTotalDebtorsYemeni();
+    }
+
+    public LiveData<Double> getTotalCreditorsYemeni() {
+        return repository.getTotalCreditorsYemeni();
+    }
 } 

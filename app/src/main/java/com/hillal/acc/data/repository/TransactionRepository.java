@@ -110,6 +110,22 @@ public class TransactionRepository {
         return transactionDao.getTotalCreditors();
     }
 
+    public LiveData<Integer> getTotalTransactionsCount() {
+        return transactionDao.getTotalTransactionsCount();
+    }
+
+    public LiveData<Integer> getTotalAccountsCount() {
+        return transactionDao.getTotalAccountsCount();
+    }
+
+    public LiveData<Double> getTotalDebtorsYemeni() {
+        return transactionDao.getTotalDebtorsYemeni();
+    }
+
+    public LiveData<Double> getTotalCreditorsYemeni() {
+        return transactionDao.getTotalCreditorsYemeni();
+    }
+
     public LiveData<Double> getBalanceUntilDate(long accountId, long transactionDate, String currency) {
         return transactionDao.getBalanceUntilDate(accountId, transactionDate, currency);
     }

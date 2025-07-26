@@ -94,10 +94,12 @@ fun ReportsScreen(
     // val sum = transactions.sumOf { it.getAmount() }
     // val avg = if (count > 0) sum / count else 0.0
     
-    // استخدام استعلامات محسنة للإحصائيات
+    // استخدام استعلامات محسنة للإحصائيات لجميع العملات
     val totalDebit by transactionViewModel.getTotalDebtors().observeAsState(0.0)
     val totalCredit by transactionViewModel.getTotalCreditors().observeAsState(0.0)
     val netBalance = totalCredit - totalDebit
+    val totalTransactionsCount by transactionViewModel.getTotalTransactionsCount().observeAsState(0)
+    val totalAccountsCount by transactionViewModel.getTotalAccountsCount().observeAsState(0)
     
     val scrollState = rememberScrollState()
 
@@ -322,12 +324,12 @@ fun ReportsScreen(
                         modifier = Modifier.size(dimens.iconSize)
                     )
                     Spacer(Modifier.width(dimens.spacingSmall))
-                    Text(
-                        text = "إحصائيات عامة",
-                        fontSize = dimens.bodyFont,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.primary
-                    )
+                                    Text(
+                    text = "إحصائيات عامة (جميع العملات)",
+                    fontSize = dimens.bodyFont,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.primary
+                )
                 }
                 Spacer(Modifier.height(dimens.spacingSmall))
                 // الإحصائيات الأولى
@@ -359,13 +361,14 @@ fun ReportsScreen(
                 ) {
                     StatItem(
                         label = "عدد المعاملات", 
-                        value = 0.0, // This will be updated when transactions are fetched
+                        value = totalTransactionsCount.toDouble(),
                         isInt = true,
                         color = colors.tertiary
                     )
                     StatItem(
-                        label = "متوسط المعاملة", 
-                        value = 0.0, // This will be updated when transactions are fetched
+                        label = "عدد الحسابات", 
+                        value = totalAccountsCount.toDouble(),
+                        isInt = true,
                         color = colors.secondary
                     )
                 }
