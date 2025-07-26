@@ -253,7 +253,7 @@ class CashboxStatementFragment : Fragment() {
                 selectedCashboxId = -1L
                 lastSelectedCashbox = null
                 if (isSummaryMode) {
-                    showSummaryWithCurrencies()
+                    loadSummaryWithOptimizedQueries()
                 }
             })
 
