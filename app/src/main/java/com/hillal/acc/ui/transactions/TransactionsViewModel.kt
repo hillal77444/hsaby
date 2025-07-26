@@ -113,37 +113,46 @@ class TransactionsViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    val accountBalancesMap: LiveData<MutableMap<Long?, MutableMap<String?, Double?>?>?>
+    // إضافة دوال محسنة
+    fun getAccountsTransactionCount(): LiveData<List<AccountTransactionCount>> {
+        return repository.getAccountsTransactionCount()
+    }
+
+    fun getAllAccountsBalancesByCurrency(): LiveData<List<AccountBalanceByCurrency>> {
+        return repository.getAllAccountsBalancesByCurrency()
+    }
+
+    // تحسين حساب الأرصدة
+    val accountBalancesMapOptimized: LiveData<Map<Long, Map<String, Double>>>
         get() {
-            val balancesLiveData =
-                MutableLiveData<MutableMap<Long?, MutableMap<String?, Double?>?>?>()
-            getTransactions().observeForever(Observer { transactionsList: MutableList<Transaction>? ->
-                val balancesMap: MutableMap<Long?, MutableMap<String?, Double?>?> =
-                    HashMap<Long?, MutableMap<String?, Double?>?>()
-                val safeList = transactionsList?.filterNotNull()?.toMutableList() ?: mutableListOf()
-                for (t in safeList) {
-                    val accountId = t.getAccountId()
-                    val currency = t.getCurrency()
-                    val amount = t.getAmount()
-                    val type = t.getType()
-                    if (!balancesMap.containsKey(accountId)) {
-                        balancesMap.put(
-                            accountId,
-                            HashMap<String?, Double?>()
-                        )
+            val balancesLiveData = MutableLiveData<Map<Long, Map<String, Double>>>()
+            getAllAccountsBalancesByCurrency().observeForever { balancesList ->
+                val balancesMap = mutableMapOf<Long, MutableMap<String, Double>>()
+                balancesList?.forEach { balance ->
+                    if (!balancesMap.containsKey(balance.accountId)) {
+                        balancesMap[balance.accountId] = mutableMapOf()
                     }
-                    val currencyMap =
-                        balancesMap.get(accountId)
-                    var prev: Double = currencyMap!!.getOrDefault(currency, 0.0)!!
-                    if (type == "عليه" || type.equals("debit", ignoreCase = true)) {
-                        prev -= amount
-                    } else {
-                        prev += amount
-                    }
-                    currencyMap.put(currency, prev)
+                    balancesMap[balance.accountId]!![balance.currency] = balance.balance
                 }
                 balancesLiveData.postValue(balancesMap)
-            })
+            }
+            return balancesLiveData
+        }
+
+    // دالة التوافق مع الملفات القديمة
+    val accountBalancesMap: LiveData<MutableMap<Long?, MutableMap<String?, Double?>?>?>
+        get() {
+            val balancesLiveData = MutableLiveData<MutableMap<Long?, MutableMap<String?, Double?>?>?>()
+            getAllAccountsBalancesByCurrency().observeForever { balancesList ->
+                val balancesMap: MutableMap<Long?, MutableMap<String?, Double?>?> = HashMap()
+                balancesList?.forEach { balance ->
+                    if (!balancesMap.containsKey(balance.accountId)) {
+                        balancesMap[balance.accountId] = HashMap()
+                    }
+                    balancesMap[balance.accountId]!![balance.currency] = balance.balance
+                }
+                balancesLiveData.postValue(balancesMap)
+            }
             return balancesLiveData
         }
 

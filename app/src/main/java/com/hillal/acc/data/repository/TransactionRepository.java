@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import com.hillal.acc.data.model.AccountTransactionCount;
+import com.hillal.acc.data.model.AccountBalanceByCurrency;
 
 public class TransactionRepository {
     private final TransactionDao transactionDao;
@@ -117,5 +119,14 @@ public class TransactionRepository {
 
     public LiveData<Double> getBalanceUntilTransaction(long accountId, long transactionDate, long transactionId, String currency) {
         return transactionDao.getBalanceUntilTransaction(accountId, transactionDate, transactionId, currency);
+    }
+
+    // دوال محسنة جديدة
+    public LiveData<List<AccountTransactionCount>> getAccountsTransactionCount() {
+        return transactionDao.getAccountsTransactionCount();
+    }
+
+    public LiveData<List<AccountBalanceByCurrency>> getAllAccountsBalancesByCurrency() {
+        return transactionDao.getAllAccountsBalancesByCurrency();
     }
 }

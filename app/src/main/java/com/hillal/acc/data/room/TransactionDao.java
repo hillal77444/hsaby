@@ -121,4 +121,12 @@ public interface TransactionDao {
     // دالة تعيد جميع أرصدة الحسابات بالريال اليمني دفعة واحدة
     @Query("SELECT account_id, SUM(CASE WHEN type = 'credit' OR type = 'له' THEN amount ELSE -amount END) as balance FROM transactions WHERE currency = 'يمني' GROUP BY account_id")
     LiveData<List<AccountBalanceYemeni>> getAllAccountsBalancesYemeni();
+
+    // دالة تعيد عدد المعاملات لكل حساب دفعة واحدة
+    @Query("SELECT account_id, COUNT(*) as transaction_count FROM transactions GROUP BY account_id")
+    LiveData<List<AccountTransactionCount>> getAccountsTransactionCount();
+
+    // دالة تعيد جميع أرصدة الحسابات لكل عملة دفعة واحدة
+    @Query("SELECT account_id, currency, SUM(CASE WHEN type = 'credit' OR type = 'له' THEN amount ELSE -amount END) as balance FROM transactions GROUP BY account_id, currency")
+    LiveData<List<AccountBalanceByCurrency>> getAllAccountsBalancesByCurrency();
 } 

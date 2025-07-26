@@ -329,20 +329,18 @@ fun AddTransactionScreen(
             lastAmountUpdate = amount
         }
         
-        // Observers
+        // Observers - محسن
         LaunchedEffect(Unit) {
             accountViewModel.getAllAccounts().observe(lifecycleOwner) { accounts ->
                 if (accounts != null) {
-                    // ترتيب الحسابات حسب عدد المعاملات
-                    val accountTransactionCount = mutableMapOf<Long, Int>()
-                    for (transaction in allTransactions) {
-                        val accountId = transaction.getAccountId()
-                        accountTransactionCount[accountId] = accountTransactionCount.getOrDefault(accountId, 0) + 1
+                    // استخدام استعلام محسن لعدد المعاملات
+                    transactionsViewModel.getAccountsTransactionCount().observe(lifecycleOwner) { transactionCounts ->
+                        val accountTransactionCount = transactionCounts?.associate { it.accountId to it.transactionCount } ?: emptyMap()
+                        val sortedAccounts = accounts.filterNotNull().sortedByDescending { account ->
+                            accountTransactionCount.getOrDefault(account.getId(), 0)
+                        }
+                        allAccounts = sortedAccounts
                     }
-                    val sortedAccounts = accounts.filterNotNull().sortedByDescending { account ->
-                        accountTransactionCount.getOrDefault(account.getId(), 0)
-                    }
-                    allAccounts = sortedAccounts
                 }
             }
             cashboxViewModel.getAllCashboxes().observe(lifecycleOwner) { cashboxes ->
@@ -357,14 +355,16 @@ fun AddTransactionScreen(
                     }
                 }
             }
-            transactionsViewModel.accountBalancesMap.observe(lifecycleOwner) { balancesMap ->
+            // استخدام الأرصدة المحسنة
+            transactionsViewModel.accountBalancesMapOptimized.observe(lifecycleOwner) { balancesMap ->
                 if (balancesMap != null) {
-                    accountBalancesMap = balancesMap.filterKeys { it != null }.mapKeys { it.key!! } as Map<Long, Map<String, Double>>
+                    accountBalancesMap = balancesMap
                 }
             }
-            transactionsViewModel.getTransactions().observe(lifecycleOwner) { txs ->
-                if (txs != null) allTransactions = txs
-            }
+            // لا نحتاج لجلب جميع المعاملات بعد الآن
+            // transactionsViewModel.getTransactions().observe(lifecycleOwner) { txs ->
+            //     if (txs != null) allTransactions = txs
+            // }
         }
 
         // Suggestions
@@ -1099,4 +1099,5 @@ fun AddCashboxDialogCompose(
             }
         )
     }
+} 
 } 
