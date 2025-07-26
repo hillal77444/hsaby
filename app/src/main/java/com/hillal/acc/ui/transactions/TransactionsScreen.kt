@@ -111,7 +111,7 @@ fun TransactionsScreen(
 
     // نوع التصفية
     val filterOptions = listOf("يومي", "أسبوعي", "شهري", "سنوي")
-    var filterType by rememberSaveable { mutableStateOf("أسبوعي") }
+    var filterType by rememberSaveable { mutableStateOf("يومي") }
 
     // دالة لحساب التواريخ حسب نوع التصفية
     fun getDateRangeForFilter(type: String): Pair<Long?, Long?> {

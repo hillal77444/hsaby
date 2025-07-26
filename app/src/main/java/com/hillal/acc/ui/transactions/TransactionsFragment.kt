@@ -118,9 +118,8 @@ class TransactionsFragment : Fragment() {
         setHasOptionsMenu(true)
 
 
-        // تهيئة التواريخ الافتراضية
+        // تهيئة التواريخ الافتراضية - اليوم الحالي
         startDate = Calendar.getInstance()
-        startDate!!.add(Calendar.DAY_OF_MONTH, -4) // قبل 4 أيام
         startDate!!.set(Calendar.HOUR_OF_DAY, 0)
         startDate!!.set(Calendar.MINUTE, 0)
         startDate!!.set(Calendar.SECOND, 0)
@@ -152,10 +151,10 @@ class TransactionsFragment : Fragment() {
                 // State للفلاتر
                 var selectedAccount by remember { mutableStateOf<Account?>(null) }
                 val today = remember { Calendar.getInstance() }
-                val fourDaysAgo = remember {
-                    Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -4); set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }
+                val todayStart = remember {
+                    Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }
                 }
-                var startDate by remember { mutableStateOf(fourDaysAgo.timeInMillis) }
+                var startDate by remember { mutableStateOf(todayStart.timeInMillis) }
                 var endDate by remember { mutableStateOf(today.timeInMillis) }
                 var searchQuery by remember { mutableStateOf("") }
                 var searchResults by remember { mutableStateOf<List<Transaction>?>(null) }
@@ -171,29 +170,21 @@ class TransactionsFragment : Fragment() {
                     }
                 }
 
-                // تصفية المعاملات حسب الفلاتر (تُستخدم فقط إذا لم يكن هناك بحث)
-                // تأكد من أن الفلترة تتجاهل الوقت (من بداية اليوم إلى نهاية اليوم)
-                val startOfDay = Calendar.getInstance().apply {
-                    timeInMillis = startDate
-                    set(Calendar.HOUR_OF_DAY, 0)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }.timeInMillis
-                val endOfDay = Calendar.getInstance().apply {
-                    timeInMillis = endDate
-                    set(Calendar.HOUR_OF_DAY, 23)
-                    set(Calendar.MINUTE, 59)
-                    set(Calendar.SECOND, 59)
-                    set(Calendar.MILLISECOND, 999)
-                }.timeInMillis
+                // تحميل المعاملات حسب التواريخ المحددة
+                LaunchedEffect(startDate, endDate) {
+                    // تأكد من أن التواريخ صحيحة قبل التحميل
+                    if (startDate > 0 && endDate > 0 && startDate <= endDate) {
+                        viewModel.loadTransactionsByDateRange(startDate, endDate)
+                    }
+                }
+
+                // تصفية المعاملات حسب الحساب فقط (التاريخ تم فلترته في قاعدة البيانات)
                 val filteredTransactions = if (searchQuery.isNotBlank() && searchResults != null) {
                     searchResults!!
                 } else {
                     transactions.filter { tx ->
                         val accountMatch = selectedAccount == null || tx.getAccountId() == selectedAccount?.getId()
-                        val dateMatch = tx.getTransactionDate() in startOfDay..endOfDay
-                        accountMatch && dateMatch
+                        accountMatch
                     }
                 }
 
@@ -765,46 +756,21 @@ class TransactionsFragment : Fragment() {
     private fun applyAllFilters() {
         val filtered: MutableList<Transaction?> = ArrayList<Transaction?>()
 
-
-        // تحويل التواريخ إلى بداية اليوم ونهاية اليوم للمقارنة
-        val startCal = Calendar.getInstance()
-        startCal.setTimeInMillis(startDate!!.timeInMillis)
-        startCal.set(Calendar.HOUR_OF_DAY, 0)
-        startCal.set(Calendar.MINUTE, 0)
-        startCal.set(Calendar.SECOND, 0)
-        startCal.set(Calendar.MILLISECOND, 0)
-
-        val endCal = Calendar.getInstance()
-        endCal.setTimeInMillis(endDate!!.timeInMillis)
-        endCal.set(Calendar.HOUR_OF_DAY, 23)
-        endCal.set(Calendar.MINUTE, 59)
-        endCal.set(Calendar.SECOND, 59)
-        endCal.set(Calendar.MILLISECOND, 999)
-
-        val startTime = startCal.getTimeInMillis()
-        val endTime = endCal.getTimeInMillis()
-
         var totalAmount = 0.0
 
         for (t in allTransactions) {
             var match = true
 
-
-            // فلترة الحساب
+            // فلترة الحساب فقط (التاريخ تم فلترته بالفعل في قاعدة البيانات)
             if (selectedAccount != null && !selectedAccount!!.isEmpty()) {
                 var account: Account? = null
                 if (accountMap.containsKey(t.getAccountId())) {
                     account = accountMap.get(t.getAccountId())
                 }
                 val accountName = if (account != null) account.getName() else null
-                if (accountName == null || accountName != selectedAccount) match = false
-            }
-
-
-            // فلترة التاريخ
-            val transactionDate = t.getTransactionDate()
-            if (transactionDate < startTime || transactionDate > endTime) {
-                match = false
+                if (accountName == null || accountName != selectedAccount) {
+                    match = false
+                }
             }
 
             if (match) {
@@ -812,7 +778,6 @@ class TransactionsFragment : Fragment() {
                 totalAmount += t.getAmount()
             }
         }
-
 
         // تحديث الإحصائيات
         // binding!!.totalTransactionsText.setText(filtered.size.toString())
