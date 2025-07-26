@@ -15,7 +15,7 @@ public class DashboardViewModel extends ViewModel {
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final MutableLiveData<List<Account>> accounts = new MutableLiveData<>();
-    private final MutableLiveData<List<Transaction>> transactions = new MutableLiveData<>();
+    // إزالة transactions لأنه غير مستخدم
     private final MutableLiveData<List<Account>> recentAccounts = new MutableLiveData<>();
     private final MutableLiveData<Double> totalDebtors = new MutableLiveData<>(0.0);
     private final MutableLiveData<Double> totalCreditors = new MutableLiveData<>(0.0);
@@ -33,17 +33,17 @@ public class DashboardViewModel extends ViewModel {
             accounts.setValue(accountsList);
         });
 
-        // جلب المعاملات
-        transactionRepository.getAllTransactions().observeForever(transactionsList -> {
-            transactions.setValue(transactionsList);
-        });
+        // إزالة جلب جميع المعاملات - غير مستخدم
+        // transactionRepository.getAllTransactions().observeForever(transactionsList -> {
+        //     transactions.setValue(transactionsList);
+        // });
 
         // Load recent accounts
         accountRepository.getRecentAccounts().observeForever(accounts -> {
             recentAccounts.setValue(accounts);
         });
 
-        // Load totals from transactions
+        // Load totals from transactions - محسن للعملة اليمنية فقط
         transactionRepository.getTotalDebtors().observeForever(debtors -> {
             totalDebtors.setValue(debtors != null ? debtors : 0.0);
             updateNetBalance();
@@ -67,9 +67,10 @@ public class DashboardViewModel extends ViewModel {
         return accounts;
     }
 
-    public LiveData<List<Transaction>> getTransactions() {
-        return transactions;
-    }
+    // إزالة getTransactions لأنه غير مستخدم
+    // public LiveData<List<Transaction>> getTransactions() {
+    //     return transactions;
+    // }
 
     public LiveData<List<Account>> getRecentAccounts() {
         return recentAccounts;
@@ -92,6 +93,7 @@ public class DashboardViewModel extends ViewModel {
         super.onCleared();
         // إزالة المراقبين عند تدمير ViewModel
         accountRepository.getAllAccounts().removeObserver(accounts::setValue);
-        transactionRepository.getAllTransactions().removeObserver(transactions::setValue);
+        // إزالة مراقب المعاملات لأنه لم يعد موجود
+        // transactionRepository.getAllTransactions().removeObserver(transactions::setValue);
     }
 } 
