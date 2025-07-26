@@ -4,13 +4,13 @@ import android.app.Application;
 import androidx.lifecycle.LiveData;
 import com.hillal.acc.data.room.AppDatabase;
 import com.hillal.acc.data.room.TransactionDao;
+import com.hillal.acc.data.room.AccountTransactionCount;
+import com.hillal.acc.data.room.AccountBalanceByCurrency;
 import com.hillal.acc.data.model.Transaction;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import com.hillal.acc.data.model.AccountTransactionCount;
-import com.hillal.acc.data.model.AccountBalanceByCurrency;
 
 public class TransactionRepository {
     private final TransactionDao transactionDao;

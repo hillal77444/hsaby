@@ -1,3 +1,5 @@
+package com.hillal.acc.data.room;
+
 public class AccountBalanceByCurrency {
     public long accountId;
     public String currency;

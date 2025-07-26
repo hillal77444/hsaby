@@ -1,4 +1,4 @@
-package com.hillal.acc.data.model;
+package com.hillal.acc.data.room;
 
 public class AccountTransactionCount {
     public long accountId;
